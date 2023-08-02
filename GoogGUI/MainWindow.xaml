@@ -1,15 +1,51 @@
-﻿<Window x:Class="GoogGUI.MainWindow"
+﻿<Window
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:GoogGUI"
+        xmlns:Controls="clr-namespace:GoogGUI.Controls" x:Class="GoogGUI.MainWindow"
         mc:Ignorable="d"
-        Title="MainWindow" Height="450" Width="800">
+        Title="MainWindow" Height="550" Width="800">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False"/>
     </WindowChrome.WindowChrome>
-    <Grid>
-
-    </Grid>
+    <Border Style="{StaticResource BackPanel}" x:Name="MainBorder">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto"/>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="Goog GUI" FontWeight="Bold" VerticalAlignment="Center" Foreground="White" Margin="6,0,0,0" />
+                <StackPanel Orientation="Horizontal" Grid.Column="3">
+                    <Controls:GButton ButtonIcon="/icons/Minimize.png" ButtonIconSize="12" Style="{StaticResource TButton}" ButtonCornerRadius="0" Width="45" MouseUp="Minimize_MouseUp" />
+                    <Controls:GButton x:Name="MaximizeButton" ButtonIcon="/icons/Maximize.png" ButtonIconSize="12" Style="{StaticResource TButton}" Width="45" ButtonCornerRadius="0" MouseUp="Maximize_MouseUp" />
+                    <Controls:GButton ButtonIcon="/icons/Close.png" ButtonIconSize="12" Style="{StaticResource TRedButton}" ButtonCornerRadius="0" Width="45" MouseUp="Close_MouseUp" />
+                </StackPanel>
+            </Grid>
+            <Grid x:Name="WindowContent" Grid.Row="2" Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="240" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid x:Name="Navigation" Margin="4,0,5,6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel x:Name="Menu"></StackPanel>
+                    <Controls:GButton x:Name="SettingBtn" Grid.Row="2" Style="{StaticResource TButton}" ButtonIcon="/icons/Settings.png" ButtonText="Settings" />
+                </Grid>
+                <Border Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0">
+                    
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
 </Window>

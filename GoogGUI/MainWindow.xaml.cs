@@ -24,5 +24,31 @@ namespace GoogGUI
         {
             InitializeComponent();
         }
+
+        private void Minimize_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            WindowState = WindowState.Minimized;
+        }
+
+        private void Maximize_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            if (WindowState == WindowState.Normal)
+            {
+                WindowState = WindowState.Maximized;
+                MaximizeButton.ButtonIcon = new BitmapImage(new Uri("/GoogGUI;component/Icons/Restore.png", UriKind.Relative));
+                MainBorder.Padding = new Thickness(10);
+            }
+            else if (WindowState == WindowState.Maximized)
+            {
+                WindowState = WindowState.Normal;
+                MaximizeButton.ButtonIcon = new BitmapImage(new Uri("/GoogGUI;component/Icons/Maximize.png", UriKind.Relative));
+                MainBorder.Padding = new Thickness(0);
+            }
+        }
+
+        private void Close_MouseUp(object sender, MouseButtonEventArgs e)
+        {
+            Close();
+        }
     }
 }
