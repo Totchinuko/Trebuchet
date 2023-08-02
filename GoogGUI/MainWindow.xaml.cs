@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using GoogGUI.Controls;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 
 namespace GoogGUI
 {
@@ -20,35 +9,33 @@ namespace GoogGUI
     /// </summary>
     public partial class MainWindow : Window
     {
+        private ICommand _tabCommand;
+        private GButton _currentTab;
         public MainWindow()
         {
             InitializeComponent();
+
+            TabCommand = new SimpleCommand(OnTabClicked);
+
+            DataContext = this;
         }
 
-        private void Minimize_MouseUp(object sender, MouseButtonEventArgs e)
+        public ICommand TabCommand { get => _tabCommand; set => _tabCommand = value; }
+        private void OnTabClicked(object? obj)
         {
-            WindowState = WindowState.Minimized;
+            if (obj == null || obj is not GButton gbutton)
+                return;
+
+            if (_currentTab != null)
+                _currentTab.ButtonAccent = false;
+            _currentTab = gbutton;
+            if (_currentTab != null)
+                _currentTab.ButtonAccent = true;
         }
 
-        private void Maximize_MouseUp(object sender, MouseButtonEventArgs e)
+        private void Settings_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            if (WindowState == WindowState.Normal)
-            {
-                WindowState = WindowState.Maximized;
-                MaximizeButton.ButtonIcon = new BitmapImage(new Uri("/GoogGUI;component/Icons/Restore.png", UriKind.Relative));
-                MainBorder.Padding = new Thickness(10);
-            }
-            else if (WindowState == WindowState.Maximized)
-            {
-                WindowState = WindowState.Normal;
-                MaximizeButton.ButtonIcon = new BitmapImage(new Uri("/GoogGUI;component/Icons/Maximize.png", UriKind.Relative));
-                MainBorder.Padding = new Thickness(0);
-            }
-        }
-
-        private void Close_MouseUp(object sender, MouseButtonEventArgs e)
-        {
-            Close();
+            ContentPanelPresenter.Content = new SettingsContent();
         }
     }
 }
