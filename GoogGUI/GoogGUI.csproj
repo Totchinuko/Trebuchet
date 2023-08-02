@@ -8,7 +8,25 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Icons\Close.png" />
+    <None Remove="Icons\Maximize.png" />
+    <None Remove="Icons\Minimize.png" />
+    <None Remove="Icons\Restore.png" />
+    <None Remove="Icons\Save.png" />
+    <None Remove="Icons\Settings.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GoogLib\GoogLib.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Icons\Maximize.png" />
+    <Resource Include="Icons\Minimize.png" />
+    <Resource Include="Icons\Restore.png" />
+    <Resource Include="Icons\Save.png" />
+    <Resource Include="Icons\Close.png" />
+    <Resource Include="Icons\Settings.png" />
   </ItemGroup>
 
 </Project>
