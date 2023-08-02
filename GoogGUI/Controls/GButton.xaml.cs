@@ -25,19 +25,22 @@ namespace GoogGUI.Controls
         {
             InitializeComponent();
             DataContext = this;
-            ButtonText = string.Empty;
         }
 
-        public static readonly DependencyProperty ButtonTextProperty = DependencyProperty.Register("ButtonText", typeof(string), typeof(GButton));
+        public static readonly DependencyProperty ButtonTextProperty = DependencyProperty.Register("ButtonText", typeof(string), typeof(GButton), new PropertyMetadata(string.Empty));
         public static readonly DependencyProperty ButtonIconProperty = DependencyProperty.Register("ButtonIcon", typeof(ImageSource), typeof(GButton));
         public static readonly DependencyProperty ButtonCornerRadiusProperty = DependencyProperty.Register("ButtonCornerRadius", typeof(CornerRadius), typeof(GButton), new PropertyMetadata(new CornerRadius(3)));
-        public static readonly DependencyProperty ButtonHoverBackgroundProperty = DependencyProperty.Register("ButtonHoverBackground", typeof(Brush), typeof(GButton));
-        public static readonly DependencyProperty ButtonForegroundProperty = DependencyProperty.Register("ButtonForeground", typeof(Brush), typeof(GButton));
+        public static readonly DependencyProperty ButtonHoverBackgroundProperty = DependencyProperty.Register("ButtonHoverBackground", typeof(Brush), typeof(GButton), new PropertyMetadata(Application.Current.Resources["GPanel"]));
+        public static readonly DependencyProperty ButtonForegroundProperty = DependencyProperty.Register("ButtonForeground", typeof(Brush), typeof(GButton), new PropertyMetadata(new SolidColorBrush(Color.FromRgb(255,255,255))));
         public static readonly DependencyProperty ButtonBorderBrushProperty = DependencyProperty.Register("ButtonBorderBrush", typeof(Brush), typeof(GButton));
         public static readonly DependencyProperty ButtonBackgroundProperty = DependencyProperty.Register("ButtonBackground", typeof(Brush), typeof(GButton));
         public static readonly DependencyProperty ButtonBorderThicknessProperty = DependencyProperty.Register("ButtonBorderThickness", typeof(Thickness), typeof(GButton));
-        public static readonly DependencyProperty ButtonFontSizeProperty = DependencyProperty.Register("ButtonFontSize", typeof(double), typeof(GButton));
+        public static readonly DependencyProperty ButtonFontSizeProperty = DependencyProperty.Register("ButtonFontSize", typeof(double), typeof(GButton), new PropertyMetadata(14d));
         public static readonly DependencyProperty ButtonIconSizeProperty = DependencyProperty.Register("ButtonIconSize", typeof(int), typeof(GButton), new PropertyMetadata(16));
+        public static readonly DependencyProperty ButtonIconOpacityProperty = DependencyProperty.Register("ButtonIconOpacity", typeof(double), typeof(GButton), new PropertyMetadata(1d));
+        public static readonly DependencyProperty ButtonAccentProperty = DependencyProperty.Register("ButtonAccent", typeof(bool), typeof(GButton), new PropertyMetadata(false));
+        public static readonly DependencyProperty ButtonAccentColorProperty = DependencyProperty.Register("ButtonAccentColor", typeof(Brush), typeof(GButton), new PropertyMetadata(Application.Current.Resources["GBlue"]));
+        public static readonly DependencyProperty CommandProperty = DependencyProperty.Register("Command", typeof(ICommand), typeof(GButton), new PropertyMetadata(null));
 
         public string ButtonText
         {
@@ -89,6 +92,28 @@ namespace GoogGUI.Controls
             get => (int)GetValue(ButtonIconSizeProperty);
             set => SetValue(ButtonIconSizeProperty, value);
         }
+        public double ButtonIconOpacity
+        {
+            get => (double)GetValue(ButtonIconOpacityProperty);
+            set => SetValue(ButtonIconOpacityProperty, value);
+        }
+
+        public bool ButtonAccent
+        {
+            get => (bool)GetValue(ButtonAccentProperty);
+            set => SetValue(ButtonAccentProperty, value);
+        }
+
+        public Brush ButtonAccentColor
+        {
+            get => (Brush)GetValue(ButtonAccentColorProperty);
+            set => SetValue(ButtonAccentColorProperty, value);
+        }
+        public ICommand Command
+        {
+            get => (ICommand)GetValue(CommandProperty);
+            set => SetValue(CommandProperty, value);
+        }
         public bool IsPressed { get; set; }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -96,6 +121,8 @@ namespace GoogGUI.Controls
         private void OnMouseDown(object sender, MouseButtonEventArgs e)
         {
             IsPressed = true;
+            if (Command != null)
+                Command.Execute(this);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPressed"));
         }
 

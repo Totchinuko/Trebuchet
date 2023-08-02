@@ -6,20 +6,19 @@
              xmlns:local="clr-namespace:GoogGUI.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="32" d:DesignWidth="150">
-    <Border Padding="6,4" MouseDown="OnMouseDown" MouseUp="OnMouseUp">
+    <Border MouseDown="OnMouseDown" MouseUp="OnMouseUp">
         <Border.Style>
             <Style TargetType="Border">
                 <Setter Property="Background" Value="{Binding ButtonBackground, FallbackValue=#FF595959}" />
                 <Setter Property="CornerRadius" Value="{Binding ButtonCornerRadius, FallbackValue=3}" />
                 <Setter Property="BorderBrush" Value="{Binding ButtonBorderBrush, FallbackValue=Black}" />
                 <Setter Property="BorderThickness" Value="{Binding ButtonBorderThickness, FallbackValue=0}" />
-                <Setter Property="Padding" Value="6,4" />
                 <Style.Triggers>
-                    <DataTrigger Binding="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Value="Collapsed">
-                        <Setter Property="Padding" Value="6,6" />
-                    </DataTrigger>
                     <DataTrigger Binding="{Binding IsPressed}" Value="True">
                         <Setter Property="Opacity" Value="0.7" />
+                    </DataTrigger>
+                    <DataTrigger Binding="{Binding ButtonAccent}" Value="True">
+                        <Setter Property="Background" Value="{Binding ButtonHoverBackground, FallbackValue=#FF595959}" />
                     </DataTrigger>
                     <Trigger Property="IsMouseOver" Value="True">
                         <Setter Property="Background" Value="{Binding ButtonHoverBackground, FallbackValue=#FF595959}" />
@@ -29,46 +28,53 @@
         </Border.Style>
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition>
-                    <ColumnDefinition.Style>
-                        <Style TargetType="ColumnDefinition">
-                            <Setter Property="Width" Value="auto" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Value="Collapsed">
-                                    <Setter Property="Width" Value="*" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ColumnDefinition.Style>
-                </ColumnDefinition>
-                <ColumnDefinition>
-                    <ColumnDefinition.Style>
-                        <Style TargetType="ColumnDefinition">
-                            <Setter Property="Width" Value="*" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Value="Collapsed">
-                                    <Setter Property="Width" Value="0" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </ColumnDefinition.Style>
-                </ColumnDefinition>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
-            <Image Width="{Binding ButtonIconSize}" Height="{Binding ButtonIconSize}" Source="{Binding ButtonIcon}" Visibility="{Binding ButtonIcon, Converter={StaticResource Null2Collapsed}}">
-                <Image.Style>
-                    <Style TargetType="Image">
-                        <Setter Property="Margin" Value="0,0,12,0" />
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Value="Collapsed">
-                                <Setter Property="Margin" Value="0" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Image.Style>
-            </Image>
-            <TextBlock Grid.Column="2" VerticalAlignment="Center" Visibility="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Foreground="{Binding ButtonForeground, FallbackValue=#FFFFFFFF}" FontSize="{Binding ButtonFontSize, FallbackValue=14}">
+            <Border Style="{StaticResource Accent}" Background="{Binding ButtonAccentColor, FallbackValue={StaticResource GBlue}}" Margin="0,6" Visibility="{Binding ButtonAccent, Converter={StaticResource False2Hidden}}" />
+            <Grid Margin="8,8" Grid.Column="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="ColumnDefinition">
+                                <Setter Property="Width" Value="auto" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Value="Collapsed">
+                                        <Setter Property="Width" Value="*" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
+                    <ColumnDefinition>
+                        <ColumnDefinition.Style>
+                            <Style TargetType="ColumnDefinition">
+                                <Setter Property="Width" Value="*" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Value="Collapsed">
+                                        <Setter Property="Width" Value="0" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ColumnDefinition.Style>
+                    </ColumnDefinition>
+                </Grid.ColumnDefinitions>
+                <Image Width="{Binding ButtonIconSize}" Opacity="{Binding ButtonIconOpacity}" Height="{Binding ButtonIconSize}" Source="{Binding ButtonIcon}" Visibility="{Binding ButtonIcon, Converter={StaticResource Null2Collapsed}}">
+                    <Image.Style>
+                        <Style TargetType="Image">
+                            <Setter Property="Margin" Value="0,0,12,0" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Value="Collapsed">
+                                    <Setter Property="Margin" Value="0" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Image.Style>
+                </Image>
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" Visibility="{Binding ButtonText, Converter={StaticResource Null2Collapsed}}" Foreground="{Binding ButtonForeground, FallbackValue=#FFFFFFFF}" FontSize="{Binding ButtonFontSize, FallbackValue=14}">
                 <Run Text="{Binding ButtonText}" />
-            </TextBlock>
-        </Grid>
+                </TextBlock>
+            </Grid>
+        </Grid>        
     </Border>
 </UserControl>
