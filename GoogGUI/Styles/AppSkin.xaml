@@ -1,0 +1,69 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:GoogGUI.Controls">
+    <Style x:Key="BackPanel" TargetType="Border">
+        <Setter Property="Background" Value="#FF202020" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="CornerRadius" Value="0" />
+    </Style>
+    <Style TargetType="Border" x:Key="Panel">
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="#11FFFFFF" />
+    </Style>
+    <Style TargetType="Border" x:Key="DarkPanel">
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Background" Value="#19000000" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="GrayButton">
+        <Setter Property="ButtonBackground" Value="#AA595959" />
+        <Setter Property="ButtonHoverBackground" Value="#FF595959" />
+        <Setter Property="ButtonBorderThickness" Value="0" />
+        <Setter Property="ButtonCornerRadius" Value="3" />
+        <Setter Property="ButtonForeground" Value="White" />
+        <Setter Property="ButtonBorderBrush" Value="Transparent" />
+        <Setter Property="ButtonIconSize" Value="16" />
+        <Setter Property="ButtonFontSize" Value="14" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="RedButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="#AAc42b1c" />
+        <Setter Property="ButtonHoverBackground" Value="#FFc42b1c" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="GreenButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="#AA5a9b40" />
+        <Setter Property="ButtonHoverBackground" Value="#FF5a9b40" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="BlueButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="#AA3a8eda" />
+        <Setter Property="ButtonHoverBackground" Value="#FF3a8eda" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="YellowButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="#AAffb300" />
+        <Setter Property="ButtonHoverBackground" Value="#FFffb300" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="TGrayButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="Transparent" />
+        <Setter Property="ButtonHoverBackground" Value="#FFc42b1c" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="TRedButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="Transparent" />
+        <Setter Property="ButtonHoverBackground" Value="#FFc42b1c" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="TGreenButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="Transparent" />
+        <Setter Property="ButtonHoverBackground" Value="#FF5a9b40" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="TBlueButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="Transparent" />
+        <Setter Property="ButtonHoverBackground" Value="#FF3a8eda" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="TYellowButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="Transparent" />
+        <Setter Property="ButtonHoverBackground" Value="#FFffb300" />
+    </Style>
+    <Style TargetType="Controls:GButton" x:Key="TButton" BasedOn="{StaticResource GrayButton}">
+        <Setter Property="ButtonBackground" Value="Transparent" />
+        <Setter Property="ButtonHoverBackground" Value="#11FFFFFF" />
+    </Style>
+</ResourceDictionary>
