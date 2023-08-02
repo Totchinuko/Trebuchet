@@ -17,7 +17,6 @@ namespace Goog
         public string InstallPath { get; set; }
         public bool ManageServer { get; set; }
         public string ClientPath { get; set; }
-        public string LastProfile { get; set; }
         public string LastMap { get; set; }
 
         [JsonIgnore]
@@ -82,7 +81,6 @@ namespace Goog
         {
             InstallPath = "";
             ClientPath = "";
-            LastProfile = "";
             LastMap = "";
         }
 
@@ -113,12 +111,6 @@ namespace Goog
             string? ConfigPath = GetConfigPath(IsTestLive) ?? "";
 
             File.WriteAllText(ConfigPath, json);
-        }
-
-        public void SetLastProfile(Profile profile)
-        {
-            LastProfile = profile.ProfileName;
-            SaveConfig();
         }
 
         public int ResolveModsPath(List<string> modlist, out List<string> resolved, out List<string> errors)

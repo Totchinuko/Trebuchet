@@ -95,7 +95,6 @@ namespace Goog
             if (string.IsNullOrEmpty(profileName))
                 throw new ArgumentException("ProfileName is null or empty");
             Load(Path.Combine(config.ProfilesFolder.FullName, profileName, Config.profileConfigName), out profile);
-            config.SetLastProfile(profile);
         }
 
         public static void Load(bool testlive, string? profileName, out Config config, [NotNull] out Profile? profile)
@@ -108,7 +107,6 @@ namespace Goog
                 if (!File.Exists(path))
                     throw new FileNotFoundException($"{path} was not found");
                 Load(path, out profile);
-                config.SetLastProfile(profile);
                 return;
             }
 
@@ -119,17 +117,6 @@ namespace Goog
                 if(File.Exists(path))
                 {
                     Load(path, out profile);
-                    config.SetLastProfile(profile);
-                    return;
-                }
-            }
-            if(!string.IsNullOrEmpty(config.LastProfile))
-            {
-                path = Path.Combine(config.ProfilesFolder.FullName, config.LastProfile, Config.profileConfigName);
-                if (File.Exists(path))
-                {
-                    Load(path, out profile);
-                    config.SetLastProfile(profile);
                     return;
                 }
             }

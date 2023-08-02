@@ -26,7 +26,6 @@ namespace Goog.Commands
 
             string prev = profile.ProfileName;
             profile.MoveTo(Path.Combine(config.ProfilesFolder.FullName, name, Config.profileConfigName));
-            config.SetLastProfile(profile);
 
             Tools.WriteColoredLine($"Profile {prev} has been renamed to {profile.ProfileName}", ConsoleColor.Cyan);
         }
