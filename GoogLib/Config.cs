@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GoogLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -14,9 +15,31 @@ namespace Goog
     {
         public const string ConfigFilename = "Goog.json";
 
-        public string InstallPath { get; set; }
-        public bool ManageServer { get; set; }
-        public string ClientPath { get; set; }
+        private string _installPath = string.Empty;
+        private string _clientPath = string.Empty;
+        private bool _managerServers = false;
+        private List<ServerInstance> _serverInstances = new List<ServerInstance> { new ServerInstance() };
+
+        public string InstallPath
+        {
+            get => _installPath;
+            set => _installPath = value;
+        }
+        public string ClientPath
+        {
+            get => _clientPath;
+            set => _clientPath = value;
+        }
+        public bool ManageServers
+        {
+            get => _managerServers;
+            set => _managerServers = value;
+        }
+        public List<ServerInstance> ServerInstances 
+        {
+            get => _serverInstances;
+            set => _serverInstances = value;
+        }
 
         [JsonIgnore]
         public bool IsTestLive { get; private set; }
@@ -75,12 +98,6 @@ namespace Goog
 
         public string ServerAppID => IsTestLive ? testLiveServerAppID : liveServerAppID;
         public string ClientAppID => IsTestLive ? testLiveClientAppID : liveClientAppID;
-
-        public Config()
-        {
-            InstallPath = "";
-            ClientPath = "";
-        }
 
         public static void Load(out Config Config, bool testlive)
         {
@@ -160,9 +177,9 @@ namespace Goog
             if (!string.IsNullOrEmpty(map))
                 return;
 
-            if (!string.IsNullOrEmpty(profile?.Map))
+            if (!string.IsNullOrEmpty(profile?.Server.Map))
             {
-                map = profile.Map;
+                map = profile.Server.Map;
                 SaveConfig();
                 return;
             }

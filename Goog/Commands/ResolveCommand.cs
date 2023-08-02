@@ -18,8 +18,8 @@ namespace Goog.Commands
         {
             Profile.Load(testlive, this.profile, out Config config, out Profile? profile);
 
-            int count = config.ResolveModsPath(profile.Modlist, out List<string> modlist, out List<string> errors);
-            profile.Modlist = modlist;
+            int count = config.ResolveModsPath(profile.Modlist.Modlist, out List<string> modlist, out List<string> errors);
+            profile.Modlist.Modlist = modlist;
 
             profile.SaveProfile();
 

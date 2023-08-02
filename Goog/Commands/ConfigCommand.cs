@@ -43,7 +43,7 @@ namespace Goog.Commands
 
             if (ManageServer != null)
             {
-                config.ManageServer = ManageServer ?? false;
+                config.ManageServers = ManageServer ?? false;
                 Tools.WriteColoredLine("manage-server Configured", ConsoleColor.Cyan);
             }
 

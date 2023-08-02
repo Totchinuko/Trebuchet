@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GoogLib;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -17,21 +18,17 @@ namespace Goog
 {
     public class Profile
     {
-        [JsonIgnore]
-        public FileInfo ProfileFile { get; private set; }
+        private ServerProfile _server = new ServerProfile();
+        private ClientProfile _client = new ClientProfile();
+        private ModListProfile _modlist = new ModListProfile();
+        private string _profileFile = string.Empty;
 
-        [JsonPropertyName("map")]
-        public string Map { get; set; }
-        [JsonPropertyName("modlist")]
-        public List<string> Modlist { get; set; }
-        [JsonPropertyName("log")]
-        public bool Log { get; set; }
-        [JsonPropertyName("server_all_cores")]
-        public bool serverUseAllCore { get; set; }
-        [JsonPropertyName("client_all_cores")]
-        public bool ClientUseAllCore { get; set; }
-        [JsonPropertyName("max_player_count")]
-        public int MaxPlayerCount { get; set; }
+        public ServerProfile Server { get => _server; set => _server = value; }
+        public ClientProfile Client { get => _client; set => _client = value; }
+        public ModListProfile Modlist { get => _modlist; set => _modlist = value; }
+
+        [JsonIgnore]
+        public FileInfo ProfileFile => new FileInfo(_profileFile);
 
         public static readonly Dictionary<string, string> MapShortcuts = new Dictionary<string, string>
                 {
@@ -43,17 +40,10 @@ namespace Goog
                 };
 
         [JsonIgnore]
-        public string ProfileName => ProfileFile.Directory?.Name ?? "";
+        public string ProfileName => ProfileFile?.Directory?.Name ?? "";
 
         [JsonIgnore]
         public FileInfo GeneratedModList => new FileInfo(Path.Combine(ProfileFile.DirectoryName ?? "", Config.profileGeneratedModlist));
-
-        public Profile()
-        {
-            Map = "";
-            Modlist = new List<string>();
-            ProfileFile = null!;
-        }
 
         public static void Create(string? path, [NotNull] out Profile? profile)
         {
@@ -61,12 +51,11 @@ namespace Goog
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException("path is null or empty");
 
-            FileInfo file = new FileInfo(path);
-            if (file.Exists)
-                throw new FileNotFoundException($"File not found: {file.FullName}");
+            if (!File.Exists(path))
+                throw new FileNotFoundException($"{path} was not found");
 
             profile = new Profile();
-            profile.ProfileFile = file;
+            profile._profileFile = path;
             profile.SaveProfile();
         }
 
@@ -76,15 +65,14 @@ namespace Goog
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException("path is null or empty");
 
-            FileInfo file = new FileInfo(path);
-            if (!file.Exists)
-                throw new FileNotFoundException($"{file.FullName} was not found");
+            if (!File.Exists(path))
+                throw new FileNotFoundException($"{path} was not found");
 
-            string json = File.ReadAllText(file.FullName);
+            string json = File.ReadAllText(path);
             profile = JsonSerializer.Deserialize<Profile>(json);
             if (profile == null)
                 throw new NullReferenceException("Could not deserialize profile");
-            profile.ProfileFile = file;
+            profile._profileFile = path;
         }
 
         public static void LoadStrict(bool testlive, string profileName, out Config config, [NotNull] out Profile? profile)
@@ -164,7 +152,7 @@ namespace Goog
                 throw new DirectoryNotFoundException($"Invalid directory for {ProfileFile.FullName}");
 
             ProfileFile.Directory.MoveTo(target.Directory.FullName);
-            ProfileFile = target;
+            _profileFile = target.FullName;
             ProfileFile.Refresh();
         }
 
@@ -184,59 +172,6 @@ namespace Goog
                 throw new DirectoryNotFoundException($"Invalid directory for {ProfileFile.FullName}");
 
             ProfileFile.Directory.CopyTo(target.Directory.FullName);
-        }
-
-        public void SetModList(string modlist)
-        {
-            Modlist = modlist.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-        }
-
-        public string GetModList()
-        {
-            return string.Join("\r\n", Modlist);
-        }
-
-        public List<string> GetModIDList()
-        {
-            List<string> list = new List<string>();
-
-            foreach (string mod in Modlist)
-                if (TryParseModID(mod, out string id))
-                    list.Add(id);
-
-            return list;
-        }
-
-        public bool TryParseModID(string mod, out string id)
-        {
-            id = string.Empty;
-            if (long.TryParse(mod, out _))
-            {
-                id = mod;
-                return true;
-            }
-            FileInfo file = new FileInfo(Path.Combine(mod));
-            if (file.Directory == null)
-                return false;
-            if (!long.TryParse(file.Directory.Name, out _))
-                return false;
-            id = file.Directory.Name;
-            return true;
-        }
-
-        public bool IsValidModList()
-        {
-            foreach (string mod in Modlist)
-            {
-                if (!File.Exists(mod))
-                    return false;
-            }
-            return true;
-        }
-
-        public void GenerateModList()
-        {
-            File.WriteAllLines(GeneratedModList.FullName, Modlist);
         }
 
         internal static string? GetCurrentProfileFolder(Config config)

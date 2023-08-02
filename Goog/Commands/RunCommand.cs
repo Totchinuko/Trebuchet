@@ -32,7 +32,7 @@ namespace Goog.Commands
 
             Profile.Load(testlive, this.profile, out Config config, out Profile? profile);
 
-            if (!profile.IsValidModList())
+            if (!profile.Modlist.IsValidModList())
             {
                 if (!autoresolve)
                     throw new FileNotFoundException("Some mod files are not found, use resolve");
@@ -44,11 +44,11 @@ namespace Goog.Commands
                 resolver.Execute();
 
                 Profile.Load(profile.ProfileFile.FullName, out profile);
-                if (!profile.IsValidModList())
+                if (!profile.Modlist.IsValidModList())
                     throw new FileNotFoundException("Some mod files are not found");
             }
 
-            profile.GenerateModList();
+            File.WriteAllLines(profile.GeneratedModList.FullName, profile.Modlist.Modlist);
 
             KillCommand kill = new KillCommand();
             kill.Execute();
@@ -77,7 +77,7 @@ namespace Goog.Commands
         {
             server = null;
 
-            if (!config.ManageServer)
+            if (!config.ManageServers)
                 throw new Exception("Goog is not configured to manage servers");
 
             if (profile == null || profile.ProfileFile.Directory == null)
@@ -93,8 +93,8 @@ namespace Goog.Commands
                 throw new FileNotFoundException("Server is not installed properly, binaries not found");
 
             List<string> args = new List<string>() { targetMap };
-            if (profile.Log) args.Add(Config.GameArgsLog);
-            if (profile.serverUseAllCore) args.Add(Config.GameArgsUseAllCore);
+            if (profile.Server.Log) args.Add(Config.GameArgsLog);
+            if (profile.Server.UseAllCores) args.Add(Config.GameArgsUseAllCore);
             args.Add(string.Format(Config.ServerArgsMaxPlayers, 10));
             args.Add(string.Format(Config.GameArgsModList, profile.GeneratedModList.FullName));
 
@@ -115,7 +115,8 @@ namespace Goog.Commands
 
             List<string> args = new List<string>();
 
-            if (profile.serverUseAllCore) args.Add(Config.GameArgsUseAllCore);
+            if (profile.Client.Log) args.Add(Config.GameArgsLog);
+            if (profile.Client.UseAllCores) args.Add(Config.GameArgsUseAllCore);
             args.Add(string.Format(Config.GameArgsModList, profile.GeneratedModList.FullName));
 
             process.StartInfo.FileName = battleEye ? config.ClientBEBin.FullName : config.ClientBin.FullName;

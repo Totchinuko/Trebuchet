@@ -18,7 +18,7 @@ namespace Goog.Commands
         {
             Profile.Load(testlive, this.profile, out _, out Profile? profile);
 
-            profile.GenerateModList();
+            File.WriteAllLines(profile.GeneratedModList.FullName, profile.Modlist.Modlist);
 
             Process process = new Process();
             process.StartInfo.FileName = "tot";

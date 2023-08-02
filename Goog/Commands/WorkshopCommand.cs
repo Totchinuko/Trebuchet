@@ -18,7 +18,7 @@ namespace Goog.Commands
         {
             Profile.Load(testlive, this.profile, out Config config, out Profile? profile);
 
-            List<string> list = profile.GetModIDList();
+            List<string> list = profile.Modlist.GetModIDList();
             if (list.Count == 0)
                 Tools.WriteColoredLine("Nothing to update", ConsoleColor.Cyan);
 

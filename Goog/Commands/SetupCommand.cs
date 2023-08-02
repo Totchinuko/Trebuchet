@@ -63,7 +63,7 @@ namespace Goog.Commands
 
             Tools.DeleteIfExists(steamCmdZip);
 
-            if(config.ManageServer)
+            if(config.ManageServers)
             {
                 UpdateCommand updateCommand = new UpdateCommand()
                 {
