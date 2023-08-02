@@ -2,16 +2,13 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:GoogGUI"
-             xmlns:controls="clr-namespace:GoogGUI.Controls"
              StartupUri="MainWindow.xaml">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles\AppSkin.xaml" />
-                <ResourceDictionary>
-                    <controls:Null2Collapsed x:Key="Null2Collapsed" />
-                    <controls:Null2Hidden x:Key="Null2Hidden" />
-                </ResourceDictionary>
+                <ResourceDictionary Source="Templates\AppMenu.xaml" />
+                <ResourceDictionary Source="Templates\Converters.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
