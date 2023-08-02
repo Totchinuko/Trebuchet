@@ -17,7 +17,6 @@ namespace Goog
         public string InstallPath { get; set; }
         public bool ManageServer { get; set; }
         public string ClientPath { get; set; }
-        public string LastMap { get; set; }
 
         [JsonIgnore]
         public bool IsTestLive { get; private set; }
@@ -81,7 +80,6 @@ namespace Goog
         {
             InstallPath = "";
             ClientPath = "";
-            LastMap = "";
         }
 
         public static void Load(out Config Config, bool testlive)
@@ -160,21 +158,13 @@ namespace Goog
         public void ResolveMap(ref string map, Profile? profile = null)
         {
             if (!string.IsNullOrEmpty(map))
-            {
-                LastMap = map;
-                SaveConfig();
-            }
+                return;
 
             if (!string.IsNullOrEmpty(profile?.Map))
             {
                 map = profile.Map;
-                LastMap = map;
                 SaveConfig();
-            }
-
-            if (!string.IsNullOrEmpty(LastMap))
-            {
-                map = LastMap;
+                return;
             }
 
             throw new Exception("No map could be resolved");
