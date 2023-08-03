@@ -7,33 +7,25 @@ using System.Threading.Tasks;
 
 namespace Goog
 {
-    static public class Tools
+    public static class Tools
     {
-        public static string PosixFullName(this string path) => path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        public static string PosixFullName(this DirectoryInfo path) => path.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        public static string PosixFullName(this FileInfo path) => path.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
-        public static string RemoveExtension(this string path) => path[..^Path.GetExtension(path).Length];
-        public static string RemoveRootFolder(this string path, string root)
+        public static bool CanWriteHere(string path)
         {
-            string result = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar).Substring(root.Length);
-            return result.StartsWith("\\") ? result.Substring(1) : result;
+            if (string.IsNullOrEmpty(path))
+                return false;
+            if (!Directory.Exists(path))
+                return false;
+
+            try
+            {
+                string file = Path.Combine(path, "file.lock");
+                File.WriteAllText(file, string.Empty);
+                File.Delete(file);
+                return true;
+            }
+            catch { return false; }
         }
 
-        public static void WriteColoredLine(string text, ConsoleColor color, ConsoleColor background = ConsoleColor.Black)
-        {
-            Console.ForegroundColor = color;        
-            Console.BackgroundColor = background;
-            Console.WriteLine(text);
-            Console.ResetColor();
-        }
-
-        public static void WriteColored(string text, ConsoleColor color, ConsoleColor background = ConsoleColor.Black)
-        {
-            Console.ForegroundColor = color;
-            Console.BackgroundColor = background;
-            Console.Write(text);
-            Console.ResetColor();
-        }
         public static void CopyTo(this DirectoryInfo directory, string destinationDir)
         {
             foreach (string dir in Directory.GetDirectories(directory.FullName, "*", SearchOption.AllDirectories))
@@ -46,6 +38,28 @@ namespace Goog
             {
                 File.Copy(newPath, newPath.Replace(directory.FullName, destinationDir), true);
             }
+        }
+
+        public static bool CreateDir(DirectoryInfo directory)
+        {
+            if (!directory.Exists)
+                Directory.CreateDirectory(directory.FullName);
+            return true;
+        }
+
+        public static bool DeleteIfExists(FileInfo file)
+        {
+            if (file.Exists)
+                file.Delete();
+            return true;
+        }
+
+        public static bool DeleteIfExists(DirectoryInfo directory, bool recursive)
+        {
+            if (directory.Exists)
+                directory.Delete(recursive);
+
+            return true;
         }
 
         public static async Task<bool> DownloadSteamCMD(string url, FileInfo file, IProgress<float>? progress)
@@ -68,32 +82,27 @@ namespace Goog
             return true;
         }
 
-        public static void UnzipFile(FileInfo file, DirectoryInfo destination)
+        public static string PosixFullName(this string path) => path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        public static string PosixFullName(this DirectoryInfo path) => path.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        public static string PosixFullName(this FileInfo path) => path.FullName.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        public static string RemoveExtension(this string path) => path[..^Path.GetExtension(path).Length];
+
+        public static string RemoveRootFolder(this string path, string root)
         {
-            using (ZipArchive archive = ZipFile.OpenRead(file.FullName))
-                foreach (ZipArchiveEntry entry in archive.Entries)
-                    entry.ExtractToFile(Path.Join(destination.FullName, entry.FullName));
+            string result = path.Replace(Path.AltDirectorySeparatorChar, Path.DirectorySeparatorChar).Substring(root.Length);
+            return result.StartsWith("\\") ? result.Substring(1) : result;
         }
 
-        public static bool DeleteIfExists(FileInfo file)
+        public static bool RemoveSymboliclink(string path)
         {
-            if (file.Exists)
-                file.Delete();
-            return true;
-        }
+            DirectoryInfo pathInfo = new DirectoryInfo(path);
 
-        public static bool DeleteIfExists(DirectoryInfo directory, bool recursive)
-        {
-            if (directory.Exists)
-                directory.Delete(recursive);
+            if (pathInfo.Exists && pathInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
+                pathInfo.Delete();
 
-            return true;
-        }
-
-        public static bool CreateDir(DirectoryInfo directory)
-        {
-            if (!directory.Exists)
-                Directory.CreateDirectory(directory.FullName);
             return true;
         }
 
@@ -112,15 +121,27 @@ namespace Goog
             return true;
         }
 
-        public static bool RemoveSymboliclink(string path)
+        public static void UnzipFile(FileInfo file, DirectoryInfo destination)
         {
-            DirectoryInfo pathInfo = new DirectoryInfo(path);
-
-            if (pathInfo.Exists && pathInfo.Attributes.HasFlag(FileAttributes.ReparsePoint))
-                pathInfo.Delete();
-
-            return true;
+            using (ZipArchive archive = ZipFile.OpenRead(file.FullName))
+                foreach (ZipArchiveEntry entry in archive.Entries)
+                    entry.ExtractToFile(Path.Join(destination.FullName, entry.FullName));
         }
 
+        public static void WriteColored(string text, ConsoleColor color, ConsoleColor background = ConsoleColor.Black)
+        {
+            Console.ForegroundColor = color;
+            Console.BackgroundColor = background;
+            Console.Write(text);
+            Console.ResetColor();
+        }
+
+        public static void WriteColoredLine(string text, ConsoleColor color, ConsoleColor background = ConsoleColor.Black)
+        {
+            Console.ForegroundColor = color;
+            Console.BackgroundColor = background;
+            Console.WriteLine(text);
+            Console.ResetColor();
+        }
     }
 }
