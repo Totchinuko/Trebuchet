@@ -22,11 +22,15 @@ namespace GoogGUI.Controls
     {
         private GButton? _current = null;
 
-        public event EventHandler<IGUIPanel?>? ContentSelected;
-
         public AppMenu()
         {
             InitializeComponent();
+        }
+
+        public event EventHandler<IGUIPanel?>? ContentSelected;
+        protected virtual void OnContentSelected(IGUIPanel? panel)
+        {
+            ContentSelected?.Invoke(this, panel);
         }
 
         protected virtual void UpdateCurrent(object sender)
@@ -37,10 +41,10 @@ namespace GoogGUI.Controls
             _current = button;
             _current.ButtonAccent = true;
         }
-
-        protected virtual void OnContentSelected(IGUIPanel? panel)
+        private void Game_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            ContentSelected?.Invoke(this, panel);
+            UpdateCurrent(sender);
+            OnContentSelected(null);
         }
 
         private void Modlist_MouseDown(object sender, MouseButtonEventArgs e)
@@ -48,13 +52,6 @@ namespace GoogGUI.Controls
             UpdateCurrent(sender);
             OnContentSelected(null);
         }
-
-        private void Game_MouseDown(object sender, MouseButtonEventArgs e)
-        {
-            UpdateCurrent(sender);
-            OnContentSelected(null);
-        }
-
         private void Server_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UpdateCurrent(sender);
