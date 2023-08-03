@@ -181,7 +181,7 @@ namespace Goog
 
             File.WriteAllText(ConfigPath, json);
         }
-        internal static string? GetConfigPath(bool testlive)
+        public static string? GetConfigPath(bool testlive)
         {
             string? ConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(ConfigPath))
