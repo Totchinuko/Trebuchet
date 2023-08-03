@@ -8,6 +8,9 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles\AppSkin.xaml" />
                 <ResourceDictionary Source="Templates\Converters.xaml" />
+                <ResourceDictionary Source="Templates\FieldRow.xaml" />
+                <ResourceDictionary Source="Templates\DirectoryField.xaml" />
+                <ResourceDictionary Source="Templates\FieldEditor.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

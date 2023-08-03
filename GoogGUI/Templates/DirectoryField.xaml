@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:GoogGUI.Controls">
+    <DataTemplate x:Key="DirectoryField">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBox
+            Style="{StaticResource TextField}"
+            VerticalAlignment="Center"
+            Height="25"
+            VerticalContentAlignment="Center"
+            Text="{Binding Value}" />
+            <Controls:DirectoryFinder Path="{Binding Value}" Grid.Column="1" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

@@ -12,32 +12,15 @@ namespace GoogGUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private Config _config = new Config();
-        private Profile? _profile;
-        private bool _testlive = false;
-        private IGUIPanel? _panel;
+        private GoogApp _app;
 
         public MainWindow()
         {
             InitializeComponent();
-            AppMenu.ContentSelected += OnContentSelected;
-            LoadConfiguration();
+            _app = new GoogApp();
             DataContext = this;
         }
 
-        protected virtual void LoadConfiguration()
-        {
-            Config.Load(out _config, _testlive);
-        }
-
-        private void OnContentSelected(object? sender, IGUIPanel? e)
-        {
-            if (_panel != null)
-                _panel.Close();
-            _panel = e;
-            if(_panel != null)
-                _panel.Setup(_config, _profile);
-            ContentPanelPresenter.Content = _panel;
-        }
+        public GoogApp App { get => _app; set => _app = value; }
     }
 }

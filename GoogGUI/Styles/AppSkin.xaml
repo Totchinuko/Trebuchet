@@ -14,7 +14,7 @@
     <SolidColorBrush x:Key="GYellow" Color="#FFffb300" />
     <SolidColorBrush x:Key="GDimBlue" Color="#AA3a8eda" />
     <SolidColorBrush x:Key="GBlue" Color="#FF3a8eda" />
-    
+
     <Style x:Key="BackPanel" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource GBackground}" />
         <Setter Property="BorderThickness" Value="0" />
@@ -53,6 +53,11 @@
         <Setter Property="ButtonBorderBrush" Value="Transparent" />
         <Setter Property="ButtonIconSize" Value="16" />
         <Setter Property="ButtonFontSize" Value="14" />
+        <Style.Triggers>
+            <Trigger Property="IsEnabled" Value="False">
+                <Setter Property="Opacity" Value="0.4" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
     <Style TargetType="Controls:GButton" x:Key="RedButton" BasedOn="{StaticResource GrayButton}">
         <Setter Property="ButtonBackground" Value="{StaticResource GDimRed}" />

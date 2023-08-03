@@ -6,9 +6,12 @@
         xmlns:local="clr-namespace:GoogGUI"
         xmlns:Controls="clr-namespace:GoogGUI.Controls" x:Class="GoogGUI.MainWindow"
         mc:Ignorable="d"
-        Title="Goog UI" Height="550" Width="800" UseLayoutRounding="True">
+        Title="Goog UI"
+        Height="550" Width="800"
+        MinHeight="450" MinWidth="700"
+        UseLayoutRounding="True">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False"/>
+        <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowBackPanel}" x:Name="MainBorder">
         <Grid>
@@ -16,20 +19,70 @@
                 <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Controls:WindowTitlebar 
-                x:Name="TitleBar" 
-                CloseIcon="pack://application:,,,/GoogGui;component/icons/Close.png" 
-                RestoreIcon="pack://application:,,,/GoogGui;component/icons/Restore.png" 
-                MaximizeIcon="pack://application:,,,/GoogGui;component/icons/Maximize.png" 
+            <Controls:WindowTitlebar
+                x:Name="TitleBar"
+                CloseIcon="pack://application:,,,/GoogGui;component/icons/Close.png"
+                RestoreIcon="pack://application:,,,/GoogGui;component/icons/Restore.png"
+                MaximizeIcon="pack://application:,,,/GoogGui;component/icons/Maximize.png"
                 MinimizeIcon="pack://application:,,,/GoogGui;component/icons/Minimize.png" />
             <Grid x:Name="WindowContent" Grid.Row="2" Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="240" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Controls:AppMenu x:Name="AppMenu" />
+                <Grid x:Name="Navigation" Margin="4,0,5,6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <Controls:GButton ButtonIcon="/Icons/List.png"
+                                          ButtonText="Mod List"
+                                          IsEnabled="{Binding App.IsProfileLoaded, RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
+                            <Controls:GButton.Style>
+                                <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                                </Style>
+                            </Controls:GButton.Style>
+                        </Controls:GButton>
+                        <Separator Height="10" Opacity="0" />
+                        <Controls:GButton ButtonIcon="/Icons/Game.png"
+                                          ButtonText="Game Parameters"
+                                          IsEnabled="{Binding App.IsProfileLoaded, RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
+                            <Controls:GButton.Style>
+                                <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                                </Style>
+                            </Controls:GButton.Style>
+                        </Controls:GButton>
+
+                        <Separator Height="10" Opacity="0" />
+
+                        <Controls:GButton ButtonIcon="/Icons/Server.png"
+                                          ButtonText="Server Parameters"
+                                          IsEnabled="{Binding App.IsProfileLoaded, RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
+                            <Controls:GButton.Style>
+                                <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                                </Style>
+                            </Controls:GButton.Style>
+                        </Controls:GButton>
+                    </StackPanel>
+                    <StackPanel Grid.Row="2">
+                        <Controls:GButton Command="{Binding App.SettingsCommand, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
+                                          ButtonIcon="/icons/Settings.png"
+                                          ButtonText="Settings">
+                            <Controls:GButton.Style>
+                                <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding App.Panel, RelativeSource={RelativeSource AncestorType=local:MainWindow}, Converter={StaticResource DataType}}" Value="{x:Type local:Settings}">
+                                            <Setter Property="ButtonAccent" Value="True" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Controls:GButton.Style>
+                        </Controls:GButton>
+                    </StackPanel>
+                </Grid>
                 <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12">
-                    <ContentPresenter x:Name="ContentPanelPresenter" />
+                    <ContentPresenter Content="{Binding App.Panel}" ContentTemplate="{Binding Template}" />
                 </Border>
             </Grid>
         </Grid>
