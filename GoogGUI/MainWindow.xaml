@@ -7,9 +7,10 @@
         xmlns:Controls="clr-namespace:GoogGUI.Controls" x:Class="GoogGUI.MainWindow"
         mc:Ignorable="d"
         Title="Goog UI"
-        Height="550" Width="800"
+        Height="650" Width="800"
         MinHeight="450" MinWidth="700"
-        UseLayoutRounding="True">
+        WindowStartupLocation="CenterScreen"
+        UseLayoutRounding="True" Background="{StaticResource GBackground}">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
