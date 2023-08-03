@@ -19,11 +19,14 @@ namespace GoogGUI.Controls
     /// <summary>
     /// Interaction logic for WindowTitlebar.xaml
     /// </summary>
-    public partial class WindowTitlebar : UserControl
+    public partial class WindowTitlebar : UserControl, INotifyPropertyChanged
     {
         public static readonly DependencyProperty CloseIconProperty = DependencyProperty.Register("CloseIcon", typeof(ImageSource), typeof(WindowTitlebar));
         public static readonly DependencyProperty MaximizeIconProperty = DependencyProperty.Register("MaximizeIcon", typeof(ImageSource), typeof(WindowTitlebar));
+        public static readonly DependencyProperty RestoreIconProperty = DependencyProperty.Register("RestoreIcon", typeof(ImageSource), typeof(WindowTitlebar));
         public static readonly DependencyProperty MinimizeIconProperty = DependencyProperty.Register("MinimizeIcon", typeof(ImageSource), typeof(WindowTitlebar));
+
+        public event PropertyChangedEventHandler? PropertyChanged;
 
         public ImageSource CloseIcon
         {
@@ -35,6 +38,12 @@ namespace GoogGUI.Controls
         {
             get => (ImageSource)GetValue(MaximizeIconProperty);
             set => SetValue(MaximizeIconProperty, value);
+        }
+
+        public ImageSource RestoreIcon
+        {
+            get => (ImageSource)GetValue(RestoreIconProperty);
+            set => SetValue(RestoreIconProperty, value);
         }
 
         public ImageSource MinimizeIcon
@@ -55,16 +64,22 @@ namespace GoogGUI.Controls
             set => Window.GetWindow(this).Icon = value;
         }
 
+        public WindowState WindowState
+        {
+            get => Window.GetWindow(this).WindowState;
+            set => Window.GetWindow(this).WindowState = value;
+        }
+
         public WindowTitlebar()
         {
-            InitializeComponent();
-            
+            InitializeComponent();            
             DataContext = this;
         }
 
         private void Minimize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             Window.GetWindow(this).WindowState = WindowState.Minimized;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("WindowState"));
         }
 
         private void MaximizeButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -72,11 +87,13 @@ namespace GoogGUI.Controls
             if (Window.GetWindow(this).WindowState == WindowState.Normal)
             {
                 Window.GetWindow(this).WindowState = WindowState.Maximized;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("WindowState"));
                 Window.GetWindow(this).Padding = new Thickness(10);
             }
             else if (Window.GetWindow(this).WindowState == WindowState.Maximized)
             {
                 Window.GetWindow(this).WindowState = WindowState.Normal;
+                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("WindowState"));
                 Window.GetWindow(this).Padding = new Thickness(0);
             }
         }

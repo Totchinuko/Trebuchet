@@ -18,7 +18,18 @@
             </TextBlock>
             <StackPanel Orientation="Horizontal" Grid.Column="3">
                 <local:GButton ButtonIcon="{Binding MinimizeIcon, RelativeSource={RelativeSource AncestorType=local:WindowTitlebar}}" ButtonIconSize="12" Style="{StaticResource TButton}" ButtonCornerRadius="0" Width="40" MouseDown="Minimize_MouseLeftButtonUp"/>
-                <local:GButton x:Name="MaximizeButton" ButtonIcon="{Binding MaximizeIcon, RelativeSource={RelativeSource AncestorType=local:WindowTitlebar}}" ButtonIconSize="12" Style="{StaticResource TButton}" Width="40" ButtonCornerRadius="0" MouseDown="MaximizeButton_MouseLeftButtonUp"/>
+                <local:GButton ButtonIconSize="12" Width="40" ButtonCornerRadius="0" MouseDown="MaximizeButton_MouseLeftButtonUp">
+                    <local:GButton.Style>
+                        <Style TargetType="local:GButton" BasedOn="{StaticResource TButton}">
+                            <Setter Property="ButtonIcon" Value="{Binding MaximizeIcon, RelativeSource={RelativeSource AncestorType=local:WindowTitlebar}}" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding WindowState, RelativeSource={RelativeSource AncestorType=local:WindowTitlebar}}" Value="Maximized">
+                                    <Setter Property="ButtonIcon" Value="{Binding RestoreIcon, RelativeSource={RelativeSource AncestorType=local:WindowTitlebar}}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </local:GButton.Style>
+                </local:GButton>
                 <local:GButton ButtonIcon="{Binding CloseIcon, RelativeSource={RelativeSource AncestorType=local:WindowTitlebar}}" ButtonIconSize="12" Style="{StaticResource TRedButton}" ButtonCornerRadius="0" Width="40" MouseDown="Close_MouseLeftButtonUp"/>
             </StackPanel>
         </Grid>
