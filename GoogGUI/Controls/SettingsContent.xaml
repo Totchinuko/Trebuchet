@@ -10,10 +10,7 @@
         <ItemsControl ItemsSource="{Binding Rows}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <ItemsControl>
-                        <ContentPresenter Content="{Binding .}" />
-                        <Separator Opacity="0" Height="10" />
-                    </ItemsControl>
+                    <ContentPresenter Content="{Binding .}" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
