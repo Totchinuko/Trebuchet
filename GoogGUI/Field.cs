@@ -53,6 +53,7 @@ namespace GoogGUI
                 _value = value;
                 OnValueChanged(_value);
                 OnPropertyChanged("Value");
+                OnPropertyChanged("IsDefault");
             }
         }
 

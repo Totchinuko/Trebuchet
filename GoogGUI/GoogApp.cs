@@ -28,21 +28,16 @@ namespace GoogGUI
             //TODO - Modal for writing error
             //if(!Tools.CanWriteHere(_config.InstallPath))
             if (!_config.IsInstallPathValid)
-            {
-                _panel = new Settings(_config);
-                return;
-            }
-            _profiles = _config.GetAllProfiles();
-            _currentProfile = _config.CurrentProfile;
-            LoadProfile();
+                DisplaySettings(this);
+            RefreshConfig();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public string CurrentProfile { get => _currentProfile; set => _currentProfile = value; }
-        public bool IsProfileLoaded => _profile != null;
         public bool CanUseGame => IsProfileLoaded && !string.IsNullOrEmpty(_config.ClientPath) && _config.ClientBin.Exists;
         public bool CanUseServer => IsProfileLoaded && _config.ServerBin.Exists;
+        public string CurrentProfile { get => _currentProfile; set => _currentProfile = value; }
+        public bool IsProfileLoaded => _profile != null;
         public object? Panel { get => _panel; set => _panel = value; }
         public List<string> Profiles { get => _profiles; set => _profiles = value; }
 
@@ -51,6 +46,7 @@ namespace GoogGUI
         public void DisplaySettings(object? sender)
         {
             Settings setting = new Settings(_config);
+            setting.ConfigChanged += OnConfigChanged;
             _panel = setting;
             OnPropertyChanged("Panel");
         }
@@ -83,6 +79,23 @@ namespace GoogGUI
         protected virtual void OnPropertyChanged(string property)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        }
+
+        private void OnConfigChanged(object? sender, EventArgs e)
+        {
+            RefreshConfig();
+            OnPropertyChanged("CanUseGame");
+            OnPropertyChanged("CanUseServer");
+        }
+
+        private void RefreshConfig()
+        {
+            _profiles = _config.GetAllProfiles();
+            _currentProfile = _config.CurrentProfile;
+            LoadProfile();
+            OnPropertyChanged("Profiles");
+            OnPropertyChanged("CurrentProfile");
+            OnPropertyChanged("IsProfileLoaded");
         }
     }
 }

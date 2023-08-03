@@ -13,8 +13,8 @@ namespace GoogGUI
 {
     public class Settings : FieldEditor
     {
-        private List<Field> _fields = new List<Field>();
         private Config _config;
+        private List<Field> _fields = new List<Field>();
 
         public Settings(Config config)
         {
@@ -29,7 +29,14 @@ namespace GoogGUI
                 field.ValueChanged += OnValueChanged;
         }
 
+        public event EventHandler? ConfigChanged;
+
         public override List<Field> Fields { get => _fields; set => _fields = value; }
+
+        protected virtual void OnConfigChanged()
+        {
+            ConfigChanged?.Invoke(this, EventArgs.Empty);
+        }
 
         private void OnValueChanged(object? sender, object? e)
         {
@@ -42,6 +49,7 @@ namespace GoogGUI
 
             property.SetValue(_config, e);
             _config.SaveConfig();
+            OnConfigChanged();
         }
     }
 }
