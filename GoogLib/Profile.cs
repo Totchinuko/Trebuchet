@@ -18,18 +18,6 @@ namespace Goog
 {
     public class Profile
     {
-        private ServerProfile _server = new ServerProfile();
-        private ClientProfile _client = new ClientProfile();
-        private ModListProfile _modlist = new ModListProfile();
-        private string _profileFile = string.Empty;
-
-        public ServerProfile Server { get => _server; set => _server = value; }
-        public ClientProfile Client { get => _client; set => _client = value; }
-        public ModListProfile Modlist { get => _modlist; set => _modlist = value; }
-
-        [JsonIgnore]
-        public FileInfo ProfileFile => new FileInfo(_profileFile);
-
         public static readonly Dictionary<string, string> MapShortcuts = new Dictionary<string, string>
                 {
                     { "Exile Land", "/Game/Maps/ConanSandbox/ConanSandbox" },
@@ -39,11 +27,24 @@ namespace Goog
                     { "MagMell", "/Game/Mods/MagMell/MagMell" },
                 };
 
-        [JsonIgnore]
-        public string ProfileName => ProfileFile?.Directory?.Name ?? "";
+        private ClientProfile _client = new ClientProfile();
+        private ModListProfile _modlist = new ModListProfile();
+        private string _profileFile = string.Empty;
+        private ServerProfile _server = new ServerProfile();
+        public ClientProfile Client { get => _client; set => _client = value; }
 
         [JsonIgnore]
         public FileInfo GeneratedModList => new FileInfo(Path.Combine(ProfileFile.DirectoryName ?? "", Config.profileGeneratedModlist));
+
+        public ModListProfile Modlist { get => _modlist; set => _modlist = value; }
+
+        [JsonIgnore]
+        public FileInfo ProfileFile => new FileInfo(_profileFile);
+
+        [JsonIgnore]
+        public string ProfileName => ProfileFile?.Directory?.Name ?? "";
+
+        public ServerProfile Server { get => _server; set => _server = value; }
 
         public static void Create(string? path, [NotNull] out Profile? profile)
         {
@@ -75,16 +76,6 @@ namespace Goog
             profile._profileFile = path;
         }
 
-        public static void LoadStrict(bool testlive, string profileName, out Config config, [NotNull] out Profile? profile)
-        {
-            profile = null;
-            Config.Load(out config, testlive);
-
-            if (string.IsNullOrEmpty(profileName))
-                throw new ArgumentException("ProfileName is null or empty");
-            Load(Path.Combine(config.ProfilesFolder.FullName, profileName, Config.profileConfigName), out profile);
-        }
-
         public static void Load(bool testlive, string? profileName, out Config config, [NotNull] out Profile? profile)
         {
             Config.Load(out config, testlive);
@@ -102,7 +93,7 @@ namespace Goog
             if (!string.IsNullOrEmpty(currentFolder))
             {
                 path = Path.Combine(config.ProfilesFolder.FullName, currentFolder, Config.profileConfigName);
-                if(File.Exists(path))
+                if (File.Exists(path))
                 {
                     Load(path, out profile);
                     return;
@@ -112,17 +103,40 @@ namespace Goog
             throw new ArgumentException("Invalid profile name");
         }
 
-        public void SaveProfile()
+        public static void LoadStrict(bool testlive, string profileName, out Config config, [NotNull] out Profile? profile)
         {
+            profile = null;
+            Config.Load(out config, testlive);
+
+            if (string.IsNullOrEmpty(profileName))
+                throw new ArgumentException("ProfileName is null or empty");
+            Load(Path.Combine(config.ProfilesFolder.FullName, profileName, Config.profileConfigName), out profile);
+        }
+
+        public static void LoadStrict(bool testlive, string profileName, Config config, [NotNull] out Profile? profile)
+        {
+            profile = null;
+            if (string.IsNullOrEmpty(profileName))
+                throw new ArgumentException("ProfileName is null or empty");
+            Load(Path.Combine(config.ProfilesFolder.FullName, profileName, Config.profileConfigName), out profile);
+        }
+
+        public void CopyTo(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentException("path is invalid");
+
+            FileInfo target = new FileInfo(path);
+            if (target.Directory == null)
+                throw new DirectoryNotFoundException($"Invalid directory for {target.FullName}");
+
+            if (target.Exists || (target.Directory.Exists))
+                throw new Exception($"{target.FullName} already exists");
+
             if (ProfileFile.Directory == null)
                 throw new DirectoryNotFoundException($"Invalid directory for {ProfileFile.FullName}");
 
-            if (!ProfileFile.Directory.Exists)
-                Directory.CreateDirectory(ProfileFile.Directory.FullName);
-
-            JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
-            string json = JsonSerializer.Serialize(this, option);
-            File.WriteAllText(ProfileFile.FullName, json);
+            ProfileFile.Directory.CopyTo(target.Directory.FullName);
         }
 
         public void DeleteProfile()
@@ -133,7 +147,7 @@ namespace Goog
             if (dir == null || !dir.Exists)
                 throw new DirectoryNotFoundException($"Invalid directory for {ProfileFile.FullName}");
 
-            dir.Delete(true);                
+            dir.Delete(true);
         }
 
         public void MoveTo(string path)
@@ -156,22 +170,17 @@ namespace Goog
             ProfileFile.Refresh();
         }
 
-        public void CopyTo(string path)
+        public void SaveProfile()
         {
-            if (string.IsNullOrEmpty(path))
-                throw new ArgumentException("path is invalid");
-
-            FileInfo target = new FileInfo(path);
-            if(target.Directory == null)
-                throw new DirectoryNotFoundException($"Invalid directory for {target.FullName}");
-
-            if (target.Exists || (target.Directory.Exists))
-                throw new Exception($"{target.FullName} already exists");
-
             if (ProfileFile.Directory == null)
                 throw new DirectoryNotFoundException($"Invalid directory for {ProfileFile.FullName}");
 
-            ProfileFile.Directory.CopyTo(target.Directory.FullName);
+            if (!ProfileFile.Directory.Exists)
+                Directory.CreateDirectory(ProfileFile.Directory.FullName);
+
+            JsonSerializerOptions option = new JsonSerializerOptions { WriteIndented = true };
+            string json = JsonSerializer.Serialize(this, option);
+            File.WriteAllText(ProfileFile.FullName, json);
         }
 
         internal static string? GetCurrentProfileFolder(Config config)
