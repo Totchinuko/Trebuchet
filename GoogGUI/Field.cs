@@ -46,7 +46,7 @@ namespace GoogGUI
 
         public string FieldName { get => _fieldName; set => _fieldName = value; }
 
-        public bool IsDefault => _default == _value;
+        public bool IsDefault => _default?.Equals(_value) ?? _value == null;
 
         public string Property { get => _property; private set => _property = value; }
 
