@@ -94,4 +94,10 @@
         <Setter Property="ButtonBackground" Value="Transparent" />
         <Setter Property="ButtonHoverBackground" Value="{StaticResource GPanel}" />
     </Style>
+
+    <Style TargetType="TextBox" x:Key="TextField">
+        <Setter Property="Background" Value="{StaticResource GPanel}" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Foreground" Value="White" />
+    </Style>
 </ResourceDictionary>
