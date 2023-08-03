@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Goog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -18,11 +19,20 @@ namespace GoogGUI.Controls
     /// <summary>
     /// Interaction logic for SettingsContent.xaml
     /// </summary>
-    public partial class SettingsContent : UserControl
+    public partial class SettingsContent : UserControl, IGUIPanel
     {
         public SettingsContent()
         {
             InitializeComponent();
+        }
+
+        public void Close()
+        {
+        }
+
+        public void Setup(Config config, Profile? profile)
+        {
+            
         }
     }
 }

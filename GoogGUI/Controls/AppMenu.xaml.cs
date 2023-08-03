@@ -22,7 +22,7 @@ namespace GoogGUI.Controls
     {
         private GButton? _current = null;
 
-        public event EventHandler<UserControl?>? ContentSelected;
+        public event EventHandler<IGUIPanel?>? ContentSelected;
 
         public AppMenu()
         {
