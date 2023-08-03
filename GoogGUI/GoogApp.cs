@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,8 +23,15 @@ namespace GoogGUI
         public GoogApp()
         {
             SettingsCommand = new SimpleCommand(DisplaySettings);
-
             Config.Load(out _config, _testlive);
+
+            //TODO - Modal for writing error
+            //if(!Tools.CanWriteHere(_config.InstallPath))
+            if (!_config.IsInstallPathValid)
+            {
+                _panel = new Settings(_config);
+                return;
+            }
             _profiles = _config.GetAllProfiles();
             _currentProfile = _config.CurrentProfile;
             LoadProfile();
