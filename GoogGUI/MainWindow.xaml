@@ -22,6 +22,7 @@
             </Grid.RowDefinitions>
             <Controls:WindowTitlebar
                 x:Name="TitleBar"
+                Title="Goog GUI"
                 CloseIcon="pack://application:,,,/GoogGui;component/icons/Close.png"
                 RestoreIcon="pack://application:,,,/GoogGui;component/icons/Restore.png"
                 MaximizeIcon="pack://application:,,,/GoogGui;component/icons/Maximize.png"

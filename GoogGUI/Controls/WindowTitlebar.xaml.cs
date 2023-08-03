@@ -19,14 +19,49 @@ namespace GoogGUI.Controls
     /// <summary>
     /// Interaction logic for WindowTitlebar.xaml
     /// </summary>
-    public partial class WindowTitlebar : UserControl, INotifyPropertyChanged
+    public partial class WindowTitlebar : UserControl
     {
-        public static readonly DependencyProperty CloseIconProperty = DependencyProperty.Register("CloseIcon", typeof(ImageSource), typeof(WindowTitlebar));
-        public static readonly DependencyProperty MaximizeIconProperty = DependencyProperty.Register("MaximizeIcon", typeof(ImageSource), typeof(WindowTitlebar));
-        public static readonly DependencyProperty RestoreIconProperty = DependencyProperty.Register("RestoreIcon", typeof(ImageSource), typeof(WindowTitlebar));
-        public static readonly DependencyProperty MinimizeIconProperty = DependencyProperty.Register("MinimizeIcon", typeof(ImageSource), typeof(WindowTitlebar));
+        private WindowState _state;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public static readonly DependencyProperty CloseIconProperty = DependencyProperty.Register(
+            "CloseIcon",
+            typeof(ImageSource),
+            typeof(WindowTitlebar),
+            new PropertyMetadata(null, new PropertyChangedCallback(OnCloseIconChanged))
+            );
+
+        public static readonly DependencyProperty MaximizeIconProperty = DependencyProperty.Register(
+            "MaximizeIcon",
+            typeof(ImageSource),
+            typeof(WindowTitlebar),
+            new PropertyMetadata(null, new PropertyChangedCallback(OnMaximizeIconChanged))
+            );
+
+        public static readonly DependencyProperty MinimizeIconProperty = DependencyProperty.Register(
+            "MinimizeIcon",
+            typeof(ImageSource),
+            typeof(WindowTitlebar),
+            new PropertyMetadata(null, new PropertyChangedCallback(OnMinimizeIconChanged))
+            );
+
+        public static readonly DependencyProperty RestoreIconProperty = DependencyProperty.Register(
+            "RestoreIcon",
+            typeof(ImageSource),
+            typeof(WindowTitlebar),
+            new PropertyMetadata(null, new PropertyChangedCallback(OnRestoreIconChanged))
+            );
+
+        public static readonly DependencyProperty TitleProperty = DependencyProperty.Register(
+            "Title",
+            typeof(string),
+            typeof(WindowTitlebar),
+            new PropertyMetadata(null, new PropertyChangedCallback(OnTitleChanged))
+            );
+
+        public WindowTitlebar()
+        {
+            InitializeComponent();
+        }
 
         public ImageSource CloseIcon
         {
@@ -40,62 +75,60 @@ namespace GoogGUI.Controls
             set => SetValue(MaximizeIconProperty, value);
         }
 
-        public ImageSource RestoreIcon
-        {
-            get => (ImageSource)GetValue(RestoreIconProperty);
-            set => SetValue(RestoreIconProperty, value);
-        }
-
         public ImageSource MinimizeIcon
         {
             get => (ImageSource)GetValue(MinimizeIconProperty);
             set => SetValue(MinimizeIconProperty, value);
         }
 
+        public ImageSource RestoreIcon
+        {
+            get => (ImageSource)GetValue(RestoreIconProperty);
+            set => SetValue(RestoreIconProperty, value);
+        }
+
         public string Title
         {
-            get => Window.GetWindow(this).Title;
-            set => Window.GetWindow(this).Title = value;
+            get => (string)GetValue(TitleProperty);
+            set => SetValue(TitleProperty, value);
         }
 
-        public ImageSource Icon
+        private static void OnCloseIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            get => Window.GetWindow(this).Icon;
-            set => Window.GetWindow(this).Icon = value;
+            if (d is WindowTitlebar titleBar)
+                titleBar.CloseBtn.ButtonIcon = (ImageSource)e.NewValue;
         }
 
-        public WindowState WindowState
+        private static void OnMaximizeIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            get => Window.GetWindow(this).WindowState;
-            set => Window.GetWindow(this).WindowState = value;
+            if (d is WindowTitlebar titleBar)
+                if (titleBar._state == WindowState.Normal)
+                    titleBar.MaximizeBtn.ButtonIcon = (ImageSource)e.NewValue;
         }
 
-        public WindowTitlebar()
+        private static void OnMinimizeIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            InitializeComponent();            
-            DataContext = this;
+            if (d is WindowTitlebar titleBar)
+                titleBar.MinimizeBtn.ButtonIcon = (ImageSource)e.NewValue;
         }
 
-        private void Minimize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private static void OnRestoreIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            Window.GetWindow(this).WindowState = WindowState.Minimized;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("WindowState"));
+            if (d is WindowTitlebar titleBar)
+                if (titleBar._state == WindowState.Maximized)
+                    titleBar.MaximizeBtn.ButtonIcon = (ImageSource)e.NewValue;
         }
 
-        private void MaximizeButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
-            if (Window.GetWindow(this).WindowState == WindowState.Normal)
-            {
-                Window.GetWindow(this).WindowState = WindowState.Maximized;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("WindowState"));
-                Window.GetWindow(this).Padding = new Thickness(10);
-            }
-            else if (Window.GetWindow(this).WindowState == WindowState.Maximized)
-            {
-                Window.GetWindow(this).WindowState = WindowState.Normal;
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("WindowState"));
-                Window.GetWindow(this).Padding = new Thickness(0);
-            }
+            if (d is WindowTitlebar titleBar)
+                titleBar.TitleRun.Text = (string)e.NewValue;
+        }
+
+        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            if (e.LeftButton == MouseButtonState.Pressed)
+                Window.GetWindow(this).DragMove();
         }
 
         private void Close_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
@@ -103,10 +136,28 @@ namespace GoogGUI.Controls
             Window.GetWindow(this).Close();
         }
 
-        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        private void MaximizeButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
-            if(e.LeftButton == MouseButtonState.Pressed)
-                Window.GetWindow(this).DragMove();
+            if (Window.GetWindow(this).WindowState == WindowState.Normal)
+            {
+                Window.GetWindow(this).WindowState = WindowState.Maximized;
+                _state = WindowState.Maximized;
+                Window.GetWindow(this).Padding = new Thickness(10);
+                MaximizeBtn.ButtonIcon = (ImageSource)GetValue(RestoreIconProperty);
+            }
+            else if (Window.GetWindow(this).WindowState == WindowState.Maximized)
+            {
+                Window.GetWindow(this).WindowState = WindowState.Normal;
+                _state = WindowState.Normal;
+                Window.GetWindow(this).Padding = new Thickness(0);
+                MaximizeBtn.ButtonIcon = (ImageSource)GetValue(MaximizeIconProperty);
+            }
+        }
+
+        private void Minimize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            Window.GetWindow(this).WindowState = WindowState.Minimized;
+            _state = WindowState.Minimized;
         }
     }
 }
