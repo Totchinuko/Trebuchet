@@ -42,6 +42,7 @@
         <Setter Property="Width" Value="2" />
         <Setter Property="Background" Value="{StaticResource GBlue}" />
         <Setter Property="CornerRadius" Value="1" />
+        <Setter Property="Height" Value="20" />
     </Style>
     <Style TargetType="Controls:GButton" x:Key="GrayButton">
         <Setter Property="ButtonBackground" Value="{StaticResource GDimGray}" />
