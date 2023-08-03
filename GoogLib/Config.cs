@@ -33,6 +33,7 @@ namespace Goog
             get => _installPath;
             set => _installPath = value;
         }
+
         [JsonIgnore]
         public bool IsTestLive { get; private set; }
 
@@ -41,6 +42,7 @@ namespace Goog
             get => _managerServers;
             set => _managerServers = value;
         }
+
         public string ServerAppID => IsTestLive ? testLiveServerAppID : liveServerAppID;
 
         public List<ServerInstance> ServerInstances
@@ -48,7 +50,9 @@ namespace Goog
             get => _serverInstances;
             set => _serverInstances = value;
         }
+
         #region constants
+
         public const string clientBEBin = "ConanSandbox_BE.exe";
         public const string clientBin = "ConanSandbox.exe";
         public const string CmdArgAppUpdate = "+app_update {0}";
@@ -77,9 +81,11 @@ namespace Goog
         public const string testLiveServerAppID = "931580";
         public const string testLiveServerFolder = "TestLiveServer";
         public const string testProfileFolder = "TestLiveProfiles";
-        #endregion
+
+        #endregion constants
 
         #region Path
+
         public FileInfo ClientBEBin => new FileInfo(Path.Combine(ClientBinaries.FullName, clientBEBin));
         public FileInfo ClientBin => new FileInfo(Path.Combine(ClientBinaries.FullName, clientBin));
         public DirectoryInfo ClientBinaries => new DirectoryInfo(Path.Combine(ClientFolder.FullName, gameBinariesFolder));
@@ -93,18 +99,30 @@ namespace Goog
         public FileInfo SteamCMD => new FileInfo(Path.Combine(SteamFolder.FullName, steamCMDBin));
         public DirectoryInfo SteamFolder => new DirectoryInfo(Path.Combine(InstallPath, steamFolder));
         public DirectoryInfo SteamModFolder => new DirectoryInfo(Path.Combine(SteamFolder.FullName, steamModFolder, ClientAppID));
-        #endregion
+
+        #endregion Path
+
+        public static string? GetConfigPath(bool testlive)
+        {
+            string? ConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (string.IsNullOrEmpty(ConfigPath))
+                return null;
+            ConfigPath = Path.Combine(ConfigPath, (testlive ? "TestLive." : "") + ConfigFilename);
+            return ConfigPath;
+        }
+
         public static void Load(out Config Config, bool testlive)
         {
             string ConfigPath = GetConfigPath(testlive) ?? "";
             string json = "";
             Config = new Config();
+            Config.IsTestLive = testlive;
 
             if (!File.Exists(ConfigPath))
                 return;
             json = File.ReadAllText(ConfigPath);
             if (string.IsNullOrEmpty(json))
-                throw new NullReferenceException($"No Json to read in {ConfigPath}");
+                return;
 
             JsonSerializerOptions options = new JsonSerializerOptions();
             options.IgnoreReadOnlyProperties = true;
@@ -180,14 +198,6 @@ namespace Goog
             string? ConfigPath = GetConfigPath(IsTestLive) ?? "";
 
             File.WriteAllText(ConfigPath, json);
-        }
-        public static string? GetConfigPath(bool testlive)
-        {
-            string? ConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (string.IsNullOrEmpty(ConfigPath))
-                return null;
-            ConfigPath = Path.Combine(ConfigPath, (testlive ? "TestLive." : "") + ConfigFilename);
-            return ConfigPath;
         }
     }
 }
