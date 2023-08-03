@@ -38,28 +38,33 @@ namespace GoogGUI.Controls
             _current.ButtonAccent = true;
         }
 
+        protected virtual void OnContentSelected(IGUIPanel? panel)
+        {
+            ContentSelected?.Invoke(this, panel);
+        }
+
         private void Modlist_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UpdateCurrent(sender);
-            ContentSelected?.Invoke(this, null);
+            OnContentSelected(null);
         }
 
         private void Game_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UpdateCurrent(sender);
-            ContentSelected?.Invoke(this, null);
+            OnContentSelected(null);
         }
 
         private void Server_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UpdateCurrent(sender);
-            ContentSelected?.Invoke(this, null);
+            OnContentSelected(null);
         }
 
         private void Settings_MouseDown(object sender, MouseButtonEventArgs e)
         {
             UpdateCurrent(sender);
-            ContentSelected?.Invoke(this, new SettingsContent());
+            OnContentSelected(new SettingsContent());
         }
     }
 }
