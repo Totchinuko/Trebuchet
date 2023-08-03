@@ -47,6 +47,8 @@ namespace Goog
             set => _installPath = value;
         }
 
+        public bool IsInstallPathValid => !string.IsNullOrEmpty(_installPath) && Directory.Exists(_installPath);
+
         [JsonIgnore]
         public bool IsTestLive { get; private set; }
 
