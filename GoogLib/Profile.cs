@@ -76,15 +76,21 @@ namespace Goog
             profile._profileFile = path;
         }
 
-        public static void Load(bool testlive, string? profileName, out Config config, [NotNull] out Profile? profile)
+        public static void Load(bool testlive, string? profileName, Config config, [NotNull] out Profile? profile)
         {
-            Config.Load(out config, testlive);
             string path = string.Empty;
             if (!string.IsNullOrEmpty(profileName))
             {
                 path = Path.Combine(config.ProfilesFolder.FullName, profileName, Config.profileConfigName);
                 if (!File.Exists(path))
                     throw new FileNotFoundException($"{path} was not found");
+                Load(path, out profile);
+                return;
+            }
+
+            if (config.ProfileExists(config.CurrentProfile))
+            {
+                path = Path.Combine(config.ProfilesFolder.FullName, config.CurrentProfile, Config.profileConfigName);
                 Load(path, out profile);
                 return;
             }
@@ -103,14 +109,16 @@ namespace Goog
             throw new ArgumentException("Invalid profile name");
         }
 
+        public static void Load(bool testlive, string? profileName, out Config config, [NotNull] out Profile? profile)
+        {
+            Config.Load(out config, testlive);
+            Load(testlive, profileName, config, out profile);
+        }
+
         public static void LoadStrict(bool testlive, string profileName, out Config config, [NotNull] out Profile? profile)
         {
-            profile = null;
             Config.Load(out config, testlive);
-
-            if (string.IsNullOrEmpty(profileName))
-                throw new ArgumentException("ProfileName is null or empty");
-            Load(Path.Combine(config.ProfilesFolder.FullName, profileName, Config.profileConfigName), out profile);
+            LoadStrict(testlive, profileName, config, out profile);
         }
 
         public static void LoadStrict(bool testlive, string profileName, Config config, [NotNull] out Profile? profile)
