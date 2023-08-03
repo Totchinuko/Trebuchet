@@ -156,7 +156,7 @@ namespace Goog
         {
             if (string.IsNullOrEmpty(profileName))
                 return false;
-            return File.Exists(Path.Combine(ProfilesFolder.FullName, profileName, profileConfigName));
+            return File.Exists(Path.Join(ProfilesFolder.FullName, profileName, profileConfigName));
         }
 
         public void ResolveMap(ref string map, Profile? profile = null)
@@ -234,11 +234,16 @@ namespace Goog
             profileName = string.Empty;
             if (!ProfilesFolder.Exists)
                 return false;
-            string[] files = Directory.GetFiles(ProfilesFolder.FullName);
-            if (files.Length == 0)
+            string[] directories = Directory.GetDirectories(ProfilesFolder.FullName);
+            if (directories.Length == 0)
                 return false;
-            profileName = files[0];
-            return true;
+            if (directories.Contains(Path.Combine(ProfilesFolder.FullName, "Default")))
+            {
+                profileName = "Default";
+                return true;
+            }
+            profileName = new DirectoryInfo(directories[0]).Name;
+            return !string.IsNullOrEmpty(profileName);
         }
     }
 }
