@@ -23,6 +23,7 @@ namespace GoogGUI
             {
                 new Field("Install path", "InstallPath", _config, string.Empty, "DirectoryField"),
                 new Field("Client path", "ClientPath", _config, string.Empty, "DirectoryField"),
+                new Field("Manage Servers", "ManageServers", _config, false, "ToggleField")
             };
 
             foreach (Field field in _fields)

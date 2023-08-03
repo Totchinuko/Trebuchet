@@ -11,6 +11,7 @@
                 <ResourceDictionary Source="Templates\FieldRow.xaml" />
                 <ResourceDictionary Source="Templates\DirectoryField.xaml" />
                 <ResourceDictionary Source="Templates\FieldEditor.xaml" />
+                <ResourceDictionary Source="Templates\ToggleField.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
