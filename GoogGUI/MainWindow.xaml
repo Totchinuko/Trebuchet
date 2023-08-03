@@ -16,7 +16,7 @@
                 <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Controls:WindowTitlebar x:Name="TitleBar" CloseIcon="/icons/Close.png" MaximizeIcon="/icons/Maximize.png" MinimizeIcon="/icons/Minimize.png" />
+            <Controls:WindowTitlebar x:Name="TitleBar" CloseIcon="/icons/Close.png" RestoreIcon="/icons/Restore.png" MaximizeIcon="/icons/Maximize.png" MinimizeIcon="/icons/Minimize.png" />
             <Grid x:Name="WindowContent" Grid.Row="2" Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="240" />
