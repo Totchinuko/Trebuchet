@@ -223,6 +223,8 @@ namespace Goog
         public bool TryGetFirstProfile(out string profileName)
         {
             profileName = string.Empty;
+            if (!ProfilesFolder.Exists)
+                return false;
             string[] files = Directory.GetFiles(ProfilesFolder.FullName);
             if (files.Length == 0)
                 return false;
