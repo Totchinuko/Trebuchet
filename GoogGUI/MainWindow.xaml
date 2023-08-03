@@ -36,6 +36,7 @@
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
                     <StackPanel>
+                        <!--Modlist button-->
                         <Controls:GButton ButtonIcon="/Icons/List.png"
                                           ButtonText="Mod List"
                                           IsEnabled="{Binding App.IsProfileLoaded, RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
@@ -45,9 +46,10 @@
                             </Controls:GButton.Style>
                         </Controls:GButton>
                         <Separator Height="10" Opacity="0" />
+                        <!--Game button-->
                         <Controls:GButton ButtonIcon="/Icons/Game.png"
                                           ButtonText="Game Parameters"
-                                          IsEnabled="{Binding App.IsProfileLoaded, RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
+                                          IsEnabled="{Binding App.CanUseGame, RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
                             <Controls:GButton.Style>
                                 <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
                                 </Style>
@@ -55,16 +57,17 @@
                         </Controls:GButton>
 
                         <Separator Height="10" Opacity="0" />
-
+                        <!--Server button-->
                         <Controls:GButton ButtonIcon="/Icons/Server.png"
                                           ButtonText="Server Parameters"
-                                          IsEnabled="{Binding App.IsProfileLoaded, RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
+                                          IsEnabled="{Binding App.CanUseServer, RelativeSource={RelativeSource AncestorType=local:MainWindow}}">
                             <Controls:GButton.Style>
                                 <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
                                 </Style>
                             </Controls:GButton.Style>
                         </Controls:GButton>
                     </StackPanel>
+                    <!--Settings button-->
                     <StackPanel Grid.Row="2">
                         <Controls:GButton Command="{Binding App.SettingsCommand, RelativeSource={RelativeSource AncestorType=local:MainWindow}}"
                                           ButtonIcon="/icons/Settings.png"

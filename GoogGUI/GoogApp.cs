@@ -41,6 +41,8 @@ namespace GoogGUI
 
         public string CurrentProfile { get => _currentProfile; set => _currentProfile = value; }
         public bool IsProfileLoaded => _profile != null;
+        public bool CanUseGame => IsProfileLoaded && !string.IsNullOrEmpty(_config.ClientPath) && _config.ClientBin.Exists;
+        public bool CanUseServer => IsProfileLoaded && _config.ServerBin.Exists;
         public object? Panel { get => _panel; set => _panel = value; }
         public List<string> Profiles { get => _profiles; set => _profiles = value; }
 
