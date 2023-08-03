@@ -27,11 +27,12 @@
                 </TextBlock>
                 <ContentPresenter Grid.Column="2" Content="{Binding .}" ContentTemplate="{Binding Template}" />
                 <Controls:GButton
-                Grid.Column="3"
-                ToolTip="Reset to default"
-                x:Name="Reset"
-                Margin="3"
-                ButtonIcon="pack://application:,,,/GoogGui;component/Icons/Reset.png">
+                    Grid.Column="3"
+                    ToolTip="Reset to default"
+                    x:Name="Reset"
+                    Margin="3"
+                    Command="{Binding ResetCommand}"
+                    ButtonIcon="pack://application:,,,/GoogGui;component/Icons/Reset.png">
                     <Controls:GButton.Style>
                         <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
                             <Style.Triggers>

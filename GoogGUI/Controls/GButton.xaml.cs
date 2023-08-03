@@ -137,6 +137,7 @@ namespace GoogGUI.Controls
         public GButton()
         {
             InitializeComponent();
+            IsEnabledChanged += OnIsEnabledChanged;
         }
 
         public bool ButtonAccent
@@ -224,7 +225,10 @@ namespace GoogGUI.Controls
         }
 
         public bool IsHovered { get; set; }
+
         public bool IsPressed { get; set; }
+
+        protected override bool IsEnabledCore => base.IsEnabledCore;
 
         protected override void OnMouseDown(MouseButtonEventArgs e)
         {
@@ -260,7 +264,7 @@ namespace GoogGUI.Controls
         protected virtual void UpdateBackground()
         {
             MainBorder.Background = ButtonAccent ? ButtonHoverBackground : IsHovered ? ButtonHoverBackground : ButtonBackground;
-            Opacity = IsPressed ? 0.7d : 1d;
+            Opacity = IsEnabled ? IsPressed ? 0.7d : 1d : 0.5d;
         }
 
         protected virtual void UpdateStyling()
@@ -289,6 +293,12 @@ namespace GoogGUI.Controls
         {
             if (d is GButton button)
                 button.UpdateStyling();
+        }
+
+        private void OnIsEnabledChanged(object sender, DependencyPropertyChangedEventArgs e)
+        {
+            if (sender is GButton button)
+                UpdateBackground();
         }
     }
 }

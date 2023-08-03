@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Input;
 
 namespace GoogGUI
 {
@@ -15,6 +16,8 @@ namespace GoogGUI
 
         public Field(string name, string property, object target, object? defaultValue, string template)
         {
+            ResetCommand = new SimpleCommand(OnReset);
+
             _fieldName = name;
             _property = property;
             if (string.IsNullOrEmpty(_property))
@@ -40,9 +43,15 @@ namespace GoogGUI
         public event EventHandler<object?>? ValueChanged;
 
         public object? Default { get => _default; set => _default = value; }
+
         public string FieldName { get => _fieldName; set => _fieldName = value; }
+
         public bool IsDefault => _default == _value;
+
         public string Property { get => _property; private set => _property = value; }
+
+        public ICommand ResetCommand { get; private set; }
+
         public object Template { get => _template; set => _template = value; }
 
         public object? Value
@@ -57,14 +66,19 @@ namespace GoogGUI
             }
         }
 
+        protected virtual void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
         protected virtual void OnValueChanged(object? value)
         {
             ValueChanged?.Invoke(this, value);
         }
 
-        protected virtual void OnPropertyChanged(string name)
+        private void OnReset(object? obj)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            Value = _default;
         }
     }
 }
