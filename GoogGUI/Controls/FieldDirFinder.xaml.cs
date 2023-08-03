@@ -32,6 +32,7 @@ namespace GoogGUI.Controls
         {
             FieldName = name;
             InitializeComponent();
+            DataContext = this;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
