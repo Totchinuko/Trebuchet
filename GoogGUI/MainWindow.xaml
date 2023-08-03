@@ -16,13 +16,18 @@
                 <RowDefinition Height="30" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Controls:WindowTitlebar x:Name="TitleBar" CloseIcon="/icons/Close.png" RestoreIcon="/icons/Restore.png" MaximizeIcon="/icons/Maximize.png" MinimizeIcon="/icons/Minimize.png" />
+            <Controls:WindowTitlebar 
+                x:Name="TitleBar" 
+                CloseIcon="pack://application:,,,/GoogGui;component/icons/Close.png" 
+                RestoreIcon="pack://application:,,,/GoogGui;component/icons/Restore.png" 
+                MaximizeIcon="pack://application:,,,/GoogGui;component/icons/Maximize.png" 
+                MinimizeIcon="pack://application:,,,/GoogGui;component/icons/Minimize.png" />
             <Grid x:Name="WindowContent" Grid.Row="2" Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="240" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Controls:AppMenu />
+                <Controls:AppMenu x:Name="AppMenu" />
                 <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0">
                     <ContentPresenter x:Name="ContentPanelPresenter" />
                 </Border>

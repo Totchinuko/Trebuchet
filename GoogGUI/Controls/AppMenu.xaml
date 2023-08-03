@@ -12,14 +12,14 @@
             <RowDefinition Height="auto" />
         </Grid.RowDefinitions>
         <StackPanel>
-            <Controls:GButton Style="{StaticResource TButton}" ButtonIcon="/Icons/List.png" ButtonText="Mod List" />
+            <Controls:GButton Style="{StaticResource TButton}" MouseDown="Modlist_MouseDown" ButtonIcon="pack://application:,,,/GoogGui;component/Icons/List.png" ButtonText="Mod List" />
             <Separator Height="10" Opacity="0" />
-            <Controls:GButton Style="{StaticResource TButton}" ButtonIcon="/Icons/Game.png" ButtonText="Game Parameters" />
+            <Controls:GButton Style="{StaticResource TButton}" MouseDown="Game_MouseDown" ButtonIcon="pack://application:,,,/GoogGui;component/Icons/Game.png" ButtonText="Game Parameters" />
             <Separator Height="10" Opacity="0" />
-            <Controls:GButton Style="{StaticResource TButton}" ButtonIcon="/Icons/Server.png" ButtonText="Server Parameters" />
+            <Controls:GButton Style="{StaticResource TButton}" MouseDown="Server_MouseDown" ButtonIcon="pack://application:,,,/GoogGui;component/Icons/Server.png" ButtonText="Server Parameters" />
         </StackPanel>
         <StackPanel Grid.Row="2">
-            <Controls:GButton Style="{StaticResource TButton}" ButtonIcon="/icons/Settings.png" ButtonText="Settings" />            
+            <Controls:GButton Style="{StaticResource TButton}" MouseDown="Settings_MouseDown" ButtonIcon="pack://application:,,,/GoogGui;component/icons/Settings.png" ButtonText="Settings" />            
         </StackPanel>
     </Grid>
 </UserControl>

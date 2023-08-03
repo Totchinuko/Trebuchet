@@ -20,9 +20,46 @@ namespace GoogGUI.Controls
     /// </summary>
     public partial class AppMenu : UserControl
     {
+        private GButton? _current = null;
+
+        public event EventHandler<UserControl?>? ContentSelected;
+
         public AppMenu()
         {
             InitializeComponent();
+        }
+
+        protected virtual void UpdateCurrent(object sender)
+        {
+            if (sender is not GButton button) return;
+            if (_current != null)
+                _current.ButtonAccent = false;
+            _current = button;
+            _current.ButtonAccent = true;
+        }
+
+        private void Modlist_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            UpdateCurrent(sender);
+            ContentSelected?.Invoke(this, null);
+        }
+
+        private void Game_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            UpdateCurrent(sender);
+            ContentSelected?.Invoke(this, null);
+        }
+
+        private void Server_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            UpdateCurrent(sender);
+            ContentSelected?.Invoke(this, null);
+        }
+
+        private void Settings_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            UpdateCurrent(sender);
+            ContentSelected?.Invoke(this, new SettingsContent());
         }
     }
 }

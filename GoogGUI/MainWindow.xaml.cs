@@ -1,5 +1,7 @@
 ﻿using GoogGUI.Controls;
+using System;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace GoogGUI
@@ -12,7 +14,13 @@ namespace GoogGUI
         public MainWindow()
         {
             InitializeComponent();
+            AppMenu.ContentSelected += OnContentSelected;
             DataContext = this;
+        }
+
+        private void OnContentSelected(object? sender, UserControl? e)
+        {
+            ContentPanelPresenter.Content = e;
         }
     }
 }
