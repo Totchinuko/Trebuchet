@@ -11,7 +11,14 @@
             <ColumnDefinition Width="*" />
             <ColumnDefinition Width="auto" />
         </Grid.ColumnDefinitions>
-        <TextBox Style="{StaticResource TextField}" Text="{Binding Path}" x:Name="PathField" TextChanged="PathField_TextChanged" />
+        <TextBox 
+            Style="{StaticResource TextField}" 
+            VerticalAlignment="Center" 
+            Height="25" 
+            VerticalContentAlignment="Center" 
+            Text="{Binding Path}" 
+            x:Name="PathField" 
+            TextChanged="PathField_TextChanged" />
         <local:GButton 
             Grid.Column="1" 
             ButtonIconSize="13" 
