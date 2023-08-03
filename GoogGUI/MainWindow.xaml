@@ -28,7 +28,7 @@
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Controls:AppMenu x:Name="AppMenu" />
-                <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0">
+                <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12">
                     <ContentPresenter x:Name="ContentPanelPresenter" />
                 </Border>
             </Grid>
