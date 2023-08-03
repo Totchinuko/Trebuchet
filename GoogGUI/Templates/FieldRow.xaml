@@ -35,7 +35,7 @@
                     <Controls:GButton.Style>
                         <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding IsDefault, RelativeSource={RelativeSource AncestorType=local:Field}}" Value="True">
+                                <DataTrigger Binding="{Binding IsDefault}" Value="True">
                                     <Setter Property="Visibility" Value="Hidden" />
                                 </DataTrigger>
                             </Style.Triggers>
