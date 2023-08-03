@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:GoogGUI.Controls"
              mc:Ignorable="d" 
              d:DesignHeight="32" d:DesignWidth="150">
-    <Border MouseDown="OnMouseDown" MouseUp="OnMouseUp">
+    <Border>
         <Border.Style>
             <Style TargetType="Border">
                 <Setter Property="Background" Value="{Binding ButtonBackground, FallbackValue=#FF595959}" />

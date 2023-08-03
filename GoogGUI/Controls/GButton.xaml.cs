@@ -118,16 +118,25 @@ namespace GoogGUI.Controls
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private void OnMouseDown(object sender, MouseButtonEventArgs e)
+        protected override void OnMouseDown(MouseButtonEventArgs e)
         {
+            base.OnMouseDown(e);
             IsPressed = true;
             if (Command != null)
                 Command.Execute(this);
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPressed"));
         }
 
-        private void OnMouseUp(object sender, MouseButtonEventArgs e)
+        protected override void OnMouseUp(MouseButtonEventArgs e)
         {
+            base.OnMouseUp(e);
+            IsPressed = false;
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPressed"));
+        }
+
+        protected override void OnMouseLeave(MouseEventArgs e)
+        {
+            base.OnMouseLeave(e);
             IsPressed = false;
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs("IsPressed"));
         }
