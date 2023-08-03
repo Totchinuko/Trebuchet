@@ -16,9 +16,16 @@ namespace Goog
         public const string ConfigFilename = "Goog.json";
 
         private string _clientPath = string.Empty;
+        private string _currentProfile = string.Empty;
         private string _installPath = string.Empty;
         private bool _managerServers = false;
         private List<ServerInstance> _serverInstances = new List<ServerInstance> { new ServerInstance() };
+
+        public Config()
+        {
+            if (!ProfileExists(_currentProfile))
+                TryGetFirstProfile(out _currentProfile);
+        }
 
         public string ClientAppID => IsTestLive ? testLiveClientAppID : liveClientAppID;
 
@@ -26,6 +33,12 @@ namespace Goog
         {
             get => _clientPath;
             set => _clientPath = value;
+        }
+
+        public string CurrentProfile
+        {
+            get { return _currentProfile; }
+            set { _currentProfile = value; }
         }
 
         public string InstallPath
@@ -130,6 +143,13 @@ namespace Goog
             Config.IsTestLive = testlive;
         }
 
+        public bool ProfileExists(string profileName)
+        {
+            if (string.IsNullOrEmpty(profileName))
+                return false;
+            return File.Exists(Path.Combine(ProfilesFolder.FullName, profileName, profileConfigName));
+        }
+
         public void ResolveMap(ref string map, Profile? profile = null)
         {
             if (!string.IsNullOrEmpty(map))
@@ -198,6 +218,16 @@ namespace Goog
             string? ConfigPath = GetConfigPath(IsTestLive) ?? "";
 
             File.WriteAllText(ConfigPath, json);
+        }
+
+        public bool TryGetFirstProfile(out string profileName)
+        {
+            profileName = string.Empty;
+            string[] files = Directory.GetFiles(ProfilesFolder.FullName);
+            if (files.Length == 0)
+                return false;
+            profileName = files[0];
+            return true;
         }
     }
 }
