@@ -7,7 +7,6 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles\AppSkin.xaml" />
-                <ResourceDictionary Source="Templates\AppMenu.xaml" />
                 <ResourceDictionary Source="Templates\Converters.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
