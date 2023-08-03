@@ -10,5 +10,6 @@
         x:Name="FindButton"
         MouseDown="FindButton_MouseDown"
         Style="{StaticResource TButton}"
+        Margin="3"
         ButtonIcon="pack://application:,,,/GoogGui;component/Icons/LocalStorage.png" />
 </UserControl>
