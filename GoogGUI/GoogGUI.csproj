@@ -12,8 +12,10 @@
     <None Remove="Icons\Close.png" />
     <None Remove="Icons\Game.png" />
     <None Remove="Icons\List.png" />
+    <None Remove="Icons\LocalStorage.png" />
     <None Remove="Icons\Maximize.png" />
     <None Remove="Icons\Minimize.png" />
+    <None Remove="Icons\Reset.png" />
     <None Remove="Icons\Restore.png" />
     <None Remove="Icons\Save.png" />
     <None Remove="Icons\Server.png" />
@@ -28,8 +30,10 @@
     <Resource Include="Icons\Close.png" />
     <Resource Include="Icons\Game.png" />
     <Resource Include="Icons\List.png" />
+    <Resource Include="Icons\LocalStorage.png" />
     <Resource Include="Icons\Maximize.png" />
     <Resource Include="Icons\Minimize.png" />
+    <Resource Include="Icons\Reset.png" />
     <Resource Include="Icons\Restore.png" />
     <Resource Include="Icons\Save.png" />
     <Resource Include="Icons\Server.png" />
