@@ -143,6 +143,13 @@ namespace Goog
             Config.IsTestLive = testlive;
         }
 
+        public List<string> GetAllProfiles()
+        {
+            if (!Directory.Exists(ProfilesFolder.FullName))
+                return new List<string>();
+            return Directory.GetFiles(ProfilesFolder.FullName).ToList();
+        }
+
         public bool ProfileExists(string profileName)
         {
             if (string.IsNullOrEmpty(profileName))
