@@ -1,10 +1,11 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
 
 namespace GoogGUI
 {
-    public class Field
+    public class Field : INotifyPropertyChanged
     {
         private object? _default;
         private string _fieldName = string.Empty;
@@ -34,6 +35,8 @@ namespace GoogGUI
                 throw new Exception($"Template {template} not found");
         }
 
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public event EventHandler<object?>? ValueChanged;
 
         public object? Default { get => _default; set => _default = value; }
@@ -49,12 +52,18 @@ namespace GoogGUI
             {
                 _value = value;
                 OnValueChanged(_value);
+                OnPropertyChanged("Value");
             }
         }
 
         protected virtual void OnValueChanged(object? value)
         {
             ValueChanged?.Invoke(this, value);
+        }
+
+        protected virtual void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }
