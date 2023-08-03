@@ -53,6 +53,7 @@ namespace GoogGUI
 
         public void LoadProfile()
         {
+            _profile = null;
             if (!_config.ProfileExists(_currentProfile))
             {
                 if (!_config.TryGetFirstProfile(out _currentProfile))
