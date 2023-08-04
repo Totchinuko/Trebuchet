@@ -93,9 +93,6 @@ namespace GoogGUI
 
         private void ModlistDisplay(object? obj)
         {
-            ModalWindow modal = new ModalWindow(new ErrorModal("Error", "This is some text", true));
-            modal.Owner = Application.Current.MainWindow;
-            modal.ShowDialog();
         }
 
         private void OnConfigChanged(object? sender, EventArgs e)
