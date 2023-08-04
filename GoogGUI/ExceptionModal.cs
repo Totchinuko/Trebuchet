@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Media;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -20,6 +21,8 @@ namespace GoogGUI
             _errorTitle = "Internal Exception";
             _errorMessage = exception.GetAllExceptions();
             Clipboard.SetText(_errorMessage);
+            if (!((App)Application.Current).IsShutingDown)
+                SystemSounds.Exclamation.Play();
         }
 
         public ICommand CloseCommand { get; private set; }
@@ -40,8 +43,8 @@ namespace GoogGUI
 
         private void OnCloseModal(object? obj)
         {
-            _windows?.Close();
             Application.Current.Shutdown();
+            _windows?.Close();
         }
     }
 }

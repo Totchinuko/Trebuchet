@@ -15,6 +15,14 @@ namespace GoogGUI
     /// </summary>
     public partial class App : Application
     {
+        public bool IsShutingDown { get; private set; }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            IsShutingDown = true;
+            base.OnExit(e);
+        }
+
         protected override void OnStartup(StartupEventArgs e)
         {
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(OnUnhandledException);
@@ -22,20 +30,23 @@ namespace GoogGUI
             Current.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(OnDispatcherUnhandledException);
         }
 
+        private void OnApplicationThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            new ExceptionModal(e.Exception).ShowDialog();
+            IsShutingDown = true;
+        }
+
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
             new ExceptionModal(e.Exception).ShowDialog();
-        }
-
-        private void OnApplicationThreadException(object sender, ThreadExceptionEventArgs e)
-        {
-            new ExceptionModal(e.Exception).ShowDialog();
+            IsShutingDown = true;
         }
 
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             new ExceptionModal(((Exception)e.ExceptionObject)).ShowDialog();
+            IsShutingDown = true;
         }
     }
 }
