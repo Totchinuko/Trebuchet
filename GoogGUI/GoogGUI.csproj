@@ -9,6 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Icons\BugWindow.png" />
     <None Remove="Icons\Close.png" />
     <None Remove="Icons\Game.png" />
     <None Remove="Icons\List.png" />
@@ -20,6 +21,7 @@
     <None Remove="Icons\Save.png" />
     <None Remove="Icons\Server.png" />
     <None Remove="Icons\Settings.png" />
+    <None Remove="Icons\Window.png" />
   </ItemGroup>
 
   <ItemGroup>
@@ -27,6 +29,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Icons\BugWindow.png" />
     <Resource Include="Icons\Close.png" />
     <Resource Include="Icons\Game.png" />
     <Resource Include="Icons\List.png" />
@@ -38,6 +41,7 @@
     <Resource Include="Icons\Save.png" />
     <Resource Include="Icons\Server.png" />
     <Resource Include="Icons\Settings.png" />
+    <Resource Include="Icons\Window.png" />
   </ItemGroup>
 
 </Project>

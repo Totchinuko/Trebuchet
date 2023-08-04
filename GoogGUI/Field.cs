@@ -31,6 +31,7 @@ namespace GoogGUI
             if (prop == null)
                 throw new NullReferenceException($"{_property} is not found on type {target.GetType()}");
 
+            _callback = callback;
             _value = prop.GetValue(target);
             _default = defaultValue;
             _template = Application.Current.Resources[template];
@@ -40,7 +41,7 @@ namespace GoogGUI
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private event Action<Field, object?>? _valueChanged;
+        private event Action<Field, object?>? _callback;
 
         public object? Default { get => _default; set => _default = value; }
 
@@ -73,7 +74,7 @@ namespace GoogGUI
 
         protected virtual void OnValueChanged(object? value)
         {
-            _valueChanged?.Invoke(this, value);
+            _callback?.Invoke(this, value);
         }
 
         private void OnReset(object? obj)

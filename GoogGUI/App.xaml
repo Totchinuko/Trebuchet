@@ -17,6 +17,7 @@
                 <ResourceDictionary Source="Templates\ToggleField.xaml" />
                 <ResourceDictionary Source="Templates\ErrorModal.xaml" />
                 <ResourceDictionary Source="Templates\ExceptionModal.xaml" />
+                <ResourceDictionary Source="Templates\TestliveSelection.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

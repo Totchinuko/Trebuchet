@@ -21,14 +21,19 @@ namespace GoogGUI
         private List<string> _profiles = new List<string>();
         private bool _testlive;
 
-        public GoogApp()
+        public GoogApp(bool testlive)
         {
             SettingsCommand = new SimpleCommand(DisplaySettings);
             ModlistCommand = new SimpleCommand(ModlistDisplay);
+            _testlive = testlive;
             Config.Load(out _config, _testlive);
 
-            //TODO - Modal for writing error
-            //if(!Tools.CanWriteHere(_config.InstallPath))
+            if (!string.IsNullOrEmpty(_config.InstallPath) && !Tools.CanWriteHere(_config.InstallPath))
+                new ErrorModal("Install Folder Error", "Cannot access the install folder", false).ShowDialog();
+
+            if (string.IsNullOrEmpty(_config.InstallPath))
+                new ErrorModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles", false).ShowDialog();
+
             if (!_config.IsInstallPathValid)
                 DisplaySettings(this);
             RefreshConfig();
