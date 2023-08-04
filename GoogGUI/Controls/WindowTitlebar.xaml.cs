@@ -21,13 +21,32 @@ namespace GoogGUI.Controls
     /// </summary>
     public partial class WindowTitlebar : UserControl
     {
-        private WindowState _state;
-
         public static readonly DependencyProperty CloseIconProperty = DependencyProperty.Register(
             "CloseIcon",
             typeof(ImageSource),
             typeof(WindowTitlebar),
             new PropertyMetadata(null, new PropertyChangedCallback(OnCloseIconChanged))
+            );
+
+        public static readonly DependencyProperty DisableCloseProperty = DependencyProperty.Register(
+            "DisableClose",
+            typeof(bool),
+            typeof(WindowTitlebar),
+            new PropertyMetadata(false, new PropertyChangedCallback(OnDisableChanged))
+            );
+
+        public static readonly DependencyProperty DisableMaximizeProperty = DependencyProperty.Register(
+            "DisableMaximize",
+            typeof(bool),
+            typeof(WindowTitlebar),
+            new PropertyMetadata(false, new PropertyChangedCallback(OnDisableChanged))
+            );
+
+        public static readonly DependencyProperty DisableMinimizeProperty = DependencyProperty.Register(
+            "DisableMinimize",
+            typeof(bool),
+            typeof(WindowTitlebar),
+            new PropertyMetadata(false, new PropertyChangedCallback(OnDisableChanged))
             );
 
         public static readonly DependencyProperty MaximizeIconProperty = DependencyProperty.Register(
@@ -58,6 +77,8 @@ namespace GoogGUI.Controls
             new PropertyMetadata(null, new PropertyChangedCallback(OnTitleChanged))
             );
 
+        private WindowState _state;
+
         public WindowTitlebar()
         {
             InitializeComponent();
@@ -67,6 +88,24 @@ namespace GoogGUI.Controls
         {
             get => (ImageSource)GetValue(CloseIconProperty);
             set => SetValue(CloseIconProperty, value);
+        }
+
+        public bool DisableClose
+        {
+            get => (bool)GetValue(DisableCloseProperty);
+            set => SetValue(DisableCloseProperty, value);
+        }
+
+        public bool DisableMaximize
+        {
+            get => (bool)GetValue(DisableMaximizeProperty);
+            set => SetValue(DisableMaximizeProperty, value);
+        }
+
+        public bool DisableMinimize
+        {
+            get => (bool)GetValue(DisableMinimizeProperty);
+            set => SetValue(DisableMinimizeProperty, value);
         }
 
         public ImageSource MaximizeIcon
@@ -97,6 +136,16 @@ namespace GoogGUI.Controls
         {
             if (d is WindowTitlebar titleBar)
                 titleBar.CloseBtn.ButtonIcon = (ImageSource)e.NewValue;
+        }
+
+        private static void OnDisableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
+        {
+            if (d is WindowTitlebar bar)
+            {
+                bar.CloseBtn.IsEnabled = !(bool)bar.GetValue(DisableCloseProperty);
+                bar.MaximizeBtn.IsEnabled = !(bool)bar.GetValue(DisableMaximizeProperty);
+                bar.MinimizeBtn.IsEnabled = !(bool)bar.GetValue(DisableMinimizeProperty);
+            }
         }
 
         private static void OnMaximizeIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
