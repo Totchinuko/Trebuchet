@@ -1,0 +1,36 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:GoogGUI.Controls">
+    <DataTemplate x:Key="ExceptionModal">
+        <Grid Margin="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="12" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}">
+                    <Run Text="{Binding ErrorTitle}" />
+                </TextBlock>
+                <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <TextBlock Style="{StaticResource NormalText}" TextWrapping="Wrap">
+                        <Run Text="{Binding ErrorMessage}" />
+                    </TextBlock>
+                </ScrollViewer>
+            </Grid>
+            <Controls:GButton Style="{StaticResource TRedButton}"
+                              ButtonText="Close"
+                              Command="{Binding CloseCommand}"
+                              HorizontalAlignment="Right"
+                              VerticalAlignment="Center"
+                              ButtonIconSize="13"
+                              Grid.Row="2"
+                              ButtonIcon="pack://application:,,,/GoogGui;component/Icons/close.png" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>
