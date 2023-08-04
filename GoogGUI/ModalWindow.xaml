@@ -8,8 +8,8 @@
         mc:Ignorable="d"
         ResizeMode="NoResize"
         Title="{Binding App.ModalTitle}"
-        Height="{Binding App.ModalHeight, FallbackValue=200}"
-        Width="{Binding App.ModalWidth, FallbackValue=650}"
+        Height="200"
+        Width="650"
         WindowStartupLocation="CenterOwner">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False" />

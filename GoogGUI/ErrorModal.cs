@@ -26,13 +26,13 @@ namespace GoogGUI
         public ICommand CloseCommand { get; private set; }
         public string ErrorMessage { get => _errorMessage; set => _errorMessage = value; }
         public string ErrorTitle { get => _errorTitle; set => _errorTitle = value; }
-        public override int Height => 200;
+        public override int ModalHeight => 200;
 
         public override string ModalTitle => "Error";
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ErrorModal"];
 
-        public override int Width => 650;
+        public override int ModalWidth => 650;
 
         public override void OnWindowClose()
         {
@@ -42,6 +42,7 @@ namespace GoogGUI
 
         private void OnCloseModal(object? obj)
         {
+            _windows?.Close();
             if (_exitApp)
                 Application.Current.Shutdown();
         }
