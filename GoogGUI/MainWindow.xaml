@@ -41,6 +41,7 @@
                         <!--Modlist button-->
                         <Controls:GButton ButtonIcon="/Icons/List.png"
                                           ButtonText="Mod List"
+                                          Command="{Binding App.ModlistCommand}"
                                           IsEnabled="{Binding App.IsProfileLoaded}">
                             <Controls:GButton.Style>
                                 <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">

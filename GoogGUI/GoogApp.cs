@@ -1,4 +1,5 @@
 ﻿using Goog;
+using GoogLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -23,6 +24,7 @@ namespace GoogGUI
         public GoogApp()
         {
             SettingsCommand = new SimpleCommand(DisplaySettings);
+            ModlistCommand = new SimpleCommand(ModlistDisplay);
             Config.Load(out _config, _testlive);
 
             //TODO - Modal for writing error
@@ -35,10 +37,17 @@ namespace GoogGUI
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool CanUseGame => IsProfileLoaded && !string.IsNullOrEmpty(_config.ClientPath) && _config.ClientBin.Exists;
+
         public bool CanUseServer => IsProfileLoaded && _config.ServerBin.Exists;
+
         public string CurrentProfile { get => _currentProfile; set => _currentProfile = value; }
+
         public bool IsProfileLoaded => _profile != null;
+
+        public ICommand ModlistCommand { get; private set; }
+
         public object? Panel { get => _panel; set => _panel = value; }
+
         public List<string> Profiles { get => _profiles; set => _profiles = value; }
 
         public ICommand SettingsCommand { get; private set; }
@@ -80,6 +89,13 @@ namespace GoogGUI
         protected virtual void OnPropertyChanged(string property)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        }
+
+        private void ModlistDisplay(object? obj)
+        {
+            ModalWindow modal = new ModalWindow(new ErrorModal("This is some text", true));
+            modal.Owner = Application.Current.MainWindow;
+            modal.ShowDialog();
         }
 
         private void OnConfigChanged(object? sender, EventArgs e)

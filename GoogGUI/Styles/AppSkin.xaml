@@ -15,6 +15,10 @@
     <SolidColorBrush x:Key="GDimBlue" Color="#AA3a8eda" />
     <SolidColorBrush x:Key="GBlue" Color="#FF3a8eda" />
 
+    <Style TargetType="TextBlock" x:Key="NormalText">
+        <Setter Property="Foreground" Value="White" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
     <Style x:Key="BackPanel" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource GBackground}" />
         <Setter Property="BorderThickness" Value="0" />

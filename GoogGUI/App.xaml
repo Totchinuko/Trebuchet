@@ -12,6 +12,7 @@
                 <ResourceDictionary Source="Templates\DirectoryField.xaml" />
                 <ResourceDictionary Source="Templates\FieldEditor.xaml" />
                 <ResourceDictionary Source="Templates\ToggleField.xaml" />
+                <ResourceDictionary Source="Templates\ErrorModal.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
