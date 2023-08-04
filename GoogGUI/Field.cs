@@ -14,7 +14,7 @@ namespace GoogGUI
         private object _template;
         private object? _value;
 
-        public Field(string name, string property, object target, object? defaultValue, string template)
+        public Field(string name, string property, object target, object? defaultValue, string template, Action<Field, object?>? callback = null)
         {
             ResetCommand = new SimpleCommand(OnReset);
 
@@ -40,7 +40,7 @@ namespace GoogGUI
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public event EventHandler<object?>? ValueChanged;
+        private event Action<Field, object?>? _valueChanged;
 
         public object? Default { get => _default; set => _default = value; }
 
@@ -73,7 +73,7 @@ namespace GoogGUI
 
         protected virtual void OnValueChanged(object? value)
         {
-            ValueChanged?.Invoke(this, value);
+            _valueChanged?.Invoke(this, value);
         }
 
         private void OnReset(object? obj)

@@ -21,13 +21,10 @@ namespace GoogGUI
             _config = config;
             _fields = new List<Field>
             {
-                new Field("Install path", "InstallPath", _config, string.Empty, "DirectoryField"),
-                new Field("Client path", "ClientPath", _config, string.Empty, "DirectoryField"),
-                new Field("Manage Servers", "ManageServers", _config, false, "ToggleField")
+                new Field("Install path", "InstallPath", _config, string.Empty, "DirectoryField", OnValueChanged),
+                new Field("Client path", "ClientPath", _config, string.Empty, "DirectoryField", OnValueChanged),
+                new Field("Manage Servers", "ManageServers", _config, false, "ToggleField", OnValueChanged)
             };
-
-            foreach (Field field in _fields)
-                field.ValueChanged += OnValueChanged;
         }
 
         public event EventHandler? ConfigChanged;
@@ -39,11 +36,8 @@ namespace GoogGUI
             ConfigChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnValueChanged(object? sender, object? e)
+        private void OnValueChanged(Field field, object? e)
         {
-            if (sender == null || sender is not Field field)
-                return;
-
             PropertyInfo? property = _config.GetType().GetProperty(field.Property);
             if (property == null)
                 throw new Exception($"Could not find property {field.Property}");
