@@ -7,13 +7,19 @@
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
-            <TextBlock VerticalAlignment="Center" HorizontalAlignment="Center" Style="{StaticResource NormalText}">
-                <Run Text="{Binding ErrorMessage}" />
-            </TextBlock>
+            <StackPanel>
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}">
+                    <Run Text="{Binding ErrorTitle}" />
+                </TextBlock>
+                <Separator Opacity="0" Height="6" />
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource NormalText}">
+                    <Run Text="{Binding ErrorMessage}" />
+                </TextBlock>
+            </StackPanel>
             <Controls:GButton Style="{StaticResource TRedButton}"
                               ButtonText="Close"
                               Command="{Binding CloseCommand}"
-                              HorizontalAlignment="Center"
+                              HorizontalAlignment="Right"
                               VerticalAlignment="Center"
                               Grid.Row="1"
                               ButtonIcon="pack://application:,,,/GoogGui;component/Icons/close.png" />

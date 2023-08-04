@@ -11,18 +11,21 @@ namespace GoogGUI
     public class ErrorModal : BaseModal
     {
         private string _errorMessage = string.Empty;
+        private string _errorTitle = string.Empty;
         private bool _exitApp = false;
 
-        public ErrorModal(string errorMessage, bool exitApp = false)
+        public ErrorModal(string title, string message, bool exitApp = false)
         {
             CloseCommand = new SimpleCommand(OnCloseModal);
 
-            _errorMessage = errorMessage;
+            _errorMessage = message;
+            _errorTitle = title;
             _exitApp = exitApp;
         }
 
         public ICommand CloseCommand { get; private set; }
         public string ErrorMessage { get => _errorMessage; set => _errorMessage = value; }
+        public string ErrorTitle { get => _errorTitle; set => _errorTitle = value; }
         public override int Height => 200;
 
         public override string ModalTitle => "Error";

@@ -19,6 +19,11 @@
         <Setter Property="Foreground" Value="White" />
         <Setter Property="FontSize" Value="16" />
     </Style>
+    <Style TargetType="TextBlock" x:Key="TitleText">
+        <Setter Property="Foreground" Value="{StaticResource GBlue}" />
+        <Setter Property="FontSize" Value="20" />
+        <Setter Property="FontWeight" Value="Bold" />
+    </Style>
     <Style x:Key="BackPanel" TargetType="Border">
         <Setter Property="Background" Value="{StaticResource GBackground}" />
         <Setter Property="BorderThickness" Value="0" />
