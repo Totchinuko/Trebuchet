@@ -35,7 +35,7 @@ namespace GoogGUI.Controls
             InitializeComponent();
         }
 
-        private void FindButton_MouseDown(object sender, MouseButtonEventArgs e)
+        private void FindButton_MouseDown(object sender, RoutedEventArgs e)
         {
             System.Windows.Forms.FolderBrowserDialog dlg = new();
             dlg.InitialDirectory = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? string.Empty;

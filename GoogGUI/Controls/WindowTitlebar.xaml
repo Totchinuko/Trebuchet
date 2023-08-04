@@ -16,26 +16,27 @@
             <TextBlock FontWeight="Bold" VerticalAlignment="Center" Foreground="White" Margin="6,0,0,0">
                 <Run x:Name="TitleRun" />
             </TextBlock>
-            <StackPanel Orientation="Horizontal" Grid.Column="3">
-                <local:GButton x:Name="MinimizeBtn"
-                               ButtonIconSize="12"
-                               Style="{StaticResource TButton}"
-                               ButtonCornerRadius="0"
-                               Width="40"
-                               MouseDown="Minimize_MouseLeftButtonUp" />
-                <local:GButton x:Name="MaximizeBtn"
-                               ButtonIconSize="12"
-                               Style="{StaticResource TButton}"
-                               Width="40"
-                               ButtonCornerRadius="0"
-                               MouseDown="MaximizeButton_MouseLeftButtonUp" />
+            <ContentPresenter Grid.Column="1" />
+            <StackPanel Orientation="Horizontal" Grid.Column="2">
+                <Button x:Name="MinimizeBtn"
+                        Style="{StaticResource WindowButton}"
+                        Width="40"
+                        Click="Minimize_MouseLeftButtonUp">
+                    <Image x:Name="MinimizeImage" Width="12" Height="12" VerticalAlignment="Center" />
+                </Button>
+                <Button x:Name="MaximizeBtn"
+                        Style="{StaticResource WindowButton}"
+                        Width="40"
+                        Click="MaximizeButton_MouseLeftButtonUp">
+                    <Image x:Name="MaximizeImage" Width="12" Height="12" VerticalAlignment="Center" />
+                </Button>
 
-                <local:GButton x:Name="CloseBtn"
-                               ButtonIconSize="12"
-                               Style="{StaticResource TRedButton}"
-                               ButtonCornerRadius="0"
-                               Width="40"
-                               MouseDown="Close_MouseLeftButtonUp" />
+                <Button x:Name="CloseBtn"
+                        Style="{StaticResource WindowCloseButton}"
+                        Width="40"
+                        Click="Close_MouseLeftButtonUp">
+                    <Image x:Name="CloseImage" Width="12" Height="12" VerticalAlignment="Center" />
+                </Button>
             </StackPanel>
         </Grid>
     </Border>

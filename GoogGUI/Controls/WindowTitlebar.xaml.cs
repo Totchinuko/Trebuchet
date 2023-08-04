@@ -135,7 +135,7 @@ namespace GoogGUI.Controls
         private static void OnCloseIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is WindowTitlebar titleBar)
-                titleBar.CloseBtn.ButtonIcon = (ImageSource)e.NewValue;
+                titleBar.CloseImage.Source = (ImageSource)e.NewValue;
         }
 
         private static void OnDisableChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -152,20 +152,20 @@ namespace GoogGUI.Controls
         {
             if (d is WindowTitlebar titleBar)
                 if (titleBar._state == WindowState.Normal)
-                    titleBar.MaximizeBtn.ButtonIcon = (ImageSource)e.NewValue;
+                    titleBar.MaximizeImage.Source = (ImageSource)e.NewValue;
         }
 
         private static void OnMinimizeIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is WindowTitlebar titleBar)
-                titleBar.MinimizeBtn.ButtonIcon = (ImageSource)e.NewValue;
+                titleBar.MinimizeImage.Source = (ImageSource)e.NewValue;
         }
 
         private static void OnRestoreIconChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is WindowTitlebar titleBar)
                 if (titleBar._state == WindowState.Maximized)
-                    titleBar.MaximizeBtn.ButtonIcon = (ImageSource)e.NewValue;
+                    titleBar.MaximizeImage.Source = (ImageSource)e.NewValue;
         }
 
         private static void OnTitleChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
@@ -180,30 +180,30 @@ namespace GoogGUI.Controls
                 Window.GetWindow(this).DragMove();
         }
 
-        private void Close_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void Close_MouseLeftButtonUp(object sender, RoutedEventArgs e)
         {
             Window.GetWindow(this).Close();
         }
 
-        private void MaximizeButton_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void MaximizeButton_MouseLeftButtonUp(object sender, RoutedEventArgs e)
         {
             if (Window.GetWindow(this).WindowState == WindowState.Normal)
             {
                 Window.GetWindow(this).WindowState = WindowState.Maximized;
                 _state = WindowState.Maximized;
                 Window.GetWindow(this).Padding = new Thickness(10);
-                MaximizeBtn.ButtonIcon = (ImageSource)GetValue(RestoreIconProperty);
+                MaximizeImage.Source = (ImageSource)GetValue(RestoreIconProperty);
             }
             else if (Window.GetWindow(this).WindowState == WindowState.Maximized)
             {
                 Window.GetWindow(this).WindowState = WindowState.Normal;
                 _state = WindowState.Normal;
                 Window.GetWindow(this).Padding = new Thickness(0);
-                MaximizeBtn.ButtonIcon = (ImageSource)GetValue(MaximizeIconProperty);
+                MaximizeImage.Source = (ImageSource)GetValue(MaximizeIconProperty);
             }
         }
 
-        private void Minimize_MouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        private void Minimize_MouseLeftButtonUp(object sender, RoutedEventArgs e)
         {
             Window.GetWindow(this).WindowState = WindowState.Minimized;
             _state = WindowState.Minimized;

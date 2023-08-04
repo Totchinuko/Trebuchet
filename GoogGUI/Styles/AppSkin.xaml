@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:Controls="clr-namespace:GoogGUI.Controls">
+                    xmlns:local="clr-namespace:GoogGUI">
     <SolidColorBrush x:Key="GBackground" Color="#FF202020" />
     <SolidColorBrush x:Key="GPanel" Color="#11FFFFFF" />
     <SolidColorBrush x:Key="GDarkPanel" Color="#19000000" />
@@ -53,67 +53,31 @@
         <Setter Property="CornerRadius" Value="1" />
         <Setter Property="Margin" Value="0,6" />
     </Style>
-    <Style TargetType="Controls:GButton" x:Key="GrayButton">
-        <Setter Property="ButtonBackground" Value="{StaticResource GDimGray}" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GGray}" />
-        <Setter Property="ButtonBorderThickness" Value="0" />
-        <Setter Property="ButtonCornerRadius" Value="3" />
-        <Setter Property="ButtonForeground" Value="White" />
-        <Setter Property="ButtonBorderBrush" Value="Transparent" />
-        <Setter Property="ButtonIconSize" Value="16" />
-        <Setter Property="ButtonFontSize" Value="14" />
-        <Style.Triggers>
-            <Trigger Property="IsEnabled" Value="False">
-                <Setter Property="Opacity" Value="0.4" />
-            </Trigger>
-        </Style.Triggers>
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="RedButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="{StaticResource GDimRed}" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GRed}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="GreenButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="{StaticResource GDimGreen}" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GGreen}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="BlueButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="{StaticResource GDimBlue}" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GBlue}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="YellowButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="{StaticResource GDimYellow}" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GYellow}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="TGrayButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="Transparent" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GGray}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="TRedButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="Transparent" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GRed}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="TGreenButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="Transparent" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GGreen}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="TBlueButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="Transparent" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GBlue}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="TYellowButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="Transparent" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GYellow}" />
-    </Style>
-    <Style TargetType="Controls:GButton" x:Key="TButton" BasedOn="{StaticResource GrayButton}">
-        <Setter Property="ButtonBackground" Value="Transparent" />
-        <Setter Property="ButtonHoverBackground" Value="{StaticResource GPanel}" />
-    </Style>
 
     <Style TargetType="TextBox" x:Key="TextField">
         <Setter Property="Background" Value="{StaticResource GDarkPanel}" />
         <Setter Property="BorderBrush" Value="{StaticResource GDimBlue}" />
         <Setter Property="BorderThickness" Value="1" />
         <Setter Property="Foreground" Value="White" />
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="{x:Type TextBoxBase}">
+                    <Border CornerRadius="{Binding (local:GuiExtensions.CornerRadius), RelativeSource={RelativeSource AncestorType=TextBlock}}"
+                            Padding="{TemplateBinding Padding}"
+                            Margin="{TemplateBinding Margin}"
+                            Background="{TemplateBinding Background}"
+                            BorderBrush="{TemplateBinding BorderBrush}"
+                            BorderThickness="{TemplateBinding BorderThickness}">
+                        <ScrollViewer Margin="0" x:Name="PART_ContentHost" />
+                    </Border>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="BorderBrush" Value="{StaticResource GBlue}" />
+            </Trigger>
+        </Style.Triggers>
     </Style>
     <Style TargetType="CheckBox" x:Key="Checkbox">
         <Setter Property="Background" Value="{StaticResource GDarkPanel}" />
@@ -131,7 +95,7 @@
                     </StackPanel>
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
-                            <Setter Property="Background" Value="{StaticResource GDarkPanel}" />
+                            <Setter Property="BorderBrush" Value="{StaticResource GBlue}" />
                         </Trigger>
                         <Trigger Property="IsPressed" Value="True">
                             <Setter Property="Opacity" Value="0.7" />

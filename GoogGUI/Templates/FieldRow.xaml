@@ -26,23 +26,22 @@
                     <Run Text="{Binding FieldName}" />
                 </TextBlock>
                 <ContentPresenter Grid.Column="2" Content="{Binding .}" ContentTemplate="{Binding Template}" />
-                <Controls:GButton
-                    Grid.Column="3"
-                    ToolTip="Reset to default"
-                    x:Name="Reset"
-                    Margin="3"
-                    Command="{Binding ResetCommand}"
-                    ButtonIcon="pack://application:,,,/GoogGui;component/Icons/Reset.png">
-                    <Controls:GButton.Style>
-                        <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                <Button Grid.Column="3"
+                        ToolTip="Reset to default"
+                        x:Name="Reset"
+                        Margin="3"
+                        Command="{Binding ResetCommand}">
+                    <Image Source="pack://application:,,,/GoogGui;component/Icons/Reset.png" Width="16" Height="16" />
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsDefault}" Value="True">
                                     <Setter Property="Visibility" Value="Hidden" />
                                 </DataTrigger>
                             </Style.Triggers>
                         </Style>
-                    </Controls:GButton.Style>
-                </Controls:GButton>
+                    </Button.Style>
+                </Button>
             </Grid>
         </Border>
     </DataTemplate>

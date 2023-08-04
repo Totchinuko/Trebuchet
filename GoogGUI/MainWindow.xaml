@@ -39,52 +39,52 @@
                     </Grid.RowDefinitions>
                     <StackPanel>
                         <!--Modlist button-->
-                        <Controls:GButton ButtonIcon="/Icons/List.png"
-                                          ButtonText="Mod List"
-                                          Command="{Binding App.ModlistCommand}"
-                                          IsEnabled="{Binding App.IsProfileLoaded}">
-                            <Controls:GButton.Style>
-                                <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                        <Button local:GuiExtensions.Icon="/Icons/List.png"
+                                Content="Mod List"
+                                Command="{Binding App.ModlistCommand}"
+                                IsEnabled="{Binding App.IsProfileLoaded}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ButtonTab}">
                                 </Style>
-                            </Controls:GButton.Style>
-                        </Controls:GButton>
+                            </Button.Style>
+                        </Button>
                         <Separator Height="10" Opacity="0" />
                         <!--Game button-->
-                        <Controls:GButton ButtonIcon="/Icons/Game.png"
-                                          ButtonText="Game Parameters"
-                                          IsEnabled="{Binding App.CanUseGame}">
-                            <Controls:GButton.Style>
-                                <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                        <Button local:GuiExtensions.Icon="/Icons/Game.png"
+                                Content="Game Parameters"
+                                IsEnabled="{Binding App.CanUseGame}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ButtonTab}">
                                 </Style>
-                            </Controls:GButton.Style>
-                        </Controls:GButton>
+                            </Button.Style>
+                        </Button>
 
                         <Separator Height="10" Opacity="0" />
                         <!--Server button-->
-                        <Controls:GButton ButtonIcon="/Icons/Server.png"
-                                          ButtonText="Server Parameters"
-                                          IsEnabled="{Binding App.CanUseServer}">
-                            <Controls:GButton.Style>
-                                <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                        <Button local:GuiExtensions.Icon="/Icons/Server.png"
+                                Content="Server Parameters"
+                                IsEnabled="{Binding App.CanUseServer}">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ButtonTab}">
                                 </Style>
-                            </Controls:GButton.Style>
-                        </Controls:GButton>
+                            </Button.Style>
+                        </Button>
                     </StackPanel>
                     <!--Settings button-->
                     <StackPanel Grid.Row="2">
-                        <Controls:GButton Command="{Binding App.SettingsCommand}"
-                                          ButtonIcon="/icons/Settings.png"
-                                          ButtonText="Settings">
-                            <Controls:GButton.Style>
-                                <Style TargetType="Controls:GButton" BasedOn="{StaticResource TButton}">
+                        <Button Command="{Binding App.SettingsCommand}"
+                                local:GuiExtensions.Icon="/icons/Settings.png"
+                                Content="Settings">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource ButtonTab}">
                                     <Style.Triggers>
                                         <DataTrigger Binding="{Binding App.Panel, Converter={StaticResource DataType}}" Value="{x:Type local:Settings}">
-                                            <Setter Property="ButtonAccent" Value="True" />
+                                            <Setter Property="local:GuiExtensions.Accent" Value="True" />
                                         </DataTrigger>
                                     </Style.Triggers>
                                 </Style>
-                            </Controls:GButton.Style>
-                        </Controls:GButton>
+                            </Button.Style>
+                        </Button>
                     </StackPanel>
                 </Grid>
                 <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12">

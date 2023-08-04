@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:Controls="clr-namespace:GoogGUI.Controls">
+                    xmlns:local="clr-namespace:GoogGUI">
     <DataTemplate x:Key="ExceptionModal">
         <Grid Margin="12">
             <Grid.RowDefinitions>
@@ -23,14 +23,14 @@
                     </TextBlock>
                 </ScrollViewer>
             </Grid>
-            <Controls:GButton Style="{StaticResource TRedButton}"
-                              ButtonText="Close"
-                              Command="{Binding CloseCommand}"
-                              HorizontalAlignment="Right"
-                              VerticalAlignment="Center"
-                              ButtonIconSize="13"
-                              Grid.Row="2"
-                              ButtonIcon="pack://application:,,,/GoogGui;component/Icons/close.png" />
+            <Button Style="{StaticResource TRedButton}"
+                    Content="Close"
+                    Command="{Binding CloseCommand}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    local:GuiExtensions.IconSize="13"
+                    Grid.Row="2"
+                    local:GuiExtensions.Icon="pack://application:,,,/GoogGui;component/Icons/close.png" />
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

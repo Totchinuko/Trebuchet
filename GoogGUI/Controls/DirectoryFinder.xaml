@@ -6,10 +6,9 @@
              xmlns:local="clr-namespace:GoogGUI.Controls"
              mc:Ignorable="d"
              d:DesignHeight="32" d:DesignWidth="32">
-    <local:GButton
-        x:Name="FindButton"
-        MouseDown="FindButton_MouseDown"
-        Style="{StaticResource TButton}"
-        Margin="3"
-        ButtonIcon="pack://application:,,,/GoogGui;component/Icons/LocalStorage.png" />
+    <Button x:Name="FindButton"
+            Click="FindButton_MouseDown"
+            Style="{StaticResource IconButton}" Padding="8">
+        <Image Source="pack://application:,,,/GoogGui;component/Icons/LocalStorage.png" Width="16" />
+    </Button>
 </UserControl>

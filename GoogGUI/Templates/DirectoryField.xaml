@@ -14,7 +14,7 @@
             VerticalContentAlignment="Center"
             Text="{Binding Value, Mode=TwoWay}" />
 
-            <Controls:DirectoryFinder Path="{Binding Value, Mode=TwoWay}" Grid.Column="1" />
+            <Controls:DirectoryFinder Path="{Binding Value, Mode=TwoWay}" Margin="3,0" VerticalAlignment="Center" Grid.Column="1" />
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
