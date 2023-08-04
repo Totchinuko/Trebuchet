@@ -14,7 +14,7 @@
                     <RowDefinition Height="12" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}">
+                <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}" Foreground="{StaticResource GRed}">
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
