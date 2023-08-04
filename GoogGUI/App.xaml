@@ -7,6 +7,7 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="Styles\AppSkin.xaml" />
+                <ResourceDictionary Source="Styles\ScrollBar.xaml" />
                 <ResourceDictionary Source="Templates\Converters.xaml" />
                 <ResourceDictionary Source="Templates\FieldRow.xaml" />
                 <ResourceDictionary Source="Templates\DirectoryField.xaml" />
