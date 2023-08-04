@@ -13,5 +13,7 @@ namespace GoogGUI
         public abstract string ModalTitle { get; }
         public abstract DataTemplate Template { get; }
         public abstract int Width { get; }
+
+        public abstract void OnWindowClose();
     }
 }

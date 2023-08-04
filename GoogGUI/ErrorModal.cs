@@ -31,6 +31,12 @@ namespace GoogGUI
 
         public override int Width => 650;
 
+        public override void OnWindowClose()
+        {
+            if (_exitApp)
+                Application.Current.Shutdown();
+        }
+
         private void OnCloseModal(object? obj)
         {
             if (_exitApp)

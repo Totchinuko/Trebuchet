@@ -23,7 +23,6 @@
             <Controls:WindowTitlebar
                 x:Name="TitleBar"
                 Title="{Binding App.ModalTitle}"
-                DisableClose="True"
                 DisableMaximize="True"
                 DisableMinimize="True"
                 CloseIcon="pack://application:,,,/GoogGui;component/icons/Close.png"

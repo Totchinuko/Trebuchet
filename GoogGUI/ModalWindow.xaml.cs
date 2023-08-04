@@ -28,6 +28,12 @@ namespace GoogGUI
             DataContext = this;
         }
 
+        protected override void OnClosed(EventArgs e)
+        {
+            _app.OnWindowClose();
+            base.OnClosed(e);
+        }
+
         public BaseModal App { get => _app; private set => _app = value; }
     }
 }
