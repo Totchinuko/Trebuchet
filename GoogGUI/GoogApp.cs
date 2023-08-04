@@ -75,15 +75,8 @@ namespace GoogGUI
             if (!_config.ProfileExists(_currentProfile))
                 return;
 
-            try
-            {
-                Profile.Load(_testlive, _currentProfile, _config, out _profile);
-                OnPropertyChanged("IsProfileLoaded");
-            }
-            catch
-            {
-                //TODO - Modal
-            }
+            Profile.Load(_testlive, _currentProfile, _config, out _profile);
+            OnPropertyChanged("IsProfileLoaded");
         }
 
         protected virtual void OnPropertyChanged(string property)

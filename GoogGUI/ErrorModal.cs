@@ -14,7 +14,7 @@ namespace GoogGUI
         private string _errorTitle = string.Empty;
         private bool _exitApp = false;
 
-        public ErrorModal(string title, string message, bool exitApp = false)
+        public ErrorModal(string title, string message, bool exitApp = false) : base()
         {
             CloseCommand = new SimpleCommand(OnCloseModal);
 

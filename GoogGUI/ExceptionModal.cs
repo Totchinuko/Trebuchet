@@ -15,7 +15,7 @@ namespace GoogGUI
         private string _errorTitle = string.Empty;
         private bool _exitApp = false;
 
-        public ExceptionModal(Exception exception)
+        public ExceptionModal(Exception exception) : base()
         {
             CloseCommand = new SimpleCommand(OnCloseModal);
             _errorTitle = "Internal Exception";
