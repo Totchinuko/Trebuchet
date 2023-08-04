@@ -20,5 +20,21 @@ namespace GoogGUI
             field.SetField(property, prop.GetValue(target), defaultValue);
             return field;
         }
+
+        public static string GetAllExceptions(this Exception ex)
+        {
+            int x = 0;
+            string pattern = "EXCEPTION #{0}:\r\n{1}";
+            string message = String.Format(pattern, ++x, ex.Message);
+            message += "\r\n============\r\n" + ex.StackTrace;
+            Exception? inner = ex.InnerException;
+            while (inner != null)
+            {
+                message += "\r\n============\r\n" + String.Format(pattern, ++x, inner.Message);
+                message += "\r\n============\r\n" + inner.StackTrace;
+                inner = inner.InnerException;
+            }
+            return message;
+        }
     }
 }
