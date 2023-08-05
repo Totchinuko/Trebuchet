@@ -16,11 +16,12 @@ namespace Goog.Commands
     {
         public const string steamCMDZipFile = "SteamCMD.zip";
 
-        [Option('u', "url", Hidden = true, Default = "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip", HelpText = "Set the url to download steamCMD in case the original url changed")]
-        public string? SteamCMDURL { get; set; }
-
         [Option("reinstall", HelpText = "Force to reinstall Goog, deleting all install")]
         public bool reinstall { get; set; }
+
+        [Option('u', "url", Hidden = true, Default = Config.SteamCMDURL, HelpText = "Set the url to download steamCMD in case the original url changed")]
+        public string? SteamCMDURL { get; set; }
+
         public bool testlive { get; set; }
 
         public void Execute()
@@ -30,7 +31,7 @@ namespace Goog.Commands
             if (string.IsNullOrEmpty(config.InstallPath))
                 throw new Exception("install-path is not configured properly");
 
-            if(string.IsNullOrEmpty(SteamCMDURL))
+            if (string.IsNullOrEmpty(SteamCMDURL))
                 throw new Exception("url is invalid");
 
             if (config.SteamCMD.Exists && !reinstall)
@@ -45,7 +46,7 @@ namespace Goog.Commands
 
             FileInfo steamCmdZip = new FileInfo(Path.Join(installPath.FullName, steamCMDZipFile));
             Tools.DeleteIfExists(steamCmdZip);
-            
+
             Task<bool> task = Tools.DownloadSteamCMD(SteamCMDURL, steamCmdZip, null);
             task.Wait();
             if (!task.Result)
@@ -63,7 +64,7 @@ namespace Goog.Commands
 
             Tools.DeleteIfExists(steamCmdZip);
 
-            if(config.ManageServers)
+            if (config.ManageServers)
             {
                 UpdateCommand updateCommand = new UpdateCommand()
                 {

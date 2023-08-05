@@ -14,6 +14,7 @@ namespace Goog
     public class Config
     {
         public const string ConfigFilename = "Goog.json";
+        public const string SteamCMDURL = "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip";
 
         private string _clientPath = string.Empty;
         private string _currentProfile = string.Empty;
