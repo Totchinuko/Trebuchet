@@ -20,25 +20,11 @@ namespace Goog.Commands
         {
             Config.Load(out Config config, testlive);
 
-            if (reinstall)
-                Tools.DeleteIfExists(config.ServerFolder, true);
-
-            Tools.CreateDir(config.ServerFolder);
-
-            Tools.WriteColoredLine("Installing server binaries...", ConsoleColor.Cyan);
-            Process process = new Process();
-            process.StartInfo.FileName = config.SteamCMD.FullName;
-            process.StartInfo.Arguments = string.Join(" ",
-                    string.Format(Config.CmdArgForceInstallDir, config.ServerFolder.FullName),
-                    Config.CmdArgLoginAnonymous,
-                    string.Format(Config.CmdArgAppUpdate, config.ServerAppID),
-                    Config.CmdArgQuit
-                );
-            process.Start();
-            process.WaitForExit();
-
-            if (process.ExitCode != 7 && process.ExitCode != 0)
-                throw new Exception($"SteamCMD failed to update and returned {process.ExitCode}");
+            Tools.WriteColoredLine("Updating server binaries...", ConsoleColor.Cyan);
+            Task<int> updateServer = Setup.UpdateServer(config, default, reinstall);
+            updateServer.Wait();
+            if (updateServer.Result != 7 && updateServer.Result != 0)
+                throw new Exception($"SteamCMD failed to update and returned {updateServer.Result}");
         }
     }
 }
