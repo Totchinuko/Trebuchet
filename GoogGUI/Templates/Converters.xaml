@@ -4,5 +4,6 @@
     <local:Null2CollapsedConverter x:Key="Null2Collapsed" />
     <local:Null2HiddenConverter x:Key="Null2Hidden" />
     <local:False2HiddenConverter x:Key="False2Hidden" />
+    <local:ObservableIntanceListConverter x:Key="ObservableIntanceList" />
     <local:DataTypeConverter x:Key="DataType" />
 </ResourceDictionary>

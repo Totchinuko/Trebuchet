@@ -1,23 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Shapes;
 
 namespace GoogGUI
 {
     /// <summary>
     /// Interaction logic for ModalWindow.xaml
     /// </summary>
-    public partial class ModalWindow : Window
+    public partial class ModalWindow : Window, INotifyPropertyChanged
     {
         private BaseModal _app;
 
@@ -25,7 +15,19 @@ namespace GoogGUI
         {
             InitializeComponent();
             _app = modal;
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public BaseModal App { get => _app; private set => _app = value; }
+
+        public void PopDialog(bool wait = true)
+        {
             DataContext = this;
+            if (wait)
+                ShowDialog();
+            else
+                Show();
         }
 
         protected override void OnClosed(EventArgs e)
@@ -34,6 +36,9 @@ namespace GoogGUI
             base.OnClosed(e);
         }
 
-        public BaseModal App { get => _app; private set => _app = value; }
+        protected virtual void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
     }
 }

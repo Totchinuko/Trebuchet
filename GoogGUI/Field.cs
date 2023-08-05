@@ -1,53 +1,57 @@
 ﻿using System;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Reflection;
 using System.Windows;
+using System.Windows.Data;
 using System.Windows.Input;
 
 namespace GoogGUI
 {
-    public class Field : INotifyPropertyChanged
+    public class Field<T> : INotifyPropertyChanged, IField
     {
-        private object? _default;
+        private Action<string, object?>? _callback;
         private string _fieldName = string.Empty;
+        private Func<T?>? _getDefault;
+        private Func<T?, bool>? _isDefault;
         private string _property = string.Empty;
         private object _template;
-        private object? _value;
+        private T? _value;
 
-        public Field(string name, string property, object target, object? defaultValue, string template, Action<Field, object?>? callback = null)
+        public Field(string name, string property, T? value, string template)
         {
             ResetCommand = new SimpleCommand(OnReset);
 
             _fieldName = name;
             _property = property;
+            _template = Application.Current.Resources[template];
+            _value = value;
+
             if (string.IsNullOrEmpty(_property))
                 throw new ArgumentException($"Missing property for {_fieldName}");
 
             if (string.IsNullOrEmpty(template))
                 throw new ArgumentException($"Missing template for {_fieldName}");
 
-            PropertyInfo? prop = target.GetType().GetProperty(_property);
-
-            if (prop == null)
-                throw new NullReferenceException($"{_property} is not found on type {target.GetType()}");
-
-            _callback = callback;
-            _value = prop.GetValue(target);
-            _default = defaultValue;
-            _template = Application.Current.Resources[template];
             if (_template == null)
                 throw new Exception($"Template {template} not found");
+
+            if (_value is INotifyCollectionChanged collection)
+                collection.CollectionChanged += OnCollectionChanged;
+        }
+
+        private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnValueChanged(_value);
+            OnPropertyChanged("Value");
+            OnPropertyChanged("IsDefault");
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private event Action<Field, object?>? _callback;
-
-        public object? Default { get => _default; set => _default = value; }
-
         public string FieldName { get => _fieldName; set => _fieldName = value; }
 
-        public bool IsDefault => _default?.Equals(_value) ?? _value == null;
+        public bool IsDefault => _isDefault?.Invoke(_value) ?? true;
 
         public string Property { get => _property; private set => _property = value; }
 
@@ -60,11 +64,31 @@ namespace GoogGUI
             get => _value;
             set
             {
-                _value = value;
+                _value = (T?)value;
                 OnValueChanged(_value);
                 OnPropertyChanged("Value");
                 OnPropertyChanged("IsDefault");
             }
+        }
+
+        public static bool IsNullOrEmpty(object? value)
+        {
+            if (value == null) return true;
+            if (value is not string svalue) return false;
+            return string.IsNullOrEmpty(svalue);
+        }
+
+        public Field<T> WhenChanged(Action<string, object?> callback)
+        {
+            _callback = callback;
+            return this;
+        }
+
+        public Field<T> WithDefault(Func<T?, bool> isDefault, Func<T?> getDefault)
+        {
+            _isDefault = isDefault;
+            _getDefault = getDefault;
+            return this;
         }
 
         protected virtual void OnPropertyChanged(string name)
@@ -72,14 +96,15 @@ namespace GoogGUI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        protected virtual void OnValueChanged(object? value)
+        protected virtual void OnValueChanged(T? value)
         {
-            _callback?.Invoke(this, value);
+            _callback?.Invoke(Property, value);
         }
 
         private void OnReset(object? obj)
         {
-            Value = _default;
+            if (_getDefault != null)
+                Value = _getDefault.Invoke();
         }
     }
 }

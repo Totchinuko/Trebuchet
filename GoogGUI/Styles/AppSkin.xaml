@@ -62,7 +62,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type TextBoxBase}">
-                    <Border CornerRadius="{Binding (local:GuiExtensions.CornerRadius), RelativeSource={RelativeSource AncestorType=TextBlock}}"
+                    <Border CornerRadius="{Binding (local:GuiExtensions.CornerRadius), RelativeSource={RelativeSource AncestorType=TextBox}}"
                             Padding="{TemplateBinding Padding}"
                             Margin="{TemplateBinding Margin}"
                             Background="{TemplateBinding Background}"

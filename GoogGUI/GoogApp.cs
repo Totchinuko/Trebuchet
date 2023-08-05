@@ -1,6 +1,7 @@
 ﻿using Goog;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 
@@ -12,7 +13,7 @@ namespace GoogGUI
         private string _currentProfile = string.Empty;
         private object? _panel;
         private Profile? _profile;
-        private List<string> _profiles = new List<string>();
+        private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private bool _testlive;
 
         public GoogApp(bool testlive)
@@ -49,7 +50,7 @@ namespace GoogGUI
 
         public object? Panel { get => _panel; set => _panel = value; }
 
-        public List<string> Profiles { get => _profiles; set => _profiles = value; }
+        public ObservableCollection<string> Profiles { get => _profiles; set => _profiles = value; }
 
         public ICommand SettingsCommand { get; private set; }
 
@@ -104,12 +105,11 @@ namespace GoogGUI
 
         private void RefreshConfig()
         {
-            _profiles = _config.GetAllProfiles();
+            _profiles = new ObservableCollection<string>(_config.GetAllProfiles());
             _currentProfile = _config.CurrentProfile;
             LoadProfile();
             OnPropertyChanged("Profiles");
             OnPropertyChanged("CurrentProfile");
-            OnPropertyChanged("IsProfileLoaded");
         }
     }
 }

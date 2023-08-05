@@ -9,7 +9,7 @@ namespace GoogGUI
 {
     public abstract class BaseModal
     {
-        protected Window _window;
+        protected ModalWindow _window;
 
         public BaseModal()
         {
@@ -27,6 +27,7 @@ namespace GoogGUI
 
         public abstract void OnWindowClose();
 
-        public void ShowDialog() => _window.ShowDialog();
+        public void ShowDialog() => _window.PopDialog();
+        public void Show() => _window.PopDialog(false);
     }
 }

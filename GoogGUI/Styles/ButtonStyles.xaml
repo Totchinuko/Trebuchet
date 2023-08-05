@@ -163,10 +163,26 @@
         </Style.Triggers>
     </Style>
     <Style TargetType="Button" x:Key="ButtonIconGreen" BasedOn="{StaticResource IconButton}">
-        <Setter Property="Background" Value="{StaticResource GDimGreen}" />
+        <Setter Property="Background" Value="Transparent" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource GGreen}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="Button" x:Key="ButtonIconRed" BasedOn="{StaticResource IconButton}">
+        <Setter Property="Background" Value="Transparent" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource GRed}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="Button" x:Key="ButtonIconYellow" BasedOn="{StaticResource IconButton}">
+        <Setter Property="Background" Value="Transparent" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource GYellow}" />
             </Trigger>
         </Style.Triggers>
     </Style>

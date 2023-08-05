@@ -1,48 +1,67 @@
 ﻿using Goog;
-using GoogGUI.Controls;
+using GoogGUI.Templates.Converters;
+using GoogLib;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace GoogGUI
 {
     public class Settings : FieldEditor
     {
         private Config _config;
-        private List<Field> _fields = new List<Field>();
+        private List<IField> _fields = new List<IField>();
+        private ObservableIntanceListConverter _instanceConverter = new ObservableIntanceListConverter();
 
         public Settings(Config config)
         {
             _config = config;
-            _fields = new List<Field>
+            TrulyObservableCollection<ObservableServerInstance> serverInstances = (TrulyObservableCollection<ObservableServerInstance>)_instanceConverter.Convert(
+                _config.ServerInstances, typeof(TrulyObservableCollection<ObservableServerInstance>), null, null);
+
+            _fields = new List<IField>
             {
-                new Field("Install path", "InstallPath", _config, string.Empty, "DirectoryField", OnValueChanged),
-                new Field("Client path", "ClientPath", _config, string.Empty, "DirectoryField", OnValueChanged),
-                new Field("Manage Servers", "ManageServers", _config, false, "ToggleField", OnValueChanged)
+                new Field<string>("Install path", "InstallPath", _config.InstallPath, "DirectoryField")
+                    .WhenChanged(OnValueChanged)
+                    .WithDefault((x) => x?.Equals(string.Empty)??true, () => string.Empty),
+                new Field<string>("Client path", "ClientPath", _config.ClientPath, "DirectoryField")
+                    .WhenChanged(OnValueChanged)
+                    .WithDefault((x) => x?.Equals(string.Empty)??true, () => string.Empty),
+                new Field<bool>("Manage Servers", "ManageServers", _config.ManageServers, "ToggleField")
+                    .WhenChanged(OnValueChanged)
+                    .WithDefault((x) => !x, () => false),
+                new Field<TrulyObservableCollection<ObservableServerInstance>>("Server Instances", "ServerInstances", serverInstances, "InstancesField")
+                    .WhenChanged(OnInstanceValueChanged)
+                    .WithDefault((x) => x?.Count == 1, () => new TrulyObservableCollection<ObservableServerInstance>{ new ObservableServerInstance(new ServerInstance()) }),
             };
         }
 
         public event EventHandler? ConfigChanged;
 
-        public override List<Field> Fields { get => _fields; set => _fields = value; }
+        public override List<IField> Fields { get => _fields; set => _fields = value; }
 
         protected virtual void OnConfigChanged()
         {
             ConfigChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        private void OnValueChanged(Field field, object? e)
+        private void OnInstanceValueChanged(string name, object? value)
         {
-            PropertyInfo? property = _config.GetType().GetProperty(field.Property);
-            if (property == null)
-                throw new Exception($"Could not find property {field.Property}");
+            if (value == null)
+            {
+                OnValueChanged(name, value);
+                return;
+            }
+            OnValueChanged(name, _instanceConverter.ConvertBack(value, typeof(List<ServerInstance>), null, null));
+        }
 
-            property.SetValue(_config, e);
+        private void OnValueChanged(string name, object? value)
+        {
+            PropertyInfo? property = _config.GetType().GetProperty(name);
+            if (property == null)
+                throw new Exception($"Could not find property {name}");
+
+            property.SetValue(_config, value);
             _config.SaveConfig();
             OnConfigChanged();
         }
