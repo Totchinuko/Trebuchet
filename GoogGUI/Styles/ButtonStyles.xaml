@@ -152,4 +152,22 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+    <Style TargetType="Button" x:Key="ButtonTabRed" BasedOn="{StaticResource ButtonTab}">
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource GRed}" />
+            </Trigger>
+            <Trigger Property="local:GuiExtensions.Accent" Value="True">
+                <Setter Property="Background" Value="{StaticResource GRed}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
+    <Style TargetType="Button" x:Key="ButtonIconGreen" BasedOn="{StaticResource ButtonTab}">
+        <Setter Property="Background" Value="{StaticResource GDimGreen}" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource GGreen}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>
