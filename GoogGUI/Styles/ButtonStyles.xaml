@@ -162,7 +162,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    <Style TargetType="Button" x:Key="ButtonIconGreen" BasedOn="{StaticResource ButtonTab}">
+    <Style TargetType="Button" x:Key="ButtonIconGreen" BasedOn="{StaticResource IconButton}">
         <Setter Property="Background" Value="{StaticResource GDimGreen}" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
