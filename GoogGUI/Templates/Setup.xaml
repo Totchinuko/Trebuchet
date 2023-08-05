@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="Setup">
+        <Grid VerticalAlignment="Top">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <TextBlock Text="Downloading and installing needed components..." Style="{StaticResource NormalText}" TextWrapping="Wrap" />
+            <TextBlock Grid.Row="1" Style="{StaticResource NormalText}" TextWrapping="Wrap"><Run Text="{Binding SetupMessage}" /></TextBlock>
+            <Button Content="Cancel" Style="{StaticResource IconButton}" Command="{Binding CancelCommand}" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>
