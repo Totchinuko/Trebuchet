@@ -1,13 +1,7 @@
 ﻿using GoogLib;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Reflection;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Threading.Tasks;
 
 namespace Goog
 {
@@ -102,17 +96,29 @@ namespace Goog
         #region Path
 
         public FileInfo ClientBEBin => new FileInfo(Path.Combine(ClientBinaries.FullName, clientBEBin));
+
         public FileInfo ClientBin => new FileInfo(Path.Combine(ClientBinaries.FullName, clientBin));
+
         public DirectoryInfo ClientBinaries => new DirectoryInfo(Path.Combine(ClientFolder.FullName, gameBinariesFolder));
+
         public DirectoryInfo ClientFolder => new DirectoryInfo(ClientPath);
+
         public DirectoryInfo ProfilesFolder => new DirectoryInfo(Path.Combine(InstallPath, IsTestLive ? testProfileFolder : profileFolder));
+
         public FileInfo ServerBin => new FileInfo(Path.Combine(ServerBinaryFolder.FullName, serverBin));
+
         public DirectoryInfo ServerBinaryFolder => new DirectoryInfo(Path.Combine(ServerFolder.FullName, gameBinariesFolder));
+
         public DirectoryInfo ServerFolder => new DirectoryInfo(Path.Combine(InstallPath, IsTestLive ? testLiveServerFolder : liveServerFolder));
+
         public DirectoryInfo ServerOriginalSaveFolder => new DirectoryInfo(Path.Combine(ServerFolder.FullName, gameSaveFolder + "_Original"));
+
         public DirectoryInfo ServerSaveFolder => new DirectoryInfo(Path.Combine(ServerFolder.FullName, gameSaveFolder));
+
         public FileInfo SteamCMD => new FileInfo(Path.Combine(SteamFolder.FullName, steamCMDBin));
+
         public DirectoryInfo SteamFolder => new DirectoryInfo(Path.Combine(InstallPath, steamFolder));
+
         public DirectoryInfo SteamModFolder => new DirectoryInfo(Path.Combine(SteamFolder.FullName, steamModFolder, ClientAppID));
 
         #endregion Path
@@ -149,7 +155,10 @@ namespace Goog
         {
             if (!Directory.Exists(ProfilesFolder.FullName))
                 return new List<string>();
-            return Directory.GetFiles(ProfilesFolder.FullName).ToList();
+            List<string> profiles = Directory.GetDirectories(ProfilesFolder.FullName).ToList();
+            for (int i = 0; i < profiles.Count; i++)
+                profiles[i] = Path.GetFileName(profiles[i]);
+            return profiles;
         }
 
         public bool ProfileExists(string profileName)
@@ -242,7 +251,7 @@ namespace Goog
                 profileName = "Default";
                 return true;
             }
-            profileName = new DirectoryInfo(directories[0]).Name;
+            profileName = Path.GetFileName(directories[0]);
             return !string.IsNullOrEmpty(profileName);
         }
     }
