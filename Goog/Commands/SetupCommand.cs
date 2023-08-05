@@ -14,8 +14,6 @@ namespace Goog.Commands
     [Verb("setup", HelpText = "Setup a few information for the command proper function")]
     internal class SetupCommand : ICommand, ITestLiveOption
     {
-        public const string steamCMDZipFile = "SteamCMD.zip";
-
         [Option("reinstall", HelpText = "Force to reinstall Goog, deleting all install")]
         public bool reinstall { get; set; }
 
@@ -44,7 +42,7 @@ namespace Goog.Commands
             Tools.RemoveSymboliclink(config.ServerSaveFolder.FullName);
             Tools.DeleteIfExists(config.ServerFolder, true);
 
-            FileInfo steamCmdZip = new FileInfo(Path.Join(installPath.FullName, steamCMDZipFile));
+            FileInfo steamCmdZip = new FileInfo(Path.Join(installPath.FullName, Config.steamCMDZipFile));
             Tools.DeleteIfExists(steamCmdZip);
 
             Task<bool> task = Tools.DownloadSteamCMD(SteamCMDURL, steamCmdZip, null);
