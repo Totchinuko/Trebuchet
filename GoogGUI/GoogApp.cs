@@ -1,13 +1,7 @@
 ﻿using Goog;
-using GoogLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace GoogGUI
@@ -41,9 +35,11 @@ namespace GoogGUI
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public bool CanUseGame => IsProfileLoaded && !string.IsNullOrEmpty(_config.ClientPath) && _config.ClientBin.Exists;
+        public bool CanUseGame => CanUseModlist && !string.IsNullOrEmpty(_config.ClientPath) && _config.ClientBin.Exists;
 
-        public bool CanUseServer => IsProfileLoaded && _config.ServerBin.Exists;
+        public bool CanUseModlist => _config.IsInstallPathValid && IsProfileLoaded && _config.SteamCMD.Exists;
+
+        public bool CanUseServer => CanUseModlist && _config.ServerBin.Exists;
 
         public string CurrentProfile { get => _currentProfile; set => _currentProfile = value; }
 
@@ -89,6 +85,11 @@ namespace GoogGUI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
+        private void InstallPrompt()
+        {
+            if (_config.IsInstallPathValid && _config.SteamCMD.Exists) return;
+        }
+
         private void ModlistDisplay(object? obj)
         {
         }
@@ -98,6 +99,7 @@ namespace GoogGUI
             RefreshConfig();
             OnPropertyChanged("CanUseGame");
             OnPropertyChanged("CanUseServer");
+            OnPropertyChanged("CanUseModlist");
         }
 
         private void RefreshConfig()

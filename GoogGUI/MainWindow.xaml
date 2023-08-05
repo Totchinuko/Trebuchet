@@ -42,7 +42,7 @@
                         <Button local:GuiExtensions.Icon="/Icons/List.png"
                                 Content="Mod List"
                                 Command="{Binding App.ModlistCommand}"
-                                IsEnabled="{Binding App.IsProfileLoaded}">
+                                IsEnabled="{Binding App.CanUseModlist}">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ButtonTab}">
                                 </Style>
