@@ -23,7 +23,7 @@
                     </TextBlock>
                 </ScrollViewer>
             </Grid>
-            <Button Style="{StaticResource TRedButton}"
+            <Button Style="{StaticResource ButtonTabRed}"
                     Content="Close"
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"

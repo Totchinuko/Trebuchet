@@ -8,7 +8,7 @@
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}" Background="{StaticResource GRed}">
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
@@ -16,7 +16,7 @@
                     <Run Text="{Binding ErrorMessage}" />
                 </TextBlock>
             </StackPanel>
-            <Button Style="{StaticResource ButtonTab}"
+            <Button Style="{StaticResource ButtonTabRed}"
                     local:GuiExtensions.Icon="pack://application:,,,/GoogGui;component/Icons/close.png"
                     local:GuiExtensions.IconSize="13"
                     Content="Close"
