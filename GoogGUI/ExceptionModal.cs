@@ -44,7 +44,7 @@ namespace GoogGUI
         private void OnCloseModal(object? obj)
         {
             Application.Current.Shutdown();
-            _windows?.Close();
+            _window?.Close();
         }
     }
 }

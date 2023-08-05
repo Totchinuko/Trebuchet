@@ -9,15 +9,15 @@ namespace GoogGUI
 {
     public abstract class BaseModal
     {
-        protected Window _windows;
+        protected Window _window;
 
         public BaseModal()
         {
-            _windows = new ModalWindow(this);
-            _windows.Height = ModalHeight;
-            _windows.Width = ModalWidth;
+            _window = new ModalWindow(this);
+            _window.Height = ModalHeight;
+            _window.Width = ModalWidth;
             if (Application.Current.MainWindow.ShowActivated)
-                _windows.Owner = Application.Current.MainWindow;
+                _window.Owner = Application.Current.MainWindow;
         }
 
         public abstract int ModalHeight { get; }
@@ -27,6 +27,6 @@ namespace GoogGUI
 
         public abstract void OnWindowClose();
 
-        public void ShowDialog() => _windows.ShowDialog();
+        public void ShowDialog() => _window.ShowDialog();
     }
 }

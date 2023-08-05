@@ -38,14 +38,14 @@ namespace GoogGUI
         private void OnLiveClicked(object? obj)
         {
             _madeASelection = true;
-            _windows.Close();
+            _window.Close();
         }
 
         private void OnTestLiveClicked(object? obj)
         {
             _madeASelection = true;
             _testlive = true;
-            _windows.Close();
+            _window.Close();
         }
     }
 }

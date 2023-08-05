@@ -44,7 +44,7 @@ namespace GoogGUI
         {
             if (_exitApp)
                 Application.Current.Shutdown();
-            _windows?.Close();
+            _window?.Close();
         }
     }
 }
