@@ -8,7 +8,7 @@
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}" Background="{StaticResource GRed}">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}" Foreground="{StaticResource GRed}">
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
