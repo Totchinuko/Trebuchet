@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Goog
 {
-    public class PublishedFile
+    public class SteamPublishedFile
     {
         public string publishedFileID = "";
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
