@@ -9,7 +9,7 @@ namespace GoogGUI
 {
     public interface IGUIPanel
     {
-        void Setup(Config config, Profile? profile);
+        void Setup(Config config);
         void Close();
     }
 }

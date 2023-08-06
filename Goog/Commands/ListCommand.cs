@@ -16,10 +16,10 @@ namespace Goog.Commands
         {
             Config.Load(out Config config, testlive);
 
-            if (!config.ProfilesFolder.Exists)
-                throw new DirectoryNotFoundException($"{config.ProfilesFolder.FullName} was not found");
+            if (!config.FolderServerProfiles.Exists)
+                throw new DirectoryNotFoundException($"{config.FolderServerProfiles.FullName} was not found");
 
-            foreach(string dir in Directory.GetDirectories(config.ProfilesFolder.FullName))
+            foreach(string dir in Directory.GetDirectories(config.FolderServerProfiles.FullName))
                 Console.WriteLine(Path.GetFileName(dir));
         }
     }

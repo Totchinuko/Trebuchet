@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.6.33829.357
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogGUI", "GoogGUI\GoogGUI.csproj", "{F148F33A-8D93-40DB-81A3-E6719C0D1077}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogGUI", "GoogGUI\GoogGUI.csproj", "{F148F33A-8D93-40DB-81A3-E6719C0D1077}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GoogLib", "GoogLib\GoogLib.csproj", "{64D1F074-DE93-4D23-8207-29F0C9C63006}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogLib", "GoogLib\GoogLib.csproj", "{64D1F074-DE93-4D23-8207-29F0C9C63006}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Goog", "Goog\Goog.csproj", "{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Goog", "Goog\Goog.csproj", "{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -24,7 +24,6 @@ Global
 		{64D1F074-DE93-4D23-8207-29F0C9C63006}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64D1F074-DE93-4D23-8207-29F0C9C63006}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection

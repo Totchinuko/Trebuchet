@@ -22,7 +22,7 @@ namespace Goog.Commands
 
             Config.Load(out Config config, testlive);
 
-            Profile.Create(Path.Combine(config.ProfilesFolder.FullName, name, Config.profileConfigName), out Profile? profile);
+            Profile.Create(Path.Combine(config.FolderServerProfiles.FullName, name, Config.FileProfileConfig), out Profile? profile);
             Tools.WriteColoredLine("Profile created", ConsoleColor.Cyan);
         }
     }

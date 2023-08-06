@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -13,7 +14,7 @@ namespace Goog
         public const string SteamCMDURL = "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip";
         public const string steamCMDZipFile = "SteamCMD.zip";
 
-        public static async Task DownloadFile(string url, FileInfo file, CancellationToken token, IProgress<float>? progress = null)
+        public static async Task DownloadFile(string url, string file, CancellationToken token, IProgress<float>? progress = null)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentException("Download URL is empty.");
@@ -22,7 +23,7 @@ namespace Goog
             {
                 client.Timeout = TimeSpan.FromSeconds(15);
 
-                using (FileStream fs = new FileStream(file.FullName, FileMode.OpenOrCreate, FileAccess.Write))
+                using (FileStream fs = new FileStream(file, FileMode.OpenOrCreate, FileAccess.Write))
                 {
                     await client.DownloadAsync(url, fs, progress, token);
                 }
@@ -37,25 +38,26 @@ namespace Goog
             if (string.IsNullOrEmpty(SteamCMDURL))
                 throw new Exception("URL is invalid");
 
-            if (config.SteamCMD.Exists && !reinstall)
+            string steamFolder = Path.Join(config.InstallPath, Config.FolderSteam);
+            string steamCMD = Path.Join(steamFolder, Config.FileSteamCMDBin);
+            if (File.Exists(steamCMD) && !reinstall)
                 throw new Exception("Install already exists.");
 
-            var installPath = new DirectoryInfo(config.InstallPath);
+            var installPath = config.InstallPath;
             Tools.CreateDir(installPath);
-            Tools.DeleteIfExists(config.SteamFolder, true);
-            Tools.CreateDir(config.SteamFolder);
-            Tools.RemoveSymboliclink(config.ServerSaveFolder.FullName);
-            Tools.DeleteIfExists(config.ServerFolder, true);
+            Tools.DeleteIfExists(steamFolder);
+            Tools.CreateDir(steamFolder);
+            config.RemoveAllSymbolicLinks();
+            Tools.DeleteIfExists(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances));
 
-            FileInfo steamCmdZip = new FileInfo(Path.Join(installPath.FullName, steamCMDZipFile));
+            string steamCmdZip = Path.Combine(installPath, steamCMDZipFile);
             Tools.DeleteIfExists(steamCmdZip);
 
             await DownloadFile(SteamCMDURL, steamCmdZip, token, null);
 
-            steamCmdZip.Refresh();
-            await Task.Run(() => Tools.UnzipFile(steamCmdZip, config.SteamFolder), token);
+            await Task.Run(() => Tools.UnzipFile(steamCmdZip, steamFolder), token);
 
-            FileInfo steamExe = new FileInfo(Path.Join(config.SteamFolder.FullName, Config.steamCMDBin));
+            FileInfo steamExe = new FileInfo(Path.Combine(steamFolder, Config.FileSteamCMDBin));
             if (!steamExe.Exists)
                 throw new FileNotFoundException($"{steamExe.FullName} was not found after extraction.");
 
@@ -64,22 +66,35 @@ namespace Goog
 
         public static async Task<int> UpdateServer(Config config, CancellationToken token, bool reinstall = false)
         {
-            if (!config.ManageServers) return 1;
+            if (config.ServerInstanceCount <= 0) return 1;
+
+            string instancesFolder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances);
+            string steamCMD = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
 
             if (reinstall)
-                Tools.DeleteIfExists(config.ServerFolder, true);
+            {
+                config.RemoveAllSymbolicLinks();
+                Tools.DeleteIfExists(instancesFolder);
+            }
 
-            Tools.CreateDir(config.ServerFolder);
+            config.CreateInstanceDirectories();
 
-            Process process = new Process();
-            process.StartInfo.FileName = config.SteamCMD.FullName;
-            process.StartInfo.Arguments = string.Join(" ",
-                    string.Format(Config.CmdArgForceInstallDir, config.ServerFolder.FullName),
-                    Config.CmdArgLoginAnonymous,
-                    string.Format(Config.CmdArgAppUpdate, config.ServerAppID),
-                    Config.CmdArgQuit
-                );
-            return await WaitForSteamCMD(process, token);
+            string[] folders = Directory.GetDirectories(instancesFolder);
+            foreach(string instance in folders)
+            {
+                Process process = new Process();
+                process.StartInfo.FileName = steamCMD;
+                process.StartInfo.Arguments = string.Join(" ",
+                        string.Format(Config.CmdArgForceInstallDir, instance),
+                        Config.CmdArgLoginAnonymous,
+                        string.Format(Config.CmdArgAppUpdate, config.ServerAppID),
+                        Config.CmdArgQuit
+                    );
+                int code = await WaitForSteamCMD(process, token);
+                if (code != 7)
+                    return code;
+            }
+            return 0;
         }
 
         public static async Task<int> WaitForSteamCMD(Process process, CancellationToken token)

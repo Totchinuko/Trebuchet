@@ -20,7 +20,7 @@ namespace Goog.Commands
         {
             if(client)
             {
-                Process[] clients = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Config.clientBin));
+                Process[] clients = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Config.FileClientBinary));
                 foreach (Process client in clients)
                 {
                     var pid = client.Id;
@@ -31,7 +31,7 @@ namespace Goog.Commands
             
             if(server)
             {
-                Process[] servers = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Config.serverBin));
+                Process[] servers = Process.GetProcessesByName(Path.GetFileNameWithoutExtension(Config.FileServerBin));
                 foreach (Process server in servers)
                 {
                     var pid = server.Id;

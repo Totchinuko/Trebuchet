@@ -1,70 +1,30 @@
 ﻿using Goog;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace GoogLib
 {
-    public class ModListProfile
+    public class ModListProfile : IFile
     {
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            IgnoreReadOnlyProperties = true
+        };
+
         private List<string> _modlist = new List<string>();
+        private string _profileFile = string.Empty;
         private string _syncURL = string.Empty;
 
-        public string SyncURL { get => _syncURL; set => _syncURL = value; }
+        public ModListProfile(string path)
+        {
+            _profileFile = path;
+        }
+
         public List<string> Modlist { get => _modlist; set => _modlist = value; }
 
-        public void SetModList(string modlist)
-        {
-            Modlist = modlist.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-        }
+        public string ProfileFile { get => _profileFile; set => _profileFile = value; }
 
-        public string GetModList()
-        {
-            return string.Join("\r\n", Modlist);
-        }
-
-        public List<string> GetModIDList()
-        {
-            List<string> list = new List<string>();
-
-            foreach (string mod in Modlist)
-                if (TryParseModID(mod, out string id))
-                    list.Add(id);
-
-            return list;
-        }
-
-        public bool TryParseModID(string mod, out string id)
-        {
-            id = string.Empty;
-            if (long.TryParse(mod, out _))
-            {
-                id = mod;
-                return true;
-            }
-            FileInfo file = new FileInfo(Path.Combine(mod));
-            if (file.Directory == null)
-                return false;
-            if (!long.TryParse(file.Directory.Name, out _))
-                return false;
-            id = file.Directory.Name;
-            return true;
-        }
-
-        public bool IsValidModList()
-        {
-            foreach (string mod in Modlist)
-            {
-                if (!File.Exists(mod))
-                    return false;
-            }
-            return true;
-        }
+        public string SyncURL { get => _syncURL; set => _syncURL = value; }
 
         public async Task DownloadModList(CancellationToken cancellationToken)
         {
@@ -75,11 +35,11 @@ namespace GoogLib
             {
                 client.Timeout = TimeSpan.FromSeconds(30);
 
-                using (MemoryStream stream = new MemoryStream(10*1024))
+                using (MemoryStream stream = new MemoryStream(10 * 1024))
                 {
                     await client.DownloadAsync(_syncURL, stream, null, cancellationToken);
 
-                    using(StreamReader sr = new StreamReader(stream))
+                    using (StreamReader sr = new StreamReader(stream))
                     {
                         string json = sr.ReadToEnd();
                         Modlist = JsonSerializer.Deserialize<List<string>>(json) ?? new List<string>();
@@ -99,6 +59,54 @@ namespace GoogLib
 
             string json = JsonSerializer.Serialize(Modlist);
             File.WriteAllText(exportFile.FullName, json);
+        }
+
+        public List<string> GetModIDList()
+        {
+            List<string> list = new List<string>();
+
+            foreach (string mod in Modlist)
+                if (TryParseModID(mod, out string id))
+                    list.Add(id);
+
+            return list;
+        }
+
+        public string GetModList()
+        {
+            return string.Join("\r\n", Modlist);
+        }
+
+        public bool IsValidModList()
+        {
+            foreach (string mod in Modlist)
+            {
+                if (!File.Exists(mod))
+                    return false;
+            }
+            return true;
+        }
+
+        public void SetModList(string modlist)
+        {
+            Modlist = modlist.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+        }
+
+        public bool TryParseModID(string mod, out string id)
+        {
+            id = string.Empty;
+            if (long.TryParse(mod, out _))
+            {
+                id = mod;
+                return true;
+            }
+            FileInfo file = new FileInfo(Path.Combine(mod));
+            if (file.Directory == null)
+                return false;
+            if (!long.TryParse(file.Directory.Name, out _))
+                return false;
+            id = file.Directory.Name;
+            return true;
         }
     }
 }

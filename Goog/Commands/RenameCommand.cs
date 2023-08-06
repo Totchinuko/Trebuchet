@@ -25,7 +25,7 @@ namespace Goog.Commands
             Profile.Load(testlive, this.profile, out Config config, out Profile? profile);
 
             string prev = profile.ProfileName;
-            profile.MoveTo(Path.Combine(config.ProfilesFolder.FullName, name, Config.profileConfigName));
+            profile.MoveTo(Path.Combine(config.FolderServerProfiles.FullName, name, Config.FileProfileConfig));
 
             Tools.WriteColoredLine($"Profile {prev} has been renamed to {profile.ProfileName}", ConsoleColor.Cyan);
         }

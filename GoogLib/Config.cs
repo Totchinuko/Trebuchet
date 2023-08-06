@@ -1,134 +1,91 @@
-﻿using GoogLib;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Goog
 {
-    public class Config
+    public sealed class Config
     {
-        public const string ConfigFilename = "Goog.json";
-
-        private string _clientPath = string.Empty;
-        private string _currentProfile = string.Empty;
-        private string _installPath = string.Empty;
-        private bool _managerServers = false;
-        private List<ServerInstance> _serverInstances = new List<ServerInstance> { new ServerInstance() };
-
-        public Config()
-        {
-            if (!ProfileExists(_currentProfile))
-                TryGetFirstProfile(out _currentProfile);
-        }
-
-        public string ClientAppID => IsTestLive ? testLiveClientAppID : liveClientAppID;
-
-        public string ClientPath
-        {
-            get => _clientPath;
-            set => _clientPath = value;
-        }
-
-        public string CurrentProfile
-        {
-            get { return _currentProfile; }
-            set { _currentProfile = value; }
-        }
-
-        public string InstallPath
-        {
-            get => _installPath;
-            set => _installPath = value;
-        }
-
-        public bool IsInstallPathValid => !string.IsNullOrEmpty(_installPath) && Directory.Exists(_installPath);
-
-        [JsonIgnore]
-        public bool IsTestLive { get; private set; }
-
-        public bool ManageServers
-        {
-            get => _managerServers;
-            set => _managerServers = value;
-        }
-
-        public string ServerAppID => IsTestLive ? testLiveServerAppID : liveServerAppID;
-
-        public List<ServerInstance> ServerInstances
-        {
-            get => _serverInstances;
-            set => _serverInstances = value;
-        }
-
         #region constants
 
-        public const string clientBEBin = "ConanSandbox_BE.exe";
-        public const string clientBin = "ConanSandbox.exe";
+        public const string AppIDLiveClient = "440900";
+        public const string AppIDLiveServer = "443030";
+        public const string AppIDTestLiveClient = "931180";
+        public const string AppIDTestLiveServer = "931580";
         public const string CmdArgAppUpdate = "+app_update {0}";
         public const string CmdArgForceInstallDir = "+force_install_dir {0}";
         public const string CmdArgLogin = "+login {0} {1}";
         public const string CmdArgLoginAnonymous = "+login anonymous";
         public const string CmdArgQuit = "+quit";
         public const string CmdArgWorkshopUpdate = "+workshop_download_item {0} {1}";
+        public const string FileClientBEBin = "ConanSandbox_BE.exe";
+        public const string FileClientBin = "ConanSandbox.exe";
+        public const string FileConfig = "Config.json";
+        public const string FileGeneratedModlist = "modlist.txt";
+        public const string FileProfileConfig = "profile.json";
+        public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
+        public const string FileSteamCMDBin = "steamcmd.exe";
+        public const string FolderClientProfiles = "ClientProfiles";
+        public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
+        public const string FolderGameSave = "ConanSandbox\\Saved";
+        public const string FolderLive = "Live";
+        public const string FolderModlistProfiles = "Modlists";
+        public const string FolderServerInstances = "ServerInstances";
+        public const string FolderServerProfiles = "ServerProfiles";
+        public const string FolderSteam = "Steam";
+        public const string FolderSteamMods = "steamapps\\workshop\\content";
+        public const string FolderTestLive = "TestLive";
         public const string GameArgsLog = "-log";
         public const string GameArgsModList = "-modlist={0}";
         public const string GameArgsUseAllCore = "-useallavailablecores";
-        public const string gameBinariesFolder = "ConanSandbox\\Binaries\\Win64";
-        public const string gameSaveFolder = "ConanSandbox\\Saved";
-        public const string liveClientAppID = "440900";
-        public const string liveServerAppID = "443030";
-        public const string liveServerFolder = "LiveServer";
-        public const string profileConfigName = "profile.json";
-        public const string profileFolder = "Profiles";
-        public const string profileGeneratedModlist = "modlist.txt";
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
-        public const string serverBin = "ConanSandboxServer-Win64-Shipping.exe";
-        public const string steamCMDBin = "steamcmd.exe";
-        public const string steamFolder = "Steam";
-        public const string steamModFolder = "steamapps\\workshop\\content";
-        public const string testLiveClientAppID = "931180";
-        public const string testLiveServerAppID = "931580";
-        public const string testLiveServerFolder = "TestLiveServer";
-        public const string testProfileFolder = "TestLiveProfiles";
 
         #endregion constants
 
-        #region Path
+        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        {
+            WriteIndented = true,
+            IgnoreReadOnlyProperties = true
+        };
 
-        public FileInfo ClientBEBin => new FileInfo(Path.Combine(ClientBinaries.FullName, clientBEBin));
+        private string _clientPath = string.Empty;
+        private string _currentClientProfile = string.Empty;
+        private string _currentModlistProfile = string.Empty;
+        private string _currentServerProfile = string.Empty;
+        private string _installPath = string.Empty;
+        private int _serverInstanceCount = 0;
 
-        public FileInfo ClientBin => new FileInfo(Path.Combine(ClientBinaries.FullName, clientBin));
+        public Config()
+        {
+            if (!ServerProfileExists(_currentServerProfile))
+                TryGetFirstProfile(out _currentServerProfile);
+        }
 
-        public DirectoryInfo ClientBinaries => new DirectoryInfo(Path.Combine(ClientFolder.FullName, gameBinariesFolder));
+        public string ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
-        public DirectoryInfo ClientFolder => new DirectoryInfo(ClientPath);
+        public string ClientPath { get => _clientPath; set => _clientPath = value; }
 
-        public DirectoryInfo ProfilesFolder => new DirectoryInfo(Path.Combine(InstallPath, IsTestLive ? testProfileFolder : profileFolder));
+        public string CurrentServerProfile { get => _currentServerProfile; set => _currentServerProfile = value; }
 
-        public FileInfo ServerBin => new FileInfo(Path.Combine(ServerBinaryFolder.FullName, serverBin));
+        public string InstallPath { get => _installPath; set => _installPath = value; }
 
-        public DirectoryInfo ServerBinaryFolder => new DirectoryInfo(Path.Combine(ServerFolder.FullName, gameBinariesFolder));
+        public bool IsInstallPathValid => !string.IsNullOrEmpty(_installPath) && Directory.Exists(_installPath);
 
-        public DirectoryInfo ServerFolder => new DirectoryInfo(Path.Combine(InstallPath, IsTestLive ? testLiveServerFolder : liveServerFolder));
+        [JsonIgnore]
+        public bool IsTestLive { get; private set; }
 
-        public DirectoryInfo ServerOriginalSaveFolder => new DirectoryInfo(Path.Combine(ServerFolder.FullName, gameSaveFolder + "_Original"));
+        public string ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
-        public DirectoryInfo ServerSaveFolder => new DirectoryInfo(Path.Combine(ServerFolder.FullName, gameSaveFolder));
+        public int ServerInstanceCount { get => _serverInstanceCount; set => _serverInstanceCount = value; }
 
-        public FileInfo SteamCMD => new FileInfo(Path.Combine(SteamFolder.FullName, steamCMDBin));
+        public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 
-        public DirectoryInfo SteamFolder => new DirectoryInfo(Path.Combine(InstallPath, steamFolder));
-
-        public DirectoryInfo SteamModFolder => new DirectoryInfo(Path.Combine(SteamFolder.FullName, steamModFolder, ClientAppID));
-
-        #endregion Path
-
-        public static string? GetConfigPath(bool testlive)
+        public static string GetConfigPath(bool testlive)
         {
             string? ConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(ConfigPath))
-                return null;
-            ConfigPath = Path.Combine(ConfigPath, (testlive ? "TestLive." : "") + ConfigFilename);
+                throw new Exception("Path to assembly is invalid.");
+            ConfigPath = Path.Combine(ConfigPath, (testlive ? FolderTestLive : FolderLive), FileConfig);
             return ConfigPath;
         }
 
@@ -145,62 +102,65 @@ namespace Goog
             if (string.IsNullOrEmpty(json))
                 return;
 
-            JsonSerializerOptions options = new JsonSerializerOptions();
-            options.IgnoreReadOnlyProperties = true;
-            Config = JsonSerializer.Deserialize<Config>(json, options) ?? new Config();
+            Config = JsonSerializer.Deserialize<Config>(json, _jsonOptions) ?? new Config();
             Config.IsTestLive = testlive;
+        }
+
+        public bool ClientProfileExists(string profileName)
+        {
+            if (string.IsNullOrEmpty(profileName))
+                return false;
+            return File.Exists(Path.Combine(InstallPath, VersionFolder, FolderClientProfiles, profileName, FileProfileConfig));
+        }
+
+        public void CreateInstanceDirectories()
+        {
+            if (ServerInstanceCount <= 0) return;
+            string instancesFolder = Path.Combine(InstallPath, VersionFolder, FolderServerInstances);
+            Tools.CreateDir(instancesFolder);
+            for (int i = 1; i <= ServerInstanceCount; i++)
+            {
+                string instance = Path.Combine(instancesFolder, "Instance_" + i);
+                Tools.CreateDir(instance);
+            }
         }
 
         public List<string> GetAllProfiles()
         {
-            if (!Directory.Exists(ProfilesFolder.FullName))
+            string folder = Path.Combine(InstallPath, VersionFolder, FolderServerProfiles);
+            if (!Directory.Exists(Path.Combine(InstallPath, VersionFolder, FolderServerProfiles)))
                 return new List<string>();
-            List<string> profiles = Directory.GetDirectories(ProfilesFolder.FullName).ToList();
+            List<string> profiles = Directory.GetDirectories(folder).ToList();
             for (int i = 0; i < profiles.Count; i++)
                 profiles[i] = Path.GetFileName(profiles[i]);
             return profiles;
         }
 
-        public bool ProfileExists(string profileName)
+        public void RemoveAllSymbolicLinks()
         {
-            if (string.IsNullOrEmpty(profileName))
-                return false;
-            return File.Exists(Path.Join(ProfilesFolder.FullName, profileName, profileConfigName));
-        }
-
-        public void ResolveMap(ref string map, Profile? profile = null)
-        {
-            if (!string.IsNullOrEmpty(map))
-                return;
-
-            if (!string.IsNullOrEmpty(profile?.Server.Map))
-            {
-                map = profile.Server.Map;
-                SaveConfig();
-                return;
-            }
-
-            throw new Exception("No map could be resolved");
+            string folder = Path.Combine(InstallPath, VersionFolder, FolderServerInstances);
+            string[] instances = Directory.GetDirectories(folder);
+            foreach (string instance in instances)
+                Tools.RemoveSymboliclink(Path.Combine(instance, FolderGameSave));
         }
 
         public bool ResolveMod(ref string mod)
         {
-            FileInfo file = new FileInfo(mod);
-
+            string file = mod;
             if (long.TryParse(mod, out _))
-                file = new FileInfo(Path.Combine(SteamModFolder.FullName, mod, "Unknown"));
+                file = Path.Combine(InstallPath, FolderSteam, FolderSteamMods, mod, "none");
 
-            if (file.Directory == null)
+            string? folder = Path.GetDirectoryName(file);
+            if (folder == null)
                 return false;
 
-            if (!long.TryParse(file.Directory.Name, out _))
-                return file.Exists;
+            if (!long.TryParse(Path.GetFileName(folder), out _))
+                return File.Exists(file);
 
-            DirectoryInfo dir = new DirectoryInfo(Path.Combine(SteamModFolder.FullName, file.Directory.Name));
-            if (!dir.Exists)
+            if (!Directory.Exists(folder))
                 return false;
 
-            string[] files = Directory.GetFiles(dir.FullName, "*.pak", SearchOption.TopDirectoryOnly);
+            string[] files = Directory.GetFiles(folder, "*.pak", SearchOption.TopDirectoryOnly);
             if (files.Length == 0)
                 return false;
 
@@ -229,24 +189,29 @@ namespace Goog
 
         public void SaveConfig()
         {
-            JsonSerializerOptions options = new JsonSerializerOptions();
-            options.IgnoreReadOnlyProperties = true;
-            options.WriteIndented = true;
-            string json = JsonSerializer.Serialize(this, options);
-            string? ConfigPath = GetConfigPath(IsTestLive) ?? "";
+            string json = JsonSerializer.Serialize(this, _jsonOptions);
+            string ConfigPath = GetConfigPath(IsTestLive);
 
             File.WriteAllText(ConfigPath, json);
+        }
+
+        public bool ServerProfileExists(string profileName)
+        {
+            if (string.IsNullOrEmpty(profileName))
+                return false;
+            return File.Exists(Path.Combine(InstallPath, VersionFolder, FolderServerProfiles, profileName, FileProfileConfig));
         }
 
         public bool TryGetFirstProfile(out string profileName)
         {
             profileName = string.Empty;
-            if (!ProfilesFolder.Exists)
+            string folder = Path.Combine(InstallPath, VersionFolder, FolderServerProfiles);
+            if (!Directory.Exists(folder))
                 return false;
-            string[] directories = Directory.GetDirectories(ProfilesFolder.FullName);
+            string[] directories = Directory.GetDirectories(folder);
             if (directories.Length == 0)
                 return false;
-            if (directories.Contains(Path.Combine(ProfilesFolder.FullName, "Default")))
+            if (directories.Contains(Path.Combine(folder, "Default")))
             {
                 profileName = "Default";
                 return true;

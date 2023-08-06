@@ -26,7 +26,7 @@ namespace Goog.Commands
             list.ForEach(x => updates.Add(string.Format(Config.CmdArgWorkshopUpdate, config.ClientAppID, x)));
 
             Process process = new Process();
-            process.StartInfo.FileName = config.SteamCMD.FullName;
+            process.StartInfo.FileName = config.FileSteamCMD.FullName;
             process.StartInfo.Arguments = string.Join(" ",
                     Config.CmdArgLoginAnonymous,
                     string.Join(" ", updates.ToArray()),

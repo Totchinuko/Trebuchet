@@ -23,7 +23,7 @@ namespace Goog.Commands
 
             Profile.Load(testlive, this.profile, out Config config, out Profile? profile);
 
-            profile.CopyTo(Path.Combine(config.ProfilesFolder.FullName, name, Config.profileConfigName));
+            profile.CopyTo(Path.Combine(config.FolderServerProfiles.FullName, name, Config.FileProfileConfig));
 
             Tools.WriteColoredLine($"Profile {profile.ProfileName} has been duplicated to {name}", ConsoleColor.Cyan);
         }

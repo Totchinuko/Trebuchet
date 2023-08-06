@@ -106,7 +106,7 @@ namespace Goog.Commands
         private void ClientExecute(Config config, Profile profile, out Process? process)
         {
             process = new Process();
-            if (!config.ClientBin.Exists)
+            if (!config.FileClientBinary.Exists)
                 throw new Exception($"Client not found ({(string.IsNullOrEmpty(config.ClientPath) ? "Missing" : config.ClientPath)})");
 
             if (profile == null)
@@ -119,9 +119,9 @@ namespace Goog.Commands
             if (profile.Client.UseAllCores) args.Add(Config.GameArgsUseAllCore);
             args.Add(string.Format(Config.GameArgsModList, profile.GeneratedModList.FullName));
 
-            process.StartInfo.FileName = battleEye ? config.ClientBEBin.FullName : config.ClientBin.FullName;
+            process.StartInfo.FileName = battleEye ? config.FileClientBEBinary.FullName : config.FileClientBinary.FullName;
             process.StartInfo.Arguments = string.Join(" ", args);
-            process.StartInfo.WorkingDirectory = config.ClientBinaries.FullName;
+            process.StartInfo.WorkingDirectory = config.FolderClientBinaries.FullName;
         }
     }
 }
