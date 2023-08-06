@@ -13,7 +13,6 @@ namespace GoogGUI
     {
         private string _errorMessage = string.Empty;
         private string _errorTitle = string.Empty;
-        private bool _exitApp = false;
 
         public ExceptionModal(Exception exception) : base()
         {
