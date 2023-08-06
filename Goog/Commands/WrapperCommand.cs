@@ -25,7 +25,7 @@ namespace Goog.Commands
             process.Start();
             process.WaitForExit();
 
-            if (process.ExitCode != 0 || process.ExitCode != 7)
+            if (process.ExitCode != 0 && process.ExitCode != 7)
                 throw new Exception($"Steam CMD terminated with error code {process.ExitCode}");
         }
     }
