@@ -11,8 +11,13 @@ namespace GoogGUI
             _window = new ModalWindow(this);
             _window.Height = ModalHeight;
             _window.Width = ModalWidth;
-            if (Application.Current.MainWindow.ShowActivated)
+            if (((MainWindow)Application.Current.MainWindow).WasShown)
+            {
                 _window.Owner = Application.Current.MainWindow;
+                _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+            }
+            else
+                _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
         public abstract int ModalHeight { get; }

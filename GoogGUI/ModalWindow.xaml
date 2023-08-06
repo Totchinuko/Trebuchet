@@ -9,8 +9,7 @@
         ResizeMode="NoResize"
         Title="{Binding App.ModalTitle}"
         Height="200"
-        Width="650"
-        WindowStartupLocation="CenterOwner">
+        Width="650">
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>

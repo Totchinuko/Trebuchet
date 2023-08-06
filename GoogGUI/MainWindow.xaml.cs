@@ -17,10 +17,16 @@ namespace GoogGUI
 
         public MainWindow()
         {
+            var modal = new TestliveModal();
+            modal.ShowDialog();
+            _app = new GoogApp(modal.Testlive);
+
             InitializeComponent();
+            DataContext = this;
         }
 
         public GoogApp? App { get => _app; set => _app = value; }
+        public bool WasShown => _shown;
 
         protected override void OnContentRendered(EventArgs e)
         {
@@ -32,10 +38,6 @@ namespace GoogGUI
 
         protected virtual void OnWindowShown()
         {
-            var modal = new TestliveModal();
-            modal.ShowDialog();
-            _app = new GoogApp(modal.Testlive);
-            DataContext = this;
         }
     }
 }
