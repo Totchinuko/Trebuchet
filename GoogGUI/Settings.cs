@@ -61,28 +61,14 @@ namespace GoogGUI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private void OnInstallSteam(object? obj)
-        {
-            _source = new CancellationTokenSource();
-            Task.Run(() => Setup.SetupAppAndSteam(_config, _source.Token, true)).ContinueWith(OnInstallSteamComplete);
-            _wait = new WaitModal("Steam", "Installing Steam CMD", OnInstallSteamCanceled);
-            _wait.Show();
-        }
-
-        private void OnInstallSteamCanceled()
-        {
-            _source?.Cancel();
-            _source?.Dispose();
-            _source = null;
-        }
-
-        private void OnInstallSteamComplete(Task<int> task)
+        private void CleanupTask(Task<int> task)
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
                 _wait?.Close();
                 _wait = null;
             });
+
             if (task.IsFaulted && task.Exception != null)
             {
                 Application.Current.Dispatcher.Invoke(() =>
@@ -92,15 +78,35 @@ namespace GoogGUI
                 return;
             }
 
-            if(task.Result != 0 && task.Result != 7)
+            if (task.Result != 0)
             {
                 Application.Current.Dispatcher.Invoke(() =>
                 {
-                    new ExceptionModal(new Exception("Steam CMD exited with an error code")).ShowDialog();
+                    new ErrorModal("Steam CMD", "Steam CMD terminated with an error code.", false).ShowDialog();
                 });
                 return;
             }
-            
+        }
+
+        private void OnInstallSteam(object? obj)
+        {
+            if (_source != null) return;
+
+            _source = new CancellationTokenSource();
+            Task.Run(() => Setup.SetupAppAndSteam(_config, _source.Token, true)).ContinueWith(OnInstallSteamComplete);
+            _wait = new WaitModal("Steam", "Installing Steam CMD...", TaskCancel);
+            _wait.ShowDialog();
+        }
+
+        private void OnInstallSteamComplete(Task<int> task)
+        {
+            CleanupTask(task);
+
+            if (_source != null && _source.IsCancellationRequested)
+            {
+                Setup.DeleteSteamCMD(_config);
+            }
+
             _source?.Dispose();
             _source = null;
             UpdateRequiredActions();
@@ -115,6 +121,42 @@ namespace GoogGUI
 
         private void OnServerInstanceInstall(object? obj)
         {
+            if (_config.ServerInstanceCount <= 0)
+                return;
+
+            int installed = _config.GetInstalledInstances();
+            if (installed >= _config.ServerInstanceCount)
+                return;
+
+            _source = new CancellationTokenSource();
+            Task.Run(() => OnServerInstanceInstallTask(_source.Token)).ContinueWith(OnServerInstanceInstallComplete);
+            _wait = new WaitModal("Server", "Updating...", TaskCancel);
+            _wait.ShowDialog();
+        }
+
+        private void OnServerInstanceInstallComplete(Task<int> task)
+        {
+            CleanupTask(task);
+            _source?.Dispose();
+            _source = null;
+            UpdateRequiredActions();
+        }
+
+        private async Task<int> OnServerInstanceInstallTask(CancellationToken token)
+        {
+            int count = _config.ServerInstanceCount;
+            for (int i = 0; i < count; i++)
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    if(_wait != null)
+                        _wait.Message = $"Updating server instance {i}...";
+                });
+                int code = await Setup.UpdateServer(_config, i, token, false);
+                if (code != 0)
+                    return code;
+            }
+            return 0;
         }
 
         private void OnValueChanged(string name, object? value)
@@ -128,6 +170,11 @@ namespace GoogGUI
             OnConfigChanged();
         }
 
+        private void TaskCancel()
+        {
+            _source?.Cancel();
+        }
+
         private void UpdateRequiredActions()
         {
             _requiredActions = new List<RequiredAction>();
@@ -135,7 +182,7 @@ namespace GoogGUI
             int installed = _config.GetInstalledInstances();
             if (!File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)))
                 _requiredActions.Add(new RequiredAction("Steam CMD is not yet installed.", "Install", OnInstallSteam));
-            if (_config.ServerInstanceCount > installed)
+            else if (_config.ServerInstanceCount > installed)
                 _requiredActions.Add(new RequiredAction("Some server instances are not yet installed.", "Install", OnServerInstanceInstall));
             OnPropertyChanged("RequiredActions");
         }

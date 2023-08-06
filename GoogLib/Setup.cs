@@ -25,6 +25,11 @@ namespace Goog
             }
         }
 
+        public static void DeleteSteamCMD(Config config)
+        {
+            Tools.DeleteIfExists(Path.Combine(config.InstallPath, Config.FolderSteam));
+        }
+
         public static async Task SetupApp(Config config, CancellationToken token, bool reinstall = false)
         {
             if (string.IsNullOrEmpty(config.InstallPath))
@@ -87,9 +92,9 @@ namespace Goog
                 );
 
             Process process = new Process();
-            process.StartInfo.FileName = Assembly.GetExecutingAssembly().Location;
-            process.StartInfo.Arguments = $"wrapper -a \"{steamArgs}\"";
-
+            process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
+            process.StartInfo.Arguments = steamArgs;
+            process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false;
             return await WaitForProcess(process, token);
         }
@@ -108,11 +113,6 @@ namespace Goog
 
             Tools.CreateDir(instance);
 
-            string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (appFolder == null)
-                throw new Exception("App is installed in an invalid folder.");
-
-            string GoogCMD = Path.Combine(appFolder, "Goog.exe");
             string steamArgs = string.Join(" ",
                     string.Format(Config.CmdArgForceInstallDir, instance),
                     Config.CmdArgLoginAnonymous,
@@ -121,20 +121,25 @@ namespace Goog
                 );
 
             Process process = new Process();
-            process.StartInfo.FileName = GoogCMD;
-            process.StartInfo.Arguments = $"wrapper -a \"{steamArgs}\"";
+            process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
+            process.StartInfo.Arguments = steamArgs;
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.UseShellExecute = false;
             return await WaitForProcess(process, token);
         }
 
         public static async Task<int> UpdateSteamCMD(Config config, CancellationToken token)
         {
-            string steamCMD = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
-            Process process = new Process();
-            process.StartInfo.FileName = steamCMD;
-            process.StartInfo.Arguments = string.Join(" ",
+            string steamArgs = string.Join(" ",
                     Config.CmdArgLoginAnonymous,
                     Config.CmdArgQuit
                 );
+
+            Process process = new Process();
+            process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
+            process.StartInfo.Arguments = steamArgs;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.CreateNoWindow = true;
             return await WaitForProcess(process, token);
         }
 
@@ -143,12 +148,22 @@ namespace Goog
             process.Start();
             while (!process.HasExited && !token.IsCancellationRequested)
                 await Task.Delay(200);
-            if (!process.HasExited)
-            {
-                process.Kill();
-                return 0;
-            }
-            return process.ExitCode;
+            if (process.HasExited) return process.ExitCode != 0 && process.ExitCode != 7 ? 1 : 0;
+            
+            process.Kill(true);
+            process.WaitForExit();
+            return 0;
+        }
+
+        public static string GetGoogCMD()
+        {
+            string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (appFolder == null)
+                throw new Exception("App is installed in an invalid folder.");
+            string GoogCMD = Path.Combine(appFolder, "Goog.exe");
+            if (!File.Exists(GoogCMD))
+                throw new FileNotFoundException($"{GoogCMD} was not found.");
+            return GoogCMD;
         }
     }
 }

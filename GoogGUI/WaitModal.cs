@@ -1,19 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
+using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 
 namespace GoogGUI
 {
-    public class WaitModal : BaseModal
+    public class WaitModal : BaseModal, INotifyPropertyChanged
     {
+        private Action _cancelCallback;
         private string _message = string.Empty;
         private string _messageTitle = string.Empty;
-        private Action _cancelCallback;
 
         public WaitModal(string title, string message, Action cancelCallback) : base()
         {
@@ -23,25 +19,52 @@ namespace GoogGUI
             _cancelCallback = cancelCallback;
         }
 
+        public event PropertyChangedEventHandler? PropertyChanged;
+
         public ICommand CloseCommand { get; private set; }
-        public string Message { get => _message; set => _message = value; }
-        public string MessageTitle { get => _messageTitle; set => _messageTitle = value; }
+
+        public string Message 
+        { 
+            get => _message; 
+            set
+            {
+                _message = value;
+                OnPropertyChanged("Message");
+            } 
+        }
+
+        public string MessageTitle 
+        { 
+            get => _messageTitle; 
+            set
+            {
+                _messageTitle = value;
+                OnPropertyChanged("MessageTitle");
+            }
+        }
+
         public override int ModalHeight => 200;
 
         public override string ModalTitle => "Working";
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["MessageModal"];
-
         public override int ModalWidth => 650;
+
+        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["WaitModal"];
 
         public override void OnWindowClose()
         {
         }
 
+        protected virtual void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
         private void OnCloseModal(object? obj)
         {
             _cancelCallback.Invoke();
-            _window?.Close();
+            _message = "Canceling...";
+            OnPropertyChanged("Message");
         }
     }
 }

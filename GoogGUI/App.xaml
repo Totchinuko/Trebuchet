@@ -20,6 +20,7 @@
                 <ResourceDictionary Source="Templates\SliderField.xaml" />
                 <ResourceDictionary Source="Templates\ErrorModal.xaml" />
                 <ResourceDictionary Source="Templates\MessageModal.xaml" />
+                <ResourceDictionary Source="Templates\WaitModal.xaml" />
                 <ResourceDictionary Source="Templates\QuestionModal.xaml" />
                 <ResourceDictionary Source="Templates\ExceptionModal.xaml" />
                 <ResourceDictionary Source="Templates\TestliveSelection.xaml" />
