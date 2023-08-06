@@ -70,7 +70,7 @@ namespace GoogGUI
             _setupMessage = "Downloading Steam CMD...";
             OnPropertyChanged("SetupMessage");
             await Setup.SetupApp(config, token, reinstall);
-            if (config.ManageServers && !token.IsCancellationRequested)
+            if (config.ServerInstanceCount > 0 && !token.IsCancellationRequested)
             {
                 _setupMessage = "Installing server...";
                 OnPropertyChanged("SetupMessage");
