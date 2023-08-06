@@ -25,6 +25,7 @@
                 <ResourceDictionary Source="Templates\ExceptionModal.xaml" />
                 <ResourceDictionary Source="Templates\TestliveSelection.xaml" />
                 <ResourceDictionary Source="Templates\InstancesField.xaml" />
+                <ResourceDictionary Source="Templates\TextboxField.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

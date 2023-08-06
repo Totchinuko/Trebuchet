@@ -50,6 +50,7 @@ namespace Goog
         private string _filePath = string.Empty;
         private string _installPath = string.Empty;
         private int _serverInstanceCount = 0;
+        private string _steamAPIKey = string.Empty;
 
         public string ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
@@ -73,6 +74,8 @@ namespace Goog
         public string ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
         public int ServerInstanceCount { get => _serverInstanceCount; set => _serverInstanceCount = value; }
+
+        public string SteamAPIKey { get => _steamAPIKey; set => _steamAPIKey = value; }
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 

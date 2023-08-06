@@ -2,9 +2,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:Controls="clr-namespace:GoogGUI.Controls">
     <DataTemplate x:Key="DirectoryField">
-        <Grid>
+        <Grid HorizontalAlignment="Left">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" MaxWidth="400" MinWidth="300" />
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <TextBox
