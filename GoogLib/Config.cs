@@ -1,10 +1,10 @@
-﻿using System.Reflection;
-using System.Text.Json;
+﻿using GoogLib;
+using System.Reflection;
 using System.Text.Json.Serialization;
 
 namespace Goog
 {
-    public sealed class Config
+    public sealed class Config : IFile
     {
         #region constants
 
@@ -28,6 +28,7 @@ namespace Goog
         public const string FolderClientProfiles = "ClientProfiles";
         public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
         public const string FolderGameSave = "ConanSandbox\\Saved";
+        public const string FolderInstancePattern = "Instance_{0}";
         public const string FolderLive = "Live";
         public const string FolderModlistProfiles = "Modlists";
         public const string FolderServerInstances = "ServerInstances";
@@ -42,37 +43,32 @@ namespace Goog
 
         #endregion constants
 
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            IgnoreReadOnlyProperties = true
-        };
-
         private string _clientPath = string.Empty;
         private string _currentClientProfile = string.Empty;
         private string _currentModlistProfile = string.Empty;
         private string _currentServerProfile = string.Empty;
+        private string _filePath = string.Empty;
         private string _installPath = string.Empty;
         private int _serverInstanceCount = 0;
-
-        public Config()
-        {
-            if (!ServerProfileExists(_currentServerProfile))
-                TryGetFirstProfile(out _currentServerProfile);
-        }
 
         public string ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
         public string ClientPath { get => _clientPath; set => _clientPath = value; }
 
+        public string CurrentClientProfile { get => _currentClientProfile; set => _currentClientProfile = value; }
+
+        public string CurrentModlistProfile { get => _currentModlistProfile; set => _currentModlistProfile = value; }
+
         public string CurrentServerProfile { get => _currentServerProfile; set => _currentServerProfile = value; }
+
+        [JsonIgnore]
+        public string FilePath { get => _filePath; set => _filePath = value; }
 
         public string InstallPath { get => _installPath; set => _installPath = value; }
 
         public bool IsInstallPathValid => !string.IsNullOrEmpty(_installPath) && Directory.Exists(_installPath);
 
-        [JsonIgnore]
-        public bool IsTestLive { get; private set; }
+        public bool IsTestLive => Path.GetFileName(Path.GetDirectoryName(_filePath)) == FolderTestLive;
 
         public string ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
@@ -89,30 +85,6 @@ namespace Goog
             return ConfigPath;
         }
 
-        public static void Load(out Config Config, bool testlive)
-        {
-            string ConfigPath = GetConfigPath(testlive) ?? "";
-            string json = "";
-            Config = new Config();
-            Config.IsTestLive = testlive;
-
-            if (!File.Exists(ConfigPath))
-                return;
-            json = File.ReadAllText(ConfigPath);
-            if (string.IsNullOrEmpty(json))
-                return;
-
-            Config = JsonSerializer.Deserialize<Config>(json, _jsonOptions) ?? new Config();
-            Config.IsTestLive = testlive;
-        }
-
-        public bool ClientProfileExists(string profileName)
-        {
-            if (string.IsNullOrEmpty(profileName))
-                return false;
-            return File.Exists(Path.Combine(InstallPath, VersionFolder, FolderClientProfiles, profileName, FileProfileConfig));
-        }
-
         public void CreateInstanceDirectories()
         {
             if (ServerInstanceCount <= 0) return;
@@ -120,25 +92,35 @@ namespace Goog
             Tools.CreateDir(instancesFolder);
             for (int i = 1; i <= ServerInstanceCount; i++)
             {
-                string instance = Path.Combine(instancesFolder, "Instance_" + i);
+                string instance = Path.Combine(instancesFolder, string.Format(FolderInstancePattern, i));
                 Tools.CreateDir(instance);
             }
         }
 
-        public List<string> GetAllProfiles()
+        public int GetInstalledInstances()
         {
-            string folder = Path.Combine(InstallPath, VersionFolder, FolderServerProfiles);
-            if (!Directory.Exists(Path.Combine(InstallPath, VersionFolder, FolderServerProfiles)))
-                return new List<string>();
-            List<string> profiles = Directory.GetDirectories(folder).ToList();
-            for (int i = 0; i < profiles.Count; i++)
-                profiles[i] = Path.GetFileName(profiles[i]);
-            return profiles;
+            int count = 0;
+
+            string folder = Path.Combine(InstallPath, VersionFolder, FolderServerInstances);
+            if (!Directory.Exists(folder))
+                return 0;
+
+            string[] instances = Directory.GetDirectories(folder);
+            foreach (string instance in instances)
+            {
+                string bin = Path.Combine(instance, FolderGameBinaries, FileServerBin);
+                if (File.Exists(bin))
+                    count++;
+            }
+
+            return count;
         }
 
         public void RemoveAllSymbolicLinks()
         {
             string folder = Path.Combine(InstallPath, VersionFolder, FolderServerInstances);
+            if (!Directory.Exists(folder))
+                return;
             string[] instances = Directory.GetDirectories(folder);
             foreach (string instance in instances)
                 Tools.RemoveSymboliclink(Path.Combine(instance, FolderGameSave));
@@ -185,21 +167,6 @@ namespace Goog
             }
 
             return count;
-        }
-
-        public void SaveConfig()
-        {
-            string json = JsonSerializer.Serialize(this, _jsonOptions);
-            string ConfigPath = GetConfigPath(IsTestLive);
-
-            File.WriteAllText(ConfigPath, json);
-        }
-
-        public bool ServerProfileExists(string profileName)
-        {
-            if (string.IsNullOrEmpty(profileName))
-                return false;
-            return File.Exists(Path.Combine(InstallPath, VersionFolder, FolderServerProfiles, profileName, FileProfileConfig));
         }
 
         public bool TryGetFirstProfile(out string profileName)

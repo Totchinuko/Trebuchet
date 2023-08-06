@@ -8,6 +8,6 @@ namespace GoogLib
 {
     public interface IFile
     {
-        public string ProfileFile { get; set; }
+        public string FilePath { get; set; }
     }
 }

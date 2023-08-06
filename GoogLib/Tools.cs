@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO.Compression;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -115,19 +116,32 @@ namespace Goog
         public static T LoadFile<T>(string path) where T : IFile
         {
             if (!File.Exists(path))
-                throw new FileNotFoundException($"{path} was not found");
+                return CreateFile<T>(path);
             string json = File.ReadAllText(path);
             T? file = JsonSerializer.Deserialize<T>(json, _jsonOptions);
             if (file == null)
                 throw new Exception($"{path} could not be loaded");
-            file.ProfileFile = path;
+            file.FilePath = path;
+            return file;
+        }
+
+        public static T CreateFile<T>(string path) where T : IFile
+        {
+            T? file = (T?)Activator.CreateInstance(typeof(T));
+            if (file == null)
+                throw new Exception($"Failed to create data of type {typeof(T)}");
+            file.FilePath = path;
             return file;
         }
 
         public static void SaveFile<T>(this T data) where T : IFile
         {
             string json = JsonSerializer.Serialize(data, typeof(T), _jsonOptions);
-            File.WriteAllText(data.ProfileFile, json);
+            string? folder = Path.GetDirectoryName(data.FilePath);
+            if (folder == null)
+                throw new Exception($"{data.FilePath} is an invalid path");
+            CreateDir(folder);
+            File.WriteAllText(data.FilePath, json);
         }
 
         public static void CopyTo<T>(this T data, string path) where T : IFile
@@ -142,20 +156,20 @@ namespace Goog
             if (File.Exists(path) || (Directory.Exists(folder)))
                 throw new Exception($"{path} already exists");
 
-            string? dataFolder = Path.GetDirectoryName(data.ProfileFile);
+            string? dataFolder = Path.GetDirectoryName(data.FilePath);
             if (dataFolder == null)
-                throw new DirectoryNotFoundException($"Invalid directory for {data.ProfileFile}");
+                throw new DirectoryNotFoundException($"Invalid directory for {data.FilePath}");
 
             DeepCopy(dataFolder, folder);
         }
 
         public static void Delete<T>(this T data) where T : IFile
         {
-            if (!File.Exists(data.ProfileFile))
-                throw new FileNotFoundException($"{data.ProfileFile} not found");
-            string? folder = Path.GetDirectoryName(data.ProfileFile);
+            if (!File.Exists(data.FilePath))
+                throw new FileNotFoundException($"{data.FilePath} not found");
+            string? folder = Path.GetDirectoryName(data.FilePath);
             if (folder == null || !Directory.Exists(folder))
-                throw new DirectoryNotFoundException($"Invalid directory for {data.ProfileFile}");
+                throw new DirectoryNotFoundException($"Invalid directory for {data.FilePath}");
 
             Directory.Delete(folder, true);
         }
@@ -172,12 +186,12 @@ namespace Goog
             if (File.Exists(path) || Directory.Exists(targetFolder))
                 throw new Exception($"{path} already exists");
 
-            string? folder = Path.GetDirectoryName(data.ProfileFile);
+            string? folder = Path.GetDirectoryName(data.FilePath);
             if (folder == null)
-                throw new DirectoryNotFoundException($"Invalid directory for {data.ProfileFile}");
+                throw new DirectoryNotFoundException($"Invalid directory for {data.FilePath}");
 
             Directory.Move(folder, targetFolder);
-            data.ProfileFile = path;
+            data.FilePath = path;
         }
     }
 }

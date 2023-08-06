@@ -15,16 +15,16 @@ namespace GoogLib
         private string _profileFile = string.Empty;
         private string _syncURL = string.Empty;
 
-        public ModListProfile(string path)
-        {
-            _profileFile = path;
-        }
+        public string FilePath { get => _profileFile; set => _profileFile = value; }
 
         public List<string> Modlist { get => _modlist; set => _modlist = value; }
 
-        public string ProfileFile { get => _profileFile; set => _profileFile = value; }
-
         public string SyncURL { get => _syncURL; set => _syncURL = value; }
+
+        public static string GetModlistPath(Config config, string modlistName)
+        {
+            return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles, modlistName + ".json");
+        }
 
         public async Task DownloadModList(CancellationToken cancellationToken)
         {

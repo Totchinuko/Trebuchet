@@ -29,7 +29,7 @@ namespace GoogLib
 
         public bool Log { get => _log; set => _log = value; }
 
-        public string ProfileFile { get => _profileFile; set => _profileFile = value; }
+        public string FilePath { get => _profileFile; set => _profileFile = value; }
 
         public bool RemoveIntroVideo { get => _removeIntroVideo; set => _removeIntroVideo = value; }
 

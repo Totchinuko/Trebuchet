@@ -35,6 +35,6 @@ namespace GoogLib
         public List<string> SudoSuperAdmins { get => _sudoSuperAdmins; set => _sudoSuperAdmins = value; }
 
         public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
-        public string ProfileFile { get => _profileFile; set => _profileFile = value; }
+        public string FilePath { get => _profileFile; set => _profileFile = value; }
     }
 }

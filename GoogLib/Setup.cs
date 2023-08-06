@@ -1,11 +1,6 @@
-﻿using Goog;
-using System;
-using System.Collections.Generic;
+﻿using GoogLib;
 using System.Diagnostics;
-using System.Linq;
-using System.Numerics;
-using System.Text;
-using System.Threading.Tasks;
+using System.Reflection;
 
 namespace Goog
 {
@@ -64,40 +59,86 @@ namespace Goog
             Tools.DeleteIfExists(steamCmdZip);
         }
 
-        public static async Task<int> UpdateServer(Config config, CancellationToken token, bool reinstall = false)
+        public static async Task<int> SetupAppAndSteam(Config config, CancellationToken token, bool reinstall = false)
+        {
+            await SetupApp(config, token, reinstall);
+            return await UpdateSteamCMD(config, token);
+        }
+
+        public static async Task<int> UpdateMods(Config config, string modlist, CancellationToken token)
+        {
+            string modlistFile = ModListProfile.GetModlistPath(config, modlist);
+            if (!File.Exists(modlistFile))
+                throw new FileNotFoundException($"modlist {modlist} was not found.");
+
+            ModListProfile modlistProfile = Tools.LoadFile<ModListProfile>(modlistFile);
+
+            List<string> list = modlistProfile.GetModIDList();
+            if (list.Count == 0)
+                Tools.WriteColoredLine("Nothing to update", ConsoleColor.Cyan);
+
+            List<string> updates = new List<string>();
+            list.ForEach(x => updates.Add(string.Format(Config.CmdArgWorkshopUpdate, config.ClientAppID, x)));
+
+            string steamArgs = string.Join(" ",
+                    Config.CmdArgLoginAnonymous,
+                    string.Join(" ", updates.ToArray()),
+                    Config.CmdArgQuit
+                );
+
+            Process process = new Process();
+            process.StartInfo.FileName = Assembly.GetExecutingAssembly().Location;
+            process.StartInfo.Arguments = $"wrapper -a \"{steamArgs}\"";
+
+            process.StartInfo.UseShellExecute = false;
+            return await WaitForProcess(process, token);
+        }
+
+        public static async Task<int> UpdateServer(Config config, int instanceNumber, CancellationToken token, bool reinstall = false)
         {
             if (config.ServerInstanceCount <= 0) return 1;
 
-            string instancesFolder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances);
-            string steamCMD = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
+            string instance = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
 
             if (reinstall)
             {
-                config.RemoveAllSymbolicLinks();
-                Tools.DeleteIfExists(instancesFolder);
+                Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
+                Tools.DeleteIfExists(instance);
             }
 
-            config.CreateInstanceDirectories();
+            Tools.CreateDir(instance);
 
-            string[] folders = Directory.GetDirectories(instancesFolder);
-            foreach(string instance in folders)
-            {
-                Process process = new Process();
-                process.StartInfo.FileName = steamCMD;
-                process.StartInfo.Arguments = string.Join(" ",
-                        string.Format(Config.CmdArgForceInstallDir, instance),
-                        Config.CmdArgLoginAnonymous,
-                        string.Format(Config.CmdArgAppUpdate, config.ServerAppID),
-                        Config.CmdArgQuit
-                    );
-                int code = await WaitForSteamCMD(process, token);
-                if (code != 7)
-                    return code;
-            }
-            return 0;
+            string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (appFolder == null)
+                throw new Exception("App is installed in an invalid folder.");
+
+            string GoogCMD = Path.Combine(appFolder, "Goog.exe");
+            string steamArgs = string.Join(" ",
+                    string.Format(Config.CmdArgForceInstallDir, instance),
+                    Config.CmdArgLoginAnonymous,
+                    string.Format(Config.CmdArgAppUpdate, config.ServerAppID),
+                    Config.CmdArgQuit
+                );
+
+            Process process = new Process();
+            process.StartInfo.FileName = GoogCMD;
+            process.StartInfo.Arguments = $"wrapper -a \"{steamArgs}\"";
+            return await WaitForProcess(process, token);
         }
 
-        public static async Task<int> WaitForSteamCMD(Process process, CancellationToken token)
+        public static async Task<int> UpdateSteamCMD(Config config, CancellationToken token)
+        {
+            string steamCMD = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
+            Process process = new Process();
+            process.StartInfo.FileName = steamCMD;
+            process.StartInfo.Arguments = string.Join(" ",
+                    Config.CmdArgLoginAnonymous,
+                    Config.CmdArgQuit
+                );
+            return await WaitForProcess(process, token);
+        }
+
+        public static async Task<int> WaitForProcess(Process process, CancellationToken token)
         {
             process.Start();
             while (!process.HasExited && !token.IsCancellationRequested)
@@ -105,7 +146,7 @@ namespace Goog
             if (!process.HasExited)
             {
                 process.Kill();
-                return 1;
+                return 0;
             }
             return process.ExitCode;
         }
