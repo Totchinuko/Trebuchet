@@ -25,7 +25,7 @@ namespace GoogGUI
                 new ErrorModal("Install Folder Error", "Cannot access the install folder", false).ShowDialog();
 
             if (string.IsNullOrEmpty(_config.InstallPath))
-                new ErrorModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles", false).ShowDialog();
+                new MessageModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles").ShowDialog();
 
             if (!_config.IsInstallPathValid)
                 DisplaySettings(this);
