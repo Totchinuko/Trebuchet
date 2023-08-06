@@ -1,30 +1,29 @@
 ﻿using CommandLine;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Goog.Commands
 {
     [Verb("update", HelpText = "Update the server installation")]
     internal class UpdateCommand : ITestLiveOption, ICommand
     {
-        public bool testlive { get; set; }
-
         [Option("reinstall", HelpText = "Force to reinstall Goog, deleting all install")]
         public bool reinstall { get; set; }
 
+        public bool testlive { get; set; }
+
         public void Execute()
         {
-            Config.Load(out Config config, testlive);
+            Config config = Tools.LoadFile<Config>(Config.GetConfigPath(testlive));
+            if (config.ServerInstanceCount == 0)
+                return;
 
-            Tools.WriteColoredLine("Updating server binaries...", ConsoleColor.Cyan);
-            Task<int> updateServer = Setup.UpdateServer(config, default, reinstall);
-            updateServer.Wait();
-            if (updateServer.Result != 7 && updateServer.Result != 0)
-                throw new Exception($"SteamCMD failed to update and returned {updateServer.Result}");
+            for (int i = 0; i < config.ServerInstanceCount; i++)
+            {
+                Tools.WriteColoredLine($"Updating server {i} binaries...", ConsoleColor.Cyan);
+                Task<int> updateServer = Setup.UpdateServer(config, i, default, reinstall);
+                updateServer.Wait();
+                if (updateServer.Result != 0)
+                    throw new Exception($"SteamCMD failed to update");
+            }
         }
     }
 }

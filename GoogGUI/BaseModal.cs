@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.Windows;
 
 namespace GoogGUI
 {
@@ -21,13 +16,19 @@ namespace GoogGUI
         }
 
         public abstract int ModalHeight { get; }
+
         public abstract string ModalTitle { get; }
-        public abstract DataTemplate Template { get; }
+
         public abstract int ModalWidth { get; }
+
+        public abstract DataTemplate Template { get; }
+
+        public void Close() => _window.Close();
 
         public abstract void OnWindowClose();
 
-        public void ShowDialog() => _window.PopDialog();
         public void Show() => _window.PopDialog(false);
+
+        public void ShowDialog() => _window.PopDialog();
     }
 }

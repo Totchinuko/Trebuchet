@@ -25,6 +25,7 @@
                 Title="{Binding App.ModalTitle}"
                 DisableMaximize="True"
                 DisableMinimize="True"
+                DisableClose="True"
                 CloseIcon="pack://application:,,,/GoogGui;component/icons/Close.png"
                 RestoreIcon="pack://application:,,,/GoogGui;component/icons/Restore.png"
                 MaximizeIcon="pack://application:,,,/GoogGui;component/icons/Maximize.png"

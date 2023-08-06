@@ -19,7 +19,7 @@ namespace GoogGUI
             SettingsCommand = new SimpleCommand(DisplaySettings);
             ModlistCommand = new SimpleCommand(ModlistDisplay);
             _testlive = testlive;
-            Config.Load(out _config, _testlive);
+            _config = Tools.LoadFile<Config>(Config.GetConfigPath(_testlive));
 
             if (!string.IsNullOrEmpty(_config.InstallPath) && !Tools.CanWriteHere(_config.InstallPath))
                 new ErrorModal("Install Folder Error", "Cannot access the install folder", false).ShowDialog();

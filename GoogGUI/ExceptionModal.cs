@@ -24,6 +24,16 @@ namespace GoogGUI
                 SystemSounds.Exclamation.Play();
         }
 
+        public ExceptionModal(AggregateException exceptions) : base()
+        {
+            CloseCommand = new SimpleCommand(OnCloseModal);
+            _errorTitle = "Internal Exception";
+            _errorMessage = exceptions.GetAllExceptions();
+            Clipboard.SetText(_errorMessage);
+            if (!((App)Application.Current).IsShutingDown)
+                SystemSounds.Exclamation.Play();
+        }
+
         public ICommand CloseCommand { get; private set; }
         public string ErrorMessage { get => _errorMessage; set => _errorMessage = value; }
         public string ErrorTitle { get => _errorTitle; set => _errorTitle = value; }

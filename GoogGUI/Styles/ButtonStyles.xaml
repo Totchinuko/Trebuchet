@@ -186,4 +186,12 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+    <Style TargetType="Button" x:Key="ButtonIconBlue" BasedOn="{StaticResource IconButton}">
+        <Setter Property="Background" Value="Transparent" />
+        <Style.Triggers>
+            <Trigger Property="IsMouseOver" Value="True">
+                <Setter Property="Background" Value="{StaticResource GBlue}" />
+            </Trigger>
+        </Style.Triggers>
+    </Style>
 </ResourceDictionary>
