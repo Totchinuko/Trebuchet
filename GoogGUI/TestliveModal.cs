@@ -24,6 +24,8 @@ namespace GoogGUI
 
         public override string ModalTitle => "Game Build";
 
+        public override bool CloseDisabled => false;
+
         public override int ModalWidth => 400;
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["TestliveSelection"];
         public bool Testlive { get => _testlive; private set => _testlive = value; }
