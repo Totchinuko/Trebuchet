@@ -7,7 +7,7 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Style="{StaticResource NormalText}" Margin="0,0,12,0">
+                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0">
                     <Run Text="{Binding Message}" />
                 </TextBlock>
                 <Button Style="{StaticResource ButtonIconBlue}"

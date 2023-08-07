@@ -3,7 +3,6 @@
     <DataTemplate x:Key="TextboxField">
         <Border Height="38" Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
             <TextBox
-            Style="{StaticResource TextField}"
             VerticalAlignment="Center"
             Height="25"
             VerticalContentAlignment="Center"

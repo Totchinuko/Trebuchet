@@ -8,7 +8,6 @@
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <TextBox
-            Style="{StaticResource TextField}"
             VerticalAlignment="Center"
             Height="25"
             VerticalContentAlignment="Center"

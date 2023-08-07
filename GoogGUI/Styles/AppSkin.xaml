@@ -15,7 +15,7 @@
     <SolidColorBrush x:Key="GDimBlue" Color="#AA3a8eda" />
     <SolidColorBrush x:Key="GBlue" Color="#FF3a8eda" />
 
-    <Style TargetType="TextBlock" x:Key="NormalText">
+    <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="White" />
         <Setter Property="FontSize" Value="12" />
     </Style>
@@ -54,7 +54,7 @@
         <Setter Property="Margin" Value="0,6" />
     </Style>
 
-    <Style TargetType="TextBox" x:Key="TextField">
+    <Style TargetType="TextBox">
         <Setter Property="Background" Value="{StaticResource GDarkPanel}" />
         <Setter Property="BorderBrush" Value="{StaticResource GDimBlue}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -79,7 +79,7 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    <Style TargetType="CheckBox" x:Key="Checkbox">
+    <Style TargetType="CheckBox">
         <Setter Property="Background" Value="{StaticResource GDarkPanel}" />
         <Setter Property="BorderBrush" Value="{StaticResource GDimBlue}" />
         <Setter Property="Foreground" Value="White" />

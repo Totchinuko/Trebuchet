@@ -18,7 +18,7 @@
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                    <TextBlock Style="{StaticResource NormalText}" TextWrapping="Wrap">
+                    <TextBlock TextWrapping="Wrap">
                         <Run Text="{Binding ErrorMessage}" />
                     </TextBlock>
                 </ScrollViewer>

@@ -12,7 +12,7 @@
                     <Run Text="{Binding MessageTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource NormalText}">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left">
                     <Run Text="{Binding Message}" />
                 </TextBlock>
             </StackPanel>

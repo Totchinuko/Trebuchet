@@ -7,7 +7,7 @@
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" MaxWidth="300" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Style="{StaticResource NormalText}" Margin="0,0,12,0">
+                <TextBlock Margin="0,0,12,0">
                     <Run Text="{Binding Value}" />
                 </TextBlock>
                 <Slider Style="{StaticResource HSlider}" Grid.Column="1" IsSnapToTickEnabled="{Binding TickEnabled}" TickFrequency="{Binding TickFrequency}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" Value="{Binding Value, Mode=TwoWay}" />

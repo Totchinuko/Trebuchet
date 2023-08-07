@@ -6,11 +6,11 @@
                 <ColumnDefinition Width="300" />
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
-            <TextBlock Style="{StaticResource NormalText}">
+            <TextBlock>
                     <Run Text="{Binding ModName, Mode=OneWay}" />
             </TextBlock>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
-                <TextBlock Style="{StaticResource NormalText}">
+                <TextBlock>
                     <Run Text="Author : "/>
                     <Run Text="{Binding AuthorName, Mode=OneWay}" />
                 </TextBlock>
