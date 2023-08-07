@@ -39,5 +39,11 @@ namespace GoogGUI
         protected virtual void OnWindowShown()
         {
         }
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Application.Current.Shutdown();
+        }
     }
 }
