@@ -9,6 +9,7 @@ namespace Goog
 {
     public class SteamPublishedFile
     {
+        [JsonPropertyName("publishedfileid")]
         public string publishedFileID = "";
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         public int result = 0;
