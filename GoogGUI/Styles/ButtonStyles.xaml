@@ -12,7 +12,7 @@
                             CornerRadius="{Binding (local:GuiExtensions.CornerRadius), RelativeSource={RelativeSource AncestorType=Button}}"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
-                        <ContentPresenter />
+                        <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
                     </Border>
                 </ControlTemplate>
             </Setter.Value>
@@ -116,6 +116,7 @@
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="Foreground" Value="White" />
         <Setter Property="local:GuiExtensions.CornerRadius" Value="3" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
         <Setter Property="Padding" Value="8" />
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">

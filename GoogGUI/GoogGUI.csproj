@@ -22,6 +22,7 @@
     <None Remove="Icons\Save.png" />
     <None Remove="Icons\Server.png" />
     <None Remove="Icons\Settings.png" />
+    <None Remove="Icons\Steam.png" />
     <None Remove="Icons\Trash.png" />
     <None Remove="Icons\Window.png" />
   </ItemGroup>
@@ -44,6 +45,7 @@
     <Resource Include="Icons\Save.png" />
     <Resource Include="Icons\Server.png" />
     <Resource Include="Icons\Settings.png" />
+    <Resource Include="Icons\Steam.png" />
     <Resource Include="Icons\Trash.png" />
     <Resource Include="Icons\Window.png" />
   </ItemGroup>

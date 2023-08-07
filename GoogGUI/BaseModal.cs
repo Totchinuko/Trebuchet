@@ -20,6 +20,12 @@ namespace GoogGUI
                 _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
         }
 
+        public virtual bool CloseDisabled => true;
+
+        public virtual bool MaximizeDisabled => true;
+
+        public virtual bool MinimizeDisabled => true;
+
         public abstract int ModalHeight { get; }
 
         public abstract string ModalTitle { get; }

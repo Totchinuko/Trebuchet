@@ -21,6 +21,7 @@ namespace GoogGUI
         private ModListProfile _profile = new ModListProfile();
         private string _selectedModlist = string.Empty;
         private CancellationTokenSource? _source;
+        private WorkshopSearch? _searchWindow;
 
         public ModlistHandler(Config config)
         {
@@ -149,7 +150,30 @@ namespace GoogGUI
 
         private void OnExploreWorkshop(object? obj)
         {
-            throw new NotImplementedException();
+            if (_searchWindow != null) return;
+            _searchWindow = new WorkshopSearch(_api);
+            _searchWindow.Closing += OnSearchClosing;
+            _searchWindow.ModAdded += OnModAdded;
+            _searchWindow.Show();
+        }
+
+        private void OnModAdded(object? sender, WorkshopSearchResult mod)
+        {
+            if (_modlist.Where((x) => x.IsID && x.Mod == mod.PublishedFile.publishedFileID).Any()) return;
+            ModFile file = new ModFile(mod.PublishedFile.publishedFileID);
+            file.SetManifest(mod.PublishedFile);
+            file.AuthorName = mod.AuthorName;
+            _modlist.Add(file);
+            if (string.IsNullOrEmpty(file.AuthorName))
+                LoadModAuthors();
+        }
+
+        private void OnSearchClosing(object? sender, CancelEventArgs e)
+        {
+            if (_searchWindow == null) return;
+            _searchWindow.Closing -= OnSearchClosing;
+            _searchWindow.ModAdded -= OnModAdded;
+            _searchWindow = null;
         }
 
         private void OnImportFromFile(object? obj)

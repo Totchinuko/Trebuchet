@@ -2,6 +2,21 @@
                     xmlns:Controls="clr-namespace:GoogGUI.Controls"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ModlistEditor">
-        <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8">
+                <WrapPanel Orientation="Horizontal">
+                    <Button Style="{StaticResource IconButton}" Padding="8" Command="{Binding ExploreWorkshopCommand}">
+                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Steam.png" Width="16" Height="16" />
+                    </Button>
+                </WrapPanel>
+            </Border>
+            <Border Grid.Row="1" Padding="0,12,0,0">
+                <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
+            </Border>
+        </Grid>            
     </DataTemplate>
 </ResourceDictionary>
