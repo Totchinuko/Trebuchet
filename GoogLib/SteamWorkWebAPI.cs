@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -58,9 +59,10 @@ namespace Goog
             using (var client = new HttpClient())
             {
                 client.Timeout = TimeSpan.FromSeconds(15);
-                client.DefaultRequestHeaders.Add("Content-Type", "application/x-www-form-urlencoded");
+                HttpContent content = new FormUrlEncodedContent(postRequest);
+                content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
-                using (var response = await client.PostAsync(url, new FormUrlEncodedContent(postRequest), token))
+                using (var response = await client.PostAsync(url, content, token))
                 {
                     using (var download = await response.Content.ReadAsStreamAsync(token))
                     {
