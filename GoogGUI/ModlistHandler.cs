@@ -31,21 +31,11 @@ namespace GoogGUI
             ImportFromURLCommand = new SimpleCommand(OnExploreWorkshop);
             ExploreWorkshopCommand = new SimpleCommand(OnExploreWorkshop);
 
-            _modlist = new TrulyObservableCollection<ModFile>
-            {
-                new ModFile("2886779102"),
-                new ModFile("2850232250"),
-                new ModFile("2847709656"),
-                new ModFile("2684530805"),
-                new ModFile("2677532697"),
-            };
-
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
 
             _selectedModlist = _config.CurrentModlistProfile;
-            LoadManifests();
-            //LoadModlist();
+            LoadModlist();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
