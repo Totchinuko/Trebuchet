@@ -16,7 +16,7 @@
                     <Run Text="{Binding Message}" />
                 </TextBlock>
             </StackPanel>
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Style="{StaticResource ButtonIconGreen}"
                         Content="Yes"
                         Command="{Binding YesCommand}"

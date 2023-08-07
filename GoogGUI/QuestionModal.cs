@@ -31,7 +31,9 @@ namespace GoogGUI
 
         public override string ModalTitle => "Information";
 
-        public override int ModalWidth => 650;
+        public override int ModalWidth => 550;
+
+        public override bool CloseDisabled => false;
 
         public DialogResult Result { get => _result; set => _result = value; }
 
@@ -41,6 +43,8 @@ namespace GoogGUI
 
         public override void OnWindowClose()
         {
+            if (_result == DialogResult.None)
+                _result = DialogResult.Cancel;
         }
 
         private void OnCancelModal(object? obj)
