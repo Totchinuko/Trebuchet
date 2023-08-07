@@ -1,4 +1,5 @@
 ﻿using System.Windows;
+using System.Windows.Controls;
 
 namespace GoogGUI
 {
@@ -41,5 +42,9 @@ namespace GoogGUI
         public void Show() => _window.PopDialog(false);
 
         public void ShowDialog() => _window.PopDialog();
+
+        public virtual void Submit()
+        {
+        }
     }
 }
