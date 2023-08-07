@@ -38,6 +38,9 @@ namespace Goog
         public async Task<List<SteamWebSearchResult>> ExtractWebSearch(string search, CancellationToken token)
         {
             List<SteamWebSearchResult> results = new List<SteamWebSearchResult>();
+            if (string.IsNullOrEmpty(search))
+                return results;
+
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
                 { "appid", "440900" },
@@ -75,6 +78,9 @@ namespace Goog
 
         public async Task<string> ExtractUserName(string steamID, CancellationToken token)
         {
+            if (string.IsNullOrEmpty(steamID))
+                return string.Empty;
+
             if (_usernamesCache.TryGetValue(steamID, out string? cachedName))
                 return cachedName;
 
@@ -93,6 +99,8 @@ namespace Goog
         public async Task<Dictionary<string, string>> ExtractUserNames(List<string> steamUserIDs, CancellationToken token)
         {
             Dictionary<string, string> results = new Dictionary<string, string>();
+            if (steamUserIDs.Count == 0) return results;
+
             foreach (string userID in steamUserIDs)
             {
                 string name = await ExtractUserName(userID, token);
@@ -106,6 +114,8 @@ namespace Goog
         public async Task<Dictionary<string, SteamPublishedFile>> GetPublishedFiles(List<string> IDs, CancellationToken token)
         {
             Dictionary<string, SteamPublishedFile> manifest = new Dictionary<string, SteamPublishedFile>(IDs.Count);
+            if (IDs.Count == 0) return manifest;
+
             Dictionary<string, string> request = new Dictionary<string, string>
             {
                 { PublishedFileCount, IDs.Count.ToString() }
