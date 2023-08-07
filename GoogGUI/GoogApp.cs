@@ -64,6 +64,9 @@ namespace GoogGUI
 
         private void ModlistDisplay(object? obj)
         {
+            ModlistHandler handler = new ModlistHandler(_config);
+            _panel = handler;
+            OnPropertyChanged("Panel");
         }
 
         private void OnConfigChanged(object? sender, EventArgs e)

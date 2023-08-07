@@ -1,0 +1,7 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:Controls="clr-namespace:GoogGUI.Controls"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="ModlistEditor">
+        <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
+    </DataTemplate>
+</ResourceDictionary>

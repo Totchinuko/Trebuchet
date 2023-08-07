@@ -39,12 +39,24 @@ namespace GoogGUI
             }
         }
 
+        public string LastUpdate
+        {
+            get
+            {
+                if (_file == null)
+                    return string.Empty;
+                DateTime date = Tools.UnixTimeStampToDateTime(_file.timeUpdated);
+                return date.ToShortDateString() + " " + date.ToShortTimeString();
+            }
+        }
+
         public void SetManifest(SteamPublishedFile file)
         {
             if (!_isID)
                 throw new Exception("Cannot set a manifest on a local mod.");
             _file = file;
             OnPropertyChanged("ModName");
+            OnPropertyChanged("LastUpdate");
         }
 
         protected virtual void OnPropertyChanged(string name)

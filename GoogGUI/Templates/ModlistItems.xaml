@@ -1,0 +1,21 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="ModlistItems">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="300" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <TextBlock Style="{StaticResource NormalText}">
+                    <Run Text="{Binding ModName, Mode=OneWay}" />
+            </TextBlock>
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <TextBlock Style="{StaticResource NormalText}">
+                    <Run Text="Last Update : "/>
+                    <Run Text="{Binding LastUpdate, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>            
+        </Grid>
+        
+    </DataTemplate>
+</ResourceDictionary>

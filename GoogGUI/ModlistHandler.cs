@@ -29,11 +29,21 @@ namespace GoogGUI
             ImportFromURLCommand = new SimpleCommand(OnExploreWorkshop);
             ExploreWorkshopCommand = new SimpleCommand(OnExploreWorkshop);
 
+            _modlist = new TrulyObservableCollection<ModFile>
+            {
+                new ModFile("2886779102"),
+                new ModFile("2850232250"),
+                new ModFile("2847709656"),
+                new ModFile("2684530805"),
+                new ModFile("2677532697"),
+            };
+
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
 
             _selectedModlist = _config.CurrentModlistProfile;
-            LoadModlist();
+            LoadManifests();
+            //LoadModlist();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -50,6 +60,10 @@ namespace GoogGUI
 
         public ICommand RefreshManifestCommand { get; private set; }
 
+        public object Template => Application.Current.Resources["ModlistEditor"];
+
+        public object ItemTemplate => Application.Current.Resources["ModlistItems"];
+
         public string SelectedModlist
         {
             get => _selectedModlist;
@@ -60,7 +74,7 @@ namespace GoogGUI
             }
         }
 
-        internal TrulyObservableCollection<ModFile> Modlist
+        public TrulyObservableCollection<ModFile> Modlist
         {
             get => _modlist;
             set
@@ -124,7 +138,10 @@ namespace GoogGUI
             Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("IsLoading"));
             if (!task.IsCompletedSuccessfully)
             {
-                new ErrorModal("Modlist", "Could not download mod details of your modlist.", false).ShowDialog();
+                if (task.Exception != null)
+                    Application.Current.Dispatcher.Invoke(() => new ExceptionModal(task.Exception).ShowDialog());
+                else
+                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Modlist", "Could not download mod details of your modlist.", false).ShowDialog());
                 return;
             }
 

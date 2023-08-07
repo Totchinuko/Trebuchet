@@ -7,7 +7,7 @@
         xmlns:Controls="clr-namespace:GoogGUI.Controls" x:Class="GoogGUI.MainWindow"
         mc:Ignorable="d"
         Title="Goog UI"
-        Height="650" Width="800"
+        Height="650" Width="900"
         MinHeight="450" MinWidth="700"
         WindowStartupLocation="CenterScreen"
         UseLayoutRounding="True" Background="{StaticResource GBackground}">
@@ -45,6 +45,11 @@
                                 IsEnabled="{Binding App.CanUseModlist}">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ButtonTab}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding App.Panel, Converter={StaticResource DataType}}" Value="{x:Type local:ModlistHandler}">
+                                            <Setter Property="local:GuiExtensions.Accent" Value="True" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </Button.Style>
                         </Button>
