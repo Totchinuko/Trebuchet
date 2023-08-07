@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
 using System.Text;
@@ -76,6 +77,46 @@ namespace GoogGUI
             return (bool)element.GetValue(AccentProperty);
         }
 
+        public static readonly DependencyProperty IsDraggingProperty = DependencyProperty.RegisterAttached(
+                "IsDragging",
+                typeof(bool),
+                typeof(GuiExtensions),
+                new FrameworkPropertyMetadata(
+                    false,
+                    FrameworkPropertyMetadataOptions.AffectsRender
+                )
+            );
+
+        public static bool GetIsDragging(DependencyObject source)
+        {
+            return (bool)source.GetValue(IsDraggingProperty);
+        }
+
+        public static void SetIsDragging(DependencyObject target, bool value)
+        {
+            target.SetValue(IsDraggingProperty, value);
+        }
+
+        public static readonly DependencyProperty IsDraggedOverProperty = DependencyProperty.RegisterAttached(
+                "IsDraggedOver",
+                typeof(bool),
+                typeof(GuiExtensions),
+                new FrameworkPropertyMetadata(
+                    false,
+                    FrameworkPropertyMetadataOptions.AffectsRender
+                )
+            );
+
+        public static bool GetIsDraggedOver(DependencyObject source)
+        {
+            return (bool)source.GetValue(IsDraggedOverProperty);
+        }
+
+        public static void SetIsDraggedOver(DependencyObject target, bool value)
+        {
+            target.SetValue(IsDraggedOverProperty, value);
+        }
+
         public static IGuiField SetField(this IGuiField field, object target, string property, object? defaultValue)
         {
             if (string.IsNullOrEmpty(property))
@@ -102,6 +143,31 @@ namespace GoogGUI
                 inner = inner.InnerException;
             }
             return message;
+        }
+
+        public static bool TryGetParent<TParent>(this DependencyObject child, [NotNullWhen(true)] out TParent? parent) where TParent : DependencyObject
+        {
+            DependencyObject current = child;
+            while (current != null && !(current is TParent))
+            {
+                current = VisualTreeHelper.GetParent(current);
+            }
+            if (current is TParent result && result != null)
+            {
+                parent = result;
+                return true;
+            }
+
+            parent = default;
+            return false;
+        }
+
+        public static void SetParentValue<TParent>(this DependencyObject child, DependencyProperty property, object value) where TParent : DependencyObject
+        {
+            if (child.TryGetParent(out TParent? parent))
+            {
+                parent.SetValue(property, value);
+            }
         }
     }
 }
