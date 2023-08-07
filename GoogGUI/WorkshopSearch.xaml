@@ -39,7 +39,7 @@
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox VerticalContentAlignment="Center" Text="{Binding SearchTerm, Mode=OneWayToSource}" MinWidth="300" MaxWidth="400" Margin="0,0,12,0" VerticalAlignment="center" Height="25" KeyDown="TextBox_KeyDown" />
+                            <TextBox VerticalContentAlignment="Center" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" MinWidth="300" MaxWidth="400" Margin="0,0,12,0" VerticalAlignment="center" Height="25" KeyDown="TextBox_KeyDown" />
                             <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90">
                                 <Button.Style>
                                     <Style TargetType="Button" BasedOn="{StaticResource ButtonIconBlue}">
@@ -95,7 +95,7 @@
                             <TextBlock Text="No results found">
                                 <TextBlock.Style>
                                     <Style TargetType="TextBlock">
-                                        <Setter Property="Visibility" Value="Visible" />
+                                        <Setter Property="Visibility" Value="Hidden" />
                                         <Setter Property="FontSize" Value="14" />
                                         <Setter Property="Foreground" Value="White" />
                                         <Style.Triggers>

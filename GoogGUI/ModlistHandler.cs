@@ -3,13 +3,13 @@ using GoogLib;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace GoogGUI
@@ -38,6 +38,7 @@ namespace GoogGUI
 
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
+            _modlist.CollectionChanged += OnModlistCollectionChanged;
 
             RefreshProfiles();
             _selectedModlist = _config.CurrentModlistProfile;
@@ -137,15 +138,6 @@ namespace GoogGUI
             Task.Run(() => _api.ExtractUserNames(requested.ToList(), _source.Token)).ContinueWith(OnAuthorsLoaded);
         }
 
-        private void LoadModlistProfile()
-        {
-            if (string.IsNullOrEmpty(_selectedModlist)) return;
-            string path = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, _selectedModlist + ".json");
-            _profile = Tools.LoadFile<ModListProfile>(path);
-
-            LoadModlist();
-        }
-
         private void LoadModlist()
         {
             _modlist.Clear();
@@ -153,6 +145,15 @@ namespace GoogGUI
                 _modlist.Add(new ModFile(m));
             OnPropertyChanged("Modlist");
             LoadManifests();
+        }
+
+        private void LoadModlistProfile()
+        {
+            if (string.IsNullOrEmpty(_selectedModlist)) return;
+            string path = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, _selectedModlist + ".json");
+            _profile = Tools.LoadFile<ModListProfile>(path);
+
+            LoadModlist();
         }
 
         private void OnAuthorsLoaded(Task<Dictionary<string, string>> task)
@@ -229,6 +230,11 @@ namespace GoogGUI
             foreach (ModFile file in _modlist)
                 _profile.Modlist.Add(file.Mod);
             _profile.SaveFile();
+        }
+
+        private void OnModlistCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            OnModlistChanged();
         }
 
         private void OnModlistCreate(object? obj)

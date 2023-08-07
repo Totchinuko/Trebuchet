@@ -60,7 +60,6 @@ namespace GoogGUI
             if (string.IsNullOrEmpty(_searchTerm) || _source != null)
                 return;
             _searchResults?.Clear();
-            _searchResults = null;
             OnPropertyChanged("SearchResults");
 
             _source = new CancellationTokenSource();
@@ -74,7 +73,12 @@ namespace GoogGUI
             _source = null;
             Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("IsSearching"));
 
-            if (task.Result == null || task.Result.Count == 0) return;
+            if (task.Result == null || task.Result.Count == 0)
+            {
+                _searchResults = null;
+                Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("SearchResults"));
+                return;
+            }
 
             _searchResults = new List<WorkshopSearchResult>();
             foreach (var data in task.Result)
