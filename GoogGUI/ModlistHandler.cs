@@ -2,6 +2,7 @@
 using GoogLib;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -19,9 +20,10 @@ namespace GoogGUI
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
         private Dictionary<string, SteamPublishedFile> _modManifests = new Dictionary<string, SteamPublishedFile>();
         private ModListProfile _profile = new ModListProfile();
+        private ObservableCollection<string> _profiles = new ObservableCollection<string>();
+        private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
         private CancellationTokenSource? _source;
-        private WorkshopSearch? _searchWindow;
 
         public ModlistHandler(Config config)
         {
@@ -30,15 +32,22 @@ namespace GoogGUI
             ImportFromTextCommand = new SimpleCommand(OnImportFromText);
             ImportFromURLCommand = new SimpleCommand(OnExploreWorkshop);
             ExploreWorkshopCommand = new SimpleCommand(OnExploreWorkshop);
+            CreateModlistCommand = new SimpleCommand(OnModlistCreate);
+            DeleteModlistCommand = new SimpleCommand(OnModlistDelete);
 
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
 
+            RefreshProfiles();
             _selectedModlist = _config.CurrentModlistProfile;
-            LoadModlist();
+            LoadModlistProfile();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public ICommand CreateModlistCommand { get; private set; }
+
+        public ICommand DeleteModlistCommand { get; private set; }
 
         public ICommand ExploreWorkshopCommand { get; private set; }
 
@@ -62,6 +71,8 @@ namespace GoogGUI
             }
         }
 
+        public ObservableCollection<string> Profiles { get => _profiles; set => _profiles = value; }
+
         public ICommand RefreshManifestCommand { get; private set; }
 
         public string SelectedModlist
@@ -70,11 +81,20 @@ namespace GoogGUI
             set
             {
                 _selectedModlist = value;
+                OnPropertyChanged("SelectedModlist");
                 OnSelectionChanged();
             }
         }
 
         public object Template => Application.Current.Resources["ModlistEditor"];
+
+        public void CreateModlist(string name)
+        {
+            _profile = Tools.CreateFile<ModListProfile>(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json"));
+            _profile.SaveFile();
+            RefreshProfiles();
+            SelectedModlist = name;
+        }
 
         protected virtual void OnPropertyChanged(string name)
         {
@@ -84,6 +104,7 @@ namespace GoogGUI
         private void LoadManifests()
         {
             if (_source != null) return;
+            if (_modlist.Count == 0) return;
 
             _source = new CancellationTokenSource();
             OnPropertyChanged("IsLoading");
@@ -108,12 +129,17 @@ namespace GoogGUI
             Task.Run(() => _api.ExtractUserNames(requested.ToList(), _source.Token)).ContinueWith(OnAuthorsLoaded);
         }
 
-        private void LoadModlist()
+        private void LoadModlistProfile()
         {
             if (string.IsNullOrEmpty(_selectedModlist)) return;
             string path = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, _selectedModlist + ".json");
             _profile = Tools.LoadFile<ModListProfile>(path);
 
+            LoadModlist();
+        }
+
+        private void LoadModlist()
+        {
             _modlist.Clear();
             foreach (string m in _profile.Modlist)
                 _modlist.Add(new ModFile(m));
@@ -147,25 +173,6 @@ namespace GoogGUI
             _searchWindow.Show();
         }
 
-        private void OnModAdded(object? sender, WorkshopSearchResult mod)
-        {
-            if (_modlist.Where((x) => x.IsID && x.Mod == mod.PublishedFile.publishedFileID).Any()) return;
-            ModFile file = new ModFile(mod.PublishedFile.publishedFileID);
-            file.SetManifest(mod.PublishedFile);
-            file.AuthorName = mod.AuthorName;
-            _modlist.Add(file);
-            if (string.IsNullOrEmpty(file.AuthorName))
-                LoadModAuthors();
-        }
-
-        private void OnSearchClosing(object? sender, CancelEventArgs e)
-        {
-            if (_searchWindow == null) return;
-            _searchWindow.Closing -= OnSearchClosing;
-            _searchWindow.ModAdded -= OnModAdded;
-            _searchWindow = null;
-        }
-
         private void OnImportFromFile(object? obj)
         {
             throw new NotImplementedException();
@@ -197,6 +204,17 @@ namespace GoogGUI
             Application.Current.Dispatcher.Invoke(RefreshModData);
         }
 
+        private void OnModAdded(object? sender, WorkshopSearchResult mod)
+        {
+            if (_modlist.Where((x) => x.IsID && x.Mod == mod.PublishedFile.publishedFileID).Any()) return;
+            ModFile file = new ModFile(mod.PublishedFile.publishedFileID);
+            file.SetManifest(mod.PublishedFile);
+            file.AuthorName = mod.AuthorName;
+            _modlist.Add(file);
+            if (string.IsNullOrEmpty(file.AuthorName))
+                LoadModAuthors();
+        }
+
         private void OnModlistChanged()
         {
             _profile.Modlist.Clear();
@@ -205,16 +223,34 @@ namespace GoogGUI
             _profile.SaveFile();
         }
 
+        private void OnModlistCreate(object? obj)
+        {
+            new ChooseNameModal("Create", string.Empty, CreateModlist).ShowDialog();
+        }
+
+        private void OnModlistDelete(object? obj)
+        {
+            throw new NotImplementedException();
+        }
+
         private void OnRefreshManifest(object? obj)
         {
             LoadManifests();
+        }
+
+        private void OnSearchClosing(object? sender, CancelEventArgs e)
+        {
+            if (_searchWindow == null) return;
+            _searchWindow.Closing -= OnSearchClosing;
+            _searchWindow.ModAdded -= OnModAdded;
+            _searchWindow = null;
         }
 
         private void OnSelectionChanged()
         {
             _config.CurrentModlistProfile = _selectedModlist;
             _config.SaveFile();
-            LoadModlist();
+            LoadModlistProfile();
         }
 
         private void RefreshAuthorData()
@@ -230,6 +266,19 @@ namespace GoogGUI
                 if (file.IsID && _modManifests.TryGetValue(file.Mod, out var value))
                     file.SetManifest(value);
             LoadModAuthors();
+        }
+
+        private void RefreshProfiles()
+        {
+            _profiles.Clear();
+            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles);
+            if (!Directory.Exists(folder))
+                return;
+
+            string[] profiles = Directory.GetFiles(folder, "*.json");
+            foreach (string p in profiles)
+                _profiles.Add(Path.GetFileNameWithoutExtension(p));
+            OnPropertyChanged("Profiles");
         }
     }
 }

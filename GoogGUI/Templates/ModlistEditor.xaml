@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:Controls="clr-namespace:GoogGUI.Controls"
+                    xmlns:local="clr-namespace:GoogGUI"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ModlistEditor">
         <Grid>
@@ -9,9 +10,17 @@
             </Grid.RowDefinitions>
             <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8">
                 <WrapPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource IconButton}" Padding="8" Command="{Binding ExploreWorkshopCommand}">
-                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Steam.png" Width="16" Height="16" />
+                    <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding CreateModlistCommand}" Margin="0,0,12,0">
+                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Add.png" Width="16" Height="16" />
                     </Button>
+                    <ComboBox ItemsSource="{Binding Profiles}" Margin="0,0,12,0" SelectedItem="{Binding SelectedModlist}" Width="200" VerticalAlignment="Center" Height="25" />
+                    <Button Style="{StaticResource ButtonTab}" 
+                            local:GuiExtensions.Icon="pack://application:,,,/GoogGui;component/Icons/Steam.png"  
+                            local:GuiExtensions.IconSize="16"
+                            Content="Workshop"
+                            Padding="8" 
+                            Command="{Binding ExploreWorkshopCommand}"/>
+
                 </WrapPanel>
             </Border>
             <Border Grid.Row="1" Padding="0,12,0,0">
