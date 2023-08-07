@@ -35,17 +35,9 @@ namespace Goog
 
         public Dictionary<string, string> UsernamesCache => _usernamesCache;
 
-        public async Task<Dictionary<string, SteamPublishedFile>> ExtractSearch(string search, CancellationToken token)
+        public async Task<List<SteamWebSearchResult>> ExtractWebSearch(string search, CancellationToken token)
         {
-            List<string> ids = await ExtractWebSearch(search, token);
-            if (ids.Count == 0)
-                return new Dictionary<string, SteamPublishedFile>();
-            return await GetPublishedFiles(ids, token);
-        }
-
-        public async Task<List<string>> ExtractWebSearch(string search, CancellationToken token)
-        {
-            List<string> results = new List<string>();
+            List<SteamWebSearchResult> results = new List<SteamWebSearchResult>();
             Dictionary<string, string> parameters = new Dictionary<string, string>
             {
                 { "appid", "440900" },
@@ -59,16 +51,26 @@ namespace Goog
 
             var htmldoc = new HtmlDocument();
             htmldoc.LoadHtml(html);
-            var nodes = htmldoc.DocumentNode.SelectNodes("//div[@class='workshopItem')/a");
+            var nodes = htmldoc.DocumentNode.SelectNodes("//div[@class='workshopBrowseItems']/div[@class='workshopItem']");
 
             foreach(var node in nodes)
             {
-                string id = node.GetAttributeValue("data-publishedfileid", string.Empty);
+                var ugcLink = node.SelectSingleNode(".//a[contains(@class,'ugc')]");
+                var title = node.SelectSingleNode(".//div[contains(@class,'workshopItemTitle')]");
+                var author = node.SelectSingleNode(".//a[contains(@class,'workshop_author_link')]");
+                var preview = node.SelectSingleNode(".//img[contains(@class,'workshopItemPreviewImage')]");
+
+                string id = ugcLink.GetAttributeValue("data-publishedfileid", string.Empty);
                 if (!string.IsNullOrEmpty(id) && long.TryParse(id, out _))
-                    results.Add(id);
+                    results.Add(new SteamWebSearchResult { 
+                        modID = id,
+                        modName = title?.InnerText ?? string.Empty,
+                        authorName = author?.InnerText ?? string.Empty,
+                        previewURL = ParsePreviewURL(preview?.GetAttributeValue("src", string.Empty) ?? string.Empty)
+                    });
             }
 
-            return results;
+            return results.ToList();
         }
 
         public async Task<string> ExtractUserName(string steamID, CancellationToken token)
@@ -176,6 +178,18 @@ namespace Goog
                     }
                 }
             }
+        }
+
+        protected virtual string ParsePreviewURL(string url)
+        {
+            if (string.IsNullOrEmpty(url)) return string.Empty;
+
+            UriBuilder builder = new UriBuilder(url);
+            var query = HttpUtility.ParseQueryString(builder.Query);
+            query.Remove("imcolor");
+            query.Remove("letterbox");
+            builder.Query = query.ToString();
+            return builder.ToString();
         }
     }
 }
