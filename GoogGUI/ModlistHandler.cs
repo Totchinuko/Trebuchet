@@ -9,6 +9,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 
 namespace GoogGUI
@@ -94,6 +95,13 @@ namespace GoogGUI
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;
+        }
+
+        public void DeleteModlist()
+        {
+            _profile.DeleteFile();
+            RefreshProfiles();
+            SelectFirst();
         }
 
         protected virtual void OnPropertyChanged(string name)
@@ -230,7 +238,13 @@ namespace GoogGUI
 
         private void OnModlistDelete(object? obj)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(_selectedModlist)) return;
+            if (_profile == null) return;
+
+            QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected modlist {_selectedModlist} ?");
+            question.ShowDialog();
+            if (question.Result == System.Windows.Forms.DialogResult.Yes)
+                DeleteModlist();
         }
 
         private void OnRefreshManifest(object? obj)
@@ -279,6 +293,24 @@ namespace GoogGUI
             foreach (string p in profiles)
                 _profiles.Add(Path.GetFileNameWithoutExtension(p));
             OnPropertyChanged("Profiles");
+        }
+
+        private void SelectFirst()
+        {
+            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles);
+            if (!Directory.Exists(folder))
+            {
+                SelectedModlist = string.Empty;
+                return;
+            }
+
+            string[] profiles = Directory.GetFiles(folder, "*.json");
+            if (profiles.Length == 0)
+            {
+                SelectedModlist = string.Empty;
+                return;
+            }
+            SelectedModlist = Path.GetFileNameWithoutExtension(profiles[0]);
         }
     }
 }

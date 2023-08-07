@@ -88,6 +88,13 @@ namespace Goog
             Directory.Delete(folder, true);
         }
 
+        public static void DeleteFile<T>(this T data) where T : IFile
+        {
+            if (!File.Exists(data.FilePath))
+                throw new FileNotFoundException($"{data.FilePath} not found");
+            File.Delete(data.FilePath);
+        }
+
         public static void DeleteIfExists(string file)
         {
             if (Directory.Exists(file))

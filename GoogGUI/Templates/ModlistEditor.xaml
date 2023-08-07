@@ -14,6 +14,9 @@
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Add.png" Width="16" Height="16" />
                     </Button>
                     <ComboBox ItemsSource="{Binding Profiles}" Margin="0,0,12,0" SelectedItem="{Binding SelectedModlist}" Width="200" VerticalAlignment="Center" Height="25" />
+                    <Button Style="{StaticResource ButtonIconRed}" Command="{Binding DeleteModlistCommand}" Margin="0,0,12,0">
+                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
+                    </Button>
                     <Button Style="{StaticResource ButtonTab}" 
                             local:GuiExtensions.Icon="pack://application:,,,/GoogGui;component/Icons/Steam.png"  
                             local:GuiExtensions.IconSize="16"
