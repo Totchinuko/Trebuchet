@@ -38,7 +38,6 @@ namespace GoogGUI
 
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
-            _modlist.CollectionChanged += OnModlistCollectionChanged;
 
             RefreshProfiles();
             _selectedModlist = _config.CurrentModlistProfile;
@@ -140,9 +139,11 @@ namespace GoogGUI
 
         private void LoadModlist()
         {
+            _modlist.CollectionChanged -= OnModlistCollectionChanged;
             _modlist.Clear();
             foreach (string m in _profile.Modlist)
                 _modlist.Add(new ModFile(m));
+            _modlist.CollectionChanged += OnModlistCollectionChanged;
             OnPropertyChanged("Modlist");
             LoadManifests();
         }
