@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GoogLib;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -46,6 +47,6 @@ namespace Goog
         [JsonPropertyName("lifetime_favorited")]
         public long lifetimeFavorited = 0;
         public long views = 0;
-        public string[] tags = new string[0];
+        public SteamTag[] tags = new SteamTag[0];
     }
 }
