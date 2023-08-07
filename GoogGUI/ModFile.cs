@@ -11,6 +11,7 @@ namespace GoogGUI
         private bool _isID;
         private bool _isValid;
         private string _mod = string.Empty;
+        private string _authorName = string.Empty;
 
         public ModFile(string mod)
         {
@@ -27,6 +28,23 @@ namespace GoogGUI
 
         public string Mod => _mod;
 
+        public string AuthorName 
+        { 
+            get
+            {
+                if (!string.IsNullOrEmpty(_authorName))
+                    return _authorName;
+                if (_file != null)
+                    return _file.creator;
+                return "Unknown";
+            }
+            set
+            {
+                _authorName = value;
+                OnPropertyChanged("AuthorName");
+            }
+        }
+
         public string ModName
         {
             get
@@ -38,6 +56,8 @@ namespace GoogGUI
                 return Path.GetFileName(_mod);
             }
         }
+
+        public SteamPublishedFile? PublishedFile => _file;
 
         public string LastUpdate
         {

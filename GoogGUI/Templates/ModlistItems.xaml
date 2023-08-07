@@ -11,8 +11,8 @@
             </TextBlock>
             <StackPanel Grid.Column="1" Orientation="Horizontal">
                 <TextBlock Style="{StaticResource NormalText}">
-                    <Run Text="Last Update : "/>
-                    <Run Text="{Binding LastUpdate, Mode=OneWay}" />
+                    <Run Text="Author : "/>
+                    <Run Text="{Binding AuthorName, Mode=OneWay}" />
                 </TextBlock>
             </StackPanel>            
         </Grid>

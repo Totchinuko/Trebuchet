@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,7 +17,7 @@ namespace GoogGUI
         private SteamWorkWebAPI _api;
         private Config _config;
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
-        private Dictionary<string, SteamPublishedFile> _modManigests = new Dictionary<string, SteamPublishedFile>();
+        private Dictionary<string, SteamPublishedFile> _modManifests = new Dictionary<string, SteamPublishedFile>();
         private ModListProfile _profile = new ModListProfile();
         private string _selectedModlist = string.Empty;
         private CancellationTokenSource? _source;
@@ -58,11 +59,19 @@ namespace GoogGUI
 
         public bool IsLoading => _source != null;
 
-        public ICommand RefreshManifestCommand { get; private set; }
-
-        public object Template => Application.Current.Resources["ModlistEditor"];
-
         public object ItemTemplate => Application.Current.Resources["ModlistItems"];
+
+        public TrulyObservableCollection<ModFile> Modlist
+        {
+            get => _modlist;
+            set
+            {
+                _modlist = value;
+                OnModlistChanged();
+            }
+        }
+
+        public ICommand RefreshManifestCommand { get; private set; }
 
         public string SelectedModlist
         {
@@ -74,15 +83,7 @@ namespace GoogGUI
             }
         }
 
-        public TrulyObservableCollection<ModFile> Modlist
-        {
-            get => _modlist;
-            set
-            {
-                _modlist = value;
-                OnModlistChanged();
-            }
-        }
+        public object Template => Application.Current.Resources["ModlistEditor"];
 
         protected virtual void OnPropertyChanged(string name)
         {
@@ -95,12 +96,25 @@ namespace GoogGUI
 
             _source = new CancellationTokenSource();
             OnPropertyChanged("IsLoading");
-            List<string> resquested = new List<string>();
+            List<string> requested = new List<string>();
             foreach (ModFile file in _modlist)
-                if (file.IsID && !_modManigests.ContainsKey(file.Mod))
-                    resquested.Add(file.Mod);
+                if (file.IsID && !_modManifests.ContainsKey(file.Mod))
+                    requested.Add(file.Mod);
 
-            Task.Run(() => _api.GetPublishedFiles(resquested, _source.Token)).ContinueWith(OnManifestsLoaded);
+            Task.Run(() => _api.GetPublishedFiles(requested, _source.Token)).ContinueWith(OnManifestsLoaded);
+        }
+
+        private void LoadModAuthors()
+        {
+            if (_source != null) return;
+
+            _source = new CancellationTokenSource();
+            HashSet<string> requested = new HashSet<string>();
+            foreach (ModFile file in _modlist)
+                if (file.PublishedFile != null && !string.IsNullOrEmpty(file.AuthorName))
+                    requested.Add(file.PublishedFile.creator);
+
+            Task.Run(() => _api.ExtractUserNames(requested.ToList(), _source.Token)).ContinueWith(OnAuthorsLoaded);
         }
 
         private void LoadModlist()
@@ -114,6 +128,23 @@ namespace GoogGUI
                 _modlist.Add(new ModFile(m));
             OnPropertyChanged("Modlist");
             LoadManifests();
+        }
+
+        private void OnAuthorsLoaded(Task<Dictionary<string, string>> task)
+        {
+            _source?.Dispose();
+            _source = null;
+            Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("IsLoading"));
+            if (!task.IsCompletedSuccessfully)
+            {
+                if (task.Exception != null)
+                    Application.Current.Dispatcher.Invoke(() => new ExceptionModal(task.Exception).ShowDialog());
+                else
+                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Modlist", "Could not download author details of your modlist.", false).ShowDialog());
+                return;
+            }
+
+            Application.Current.Dispatcher.Invoke(RefreshAuthorData);
         }
 
         private void OnExploreWorkshop(object? obj)
@@ -147,7 +178,7 @@ namespace GoogGUI
 
             var toAdd = task.Result;
             foreach (var data in toAdd)
-                _modManigests[data.Key] = data.Value;
+                _modManifests[data.Key] = data.Value;
 
             Application.Current.Dispatcher.Invoke(RefreshModData);
         }
@@ -172,11 +203,19 @@ namespace GoogGUI
             LoadModlist();
         }
 
+        private void RefreshAuthorData()
+        {
+            foreach (ModFile file in _modlist)
+                if (file.PublishedFile != null && _api.UsernamesCache.TryGetValue(file.PublishedFile.creator, out var value))
+                    file.AuthorName = value;
+        }
+
         private void RefreshModData()
         {
             foreach (ModFile file in _modlist)
-                if (file.IsID && _modManigests.TryGetValue(file.Mod, out var value))
+                if (file.IsID && _modManifests.TryGetValue(file.Mod, out var value))
                     file.SetManifest(value);
+            LoadModAuthors();
         }
     }
 }
