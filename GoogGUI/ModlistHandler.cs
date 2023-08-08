@@ -35,6 +35,7 @@ namespace GoogGUI
             ExploreWorkshopCommand = new SimpleCommand(OnExploreWorkshop);
             CreateModlistCommand = new SimpleCommand(OnModlistCreate);
             DeleteModlistCommand = new SimpleCommand(OnModlistDelete);
+            DuplicateModlistCommand = new SimpleCommand(OnModlistDuplicate);
 
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
@@ -49,6 +50,8 @@ namespace GoogGUI
         public ICommand CreateModlistCommand { get; private set; }
 
         public ICommand DeleteModlistCommand { get; private set; }
+
+        public ICommand DuplicateModlistCommand { get; private set; }
 
         public ICommand ExploreWorkshopCommand { get; private set; }
 
@@ -88,21 +91,6 @@ namespace GoogGUI
         }
 
         public object Template => Application.Current.Resources["ModlistEditor"];
-
-        public void CreateModlist(string name)
-        {
-            _profile = Tools.CreateFile<ModListProfile>(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json"));
-            _profile.SaveFile();
-            RefreshProfiles();
-            SelectedModlist = name;
-        }
-
-        public void DeleteModlist()
-        {
-            _profile.DeleteFile();
-            RefreshProfiles();
-            SelectFirst();
-        }
 
         protected virtual void OnPropertyChanged(string name)
         {
@@ -240,7 +228,15 @@ namespace GoogGUI
 
         private void OnModlistCreate(object? obj)
         {
-            new ChooseNameModal("Create", string.Empty, CreateModlist).ShowDialog();
+            ChooseNameModal modal = new ChooseNameModal("Create", string.Empty);
+            modal.ShowDialog();
+            string name = modal.Name;
+            if (string.IsNullOrEmpty(name)) return;
+
+            _profile = Tools.CreateFile<ModListProfile>(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json"));
+            _profile.SaveFile();
+            RefreshProfiles();
+            SelectedModlist = name;
         }
 
         private void OnModlistDelete(object? obj)
@@ -251,7 +247,29 @@ namespace GoogGUI
             QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected modlist {_selectedModlist} ?");
             question.ShowDialog();
             if (question.Result == System.Windows.Forms.DialogResult.Yes)
-                DeleteModlist();
+            {
+                _profile.DeleteFile();
+                RefreshProfiles();
+                SelectFirst();
+            }
+        }
+
+        private void OnModlistDuplicate(object? obj)
+        {
+            ChooseNameModal modal = new ChooseNameModal("Duplicate", _selectedModlist);
+            modal.ShowDialog();
+            string name = modal.Name;
+            if (string.IsNullOrEmpty(name)) return;
+
+            _profile.FilePath = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json");
+            _profile.SaveFile();
+            RefreshProfiles();
+            SelectedModlist = name;
+        }
+
+        private void OnModlistDuplicated(string obj)
+        {
+            throw new NotImplementedException();
         }
 
         private void OnRefreshManifest(object? obj)

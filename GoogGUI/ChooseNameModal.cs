@@ -8,12 +8,11 @@ namespace GoogGUI
     {
         private string _buttonLabel = string.Empty;
         private string _name = string.Empty;
-        private Action<string> _callback;
+        private bool _validated;
 
-        public ChooseNameModal(string buttonLabel, string value, Action<string> callback)
+        public ChooseNameModal(string buttonLabel, string value)
         {
             ValidateCommand = new SimpleCommand(OnValidate);
-            _callback = callback;
             _buttonLabel = buttonLabel;
             _name = value;
         }
@@ -36,13 +35,15 @@ namespace GoogGUI
 
         public override void OnWindowClose()
         {
+            if (!_validated)
+                _name = string.Empty;
         }
 
         private void OnValidate(object? obj)
         {
             if (string.IsNullOrEmpty(_name))
                 return;
-            _callback.Invoke(_name);
+            _validated = true;
             _window.Close();
         }
 
