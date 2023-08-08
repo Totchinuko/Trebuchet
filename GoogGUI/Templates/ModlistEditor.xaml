@@ -20,6 +20,9 @@
                     <Button Style="{StaticResource IconButton}" Command="{Binding DuplicateModlistCommand}" ToolTip="Duplicate" Margin="0">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Duplicate.png" Width="16" Height="16" />
                     </Button>
+                    <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding RefreshModlistCommand}" ToolTip="Refresh mod infos" Margin="0">
+                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Reset.png" Width="16" Height="16" />
+                    </Button>
                     <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding DownloadlistCommand}" ToolTip="Update Mods" Margin="0">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Download.png" Width="16" Height="16" />
                     </Button>

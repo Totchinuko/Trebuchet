@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
+using System.Windows.Threading;
 
 namespace GoogGUI
 {
@@ -38,6 +39,7 @@ namespace GoogGUI
             DeleteModlistCommand = new SimpleCommand(OnModlistDelete);
             DuplicateModlistCommand = new SimpleCommand(OnModlistDuplicate);
             DownloadlistCommand = new SimpleCommand(OnModlistDownload);
+            RefreshModlistCommand = new SimpleCommand(OnModlistRefresh);
 
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
@@ -45,39 +47,6 @@ namespace GoogGUI
             RefreshProfiles();
             _selectedModlist = _config.CurrentModlistProfile;
             LoadModlistProfile();
-        }
-
-        private void OnModlistDownload(object? obj)
-        {
-            if (_source != null) return;
-
-            QuestionModal question = new QuestionModal("Download", "Do you wish to update your modlist ? This might take a while.");
-            question.ShowDialog();
-            if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
-
-            _source = new CancellationTokenSource();
-            _wait = new WaitModal("Download", "Updating your modlist mods...", () => _source?.Cancel());
-            Task.Run(() => Setup.UpdateMods(_config, SelectedModlist, _source.Token)).ContinueWith(OnModlistDownloaded);
-            _wait.ShowDialog();
-        }
-
-        private void OnModlistDownloaded(Task<int> task)
-        {
-            Application.Current.Dispatcher.Invoke(() => {
-                _wait?.Close();
-                _wait = null;
-            });
-
-            _source?.Dispose();
-            _source = null;
-
-            if (task.Exception != null)
-            {
-                Application.Current.Dispatcher.Invoke(() => new ExceptionModal(task.Exception).ShowDialog());
-                return;
-            }
-
-            LoadModlist();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -115,6 +84,8 @@ namespace GoogGUI
         public ObservableCollection<string> Profiles { get => _profiles; set => _profiles = value; }
 
         public ICommand RefreshManifestCommand { get; private set; }
+
+        public ICommand RefreshModlistCommand { get; private set; }
 
         public string SelectedModlist
         {
@@ -305,6 +276,40 @@ namespace GoogGUI
             }
         }
 
+        private void OnModlistDownload(object? obj)
+        {
+            if (_source != null) return;
+
+            QuestionModal question = new QuestionModal("Download", "Do you wish to update your modlist ? This might take a while.");
+            question.ShowDialog();
+            if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+
+            _source = new CancellationTokenSource();
+            _wait = new WaitModal("Download", "Updating your modlist mods...", () => _source?.Cancel());
+            Task.Run(() => Setup.UpdateMods(_config, SelectedModlist, _source.Token)).ContinueWith(OnModlistDownloaded);
+            _wait.ShowDialog();
+        }
+
+        private void OnModlistDownloaded(Task<int> task)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                _wait?.Close();
+                _wait = null;
+            });
+
+            _source?.Dispose();
+            _source = null;
+
+            if (task.Exception != null)
+            {
+                Application.Current.Dispatcher.Invoke(() => new ExceptionModal(task.Exception).ShowDialog());
+                return;
+            }
+
+            Application.Current.Dispatcher.Invoke(LoadModlist);
+        }
+
         private void OnModlistDuplicate(object? obj)
         {
             ChooseNameModal modal = new ChooseNameModal("Duplicate", _selectedModlist);
@@ -321,6 +326,12 @@ namespace GoogGUI
         private void OnModlistDuplicated(string obj)
         {
             throw new NotImplementedException();
+        }
+
+        private void OnModlistRefresh(object? obj)
+        {
+            _modManifests.Clear();
+            LoadModlist();
         }
 
         private void OnRefreshManifest(object? obj)
