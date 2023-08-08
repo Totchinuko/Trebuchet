@@ -1,6 +1,6 @@
 ﻿using Goog;
 using GoogLib;
-using System.ComponentModel;
+using System.Drawing;
 
 namespace GoogGUI
 {
@@ -14,11 +14,11 @@ namespace GoogGUI
             _result = result;
         }
 
-        public string AuthorName =>_result.authorName;
+        public string AuthorName => _result.authorName;
 
         public string ImageURL => _result.previewURL;
 
-        public string Title => _result.modName;
+        public string ModID => _result.modID;
 
         public SteamPublishedFile PublishedFile
         {
@@ -32,5 +32,7 @@ namespace GoogGUI
                 };
             }
         }
+
+        public string Title => _result.modName;
     }
 }

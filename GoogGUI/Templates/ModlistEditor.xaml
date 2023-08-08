@@ -8,9 +8,9 @@
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8">
+            <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8" Margin="0,0,0,12">
                 <WrapPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource IconButton}" Command="{Binding CreateModlistCommand}" Margin="0,0,6,0">
+                    <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding CreateModlistCommand}" ToolTip="Create" Margin="0,0,6,0">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Add.png" Width="16" Height="16" />
                     </Button>
                     <ComboBox ItemsSource="{Binding Profiles}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist}" Width="200" VerticalAlignment="Center" Height="25" />
@@ -20,12 +20,15 @@
                     <Button Style="{StaticResource IconButton}" Command="{Binding DuplicateModlistCommand}" ToolTip="Duplicate" Margin="0">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Duplicate.png" Width="16" Height="16" />
                     </Button>
+                    <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding DownloadlistCommand}" ToolTip="Update Mods" Margin="0">
+                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Download.png" Width="16" Height="16" />
+                    </Button>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,0" Height="25" />
                     <Button Style="{StaticResource ButtonTab}" 
                             local:GuiExtensions.Icon="pack://application:,,,/GoogGui;component/Icons/Steam.png"  
                             local:GuiExtensions.IconSize="16"
                             Content="Workshop"
                             Command="{Binding ExploreWorkshopCommand}"/>
-
                 </WrapPanel>
             </Border>
             <Border Grid.Row="1" Padding="0,12,0,0">

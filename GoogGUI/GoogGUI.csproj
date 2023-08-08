@@ -12,7 +12,9 @@
     <None Remove="Icons\Add.png" />
     <None Remove="Icons\BugWindow.png" />
     <None Remove="Icons\Close.png" />
+    <None Remove="Icons\Download.png" />
     <None Remove="Icons\Duplicate.png" />
+    <None Remove="Icons\FIle.png" />
     <None Remove="Icons\Game.png" />
     <None Remove="Icons\List.png" />
     <None Remove="Icons\LocalStorage.png" />
@@ -29,6 +31,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Icons\Download.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\GoogLib\GoogLib.csproj" />
   </ItemGroup>
 
@@ -37,6 +43,7 @@
     <Resource Include="Icons\BugWindow.png" />
     <Resource Include="Icons\Close.png" />
     <Resource Include="Icons\Duplicate.png" />
+    <Resource Include="Icons\FIle.png" />
     <Resource Include="Icons\Game.png" />
     <Resource Include="Icons\List.png" />
     <Resource Include="Icons\LocalStorage.png" />

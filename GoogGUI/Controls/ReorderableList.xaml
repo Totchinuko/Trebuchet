@@ -34,7 +34,16 @@
                             </Style.Triggers>
                         </Style>
                     </Border.Style>
-                    <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" />
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="auto" />
+                        </Grid.ColumnDefinitions>
+                        <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" />
+                        <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding RemoveCommand, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" CommandParameter="{Binding .}">
+                            <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
+                        </Button>
+                    </Grid>
                 </Border>
             </DataTemplate>
         </ItemsControl.ItemTemplate>

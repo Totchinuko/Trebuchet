@@ -1,6 +1,5 @@
 ﻿using System.Collections;
 using System.ComponentModel;
-using System.Drawing.Imaging;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -12,8 +11,6 @@ namespace GoogGUI.Controls
     /// </summary>
     public partial class ReorderableList : UserControl, INotifyPropertyChanged
     {
-        private DependencyObject? _draggedObject;
-
         public static readonly DependencyProperty ItemsSourceProperty = DependencyProperty.Register(
             "ItemsSource",
             typeof(IList),
@@ -32,8 +29,11 @@ namespace GoogGUI.Controls
                 )
             );
 
+        private DependencyObject? _draggedObject;
+
         public ReorderableList()
         {
+            RemoveCommand = new SimpleCommand(OnRemoved);
             InitializeComponent();
         }
 
@@ -51,6 +51,8 @@ namespace GoogGUI.Controls
             set => SetValue(ItemTemplateProperty, value);
         }
 
+        public ICommand RemoveCommand { get; private set; }
+
         protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -58,7 +60,7 @@ namespace GoogGUI.Controls
 
         private void Item_DragEnter(object sender, DragEventArgs e)
         {
-            if(sender != _draggedObject)
+            if (sender != _draggedObject)
                 GuiExtensions.SetIsDraggedOver((DependencyObject)sender, true);
         }
 
@@ -71,7 +73,7 @@ namespace GoogGUI.Controls
         private void Item_Drop(object sender, DragEventArgs e)
         {
             GuiExtensions.SetIsDraggedOver((DependencyObject)sender, false);
-            
+
             var myElement = e.Data.GetFormats();
             object droppedData = e.Data.GetData(myElement[0]);
 
@@ -105,6 +107,11 @@ namespace GoogGUI.Controls
                 _draggedObject = dragged;
                 DragDrop.DoDragDrop(dragged, dragged.DataContext, DragDropEffects.Move);
             }
+        }
+
+        private void OnRemoved(object? obj)
+        {
+            ItemsSource.Remove(obj);
         }
     }
 }

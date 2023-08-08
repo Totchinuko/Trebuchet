@@ -25,6 +25,7 @@ namespace GoogGUI
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
         private CancellationTokenSource? _source;
+        private WaitModal? _wait;
 
         public ModlistHandler(Config config)
         {
@@ -36,6 +37,7 @@ namespace GoogGUI
             CreateModlistCommand = new SimpleCommand(OnModlistCreate);
             DeleteModlistCommand = new SimpleCommand(OnModlistDelete);
             DuplicateModlistCommand = new SimpleCommand(OnModlistDuplicate);
+            DownloadlistCommand = new SimpleCommand(OnModlistDownload);
 
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
@@ -45,11 +47,46 @@ namespace GoogGUI
             LoadModlistProfile();
         }
 
+        private void OnModlistDownload(object? obj)
+        {
+            if (_source != null) return;
+
+            QuestionModal question = new QuestionModal("Download", "Do you wish to update your modlist ? This might take a while.");
+            question.ShowDialog();
+            if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+
+            _source = new CancellationTokenSource();
+            _wait = new WaitModal("Download", "Updating your modlist mods...", () => _source?.Cancel());
+            Task.Run(() => Setup.UpdateMods(_config, SelectedModlist, _source.Token)).ContinueWith(OnModlistDownloaded);
+            _wait.ShowDialog();
+        }
+
+        private void OnModlistDownloaded(Task<int> task)
+        {
+            Application.Current.Dispatcher.Invoke(() => {
+                _wait?.Close();
+                _wait = null;
+            });
+
+            _source?.Dispose();
+            _source = null;
+
+            if (task.Exception != null)
+            {
+                Application.Current.Dispatcher.Invoke(() => new ExceptionModal(task.Exception).ShowDialog());
+                return;
+            }
+
+            LoadModlist();
+        }
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public ICommand CreateModlistCommand { get; private set; }
 
         public ICommand DeleteModlistCommand { get; private set; }
+
+        public ICommand DownloadlistCommand { get; private set; }
 
         public ICommand DuplicateModlistCommand { get; private set; }
 
@@ -97,6 +134,16 @@ namespace GoogGUI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        private bool GetFileInfo(string mod, out DateTime lastModified)
+        {
+            string path = mod;
+            lastModified = default;
+            if (!_config.ResolveMod(ref path)) return false;
+
+            lastModified = File.GetLastWriteTimeUtc(path);
+            return true;
+        }
+
         private void LoadManifests()
         {
             if (_source != null) return;
@@ -130,7 +177,10 @@ namespace GoogGUI
             _modlist.CollectionChanged -= OnModlistCollectionChanged;
             _modlist.Clear();
             foreach (string m in _profile.Modlist)
-                _modlist.Add(new ModFile(m));
+            {
+                bool exists = GetFileInfo(m, out DateTime lastModified);
+                _modlist.Add(new ModFile(m, exists, lastModified));
+            }
             _modlist.CollectionChanged += OnModlistCollectionChanged;
             OnPropertyChanged("Modlist");
             LoadManifests();
@@ -205,7 +255,8 @@ namespace GoogGUI
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
         {
             if (_modlist.Where((x) => x.IsID && x.Mod == mod.PublishedFile.publishedFileID).Any()) return;
-            ModFile file = new ModFile(mod.PublishedFile.publishedFileID);
+            bool exists = GetFileInfo(mod.ModID, out DateTime lastModified);
+            ModFile file = new ModFile(mod.PublishedFile.publishedFileID, exists, lastModified);
             file.SetManifest(mod.PublishedFile);
             file.AuthorName = mod.AuthorName;
             _modlist.Add(file);
