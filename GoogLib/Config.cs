@@ -47,6 +47,7 @@ namespace Goog
         private string _currentClientProfile = string.Empty;
         private string _currentModlistProfile = string.Empty;
         private string _currentServerProfile = string.Empty;
+        private bool _displayCMD = false;
         private string _filePath = string.Empty;
         private string _installPath = string.Empty;
         private int _serverInstanceCount = 0;
@@ -61,6 +62,8 @@ namespace Goog
         public string CurrentModlistProfile { get => _currentModlistProfile; set => _currentModlistProfile = value; }
 
         public string CurrentServerProfile { get => _currentServerProfile; set => _currentServerProfile = value; }
+
+        public bool DisplayCMD { get => _displayCMD; set => _displayCMD = value; }
 
         [JsonIgnore]
         public string FilePath { get => _filePath; set => _filePath = value; }
@@ -133,7 +136,7 @@ namespace Goog
         {
             string file = mod;
             if (long.TryParse(mod, out _))
-                file = Path.Combine(InstallPath, FolderSteam, FolderSteamMods, mod, "none");
+                file = Path.Combine(InstallPath, FolderSteam, FolderSteamMods, ClientAppID, mod, "none");
 
             string? folder = Path.GetDirectoryName(file);
             if (folder == null)

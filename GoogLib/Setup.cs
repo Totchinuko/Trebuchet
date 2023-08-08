@@ -94,7 +94,7 @@ namespace Goog
             Process process = new Process();
             process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             process.StartInfo.Arguments = steamArgs;
-            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.CreateNoWindow = !config.DisplayCMD;
             process.StartInfo.UseShellExecute = false;
             return await WaitForProcess(process, token);
         }
@@ -123,7 +123,7 @@ namespace Goog
             Process process = new Process();
             process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             process.StartInfo.Arguments = steamArgs;
-            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.CreateNoWindow = !config.DisplayCMD;
             process.StartInfo.UseShellExecute = false;
             return await WaitForProcess(process, token);
         }
@@ -139,7 +139,7 @@ namespace Goog
             process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             process.StartInfo.Arguments = steamArgs;
             process.StartInfo.UseShellExecute = false;
-            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.CreateNoWindow = !config.DisplayCMD;
             return await WaitForProcess(process, token);
         }
 
