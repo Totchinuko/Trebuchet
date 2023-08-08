@@ -44,7 +44,7 @@
                             <ContextMenu>
                                 <MenuItem Style="{StaticResource HeaderMI}">
                                     <MenuItem.Header>
-                                        <TextBlock Text="Import" FontWeight="Bold" Foreground="{StaticResource GBlue}" />
+                                        <TextBlock Text="Import" FontWeight="Bold" />
                                     </MenuItem.Header>
                                 </MenuItem>
                                 <MenuItem Header="File (Json/Txt)" Style="{StaticResource NoIconMI}"/>
@@ -52,7 +52,7 @@
                                 <MenuItem Header="URL" Style="{StaticResource NoIconMI}"/>
                                 <MenuItem Style="{StaticResource HeaderMI}">
                                     <MenuItem.Header>
-                                        <TextBlock Text="Export" FontWeight="Bold" Foreground="{StaticResource GBlue}" />
+                                        <TextBlock Text="Export" FontWeight="Bold" />
                                     </MenuItem.Header>
                                 </MenuItem>
                                 <MenuItem Header="File (Json/Txt)" Style="{StaticResource NoIconMI}"/>

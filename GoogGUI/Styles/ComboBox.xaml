@@ -217,7 +217,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
-                    <Border x:Name="Border" Padding="8,4" SnapsToDevicePixels="true" Background="{TemplateBinding Background}">
+                    <Border x:Name="Border" Padding="8,6" SnapsToDevicePixels="true" Background="{TemplateBinding Background}">
                         <ContentPresenter ContentSource="Header" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                     </Border>
                 </ControlTemplate>
@@ -236,7 +236,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type MenuItem}">
-                    <Border x:Name="Border" Padding="2,3" SnapsToDevicePixels="true" Background="{StaticResource GPanel}">
+                    <Border x:Name="Border" Padding="2,6" SnapsToDevicePixels="true" Background="{StaticResource GPanel}">
                         <ContentPresenter ContentSource="Header" Margin="{TemplateBinding Padding}" RecognizesAccessKey="True" VerticalAlignment="Center" SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
                     </Border>
                 </ControlTemplate>
