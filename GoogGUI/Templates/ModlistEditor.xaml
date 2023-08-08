@@ -14,8 +14,8 @@
                     <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding CreateModlistCommand}" ToolTip="Create" Margin="0,0,6,0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Add.png" Width="16" Height="16" />
                     </Button>
-                    <Border VerticalAlignment="Top" Height="35">
-                        <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="25" VerticalAlignment="Center" />
+                    <Border VerticalAlignment="Top" Height="32">
+                        <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center" />
                     </Border>
                     <Button Style="{StaticResource ButtonIconRed}" Command="{Binding DeleteModlistCommand}" ToolTip="Delete" Margin="0,0,0,6" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
