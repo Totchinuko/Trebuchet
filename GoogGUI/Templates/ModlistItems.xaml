@@ -5,22 +5,21 @@
     <DataTemplate x:Key="ModlistItems">
         <Grid>
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="250" />
+                <ColumnDefinition Width="2*" />
                 <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="1*" />
             </Grid.ColumnDefinitions>
             <TextBlock VerticalAlignment="Center">
                     <Run Text="{Binding ModName, Mode=OneWay}" />
             </TextBlock>
-            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
-                <TextBlock>
-                    <Run Text="Author : "/>
-                    <Run Text="{Binding AuthorName, Mode=OneWay}" />
-                </TextBlock>
-            </StackPanel>
             <Border Grid.Column="1" Background="{Binding StatusColor}" ToolTip="{Binding StatusTooltip}" Margin="0,0,12,0" CornerRadius="3" Height="25" Width="25">
                 <Image Source="pack://application:,,,/GoogGui;component/Icons/File.png" Height="16" Width="16" />
             </Border>
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                <TextBlock>
+                    <Run Text="{Binding LastUpdate, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

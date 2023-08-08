@@ -9,7 +9,6 @@ namespace GoogGUI
 {
     internal class ModFile : INotifyPropertyChanged
     {
-        private string _authorName = string.Empty;
         private SteamPublishedFile? _file;
         private bool _fileExists = false;
         private bool _isID;
@@ -29,26 +28,26 @@ namespace GoogGUI
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public string AuthorName
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(_authorName))
-                    return _authorName;
-                if (_file != null)
-                    return _file.creator;
-                return "Unknown";
-            }
-            set
-            {
-                _authorName = value;
-                OnPropertyChanged("AuthorName");
-            }
-        }
-
         public bool IsID => _isID;
 
         public bool IsValid => _isValid;
+
+        public string LastUpdate
+        {
+            get
+            {
+                if (!_isID && !_isValid) return string.Empty;
+                if(!_isID)
+                {
+                    DateTime lastModified = _lastModified.ToLocalTime();
+                    return "Last Modified : " + lastModified.ToShortDateString() + " " + lastModified.ToShortTimeString();
+                }
+
+                if (_file == null) return "Loading...";
+                DateTime local = _lastUpdate.ToLocalTime();
+                return "Last Update : " + local.ToShortDateString() + " " + local.ToShortTimeString();
+            }
+        }
 
         public string Mod => _mod;
 

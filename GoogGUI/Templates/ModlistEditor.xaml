@@ -6,6 +6,7 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,0" Margin="0,0,0,12">
@@ -54,12 +55,7 @@
                                     VerticalAlignment="Top"
                                     Content="File"
                                     Command="{Binding ImportFromFileCommand}"/>
-                            <Button Style="{StaticResource IconButton}" 
-                                    VerticalAlignment="Top"
-                                    Content="URL"
-                                    Command="{Binding ImportFromURLCommand}"/>
                         </WrapPanel>
-
                     </Grid>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,3" VerticalAlignment="Top" Height="25" />
                     <Grid>
@@ -78,7 +74,19 @@
                     </Grid>
                 </WrapPanel>
             </Border>
-            <Border Grid.Row="1" Padding="0,12,0,0">
+            <Border Style="{StaticResource Panel}" Grid.Row="1" CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,8" Margin="0,0,0,12">
+                <Grid>
+                    <TextBlock Margin="0,-10,0,0" Text="Mod List URL" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                    <WrapPanel>
+                        <TextBox Text="{Binding ModlistURL, Mode=TwoWay, Delay=500, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0" Width="400" VerticalAlignment="Center" Height="25" VerticalContentAlignment="Center" ToolTip="Valid URL are either pointing to a steam collection or a json response/file" />
+                        <Button Style="{StaticResource ButtonIconGreen}" 
+                                    VerticalAlignment="Center"
+                                    Content="Fetch"
+                                    Command="{Binding FetchCommand}"/>                       
+                    </WrapPanel>
+                </Grid>
+            </Border>
+            <Border Grid.Row="2" Padding="0,12,0,0">
                 <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
             </Border>
         </Grid>            

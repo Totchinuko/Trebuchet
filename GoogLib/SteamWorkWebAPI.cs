@@ -22,6 +22,7 @@ namespace Goog
         public const string PublishedFileArg = "publishedfileids[{0}]";
         public const string PublishedFileCount = "itemcount";
         public const string PublishedFilesURL = "https://api.steampowered.com/ISteamRemoteStorage/GetPublishedFileDetails/v1/";
+        public const string SteamHost = "steamcommunity.com";
 
         #endregion constants
 
@@ -136,6 +137,34 @@ namespace Goog
 
             foreach (SteamPublishedFile file in response.response.publishedFileDetails)
                 manifest.TryAdd(file.publishedFileID, file);
+            return manifest;
+        }
+
+        public async Task<Dictionary<string, SteamCollectionDetails>> GetCollectionDetails(HashSet<string> IDs, CancellationToken token)
+        {
+            Dictionary<string, SteamCollectionDetails> manifest = new Dictionary<string, SteamCollectionDetails>(IDs.Count);
+            if (IDs.Count == 0) return manifest;
+
+            Dictionary<string, string> request = new Dictionary<string, string>
+            {
+                { PublishedCollectionCount, IDs.Count.ToString() }
+            };
+
+            int i = 0;
+            foreach (string id in IDs)
+            {
+                request.Add(string.Format(PublishedFileArg, i), id);
+                i++;
+            }
+
+            string json = await RequestPostAsync(PublishedCollectionURL, request, token);
+            SteamResponse<SteamCollectionDetailsResult>? response = JsonSerializer.Deserialize<SteamResponse<SteamCollectionDetailsResult>>(json, _jsonOptions);
+
+            if (response == null || response.response == null || response.response.collectionDetails == null)
+                throw new Exception("Could not parse reponse from steam api.");
+
+            foreach (SteamCollectionDetails collection in response.response.collectionDetails)
+                manifest.TryAdd(collection.publishedFileId, collection);
             return manifest;
         }
 
