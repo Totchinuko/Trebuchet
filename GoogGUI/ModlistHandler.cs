@@ -2,6 +2,7 @@
 using GoogLib;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
@@ -24,7 +25,7 @@ namespace GoogGUI
         private string _modlistURL = string.Empty;
         private Dictionary<string, SteamPublishedFile> _modManifests = new Dictionary<string, SteamPublishedFile>();
         private ModListProfile _profile = new ModListProfile();
-        private List<string> _profiles = new List<string>();
+        private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
         private CancellationTokenSource? _source;
@@ -91,7 +92,7 @@ namespace GoogGUI
             }
         }
 
-        public List<string> Profiles { get => _profiles; set => _profiles = value; }
+        public ObservableCollection<string> Profiles { get => _profiles; set => _profiles = value; }
 
         public ICommand RefreshManifestCommand => new SimpleCommand(OnRefreshManifest);
 
