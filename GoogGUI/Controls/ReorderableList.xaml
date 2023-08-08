@@ -11,44 +11,59 @@
         <ItemsControl ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Vertical">
-                        <Border Padding="8" 
-                                ToolTip="Drag to reorder"
-                                CornerRadius="3" 
-                                MouseDown="Item_MouseDown" 
-                                AllowDrop="True" 
-                                Drop="Item_Drop" 
-                                DragEnter="Item_DragEnter"
-                                DragLeave="Item_DragLeave"
-                                Margin="0">
-                            <Border.Style>
-                                <Style TargetType="Border">
-                                    <Setter Property="Background" Value="{StaticResource GPanel}" />
-                                    <Setter Property="Cursor" Value="Hand" />
-                                    <Style.Triggers>
-                                        <Trigger Property="goog:GuiExtensions.IsDragging" Value="True">
-                                            <Setter Property="Opacity" Value="0.6" />
-                                        </Trigger>
-                                        <Trigger Property="goog:GuiExtensions.IsDraggedOver" Value="True">
-                                            <Setter Property="Background" Value="{StaticResource GDimBlue}" />
-                                            <Setter Property="Cursor" Value="None" />
-                                        </Trigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Border.Style>
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="auto" />
-                                </Grid.ColumnDefinitions>
-                                <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" />
-                                <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding RemoveCommand, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" CommandParameter="{Binding .}">
-                                    <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
-                                </Button>
-                            </Grid>
-                        </Border>
-                        <Border AllowDrop="True" Height="12" Background="{StaticResource GBackground}" Opacity="0" />
-                    </StackPanel>
+                    <Border Name="MainRowBorder" 
+                            DragEnter="Item_DragEnter"
+                            DragLeave="Item_DragLeave"
+                            Drop="Item_Drop" 
+                            AllowDrop="True">
+                        <StackPanel Orientation="Vertical">
+                            <Border x:Name="GhostRow" CornerRadius="3" Background="Black" Opacity="0" Height="40">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <MultiDataTrigger>
+                                                <MultiDataTrigger.Conditions>
+                                                    <Condition Binding="{Binding (goog:GuiExtensions.IsDraggedOver), ElementName=MainRowBorder}" Value="True"/>
+                                                    <Condition Binding="{Binding (goog:GuiExtensions.IsDragging), ElementName=RowItem}" Value="False"/>
+                                                </MultiDataTrigger.Conditions>
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </MultiDataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                            </Border>
+                            <Border AllowDrop="True" Background="#FF000000" Opacity="0" Height="12"/>
+                            <Border Padding="8" 
+                                    x:Name="RowItem"
+                                    ToolTip="Drag to reorder"
+                                    CornerRadius="3" 
+                                    MouseDown="Item_MouseDown" 
+                                    AllowDrop="True">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource GPanel}" />
+                                        <Setter Property="Cursor" Value="Hand" />
+                                        <Style.Triggers>
+                                            <Trigger Property="goog:GuiExtensions.IsDragging" Value="True">
+                                                <Setter Property="Opacity" Value="0.5" />
+                                            </Trigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="auto" />
+                                    </Grid.ColumnDefinitions>
+                                    <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" />
+                                    <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding RemoveCommand, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" CommandParameter="{Binding .}">
+                                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
+                                    </Button>
+                                </Grid>
+                            </Border>
+                        </StackPanel>
+                    </Border>
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>

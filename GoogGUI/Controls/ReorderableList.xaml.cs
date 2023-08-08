@@ -1,5 +1,7 @@
-﻿using System.Collections;
+﻿using System;
+using System.Collections;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -82,9 +84,11 @@ namespace GoogGUI.Controls
             int removedIdx = ItemsSource.IndexOf(droppedData);
             int targetIdx = ItemsSource.IndexOf(target);
 
+            if (removedIdx == targetIdx) return;
+
             if (removedIdx < targetIdx)
             {
-                ItemsSource.Insert(targetIdx + 1, droppedData);
+                ItemsSource.Insert(targetIdx, droppedData);
                 ItemsSource.RemoveAt(removedIdx);
             }
             else
@@ -105,7 +109,9 @@ namespace GoogGUI.Controls
             {
                 e.Handled = true;
                 _draggedObject = dragged;
+                GuiExtensions.SetIsDragging(dragged, true);
                 DragDrop.DoDragDrop(dragged, dragged.DataContext, DragDropEffects.Move);
+                GuiExtensions.SetIsDragging(dragged, false);
             }
         }
 
