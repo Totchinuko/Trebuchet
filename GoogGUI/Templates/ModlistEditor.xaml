@@ -49,7 +49,7 @@
                         <WrapPanel Orientation="Horizontal">
                             <Button Style="{StaticResource IconButton}" 
                                     VerticalAlignment="Top"
-                                    Content="Clipboard"
+                                    Content="Paste"
                                     Command="{Binding ImportFromTextCommand}"/>
                             <Button Style="{StaticResource IconButton}" 
                                     VerticalAlignment="Top"
