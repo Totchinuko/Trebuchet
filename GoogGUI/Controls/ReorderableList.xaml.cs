@@ -113,5 +113,27 @@ namespace GoogGUI.Controls
         {
             ItemsSource.Remove(obj);
         }
+
+        private void ScrollArea_DragOver(object sender, DragEventArgs e)
+        {
+            ScrollViewer container = (ScrollViewer)sender;
+
+            if (container == null) return;
+
+            double tolerance = 60;
+            double verticalPos = e.GetPosition(container).Y;
+            double offset = 20;
+
+            if (verticalPos < tolerance) // Top of visible list? 
+            {
+                //Scroll up
+                container.ScrollToVerticalOffset(container.VerticalOffset - offset);
+            }
+            else if (verticalPos > container.ActualHeight - tolerance) //Bottom of visible list? 
+            {
+                //Scroll down
+                container.ScrollToVerticalOffset(container.VerticalOffset + offset);
+            }
+        }
     }
 }

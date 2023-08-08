@@ -7,45 +7,50 @@
              xmlns:goog="clr-namespace:GoogGUI"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
-    <ItemsControl ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}">
-        <ItemsControl.ItemTemplate>
-            <DataTemplate>
-                <Border Padding="8" 
-                        ToolTip="Drag to reorder"
-                        CornerRadius="3" 
-                        MouseDown="Item_MouseDown" 
-                        AllowDrop="True" 
-                        Drop="Item_Drop" 
-                        DragEnter="Item_DragEnter"
-                        DragLeave="Item_DragLeave"
-                        Margin="0,0,0,12">
-                    <Border.Style>
-                        <Style TargetType="Border">
-                            <Setter Property="Background" Value="{StaticResource GPanel}" />
-                            <Setter Property="Cursor" Value="Hand" />
-                            <Style.Triggers>
-                                <Trigger Property="goog:GuiExtensions.IsDragging" Value="True">
-                                    <Setter Property="Opacity" Value="0.6" />
-                                </Trigger>
-                                <Trigger Property="goog:GuiExtensions.IsDraggedOver" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource GDimBlue}" />
-                                    <Setter Property="Cursor" Value="None" />
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="auto" />
-                        </Grid.ColumnDefinitions>
-                        <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" />
-                        <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding RemoveCommand, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" CommandParameter="{Binding .}">
-                            <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
-                        </Button>
-                    </Grid>
-                </Border>
-            </DataTemplate>
-        </ItemsControl.ItemTemplate>
-    </ItemsControl>
+    <ScrollViewer x:Name="ScrollArea" DragOver="ScrollArea_DragOver">
+        <ItemsControl ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}">
+            <ItemsControl.ItemTemplate>
+                <DataTemplate>
+                    <StackPanel Orientation="Vertical">
+                        <Border Padding="8" 
+                                ToolTip="Drag to reorder"
+                                CornerRadius="3" 
+                                MouseDown="Item_MouseDown" 
+                                AllowDrop="True" 
+                                Drop="Item_Drop" 
+                                DragEnter="Item_DragEnter"
+                                DragLeave="Item_DragLeave"
+                                Margin="0">
+                            <Border.Style>
+                                <Style TargetType="Border">
+                                    <Setter Property="Background" Value="{StaticResource GPanel}" />
+                                    <Setter Property="Cursor" Value="Hand" />
+                                    <Style.Triggers>
+                                        <Trigger Property="goog:GuiExtensions.IsDragging" Value="True">
+                                            <Setter Property="Opacity" Value="0.6" />
+                                        </Trigger>
+                                        <Trigger Property="goog:GuiExtensions.IsDraggedOver" Value="True">
+                                            <Setter Property="Background" Value="{StaticResource GDimBlue}" />
+                                            <Setter Property="Cursor" Value="None" />
+                                        </Trigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Border.Style>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+                                <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" />
+                                <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding RemoveCommand, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" CommandParameter="{Binding .}">
+                                    <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                        <Border AllowDrop="True" Height="12" Background="{StaticResource GBackground}" Opacity="0" />
+                    </StackPanel>
+                </DataTemplate>
+            </ItemsControl.ItemTemplate>
+        </ItemsControl>
+    </ScrollViewer>
 </UserControl>
