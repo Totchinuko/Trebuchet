@@ -32,11 +32,41 @@
                             local:GuiExtensions.IconSize="16"
                             Content="Workshop"
                             Command="{Binding ExploreWorkshopCommand}"/>
+                    <MenuItem x:Name="AddPresetButton" Command="{Binding MenuOpenCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}">
+                        <MenuItem.Icon>
+                            <Image Source="pack://application:,,,/GoogGui;component/Icons/Upload.png" Height="16"/>
+                        </MenuItem.Icon>
+                        <MenuItem.Header>
+                            <TextBlock Text="Import/Export"/>
+                        </MenuItem.Header>
+                        <MenuItem.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Style="{StaticResource HeaderMI}">
+                                    <MenuItem.Header>
+                                        <TextBlock Text="Import" FontWeight="Bold" Foreground="{StaticResource GBlue}" />
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Header="File (Json/Txt)" Style="{StaticResource NoIconMI}"/>
+                                <MenuItem Header="Text (Json/Txt)" Style="{StaticResource NoIconMI}"/>
+                                <MenuItem Header="URL" Style="{StaticResource NoIconMI}"/>
+                                <MenuItem Style="{StaticResource HeaderMI}">
+                                    <MenuItem.Header>
+                                        <TextBlock Text="Export" FontWeight="Bold" Foreground="{StaticResource GBlue}" />
+                                    </MenuItem.Header>
+                                </MenuItem>
+                                <MenuItem Header="File (Json/Txt)" Style="{StaticResource NoIconMI}"/>
+                                <MenuItem Header="Text (Json/Txt)" Style="{StaticResource NoIconMI}"/>
+                            </ContextMenu>
+                        </MenuItem.ContextMenu>
+                    </MenuItem>
                 </WrapPanel>
             </Border>
             <Border Grid.Row="1" Padding="0,12,0,0">
                 <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
             </Border>
+
+            
+
         </Grid>            
     </DataTemplate>
 </ResourceDictionary>

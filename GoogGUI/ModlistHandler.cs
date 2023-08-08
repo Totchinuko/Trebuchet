@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Threading;
 
@@ -40,6 +41,7 @@ namespace GoogGUI
             DuplicateModlistCommand = new SimpleCommand(OnModlistDuplicate);
             DownloadlistCommand = new SimpleCommand(OnModlistDownload);
             RefreshModlistCommand = new SimpleCommand(OnModlistRefresh);
+            MenuOpenCommand = new SimpleCommand(OnMenuOpen);
 
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
@@ -47,6 +49,12 @@ namespace GoogGUI
             RefreshProfiles();
             _selectedModlist = _config.CurrentModlistProfile;
             LoadModlistProfile();
+        }
+
+        private void OnMenuOpen(object? obj)
+        {
+            if (obj is MenuItem menuItem)
+                menuItem.ContextMenu.IsOpen = !menuItem.ContextMenu.IsOpen;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -66,6 +74,7 @@ namespace GoogGUI
         public ICommand ImportFromTextCommand { get; private set; }
 
         public ICommand ImportFromURLCommand { get; private set; }
+        public ICommand MenuOpenCommand { get; private set; }
 
         public bool IsLoading => _source != null;
 

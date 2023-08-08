@@ -1,9 +1,13 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:GoogGUI">
-    <SolidColorBrush x:Key="GBackground" Color="#FF202020" />
-    <SolidColorBrush x:Key="GPanel" Color="#11FFFFFF" />
-    <SolidColorBrush x:Key="GDarkPanel" Color="#19000000" />
+    <Color x:Key="CBackground">#FF202020</Color>
+    <Color x:Key="CPanel">#11FFFFFF</Color>
+    <Color x:Key="CDarkPanel">#19000000</Color>
+    <Color x:Key="CDimBlue">#AA3a8eda</Color>
+    <SolidColorBrush x:Key="GBackground" Color="{StaticResource CBackground}" />
+    <SolidColorBrush x:Key="GPanel" Color="{StaticResource CPanel}" />
+    <SolidColorBrush x:Key="GDarkPanel" Color="{StaticResource CDarkPanel}" />
     <SolidColorBrush x:Key="GDimGray" Color="#AA595959" />
     <SolidColorBrush x:Key="GGray" Color="#FF595959" />
     <SolidColorBrush x:Key="GDimRed" Color="#AAc42b1c" />
@@ -12,8 +16,8 @@
     <SolidColorBrush x:Key="GGreen" Color="#FF5a9b40" />
     <SolidColorBrush x:Key="GDimYellow" Color="#AAffb300" />
     <SolidColorBrush x:Key="GYellow" Color="#FFffb300" />
-    <SolidColorBrush x:Key="GDimBlue" Color="#AA3a8eda" />
-    <SolidColorBrush x:Key="GBlue" Color="#FF3a8eda" />
+    <SolidColorBrush x:Key="GDimBlue" Color="{StaticResource CDimBlue}" />
+    <SolidColorBrush x:Key="GBlue" Color="#FF3a8eda" />  
 
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="White" />
