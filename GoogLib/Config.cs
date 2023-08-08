@@ -156,23 +156,18 @@ namespace Goog
             return true;
         }
 
-        public int ResolveModsPath(List<string> modlist, out List<string> resolved, out List<string> errors)
+        public void ResolveModsPath(List<string> modlist, out List<string> result, out List<string> errors)
         {
-            resolved = new List<string>();
+            result = new List<string>();
             errors = new List<string>();
 
-            int count = 0;
             foreach (string mod in modlist)
             {
                 string path = mod;
-                if (ResolveMod(ref path))
-                    count++;
-                else
+                if (!ResolveMod(ref path))
                     errors.Add(path);
-                resolved.Add(path);
+                result.Add(path);
             }
-
-            return count;
         }
 
         public bool TryGetFirstProfile(out string profileName)

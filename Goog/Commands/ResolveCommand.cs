@@ -28,19 +28,19 @@ namespace Goog.Commands
 
             ModListProfile modlistProfile = Tools.LoadFile<ModListProfile>(modlistFile);
 
-            int count = config.ResolveModsPath(modlistProfile.Modlist, out List<string> modlist, out List<string> errors);
+            config.ResolveModsPath(modlistProfile.Modlist, out List<string> modlist, out List<string> errors);
             modlistProfile.Modlist = modlist;
 
             modlistProfile.SaveFile();
 
-            if (count != modlist.Count)
+            if (errors.Count > 0)
             {
                 Tools.WriteColoredLine("These mods could not be resolved:", ConsoleColor.Cyan);
                 foreach(string mod in errors)
                     Tools.WriteColoredLine(mod, ConsoleColor.Yellow);
             }
 
-            Tools.WriteColoredLine($"Resolver {count} mod path over {modlist.Count}", ConsoleColor.Cyan);
+            Tools.WriteColoredLine($"Resolver {modlist.Count - errors.Count} mod path over {modlist.Count}", ConsoleColor.Cyan);
         }
     }
 }

@@ -48,19 +48,6 @@ namespace GoogLib
             }
         }
 
-        public void ExportModList(string exportPath)
-        {
-            if (string.IsNullOrEmpty(exportPath))
-                throw new ArgumentException("Export path is invalid");
-
-            FileInfo exportFile = new FileInfo(exportPath);
-            if (exportFile.Directory == null || !exportFile.Directory.Exists)
-                throw new ArgumentException("Target directory does not exists");
-
-            string json = JsonSerializer.Serialize(Modlist);
-            File.WriteAllText(exportFile.FullName, json);
-        }
-
         public List<string> GetModIDList()
         {
             List<string> list = new List<string>();
@@ -77,22 +64,21 @@ namespace GoogLib
             return string.Join("\r\n", Modlist);
         }
 
-        public bool IsValidModList()
-        {
-            foreach (string mod in Modlist)
-            {
-                if (!File.Exists(mod))
-                    return false;
-            }
-            return true;
-        }
-
         public void SetModList(string modlist)
         {
             Modlist = modlist.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
         }
 
-        public bool TryParseModID(string mod, out string id)
+        public static void TryParseModList(ref List<string> modlist)
+        {
+            for(int i = 0; i < modlist.Count; i++)
+            {
+                if (TryParseModID(modlist[i], out string id))
+                    modlist[i] = id;
+            }
+        }
+
+        public static bool TryParseModID(string mod, out string id)
         {
             id = string.Empty;
             if (long.TryParse(mod, out _))
