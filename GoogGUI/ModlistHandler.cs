@@ -2,17 +2,19 @@
 using GoogLib;
 using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using System.Windows.Forms.VisualStyles;
 using System.Windows.Input;
-using System.Windows.Threading;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace GoogGUI
 {
@@ -31,18 +33,6 @@ namespace GoogGUI
 
         public ModlistHandler(Config config)
         {
-            RefreshManifestCommand = new SimpleCommand(OnRefreshManifest);
-            ImportFromFileCommand = new SimpleCommand(OnImportFromFile);
-            ImportFromTextCommand = new SimpleCommand(OnImportFromText);
-            ImportFromURLCommand = new SimpleCommand(OnExploreWorkshop);
-            ExploreWorkshopCommand = new SimpleCommand(OnExploreWorkshop);
-            CreateModlistCommand = new SimpleCommand(OnModlistCreate);
-            DeleteModlistCommand = new SimpleCommand(OnModlistDelete);
-            DuplicateModlistCommand = new SimpleCommand(OnModlistDuplicate);
-            DownloadlistCommand = new SimpleCommand(OnModlistDownload);
-            RefreshModlistCommand = new SimpleCommand(OnModlistRefresh);
-            MenuOpenCommand = new SimpleCommand(OnMenuOpen);
-
             _config = config;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
 
@@ -50,34 +40,35 @@ namespace GoogGUI
             SelectedModlist = _config.CurrentModlistProfile;
         }
 
-        private void OnMenuOpen(object? obj)
-        {
-            if (obj is MenuItem menuItem)
-                menuItem.ContextMenu.IsOpen = !menuItem.ContextMenu.IsOpen;
-        }
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public ICommand CreateModlistCommand { get; private set; }
+        public ICommand CreateModlistCommand => new SimpleCommand(OnModlistCreate);
 
-        public ICommand DeleteModlistCommand { get; private set; }
+        public ICommand DeleteModlistCommand => new SimpleCommand(OnModlistDelete);
 
-        public ICommand DownloadlistCommand { get; private set; }
+        public ICommand DownloadlistCommand => new SimpleCommand(OnModlistDownload);
 
-        public ICommand DuplicateModlistCommand { get; private set; }
+        public ICommand DuplicateModlistCommand => new SimpleCommand(OnModlistDuplicate);
 
-        public ICommand ExploreWorkshopCommand { get; private set; }
+        public ICommand ExploreLocalCommand => new SimpleCommand(OnExploreLocal);
 
-        public ICommand ImportFromFileCommand { get; private set; }
+        public ICommand ExploreWorkshopCommand => new SimpleCommand(OnExploreWorkshop);
 
-        public ICommand ImportFromTextCommand { get; private set; }
+        public ICommand ExportToJsonCommand => new SimpleCommand(OnExportToJson);
 
-        public ICommand ImportFromURLCommand { get; private set; }
-        public ICommand MenuOpenCommand { get; private set; }
+        public ICommand ExportToTxtCommand => new SimpleCommand(OnExportToTxt);
+
+        public ICommand ImportFromFileCommand => new SimpleCommand(OnImportFromFile);
+
+        public ICommand ImportFromTextCommand => new SimpleCommand(OnImportFromText);
+
+        public ICommand ImportFromURLCommand => new SimpleCommand(OnExploreWorkshop);
 
         public bool IsLoading => _source != null;
 
         public object ItemTemplate => Application.Current.Resources["ModlistItems"];
+
+        public ICommand MenuOpenCommand => new SimpleCommand(OnMenuOpen);
 
         public TrulyObservableCollection<ModFile> Modlist
         {
@@ -91,9 +82,9 @@ namespace GoogGUI
 
         public List<string> Profiles { get => _profiles; set => _profiles = value; }
 
-        public ICommand RefreshManifestCommand { get; private set; }
+        public ICommand RefreshManifestCommand => new SimpleCommand(OnRefreshManifest);
 
-        public ICommand RefreshModlistCommand { get; private set; }
+        public ICommand RefreshModlistCommand => new SimpleCommand(OnModlistRefresh);
 
         public string SelectedModlist
         {
@@ -191,6 +182,23 @@ namespace GoogGUI
             Application.Current.Dispatcher.Invoke(RefreshAuthorData);
         }
 
+        private void OnExploreLocal(object? obj)
+        {
+            System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
+            dialog.DefaultExt = FileType.Pak.extention;
+            dialog.AddExtension = true;
+            dialog.FileName = "ModArchive";
+            dialog.Filter = FileType.Pak.Filter;
+            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog(NativeWindow.GetIWin32Window(Application.Current.MainWindow));
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                var path = Path.GetFullPath(dialog.FileName);
+                var exists = GetFileInfo(path, out DateTime lastModified);
+                _modlist.Add(new ModFile(path, exists, lastModified));
+            }
+        }
+
         private void OnExploreWorkshop(object? obj)
         {
             if (_searchWindow != null) return;
@@ -200,14 +208,98 @@ namespace GoogGUI
             _searchWindow.Show();
         }
 
+        private void OnExportToJson(object? obj)
+        {
+            string json = JsonSerializer.Serialize(_profile.Modlist);
+            new ModlistTextImport(json, true, FileType.Json).ShowDialog();
+        }
+
+        private void OnExportToTxt(object? obj)
+        {
+            _config.ResolveModsPath(_profile.Modlist, out List<string> results, out List<string> error);
+            if (error.Count > 0)
+                new MessageModal("Invalid", "Some mods from your list are missing and could not be resolved").ShowDialog();
+            new ModlistTextImport(string.Join("\r\n", results), true, FileType.Txt).ShowDialog();
+        }
+
         private void OnImportFromFile(object? obj)
         {
-            throw new NotImplementedException();
+            System.Windows.Forms.SaveFileDialog dialog = new System.Windows.Forms.SaveFileDialog();
+            dialog.DefaultExt = FileType.Json.extention;
+            dialog.AddExtension = true;
+            dialog.FileName = "Modlist";
+            dialog.Filter = string.Join("|", new string[] { FileType.Json.Filter, FileType.Txt.Filter });
+            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+            System.Windows.Forms.DialogResult result = dialog.ShowDialog(NativeWindow.GetIWin32Window(Application.Current.MainWindow));
+            if (result == System.Windows.Forms.DialogResult.OK)
+            {
+                var path = Path.GetFullPath(dialog.FileName);
+                var ext = Path.GetExtension(dialog.FileName);
+                if (ext == FileType.Json.extention)
+                    OnImportFromJsonFile(File.ReadAllText(path));
+                else if (ext == FileType.Txt.extention)
+                    OnImportFromTxtFile(File.ReadAllText(path));
+                else
+                    new ErrorModal("Wrong Type", "The type of file provided is unsupported.").ShowDialog();
+            }
+        }
+
+        private void OnImportFromJsonFile(string json)
+        {
+            List<string>? modlist = JsonSerializer.Deserialize<List<string>>(json);
+            if (modlist == null)
+            {
+                new ErrorModal("Invalid Json", "Loaded json could not be parsed.");
+                return;
+            }
+
+            _profile.Modlist = modlist;
+            _profile.SaveFile();
+            LoadModlist();
         }
 
         private void OnImportFromText(object? obj)
         {
-            throw new NotImplementedException();
+            ModlistTextImport import = new ModlistTextImport(string.Empty, false, FileType.Json);
+            import.ShowDialog();
+
+            if (import.Canceled) return;
+
+            string text = import.Text;
+            List<string>? modlist;
+            try
+            {
+                modlist = JsonSerializer.Deserialize<List<string>>(text);
+                if (modlist == null)
+                    throw new Exception("This is not Json");
+            }
+            catch
+            {
+                modlist = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+                ModListProfile.TryParseModList(ref modlist);
+            }
+
+            if (modlist == null)
+            {
+                new ErrorModal("Invalid Modlist", "The modlist could not be parsed.");
+                return;
+            }
+
+            if (import.Append)
+                _profile.Modlist.AddRange(modlist);
+            else
+                _profile.Modlist = modlist;
+            _profile.SaveFile();
+            LoadModlist();
+        }
+
+        private void OnImportFromTxtFile(string text)
+        {
+            List<string> modlist = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+            ModListProfile.TryParseModList(ref modlist);
+            _profile.Modlist = modlist;
+            _profile.SaveFile();
+            LoadModlist();
         }
 
         private void OnManifestsLoaded(Task<Dictionary<string, SteamPublishedFile>> task)
@@ -229,6 +321,12 @@ namespace GoogGUI
                 _modManifests[data.Key] = data.Value;
 
             Application.Current.Dispatcher.Invoke(RefreshModData);
+        }
+
+        private void OnMenuOpen(object? obj)
+        {
+            if (obj is MenuItem menuItem)
+                menuItem.ContextMenu.IsOpen = !menuItem.ContextMenu.IsOpen;
         }
 
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
@@ -329,11 +427,6 @@ namespace GoogGUI
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;
-        }
-
-        private void OnModlistDuplicated(string obj)
-        {
-            throw new NotImplementedException();
         }
 
         private void OnModlistRefresh(object? obj)

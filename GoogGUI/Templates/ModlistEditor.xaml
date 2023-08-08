@@ -8,66 +8,79 @@
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8" Margin="0,0,0,12">
+            <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,0" Margin="0,0,0,12">
                 <WrapPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding CreateModlistCommand}" ToolTip="Create" Margin="0,0,6,0" VerticalAlignment="Center">
+                    <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding CreateModlistCommand}" ToolTip="Create" Margin="0,0,6,0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Add.png" Width="16" Height="16" />
                     </Button>
-                    <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" VerticalAlignment="Center" Height="25" />
-                    <Button Style="{StaticResource ButtonIconRed}" Command="{Binding DeleteModlistCommand}" ToolTip="Delete" Margin="0" VerticalAlignment="Center">
+                    <Border VerticalAlignment="Top" Height="35">
+                        <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="25" VerticalAlignment="Center" />
+                    </Border>
+                    <Button Style="{StaticResource ButtonIconRed}" Command="{Binding DeleteModlistCommand}" ToolTip="Delete" Margin="0,0,0,6" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
                     </Button>
-                    <Button Style="{StaticResource IconButton}" Command="{Binding DuplicateModlistCommand}" ToolTip="Duplicate" Margin="0" VerticalAlignment="Center">
+                    <Button Style="{StaticResource IconButton}" Command="{Binding DuplicateModlistCommand}" ToolTip="Duplicate" Margin="0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Duplicate.png" Width="16" Height="16" />
                     </Button>
-                    <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding RefreshModlistCommand}" ToolTip="Refresh mod infos" Margin="0" VerticalAlignment="Center">
+                    <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding RefreshModlistCommand}" ToolTip="Refresh mod infos" Margin="0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Reset.png" Width="16" Height="16" />
                     </Button>
-                    <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding DownloadlistCommand}" ToolTip="Update Mods" Margin="0" VerticalAlignment="Center">
+                    <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding DownloadlistCommand}" ToolTip="Update Mods" Margin="0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Download.png" Width="16" Height="16" />
                     </Button>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,0" Height="25" />
-                    <Button Style="{StaticResource ButtonTab}" 
-                            local:GuiExtensions.Icon="pack://application:,,,/GoogGui;component/Icons/Steam.png"  
-                            local:GuiExtensions.IconSize="16"
-                            VerticalAlignment="Center"
-                            Content="Workshop"
-                            Command="{Binding ExploreWorkshopCommand}"/>
-                    <MenuItem x:Name="AddPresetButton" Command="{Binding MenuOpenCommand}" CommandParameter="{Binding RelativeSource={RelativeSource Self}}" VerticalAlignment="Center">
-                        <MenuItem.Icon>
-                            <Image Source="pack://application:,,,/GoogGui;component/Icons/Upload.png" Height="16"/>
-                        </MenuItem.Icon>
-                        <MenuItem.Header>
-                            <TextBlock Text="Import/Export"/>
-                        </MenuItem.Header>
-                        <MenuItem.ContextMenu>
-                            <ContextMenu>
-                                <MenuItem Style="{StaticResource HeaderMI}">
-                                    <MenuItem.Header>
-                                        <TextBlock Text="Import" FontWeight="Bold" />
-                                    </MenuItem.Header>
-                                </MenuItem>
-                                <MenuItem Header="File (Json/Txt)" Style="{StaticResource NoIconMI}"/>
-                                <MenuItem Header="Text (Json/Txt)" Style="{StaticResource NoIconMI}"/>
-                                <MenuItem Header="URL" Style="{StaticResource NoIconMI}"/>
-                                <MenuItem Style="{StaticResource HeaderMI}">
-                                    <MenuItem.Header>
-                                        <TextBlock Text="Export" FontWeight="Bold" />
-                                    </MenuItem.Header>
-                                </MenuItem>
-                                <MenuItem Header="File (Json/Txt)" Style="{StaticResource NoIconMI}"/>
-                                <MenuItem Header="Text (Json/Txt)" Style="{StaticResource NoIconMI}"/>
-                            </ContextMenu>
-                        </MenuItem.ContextMenu>
-                    </MenuItem>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,3" Height="25" VerticalAlignment="Top"  />
+                    <Grid>
+                        <TextBlock Margin="0,-10,0,0" Text="Add Mod" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource IconButton}" 
+                                    VerticalAlignment="Top"
+                                    Content="Workshop"
+                                    Command="{Binding ExploreWorkshopCommand}"/>
+                            <Button Style="{StaticResource IconButton}" 
+                                    VerticalAlignment="Top"
+                                    Content="Local"
+                                    Command="{Binding ExploreLocalCommand}"/>
+                        </WrapPanel>
+                    </Grid>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,3" VerticalAlignment="Top" Height="25" />
+                    <Grid>
+                        <TextBlock Margin="0,-10,0,0" Text="Import" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource IconButton}" 
+                                    VerticalAlignment="Top"
+                                    Content="Clipboard"
+                                    Command="{Binding ImportFromTextCommand}"/>
+                            <Button Style="{StaticResource IconButton}" 
+                                    VerticalAlignment="Top"
+                                    Content="File"
+                                    Command="{Binding ImportFromFileCommand}"/>
+                            <Button Style="{StaticResource IconButton}" 
+                                    VerticalAlignment="Top"
+                                    Content="URL"
+                                    Command="{Binding ImportFromURLCommand}"/>
+                        </WrapPanel>
+
+                    </Grid>
+                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,3" VerticalAlignment="Top" Height="25" />
+                    <Grid>
+                        <TextBlock Margin="0,-10,0,0" Text="Export" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                        <WrapPanel Orientation="Horizontal">
+                            <Button Style="{StaticResource IconButton}" 
+                                    VerticalAlignment="Top"
+                                    Content="Json"
+                                    Command="{Binding ExportToJsonCommand}"/>
+                            <Button Style="{StaticResource IconButton}" 
+                                    VerticalAlignment="Top"
+                                    Content="Txt"
+                                    Command="{Binding ExportToTxtCommand}"/>
+                        </WrapPanel>
+
+                    </Grid>
                 </WrapPanel>
             </Border>
             <Border Grid.Row="1" Padding="0,12,0,0">
                 <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
             </Border>
-
-            
-
         </Grid>            
     </DataTemplate>
 </ResourceDictionary>

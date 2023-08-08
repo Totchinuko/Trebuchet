@@ -30,6 +30,7 @@
                 <ResourceDictionary Source="Templates\ModlistEditor.xaml" />
                 <ResourceDictionary Source="Templates\ModlistItems.xaml" />
                 <ResourceDictionary Source="Templates\ChooseNameModal.xaml" />
+                <ResourceDictionary Source="Templates\ModlistTextImport.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
