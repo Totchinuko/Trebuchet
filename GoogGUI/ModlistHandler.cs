@@ -130,7 +130,7 @@ namespace GoogGUI
 
             _source = new CancellationTokenSource();
             OnPropertyChanged("IsLoading");
-            List<string> requested = new List<string>();
+            HashSet<string> requested = new HashSet<string>();
             foreach (ModFile file in _modlist)
                 if (file.IsID && !_modManifests.ContainsKey(file.Mod))
                     requested.Add(file.Mod);
@@ -148,7 +148,7 @@ namespace GoogGUI
                 if (file.PublishedFile != null && !string.IsNullOrEmpty(file.AuthorName))
                     requested.Add(file.PublishedFile.creator);
 
-            Task.Run(() => _api.ExtractUserNames(requested.ToList(), _source.Token)).ContinueWith(OnAuthorsLoaded);
+            Task.Run(() => _api.ExtractUserNames(requested, _source.Token)).ContinueWith(OnAuthorsLoaded);
         }
 
         private void LoadModlist()

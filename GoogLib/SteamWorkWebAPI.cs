@@ -96,7 +96,7 @@ namespace Goog
             return name;
         }
 
-        public async Task<Dictionary<string, string>> ExtractUserNames(List<string> steamUserIDs, CancellationToken token)
+        public async Task<Dictionary<string, string>> ExtractUserNames(HashSet<string> steamUserIDs, CancellationToken token)
         {
             Dictionary<string, string> results = new Dictionary<string, string>();
             if (steamUserIDs.Count == 0) return results;
@@ -111,7 +111,7 @@ namespace Goog
             return results;
         }
 
-        public async Task<Dictionary<string, SteamPublishedFile>> GetPublishedFiles(List<string> IDs, CancellationToken token)
+        public async Task<Dictionary<string, SteamPublishedFile>> GetPublishedFiles(HashSet<string> IDs, CancellationToken token)
         {
             Dictionary<string, SteamPublishedFile> manifest = new Dictionary<string, SteamPublishedFile>(IDs.Count);
             if (IDs.Count == 0) return manifest;
@@ -121,8 +121,12 @@ namespace Goog
                 { PublishedFileCount, IDs.Count.ToString() }
             };
 
-            for (int i = 0; i < IDs.Count; i++)
-                request.Add(string.Format(PublishedFileArg, i), IDs[i]);
+            int i = 0;
+            foreach(string id in IDs)
+            {
+                request.Add(string.Format(PublishedFileArg, i), id);
+                i++;
+            }
 
             string json = await RequestPostAsync(PublishedFilesURL, request, token);
             SteamResponse<SteamPublishedFilesResult>? response = JsonSerializer.Deserialize<SteamResponse<SteamPublishedFilesResult>>(json, _jsonOptions);
@@ -131,7 +135,7 @@ namespace Goog
                 throw new Exception("Could not parse reponse from steam api.");
 
             foreach (SteamPublishedFile file in response.response.publishedFileDetails)
-                manifest.Add(file.publishedFileID, file);
+                manifest.TryAdd(file.publishedFileID, file);
             return manifest;
         }
 
