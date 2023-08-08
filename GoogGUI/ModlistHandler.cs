@@ -23,7 +23,7 @@ namespace GoogGUI
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
         private Dictionary<string, SteamPublishedFile> _modManifests = new Dictionary<string, SteamPublishedFile>();
         private ModListProfile _profile = new ModListProfile();
-        private ObservableCollection<string> _profiles = new ObservableCollection<string>();
+        private List<string> _profiles = new List<string>();
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
         private CancellationTokenSource? _source;
@@ -47,8 +47,7 @@ namespace GoogGUI
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
 
             RefreshProfiles();
-            _selectedModlist = _config.CurrentModlistProfile;
-            LoadModlistProfile();
+            SelectedModlist = _config.CurrentModlistProfile;
         }
 
         private void OnMenuOpen(object? obj)
@@ -90,7 +89,7 @@ namespace GoogGUI
             }
         }
 
-        public ObservableCollection<string> Profiles { get => _profiles; set => _profiles = value; }
+        public List<string> Profiles { get => _profiles; set => _profiles = value; }
 
         public ICommand RefreshManifestCommand { get; private set; }
 
