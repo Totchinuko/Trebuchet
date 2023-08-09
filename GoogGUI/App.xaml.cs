@@ -28,6 +28,10 @@ namespace GoogGUI
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(OnUnhandledException);
             System.Windows.Forms.Application.ThreadException += new ThreadExceptionEventHandler(OnApplicationThreadException);
             Current.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(OnDispatcherUnhandledException);
+
+            TestliveModal modal = new TestliveModal();
+            Current.MainWindow = modal.Window;
+            modal.ShowDialog();
         }
 
         private void OnApplicationThreadException(object sender, ThreadExceptionEventArgs e)

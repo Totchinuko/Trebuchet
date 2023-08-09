@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
@@ -40,13 +41,21 @@ namespace GoogGUI
         private void OnLiveClicked(object? obj)
         {
             _madeASelection = true;
-            _window.Close();
+            OpenApp();
         }
 
         private void OnTestLiveClicked(object? obj)
         {
             _madeASelection = true;
             _testlive = true;
+            OpenApp();
+        }
+
+        private void OpenApp()
+        {
+            MainWindow mainWindow = new MainWindow(Testlive);
+            Application.Current.MainWindow = mainWindow;
+            mainWindow.Show();
             _window.Close();
         }
     }

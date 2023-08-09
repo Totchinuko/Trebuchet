@@ -15,12 +15,9 @@ namespace GoogGUI
         private GoogApp? _app;
         private bool _shown;
 
-        public MainWindow()
+        public MainWindow(bool testlive)
         {
-            var modal = new TestliveModal();
-            modal.ShowDialog();
-            _app = new GoogApp(modal.Testlive);
-
+            _app = new GoogApp(testlive);
             InitializeComponent();
             DataContext = this;
         }

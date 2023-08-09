@@ -1,5 +1,4 @@
 ﻿using System.Windows;
-using System.Windows.Controls;
 
 namespace GoogGUI
 {
@@ -12,7 +11,9 @@ namespace GoogGUI
             _window = new ModalWindow(this);
             _window.Height = ModalHeight;
             _window.Width = ModalWidth;
-            if (((MainWindow)Application.Current.MainWindow).WasShown)
+            // User should not be able to go back on the main window as long as the modal was not removed..
+            // But in some cases we want to be to show it without a main window open
+            if (Application.Current.MainWindow is MainWindow && ((MainWindow)Application.Current.MainWindow).WasShown)
             {
                 _window.Owner = Application.Current.MainWindow;
                 _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
@@ -34,6 +35,8 @@ namespace GoogGUI
         public abstract int ModalWidth { get; }
 
         public abstract DataTemplate Template { get; }
+
+        public Window Window => _window;
 
         public void Close() => _window.Close();
 
