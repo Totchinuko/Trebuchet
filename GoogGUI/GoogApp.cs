@@ -13,6 +13,8 @@ namespace GoogGUI
         private Config _config;
         private object? _panel;
         private bool _testlive;
+        private Settings? _settings;
+        private ModlistHandler? _modlist;
 
         public GoogApp(bool testlive)
         {
@@ -48,9 +50,12 @@ namespace GoogGUI
         public void DisplaySettings(object? sender)
         {
             if (_panel is Settings) return;
-            Settings setting = new Settings(_config);
-            setting.ConfigChanged += OnConfigChanged;
-            _panel = setting;
+            if(_settings == null)
+            {
+                _settings = new Settings(_config);
+                _settings.ConfigChanged += OnConfigChanged;
+            }                
+            _panel = _settings;
             OnPropertyChanged("Panel");
         }
 
@@ -66,8 +71,11 @@ namespace GoogGUI
         private void ModlistDisplay(object? obj)
         {
             if (_panel is ModlistHandler) return;
-            ModlistHandler handler = new ModlistHandler(_config);
-            _panel = handler;
+            if(_modlist == null)
+            {
+                _modlist = new ModlistHandler(_config);
+            }
+            _panel = _modlist;
             OnPropertyChanged("Panel");
         }
 
