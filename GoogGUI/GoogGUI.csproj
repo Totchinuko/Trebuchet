@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
 	<UseWindowsForms>true</UseWindowsForms>
+	<ApplicationIcon>Icons\AppIcon.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -30,6 +31,10 @@
     <None Remove="Icons\Trash.png" />
     <None Remove="Icons\Upload.png" />
     <None Remove="Icons\Window.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Icons\AppIcon.ico" />
   </ItemGroup>
 
   <ItemGroup>

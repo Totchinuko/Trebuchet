@@ -6,7 +6,7 @@
         xmlns:local="clr-namespace:GoogGUI"
         xmlns:Controls="clr-namespace:GoogGUI.Controls" 
         mc:Ignorable="d"
-        Title="Goog UI"
+        Title="Tot ! Trebuchet"
         Height="650" Width="1010"
         MinHeight="550" MinWidth="800"
         WindowStartupLocation="CenterScreen"
@@ -22,7 +22,7 @@
             </Grid.RowDefinitions>
             <Controls:WindowTitlebar
                 x:Name="TitleBar"
-                Title="Goog GUI"
+                Title="Tot ! Trebuchet"
                 CloseIcon="pack://application:,,,/GoogGui;component/icons/Close.png"
                 RestoreIcon="pack://application:,,,/GoogGui;component/icons/Restore.png"
                 MaximizeIcon="pack://application:,,,/GoogGui;component/icons/Maximize.png"
