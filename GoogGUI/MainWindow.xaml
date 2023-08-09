@@ -80,9 +80,15 @@
                         <!--Game button-->
                         <Button local:GuiExtensions.Icon="/Icons/Game.png"
                                 Content="Game Parameters"
+                                Command="{Binding App.ClientSettingsCommand}"
                                 IsEnabled="{Binding App.CanUseGame}">
                             <Button.Style>
                                 <Style TargetType="Button" BasedOn="{StaticResource ButtonTab}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding App.Panel, Converter={StaticResource DataType}}" Value="{x:Type local:ClientSettings}">
+                                            <Setter Property="local:GuiExtensions.Accent" Value="True" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
                                 </Style>
                             </Button.Style>
                         </Button>

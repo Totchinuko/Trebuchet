@@ -8,6 +8,7 @@ namespace GoogGUI
 {
     public class GoogApp : INotifyPropertyChanged
     {
+        private ClientSettings? _clientSettings;
         private Config _config;
         private ModlistHandler? _modlist;
         private object? _panel;
@@ -15,8 +16,6 @@ namespace GoogGUI
 
         public GoogApp(Config config)
         {
-            SettingsCommand = new SimpleCommand(DisplaySettings);
-            ModlistCommand = new SimpleCommand(ModlistDisplay);
             _config = config;
         }
 
@@ -28,11 +27,13 @@ namespace GoogGUI
 
         public bool CanUseServer => CanUseModlist;
 
-        public ICommand ModlistCommand { get; private set; }
+        public ICommand ClientSettingsCommand => new SimpleCommand(DisplayClientSettings);
+
+        public ICommand ModlistCommand => new SimpleCommand(ModlistDisplay);
 
         public object? Panel { get => _panel; set => _panel = value; }
 
-        public ICommand SettingsCommand { get; private set; }
+        public ICommand SettingsCommand => new SimpleCommand(DisplaySettings);
 
         public void BaseChecks()
         {
@@ -44,6 +45,17 @@ namespace GoogGUI
 
             if (!_config.IsInstallPathValid)
                 DisplaySettings(this);
+        }
+
+        public void DisplayClientSettings(object? sender)
+        {
+            if (_panel is ClientSettings) return;
+            if (_clientSettings == null)
+            {
+                _clientSettings = new ClientSettings(_config);
+            }
+            _panel = _clientSettings;
+            OnPropertyChanged("Panel");
         }
 
         public void DisplaySettings(object? sender)
