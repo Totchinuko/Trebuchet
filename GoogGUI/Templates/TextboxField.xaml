@@ -6,7 +6,7 @@
             VerticalAlignment="Center"
             Height="25"
             VerticalContentAlignment="Center"
-            Text="{Binding Value, Mode=TwoWay}" />
+            Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" />
         </Border>
     </DataTemplate>
 </ResourceDictionary>
