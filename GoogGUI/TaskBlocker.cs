@@ -14,11 +14,11 @@ namespace GoogGUI
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public ICommand CancelCommand => new SimpleCommand((x) => _source?.Cancel());
+        public ICommand CancelCommand => new SimpleCommand(OnCancel);
 
-        public string Description 
-        { 
-            get => _description; 
+        public string Description
+        {
+            get => _description;
             set
             {
                 _description = value;
@@ -50,6 +50,13 @@ namespace GoogGUI
         protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private void OnCancel(object? obj)
+        {
+            if (_source == null || _source.IsCancellationRequested) return;
+            _source?.Cancel();
+            Description = "Canceling...";
         }
     }
 }
