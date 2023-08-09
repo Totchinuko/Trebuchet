@@ -10,7 +10,7 @@ using System.Windows;
 
 namespace GoogGUI
 {
-    public class Settings : INotifyPropertyChanged
+    public class Settings : INotifyPropertyChanged, ITemplateHolder
     {
         private Config _config;
         private List<IField> _fields = new List<IField>();

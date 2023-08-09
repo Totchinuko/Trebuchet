@@ -94,7 +94,7 @@
                     </StackPanel>
                 </Grid>
                 <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12">
-                    <ContentPresenter Content="{Binding App.Panel}" ContentTemplate="{Binding Template}" />
+                    <ContentPresenter Content="{Binding App.Panel}" ContentTemplateSelector="{StaticResource TemplateHolderSelector}" />
                 </Border>
             </Grid>
         </Grid>

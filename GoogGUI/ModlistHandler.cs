@@ -17,7 +17,7 @@ using System.Windows.Input;
 
 namespace GoogGUI
 {
-    internal class ModlistHandler : INotifyPropertyChanged
+    internal class ModlistHandler : INotifyPropertyChanged, ITemplateHolder
     {
         private SteamWorkWebAPI _api;
         private Config _config;
@@ -109,7 +109,7 @@ namespace GoogGUI
             }
         }
 
-        public object Template => Application.Current.Resources["ModlistEditor"];
+        public DataTemplate Template => (DataTemplate)Application.Current.Resources["ModlistEditor"];
 
         protected virtual void OnPropertyChanged(string name)
         {
