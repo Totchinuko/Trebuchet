@@ -29,7 +29,6 @@ namespace GoogGUI
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
         private CancellationTokenSource? _source;
-        private WaitModal? _wait;
 
         public ModlistHandler(Config config)
         {
@@ -138,7 +137,7 @@ namespace GoogGUI
                 if (file.IsID && !_modManifests.ContainsKey(file.Mod))
                     requested.Add(file.Mod);
 
-            Task.Run(() => _api.GetPublishedFiles(requested, _source.Token)).ContinueWith(OnManifestsLoaded);
+            Task.Run(() => _api.GetPublishedFiles(requested, _source.Token)).ContinueWith((x)=> Application.Current.Dispatcher.Invoke(() => OnManifestsLoaded(x)));
         }
 
         private void LoadModlist()
@@ -379,13 +378,13 @@ namespace GoogGUI
         {
             _source?.Dispose();
             _source = null;
-            Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("IsLoading"));
+            OnPropertyChanged("IsLoading");
             if (!task.IsCompletedSuccessfully)
             {
                 if (task.Exception != null)
-                    Application.Current.Dispatcher.Invoke(() => new ExceptionModal(task.Exception).ShowDialog());
+                    new ExceptionModal(task.Exception).ShowDialog();
                 else
-                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Modlist", "Could not download mod details of your modlist.", false).ShowDialog());
+                    new ErrorModal("Modlist", "Could not download mod details of your modlist.", false).ShowDialog();
                 return;
             }
 
@@ -393,7 +392,7 @@ namespace GoogGUI
             foreach (var data in toAdd)
                 _modManifests[data.Key] = data.Value;
 
-            Application.Current.Dispatcher.Invoke(RefreshModData);
+            RefreshModData();
         }
 
         private void OnMenuOpen(object? obj)
@@ -455,35 +454,30 @@ namespace GoogGUI
         private void OnModlistDownload(object? obj)
         {
             if (_source != null) return;
+            if (!App.TaskBlocker.IsAvailable) return;
 
             QuestionModal question = new QuestionModal("Download", "Do you wish to update your modlist ? This might take a while.");
             question.ShowDialog();
             if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
 
             _source = new CancellationTokenSource();
-            _wait = new WaitModal("Download", "Updating your modlist mods...", () => _source?.Cancel());
-            Task.Run(() => Setup.UpdateMods(_config, SelectedModlist, _source.Token)).ContinueWith(OnModlistDownloaded);
-            _wait.ShowDialog();
+            var task = Task.Run(() => Setup.UpdateMods(_config, SelectedModlist, _source.Token)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModlistDownloaded(x)));
+            App.TaskBlocker.Set(task, $"Updating your modlist mods {_selectedModlist}...", _source);
         }
 
         private void OnModlistDownloaded(Task<int> task)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _wait?.Close();
-                _wait = null;
-            });
-
             _source?.Dispose();
             _source = null;
+            App.TaskBlocker.Release();
 
             if (task.Exception != null)
             {
-                Application.Current.Dispatcher.Invoke(() => new ExceptionModal(task.Exception).ShowDialog());
+                new ExceptionModal(task.Exception).ShowDialog();
                 return;
             }
 
-            Application.Current.Dispatcher.Invoke(LoadModlist);
+            LoadModlist();
         }
 
         private void OnModlistDuplicate(object? obj)
