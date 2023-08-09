@@ -14,9 +14,8 @@ namespace GoogGUI
     {
         private Config _config;
         private List<IField> _fields = new List<IField>();
-        private List<RequiredAction> _requiredActions = new List<RequiredAction>();
+        private List<RequiredCommand> _requiredActions = new List<RequiredCommand>();
         private CancellationTokenSource? _source;
-        private WaitModal? _wait;
 
         public Settings(Config config)
         {
@@ -52,7 +51,7 @@ namespace GoogGUI
 
         public List<IField> Fields { get => _fields; set => _fields = value; }
 
-        public List<RequiredAction> RequiredActions { get => _requiredActions; set => _requiredActions = value; }
+        public List<RequiredCommand> RequiredActions { get => _requiredActions; set => _requiredActions = value; }
 
         public DataTemplate Template => (DataTemplate)Application.Current.Resources["FieldEditor"];
 
@@ -67,55 +66,35 @@ namespace GoogGUI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        private void CleanupTask(Task<int> task)
+        private void HandleTaskErrors(Task<int> task)
         {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                _wait?.Close();
-                _wait = null;
-            });
-
             if (task.IsFaulted && task.Exception != null)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    new ExceptionModal(task.Exception).ShowDialog();
-                });
-                return;
-            }
-
-            if (task.Result != 0)
-            {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    new ErrorModal("Steam CMD", "Steam CMD terminated with an error code.", false).ShowDialog();
-                });
-                return;
-            }
+                new ExceptionModal(task.Exception).ShowDialog();
+            else if (task.Result != 0)
+                new ErrorModal("Steam CMD", "Steam CMD terminated with an error code.", false).ShowDialog();
         }
 
         private void OnInstallSteam(object? obj)
         {
             if (_source != null) return;
+            if (!App.TaskBlocker.IsAvailable) return;
 
             _source = new CancellationTokenSource();
-            Task.Run(() => Setup.SetupAppAndSteam(_config, _source.Token, true)).ContinueWith(OnInstallSteamComplete);
-            _wait = new WaitModal("Steam", "Installing Steam CMD...", TaskCancel);
-            _wait.ShowDialog();
+            var task = Task.Run(() => Setup.SetupAppAndSteam(_config, _source.Token, true)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnInstallSteamComplete(x)));
+            App.TaskBlocker.Set(task, "Installing steam CMD...", _source);
         }
 
         private void OnInstallSteamComplete(Task<int> task)
         {
-            CleanupTask(task);
-
+            HandleTaskErrors(task);
             if (_source != null && _source.IsCancellationRequested)
-            {
                 Setup.DeleteSteamCMD(_config);
-            }
 
             _source?.Dispose();
             _source = null;
+            App.TaskBlocker.Release();
             UpdateRequiredActions();
+            OnConfigChanged();
         }
 
         private void OnInstanceCountChanged(string name, object? value)
@@ -127,24 +106,25 @@ namespace GoogGUI
 
         private void OnServerInstanceInstall(object? obj)
         {
-            if (_config.ServerInstanceCount <= 0)
-                return;
+            if (_config.ServerInstanceCount <= 0) return;
+            if (_source != null) return;
+            if (!App.TaskBlocker.IsAvailable) return;
 
             int installed = _config.GetInstalledInstances();
             if (installed >= _config.ServerInstanceCount)
                 return;
 
             _source = new CancellationTokenSource();
-            Task.Run(() => OnServerInstanceInstallTask(_source.Token)).ContinueWith(OnServerInstanceInstallComplete);
-            _wait = new WaitModal("Server", "Updating...", TaskCancel);
-            _wait.ShowDialog();
+            var task = Task.Run(() => OnServerInstanceInstallTask(_source.Token)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnServerInstanceInstallComplete(x)));
+            App.TaskBlocker.Set(task, "Updating server instances...", _source);
         }
 
         private void OnServerInstanceInstallComplete(Task<int> task)
         {
-            CleanupTask(task);
+            HandleTaskErrors(task);
             _source?.Dispose();
             _source = null;
+            App.TaskBlocker.Release();
             UpdateRequiredActions();
         }
 
@@ -153,11 +133,7 @@ namespace GoogGUI
             int count = _config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
             {
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    if(_wait != null)
-                        _wait.Message = $"Updating server instance {i}...";
-                });
+                Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = $"Updating server instance {i}...");
                 int code = await Setup.UpdateServer(_config, i, token, false);
                 if (code != 0)
                     return code;
@@ -183,13 +159,13 @@ namespace GoogGUI
 
         private void UpdateRequiredActions()
         {
-            _requiredActions = new List<RequiredAction>();
+            _requiredActions = new List<RequiredCommand>();
 
             int installed = _config.GetInstalledInstances();
             if (!File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)))
-                _requiredActions.Add(new RequiredAction("Steam CMD is not yet installed.", "Install", OnInstallSteam));
+                _requiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, true));
             else if (_config.ServerInstanceCount > installed)
-                _requiredActions.Add(new RequiredAction("Some server instances are not yet installed.", "Install", OnServerInstanceInstall));
+                _requiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, true));
             OnPropertyChanged("RequiredActions");
         }
     }

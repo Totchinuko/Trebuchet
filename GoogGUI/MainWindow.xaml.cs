@@ -1,9 +1,5 @@
-﻿using Goog;
-using GoogGUI.Controls;
-using System;
+﻿using System;
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 
 namespace GoogGUI
 {
@@ -14,6 +10,7 @@ namespace GoogGUI
     {
         private GoogApp? _app;
         private bool _shown;
+        private TaskBlocker _taskBlocker = new TaskBlocker();
 
         public MainWindow(bool testlive)
         {
@@ -23,7 +20,16 @@ namespace GoogGUI
         }
 
         public GoogApp? App { get => _app; set => _app = value; }
+
+        public TaskBlocker TaskBlocker => _taskBlocker;
+
         public bool WasShown => _shown;
+
+        protected override void OnClosed(EventArgs e)
+        {
+            base.OnClosed(e);
+            Application.Current.Shutdown();
+        }
 
         protected override void OnContentRendered(EventArgs e)
         {
@@ -35,12 +41,6 @@ namespace GoogGUI
 
         protected virtual void OnWindowShown()
         {
-        }
-
-        protected override void OnClosed(EventArgs e)
-        {
-            base.OnClosed(e);
-            Application.Current.Shutdown();
         }
     }
 }

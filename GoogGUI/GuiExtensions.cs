@@ -3,31 +3,24 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Media;
 
 namespace GoogGUI
 {
     public static class GuiExtensions
     {
+        public static readonly DependencyProperty AccentProperty = DependencyProperty.RegisterAttached(
+            "Accent",
+            typeof(bool),
+            typeof(GuiExtensions),
+            new PropertyMetadata(default(bool)));
+
         public static readonly DependencyProperty CornerRadiusProperty = DependencyProperty.RegisterAttached(
-            "CornerRadius",
+                    "CornerRadius",
             typeof(CornerRadius),
             typeof(GuiExtensions),
             new PropertyMetadata(default(CornerRadius)));
-
-        public static void SetCornerRadius(UIElement element, CornerRadius value)
-        {
-            element.SetValue(CornerRadiusProperty, value);
-        }
-
-        public static CornerRadius GetCornerRadius(UIElement element)
-        {
-            return (CornerRadius)element.GetValue(CornerRadiusProperty);
-        }
 
         public static readonly DependencyProperty IconProperty = DependencyProperty.RegisterAttached(
             "Icon",
@@ -35,67 +28,11 @@ namespace GoogGUI
             typeof(GuiExtensions),
             new PropertyMetadata(default(ImageSource)));
 
-        public static void SetIcon(UIElement element, ImageSource value)
-        {
-            element.SetValue(IconProperty, value);
-        }
-
-        public static ImageSource GetIcon(UIElement element)
-        {
-            return (ImageSource)element.GetValue(IconProperty);
-        }
-
         public static readonly DependencyProperty IconSizeProperty = DependencyProperty.RegisterAttached(
             "IconSize",
             typeof(double),
             typeof(GuiExtensions),
             new PropertyMetadata(default(double)));
-
-        public static void SetIconSize(UIElement element, double value)
-        {
-            element.SetValue(IconSizeProperty, value);
-        }
-
-        public static double GetIconSize(UIElement element)
-        {
-            return (double)element.GetValue(IconSizeProperty);
-        }
-
-        public static readonly DependencyProperty AccentProperty = DependencyProperty.RegisterAttached(
-            "Accent",
-            typeof(bool),
-            typeof(GuiExtensions),
-            new PropertyMetadata(default(bool)));
-
-        public static void SetAccent(UIElement element, bool value)
-        {
-            element.SetValue(AccentProperty, value);
-        }
-
-        public static bool GetAccent(UIElement element)
-        {
-            return (bool)element.GetValue(AccentProperty);
-        }
-
-        public static readonly DependencyProperty IsDraggingProperty = DependencyProperty.RegisterAttached(
-                "IsDragging",
-                typeof(bool),
-                typeof(GuiExtensions),
-                new FrameworkPropertyMetadata(
-                    false,
-                    FrameworkPropertyMetadataOptions.AffectsRender
-                )
-            );
-
-        public static bool GetIsDragging(DependencyObject source)
-        {
-            return (bool)source.GetValue(IsDraggingProperty);
-        }
-
-        public static void SetIsDragging(DependencyObject target, bool value)
-        {
-            target.SetValue(IsDraggingProperty, value);
-        }
 
         public static readonly DependencyProperty IsDraggedOverProperty = DependencyProperty.RegisterAttached(
                 "IsDraggedOver",
@@ -107,26 +44,31 @@ namespace GoogGUI
                 )
             );
 
-        public static bool GetIsDraggedOver(DependencyObject source)
+        public static readonly DependencyProperty IsDraggingProperty = DependencyProperty.RegisterAttached(
+                "IsDragging",
+                typeof(bool),
+                typeof(GuiExtensions),
+                new FrameworkPropertyMetadata(
+                    false,
+                    FrameworkPropertyMetadataOptions.AffectsRender
+                )
+            );
+
+        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
-            return (bool)source.GetValue(IsDraggedOverProperty);
+            if (depObj == null) yield return (T)Enumerable.Empty<T>();
+            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
+            {
+                DependencyObject ithChild = VisualTreeHelper.GetChild(depObj, i);
+                if (ithChild == null) continue;
+                if (ithChild is T t) yield return t;
+                foreach (T childOfChild in FindVisualChildren<T>(ithChild)) yield return childOfChild;
+            }
         }
 
-        public static void SetIsDraggedOver(DependencyObject target, bool value)
+        public static bool GetAccent(UIElement element)
         {
-            target.SetValue(IsDraggedOverProperty, value);
-        }
-
-        public static IGuiField SetField(this IGuiField field, object target, string property, object? defaultValue)
-        {
-            if (string.IsNullOrEmpty(property))
-                throw new NullReferenceException("Property is not set to a valid name");
-            PropertyInfo? prop = target.GetType().GetProperty(property);
-            if (prop == null)
-                throw new NullReferenceException($"{property} was not found on {target.GetType()}");
-
-            field.SetField(property, prop.GetValue(target), defaultValue);
-            return field;
+            return (bool)element.GetValue(AccentProperty);
         }
 
         public static string GetAllExceptions(this Exception ex)
@@ -145,6 +87,86 @@ namespace GoogGUI
             return message;
         }
 
+        public static CornerRadius GetCornerRadius(UIElement element)
+        {
+            return (CornerRadius)element.GetValue(CornerRadiusProperty);
+        }
+
+        public static ImageSource GetIcon(UIElement element)
+        {
+            return (ImageSource)element.GetValue(IconProperty);
+        }
+
+        public static double GetIconSize(UIElement element)
+        {
+            return (double)element.GetValue(IconSizeProperty);
+        }
+
+        public static bool GetIsDraggedOver(DependencyObject source)
+        {
+            return (bool)source.GetValue(IsDraggedOverProperty);
+        }
+
+        public static bool GetIsDragging(DependencyObject source)
+        {
+            return (bool)source.GetValue(IsDraggingProperty);
+        }
+
+        public static TaskBlocker GetTaskBlocker(this Application application)
+        {
+            return ((MainWindow)application.MainWindow).TaskBlocker;
+        }
+
+        public static void SetAccent(UIElement element, bool value)
+        {
+            element.SetValue(AccentProperty, value);
+        }
+
+        public static void SetCornerRadius(UIElement element, CornerRadius value)
+        {
+            element.SetValue(CornerRadiusProperty, value);
+        }
+
+        public static IGuiField SetField(this IGuiField field, object target, string property, object? defaultValue)
+        {
+            if (string.IsNullOrEmpty(property))
+                throw new NullReferenceException("Property is not set to a valid name");
+            PropertyInfo? prop = target.GetType().GetProperty(property);
+            if (prop == null)
+                throw new NullReferenceException($"{property} was not found on {target.GetType()}");
+
+            field.SetField(property, prop.GetValue(target), defaultValue);
+            return field;
+        }
+
+        public static void SetIcon(UIElement element, ImageSource value)
+        {
+            element.SetValue(IconProperty, value);
+        }
+
+        public static void SetIconSize(UIElement element, double value)
+        {
+            element.SetValue(IconSizeProperty, value);
+        }
+
+        public static void SetIsDraggedOver(DependencyObject target, bool value)
+        {
+            target.SetValue(IsDraggedOverProperty, value);
+        }
+
+        public static void SetIsDragging(DependencyObject target, bool value)
+        {
+            target.SetValue(IsDraggingProperty, value);
+        }
+
+        public static void SetParentValue<TParent>(this DependencyObject child, DependencyProperty property, object value) where TParent : DependencyObject
+        {
+            if (child.TryGetParent(out TParent? parent))
+            {
+                parent.SetValue(property, value);
+            }
+        }
+
         public static bool TryGetParent<TParent>(this DependencyObject child, [NotNullWhen(true)] out TParent? parent) where TParent : DependencyObject
         {
             DependencyObject current = child;
@@ -160,26 +182,6 @@ namespace GoogGUI
 
             parent = default;
             return false;
-        }
-
-        public static void SetParentValue<TParent>(this DependencyObject child, DependencyProperty property, object value) where TParent : DependencyObject
-        {
-            if (child.TryGetParent(out TParent? parent))
-            {
-                parent.SetValue(property, value);
-            }
-        }
-
-        public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
-        {
-            if (depObj == null) yield return (T)Enumerable.Empty<T>();
-            for (int i = 0; i < VisualTreeHelper.GetChildrenCount(depObj); i++)
-            {
-                DependencyObject ithChild = VisualTreeHelper.GetChild(depObj, i);
-                if (ithChild == null) continue;
-                if (ithChild is T t) yield return t;
-                foreach (T childOfChild in FindVisualChildren<T>(ithChild)) yield return childOfChild;
-            }
         }
     }
 }
