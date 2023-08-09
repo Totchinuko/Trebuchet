@@ -73,7 +73,24 @@ namespace Goog
 
             foreach (string newPath in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
             {
-                File.Copy(newPath, newPath.Replace(directory, destinationDir), true);
+                ;
+            }
+        }
+
+        public static async Task DeepCopyAsync(string directory, string destinationDir, CancellationToken token)
+        {
+            foreach (string dir in Directory.GetDirectories(directory, "*", SearchOption.AllDirectories))
+            {
+                string dirToCreate = dir.Replace(directory, destinationDir);
+                Directory.CreateDirectory(dirToCreate);
+            }
+
+            foreach (string newPath in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
+            {
+                if (token.IsCancellationRequested) 
+                    return;
+
+                await Task.Run(() => File.Copy(newPath, newPath.Replace(directory, destinationDir), true));
             }
         }
 

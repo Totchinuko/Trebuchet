@@ -99,9 +99,28 @@ namespace Goog
             return await WaitForProcess(process, token);
         }
 
+        public static async Task UpdateServerFromInstance0(Config config, int instanceNumber, CancellationToken token)
+        {
+            if (config.ServerInstanceCount <= 0) return;
+            if (instanceNumber == 0)
+                throw new Exception("Can't update instance 0 with itself.");
+
+            string instance = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
+            string instance0 = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, 0));
+
+            if (!Directory.Exists(instance0))
+                throw new DirectoryNotFoundException($"{instance0} was not found.");
+
+            Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
+            Tools.DeleteIfExists(instance);
+            Tools.CreateDir(instance);
+
+            await Tools.DeepCopyAsync(instance0, instance, token);
+        }
+
         public static async Task<int> UpdateServer(Config config, int instanceNumber, CancellationToken token, bool reinstall = false)
         {
-            if (config.ServerInstanceCount <= 0) return 1;
+            if (config.ServerInstanceCount <= 0) return 0;
 
             string instance = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
 

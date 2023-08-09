@@ -131,9 +131,16 @@ namespace GoogGUI
             for (int i = 0; i < count; i++)
             {
                 Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = $"Updating server instance {i}...");
-                int code = await Setup.UpdateServer(_config, i, token, false);
-                if (code != 0)
-                    return code;
+                if (i == 0)
+                {
+                    int code = await Setup.UpdateServer(_config, i, token, false);
+                    if (code != 0)
+                        return code;
+                }
+                else
+                {
+                    await Setup.UpdateServerFromInstance0(_config, i, token);
+                }
             }
             return 0;
         }
