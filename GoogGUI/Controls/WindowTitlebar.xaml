@@ -15,10 +15,10 @@
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <Image Source="pack://application:,,,/GoogGui;component/Icons/Logo.png" Height="20" Width="20" VerticalAlignment="Center" Margin="6,0,6,0" />
-            <TextBlock Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" Foreground="White" Margin="6,0,0,0">
+            <TextBlock Grid.Column="1" FontWeight="Bold" VerticalAlignment="Center" Foreground="White" Margin="6,0,12,0">
                 <Run x:Name="TitleRun" />
             </TextBlock>
-            <ContentPresenter Grid.Column="2" />
+            <ContentPresenter Grid.Column="2" Content="{Binding Header, RelativeSource={RelativeSource AncestorType=local:WindowTitlebar}}" Margin="0,0,12,0" />
             <StackPanel Orientation="Horizontal" Grid.Column="3">
                 <Button x:Name="MinimizeBtn"
                         Style="{StaticResource WindowButton}"

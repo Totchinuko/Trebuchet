@@ -26,7 +26,8 @@
                 CloseIcon="pack://application:,,,/GoogGui;component/icons/Close.png"
                 RestoreIcon="pack://application:,,,/GoogGui;component/icons/Restore.png"
                 MaximizeIcon="pack://application:,,,/GoogGui;component/icons/Maximize.png"
-                MinimizeIcon="pack://application:,,,/GoogGui;component/icons/Minimize.png" />
+                MinimizeIcon="pack://application:,,,/GoogGui;component/icons/Minimize.png">
+            </Controls:WindowTitlebar>
             <Grid x:Name="WindowContent" Grid.Row="2" Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="240" />
