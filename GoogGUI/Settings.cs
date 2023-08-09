@@ -37,6 +37,9 @@ namespace GoogGUI
                 new Field<bool>("Display Steam CMD", "DisplayCMD", _config.DisplayCMD, "ToggleField")
                     .WhenChanged(OnValueChanged)
                     .WithDefault((x) => x == false, () => false),
+                new Field<bool>("Use Hardware Acceleration", "UseHardwareAcceleration", _config.UseHardwareAcceleration, "ToggleField")
+                    .WhenChanged(OnValueChanged)
+                    .WithDefault((x) => x == true, () => true),
             };
 
             UpdateRequiredActions();
@@ -69,6 +72,12 @@ namespace GoogGUI
                 new ExceptionModal(task.Exception).ShowDialog();
             else if (task.Result != 0)
                 new ErrorModal("Steam CMD", "Steam CMD terminated with an error code.", false).ShowDialog();
+        }
+
+        private void OnAppRestart(object? obj)
+        {
+            System.Windows.Forms.Application.Restart();
+            System.Windows.Application.Current.Shutdown();
         }
 
         private void OnInstallSteam(object? obj)
@@ -156,11 +165,6 @@ namespace GoogGUI
             OnConfigChanged();
         }
 
-        private void TaskCancel()
-        {
-            _source?.Cancel();
-        }
-
         private void UpdateRequiredActions()
         {
             _requiredActions = new List<RequiredCommand>();
@@ -170,6 +174,8 @@ namespace GoogGUI
                 _requiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, true));
             else if (_config.ServerInstanceCount > installed)
                 _requiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, true));
+            if (App.UseSoftwareRendering == _config.UseHardwareAcceleration)
+                _requiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, true));
             OnPropertyChanged("RequiredActions");
         }
     }

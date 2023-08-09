@@ -1,7 +1,5 @@
 ﻿using Goog;
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Windows.Input;
@@ -11,26 +9,15 @@ namespace GoogGUI
     public class GoogApp : INotifyPropertyChanged
     {
         private Config _config;
-        private object? _panel;
-        private bool _testlive;
-        private Settings? _settings;
         private ModlistHandler? _modlist;
+        private object? _panel;
+        private Settings? _settings;
 
-        public GoogApp(bool testlive)
+        public GoogApp(Config config)
         {
             SettingsCommand = new SimpleCommand(DisplaySettings);
             ModlistCommand = new SimpleCommand(ModlistDisplay);
-            _testlive = testlive;
-            _config = Tools.LoadFile<Config>(Config.GetConfigPath(_testlive));
-
-            if (!string.IsNullOrEmpty(_config.InstallPath) && !Tools.CanWriteHere(_config.InstallPath))
-                new ErrorModal("Install Folder Error", "Cannot access the install folder", false).ShowDialog();
-
-            if (string.IsNullOrEmpty(_config.InstallPath))
-                new MessageModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles").ShowDialog();
-
-            if (!_config.IsInstallPathValid)
-                DisplaySettings(this);
+            _config = config;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -47,14 +34,26 @@ namespace GoogGUI
 
         public ICommand SettingsCommand { get; private set; }
 
+        public void BaseChecks()
+        {
+            if (!string.IsNullOrEmpty(_config.InstallPath) && !Tools.CanWriteHere(_config.InstallPath))
+                new ErrorModal("Install Folder Error", "Cannot access the install folder", false).ShowDialog();
+
+            if (string.IsNullOrEmpty(_config.InstallPath))
+                new MessageModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles").ShowDialog();
+
+            if (!_config.IsInstallPathValid)
+                DisplaySettings(this);
+        }
+
         public void DisplaySettings(object? sender)
         {
             if (_panel is Settings) return;
-            if(_settings == null)
+            if (_settings == null)
             {
                 _settings = new Settings(_config);
                 _settings.ConfigChanged += OnConfigChanged;
-            }                
+            }
             _panel = _settings;
             OnPropertyChanged("Panel");
         }
@@ -64,14 +63,10 @@ namespace GoogGUI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        private void InstallPrompt()
-        {
-        }
-
         private void ModlistDisplay(object? obj)
         {
             if (_panel is ModlistHandler) return;
-            if(_modlist == null)
+            if (_modlist == null)
             {
                 _modlist = new ModlistHandler(_config);
             }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Goog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -53,7 +54,10 @@ namespace GoogGUI
 
         private void OpenApp()
         {
-            MainWindow mainWindow = new MainWindow(Testlive);
+            Config config = Tools.LoadFile<Config>(Config.GetConfigPath(Testlive));
+            App.UseSoftwareRendering = !config.UseHardwareAcceleration;
+
+            MainWindow mainWindow = new MainWindow(config);
             Application.Current.MainWindow = mainWindow;
             mainWindow.Show();
             _window.Close();

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Goog;
+using System;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -11,6 +12,7 @@ namespace GoogGUI
     public partial class App : Application
     {
         public bool IsShutingDown { get; private set; }
+        public static bool UseSoftwareRendering = true;
 
         public static TaskBlocker TaskBlocker => ((MainWindow)Current.MainWindow).TaskBlocker;
 

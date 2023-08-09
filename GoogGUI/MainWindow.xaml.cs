@@ -1,5 +1,7 @@
-﻿using System;
+﻿using Goog;
+using System;
 using System.Windows;
+using System.Windows.Interop;
 
 namespace GoogGUI
 {
@@ -8,13 +10,13 @@ namespace GoogGUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private GoogApp? _app;
+        private GoogApp _app;
         private bool _shown;
         private TaskBlocker _taskBlocker = new TaskBlocker();
 
-        public MainWindow(bool testlive)
+        public MainWindow(Config config)
         {
-            _app = new GoogApp(testlive);
+            _app = new GoogApp(config);
             InitializeComponent();
             DataContext = this;
         }
@@ -39,8 +41,19 @@ namespace GoogGUI
             OnWindowShown();
         }
 
+        protected override void OnSourceInitialized(EventArgs e)
+        {
+            var hwndSource = PresentationSource.FromVisual(this) as HwndSource;
+
+            if (hwndSource != null && GoogGUI.App.UseSoftwareRendering)
+                hwndSource.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
+
+            base.OnSourceInitialized(e);
+        }
+
         protected virtual void OnWindowShown()
         {
+            _app.BaseChecks();
         }
     }
 }
