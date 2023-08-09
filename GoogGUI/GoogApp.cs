@@ -47,6 +47,7 @@ namespace GoogGUI
 
         public void DisplaySettings(object? sender)
         {
+            if (_panel is Settings) return;
             Settings setting = new Settings(_config);
             setting.ConfigChanged += OnConfigChanged;
             _panel = setting;
@@ -64,6 +65,7 @@ namespace GoogGUI
 
         private void ModlistDisplay(object? obj)
         {
+            if (_panel is ModlistHandler) return;
             ModlistHandler handler = new ModlistHandler(_config);
             _panel = handler;
             OnPropertyChanged("Panel");
