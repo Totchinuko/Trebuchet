@@ -5,7 +5,7 @@ namespace Goog
 {
     public abstract class ConfigFile<T> where T : ConfigFile<T>
     {
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
+        public static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
             IgnoreReadOnlyProperties = true,

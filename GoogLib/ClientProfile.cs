@@ -5,12 +5,6 @@ namespace GoogLib
 {
     public class ClientProfile : ConfigFile<ClientProfile>
     {
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            IgnoreReadOnlyProperties = true
-        };
-
         private int _addedTexturePool = 0;
         private bool _backgroundSound = false;
         private bool _log = false;

@@ -5,14 +5,7 @@ namespace GoogLib
 {
     public class ModListProfile : ConfigFile<ModListProfile>
     {
-        private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
-        {
-            WriteIndented = true,
-            IgnoreReadOnlyProperties = true
-        };
-
         private List<string> _modlist = new List<string>();
-        private string _profileFile = string.Empty;
         private string _syncURL = string.Empty;
 
         public List<string> Modlist { get => _modlist; set => _modlist = value; }
