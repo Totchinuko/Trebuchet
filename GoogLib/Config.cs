@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Goog
 {
-    public sealed class Config : IFile
+    public sealed class Config : ConfigFile<Config>
     {
         #region constants
 
@@ -48,7 +48,6 @@ namespace Goog
         private string _currentModlistProfile = string.Empty;
         private string _currentServerProfile = string.Empty;
         private bool _displayCMD = false;
-        private string _filePath = string.Empty;
         private string _installPath = string.Empty;
         private int _serverInstanceCount = 0;
         private string _steamAPIKey = string.Empty;
@@ -66,14 +65,11 @@ namespace Goog
 
         public bool DisplayCMD { get => _displayCMD; set => _displayCMD = value; }
 
-        [JsonIgnore]
-        public string FilePath { get => _filePath; set => _filePath = value; }
-
         public string InstallPath { get => _installPath; set => _installPath = value; }
 
         public bool IsInstallPathValid => !string.IsNullOrEmpty(_installPath) && Directory.Exists(_installPath);
 
-        public bool IsTestLive => Path.GetFileName(Path.GetDirectoryName(_filePath)) == FolderTestLive;
+        public bool IsTestLive => Path.GetFileName(Path.GetDirectoryName(FilePath)) == FolderTestLive;
 
         public string ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 

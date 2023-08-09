@@ -16,7 +16,7 @@ namespace Goog.Commands
 
         public void Execute()
         {
-            Config config = Tools.LoadFile<Config>(Config.GetConfigPath(false));
+            Config config = Config.LoadFile(Config.GetConfigPath(false));
 
             string steamCMD = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             Process process = new Process();

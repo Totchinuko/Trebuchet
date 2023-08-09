@@ -158,7 +158,7 @@ namespace GoogGUI
         {
             if (string.IsNullOrEmpty(_selectedModlist)) return;
             string path = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, _selectedModlist + ".json");
-            _profile = Tools.LoadFile<ModListProfile>(path);
+            _profile = ModListProfile.LoadFile(path);
             _modlistURL = _profile.SyncURL;
             OnPropertyChanged("ModlistURL");
 
@@ -429,8 +429,13 @@ namespace GoogGUI
             modal.ShowDialog();
             string name = modal.Name;
             if (string.IsNullOrEmpty(name)) return;
+            if (_profiles.Contains(name))
+            {
+                new ErrorModal("Already Exitsts", "This mod list name is already used").ShowDialog();
+                return;
+            }
 
-            _profile = Tools.CreateFile<ModListProfile>(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json"));
+            _profile = ModListProfile.CreateFile(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json"));
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;
@@ -486,8 +491,15 @@ namespace GoogGUI
             modal.ShowDialog();
             string name = modal.Name;
             if (string.IsNullOrEmpty(name)) return;
+            if(_profiles.Contains(name))
+            {
+                new ErrorModal("Already Exitsts", "This mod list name is already used").ShowDialog();
+                return;
+            }
 
-            _profile.FilePath = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json");
+            string path = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json");
+            _profile.CopyFileTo(path);
+            _profile = ModListProfile.LoadFile(path);
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;

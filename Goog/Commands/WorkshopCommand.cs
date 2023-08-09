@@ -15,7 +15,7 @@ namespace Goog.Commands
             if (modlist == null)
                 throw new ArgumentException("modlist is required.");
 
-            Config config = Tools.LoadFile<Config>(Config.GetConfigPath(testlive));
+            Config config = Config.LoadFile(Config.GetConfigPath(testlive));
             Task<int> updateServer = Setup.UpdateMods(config, modlist, default);
             updateServer.Wait();
             if (updateServer.Result != 0)

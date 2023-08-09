@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace GoogLib
 {
-    public class ServerProfile : IFile
+    public class ServerProfile : ConfigFile<ServerProfile>
     {
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
@@ -35,6 +35,5 @@ namespace GoogLib
         public List<string> SudoSuperAdmins { get => _sudoSuperAdmins; set => _sudoSuperAdmins = value; }
 
         public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
-        public string FilePath { get => _profileFile; set => _profileFile = value; }
     }
 }

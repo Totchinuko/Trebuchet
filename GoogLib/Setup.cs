@@ -76,7 +76,7 @@ namespace Goog
             if (!File.Exists(modlistFile))
                 throw new FileNotFoundException($"modlist {modlist} was not found.");
 
-            ModListProfile modlistProfile = Tools.LoadFile<ModListProfile>(modlistFile);
+            ModListProfile modlistProfile = ModListProfile.LoadFile(modlistFile);
 
             List<string> list = modlistProfile.GetModIDList();
             if (list.Count == 0)

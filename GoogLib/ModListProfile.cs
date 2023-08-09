@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace GoogLib
 {
-    public class ModListProfile : IFile
+    public class ModListProfile : ConfigFile<ModListProfile>
     {
         private static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
@@ -14,8 +14,6 @@ namespace GoogLib
         private List<string> _modlist = new List<string>();
         private string _profileFile = string.Empty;
         private string _syncURL = string.Empty;
-
-        public string FilePath { get => _profileFile; set => _profileFile = value; }
 
         public List<string> Modlist { get => _modlist; set => _modlist = value; }
 
