@@ -45,8 +45,6 @@ namespace GoogGUI
             UpdateRequiredActions();
         }
 
-        public event EventHandler? ConfigChanged;
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public List<IField> Fields { get => _fields; set => _fields = value; }
@@ -54,12 +52,6 @@ namespace GoogGUI
         public List<RequiredCommand> RequiredActions { get => _requiredActions; set => _requiredActions = value; }
 
         public DataTemplate Template => (DataTemplate)Application.Current.Resources["FieldEditor"];
-
-        protected virtual void OnConfigChanged()
-        {
-            UpdateRequiredActions();
-            ConfigChanged?.Invoke(this, EventArgs.Empty);
-        }
 
         protected virtual void OnPropertyChanged(string name)
         {
@@ -100,7 +92,6 @@ namespace GoogGUI
             _source = null;
             App.TaskBlocker.Release();
             UpdateRequiredActions();
-            OnConfigChanged();
         }
 
         private void OnInstanceCountChanged(string name, object? value)
@@ -162,7 +153,7 @@ namespace GoogGUI
 
             property.SetValue(_config, value);
             _config.SaveFile();
-            OnConfigChanged();
+            UpdateRequiredActions();
         }
 
         private void UpdateRequiredActions()

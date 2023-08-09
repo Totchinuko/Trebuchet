@@ -17,6 +17,8 @@ namespace Goog
         protected ConfigFile()
         { }
 
+        public event EventHandler<T>? FileSaved;
+
         [JsonIgnore]
         public string FilePath { get => _filePath; private set => _filePath = value; }
 
@@ -29,23 +31,16 @@ namespace Goog
             return file;
         }
 
-        public void CopyFolderTo(string path)
+        public static T LoadFile(string path)
         {
-            if (string.IsNullOrEmpty(path))
-                throw new ArgumentException("path is invalid");
-
-            string? folder = Path.GetDirectoryName(path);
-            if (folder == null)
-                throw new DirectoryNotFoundException($"Invalid directory for {path}");
-
-            if (File.Exists(path) || (Directory.Exists(folder)))
-                throw new Exception($"{path} already exists");
-
-            string? dataFolder = Path.GetDirectoryName(FilePath);
-            if (dataFolder == null)
-                throw new DirectoryNotFoundException($"Invalid directory for {FilePath}");
-
-            Tools.DeepCopy(dataFolder, folder);
+            if (!File.Exists(path))
+                return CreateFile(path);
+            string json = File.ReadAllText(path);
+            T? file = JsonSerializer.Deserialize<T>(json, _jsonOptions);
+            if (file == null)
+                throw new Exception($"{path} could not be loaded");
+            file.FilePath = path;
+            return file;
         }
 
         public void CopyFileTo(string path)
@@ -67,16 +62,23 @@ namespace Goog
             File.Copy(FilePath, path);
         }
 
-        public static T LoadFile(string path)
+        public void CopyFolderTo(string path)
         {
-            if (!File.Exists(path))
-                return CreateFile(path);
-            string json = File.ReadAllText(path);
-            T? file = JsonSerializer.Deserialize<T>(json, _jsonOptions);
-            if (file == null)
-                throw new Exception($"{path} could not be loaded");
-            file.FilePath = path;
-            return file;
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentException("path is invalid");
+
+            string? folder = Path.GetDirectoryName(path);
+            if (folder == null)
+                throw new DirectoryNotFoundException($"Invalid directory for {path}");
+
+            if (File.Exists(path) || (Directory.Exists(folder)))
+                throw new Exception($"{path} already exists");
+
+            string? dataFolder = Path.GetDirectoryName(FilePath);
+            if (dataFolder == null)
+                throw new DirectoryNotFoundException($"Invalid directory for {FilePath}");
+
+            Tools.DeepCopy(dataFolder, folder);
         }
 
         public void DeleteFile()
@@ -125,6 +127,12 @@ namespace Goog
                 throw new Exception($"{FilePath} is an invalid path");
             Tools.CreateDir(folder);
             File.WriteAllText(FilePath, json);
+            OnFileSaved();
+        }
+
+        protected virtual void OnFileSaved()
+        {
+            FileSaved?.Invoke(this, (T)this);
         }
     }
 }

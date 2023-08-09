@@ -17,6 +17,7 @@ namespace GoogGUI
         public GoogApp(Config config)
         {
             _config = config;
+            _config.FileSaved += OnConfigFileSaved;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -64,7 +65,6 @@ namespace GoogGUI
             if (_settings == null)
             {
                 _settings = new Settings(_config);
-                _settings.ConfigChanged += OnConfigChanged;
             }
             _panel = _settings;
             OnPropertyChanged("Panel");
@@ -86,7 +86,7 @@ namespace GoogGUI
             OnPropertyChanged("Panel");
         }
 
-        private void OnConfigChanged(object? sender, EventArgs e)
+        private void OnConfigFileSaved(object? sender, Config e)
         {
             OnPropertyChanged("CanUseGame");
             OnPropertyChanged("CanUseServer");
