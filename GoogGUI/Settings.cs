@@ -161,9 +161,9 @@ namespace GoogGUI
             _requiredActions = new List<RequiredCommand>();
 
             int installed = _config.GetInstalledInstances();
-            if (!File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)))
+            if (Directory.Exists(_config.InstallPath) && !File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)))
                 _requiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, true));
-            else if (_config.ServerInstanceCount > installed)
+            else if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)
                 _requiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, true));
             if (App.UseSoftwareRendering == _config.UseHardwareAcceleration)
                 _requiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, true));
