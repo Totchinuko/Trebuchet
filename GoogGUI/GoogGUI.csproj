@@ -18,6 +18,7 @@
     <None Remove="Icons\Game.png" />
     <None Remove="Icons\List.png" />
     <None Remove="Icons\LocalStorage.png" />
+    <None Remove="Icons\Logo.png" />
     <None Remove="Icons\Maximize.png" />
     <None Remove="Icons\Minimize.png" />
     <None Remove="Icons\Reset.png" />
@@ -48,6 +49,7 @@
     <Resource Include="Icons\Game.png" />
     <Resource Include="Icons\List.png" />
     <Resource Include="Icons\LocalStorage.png" />
+    <Resource Include="Icons\Logo.png" />
     <Resource Include="Icons\Maximize.png" />
     <Resource Include="Icons\Minimize.png" />
     <Resource Include="Icons\Reset.png" />
