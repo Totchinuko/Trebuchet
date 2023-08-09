@@ -37,7 +37,7 @@ namespace GoogGUI
 
         public override int ModalHeight => 600;
 
-        public override string ModalTitle => "Modlist";
+        public override string ModalTitle => "Mod List";
 
         public override int ModalWidth => 650;
 

@@ -17,7 +17,7 @@
     <Border Style="{StaticResource WindowBackPanel}" x:Name="MainBorder">
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="30" />
+                <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <Controls:WindowTitlebar
