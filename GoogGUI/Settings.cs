@@ -34,9 +34,6 @@ namespace GoogGUI
                     .WithIntFrequency()
                     .WhenChanged(OnInstanceCountChanged)
                     .WithDefault((x) => x == 0, () => 0) ,
-                new Field<string>("Steam API Key", "SteamAPIKey", _config.SteamAPIKey, "TextboxField")
-                    .WhenChanged(OnValueChanged)
-                    .WithDefault((x) => x?.Equals(string.Empty)??true, () => string.Empty),
                 new Field<bool>("Display Steam CMD", "DisplayCMD", _config.DisplayCMD, "ToggleField")
                     .WhenChanged(OnValueChanged)
                     .WithDefault((x) => x == false, () => false),
