@@ -20,8 +20,6 @@ namespace GoogGUI
         public GoogApp(Config config)
         {
             _config = config;
-            _config.FileSaved += OnConfigFileSaved;
-
             _topTabs = new List<IPanel>
             {
                 new ModlistHandler(_config),
@@ -67,13 +65,6 @@ namespace GoogGUI
         protected virtual void OnPropertyChanged(string property)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
-        }
-
-        private void OnConfigFileSaved(object? sender, Config e)
-        {
-            OnPropertyChanged("CanUseGame");
-            OnPropertyChanged("CanUseServer");
-            OnPropertyChanged("CanUseModlist");
         }
     }
 }
