@@ -7,11 +7,14 @@ using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
-    public class Settings : INotifyPropertyChanged, ITemplateHolder, IFieldEditor
+    public class Settings : IPanel, IFieldEditor
     {
+        private bool _active;
         private Config _config;
         private List<IField> _fields = new List<IField>();
         private List<RequiredCommand> _requiredActions = new List<RequiredCommand>();
@@ -20,6 +23,7 @@ namespace GoogGUI
         public Settings(Config config)
         {
             _config = config;
+            _config.FileSaved += OnConfigSaved;
 
             _fields = new List<IField>
             {
@@ -45,13 +49,39 @@ namespace GoogGUI
             UpdateRequiredActions();
         }
 
+        public event EventHandler? CanExecuteChanged;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        public bool Active
+        {
+            get => _active;
+            set
+            {
+                _active = value;
+                OnPropertyChanged("Active");
+            }
+        }
+
         public List<IField> Fields { get => _fields; set => _fields = value; }
+
+        public ImageSource Icon => new BitmapImage(new Uri(@"/Icons/Settings.png", UriKind.Relative));
+
+        public string Label => "Settings";
 
         public List<RequiredCommand> RequiredActions { get => _requiredActions; set => _requiredActions = value; }
 
         public DataTemplate Template => (DataTemplate)Application.Current.Resources["FieldEditor"];
+
+        public bool CanExecute(object? parameter)
+        {
+            return true;
+        }
+
+        public void Execute(object? parameter)
+        {
+            ((MainWindow)Application.Current.MainWindow).App.Panel = this;
+        }
 
         protected virtual void OnPropertyChanged(string name)
         {
@@ -70,6 +100,11 @@ namespace GoogGUI
         {
             System.Windows.Forms.Application.Restart();
             System.Windows.Application.Current.Shutdown();
+        }
+
+        private void OnConfigSaved(object? sender, Config e)
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnInstallSteam(object? obj)

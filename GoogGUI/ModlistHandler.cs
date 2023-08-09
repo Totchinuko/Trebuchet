@@ -12,13 +12,15 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
-using System.Windows.Controls;
 using System.Windows.Input;
+using System.Windows.Media;
+using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
-    internal class ModlistHandler : INotifyPropertyChanged, ITemplateHolder
+    internal class ModlistHandler : IPanel
     {
+        private bool _active = false;
         private SteamWorkWebAPI _api;
         private Config _config;
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
@@ -33,13 +35,26 @@ namespace GoogGUI
         public ModlistHandler(Config config)
         {
             _config = config;
+            _config.FileSaved += OnConfigSaved;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
 
             RefreshProfiles();
             SelectedModlist = _config.CurrentModlistProfile;
         }
 
+        public event EventHandler? CanExecuteChanged;
+
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public bool Active
+        {
+            get => _active;
+            set
+            {
+                _active = value;
+                OnPropertyChanged("Active");
+            }
+        }
 
         public ICommand CreateModlistCommand => new SimpleCommand(OnModlistCreate);
 
@@ -59,6 +74,8 @@ namespace GoogGUI
 
         public ICommand FetchCommand => new SimpleCommand(OnFetchClicked);
 
+        public ImageSource Icon => new BitmapImage(new Uri(@"/Icons/List.png", UriKind.Relative));
+
         public ICommand ImportFromFileCommand => new SimpleCommand(OnImportFromFile);
 
         public ICommand ImportFromTextCommand => new SimpleCommand(OnImportFromText);
@@ -69,7 +86,7 @@ namespace GoogGUI
 
         public object ItemTemplate => Application.Current.Resources["ModlistItems"];
 
-        public ICommand MenuOpenCommand => new SimpleCommand(OnMenuOpen);
+        public string Label => "Mod List";
 
         public TrulyObservableCollection<ModFile> Modlist
         {
@@ -110,9 +127,41 @@ namespace GoogGUI
 
         public DataTemplate Template => (DataTemplate)Application.Current.Resources["ModlistEditor"];
 
+        public bool CanExecute(object? parameter)
+        {
+            return _config.IsInstallPathValid && File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin));
+        }
+
+        public void Execute(object? parameter)
+        {
+            ((MainWindow)Application.Current.MainWindow).App.Panel = this;
+        }
+
         protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private void FetchJsonList(UriBuilder builder)
+        {
+            _source = new CancellationTokenSource();
+            OnPropertyChanged("IsLoading");
+            Task.Run(() => ModListProfile.DownloadModList(builder.ToString(), _source.Token)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModListDownloaded(x)));
+        }
+
+        private void FetchSteamCollection(UriBuilder builder)
+        {
+            var query = HttpUtility.ParseQueryString(builder.Query);
+            var id = query.Get("id");
+            if (id == null || !long.TryParse(id, out _))
+            {
+                new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").ShowDialog();
+                return;
+            }
+            _source = new CancellationTokenSource();
+            OnPropertyChanged("IsLoading");
+            Task.Run(() => _api.GetCollectionDetails(new HashSet<string> { id }, _source.Token)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCollectionDownloaded(x)));
+            return;
         }
 
         private bool GetFileInfo(string mod, out DateTime lastModified)
@@ -137,7 +186,7 @@ namespace GoogGUI
                 if (file.IsID && !_modManifests.ContainsKey(file.Mod))
                     requested.Add(file.Mod);
 
-            Task.Run(() => _api.GetPublishedFiles(requested, _source.Token)).ContinueWith((x)=> Application.Current.Dispatcher.Invoke(() => OnManifestsLoaded(x)));
+            Task.Run(() => _api.GetPublishedFiles(requested, _source.Token)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnManifestsLoaded(x)));
         }
 
         private void LoadModlist()
@@ -163,6 +212,40 @@ namespace GoogGUI
             OnPropertyChanged("ModlistURL");
 
             LoadModlist();
+        }
+
+        private void OnCollectionDownloaded(Task<Dictionary<string, SteamCollectionDetails>> task)
+        {
+            _source?.Dispose();
+            _source = null;
+            OnPropertyChanged("IsLoading");
+            if (!task.IsCompleted || task.Exception != null)
+            {
+                new ErrorModal("Failed", $"Could not download the collection. ({(task.Exception?.Message ?? "Unknown Error")})").ShowDialog();
+                return;
+            }
+            if (task.Result.Count == 0)
+            {
+                new ErrorModal("Not Found", "Collection could not be found.");
+                return;
+            }
+            if (task.Result.First().Value.children.Length == 0)
+                if (task.Result.Count == 0)
+                {
+                    new ErrorModal("Empty", "Collection is empty.");
+                    return;
+                }
+
+            List<string> modlist = new List<string>();
+            foreach (var child in task.Result.First().Value.children)
+                modlist.Add(child.publishedFileId);
+            _profile.Modlist = modlist;
+            LoadModlist();
+        }
+
+        private void OnConfigSaved(object? sender, Config e)
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnExploreLocal(object? obj)
@@ -219,79 +302,6 @@ namespace GoogGUI
                 FetchSteamCollection(builder);
             else
                 FetchJsonList(builder);
-        }
-
-        private void FetchJsonList(UriBuilder builder)
-        {
-            _source = new CancellationTokenSource();
-            OnPropertyChanged("IsLoading");
-            Task.Run(() => ModListProfile.DownloadModList(builder.ToString(), _source.Token)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModListDownloaded(x)));
-        }
-
-        private void OnModListDownloaded(Task<List<string>> task)
-        {
-            _source?.Dispose();
-            _source = null;
-            OnPropertyChanged("IsLoading");
-            if (!task.IsCompleted || task.Exception != null)
-            {
-                new ErrorModal("Failed", $"Could not download the file. ({(task.Exception?.Message ?? "Unknown Error")})").ShowDialog();
-                return;
-            }
-            if(task.Result.Count == 0)
-            {
-                new ErrorModal("Empty", "Downloaded list is empty.");
-                return;
-            }
-
-            List<string> modlist = task.Result;
-            ModListProfile.TryParseModList(ref modlist);
-            _profile.Modlist = modlist;
-            LoadModlist();
-        }
-
-        private void FetchSteamCollection(UriBuilder builder)
-        {
-            var query = HttpUtility.ParseQueryString(builder.Query);
-            var id = query.Get("id");
-            if (id == null || !long.TryParse(id, out _))
-            {
-                new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").ShowDialog();
-                return;
-            }
-            _source = new CancellationTokenSource();
-            OnPropertyChanged("IsLoading");
-            Task.Run(() => _api.GetCollectionDetails(new HashSet<string> { id }, _source.Token)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCollectionDownloaded(x)));
-            return;
-        }
-
-        private void OnCollectionDownloaded(Task<Dictionary<string, SteamCollectionDetails>> task)
-        {
-            _source?.Dispose();
-            _source = null;
-            OnPropertyChanged("IsLoading");
-            if (!task.IsCompleted || task.Exception != null)
-            {
-                new ErrorModal("Failed", $"Could not download the collection. ({(task.Exception?.Message ?? "Unknown Error")})").ShowDialog();
-                return;
-            }
-            if (task.Result.Count == 0)
-            {
-                new ErrorModal("Not Found", "Collection could not be found.");
-                return;
-            }
-            if(task.Result.First().Value.children.Length == 0)
-            if (task.Result.Count == 0)
-            {
-                new ErrorModal("Empty", "Collection is empty.");
-                return;
-            }
-
-            List<string> modlist = new List<string>();
-            foreach (var child in task.Result.First().Value.children)
-                modlist.Add(child.publishedFileId);
-            _profile.Modlist = modlist;
-            LoadModlist();
         }
 
         private void OnImportFromFile(object? obj)
@@ -395,12 +405,6 @@ namespace GoogGUI
             RefreshModData();
         }
 
-        private void OnMenuOpen(object? obj)
-        {
-            if (obj is MenuItem menuItem)
-                menuItem.ContextMenu.IsOpen = !menuItem.ContextMenu.IsOpen;
-        }
-
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
         {
             if (_modlist.Where((x) => x.IsID && x.Mod == mod.PublishedFile.publishedFileID).Any()) return;
@@ -485,13 +489,35 @@ namespace GoogGUI
             LoadModlist();
         }
 
+        private void OnModListDownloaded(Task<List<string>> task)
+        {
+            _source?.Dispose();
+            _source = null;
+            OnPropertyChanged("IsLoading");
+            if (!task.IsCompleted || task.Exception != null)
+            {
+                new ErrorModal("Failed", $"Could not download the file. ({(task.Exception?.Message ?? "Unknown Error")})").ShowDialog();
+                return;
+            }
+            if (task.Result.Count == 0)
+            {
+                new ErrorModal("Empty", "Downloaded list is empty.");
+                return;
+            }
+
+            List<string> modlist = task.Result;
+            ModListProfile.TryParseModList(ref modlist);
+            _profile.Modlist = modlist;
+            LoadModlist();
+        }
+
         private void OnModlistDuplicate(object? obj)
         {
             ChooseNameModal modal = new ChooseNameModal("Duplicate", _selectedModlist);
             modal.ShowDialog();
             string name = modal.Name;
             if (string.IsNullOrEmpty(name)) return;
-            if(_profiles.Contains(name))
+            if (_profiles.Contains(name))
             {
                 new ErrorModal("Already Exitsts", "This mod list name is already used").ShowDialog();
                 return;

@@ -1,40 +1,56 @@
 ﻿using Goog;
 using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Drawing;
 using System.IO;
+using System.Windows.Automation;
 using System.Windows.Input;
+using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
     public class GoogApp : INotifyPropertyChanged
     {
-        private ClientSettings? _clientSettings;
         private Config _config;
-        private ModlistHandler? _modlist;
-        private object? _panel;
-        private Settings? _settings;
+        private IPanel? _panel;
+        private List<IPanel> _topTabs;
+        private List<IPanel> _bottomTabs;
 
         public GoogApp(Config config)
         {
             _config = config;
             _config.FileSaved += OnConfigFileSaved;
+
+            _topTabs = new List<IPanel>
+            {
+                new ModlistHandler(_config),
+                new ClientSettings(_config),
+            };
+
+            _bottomTabs = new List<IPanel>
+            {
+                new Settings(_config),
+            };
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public bool CanUseGame => CanUseModlist && !string.IsNullOrEmpty(_config.ClientPath) && File.Exists(Path.Combine(_config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
-
-        public bool CanUseModlist => _config.IsInstallPathValid && File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin));
-
-        public bool CanUseServer => CanUseModlist;
-
-        public ICommand ClientSettingsCommand => new SimpleCommand(DisplayClientSettings);
-
-        public ICommand ModlistCommand => new SimpleCommand(ModlistDisplay);
-
-        public object? Panel { get => _panel; set => _panel = value; }
-
-        public ICommand SettingsCommand => new SimpleCommand(DisplaySettings);
+        public IPanel? Panel 
+        { 
+            get => _panel; 
+            set
+            {
+                if (_panel != null)
+                    _panel.Active = false;
+                _panel = value;
+                if (_panel != null)
+                    _panel.Active = true;
+                OnPropertyChanged("Panel");
+            }
+        }
+        public List<IPanel> TopTabs { get => _topTabs; }
+        public List<IPanel> BottomTabs { get => _bottomTabs; }
 
         public void BaseChecks()
         {
@@ -45,45 +61,12 @@ namespace GoogGUI
                 new MessageModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles").ShowDialog();
 
             if (!_config.IsInstallPathValid)
-                DisplaySettings(this);
-        }
-
-        public void DisplayClientSettings(object? sender)
-        {
-            if (_panel is ClientSettings) return;
-            if (_clientSettings == null)
-            {
-                _clientSettings = new ClientSettings(_config);
-            }
-            _panel = _clientSettings;
-            OnPropertyChanged("Panel");
-        }
-
-        public void DisplaySettings(object? sender)
-        {
-            if (_panel is Settings) return;
-            if (_settings == null)
-            {
-                _settings = new Settings(_config);
-            }
-            _panel = _settings;
-            OnPropertyChanged("Panel");
+                Panel = _bottomTabs[0];
         }
 
         protected virtual void OnPropertyChanged(string property)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
-        }
-
-        private void ModlistDisplay(object? obj)
-        {
-            if (_panel is ModlistHandler) return;
-            if (_modlist == null)
-            {
-                _modlist = new ModlistHandler(_config);
-            }
-            _panel = _modlist;
-            OnPropertyChanged("Panel");
         }
 
         private void OnConfigFileSaved(object? sender, Config e)
