@@ -21,7 +21,7 @@ namespace GoogGUI
             DataContext = this;
         }
 
-        public GoogApp? App { get => _app; set => _app = value; }
+        public GoogApp App { get => _app; set => _app = value; }
 
         public TaskBlocker TaskBlocker => _taskBlocker;
 
