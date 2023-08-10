@@ -26,16 +26,7 @@
                     <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding RefreshModlistCommand}" ToolTip="Refresh mod infos" Margin="0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Reset.png" Width="16" Height="16" />
                     </Button>
-                    <Button Command="{Binding DownloadlistCommand}" ToolTip="Update Mods" Margin="0" VerticalAlignment="Top">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource ButtonIconBlue}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding TaskBlocker.IsAvailable, RelativeSource={RelativeSource AncestorType=local:MainWindow}}" Value="False">
-                                        <Setter Property="IsEnabled" Value="False" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
+                    <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding ModFilesDownloadCommand}" ToolTip="Update Mods" Margin="0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Download.png" Width="16" Height="16" />
                     </Button>
                     <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,3" Height="25" VerticalAlignment="Top"  />

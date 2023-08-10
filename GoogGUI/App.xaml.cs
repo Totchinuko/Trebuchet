@@ -14,7 +14,7 @@ namespace GoogGUI
         public bool IsShutingDown { get; private set; }
         public static bool UseSoftwareRendering = true;
 
-        public static TaskBlocker TaskBlocker => ((MainWindow)Current.MainWindow).TaskBlocker;
+        public static readonly TaskBlocker TaskBlocker = new TaskBlocker();
 
         protected override void OnExit(ExitEventArgs e)
         {

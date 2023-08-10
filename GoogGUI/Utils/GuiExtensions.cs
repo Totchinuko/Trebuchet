@@ -112,11 +112,6 @@ namespace GoogGUI
             return (bool)source.GetValue(IsDraggingProperty);
         }
 
-        public static TaskBlocker GetTaskBlocker(this Application application)
-        {
-            return ((MainWindow)application.MainWindow).TaskBlocker;
-        }
-
         public static void SetAccent(UIElement element, bool value)
         {
             element.SetValue(AccentProperty, value);

@@ -12,7 +12,6 @@ namespace GoogGUI
     {
         private GoogApp _app;
         private bool _shown;
-        private TaskBlocker _taskBlocker = new TaskBlocker();
 
         public MainWindow(Config config)
         {
@@ -23,9 +22,9 @@ namespace GoogGUI
 
         public GoogApp App { get => _app; set => _app = value; }
 
-        public TaskBlocker TaskBlocker => _taskBlocker;
-
         public bool WasShown => _shown;
+
+        public TaskBlocker TaskBlocker => GoogGUI.App.TaskBlocker;
 
         protected override void OnClosed(EventArgs e)
         {

@@ -10,20 +10,18 @@ namespace GoogGUI
     internal class ModFile : INotifyPropertyChanged
     {
         private SteamPublishedFile? _file;
-        private bool _fileExists = false;
+        private FileInfo _infos;
         private bool _isID;
         private bool _isValid;
-        private DateTime _lastModified;
         private DateTime _lastUpdate;
         private string _mod = string.Empty;
 
-        public ModFile(string mod, bool fileExists, DateTime lastModified = default)
+        public ModFile(string mod, string path)
         {
             _mod = mod;
             _isID = long.TryParse(_mod, out _);
             _isValid = _isID || File.Exists(_mod);
-            _fileExists = fileExists;
-            _lastModified = lastModified;
+            _infos = new FileInfo(path);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -39,7 +37,7 @@ namespace GoogGUI
                 if (!_isID && !_isValid) return string.Empty;
                 if(!_isID)
                 {
-                    DateTime lastModified = _lastModified.ToLocalTime();
+                    DateTime lastModified = _infos.LastWriteTime;
                     return "Last Modified : " + lastModified.ToShortDateString() + " " + lastModified.ToShortTimeString();
                 }
 
@@ -81,19 +79,26 @@ namespace GoogGUI
             OnPropertyChanged("StatusTooltip");
         }
 
+        public void RefreshFile()
+        {
+            _infos.Refresh();
+            OnPropertyChanged("StatusColor");
+            OnPropertyChanged("StatusTooltip");
+        }
+
         protected virtual Brush GetStatusBrush()
         {
-            if (!_fileExists) return (Brush)Application.Current.Resources["GDimRed"];
+            if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
             if (_file == null) return (Brush)Application.Current.Resources["GDimBlue"];
-            if (_lastUpdate < _lastModified) return (Brush)Application.Current.Resources["GDimGreen"];
+            if (_lastUpdate < _infos.LastWriteTimeUtc) return (Brush)Application.Current.Resources["GDimGreen"];
             return (Brush)Application.Current.Resources["GDimYellow"];
         }
 
         protected virtual string GetStatusText()
         {
-            if (!_fileExists) return "Missing";
+            if (!_infos.Exists) return "Missing";
             if (_file == null) return "Found";
-            if (_lastUpdate < _lastModified) return "Up to Date";
+            if (_lastUpdate < _infos.LastWriteTimeUtc) return "Up to Date";
             return "Update available";
         }
 

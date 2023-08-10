@@ -16,8 +16,6 @@ namespace GoogGUI
     [Panel("Settings", "/Icons/Settings.png", true, 10)]
     public class Settings : FieldEditorPanel
     {
-        private CancellationTokenSource? _source;
-
         public Settings(Config config) : base(config)
         {
             _config.FileSaved += OnConfigSaved;
@@ -103,47 +101,39 @@ namespace GoogGUI
 
         private void OnInstallSteam(object? obj)
         {
-            if (_source != null) return;
             if (!App.TaskBlocker.IsAvailable) return;
 
-            _source = new CancellationTokenSource();
-            var task = Task.Run(() => Setup.SetupAppAndSteam(_config, _source.Token, true)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnInstallSteamComplete(x)));
-            App.TaskBlocker.Set(task, "Installing steam CMD...", _source);
+            var token = App.TaskBlocker.SetMain("Installing steam CMD...");
+            var task = Task.Run(() => Setup.SetupAppAndSteam(_config, token, true), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnInstallSteamComplete(x)));
         }
 
         private void OnInstallSteamComplete(Task<int> task)
         {
             HandleTaskErrors(task);
-            if (_source != null && _source.IsCancellationRequested)
+            if (task.IsCanceled)
                 Setup.DeleteSteamCMD(_config);
 
-            _source?.Dispose();
-            _source = null;
-            App.TaskBlocker.Release();
+            App.TaskBlocker.ReleaseMain();
             UpdateRequiredActions();
         }
 
         private void OnServerInstanceInstall(object? obj)
         {
             if (_config.ServerInstanceCount <= 0) return;
-            if (_source != null) return;
             if (!App.TaskBlocker.IsAvailable) return;
 
             int installed = _config.GetInstalledInstances();
             if (installed >= _config.ServerInstanceCount)
                 return;
 
-            _source = new CancellationTokenSource();
-            var task = Task.Run(() => OnServerInstanceInstallTask(_source.Token)).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnServerInstanceInstallComplete(x)));
-            App.TaskBlocker.Set(task, "Updating server instances...", _source);
+            var token = App.TaskBlocker.SetMain("Updating server instances...");
+            var task = Task.Run(() => OnServerInstanceInstallTask(token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnServerInstanceInstallComplete(x)));
         }
 
         private void OnServerInstanceInstallComplete(Task<int> task)
         {
             HandleTaskErrors(task);
-            _source?.Dispose();
-            _source = null;
-            App.TaskBlocker.Release();
+            App.TaskBlocker.ReleaseMain();
             UpdateRequiredActions();
         }
 
