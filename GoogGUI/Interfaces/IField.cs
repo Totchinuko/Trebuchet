@@ -19,6 +19,8 @@ namespace GoogGUI
 
         public object? Value { get; set; }
 
+        public void RefreshValue();
+
         public static List<IField> BuildFieldList(object target)
         {
             List<IField> fields = new List<IField>();

@@ -56,6 +56,11 @@ namespace GoogGUI
             }
         }
 
+        public void RefreshValue()
+        {
+            OnPropertyChanged("Value");
+        }
+
         public static bool IsNullOrEmpty(object? value)
         {
             if (value == null) return true;
