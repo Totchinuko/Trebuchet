@@ -29,11 +29,13 @@ namespace GoogGUI
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
+        private FileSystemWatcher _modWatcher;
 
         public ModlistHandler(Config config) : base(config)
         {
             _config.FileSaved += (_, _) => OnCanExecuteChanged();
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
+            _modWatcher = SetupFileWatcher();
 
             RefreshProfiles();
             SelectedModlist = _config.CurrentModlistProfile;
@@ -96,6 +98,35 @@ namespace GoogGUI
                 OnPropertyChanged("SelectedModlist");
                 OnSelectionChanged();
             }
+        }
+
+        private FileSystemWatcher SetupFileWatcher()
+        {
+            var watcher = new FileSystemWatcher(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods));
+            watcher.NotifyFilter = NotifyFilters.Attributes
+                                 | NotifyFilters.CreationTime
+                                 | NotifyFilters.DirectoryName
+                                 | NotifyFilters.FileName
+                                 | NotifyFilters.LastAccess
+                                 | NotifyFilters.LastWrite
+                                 | NotifyFilters.Security
+                                 | NotifyFilters.Size;
+            watcher.Changed += OnModFileChanged;
+            watcher.Created += OnModFileChanged;
+            watcher.Deleted += OnModFileChanged;
+            watcher.Renamed += OnModFileChanged;
+            //  watcher.Filter = "*.pak";
+            watcher.IncludeSubdirectories = true;
+            watcher.EnableRaisingEvents = true;
+            return watcher;
+        }
+
+        private void OnModFileChanged(object sender, FileSystemEventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                RefreshModFileStatus();
+            });
         }
 
         public override bool CanExecute(object? parameter)
@@ -341,11 +372,12 @@ namespace GoogGUI
                 return;
             }
 
-            var toAdd = task.Result;
-            foreach (var data in toAdd)
+            foreach (var data in task.Result)
                 _modManifests[data.Key] = data.Value;
 
-            RefreshModData();
+            foreach (ModFile file in _modlist)
+                if (file.IsID && _modManifests.TryGetValue(file.Mod, out var value))
+                    file.SetManifest(value);
         }
 
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
@@ -379,8 +411,7 @@ namespace GoogGUI
                 return;
             }
 
-            foreach (ModFile file in _modlist)
-                file.RefreshFile();
+            RefreshModFileStatus();
         }
 
         private void OnModlistChanged()
@@ -497,13 +528,6 @@ namespace GoogGUI
             LoadModlistProfile();
         }
 
-        private void RefreshModData()
-        {
-            foreach (ModFile file in _modlist)
-                if (file.IsID && _modManifests.TryGetValue(file.Mod, out var value))
-                    file.SetManifest(value);
-        }
-
         private void RefreshProfiles()
         {
             _profiles.Clear();
@@ -515,6 +539,16 @@ namespace GoogGUI
             foreach (string p in profiles)
                 _profiles.Add(Path.GetFileNameWithoutExtension(p));
             OnPropertyChanged("Profiles");
+        }
+
+        private void RefreshModFileStatus()
+        {
+            foreach(ModFile file in _modlist)
+            {
+                string path = file.Mod;
+                _config.ResolveMod(ref path);
+                file.RefreshFile(path);
+            }
         }
 
         private void SelectFirst()
