@@ -29,7 +29,7 @@ namespace GoogGUI
 
         #region Fields
 
-        [IntSliderField("Texture Streaming Pool", 0, 4000, 0, Frequency = 100, Sort = 40)]
+        [IntSliderField("Texture Streaming Pool (MB)", 0, 4000, 0, Frequency = 100, Sort = 40)]
         public int AddedTexturePool
         {
             get => _profile.AddedTexturePool;
