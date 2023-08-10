@@ -13,20 +13,14 @@ using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
-    [Panel(true, 100)]
-    public class Settings : IPanel, IFieldEditor
+    [Panel("Settings", "/Icons/Settings.png", true, 10)]
+    public class Settings : FieldEditorPanel
     {
-        private bool _active;
-        private Config _config;
-        private List<IField> _fields = new List<IField>();
-        private List<RequiredCommand> _requiredActions = new List<RequiredCommand>();
         private CancellationTokenSource? _source;
 
-        public Settings(Config config)
+        public Settings(Config config) : base(config)
         {
-            _config = config;
             _config.FileSaved += OnConfigSaved;
-            _fields = IField.BuildFieldList(this);
             UpdateRequiredActions();
         }
 
@@ -87,45 +81,6 @@ namespace GoogGUI
         }
         #endregion
 
-        public event EventHandler? CanExecuteChanged;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public bool Active
-        {
-            get => _active;
-            set
-            {
-                _active = value;
-                OnPropertyChanged("Active");
-            }
-        }
-
-        public List<IField> Fields { get => _fields; set => _fields = value; }
-
-        public ImageSource Icon => new BitmapImage(new Uri(@"/Icons/Settings.png", UriKind.Relative));
-
-        public string Label => "Settings";
-
-        public List<RequiredCommand> RequiredActions { get => _requiredActions; set => _requiredActions = value; }
-
-        public DataTemplate Template => (DataTemplate)Application.Current.Resources["FieldEditor"];
-
-        public bool CanExecute(object? parameter)
-        {
-            return true;
-        }
-
-        public void Execute(object? parameter)
-        {
-            ((MainWindow)Application.Current.MainWindow).App.Panel = this;
-        }
-
-        protected virtual void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-
         private void HandleTaskErrors(Task<int> task)
         {
             if (task.IsFaulted && task.Exception != null)
@@ -142,7 +97,7 @@ namespace GoogGUI
 
         private void OnConfigSaved(object? sender, Config e)
         {
-            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            OnCanExecuteChanged();
         }
 
         private void OnInstallSteam(object? obj)
@@ -219,16 +174,15 @@ namespace GoogGUI
 
         private void UpdateRequiredActions()
         {
-            _requiredActions = new List<RequiredCommand>();
+            RequiredActions.Clear();
 
             int installed = _config.GetInstalledInstances();
             if (Directory.Exists(_config.InstallPath) && !File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)))
-                _requiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, true));
+                RequiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, true));
             else if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)
-                _requiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, true));
+                RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, true));
             if (App.UseSoftwareRendering == _config.UseHardwareAcceleration)
-                _requiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, true));
-            OnPropertyChanged("RequiredActions");
+                RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, true));
         }
     }
 }

@@ -14,17 +14,13 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
-    [Panel(false, 0)]
-    internal class ModlistHandler : IPanel
+    [Panel("Mod List", "/Icons/List.png", false, 0, "ModlistEditor")]
+    internal class ModlistHandler : Panel
     {
-        private bool _active = false;
         private SteamWorkWebAPI _api;
-        private Config _config;
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
         private string _modlistURL = string.Empty;
         private Dictionary<string, SteamPublishedFile> _modManifests = new Dictionary<string, SteamPublishedFile>();
@@ -34,28 +30,13 @@ namespace GoogGUI
         private string _selectedModlist = string.Empty;
         private CancellationTokenSource? _source;
 
-        public ModlistHandler(Config config)
+        public ModlistHandler(Config config) : base(config)
         {
-            _config = config;
             _config.FileSaved += OnConfigSaved;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
 
             RefreshProfiles();
             SelectedModlist = _config.CurrentModlistProfile;
-        }
-
-        public event EventHandler? CanExecuteChanged;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        public bool Active
-        {
-            get => _active;
-            set
-            {
-                _active = value;
-                OnPropertyChanged("Active");
-            }
         }
 
         public ICommand CreateModlistCommand => new SimpleCommand(OnModlistCreate);
@@ -76,8 +57,6 @@ namespace GoogGUI
 
         public ICommand FetchCommand => new SimpleCommand(OnFetchClicked);
 
-        public ImageSource Icon => new BitmapImage(new Uri(@"/Icons/List.png", UriKind.Relative));
-
         public ICommand ImportFromFileCommand => new SimpleCommand(OnImportFromFile);
 
         public ICommand ImportFromTextCommand => new SimpleCommand(OnImportFromText);
@@ -87,8 +66,6 @@ namespace GoogGUI
         public bool IsLoading => _source != null;
 
         public object ItemTemplate => Application.Current.Resources["ModlistItems"];
-
-        public string Label => "Mod List";
 
         public TrulyObservableCollection<ModFile> Modlist
         {
@@ -127,21 +104,9 @@ namespace GoogGUI
             }
         }
 
-        public DataTemplate Template => (DataTemplate)Application.Current.Resources["ModlistEditor"];
-
-        public bool CanExecute(object? parameter)
+        public override bool CanExecute(object? parameter)
         {
             return _config.IsInstallPathValid && File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin));
-        }
-
-        public void Execute(object? parameter)
-        {
-            ((MainWindow)Application.Current.MainWindow).App.Panel = this;
-        }
-
-        protected virtual void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         private void FetchJsonList(UriBuilder builder)
@@ -247,7 +212,7 @@ namespace GoogGUI
 
         private void OnConfigSaved(object? sender, Config e)
         {
-            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            OnCanExecuteChanged();
         }
 
         private void OnExploreLocal(object? obj)

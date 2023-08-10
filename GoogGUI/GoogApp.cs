@@ -10,10 +10,10 @@ namespace GoogGUI
 {
     public class GoogApp : INotifyPropertyChanged
     {
-        private List<IPanel> _bottomTabs = new List<IPanel>();
+        private List<Panel> _bottomTabs = new List<Panel>();
         private Config _config;
-        private IPanel? _panel;
-        private List<IPanel> _topTabs = new List<IPanel>();
+        private Panel? _panel;
+        private List<Panel> _topTabs = new List<Panel>();
 
         public GoogApp(Config config)
         {
@@ -26,7 +26,7 @@ namespace GoogGUI
 
             foreach (Type t in types)
             {
-                IPanel? panel = (IPanel?)Activator.CreateInstance(t, _config) ?? throw new Exception("Panel attribute must be places on IPanel classes.");
+                Panel? panel = (Panel?)Activator.CreateInstance(t, _config) ?? throw new Exception("Panel attribute must be placed on Panel classes.");
                 if (panel == null) continue;
                 if (t.GetCustomAttribute<PanelAttribute>()?.Bottom ?? false)
                     _bottomTabs.Add(panel);
@@ -37,9 +37,9 @@ namespace GoogGUI
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public List<IPanel> BottomTabs { get => _bottomTabs; }
+        public List<Panel> BottomTabs { get => _bottomTabs; }
 
-        public IPanel? Panel
+        public Panel? Panel
         {
             get => _panel;
             set
@@ -53,7 +53,7 @@ namespace GoogGUI
             }
         }
 
-        public List<IPanel> TopTabs { get => _topTabs; }
+        public List<Panel> TopTabs { get => _topTabs; }
 
         public void BaseChecks()
         {
