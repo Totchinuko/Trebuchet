@@ -86,7 +86,7 @@ namespace Goog
             string? ConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(ConfigPath))
                 throw new Exception("Path to assembly is invalid.");
-            ConfigPath = Path.Combine(ConfigPath, (testlive ? FolderTestLive : FolderLive), FileConfig);
+            ConfigPath = Path.Combine(ConfigPath, $"{(testlive ? FolderTestLive : FolderLive)}.{FileConfig}");
             return ConfigPath;
         }
 
