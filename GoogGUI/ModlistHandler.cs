@@ -26,7 +26,7 @@ namespace GoogGUI
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
         private string _modlistURL = string.Empty;
         private Dictionary<string, SteamPublishedFile> _modManifests = new Dictionary<string, SteamPublishedFile>();
-        private FileSystemWatcher _modWatcher;
+        private FileSystemWatcher? _modWatcher;
         private ModListProfile _profile;
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private WorkshopSearch? _searchWindow;
@@ -34,9 +34,9 @@ namespace GoogGUI
 
         public ModlistHandler(Config config) : base(config)
         {
-            _config.FileSaved += (_, _) => OnCanExecuteChanged();
+            _config.FileSaved += OnConfigFileChanged;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
-            _modWatcher = SetupFileWatcher();
+            SetupFileWatcher();
 
             _selectedModlist = _config.CurrentModlistProfile;
             ModListProfile.ResolveProfile(_config, ref _selectedModlist);
@@ -194,6 +194,12 @@ namespace GoogGUI
                 modlist.Add(child.publishedFileId);
             _profile.Modlist = modlist;
             LoadModlist();
+        }
+
+        private void OnConfigFileChanged(object? sender, Config e)
+        {
+            SetupFileWatcher();
+            OnCanExecuteChanged();
         }
 
         private void OnExploreLocal(object? obj)
@@ -536,10 +542,14 @@ namespace GoogGUI
             OnPropertyChanged("Profiles");
         }
 
-        private FileSystemWatcher SetupFileWatcher()
+        private void SetupFileWatcher()
         {
-            var watcher = new FileSystemWatcher(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods));
-            watcher.NotifyFilter = NotifyFilters.Attributes
+            if (_modWatcher != null) return;
+            string path = Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods);
+            if (!Directory.Exists(path)) return;
+
+            _modWatcher = new FileSystemWatcher(path);
+            _modWatcher.NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
                                  | NotifyFilters.DirectoryName
                                  | NotifyFilters.FileName
@@ -547,14 +557,13 @@ namespace GoogGUI
                                  | NotifyFilters.LastWrite
                                  | NotifyFilters.Security
                                  | NotifyFilters.Size;
-            watcher.Changed += OnModFileChanged;
-            watcher.Created += OnModFileChanged;
-            watcher.Deleted += OnModFileChanged;
-            watcher.Renamed += OnModFileChanged;
+            _modWatcher.Changed += OnModFileChanged;
+            _modWatcher.Created += OnModFileChanged;
+            _modWatcher.Deleted += OnModFileChanged;
+            _modWatcher.Renamed += OnModFileChanged;
             //  watcher.Filter = "*.pak";
-            watcher.IncludeSubdirectories = true;
-            watcher.EnableRaisingEvents = true;
-            return watcher;
+            _modWatcher.IncludeSubdirectories = true;
+            _modWatcher.EnableRaisingEvents = true;
         }
     }
 }
