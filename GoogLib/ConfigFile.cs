@@ -91,8 +91,6 @@ namespace Goog
 
         public void DeleteFolder()
         {
-            if (!File.Exists(FilePath))
-                throw new FileNotFoundException($"{FilePath} not found");
             string? folder = Path.GetDirectoryName(FilePath);
             if (folder == null || !Directory.Exists(folder))
                 throw new DirectoryNotFoundException($"Invalid directory for {FilePath}");
