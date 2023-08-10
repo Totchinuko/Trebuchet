@@ -1,8 +1,11 @@
 ﻿using Goog;
 using GoogGUI.Attributes;
 using GoogLib;
+using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Windows;
+using System.Windows.Input;
 
 namespace GoogGUI
 {
@@ -10,25 +13,29 @@ namespace GoogGUI
     public class ClientSettings : FieldEditorPanel
     {
         private ClientProfile _profile;
+        private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private string _selectedProfile;
 
         public ClientSettings(Config config) : base(config)
         {
             _config.FileSaved += OnConfigSaved;
 
+            MoveOriginalSavedFolder();
             _selectedProfile = _config.CurrentClientProfile;
             ClientProfile.ResolveProfile(_config, ref _selectedProfile);
+            LoadProfileList();
             LoadProfile();
         }
 
         #region Fields
-        [ToggleField("Remove Intro Video", false, Sort = 0)]
-        public bool RemoveIntroVideo
+
+        [IntSliderField("Texture Streaming Pool", 0, 4000, 0, Frequency = 100, Sort = 40)]
+        public int AddedTexturePool
         {
-            get => _profile.RemoveIntroVideo;
+            get => _profile.AddedTexturePool;
             set
             {
-                _profile.RemoveIntroVideo = value;
+                _profile.AddedTexturePool = value;
                 OnValueChanged();
             }
         }
@@ -44,17 +51,6 @@ namespace GoogGUI
             }
         }
 
-        [ToggleField("Use All Cores", false, Sort = 20)]
-        public bool UseAllCores
-        {
-            get => _profile.UseAllCores;
-            set
-            {
-                _profile.UseAllCores = value;
-                OnValueChanged();
-            }
-        }
-
         [ToggleField("Display Log Console", false, Sort = 30)]
         public bool Log
         {
@@ -66,17 +62,35 @@ namespace GoogGUI
             }
         }
 
-        [IntSliderField("Texture Streaming Pool", 0, 4000, 0, Frequency = 100, Sort = 40)]
-        public int AddedTexturePool
+        [ToggleField("Remove Intro Video", false, Sort = 0)]
+        public bool RemoveIntroVideo
         {
-            get => _profile.AddedTexturePool;
+            get => _profile.RemoveIntroVideo;
             set
             {
-                _profile.AddedTexturePool = value;
+                _profile.RemoveIntroVideo = value;
                 OnValueChanged();
             }
         }
+
+        [ToggleField("Use All Cores", false, Sort = 20)]
+        public bool UseAllCores
+        {
+            get => _profile.UseAllCores;
+            set
+            {
+                _profile.UseAllCores = value;
+                OnValueChanged();
+            }
+        }
+
         #endregion Fields
+
+        public ICommand CreateProfileCommand => new SimpleCommand(OnProfileCreate);
+
+        public ICommand DeleteProfileCommand => new SimpleCommand(OnProfileDelete);
+
+        public ICommand DuplicateProfileCommand => new SimpleCommand(OnProfileDuplicate);
 
         public string SelectedProfile
         {
@@ -87,6 +101,10 @@ namespace GoogGUI
                 OnProfileChanged();
             }
         }
+
+        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ClientSettings"];
+
+        public ObservableCollection<string> Profiles { get => _profiles; }
 
         public override bool CanExecute(object? parameter)
         {
@@ -107,9 +125,50 @@ namespace GoogGUI
                 Fields.ForEach(field => field.RefreshValue());
         }
 
+        private void LoadProfileList()
+        {
+            _profiles.Clear();
+            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderClientProfiles);
+            if (!Directory.Exists(folder))
+                return;
+
+            string[] profiles = Directory.GetDirectories(folder, "*");
+            foreach (string p in profiles)
+                _profiles.Add(Path.GetFileName(p));
+            OnPropertyChanged("Profiles");
+        }
+
+        private void MoveOriginalSavedFolder()
+        {
+            if (string.IsNullOrEmpty(_config.ClientPath)) return;
+            string savedFolder = Path.Combine(_config.ClientPath, Config.FolderGameSave);
+            if (!Directory.Exists(savedFolder)) return;
+            if (Tools.IsSymbolicLink(savedFolder)) return;
+
+            QuestionModal question = new QuestionModal("Saved Data", "Your game directory contain saved data from your previous use of the game. " +
+                "In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original. " +
+                "Do you wish to continue ?");
+            question.ShowDialog();
+
+            if (question.Result != System.Windows.Forms.DialogResult.Yes)
+            {
+                _config.ClientPath = string.Empty;
+                _config.SaveFile();
+                return;
+            }
+
+            string newPath = savedFolder + "_Original";
+            Directory.Move(savedFolder, newPath);
+            ClientProfile Original = ClientProfile.CreateFile(ClientProfile.GetPath(_config, "_Original"));
+            Original.SaveFile();
+            string profileFolder = Path.GetDirectoryName(Original.FilePath) ?? throw new DirectoryNotFoundException($"{Original.FilePath} path is invalid");
+            Tools.DeepCopy(newPath, profileFolder);
+        }
+
         private void OnConfigSaved(object? sender, Config e)
         {
             OnCanExecuteChanged();
+            MoveOriginalSavedFolder();
         }
 
         private void OnProfileChanged()
@@ -120,6 +179,62 @@ namespace GoogGUI
             _config.SaveFile();
             OnPropertyChanged("SelectedProfile");
             LoadProfile();
+        }
+
+        private void OnProfileCreate(object? obj)
+        {
+            ChooseNameModal modal = new ChooseNameModal("Create", string.Empty);
+            modal.ShowDialog();
+            string name = modal.Name;
+            if (string.IsNullOrEmpty(name)) return;
+            if (_profiles.Contains(name))
+            {
+                new ErrorModal("Already Exitsts", "This mod list name is already used").ShowDialog();
+                return;
+            }
+
+            _profile = ClientProfile.CreateFile(Path.Combine(ClientProfile.GetPath(_config, name)));
+            _profile.SaveFile();
+            LoadProfileList();
+            SelectedProfile = name;
+        }
+
+        private void OnProfileDelete(object? obj)
+        {
+            if (string.IsNullOrEmpty(_selectedProfile)) return;
+            if (_profile == null) return;
+
+            QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
+            question.ShowDialog();
+            if (question.Result == System.Windows.Forms.DialogResult.Yes)
+            {
+                _profile.DeleteFolder();
+
+                string profile = string.Empty;
+                ClientProfile.ResolveProfile(_config, ref profile);
+                LoadProfileList();
+                SelectedProfile = profile;
+            }
+        }
+
+        private void OnProfileDuplicate(object? obj)
+        {
+            ChooseNameModal modal = new ChooseNameModal("Duplicate", _selectedProfile);
+            modal.ShowDialog();
+            string name = modal.Name;
+            if (string.IsNullOrEmpty(name)) return;
+            if (_profiles.Contains(name))
+            {
+                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                return;
+            }
+
+            string path = Path.Combine(ClientProfile.GetPath(_config, name));
+            _profile.CopyFolderTo(path);
+            _profile = ClientProfile.LoadFile(path);
+            _profile.SaveFile();
+            LoadProfileList();
+            SelectedProfile = name;
         }
 
         private void OnValueChanged()

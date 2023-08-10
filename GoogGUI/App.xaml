@@ -30,6 +30,7 @@
                 <ResourceDictionary Source="Templates\ChooseNameModal.xaml" />
                 <ResourceDictionary Source="Templates\ModlistTextImport.xaml" />
                 <ResourceDictionary Source="Templates\Selectors.xaml" />
+                <ResourceDictionary Source="Templates\ClientSettings.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

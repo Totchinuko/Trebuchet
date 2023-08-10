@@ -76,6 +76,11 @@ namespace Goog
             return result.StartsWith("\\") ? result.Substring(1) : result;
         }
 
+        public static bool IsSymbolicLink(string path)
+        {
+            return Directory.Exists(path) && File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint);
+        }
+
         public static void RemoveSymboliclink(string path)
         {
             if (Directory.Exists(path) && File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint))
