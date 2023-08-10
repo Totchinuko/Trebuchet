@@ -133,5 +133,15 @@ namespace Goog
                 return string.Empty;
             return Path.GetFileNameWithoutExtension(profiles[0]);
         }
+
+        public static string GetFirstDirectoryName(string folder, string pattern)
+        {
+            if (!Directory.Exists(folder))
+                return string.Empty;
+            string[] profiles = Directory.GetDirectories(folder, pattern);
+            if (profiles.Length == 0)
+                return string.Empty;
+            return Path.GetFileNameWithoutExtension(profiles[0]);
+        }
     }
 }

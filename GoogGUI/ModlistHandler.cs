@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -26,7 +27,7 @@ namespace GoogGUI
         private string _modlistURL = string.Empty;
         private Dictionary<string, SteamPublishedFile> _modManifests = new Dictionary<string, SteamPublishedFile>();
         private FileSystemWatcher _modWatcher;
-        private ModListProfile _profile = new ModListProfile();
+        private ModListProfile _profile;
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
@@ -37,7 +38,9 @@ namespace GoogGUI
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
             _modWatcher = SetupFileWatcher();
 
-            SelectedModlist = _config.CurrentModlistProfile;
+            _selectedModlist = _config.CurrentModlistProfile;
+            ModListProfile.ResolveProfile(_config, ref _selectedModlist);
+            LoadProfile();
             RefreshProfiles();
         }
 
@@ -155,11 +158,10 @@ namespace GoogGUI
             LoadManifests();
         }
 
+        [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            if (string.IsNullOrEmpty(_selectedModlist)) return;
-            string path = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, _selectedModlist + ".json");
-            _profile = ModListProfile.LoadFile(path);
+            _profile = ModListProfile.LoadFile(ModListProfile.GetPath(_config, _selectedModlist));
             _modlistURL = _profile.SyncURL;
             OnPropertyChanged("ModlistURL");
 

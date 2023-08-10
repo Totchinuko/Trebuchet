@@ -3,7 +3,7 @@ using System.Text.Json;
 
 namespace GoogLib
 {
-    public class ModListProfile : ConfigFile<ModListProfile>
+    public sealed class ModListProfile : ConfigFile<ModListProfile>
     {
         private List<string> _modlist = new List<string>();
         private string _syncURL = string.Empty;
@@ -11,6 +11,8 @@ namespace GoogLib
         public List<string> Modlist { get => _modlist; set => _modlist = value; }
 
         public string SyncURL { get => _syncURL; set => _syncURL = value; }
+
+        private ModListProfile() { }
 
         public static async Task<List<string>> DownloadModList(string url, CancellationToken cancellationToken)
         {
