@@ -34,7 +34,8 @@ namespace GoogGUI
 
         public void Execute(object? parameter)
         {
-            _command.Invoke(parameter);
+            if(CanExecute(parameter))
+                _command.Invoke(parameter);
         }
     }
 }

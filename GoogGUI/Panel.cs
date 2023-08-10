@@ -54,7 +54,8 @@ namespace GoogGUI
 
         public virtual void Execute(object? parameter)
         {
-            ((MainWindow)Application.Current.MainWindow).App.Panel = this;
+            if(CanExecute(parameter))
+                ((MainWindow)Application.Current.MainWindow).App.Panel = this;
         }
 
         protected virtual void OnPropertyChanged(string name)
