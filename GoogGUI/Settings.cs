@@ -21,6 +21,7 @@ namespace GoogGUI
         public Settings(Config config) : base(config)
         {
             _config.FileSaved += OnConfigSaved;
+            BuildFields();
             UpdateRequiredActions();
         }
 

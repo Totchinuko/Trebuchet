@@ -16,7 +16,12 @@ namespace GoogGUI
 
         protected FieldEditorPanel(Config config) : base(config)
         {
+        }
+
+        protected virtual void BuildFields()
+        {
             _fields = IField.BuildFieldList(this);
+            OnPropertyChanged("Fields");
         }
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["FieldEditor"];
