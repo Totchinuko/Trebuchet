@@ -12,7 +12,7 @@
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap">
                     <Run Text="{Binding ErrorMessage}" />
                 </TextBlock>
             </StackPanel>
