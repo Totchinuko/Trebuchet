@@ -72,7 +72,7 @@ namespace Goog
 
         public static async Task<int> UpdateMods(Config config, string modlist, CancellationToken token)
         {
-            string modlistFile = ModListProfile.GetModlistPath(config, modlist);
+            string modlistFile = ModListProfile.GetPath(config, modlist);
             if (!File.Exists(modlistFile))
                 throw new FileNotFoundException($"modlist {modlist} was not found.");
 

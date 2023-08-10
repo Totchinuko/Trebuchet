@@ -81,7 +81,7 @@ namespace Goog
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 
-        public static string GetConfigPath(bool testlive)
+        public static string GetPath(bool testlive)
         {
             string? ConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (string.IsNullOrEmpty(ConfigPath))

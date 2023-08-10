@@ -123,5 +123,15 @@ namespace Goog
             Console.WriteLine(text);
             Console.ResetColor();
         }
+
+        public static string GetFirstFileName(string folder, string pattern)
+        {
+            if (!Directory.Exists(folder))
+                return string.Empty;
+            string[] profiles = Directory.GetFiles(folder, pattern);
+            if (profiles.Length == 0)
+                return string.Empty;
+            return Path.GetFileNameWithoutExtension(profiles[0]);
+        }
     }
 }

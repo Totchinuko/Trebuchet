@@ -37,7 +37,7 @@ namespace GoogLib
             }
         }
 
-        public static string GetModlistPath(Config config, string modlistName)
+        public static string GetPath(Config config, string modlistName)
         {
             return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles, modlistName + ".json");
         }
@@ -87,6 +87,18 @@ namespace GoogLib
         public void SetModList(string modlist)
         {
             Modlist = modlist.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+        }
+
+        public static void ResolveProfile(Config config, ref string profileName)
+        {
+            string path = GetPath(config, profileName);
+            if(File.Exists(path)) return;
+
+            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles), "*.json");
+            if (!string.IsNullOrEmpty(profileName)) return;
+
+            profileName = "Default";
+            CreateFile(GetPath(config, profileName)).SaveFile();
         }
     }
 }

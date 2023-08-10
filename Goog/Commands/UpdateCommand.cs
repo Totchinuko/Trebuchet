@@ -12,7 +12,7 @@ namespace Goog.Commands
 
         public void Execute()
         {
-            Config config = Config.LoadFile(Config.GetConfigPath(testlive));
+            Config config = Config.LoadFile(Config.GetPath(testlive));
             if (config.ServerInstanceCount == 0)
                 return;
 
