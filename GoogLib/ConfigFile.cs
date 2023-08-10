@@ -24,7 +24,7 @@ namespace Goog
 
         public static T CreateFile(string path)
         {
-            T? file = (T?)Activator.CreateInstance(typeof(T));
+            T? file = (T?)Activator.CreateInstance(typeof(T), true);
             if (file == null)
                 throw new Exception($"Failed to create data of type {typeof(T)}");
             file.FilePath = path;
