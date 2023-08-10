@@ -425,7 +425,7 @@ namespace GoogGUI
                 return;
             }
 
-            _profile = ModListProfile.CreateFile(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json"));
+            _profile = ModListProfile.CreateFile(ModListProfile.GetPath(_config, name));
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;
@@ -481,7 +481,7 @@ namespace GoogGUI
                 return;
             }
 
-            string path = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles, name + ".json");
+            string path = Path.Combine(ModListProfile.GetPath(_config, name));
             _profile.CopyFileTo(path);
             _profile = ModListProfile.LoadFile(path);
             _profile.SaveFile();
