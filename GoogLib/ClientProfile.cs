@@ -20,5 +20,7 @@ namespace GoogLib
         public bool RemoveIntroVideo { get => _removeIntroVideo; set => _removeIntroVideo = value; }
 
         public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
+
+        public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles, name, Config.FileProfileConfig);
     }
 }
