@@ -2,6 +2,7 @@
 using GoogGUI.Attributes;
 using GoogLib;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
@@ -92,6 +93,10 @@ namespace GoogGUI
 
         public ICommand DuplicateProfileCommand => new SimpleCommand(OnProfileDuplicate);
 
+        public ICommand OpenFolderProfileCommand => new SimpleCommand(OnOpenFolderProfile);
+
+        public ObservableCollection<string> Profiles { get => _profiles; }
+
         public string SelectedProfile
         {
             get => _selectedProfile;
@@ -103,8 +108,6 @@ namespace GoogGUI
         }
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ClientSettings"];
-
-        public ObservableCollection<string> Profiles { get => _profiles; }
 
         public override bool CanExecute(object? parameter)
         {
@@ -171,11 +174,17 @@ namespace GoogGUI
             MoveOriginalSavedFolder();
         }
 
+        private void OnOpenFolderProfile(object? obj)
+        {
+            string? folder = Path.GetDirectoryName(_profile.FilePath);
+            if (string.IsNullOrEmpty(folder)) return;
+            Process.Start("explorer.exe", folder);
+        }
+
         private void OnProfileChanged()
         {
-            string selected = _config.CurrentClientProfile;
-            ClientProfile.ResolveProfile(_config, ref selected);
-            _config.CurrentClientProfile = selected;
+            ClientProfile.ResolveProfile(_config, ref _selectedProfile);
+            _config.CurrentClientProfile = _selectedProfile;
             _config.SaveFile();
             OnPropertyChanged("SelectedProfile");
             LoadProfile();

@@ -8,17 +8,20 @@
             </Grid.RowDefinitions>
             <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,0" Margin="0,0,0,12">
                 <WrapPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding CreateModlistCommand}" ToolTip="Create" Margin="0,0,6,0" VerticalAlignment="Top">
+                    <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding CreateProfileCommand}" ToolTip="Create" Margin="0,0,6,0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Add.png" Width="16" Height="16" />
                     </Button>
                     <Border VerticalAlignment="Top" Height="32">
                         <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center" />
                     </Border>
-                    <Button Style="{StaticResource ButtonIconRed}" Command="{Binding DeleteModlistCommand}" ToolTip="Delete" Margin="0,0,0,6" VerticalAlignment="Top">
+                    <Button Style="{StaticResource ButtonIconRed}" Command="{Binding DeleteProfileCommand}" ToolTip="Delete" Margin="0,0,0,6" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Trash.png" Width="16" Height="16" />
                     </Button>
-                    <Button Style="{StaticResource IconButton}" Command="{Binding DuplicateModlistCommand}" ToolTip="Duplicate" Margin="0" VerticalAlignment="Top">
+                    <Button Style="{StaticResource IconButton}" Command="{Binding DuplicateProfileCommand}" ToolTip="Duplicate" Margin="0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Duplicate.png" Width="16" Height="16" />
+                    </Button>
+                    <Button Style="{StaticResource IconButton}" Command="{Binding OpenFolderProfileCommand}" ToolTip="Open Profile Folder" Margin="0" VerticalAlignment="Top">
+                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Folder.png" Width="16" Height="16" />
                     </Button>
                 </WrapPanel>
             </Border>
