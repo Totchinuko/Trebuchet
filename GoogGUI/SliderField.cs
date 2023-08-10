@@ -1,4 +1,6 @@
-﻿namespace GoogGUI
+﻿using System.Reflection;
+
+namespace GoogGUI
 {
     public class SliderField<T> : Field<T>
     {
@@ -7,7 +9,7 @@
         private bool _tickEnabled = false;
         private double _tickFrequency = 1d;
 
-        public SliderField(string name, string property, T? value, string template) : base(name, property, value, template)
+        public SliderField(string name, PropertyInfo property, object target, string template) : base(name, property, target, template)
         {
         }
 
@@ -28,6 +30,7 @@
 
         public SliderField<T> WithFrequency(double frequency)
         {
+            if (frequency < 0) return this;
             _tickEnabled = true;
             _tickFrequency = frequency;
             return this;

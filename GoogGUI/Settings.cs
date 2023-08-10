@@ -26,30 +26,66 @@ namespace GoogGUI
         {
             _config = config;
             _config.FileSaved += OnConfigSaved;
-
-            _fields = new List<IField>
-            {
-                new Field<string>("Install path", "InstallPath", _config.InstallPath, "DirectoryField")
-                    .WhenChanged(OnValueChanged)
-                    .WithDefault((x) => x?.Equals(string.Empty)??true, () => string.Empty),
-                new Field<string>("Client path", "ClientPath", _config.ClientPath, "DirectoryField")
-                    .WhenChanged(OnValueChanged)
-                    .WithDefault((x) => x?.Equals(string.Empty)??true, () => string.Empty),
-                new SliderField<double>("Server Instances", "ServerInstanceCount", _config.ServerInstanceCount, "SliderField")
-                    .WithMinMax(0, 6)
-                    .WithIntFrequency()
-                    .WhenChanged(OnInstanceCountChanged)
-                    .WithDefault((x) => x == 0, () => 0) ,
-                new Field<bool>("Display Steam CMD", "DisplayCMD", _config.DisplayCMD, "ToggleField")
-                    .WhenChanged(OnValueChanged)
-                    .WithDefault((x) => x == false, () => false),
-                new Field<bool>("Use Hardware Acceleration", "UseHardwareAcceleration", _config.UseHardwareAcceleration, "ToggleField")
-                    .WhenChanged(OnValueChanged)
-                    .WithDefault((x) => x == true, () => true),
-            };
-
+            _fields = IField.BuildFieldList(this);
             UpdateRequiredActions();
         }
+
+        #region Fields
+        [DirectoryField("Install Path", Sort = 0)]
+        public string InstallPath
+        {
+            get => _config.InstallPath;
+            set
+            {
+                _config.InstallPath = value;
+                OnValueChanged();
+            }
+        }
+
+        [DirectoryField("Game Path", Sort = 10)]
+        public string ClientPath
+        {
+            get => _config.ClientPath;
+            set
+            {
+                _config.ClientPath = value;
+                OnValueChanged();
+            }
+        }
+
+        [IntSliderField("Server Instances", 0, 6, Frequency = 1, Sort = 20)]
+        public int ServerInstanceCount
+        {
+            get => _config.ServerInstanceCount;
+            set
+            {
+                _config.ServerInstanceCount = value;
+                OnValueChanged();
+            }
+        }
+
+        [ToggleField("Display Steam CMD", Sort = 30)]
+        public bool DisplayCMD
+        {
+            get => _config.DisplayCMD;
+            set
+            {
+                _config.DisplayCMD = value;
+                OnValueChanged();
+            }
+        }
+
+        [ToggleField("Use Hardware Acceleration", defaultValue: true, Sort = 40)]
+        public bool UseHardwareAcceleration
+        {
+            get => _config.UseHardwareAcceleration;
+            set
+            {
+                _config.UseHardwareAcceleration = value;
+                OnValueChanged();
+            }
+        }
+        #endregion
 
         public event EventHandler? CanExecuteChanged;
 
@@ -131,13 +167,6 @@ namespace GoogGUI
             UpdateRequiredActions();
         }
 
-        private void OnInstanceCountChanged(string name, object? value)
-        {
-            if (value is not double n)
-                throw new Exception($"{name} is not a double");
-            OnValueChanged(name, (int)n);
-        }
-
         private void OnServerInstanceInstall(object? obj)
         {
             if (_config.ServerInstanceCount <= 0) return;
@@ -182,13 +211,8 @@ namespace GoogGUI
             return 0;
         }
 
-        private void OnValueChanged(string name, object? value)
+        private void OnValueChanged()
         {
-            PropertyInfo? property = _config.GetType().GetProperty(name);
-            if (property == null)
-                throw new Exception($"Could not find property {name}");
-
-            property.SetValue(_config, value);
             _config.SaveFile();
             UpdateRequiredActions();
         }

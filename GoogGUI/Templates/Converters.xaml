@@ -6,4 +6,5 @@
     <local:False2HiddenConverter x:Key="False2Hidden" />
     <local:ObservableIntanceListConverter x:Key="ObservableIntanceList" />
     <local:DataTypeConverter x:Key="DataType" />
+    <local:IntDoubleConverter x:Key="IntDouble" />
 </ResourceDictionary>

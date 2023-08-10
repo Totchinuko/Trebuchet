@@ -16,7 +16,7 @@
                 <ResourceDictionary Source="Templates\RequiredAction.xaml" />
                 <ResourceDictionary Source="Templates\FieldEditor.xaml" />
                 <ResourceDictionary Source="Templates\ToggleField.xaml" />
-                <ResourceDictionary Source="Templates\SliderField.xaml" />
+                <ResourceDictionary Source="Templates\IntSliderField.xaml" />
                 <ResourceDictionary Source="Templates\ErrorModal.xaml" />
                 <ResourceDictionary Source="Templates\MessageModal.xaml" />
                 <ResourceDictionary Source="Templates\WaitModal.xaml" />
