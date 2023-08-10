@@ -1,4 +1,5 @@
 ﻿using Goog;
+using GoogGUI.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -12,6 +13,7 @@ using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
+    [Panel(true, 100)]
     public class Settings : IPanel, IFieldEditor
     {
         private bool _active;

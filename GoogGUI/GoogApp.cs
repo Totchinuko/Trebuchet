@@ -1,42 +1,47 @@
 ﻿using Goog;
+using GoogGUI.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Drawing;
-using System.IO;
-using System.Windows.Automation;
-using System.Windows.Input;
-using System.Windows.Media.Imaging;
+using System.Linq;
+using System.Reflection;
 
 namespace GoogGUI
 {
     public class GoogApp : INotifyPropertyChanged
     {
+        private List<IPanel> _bottomTabs = new List<IPanel>();
         private Config _config;
         private IPanel? _panel;
-        private List<IPanel> _topTabs;
-        private List<IPanel> _bottomTabs;
+        private List<IPanel> _topTabs = new List<IPanel>();
 
         public GoogApp(Config config)
         {
             _config = config;
-            _topTabs = new List<IPanel>
-            {
-                new ModlistHandler(_config),
-                new ClientSettings(_config),
-            };
 
-            _bottomTabs = new List<IPanel>
+            IEnumerable<Type> types = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(x => x.GetCustomAttributes<PanelAttribute>().Any())
+                .OrderBy(type => type.GetCustomAttribute<PanelAttribute>()?.Sort ?? 0);
+
+            foreach (Type t in types)
             {
-                new Settings(_config),
-            };
+                IPanel? panel = (IPanel?)Activator.CreateInstance(t, _config) ?? throw new Exception("Panel attribute must be places on IPanel classes.");
+                if (panel == null) continue;
+                if (t.GetCustomAttribute<PanelAttribute>()?.Bottom ?? false)
+                    _bottomTabs.Add(panel);
+                else
+                    _topTabs.Add(panel);
+            }
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public IPanel? Panel 
-        { 
-            get => _panel; 
+        public List<IPanel> BottomTabs { get => _bottomTabs; }
+
+        public IPanel? Panel
+        {
+            get => _panel;
             set
             {
                 if (_panel != null)
@@ -47,8 +52,8 @@ namespace GoogGUI
                 OnPropertyChanged("Panel");
             }
         }
+
         public List<IPanel> TopTabs { get => _topTabs; }
-        public List<IPanel> BottomTabs { get => _bottomTabs; }
 
         public void BaseChecks()
         {

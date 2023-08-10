@@ -1,4 +1,5 @@
 ﻿using Goog;
+using GoogGUI.Attributes;
 using GoogLib;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
+    [Panel(false, 0)]
     internal class ModlistHandler : IPanel
     {
         private bool _active = false;
