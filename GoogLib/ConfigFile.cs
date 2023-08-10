@@ -78,6 +78,7 @@ namespace Goog
             if (dataFolder == null)
                 throw new DirectoryNotFoundException($"Invalid directory for {FilePath}");
 
+            Tools.CreateDir(folder);
             Tools.DeepCopy(dataFolder, folder);
         }
 
