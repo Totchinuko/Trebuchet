@@ -37,7 +37,7 @@ namespace Goog
 
             foreach (string newPath in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
             {
-                ;
+                File.Copy(newPath, newPath.Replace(directory, destinationDir), true);
             }
         }
 
