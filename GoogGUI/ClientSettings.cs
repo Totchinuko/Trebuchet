@@ -172,6 +172,9 @@ namespace GoogGUI
         {
             OnCanExecuteChanged();
             MoveOriginalSavedFolder();
+
+            if (_config.CurrentClientProfile != _selectedProfile)
+                SelectedProfile = _config.CurrentClientProfile;
         }
 
         private void OnOpenFolderProfile(object? obj)
