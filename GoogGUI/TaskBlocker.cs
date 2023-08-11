@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Threading;
-using System.Threading.Tasks;
 using System.Windows.Input;
 
 namespace GoogGUI
@@ -12,8 +11,6 @@ namespace GoogGUI
         public const string MainTask = "MainTask";
 
         private string _description = string.Empty;
-        private CancellationTokenSource? _source;
-        private Task? _task;
         private Dictionary<string, CancellationTokenSource> _taskSources = new Dictionary<string, CancellationTokenSource>();
 
         public event PropertyChangedEventHandler? PropertyChanged;
