@@ -1,5 +1,6 @@
 ﻿using Goog;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 
 namespace GoogLib
 {
@@ -59,9 +60,11 @@ namespace GoogLib
                 _process.Kill();
         }
 
+        [MemberNotNull("_process", "Process")]
         public void StartProcess()
         {
-            if (_process != null) return;
+            if (_process != null)
+                throw new Exception("Cannot start a process already started.");
             _process = new Process();
             _process.StartInfo.FileName = Path.Combine(_config.InstallPath,
                 _config.VersionFolder,
