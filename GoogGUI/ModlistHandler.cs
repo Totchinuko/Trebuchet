@@ -532,14 +532,7 @@ namespace GoogGUI
 
         private void RefreshProfiles()
         {
-            _profiles.Clear();
-            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles);
-            if (!Directory.Exists(folder))
-                return;
-
-            string[] profiles = Directory.GetFiles(folder, "*.json");
-            foreach (string p in profiles)
-                _profiles.Add(Path.GetFileNameWithoutExtension(p));
+            _profiles = new ObservableCollection<string>(ModListProfile.ListProfiles(_config));
             OnPropertyChanged("Profiles");
         }
 

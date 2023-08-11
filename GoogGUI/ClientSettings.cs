@@ -130,14 +130,7 @@ namespace GoogGUI
 
         private void LoadProfileList()
         {
-            _profiles.Clear();
-            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderClientProfiles);
-            if (!Directory.Exists(folder))
-                return;
-
-            string[] profiles = Directory.GetDirectories(folder, "*");
-            foreach (string p in profiles)
-                _profiles.Add(Path.GetFileName(p));
+            _profiles = new ObservableCollection<string>(ClientProfile.ListProfiles(_config));
             OnPropertyChanged("Profiles");
         }
 

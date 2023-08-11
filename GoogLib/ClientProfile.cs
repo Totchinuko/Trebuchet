@@ -83,5 +83,18 @@ namespace GoogLib
             CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
+        public static List<string> ListProfiles(Config config)
+        {
+            List<string> list = new List<string>();
+            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles);
+            if (!Directory.Exists(folder))
+                return list;
+
+            string[] profiles = Directory.GetDirectories(folder, "*");
+            foreach (string p in list)
+                list.Add(Path.GetFileName(p));
+            return list;
+        }
+
     }
 }

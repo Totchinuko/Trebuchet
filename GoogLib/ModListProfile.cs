@@ -102,5 +102,18 @@ namespace GoogLib
             profileName = "Default";
             CreateFile(GetPath(config, profileName)).SaveFile();
         }
+
+        public static List<string> ListProfiles(Config config)
+        {
+            List<string> list = new List<string>();
+            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles);
+            if (!Directory.Exists(folder))
+                return list;
+
+            string[] profiles = Directory.GetFiles(folder, "*.json");
+            foreach (string p in profiles)
+                list.Add(Path.GetFileNameWithoutExtension(p));
+            return list;
+        }
     }
 }
