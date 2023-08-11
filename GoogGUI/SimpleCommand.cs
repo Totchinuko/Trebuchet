@@ -10,23 +10,33 @@ namespace GoogGUI
 {
     public class SimpleCommand : ICommand
     {
+        private bool _enabled = true;
+
         public event EventHandler? CanExecuteChanged;
 
         private readonly Action<object?> _execute;
 
-        public SimpleCommand(Action<object?> execute)
+        public SimpleCommand(Action<object?> execute, bool enabled = true)
         {
             _execute = execute;
+            _enabled = enabled;
         }
 
         public bool CanExecute(object? parameter)
         {
-            return true;
+            return _enabled;
         }
 
         public void Execute(object? parameter)
         {
-            _execute(parameter);
+            if(_enabled)
+                _execute(parameter);
+        }
+
+        public void Toggle(bool enabled)
+        {
+            _enabled = enabled;
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }
 }
