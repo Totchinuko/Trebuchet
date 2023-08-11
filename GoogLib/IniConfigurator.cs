@@ -22,7 +22,7 @@ namespace GoogLib
             _config = config;
         }
 
-        public void WriteIniConfigs(object target) 
+        public void WriteIniConfigs(object target, string gamePath) 
         {
             var methods = target.GetType().GetMethods()
                 .Where(meth => meth.GetCustomAttributes(typeof(IniSettingAttribute), true).Any())
@@ -31,7 +31,7 @@ namespace GoogLib
             foreach(var method in methods)
             {
                 IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
-                IniDocument document = GetIniDocument(attr.Path);
+                IniDocument document = GetIniDocument(Path.Combine(gamePath, attr.Path));
                 method.Invoke(target, new object?[] { document });
             }
         }

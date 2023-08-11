@@ -11,6 +11,7 @@ namespace GoogLib
         private bool _removeIntroVideo = false;
         private bool _ultraAnisotropy;
         private bool _useAllCores = false;
+        private bool _useBattleEye = false;
 
         private ClientProfile()
         { }
@@ -29,7 +30,44 @@ namespace GoogLib
 
         public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
 
+        public bool UseBattleEye { get => _useBattleEye; set => _useBattleEye = value; }
+
         #endregion Settings
+
+        #region IniConfig
+
+        [IniSetting(Config.FileIniDefault, "Game")]
+        public void SkipMovies(IniDocument document)
+        {
+            IniSection section = document.GetSection("/Script/MoviePlayer.MoviePlayerSettings");
+            section.GetParameters("+StartupMovies").ForEach(section.Remove);
+            if (!RemoveIntroVideo)
+            {
+                section.AddParameter("+StartupMovies", "StartupUE4");
+                section.AddParameter("+StartupMovies", "StartupNvidia");
+                section.AddParameter("+StartupMovies", "CinematicIntroV2");
+            }
+            else
+            {
+                section.SetParameter("bWaitForMoviesToComplete", "True");
+                section.SetParameter("bMoviesAreSkippable", "True");
+            }
+        }
+
+        [IniSetting(Config.FileIniUser, "Engine")]
+        public void SoundSettings(IniDocument document)
+        {
+            document.GetSection("Audio").SetParameter("UnfocusedVolumeMultiplier", BackgroundSound ? "1.0" : "0,0");
+        }
+
+        [IniSetting(Config.FileIniUser, "Scalability")]
+        public void UltraSetting(IniDocument document)
+        {
+            document.GetSection("TextureQuality@3").SetParameter("r.Streaming.PoolSize", (1500 + AddedTexturePool).ToString());
+            document.GetSection("TextureQuality@3").SetParameter("r.MaxAnisotropy", UltraAnisotropy ? "16" : "8");
+        }
+
+        #endregion IniConfig
 
         public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles, name, Config.FileProfileConfig);
 
@@ -45,39 +83,5 @@ namespace GoogLib
             CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
-        #region IniConfig
-
-        [IniSetting(Config.FileIniUser, "Engine")]
-        public void SoundSettings(IniDocument document)
-        {
-            document.GetSection("Audio").SetParameter("UnfocusedVolumeMultiplier", BackgroundSound ? "1.0" : "0,0");
-        }
-
-        [IniSetting(Config.FileIniUser, "Scalability")]
-        public void UltraSetting(IniDocument document)
-        {
-            document.GetSection("TextureQuality@3").SetParameter("r.Streaming.PoolSize", (1500 + AddedTexturePool).ToString());
-            document.GetSection("TextureQuality@3").SetParameter("r.MaxAnisotropy", UltraAnisotropy ? "16" : "8");
-        }
-
-        [IniSetting(Config.FileIniDefault, "Game")]
-        public void SkipMovies(IniDocument document)
-        {
-            IniSection section = document.GetSection("/Script/MoviePlayer.MoviePlayerSettings");
-            section.GetParameters("+StartupMovies").ForEach(section.Remove);
-            if(!RemoveIntroVideo)
-            {
-                section.AddParameter("+StartupMovies", "StartupUE4");
-                section.AddParameter("+StartupMovies", "StartupNvidia");
-                section.AddParameter("+StartupMovies", "CinematicIntroV2");
-            }
-            else
-            {
-                section.SetParameter("bWaitForMoviesToComplete", "True");
-                section.SetParameter("bMoviesAreSkippable", "True");
-            }
-        }
-
-        #endregion IniConfig
     }
 }

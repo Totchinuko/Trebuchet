@@ -93,6 +93,11 @@ namespace Goog
             return ConfigPath;
         }
 
+        public string GetInstancePath(int instance)
+        {
+            return Path.Combine(InstallPath, VersionFolder, FolderServerInstances, string.Format(FolderInstancePattern, instance));
+        }
+
         public void CreateInstanceDirectories()
         {
             if (ServerInstanceCount <= 0) return;
