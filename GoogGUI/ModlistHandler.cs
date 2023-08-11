@@ -229,7 +229,7 @@ namespace GoogGUI
 
         private void OnExportToJson(object? obj)
         {
-            string json = JsonSerializer.Serialize(_profile.Modlist);
+            string json = JsonSerializer.Serialize(new ModlistExport { Modlist = _profile.Modlist });
             new ModlistTextImport(json, true, FileType.Json).ShowDialog();
         }
 
@@ -281,14 +281,14 @@ namespace GoogGUI
 
         private void OnImportFromJsonFile(string json)
         {
-            List<string>? modlist = JsonSerializer.Deserialize<List<string>>(json);
+            ModlistExport? modlist = JsonSerializer.Deserialize<ModlistExport>(json);
             if (modlist == null)
             {
                 new ErrorModal("Invalid Json", "Loaded json could not be parsed.");
                 return;
             }
 
-            _profile.Modlist = modlist;
+            _profile.Modlist = modlist.Modlist;
             _profile.SaveFile();
             LoadModlist();
         }
@@ -304,9 +304,10 @@ namespace GoogGUI
             List<string>? modlist;
             try
             {
-                modlist = JsonSerializer.Deserialize<List<string>>(text);
-                if (modlist == null)
+                ModlistExport? export = JsonSerializer.Deserialize<ModlistExport>(text);
+                if (export == null)
                     throw new Exception("This is not Json.");
+                modlist = export.Modlist;
             }
             catch
             {
