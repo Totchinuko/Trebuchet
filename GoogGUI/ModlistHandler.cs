@@ -32,13 +32,13 @@ namespace GoogGUI
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
 
-        public ModlistHandler(Config config) : base(config)
+        public ModlistHandler(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
             _config.FileSaved += OnConfigFileChanged;
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
             SetupFileWatcher();
 
-            _selectedModlist = _config.CurrentModlistProfile;
+            _selectedModlist = _uiConfig.CurrentModlistProfile;
             ModListProfile.ResolveProfile(_config, ref _selectedModlist);
             LoadProfile();
             RefreshProfiles();
@@ -515,7 +515,7 @@ namespace GoogGUI
         {
             ModListProfile.ResolveProfile(_config, ref _selectedModlist);
             OnPropertyChanged("SelectedModlist");
-            _config.CurrentModlistProfile = _selectedModlist;
+            _uiConfig.CurrentModlistProfile = _selectedModlist;
             _config.SaveFile();
             LoadProfile();
         }

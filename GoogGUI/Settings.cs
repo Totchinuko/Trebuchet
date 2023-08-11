@@ -16,7 +16,7 @@ namespace GoogGUI
     [Panel("Settings", "/Icons/Settings.png", true, 10)]
     public class Settings : FieldEditorPanel
     {
-        public Settings(Config config) : base(config)
+        public Settings(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
             _config.FileSaved += OnConfigSaved;
             BuildFields();
@@ -71,10 +71,10 @@ namespace GoogGUI
         [ToggleField("Use Hardware Acceleration", defaultValue: true, Sort = 40)]
         public bool UseHardwareAcceleration
         {
-            get => _config.UseHardwareAcceleration;
+            get => _uiConfig.UseHardwareAcceleration;
             set
             {
-                _config.UseHardwareAcceleration = value;
+                _uiConfig.UseHardwareAcceleration = value;
                 OnValueChanged();
             }
         }
@@ -172,7 +172,7 @@ namespace GoogGUI
                 RequiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, true));
             else if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)
                 RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, true));
-            if (App.UseSoftwareRendering == _config.UseHardwareAcceleration)
+            if (App.UseSoftwareRendering == _uiConfig.UseHardwareAcceleration)
                 RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, true));
         }
     }

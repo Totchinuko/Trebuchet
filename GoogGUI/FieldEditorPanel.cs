@@ -14,7 +14,7 @@ namespace GoogGUI
         private List<IField> _fields = new List<IField>();
         private ObservableCollection<RequiredCommand> _requiredActions = new ObservableCollection<RequiredCommand>();
 
-        protected FieldEditorPanel(Config config) : base(config)
+        protected FieldEditorPanel(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
         }
 

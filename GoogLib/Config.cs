@@ -47,24 +47,14 @@ namespace Goog
         #endregion constants
 
         private string _clientPath = string.Empty;
-        private string _currentClientProfile = string.Empty;
-        private string _currentModlistProfile = string.Empty;
-        private string _currentServerProfile = string.Empty;
         private bool _displayCMD = false;
         private string _installPath = string.Empty;
         private int _serverInstanceCount = 0;
         private string _steamAPIKey = string.Empty;
-        private bool _useHardwareAcceleration = true;
 
         public string ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
         public string ClientPath { get => _clientPath; set => _clientPath = value; }
-
-        public string CurrentClientProfile { get => _currentClientProfile; set => _currentClientProfile = value; }
-
-        public string CurrentModlistProfile { get => _currentModlistProfile; set => _currentModlistProfile = value; }
-
-        public string CurrentServerProfile { get => _currentServerProfile; set => _currentServerProfile = value; }
 
         public bool DisplayCMD { get => _displayCMD; set => _displayCMD = value; }
 
@@ -79,8 +69,6 @@ namespace Goog
         public int ServerInstanceCount { get => _serverInstanceCount; set => _serverInstanceCount = value; }
 
         public string SteamAPIKey { get => _steamAPIKey; set => _steamAPIKey = value; }
-
-        public bool UseHardwareAcceleration { get => _useHardwareAcceleration; set => _useHardwareAcceleration = value; }
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 

@@ -17,10 +17,12 @@ namespace GoogGUI
         protected string _label;
         protected string _template;
         protected Config _config;
+        protected UIConfig _uiConfig;
 
-        public Panel(Config config)
+        public Panel(Config config, UIConfig uiConfig)
         {
             _config = config;
+            _uiConfig = uiConfig;
             PanelAttribute attr = GetType().GetCustomAttribute<PanelAttribute>() ?? throw new Exception($"Panel {GetType()} is missing an attribute.");
             _label = attr.Label;
             _icon = attr.Icon;

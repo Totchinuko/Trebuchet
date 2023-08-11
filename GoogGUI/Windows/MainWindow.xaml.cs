@@ -13,9 +13,9 @@ namespace GoogGUI
         private GoogApp _app;
         private bool _shown;
 
-        public MainWindow(Config config)
+        public MainWindow(Config config, UIConfig uiConfig)
         {
-            _app = new GoogApp(config);
+            _app = new GoogApp(config, uiConfig);
             InitializeComponent();
             DataContext = this;
         }

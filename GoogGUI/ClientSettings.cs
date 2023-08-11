@@ -17,12 +17,12 @@ namespace GoogGUI
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private string _selectedProfile;
 
-        public ClientSettings(Config config) : base(config)
+        public ClientSettings(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
             _config.FileSaved += OnConfigSaved;
 
             MoveOriginalSavedFolder();
-            _selectedProfile = _config.CurrentClientProfile;
+            _selectedProfile = _uiConfig.CurrentClientProfile;
             ClientProfile.ResolveProfile(_config, ref _selectedProfile);
             LoadProfileList();
             LoadProfile();
@@ -173,8 +173,8 @@ namespace GoogGUI
             OnCanExecuteChanged();
             MoveOriginalSavedFolder();
 
-            if (_config.CurrentClientProfile != _selectedProfile)
-                SelectedProfile = _config.CurrentClientProfile;
+            if (_uiConfig.CurrentClientProfile != _selectedProfile)
+                SelectedProfile = _uiConfig.CurrentClientProfile;
         }
 
         private void OnOpenFolderProfile(object? obj)
@@ -187,7 +187,7 @@ namespace GoogGUI
         private void OnProfileChanged()
         {
             ClientProfile.ResolveProfile(_config, ref _selectedProfile);
-            _config.CurrentClientProfile = _selectedProfile;
+            _uiConfig.CurrentClientProfile = _selectedProfile;
             _config.SaveFile();
             OnPropertyChanged("SelectedProfile");
             LoadProfile();

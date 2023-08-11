@@ -12,12 +12,14 @@ namespace GoogGUI
     {
         private List<Panel> _bottomTabs = new List<Panel>();
         private Config _config;
+        private UIConfig _uiConfig;
         private Panel? _panel;
         private List<Panel> _topTabs = new List<Panel>();
 
-        public GoogApp(Config config)
+        public GoogApp(Config config, UIConfig uiConfig)
         {
             _config = config;
+            _uiConfig = uiConfig;
 
             IEnumerable<Type> types = Assembly.GetExecutingAssembly()
                 .GetTypes()
@@ -26,7 +28,7 @@ namespace GoogGUI
 
             foreach (Type t in types)
             {
-                Panel? panel = (Panel?)Activator.CreateInstance(t, _config) ?? throw new Exception("Panel attribute must be placed on Panel classes.");
+                Panel? panel = (Panel?)Activator.CreateInstance(t, _config, _uiConfig) ?? throw new Exception("Panel attribute must be placed on Panel classes.");
                 if (panel == null) continue;
                 if (t.GetCustomAttribute<PanelAttribute>()?.Bottom ?? false)
                     _bottomTabs.Add(panel);

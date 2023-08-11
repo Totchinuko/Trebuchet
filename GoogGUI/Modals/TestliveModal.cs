@@ -55,9 +55,10 @@ namespace GoogGUI
         private void OpenApp()
         {
             Config config = Config.LoadFile(Config.GetPath(Testlive));
-            App.UseSoftwareRendering = !config.UseHardwareAcceleration;
+            UIConfig uiConfig = UIConfig.LoadFile(UIConfig.GetPath(Testlive));
+            App.UseSoftwareRendering = !uiConfig.UseHardwareAcceleration;
 
-            MainWindow mainWindow = new MainWindow(config);
+            MainWindow mainWindow = new MainWindow(config, uiConfig);
             Application.Current.MainWindow = mainWindow;
             mainWindow.Show();
             _window.Close();
