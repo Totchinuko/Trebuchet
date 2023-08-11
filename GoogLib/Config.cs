@@ -40,6 +40,9 @@ namespace Goog
         public const string GameArgsModList = "-modlist={0}";
         public const string GameArgsUseAllCore = "-useallavailablecores";
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
+        public const string FileIniDefault = "ConanSandbox\\Config\\Default{0}.ini";
+        public const string FileIniBase = "Engine\\Config\\Base{0}.ini";
+        public const string FileIniUser = "ConanSandbox\\Saved\\Config\\WindowsNoEditor\\{0}.ini";
 
         #endregion constants
 

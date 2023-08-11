@@ -1,5 +1,5 @@
 ﻿using Goog;
-using System.Text.Json;
+using Yuu.Ini;
 
 namespace GoogLib
 {
@@ -9,9 +9,13 @@ namespace GoogLib
         private bool _backgroundSound = false;
         private bool _log = false;
         private bool _removeIntroVideo = false;
+        private bool _ultraAnisotropy;
         private bool _useAllCores = false;
 
-        private ClientProfile() { }
+        private ClientProfile()
+        { }
+
+        #region Settings
 
         public int AddedTexturePool { get => _addedTexturePool; set => _addedTexturePool = value; }
 
@@ -21,7 +25,11 @@ namespace GoogLib
 
         public bool RemoveIntroVideo { get => _removeIntroVideo; set => _removeIntroVideo = value; }
 
+        public bool UltraAnisotropy { get => _ultraAnisotropy; set => _ultraAnisotropy = value; }
+
         public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
+
+        #endregion Settings
 
         public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles, name, Config.FileProfileConfig);
 
@@ -30,11 +38,46 @@ namespace GoogLib
             string path = GetPath(config, profileName);
             if (File.Exists(path)) return;
 
-            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles),  "*");
+            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles), "*");
             if (!string.IsNullOrEmpty(profileName)) return;
 
             profileName = "Default";
             CreateFile(GetPath(config, profileName)).SaveFile();
         }
+
+        #region IniConfig
+
+        [IniSetting(Config.FileIniUser, "Engine")]
+        public void SoundSettings(IniDocument document)
+        {
+            document.GetSection("Audio").SetParameter("UnfocusedVolumeMultiplier", BackgroundSound ? "1.0" : "0,0");
+        }
+
+        [IniSetting(Config.FileIniUser, "Scalability")]
+        public void UltraSetting(IniDocument document)
+        {
+            document.GetSection("TextureQuality@3").SetParameter("r.Streaming.PoolSize", (1500 + AddedTexturePool).ToString());
+            document.GetSection("TextureQuality@3").SetParameter("r.MaxAnisotropy", UltraAnisotropy ? "16" : "8");
+        }
+
+        [IniSetting(Config.FileIniDefault, "Game")]
+        public void SkipMovies(IniDocument document)
+        {
+            IniSection section = document.GetSection("/Script/MoviePlayer.MoviePlayerSettings");
+            section.GetParameters("+StartupMovies").ForEach(section.Remove);
+            if(!RemoveIntroVideo)
+            {
+                section.AddParameter("+StartupMovies", "StartupUE4");
+                section.AddParameter("+StartupMovies", "StartupNvidia");
+                section.AddParameter("+StartupMovies", "CinematicIntroV2");
+            }
+            else
+            {
+                section.SetParameter("bWaitForMoviesToComplete", "True");
+                section.SetParameter("bMoviesAreSkippable", "True");
+            }
+        }
+
+        #endregion IniConfig
     }
 }
