@@ -24,11 +24,19 @@ namespace GoogLib
 
         public ReadOnlyDictionary<int, ServerWatcher> ServerProcesses => _serverProcesses.AsReadOnly();
 
-        public bool CatapultClient(ClientProfile profile)
+        public void CatapultClient(ClientProfile profile, ModListProfile modlist)
         {
-            if (_clientProcesses != null) return false;
+            if (_clientProcesses != null)
+                throw new Exception("Client is already running.");
 
             string profileFolder = Path.GetDirectoryName(profile.FilePath) ?? throw new Exception();
+
+            _config.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
+            if (errors.Count > 0)
+                throw new Exception("Some mods path could not be resolved.");
+
+            File.WriteAllLines(Path.Combine(profileFolder, Config.FileGeneratedModlist), result);
+
             SetupJunction(_config.ClientPath, profileFolder);
 
             IniConfigurator configurator = new IniConfigurator(_config);
@@ -38,14 +46,21 @@ namespace GoogLib
             _clientProcesses = new ClientWatcher(_config, profile);
             _clientProcesses.ProcessExited += OnClientProcessTerminate;
             _clientProcesses.StartProcess();
-            return true;
         }
 
-        public bool CatapultServer(ServerProfile profile, int instance)
+        public void CatapultServer(ServerProfile profile, int instance, ModListProfile modlist)
         {
-            if (_serverProcesses.ContainsKey(instance)) return false;
-
+            if (_serverProcesses.ContainsKey(instance))
+                throw new Exception("Server instance is already running.");
+            
             string profileFolder = Path.GetDirectoryName(profile.FilePath) ?? throw new Exception();
+
+            _config.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
+            if (errors.Count > 0)
+                throw new Exception("Some mods path could not be resolved.");
+
+            File.WriteAllLines(Path.Combine(profileFolder, Config.FileGeneratedModlist), result);
+
             SetupJunction(_config.GetInstancePath(instance), profileFolder);
 
             IniConfigurator configurator = new IniConfigurator(_config);
@@ -57,7 +72,6 @@ namespace GoogLib
             watcher.ProcessRestarted += OnServerProcessRestarted;
             watcher.StartProcess();
             _serverProcesses.Add(instance, watcher);
-            return true;
         }
 
         public void KillAllServers()
