@@ -78,6 +78,17 @@ namespace GoogGUI
                 OnValueChanged();
             }
         }
+
+        [ToggleField("Process Kill Warning", defaultValue: true, Sort = 50)]
+        public bool DisplayWarningOnKill
+        {
+            get => _uiConfig.DisplayWarningOnKill;
+            set
+            {
+                _uiConfig.DisplayWarningOnKill = value;
+                OnValueChanged();
+            }
+        }
         #endregion
 
         private void HandleTaskErrors(Task<int> task)

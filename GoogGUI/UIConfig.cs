@@ -14,6 +14,7 @@ namespace GoogGUI
         private string _dashboardClientProfile = string.Empty;
         private string[] _dashboardServerModlist = new string[0];
         private string[] _dashboardServerProfiles = new string[0];
+        private bool _displayWarningOnKill = true;
         private bool _useHardwareAcceleration = true;
 
         public string CurrentClientProfile { get => _currentClientProfile; set => _currentClientProfile = value; }
@@ -29,6 +30,8 @@ namespace GoogGUI
         public string[] DashboardServerModlist { get => _dashboardServerModlist; set => _dashboardServerModlist = value; }
 
         public string[] DashboardServerProfiles { get => _dashboardServerProfiles; set => _dashboardServerProfiles = value; }
+
+        public bool DisplayWarningOnKill { get => _displayWarningOnKill; set => _displayWarningOnKill = value; }
 
         public bool UseHardwareAcceleration { get => _useHardwareAcceleration; set => _useHardwareAcceleration = value; }
 

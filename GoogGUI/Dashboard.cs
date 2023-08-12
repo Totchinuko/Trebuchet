@@ -112,6 +112,14 @@ namespace GoogGUI
         {
             if (_trebuchet.ClientProcess == null) return;
 
+            if(_uiConfig.DisplayWarningOnKill)
+            {
+                QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
+                    "Do you wish to continue ?");
+                question.ShowDialog();
+                if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+            }
+
             ClientKillCommand.Toggle(false);
             _trebuchet.ClientProcess.Kill();
         }
