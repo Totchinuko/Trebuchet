@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -371,9 +372,16 @@ namespace GoogGUI
 
         private void OnModFileChanged(object sender, FileSystemEventArgs e)
         {
+            if (!ModListProfile.TryParseDirectory2ModID(e.FullPath, out string id)) return;
+
             Application.Current.Dispatcher.Invoke(() =>
             {
-                RefreshModFileStatus();
+                foreach (var file in _modlist.Where(file => file.Mod == id))
+                {
+                    string path = file.Mod;
+                    _config.ResolveMod(ref path);
+                    file.RefreshFile(path);
+                }
             });
         }
 
@@ -539,9 +547,9 @@ namespace GoogGUI
         private void SetupFileWatcher()
         {
             if (_modWatcher != null) return;
-            string path = Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods);
+            string path = Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, _config.ClientAppID);
             if (!Directory.Exists(path)) return;
-
+                
             _modWatcher = new FileSystemWatcher(path);
             _modWatcher.NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
@@ -556,7 +564,7 @@ namespace GoogGUI
             _modWatcher.Deleted += OnModFileChanged;
             _modWatcher.Renamed += OnModFileChanged;
             //  watcher.Filter = "*.pak";
-            _modWatcher.IncludeSubdirectories = true;
+            _modWatcher.IncludeSubdirectories = false;
             _modWatcher.EnableRaisingEvents = true;
         }
     }

@@ -74,21 +74,50 @@ namespace GoogLib
             CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
-        public static bool TryParseModID(string mod, out string id)
+        public static bool TryParseModID(string path, out string id)
         {
             id = string.Empty;
-            if (long.TryParse(mod, out _))
+            if (long.TryParse(path, out _))
             {
-                id = mod;
+                id = path;
                 return true;
             }
-            FileInfo file = new FileInfo(Path.Combine(mod));
-            if (file.Directory == null)
+
+            if (Path.GetExtension(path) == ".pak")
+                return TryParseFile2ModID(path, out id);
+            else
+                return TryParseDirectory2ModID(path, out id);
+        }
+
+        public static bool TryParseFile2ModID(string path, out string id)
+        {
+            id = string.Empty;
+
+            string? folder = Path.GetDirectoryName(path);
+            if (folder == null)
                 return false;
-            if (!long.TryParse(file.Directory.Name, out _))
+            if (!long.TryParse(Path.GetFileName(folder), out _))
                 return false;
-            id = file.Directory.Name;
+            id = Path.GetFileName(folder);
             return true;
+        }
+
+        public static bool TryParseDirectory2ModID(string path, out string id)
+        {
+            id = string.Empty;
+            if(long.TryParse(Path.GetFileName(path), out _))
+            {
+                id = Path.GetFileName(path);
+                return true;
+            }
+
+            string? parent = Path.GetDirectoryName(path);
+            if(parent != null && long.TryParse(Path.GetFileName(parent), out _))
+            {
+                id = Path.GetFileName(parent);
+                return true;
+            }
+            return false;                
         }
 
         public static void TryParseModList(ref List<string> modlist)
