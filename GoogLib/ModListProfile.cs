@@ -74,7 +74,8 @@ namespace GoogLib
             if (!string.IsNullOrEmpty(profileName)) return;
 
             profileName = "Default";
-            CreateFile(GetPath(config, profileName)).SaveFile();
+            if (!File.Exists(GetPath(config, profileName)))
+                CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
         public static bool TryParseModID(string path, out string id)
