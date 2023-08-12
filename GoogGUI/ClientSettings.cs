@@ -85,6 +85,27 @@ namespace GoogGUI
             }
         }
 
+        [ToggleField("Use Battle Eye", false, Sort = -10)]
+        public bool UseBattleEye
+        {
+            get => _profile.UseBattleEye;
+            set
+            {
+                _profile.UseBattleEye = value;
+                OnValueChanged();
+            }
+        }
+
+        [ToggleField("Better Texture on Ultra", false, Sort = 50)]
+        public bool UltraAnisotropy
+        {
+            get => _profile.UltraAnisotropy;
+            set
+            {
+                _profile.UltraAnisotropy = value;
+                OnValueChanged();
+            }
+        }
         #endregion Fields
 
         public ICommand CreateProfileCommand => new SimpleCommand(OnProfileCreate);
