@@ -1,4 +1,6 @@
 ﻿using Goog;
+using System.Reflection;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace GoogLib
@@ -37,8 +39,11 @@ namespace GoogLib
 
         public static void ResolveProfile(Config config, ref string profileName)
         {
-            string path = GetPath(config, profileName);
-            if (File.Exists(path)) return;
+            if(!string.IsNullOrEmpty(profileName))
+            {
+                string path = GetPath(config, profileName);
+                if (File.Exists(path)) return;
+            }
 
             profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles), "*");
             if (!string.IsNullOrEmpty(profileName)) return;

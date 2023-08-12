@@ -64,8 +64,11 @@ namespace GoogLib
 
         public static void ResolveProfile(Config config, ref string profileName)
         {
-            string path = GetPath(config, profileName);
-            if (File.Exists(path)) return;
+            if(!string.IsNullOrEmpty(profileName))
+            {
+                string path = GetPath(config, profileName);
+                if (File.Exists(path)) return;
+            }
 
             profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles), "*.json");
             if (!string.IsNullOrEmpty(profileName)) return;
