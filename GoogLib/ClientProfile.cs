@@ -60,7 +60,7 @@ namespace GoogLib
             document.GetSection("Audio").SetParameter("UnfocusedVolumeMultiplier", BackgroundSound ? "1.0" : "0,0");
         }
 
-        [IniSetting(Config.FileIniUser, "Scalability")]
+        [IniSetting(Config.FileIniDefault, "Scalability")]
         public void UltraSetting(IniDocument document)
         {
             document.GetSection("TextureQuality@3").SetParameter("r.Streaming.PoolSize", (1500 + AddedTexturePool).ToString());
