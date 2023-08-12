@@ -13,8 +13,11 @@ namespace GoogGUI
     {
         public bool IsShutingDown { get; private set; }
         public static bool UseSoftwareRendering = true;
+        public static bool HasCrashed { get; private set; }
 
         public static readonly TaskBlocker TaskBlocker = new TaskBlocker();
+
+        public static void Crash() => HasCrashed = true;
 
         protected override void OnExit(ExitEventArgs e)
         {

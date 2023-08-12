@@ -17,6 +17,8 @@ namespace GoogGUI
         public ExceptionModal(Exception exception) : base()
         {
             CloseCommand = new SimpleCommand(OnCloseModal);
+            if (App.HasCrashed) return;
+            App.Crash();
             _errorTitle = "Internal Exception";
             _errorMessage = exception.GetAllExceptions();
             Clipboard.SetText(_errorMessage);
@@ -27,6 +29,8 @@ namespace GoogGUI
         public ExceptionModal(AggregateException exceptions) : base()
         {
             CloseCommand = new SimpleCommand(OnCloseModal);
+            if (App.HasCrashed) return;
+            App.Crash();
             _errorTitle = "Internal Exception";
             _errorMessage = exceptions.GetAllExceptions();
             Clipboard.SetText(_errorMessage);
