@@ -91,7 +91,7 @@ namespace GoogLib
                 return list;
 
             string[] profiles = Directory.GetDirectories(folder, "*");
-            foreach (string p in list)
+            foreach (string p in profiles)
                 list.Add(Path.GetFileName(p));
             return list;
         }
