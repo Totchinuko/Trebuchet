@@ -33,5 +33,31 @@ namespace GoogLib
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
 
+        public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
+
+        public static void ResolveProfile(Config config, ref string profileName)
+        {
+            string path = GetPath(config, profileName);
+            if (File.Exists(path)) return;
+
+            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles), "*");
+            if (!string.IsNullOrEmpty(profileName)) return;
+
+            profileName = "Default";
+            CreateFile(GetPath(config, profileName)).SaveFile();
+        }
+
+        public static List<string> ListProfiles(Config config)
+        {
+            List<string> list = new List<string>();
+            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles);
+            if (!Directory.Exists(folder))
+                return list;
+
+            string[] profiles = Directory.GetDirectories(folder, "*");
+            foreach (string p in profiles)
+                list.Add(Path.GetFileName(p));
+            return list;
+        }
     }
 }
