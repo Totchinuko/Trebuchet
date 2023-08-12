@@ -215,7 +215,7 @@ namespace GoogGUI
             if (string.IsNullOrEmpty(name)) return;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This mod list name is already used").ShowDialog();
+                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
                 return;
             }
 
