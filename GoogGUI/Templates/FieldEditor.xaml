@@ -7,8 +7,9 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <ItemsControl ItemsSource="{Binding RequiredActions}" ItemTemplate="{StaticResource RequiredAction}" />
-            <ItemsControl Grid.Row="1" ItemsSource="{Binding Fields}" ItemTemplate="{StaticResource FieldRow}" />
-        </Grid>
-        
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl ItemsSource="{Binding Fields}" ItemTemplate="{StaticResource FieldRow}" />
+            </ScrollViewer>
+        </Grid>        
     </DataTemplate>
 </ResourceDictionary>
