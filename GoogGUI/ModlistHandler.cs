@@ -18,7 +18,7 @@ using System.Windows.Input;
 
 namespace GoogGUI
 {
-    [Panel("Mod List", "/Icons/List.png", false, 0, "ModlistEditor")]
+    [Panel("Mod Lists", "/Icons/List.png", false, 0, "ModlistEditor")]
     internal class ModlistHandler : Panel
     {
         private const string FetchManifests = "FetchManifests";

@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace GoogGUI
 {
-    [Panel("Game Settings", "/Icons/Game.png", false, 100)]
+    [Panel("Settings", "/Icons/Game.png", false, 100, group: "Game")]
     public class ClientSettings : FieldEditorPanel
     {
         private ClientProfile _profile;

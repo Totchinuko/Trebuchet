@@ -10,36 +10,23 @@ namespace GoogGUI
 {
     public class GoogApp : INotifyPropertyChanged
     {
-        private List<Panel> _bottomTabs = new List<Panel>();
+        private List<object> _bottomTabs = new List<object>();
         private Config _config;
-        private UIConfig _uiConfig;
         private Panel? _panel;
-        private List<Panel> _topTabs = new List<Panel>();
+        private List<object> _topTabs = new List<object>();
+        private UIConfig _uiConfig;
 
         public GoogApp(Config config, UIConfig uiConfig)
         {
             _config = config;
             _uiConfig = uiConfig;
 
-            IEnumerable<Type> types = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(x => x.GetCustomAttributes<PanelAttribute>().Any())
-                .OrderBy(type => type.GetCustomAttribute<PanelAttribute>()?.Sort ?? 0);
-
-            foreach (Type t in types)
-            {
-                Panel? panel = (Panel?)Activator.CreateInstance(t, _config, _uiConfig) ?? throw new Exception("Panel attribute must be placed on Panel classes.");
-                if (panel == null) continue;
-                if (t.GetCustomAttribute<PanelAttribute>()?.Bottom ?? false)
-                    _bottomTabs.Add(panel);
-                else
-                    _topTabs.Add(panel);
-            }
+            BuildTabs();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public List<Panel> BottomTabs { get => _bottomTabs; }
+        public List<object> BottomTabs { get => _bottomTabs; }
 
         public Panel? Panel
         {
@@ -55,7 +42,7 @@ namespace GoogGUI
             }
         }
 
-        public List<Panel> TopTabs { get => _topTabs; }
+        public List<object> TopTabs { get => _topTabs; }
 
         public void BaseChecks()
         {
@@ -66,9 +53,45 @@ namespace GoogGUI
                 new MessageModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles").ShowDialog();
 
             if (!_config.IsInstallPathValid)
-                Panel = _bottomTabs.Where(x => x.GetType() == typeof(Settings)).FirstOrDefault();
+                Panel = (Panel)_bottomTabs.Where(x => x.GetType() == typeof(Settings)).First();
             else
-                Panel = _bottomTabs.Where(x => x.GetType() == typeof(Dashboard)).FirstOrDefault();
+                Panel = (Panel)_bottomTabs.Where(x => x.GetType() == typeof(Dashboard)).First();
+        }
+
+        protected virtual void BuildTabs()
+        {
+            IEnumerable<Type> types = Assembly.GetExecutingAssembly()
+                .GetTypes()
+                .Where(x => x.GetCustomAttributes<PanelAttribute>().Any())
+                .OrderBy(type => !type.GetCustomAttribute<PanelAttribute>()?.Bottom)
+                .ThenBy(type => type.GetCustomAttribute<PanelAttribute>()?.Group)
+                .ThenBy(type => type.GetCustomAttribute<PanelAttribute>()?.Sort ?? 0);
+
+            string group = string.Empty;
+            foreach (Type t in types)
+            {
+                Panel? panel = (Panel?)Activator.CreateInstance(t, _config, _uiConfig) ?? throw new Exception("Panel attribute must be placed on Panel classes.");
+                if (panel == null) continue;
+                PanelAttribute? attr = t.GetCustomAttribute<PanelAttribute>();
+                if (attr == null) continue;
+
+                if (attr.Group != group)
+                {
+                    group = attr.Group;
+                    if(!string.IsNullOrEmpty(group))
+                    {
+                        if (attr.Bottom)
+                            _bottomTabs.Add(group);
+                        else
+                            _topTabs.Add(group);
+                    }
+                }
+
+                if (attr.Bottom)
+                    _bottomTabs.Add(panel);
+                else
+                    _topTabs.Add(panel);
+            }
         }
 
         protected virtual void OnPropertyChanged(string property)

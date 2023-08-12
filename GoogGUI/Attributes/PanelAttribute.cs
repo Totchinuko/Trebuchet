@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace GoogGUI.Attributes
 {
@@ -10,24 +6,32 @@ namespace GoogGUI.Attributes
     public class PanelAttribute : Attribute
     {
         private bool _bottom;
-        private int _sort;
+        private string _group;
         private string _icon;
         private string _label;
+        private int _sort;
         private string _template;
 
-        public PanelAttribute(string label, string icon, bool bottom, int sort, string template = "")
+        public PanelAttribute(string label, string icon, bool bottom, int sort, string template = "", string group = "")
         {
             _bottom = bottom;
             _sort = sort;
             _icon = icon;
             _label = label;
             _template = template;
+            _group = group;
         }
 
         public bool Bottom => _bottom;
-        public int Sort => _sort;
+
+        public string Group => _group;
+
         public string Icon => _icon;
+
         public string Label => _label;
+
+        public int Sort => _sort;
+
         public string Template => _template;
     }
 }
