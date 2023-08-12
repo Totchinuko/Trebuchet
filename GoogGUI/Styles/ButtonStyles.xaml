@@ -210,4 +210,16 @@
             </Trigger>
         </Style.Triggers>
     </Style>
+
+    <Style TargetType="Button" x:Key="LaunchButton" BasedOn="{StaticResource ButtonIconGreen}">
+        <Setter Property="Background" Value="{StaticResource GPanel}" />
+    </Style>
+
+    <Style TargetType="Button" x:Key="CloseButton" BasedOn="{StaticResource ButtonIconYellow}">
+        <Setter Property="Background" Value="{StaticResource GPanel}" />
+    </Style>
+
+    <Style TargetType="Button" x:Key="KillButton" BasedOn="{StaticResource ButtonIconRed}">
+        <Setter Property="Background" Value="{StaticResource GPanel}" />
+    </Style>
 </ResourceDictionary>

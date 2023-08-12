@@ -35,6 +35,7 @@
                 <ResourceDictionary Source="Templates\TabLabel.xaml" />
                 <ResourceDictionary Source="Templates\MapField.xaml" />
                 <ResourceDictionary Source="Templates\IntField.xaml" />
+                <ResourceDictionary Source="Templates\ProcessStats.xaml" />
                 <ResourceDictionary Source="Templates\ClientDashboard.xaml" />
                 <ResourceDictionary Source="Templates\ServerDashboard.xaml" />
                 <ResourceDictionary Source="Templates\Dashboard.xaml" />

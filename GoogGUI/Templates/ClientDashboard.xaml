@@ -13,63 +13,56 @@
             </Border.Style>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="250" />
                 </Grid.ColumnDefinitions>
-                <Border Margin="0,15,12,15" CornerRadius="5" Width="5">
-                    <Border.Style>
-                        <Style TargetType="Border" BasedOn="{StaticResource Accent}">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding ProcessRunning}" Value="True">
-                                    <Setter Property="Background" Value="{StaticResource GGreen}" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Border.Style>
-                </Border>
-                <Grid Grid.Column="1" Margin="12">
+                <Grid Grid.Column="0" Margin="12">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="auto" />
                         <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
-                    <TextBlock Text="Game Launcher" Margin="-12,-10,0,20" FontSize="16" FontWeight="Bold" />
-                    <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
-                        <Grid>
-                            <TextBlock Margin="0,-12,0,0" Text="Game Settings" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="200" Margin="0,0,12,0" />
-                        </Grid>
-                        <Grid>
-                            <TextBlock Margin="0,-12,0,0" Text="Mod List" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                            <ComboBox ItemsSource="{Binding Modlists, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Margin="0,0,12,0" />
-                        </Grid>
-                        <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding LaunchCommand}" ToolTip="Launch Game" ToolTipService.InitialShowDelay="0" Margin="0" VerticalAlignment="Center">
-                            <Image Source="pack://application:,,,/GoogGui;component/Icons/Pacman.png" Width="16" Height="16" />
-                        </Button>
-                        <Button Style="{StaticResource ButtonIconRed}" Command="{Binding KillCommand}" ToolTip="Kill Game Process" ToolTipService.InitialShowDelay="0" Margin="0" VerticalAlignment="Center">
-                            <Image Source="pack://application:,,,/GoogGui;component/Icons/Skull.png" Width="16" Height="16" />
-                        </Button>
-                    </WrapPanel>
-                    <WrapPanel Grid.Row="2" Orientation="Horizontal">
-                        <WrapPanel.Style>
-                            <Style TargetType="WrapPanel">
+                    <TextBlock Text="Game" Margin="-10,-20,0,20" FontSize="30" FontWeight="Bold">
+                        <TextBlock.Style>
+                            <Style TargetType="TextBlock">
+                                <Setter Property="Foreground" Value="White" />
+                                <Setter Property="Opacity" Value="0.3" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ProcessRunning}" Value="False">
-                                        <Setter Property="Visibility" Value="Hidden" />
+                                    <DataTrigger Binding="{Binding ProcessRunning}" Value="True">
+                                        <Setter Property="Foreground" Value="{StaticResource GGreen}" />
+                                        <Setter Property="Opacity" Value="0.8" />
                                     </DataTrigger>
                                 </Style.Triggers>
                             </Style>
-                        </WrapPanel.Style>
-                        <Border Style="{StaticResource DarkPanel}" CornerRadius="3" Padding="8" MinWidth="80" Margin="0,0,12,0">
-                            <TextBlock Text="{Binding ProcessStats.CpuUsage, Mode=OneWay}" />
-                        </Border>
-                        <Border Style="{StaticResource DarkPanel}" CornerRadius="3" Padding="8" MinWidth="150">
-                            <TextBlock Text="{Binding ProcessStats.MemoryConsumption, Mode=OneWay}" />
-                        </Border>
+                        </TextBlock.Style>
+                    </TextBlock>
+                    <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,20,0,12">
+                        <Grid Margin="0,20,0,0">
+                            <TextBlock Margin="0,-18,0,0" Text="Game Settings" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="200" Margin="0,0,12,0" />
+                        </Grid>
+                        <Grid Margin="0,20,0,0">
+                            <TextBlock Margin="0,-18,0,0" Text="Mod List" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                            <ComboBox ItemsSource="{Binding Modlists, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Margin="0,0,12,0" />
+                        </Grid>
+                    </WrapPanel>
+                    <WrapPanel Grid.Row="1">
+                        <Button Style="{StaticResource LaunchButton}" Command="{Binding LaunchCommand}" ToolTip="Launch Game" ToolTipService.InitialShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="pack://application:,,,/GoogGui;component/Icons/Pacman.png" Width="16" Height="16" Margin="0,0,12,0" />
+                                <TextBlock Text="Launch" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource KillButton}" Command="{Binding KillCommand}" ToolTip="Kill Game Process" ToolTipService.InitialShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="pack://application:,,,/GoogGui;component/Icons/Skull.png" Width="16" Height="16" Margin="0,0,12,0" />
+                                <TextBlock Text="Kill" />
+                            </StackPanel>
+                        </Button>
                     </WrapPanel>
                 </Grid>
-
+                <Border Grid.Column="1" Background="{StaticResource GDarkPanel}">
+                    <ContentPresenter Content="{Binding ProcessStats}" ContentTemplate="{StaticResource ProcessStats}" />
+                </Border>
             </Grid>
         </Border>
     </DataTemplate>

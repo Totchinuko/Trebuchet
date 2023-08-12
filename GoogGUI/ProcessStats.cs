@@ -11,8 +11,8 @@ namespace GoogGUI
 {
     public class ProcessStats : INotifyPropertyChanged
     {
-        protected const string MemoryFormat = "Memory: {0}MB (Max {1}MB)";
-        protected const string CPUFormat = "CPU: {0}%";
+        protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
+        protected const string CPUFormat = "{0}%";
 
         protected Process? _process;
         private int _cpuUsage = 0;
@@ -22,6 +22,7 @@ namespace GoogGUI
         private PerformanceCounter? _memoryConsumptionCounter;
         private long _peakMemoryConsumption = 0;
         private DateTime _start;
+        private string _processName;
 
         private DispatcherTimer _timer;
 
@@ -38,22 +39,24 @@ namespace GoogGUI
 
         public string Uptime => _process == null ? string.Empty : (DateTime.UtcNow - _start).ToString("c");
 
-        public virtual void SetProcess(Process process)
+        public bool Running => _process != null;
+
+        public virtual void SetProcess(Process process, string processName)
         {
             if (_process != null) throw new Exception("Stats already have a process.");
 
             _process = process;
             _process.EnableRaisingEvents = true;
             _process.Exited += OnProcessExited;
+            _processName = processName;
 
-            string processName = Path.GetFileNameWithoutExtension(_process.StartInfo.FileName);
-
-            Task.Run(() => _memoryConsumptionCounter = new PerformanceCounter("Process V2", "Working Set", processName + ":" + process.Id)).ContinueWith(OnMemoryCounterCreated);
-            Task.Run(() => _cpuUsageCounter = new PerformanceCounter("Process V2", "% Processor Time", processName + ":" + process.Id)).ContinueWith(OnCPUCounterCreated);
+            Task.Run(() => _memoryConsumptionCounter = new PerformanceCounter("Process V2", "Working Set", _processName + ":" + process.Id)).ContinueWith(OnMemoryCounterCreated);
+            Task.Run(() => _cpuUsageCounter = new PerformanceCounter("Process V2", "% Processor Time", _processName + ":" + process.Id)).ContinueWith(OnCPUCounterCreated);
 
             _start = DateTime.UtcNow;
 
             _timer.Start();
+            OnPropertyChanged("Running");
         }
 
         private void OnCPUCounterCreated(Task<PerformanceCounter> task)
@@ -77,6 +80,7 @@ namespace GoogGUI
             _memoryConsumption = _peakMemoryConsumption = 0;
             _cpuUsage = 0;
             _timer.Stop();
+            OnPropertyChanged("Running");
         }
 
         protected virtual void OnPropertyChanged(string name)

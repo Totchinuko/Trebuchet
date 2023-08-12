@@ -33,7 +33,7 @@ namespace GoogGUI
 
             if (_trebuchet.ClientProcess?.Process != null)
             {
-                _processStats.SetProcess(_trebuchet.ClientProcess.Process);
+                _processStats.SetProcess(_trebuchet.ClientProcess.Process, Path.GetFileNameWithoutExtension(Config.FileClientBin));
                 KillCommand.Toggle(true);
                 LaunchCommand.Toggle(false);
             }
@@ -128,7 +128,7 @@ namespace GoogGUI
             LaunchCommand.Toggle(false);
 
             Process process = _trebuchet.CatapultClient(_selectedProfile, _selectedModlist);
-            _processStats.SetProcess(process);
+            _processStats.SetProcess(process, Path.GetFileNameWithoutExtension(Config.FileClientBin));
 
             KillCommand.Toggle(true);
             OnPropertyChanged("ProcessRunning");
