@@ -61,36 +61,10 @@
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
                     <StackPanel>
-                        <ItemsControl ItemsSource="{Binding App.TopTabs}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button local:GuiExtensions.Icon="{Binding Icon}"
-                                            local:GuiExtensions.Accent="{Binding Active}"
-                                            Style="{StaticResource ButtonTab}"
-                                            Content="{Binding Label}"
-                                            FontSize="16"
-                                            FontWeight="Bold"
-                                            Margin="0,0,0,12"
-                                            Command="{Binding .}"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <ItemsControl ItemsSource="{Binding App.TopTabs}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="2">
-                        <ItemsControl ItemsSource="{Binding App.BottomTabs}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <Button local:GuiExtensions.Icon="{Binding Icon}"
-                                            local:GuiExtensions.Accent="{Binding Active}"
-                                            FontSize="16"
-                                            FontWeight="Bold"
-                                            Style="{StaticResource ButtonTab}"
-                                            Content="{Binding Label}"
-                                            Margin="0,12,0,0"
-                                            Command="{Binding .}"/>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
+                        <ItemsControl ItemsSource="{Binding App.BottomTabs}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
                     </StackPanel>
                 </Grid>
                 <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12">

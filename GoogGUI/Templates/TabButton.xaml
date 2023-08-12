@@ -1,0 +1,14 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:local="clr-namespace:GoogGUI"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="TabButtonTemplate">
+        <Button local:GuiExtensions.Icon="{Binding Icon}"
+                local:GuiExtensions.Accent="{Binding Active}"
+                FontSize="16"
+                FontWeight="Bold"
+                Style="{StaticResource ButtonTab}"
+                Content="{Binding Label}"
+                Margin="0,12,0,0"
+                Command="{Binding .}"/>
+    </DataTemplate>
+</ResourceDictionary>

@@ -32,6 +32,8 @@
                 <ResourceDictionary Source="Templates\Selectors.xaml" />
                 <ResourceDictionary Source="Templates\ClientSettings.xaml" />
                 <ResourceDictionary Source="Templates\Dashboard.xaml" />
+                <ResourceDictionary Source="Templates\TabButton.xaml" />
+                <ResourceDictionary Source="Templates\TabLabel.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

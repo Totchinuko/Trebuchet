@@ -2,4 +2,5 @@
                     xmlns:local="clr-namespace:GoogGUI"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <local:TemplateHolderSelector x:Key="TemplateHolderSelector" />
+    <local:TabTemplateSelector x:Key="TabTemplateSelector" />
 </ResourceDictionary>
