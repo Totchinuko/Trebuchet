@@ -1,6 +1,7 @@
 ﻿using Goog;
 using GoogGUI.Attributes;
 using GoogLib;
+using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -20,6 +21,7 @@ namespace GoogGUI
         public ClientSettings(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
             _config.FileSaved += OnConfigSaved;
+            _uiConfig.FileSaved += OnUIConfigSaved;
 
             MoveOriginalSavedFolder();
             _selectedProfile = _uiConfig.CurrentClientProfile;
@@ -186,9 +188,6 @@ namespace GoogGUI
         {
             OnCanExecuteChanged();
             MoveOriginalSavedFolder();
-
-            if (_uiConfig.CurrentClientProfile != _selectedProfile)
-                SelectedProfile = _uiConfig.CurrentClientProfile;
         }
 
         private void OnOpenFolderProfile(object? obj)
@@ -202,7 +201,7 @@ namespace GoogGUI
         {
             ClientProfile.ResolveProfile(_config, ref _selectedProfile);
             _uiConfig.CurrentClientProfile = _selectedProfile;
-            _config.SaveFile();
+            _uiConfig.SaveFile();
             OnPropertyChanged("SelectedProfile");
             LoadProfile();
         }
@@ -266,6 +265,12 @@ namespace GoogGUI
         private void OnValueChanged()
         {
             _profile.SaveFile();
+        }
+
+        private void OnUIConfigSaved(object? sender, UIConfig e)
+        {
+            if (_uiConfig.CurrentClientProfile != _selectedProfile)
+                SelectedProfile = _uiConfig.CurrentClientProfile;
         }
     }
 }

@@ -6,7 +6,6 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -36,6 +35,7 @@ namespace GoogGUI
         public ModlistHandler(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
             _config.FileSaved += OnConfigFileChanged;
+
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
             SetupFileWatcher();
 
@@ -524,7 +524,7 @@ namespace GoogGUI
             ModListProfile.ResolveProfile(_config, ref _selectedModlist);
             OnPropertyChanged("SelectedModlist");
             _uiConfig.CurrentModlistProfile = _selectedModlist;
-            _config.SaveFile();
+            _uiConfig.SaveFile();
             LoadProfile();
         }
 
@@ -549,7 +549,7 @@ namespace GoogGUI
             if (_modWatcher != null) return;
             string path = Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, _config.ClientAppID);
             if (!Directory.Exists(path)) return;
-                
+
             _modWatcher = new FileSystemWatcher(path);
             _modWatcher.NotifyFilter = NotifyFilters.Attributes
                                  | NotifyFilters.CreationTime
