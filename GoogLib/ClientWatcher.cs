@@ -41,6 +41,9 @@ namespace GoogLib
                 Config.FolderGameBinaries,
                 (_profile.UseBattleEye ? Config.FileClientBEBin : Config.FileClientBin));
 
+            Process.StartInfo.WorkingDirectory = Path.Combine(_config.ClientPath,
+                Config.FolderGameBinaries);
+
             List<string> args = new List<string>();
             if (_profile.Log) args.Add(Config.GameArgsLog);
             if (_profile.UseAllCores) args.Add(Config.GameArgsUseAllCore);

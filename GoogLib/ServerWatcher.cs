@@ -86,6 +86,12 @@ namespace GoogLib
                 Config.FolderGameBinaries,
                 Config.FileServerBin);
 
+            Process.StartInfo.WorkingDirectory = Path.Combine(_config.InstallPath,
+                _config.VersionFolder,
+                Config.FolderServerInstances,
+                string.Format(Config.FolderInstancePattern, _serverInstance),
+                Config.FolderGameBinaries);
+
             List<string> args = new List<string>() { _profile.Map };
             if (_profile.Log) args.Add(Config.GameArgsLog);
             if (_profile.UseAllCores) args.Add(Config.GameArgsUseAllCore);
@@ -93,6 +99,7 @@ namespace GoogLib
             args.Add(string.Format(Config.GameArgsModList, Path.Combine(_profileFolder, Config.FileGeneratedModlist)));
 
             Process.StartInfo.Arguments = string.Join(" ", args);
+            
             Process.StartInfo.UseShellExecute = false;
             Process.EnableRaisingEvents = true;
             Process.Exited += OnProcessExited;
