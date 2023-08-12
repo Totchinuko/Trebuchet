@@ -1,4 +1,5 @@
 ﻿using GoogLib;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json.Serialization;
 
@@ -51,6 +52,8 @@ namespace Goog
         private string _installPath = string.Empty;
         private int _serverInstanceCount = 0;
         private string _steamAPIKey = string.Empty;
+        private PastLaunch? _clientPastLaunch = null;
+        private PastLaunch?[] _serverPastLaunch = new PastLaunch[0];
 
         public string ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
@@ -71,6 +74,8 @@ namespace Goog
         public string SteamAPIKey { get => _steamAPIKey; set => _steamAPIKey = value; }
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
+
+        public PastLaunch? ClientPastLaunch { get => _clientPastLaunch; set => _clientPastLaunch = value; }
 
         public static string GetPath(bool testlive)
         {
@@ -181,6 +186,21 @@ namespace Goog
             }
             profileName = Path.GetFileName(directories[0]);
             return !string.IsNullOrEmpty(profileName);
+        }
+
+        public void SetServerPastLaunch(PastLaunch? pastLaunch, int instance)
+        {
+            if (_serverPastLaunch.Length <= instance)
+                Array.Resize(ref _serverPastLaunch, instance + 1);
+            _serverPastLaunch[instance] = pastLaunch;
+        }
+
+        public bool TryGetServerPastLaunch(int instance, [NotNullWhen(true)] out PastLaunch? pastLaunch)
+        {
+            pastLaunch = null;
+            if (_serverPastLaunch.Length <= instance) return false;
+            pastLaunch = _serverPastLaunch[instance];
+            return pastLaunch != null;
         }
     }
 }

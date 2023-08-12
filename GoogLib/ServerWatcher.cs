@@ -6,13 +6,12 @@ namespace GoogLib
 {
     public class ServerWatcher
     {
+        private bool _closed;
         private Config _config;
         private DateTime _lastResponsive;
-        private Process? _process;
         private ServerProfile _profile;
         private string _profileFolder;
         private int _serverInstance;
-        private bool _closed;
 
         public ServerWatcher(Config config, ServerProfile profile, int instance)
         {
@@ -29,44 +28,58 @@ namespace GoogLib
 
         public bool IsZombie { get => (_lastResponsive + TimeSpan.FromSeconds(_profile.ZombieCheckSeconds)) < DateTime.UtcNow; }
 
-        public int ServerInstance { get => _serverInstance; }
+        public Process? Process { get; private set; }
 
-        public Process? Process => _process;
+        public ServerProfile Profile => _profile;
+
+        public int ServerInstance { get => _serverInstance; }
 
         public void Close()
         {
-            if (_process == null) return;
+            if (Process == null) return;
 
             _closed = true;
-            _process.CloseMainWindow();
+            Process.CloseMainWindow();
         }
 
         public void Kill()
         {
-            if (_process == null) return;
+            if (Process == null) return;
 
             _closed = true;
-            _process.Kill();
+            Process.Kill();
         }
 
         public void ProcessRefresh()
         {
-            if (_process == null) return;
-            _process.Refresh();
+            if (Process == null) return;
+            Process.Refresh();
 
-            if (_process.Responding)
+            if (Process.Responding)
                 _lastResponsive = DateTime.UtcNow;
             if (IsZombie && _profile.KillZombies)
-                _process.Kill();
+                Process.Kill();
         }
 
-        [MemberNotNull("_process", "Process")]
+        [MemberNotNull("Process")]
+        public void SetRunningProcess(Process process)
+        {
+            if (Process != null)
+                throw new Exception("Cannot start a process already started.");
+
+            Process = process;
+            Process.EnableRaisingEvents = true;
+            Process.Exited -= OnProcessExited;
+            Process.Exited += OnProcessExited;
+        }
+
+        [MemberNotNull("Process")]
         public void StartProcess()
         {
-            if (_process != null)
+            if (Process != null)
                 throw new Exception("Cannot start a process already started.");
-            _process = new Process();
-            _process.StartInfo.FileName = Path.Combine(_config.InstallPath,
+            Process = new Process();
+            Process.StartInfo.FileName = Path.Combine(_config.InstallPath,
                 _config.VersionFolder,
                 Config.FolderServerInstances,
                 string.Format(Config.FolderInstancePattern, _serverInstance),
@@ -79,18 +92,18 @@ namespace GoogLib
             args.Add(string.Format(Config.ServerArgsMaxPlayers, 10));
             args.Add(string.Format(Config.GameArgsModList, Path.Combine(_profileFolder, Config.FileGeneratedModlist)));
 
-            _process.StartInfo.Arguments = string.Join(" ", args);
-            _process.StartInfo.UseShellExecute = false;
-            _process.EnableRaisingEvents = true;
-            _process.Exited += OnProcessExited;
-            _process.Start();
+            Process.StartInfo.Arguments = string.Join(" ", args);
+            Process.StartInfo.UseShellExecute = false;
+            Process.EnableRaisingEvents = true;
+            Process.Exited += OnProcessExited;
+            Process.Start();
         }
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)
         {
-            if (_process == null) return;
-            _process.Exited -= OnProcessExited;
-            _process = null;
+            if (Process == null) return;
+            Process.Exited -= OnProcessExited;
+            Process = null;
 
             if (_profile.RestartWhenDown && !_closed)
             {

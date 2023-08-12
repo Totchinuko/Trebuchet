@@ -13,6 +13,7 @@
     <None Remove="Icons\Add.png" />
     <None Remove="Icons\BugWindow.png" />
     <None Remove="Icons\Close.png" />
+    <None Remove="Icons\Dashboard.png" />
     <None Remove="Icons\Download.png" />
     <None Remove="Icons\Duplicate.png" />
     <None Remove="Icons\FIle.png" />
@@ -23,11 +24,13 @@
     <None Remove="Icons\Logo.png" />
     <None Remove="Icons\Maximize.png" />
     <None Remove="Icons\Minimize.png" />
+    <None Remove="Icons\Pacman.png" />
     <None Remove="Icons\Reset.png" />
     <None Remove="Icons\Restore.png" />
     <None Remove="Icons\Save.png" />
     <None Remove="Icons\Server.png" />
     <None Remove="Icons\Settings.png" />
+    <None Remove="Icons\Skull.png" />
     <None Remove="Icons\Steam.png" />
     <None Remove="Icons\Trash.png" />
     <None Remove="Icons\Upload.png" />
@@ -39,6 +42,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Icons\Dashboard.png" />
     <Resource Include="Icons\Download.png" />
   </ItemGroup>
 
@@ -59,11 +63,13 @@
     <Resource Include="Icons\Logo.png" />
     <Resource Include="Icons\Maximize.png" />
     <Resource Include="Icons\Minimize.png" />
+    <Resource Include="Icons\Pacman.png" />
     <Resource Include="Icons\Reset.png" />
     <Resource Include="Icons\Restore.png" />
     <Resource Include="Icons\Save.png" />
     <Resource Include="Icons\Server.png" />
     <Resource Include="Icons\Settings.png" />
+    <Resource Include="Icons\Skull.png" />
     <Resource Include="Icons\Steam.png" />
     <Resource Include="Icons\Trash.png" />
     <Resource Include="Icons\Upload.png" />

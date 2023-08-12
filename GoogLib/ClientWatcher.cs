@@ -1,4 +1,4 @@
-﻿using Goog;
+﻿    using Goog;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
@@ -7,7 +7,6 @@ namespace GoogLib
     public class ClientWatcher
     {
         private Config _config;
-        private Process? _process;
         private ClientProfile _profile;
         private string _profileFolder;
 
@@ -15,31 +14,30 @@ namespace GoogLib
         {
             _config = config;
             _profile = profile;
-            _process = new Process();
             _profileFolder = Path.GetDirectoryName(_profile.FilePath) ?? throw new Exception("Invalid folder directory.");
         }
 
         public event EventHandler<ClientWatcher>? ProcessExited;
-        public Process? Process => _process;
+        public Process? Process { get; private set; }
 
         public void Close()
         {
-            _process?.CloseMainWindow();
+            Process?.CloseMainWindow();
         }
 
         public void Kill()
         {
-            _process?.Kill();
+            Process?.Kill();
         }
 
-        [MemberNotNull("_process", "Process")]
+        [MemberNotNull("Process")]
         public void StartProcess()
         {
-            if (_process != null)
+            if (Process != null)
                 throw new Exception("Cannot start a process already started.");
 
-            _process = new Process();
-            _process.StartInfo.FileName = Path.Combine(_config.ClientPath,
+            Process = new Process();
+            Process.StartInfo.FileName = Path.Combine(_config.ClientPath,
                 Config.FolderGameBinaries,
                 (_profile.UseBattleEye ? Config.FileClientBEBin : Config.FileClientBin));
 
@@ -48,11 +46,23 @@ namespace GoogLib
             if (_profile.UseAllCores) args.Add(Config.GameArgsUseAllCore);
             args.Add(string.Format(Config.GameArgsModList, Path.Combine(_profileFolder, Config.FileGeneratedModlist)));
 
-            _process.StartInfo.Arguments = string.Join(" ", args);
-            _process.StartInfo.UseShellExecute = false;
-            _process.EnableRaisingEvents = true;
-            _process.Exited += OnProcessExited;
-            _process.Start();
+            Process.StartInfo.Arguments = string.Join(" ", args);
+            Process.StartInfo.UseShellExecute = false;
+            Process.EnableRaisingEvents = true;
+            Process.Exited += OnProcessExited;
+            Process.Start();
+        }
+
+        [MemberNotNull("Process")]
+        public void SetRunningProcess(Process process)
+        {
+            if (Process != null)
+                throw new Exception("Cannot start a process already started.");
+
+            Process = process;
+            Process.EnableRaisingEvents = true;
+            Process.Exited -= OnProcessExited;
+            Process.Exited += OnProcessExited;
         }
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)

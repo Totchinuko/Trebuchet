@@ -66,7 +66,9 @@ namespace GoogGUI
                 new MessageModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles").ShowDialog();
 
             if (!_config.IsInstallPathValid)
-                Panel = _bottomTabs[0];
+                Panel = _bottomTabs.Where(x => x.GetType() == typeof(Settings)).FirstOrDefault();
+            else
+                Panel = _bottomTabs.Where(x => x.GetType() == typeof(Dashboard)).FirstOrDefault();
         }
 
         protected virtual void OnPropertyChanged(string property)
