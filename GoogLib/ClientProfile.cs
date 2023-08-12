@@ -1,4 +1,5 @@
 ﻿using Goog;
+using System.Text.Json.Serialization;
 using Yuu.Ini;
 
 namespace GoogLib
@@ -15,6 +16,9 @@ namespace GoogLib
 
         private ClientProfile()
         { }
+
+        [JsonIgnore]
+        public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
 
         #region Settings
 

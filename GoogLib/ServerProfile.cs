@@ -1,4 +1,5 @@
 ﻿using Goog;
+using System.Text.Json.Serialization;
 
 namespace GoogLib
 {
@@ -31,6 +32,9 @@ namespace GoogLib
         public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
 
         public int ZombieCheckSeconds { get => _zombieCheckSeconds; set => _zombieCheckSeconds = value; }
+
+        [JsonIgnore]
+        public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
 
     }
 }

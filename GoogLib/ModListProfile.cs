@@ -1,5 +1,6 @@
 ﻿using Goog;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace GoogLib
 {
@@ -8,11 +9,15 @@ namespace GoogLib
         private List<string> _modlist = new List<string>();
         private string _syncURL = string.Empty;
 
+        private ModListProfile()
+        { }
+
         public List<string> Modlist { get => _modlist; set => _modlist = value; }
 
-        public string SyncURL { get => _syncURL; set => _syncURL = value; }
+        [JsonIgnore]
+        public string ProfileName => Path.GetFileNameWithoutExtension(FilePath) ?? string.Empty;
 
-        private ModListProfile() { }
+        public string SyncURL { get => _syncURL; set => _syncURL = value; }
 
         public static async Task<List<string>> DownloadModList(string url, CancellationToken cancellationToken)
         {
@@ -42,6 +47,31 @@ namespace GoogLib
         public static string GetPath(Config config, string modlistName)
         {
             return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles, modlistName + ".json");
+        }
+
+        public static List<string> ListProfiles(Config config)
+        {
+            List<string> list = new List<string>();
+            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles);
+            if (!Directory.Exists(folder))
+                return list;
+
+            string[] profiles = Directory.GetFiles(folder, "*.json");
+            foreach (string p in profiles)
+                list.Add(Path.GetFileNameWithoutExtension(p));
+            return list;
+        }
+
+        public static void ResolveProfile(Config config, ref string profileName)
+        {
+            string path = GetPath(config, profileName);
+            if (File.Exists(path)) return;
+
+            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles), "*.json");
+            if (!string.IsNullOrEmpty(profileName)) return;
+
+            profileName = "Default";
+            CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
         public static bool TryParseModID(string mod, out string id)
@@ -89,31 +119,6 @@ namespace GoogLib
         public void SetModList(string modlist)
         {
             Modlist = modlist.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-        }
-
-        public static void ResolveProfile(Config config, ref string profileName)
-        {
-            string path = GetPath(config, profileName);
-            if(File.Exists(path)) return;
-
-            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles), "*.json");
-            if (!string.IsNullOrEmpty(profileName)) return;
-
-            profileName = "Default";
-            CreateFile(GetPath(config, profileName)).SaveFile();
-        }
-
-        public static List<string> ListProfiles(Config config)
-        {
-            List<string> list = new List<string>();
-            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles);
-            if (!Directory.Exists(folder))
-                return list;
-
-            string[] profiles = Directory.GetFiles(folder, "*.json");
-            foreach (string p in profiles)
-                list.Add(Path.GetFileNameWithoutExtension(p));
-            return list;
         }
     }
 }
