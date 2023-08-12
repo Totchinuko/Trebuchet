@@ -1,7 +1,6 @@
 ﻿using GoogLib;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
-using System.Text.Json.Serialization;
 
 namespace Goog
 {
@@ -23,6 +22,10 @@ namespace Goog
         public const string FileClientBin = "ConanSandbox.exe";
         public const string FileConfig = "Config.json";
         public const string FileGeneratedModlist = "modlist.txt";
+        public const string FileIniBase = "Engine\\Config\\Base{0}.ini";
+        public const string FileIniDefault = "ConanSandbox\\Config\\Default{0}.ini";
+        public const string FileIniUser = "ConanSandbox\\Saved\\Config\\WindowsNoEditor\\{0}.ini";
+        public const string FileMapJson = "Json\\Maps.json";
         public const string FileProfileConfig = "profile.json";
         public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
         public const string FileSteamCMDBin = "steamcmd.exe";
@@ -41,21 +44,20 @@ namespace Goog
         public const string GameArgsModList = "-modlist={0}";
         public const string GameArgsUseAllCore = "-useallavailablecores";
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
-        public const string FileIniDefault = "ConanSandbox\\Config\\Default{0}.ini";
-        public const string FileIniBase = "Engine\\Config\\Base{0}.ini";
-        public const string FileIniUser = "ConanSandbox\\Saved\\Config\\WindowsNoEditor\\{0}.ini";
 
         #endregion constants
 
+        private PastLaunch? _clientPastLaunch = null;
         private string _clientPath = string.Empty;
         private bool _displayCMD = false;
         private string _installPath = string.Empty;
         private int _serverInstanceCount = 0;
-        private string _steamAPIKey = string.Empty;
-        private PastLaunch? _clientPastLaunch = null;
         private PastLaunch?[] _serverPastLaunch = new PastLaunch[0];
+        private string _steamAPIKey = string.Empty;
 
         public string ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
+
+        public PastLaunch? ClientPastLaunch { get => _clientPastLaunch; set => _clientPastLaunch = value; }
 
         public string ClientPath { get => _clientPath; set => _clientPath = value; }
 
@@ -75,8 +77,6 @@ namespace Goog
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 
-        public PastLaunch? ClientPastLaunch { get => _clientPastLaunch; set => _clientPastLaunch = value; }
-
         public static string GetPath(bool testlive)
         {
             string? ConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -84,11 +84,6 @@ namespace Goog
                 throw new Exception("Path to assembly is invalid.");
             ConfigPath = Path.Combine(ConfigPath, $"{(testlive ? FolderTestLive : FolderLive)}.{FileConfig}");
             return ConfigPath;
-        }
-
-        public string GetInstancePath(int instance)
-        {
-            return Path.Combine(InstallPath, VersionFolder, FolderServerInstances, string.Format(FolderInstancePattern, instance));
         }
 
         public void CreateInstanceDirectories()
@@ -120,6 +115,11 @@ namespace Goog
             }
 
             return count;
+        }
+
+        public string GetInstancePath(int instance)
+        {
+            return Path.Combine(InstallPath, VersionFolder, FolderServerInstances, string.Format(FolderInstancePattern, instance));
         }
 
         public void RemoveAllSymbolicLinks()
@@ -170,6 +170,13 @@ namespace Goog
             }
         }
 
+        public void SetServerPastLaunch(PastLaunch? pastLaunch, int instance)
+        {
+            if (_serverPastLaunch.Length <= instance)
+                Array.Resize(ref _serverPastLaunch, instance + 1);
+            _serverPastLaunch[instance] = pastLaunch;
+        }
+
         public bool TryGetFirstProfile(out string profileName)
         {
             profileName = string.Empty;
@@ -186,13 +193,6 @@ namespace Goog
             }
             profileName = Path.GetFileName(directories[0]);
             return !string.IsNullOrEmpty(profileName);
-        }
-
-        public void SetServerPastLaunch(PastLaunch? pastLaunch, int instance)
-        {
-            if (_serverPastLaunch.Length <= instance)
-                Array.Resize(ref _serverPastLaunch, instance + 1);
-            _serverPastLaunch[instance] = pastLaunch;
         }
 
         public bool TryGetServerPastLaunch(int instance, [NotNullWhen(true)] out PastLaunch? pastLaunch)

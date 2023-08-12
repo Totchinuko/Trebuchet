@@ -34,6 +34,7 @@
                 <ResourceDictionary Source="Templates\Dashboard.xaml" />
                 <ResourceDictionary Source="Templates\TabButton.xaml" />
                 <ResourceDictionary Source="Templates\TabLabel.xaml" />
+                <ResourceDictionary Source="Templates\MapField.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

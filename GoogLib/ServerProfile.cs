@@ -64,5 +64,19 @@ namespace GoogLib
                 list.Add(Path.GetFileName(p));
             return list;
         }
+
+        public static Dictionary<string, string> GetMapList()
+        {
+            string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (string.IsNullOrEmpty(appFolder)) throw new Exception("Path to assembly is invalid.");
+
+            string file = Path.Combine(appFolder, Config.FileMapJson);
+            if (!File.Exists(file)) throw new Exception("Map list file is missing.");
+
+            var data = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
+            if (data == null) throw new Exception("Map list could ne be parsed.");
+
+            return data;
+        }
     }
 }
