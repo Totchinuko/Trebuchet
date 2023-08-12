@@ -29,7 +29,7 @@
                     <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding ModFilesDownloadCommand}" ToolTip="Update Mods" Margin="0" VerticalAlignment="Top">
                         <Image Source="pack://application:,,,/GoogGui;component/Icons/Download.png" Width="16" Height="16" />
                     </Button>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,3" Height="25" VerticalAlignment="Top"  />
+                    <Border Style="{StaticResource VerticalSep}" VerticalAlignment="Top" Margin="12,0,12,0" Height="35" />
                     <Grid>
                         <TextBlock Margin="0,-10,0,0" Text="Add Mod" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <WrapPanel Orientation="Horizontal">
@@ -43,7 +43,7 @@
                                     Command="{Binding ExploreLocalCommand}"/>
                         </WrapPanel>
                     </Grid>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,3" VerticalAlignment="Top" Height="25" />
+                    <Border Style="{StaticResource VerticalSep}" VerticalAlignment="Top" Margin="12,0,12,0" Height="35" />
                     <Grid>
                         <TextBlock Margin="0,-10,0,0" Text="Import" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <WrapPanel Orientation="Horizontal">
@@ -57,7 +57,7 @@
                                     Command="{Binding ImportFromFileCommand}"/>
                         </WrapPanel>
                     </Grid>
-                    <Separator Style="{StaticResource {x:Static ToolBar.SeparatorStyleKey}}" Opacity="0.5" Margin="3,3" VerticalAlignment="Top" Height="25" />
+                    <Border Style="{StaticResource VerticalSep}" VerticalAlignment="Top" Margin="12,0,12,0" Height="35" />
                     <Grid>
                         <TextBlock Margin="0,-10,0,0" Text="Export" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <WrapPanel Orientation="Horizontal">

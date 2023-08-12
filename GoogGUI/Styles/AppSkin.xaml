@@ -120,4 +120,40 @@
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="Padding" Value="6" />
     </Style>
+
+    <Style TargetType="Separator">
+        
+    </Style>
+
+    <Style TargetType="Separator" x:Key="VerticalSeparator">
+        <Setter Property="LayoutTransform">
+            <Setter.Value>
+                <TransformGroup>
+                    <TransformGroup.Children>
+                        <TransformCollection>
+                            <RotateTransform Angle="90"/>
+                        </TransformCollection>
+                    </TransformGroup.Children>
+                </TransformGroup>
+            </Setter.Value>
+        </Setter>
+        <Setter Property="Width" Value="25" />
+        <Setter Property="Background" Value="White" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="HorizontalSep">
+        <Setter Property="Background" Value="#FF202020"/>
+        <Setter Property="BorderBrush" Value="#FF393939" />
+        <Setter Property="BorderThickness" Value="0,0,0,1" />
+        <Setter Property="Height" Value="2" />
+        <Setter Property="Margin" Value="6,12" />
+    </Style>
+
+    <Style TargetType="Border" x:Key="VerticalSep">
+        <Setter Property="Background" Value="#FF202020"/>
+        <Setter Property="BorderBrush" Value="#FF393939" />
+        <Setter Property="BorderThickness" Value="0,0,1,0" />
+        <Setter Property="Width" Value="2" />
+        <Setter Property="Margin" Value="12,6" />
+    </Style>
 </ResourceDictionary>
