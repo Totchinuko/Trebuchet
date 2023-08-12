@@ -60,6 +60,10 @@ namespace GoogLib
             if (!Directory.Exists(_config.ClientPath)) throw new DirectoryNotFoundException("Game path is not found.");
 
             path = Path.Combine(_config.ClientPath, path);
+
+            string? folder = Path.GetDirectoryName(path);
+            if (folder == null) throw new Exception($"Invalid folder for {path}.");
+            Tools.CreateDir(folder);
             File.WriteAllText(path, content);
         }
 
