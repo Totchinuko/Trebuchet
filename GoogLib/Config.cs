@@ -13,8 +13,8 @@ namespace Goog
         public const string AppIDTestLiveClient = "931180";
         public const string AppIDTestLiveServer = "931580";
         public const string CmdArgAppUpdate = "+app_update {0}";
-        public const string CmdArgForceInstallDir = "+force_install_dir {0}";
-        public const string CmdArgLogin = "+login {0} {1}";
+        public const string CmdArgForceInstallDir = "+force_install_dir \"{0}\"";
+        public const string CmdArgLogin = "+login \"{0}\" \"{1}\"";
         public const string CmdArgLoginAnonymous = "+login anonymous";
         public const string CmdArgQuit = "+quit";
         public const string CmdArgWorkshopUpdate = "+workshop_download_item {0} {1}";
@@ -41,7 +41,7 @@ namespace Goog
         public const string FolderSteamMods = "steamapps\\workshop\\content";
         public const string FolderTestLive = "TestLive";
         public const string GameArgsLog = "-log";
-        public const string GameArgsModList = "-modlist={0}";
+        public const string GameArgsModList = "-modlist=\"{0}\"";
         public const string GameArgsUseAllCore = "-useallavailablecores";
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
 
