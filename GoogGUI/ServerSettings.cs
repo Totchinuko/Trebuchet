@@ -72,6 +72,60 @@ namespace GoogGUI
             }
         }
 
+        [ToggleField("Display Log Console", false, Sort = 30)]
+        public bool Log
+        {
+            get => _profile.Log;
+            set
+            {
+                _profile.Log = value;
+                OnValueChanged();
+            }
+        }
+
+        [ToggleField("Use All Cores", false, Sort = 25)]
+        public bool UseAllCores
+        {
+            get => _profile.UseAllCores;
+            set
+            {
+                _profile.UseAllCores = value;
+                OnValueChanged();
+            }
+        }
+
+        [IntField("Zombie Check (Sec)", min: 30, defaultValue: 300, Sort = 50)]
+        public int ZombieCheckSeconds
+        {
+            get => _profile.ZombieCheckSeconds;
+            set
+            {
+                _profile.ZombieCheckSeconds = value;
+                OnValueChanged();
+            }
+        }
+
+        [ToggleField("Kill Zombies", false, Sort = 40)]
+        public bool KillZombies
+        {
+            get => _profile.KillZombies;
+            set
+            {
+                _profile.KillZombies = value;
+                OnValueChanged();
+            }
+        }
+
+        [ToggleField("Restart When Down", false, Sort = 40)]
+        public bool RestartWhenDown
+        {
+            get => _profile.RestartWhenDown;
+            set
+            {
+                _profile.RestartWhenDown = value;
+                OnValueChanged();
+            }
+        }
         #endregion Fields
 
 

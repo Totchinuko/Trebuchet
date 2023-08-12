@@ -2,6 +2,7 @@
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Yuu.Ini;
 
 namespace GoogLib
 {
@@ -15,6 +16,8 @@ namespace GoogLib
         private List<string> _sudoSuperAdmins = new List<string>();
         private bool _useAllCores = true;
         private int _zombieCheckSeconds = 300;
+
+        #region Settings
 
         public bool KillZombies { get => _killZombies; set => _killZombies = value; }
 
@@ -31,6 +34,22 @@ namespace GoogLib
         public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
 
         public int ZombieCheckSeconds { get => _zombieCheckSeconds; set => _zombieCheckSeconds = value; }
+
+        #endregion
+
+        #region IniSettings
+
+        [IniSetting(Config.FileIniDefault, "Engine")]
+        public void ApplySudoSettings(IniDocument document)
+        {
+            IniSection section = document.GetSection("/Game/Mods/ModAdmin/Auth/EA_MC_Auth.EA_MC_Auth_C");
+            section.GetParameters("+SuperAdminSteamIDs").ForEach(section.Remove);
+
+            foreach (string id in _sudoSuperAdmins)
+                section.InsertParameter(0, "+SuperAdminSteamIDs", id);
+        }
+
+        #endregion
 
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
