@@ -4,78 +4,13 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
+                <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Border Grid.Column="1" CornerRadius="3" Padding="0">
-                <Border.Style>
-                    <Style TargetType="Border" BasedOn="{StaticResource Panel}">
-                        <Style.Triggers>
-                            <DataTrigger Binding="{Binding CanLaunchClient}">
-                                <Setter Property="Visibility" Value="Collapsed" />
-                            </DataTrigger>
-                        </Style.Triggers>
-                    </Style>
-                </Border.Style>
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Border Margin="0,15,12,15" CornerRadius="5" Width="5">
-                        <Border.Style>
-                            <Style TargetType="Border" BasedOn="{StaticResource Accent}">
-                                <Setter Property="Background" Value="Transparent" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding ClientRunning}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource GGreen}" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                    </Border>
-                    <Grid Grid.Column="1" Margin="12">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="auto" />
-                        </Grid.RowDefinitions>
-                        <TextBlock Text="Game Launcher" Margin="-12,-10,0,20" FontSize="16" FontWeight="Bold" />
-                        <WrapPanel Grid.Row="1" Orientation="Horizontal" Margin="0,0,0,12">
-                            <Grid>
-                                <TextBlock Margin="0,-12,0,0" Text="Game Settings" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                                <ComboBox ItemsSource="{Binding ClientProfiles, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedClientProfile, Mode=TwoWay}" Width="200" Margin="0,0,12,0" />
-                            </Grid>
-                            <Grid>
-                                <TextBlock Margin="0,-12,0,0" Text="Mod List" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                                <ComboBox ItemsSource="{Binding Modlists, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectClientModlist, Mode=TwoWay}" Width="200" Margin="0,0,12,0" />
-                            </Grid>
-                            <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding ClientLaunchCommand}" ToolTip="Launch Game" ToolTipService.InitialShowDelay="0" Margin="0" VerticalAlignment="Center">
-                                <Image Source="pack://application:,,,/GoogGui;component/Icons/Pacman.png" Width="16" Height="16" />
-                            </Button>
-                            <Button Style="{StaticResource ButtonIconRed}" Command="{Binding ClientKillCommand}" ToolTip="Kill Game Process" ToolTipService.InitialShowDelay="0" Margin="0" VerticalAlignment="Center">
-                                <Image Source="pack://application:,,,/GoogGui;component/Icons/Skull.png" Width="16" Height="16" />
-                            </Button>
-                        </WrapPanel>
-                        <WrapPanel Grid.Row="2" Orientation="Horizontal">
-                            <WrapPanel.Style>
-                                <Style TargetType="WrapPanel">
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding ClientRunning}" Value="False">
-                                            <Setter Property="Visibility" Value="Hidden" />
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </WrapPanel.Style>
-                            <Border Style="{StaticResource DarkPanel}" CornerRadius="3" Padding="8" MinWidth="80" Margin="0,0,12,0">
-                                <TextBlock Text="{Binding ClientStats.CpuUsage, Mode=OneWay}" />
-                            </Border>
-                            <Border Style="{StaticResource DarkPanel}" CornerRadius="3" Padding="8" MinWidth="150">
-                                <TextBlock Text="{Binding ClientStats.MemoryConsumption, Mode=OneWay}" />
-                            </Border>
-                        </WrapPanel>
-                    </Grid>
-
-                </Grid>
+            <ContentPresenter ContentTemplate="{StaticResource ClientDashboard}" Content="{Binding Client}" />
+            <Border Grid.Row="1" Margin="0,12" />
+            <Border Grid.Row="2" Padding="24,0,0,0">
+                <ItemsControl ItemsSource="{Binding Instances}" ItemTemplate="{StaticResource ServerDashboard}"/>
             </Border>
         </Grid>
     </DataTemplate>

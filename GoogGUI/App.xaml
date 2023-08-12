@@ -31,11 +31,13 @@
                 <ResourceDictionary Source="Templates\ModlistTextImport.xaml" />
                 <ResourceDictionary Source="Templates\Selectors.xaml" />
                 <ResourceDictionary Source="Templates\ClientSettings.xaml" />
-                <ResourceDictionary Source="Templates\Dashboard.xaml" />
                 <ResourceDictionary Source="Templates\TabButton.xaml" />
                 <ResourceDictionary Source="Templates\TabLabel.xaml" />
                 <ResourceDictionary Source="Templates\MapField.xaml" />
                 <ResourceDictionary Source="Templates\IntField.xaml" />
+                <ResourceDictionary Source="Templates\ClientDashboard.xaml" />
+                <ResourceDictionary Source="Templates\ServerDashboard.xaml" />
+                <ResourceDictionary Source="Templates\Dashboard.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
