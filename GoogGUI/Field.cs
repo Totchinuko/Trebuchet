@@ -31,8 +31,7 @@ namespace GoogGUI
             if (_template == null)
                 throw new Exception($"Template {template} not found");
 
-            if (Value is INotifyCollectionChanged collection)
-                collection.CollectionChanged += OnCollectionChanged;
+            AddCollectionEvent();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -50,7 +49,9 @@ namespace GoogGUI
             get => (T?)_property.GetValue(_target);
             set
             {
+                RemoveCollectionEvent();
                 _property.SetValue(_target, (T?)value);
+                AddCollectionEvent();
                 OnPropertyChanged("Value");
                 OnPropertyChanged("IsDefault");
             }
@@ -91,6 +92,18 @@ namespace GoogGUI
         {
             if (_getDefault != null)
                 Value = _getDefault.Invoke();
+        }
+
+        private void RemoveCollectionEvent()
+        {
+            if (Value is INotifyCollectionChanged collection)
+                collection.CollectionChanged -= OnCollectionChanged;
+        }
+
+        private void AddCollectionEvent()
+        {
+            if (Value is INotifyCollectionChanged collection)
+                collection.CollectionChanged += OnCollectionChanged;
         }
     }
 }

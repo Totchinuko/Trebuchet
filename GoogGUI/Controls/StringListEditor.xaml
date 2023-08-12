@@ -30,7 +30,10 @@
                                     <ColumnDefinition Width="auto" />
                                 </Grid.ColumnDefinitions>
                                 <TextBox VerticalAlignment="Center" 
-                                         Text="{Binding ., Mode=TwoWay}"
+                                         Height="25"
+                                         VerticalContentAlignment="Center"
+                                         PreviewLostKeyboardFocus="TextBox_PreviewLostKeyboardFocus"
+                                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=300}"
                                          Margin="0,0,12,0" />       
                                 <Button Style="{StaticResource ButtonIconYellow}"
                                         x:Name="TrashBtn"

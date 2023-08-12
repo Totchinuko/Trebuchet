@@ -23,7 +23,7 @@
                 <ResourceDictionary Source="Templates\QuestionModal.xaml" />
                 <ResourceDictionary Source="Templates\ExceptionModal.xaml" />
                 <ResourceDictionary Source="Templates\TestliveSelection.xaml" />
-                <ResourceDictionary Source="Templates\InstancesField.xaml" />
+                <ResourceDictionary Source="Templates\StringListFields.xaml" />
                 <ResourceDictionary Source="Templates\TextboxField.xaml" />
                 <ResourceDictionary Source="Templates\ModlistEditor.xaml" />
                 <ResourceDictionary Source="Templates\ModlistItems.xaml" />
@@ -35,6 +35,7 @@
                 <ResourceDictionary Source="Templates\TabButton.xaml" />
                 <ResourceDictionary Source="Templates\TabLabel.xaml" />
                 <ResourceDictionary Source="Templates\MapField.xaml" />
+                <ResourceDictionary Source="Templates\IntField.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

@@ -18,6 +18,7 @@ namespace GoogGUI
         private ServerProfile _profile;
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private string _selectedProfile;
+        private TrulyObservableCollection<ObservableString> _sudoList = new TrulyObservableCollection<ObservableString>();
 
         public ServerSettings(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
@@ -31,6 +32,7 @@ namespace GoogGUI
         }
 
         #region Fields
+
         [MapField("Game Map", "/Game/Maps/ConanSandbox/ConanSandbox", Sort = 0)]
         public string Map
         {
@@ -41,7 +43,37 @@ namespace GoogGUI
                 OnValueChanged();
             }
         }
+
+        [IntField("Max Players", min: 0, defaultValue: 30, Sort = 10)]
+        public int MaxPlayers
+        {
+            get => _profile.MaxPlayers;
+            set
+            {
+                _profile.MaxPlayers = value;
+                OnValueChanged();
+            }
+        }
+
+        [StringListField("Sudo Super Admins", Sort = 20)]
+        public TrulyObservableCollection<ObservableString> SudoSuperAdmins
+        {
+            get => _sudoList;
+            set
+            {
+                if (_sudoList != null)
+                    _sudoList.CollectionChanged -= OnSudoListChanged;
+                _sudoList = value;
+                if (_sudoList != null)
+                    _sudoList.CollectionChanged += OnSudoListChanged;
+
+                _profile.SudoSuperAdmins = ObservableString.ToList(value);
+                OnValueChanged();
+            }
+        }
+
         #endregion Fields
+
 
         public ICommand CreateProfileCommand => new SimpleCommand(OnProfileCreate);
 
@@ -76,6 +108,7 @@ namespace GoogGUI
         private void LoadProfile()
         {
             _profile = ServerProfile.LoadFile(ServerProfile.GetPath(_config, _selectedProfile));
+            SudoSuperAdmins = ObservableString.ToObservableList(_profile.SudoSuperAdmins);
 
             if (Fields.Count == 0)
                 BuildFields();
@@ -164,6 +197,12 @@ namespace GoogGUI
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
+        }
+
+        private void OnSudoListChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            _profile.SudoSuperAdmins = ObservableString.ToList(_sudoList);
+            OnValueChanged();
         }
 
         private void OnUIConfigSaved(object? sender, UIConfig e)

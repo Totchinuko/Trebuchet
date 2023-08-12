@@ -15,10 +15,10 @@ namespace GoogGUI.Controls
     {
         public static readonly DependencyProperty ValuesProperty = DependencyProperty.Register(
             "Values",
-            typeof(ObservableCollection<string>),
+            typeof(TrulyObservableCollection<ObservableString>),
             typeof(StringListEditor),
             new PropertyMetadata(
-                new ObservableCollection<string>())
+                new TrulyObservableCollection<ObservableString>())
             );
 
         public StringListEditor()
@@ -31,9 +31,9 @@ namespace GoogGUI.Controls
 
         public ICommand DeleteCommand { get; private set; }
 
-        public ObservableCollection<string> Values
+        public TrulyObservableCollection<ObservableString> Values
         {
-            get => (ObservableCollection<string>)GetValue(ValuesProperty);
+            get => (TrulyObservableCollection<ObservableString>)GetValue(ValuesProperty);
             set => SetValue(ValuesProperty, value);
         }
 
@@ -45,16 +45,21 @@ namespace GoogGUI.Controls
         private void AddBtn_Click(object sender, RoutedEventArgs e)
         {
             if (Values == null)
-                Values = new ObservableCollection<string>();
-            Values.Add(string.Empty);
+                Values = new TrulyObservableCollection<ObservableString>();
+            Values.Add(new ObservableString());
         }
 
         private void OnInstanceDelete(object? obj)
         {
-            if (Values.Count <= 1) return;
-            if (obj is string value)
+            if (Values.Count == 0) return;
+            if (obj is ObservableString value)
                 Values.Remove(value);
             InstanceList.ItemsSource = Values;
+        }
+
+        private void TextBox_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
+        {
+            Values = Values;
         }
     }
 }

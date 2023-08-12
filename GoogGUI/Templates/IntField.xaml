@@ -1,0 +1,13 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:GoogGUI.Controls">
+    <DataTemplate x:Key="IntField">
+        <Border Height="38" Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
+            <Controls:IntBox VerticalAlignment="Center"
+                             Height="25"
+                             MinValue="{Binding Minimum}"
+                             MaxValue="{Binding Maximum}"
+                             Value="{Binding Value, Mode=TwoWay}" /> 
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>
