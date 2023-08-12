@@ -72,8 +72,8 @@ namespace GoogLib
             if (_serverProcesses.ContainsKey(instance))
                 throw new Exception("Server instance is already running.");
 
-            string profilePath = ClientProfile.GetPath(_config, profileName);
-            if (!File.Exists(profilePath)) throw new Exception("Unknown game profile.");
+            string profilePath = ServerProfile.GetPath(_config, profileName);
+            if (!File.Exists(profilePath)) throw new Exception("Unknown server profile.");
             ServerProfile profile = ServerProfile.LoadFile(profilePath);
 
             string modlistPath = ModListProfile.GetPath(_config, modlistName);
