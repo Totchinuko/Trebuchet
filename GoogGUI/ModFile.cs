@@ -91,7 +91,7 @@ namespace GoogGUI
             if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
             if (_file == null) return (Brush)Application.Current.Resources["GDimBlue"];
             if (_lastUpdate < _infos.LastWriteTimeUtc && _file.fileSize == _infos.Length) return (Brush)Application.Current.Resources["GDimGreen"];
-            if (_file.fileSize != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.fileSize != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
             return (Brush)Application.Current.Resources["GDimYellow"];
         }
 
@@ -100,7 +100,7 @@ namespace GoogGUI
             if (!_infos.Exists) return "Missing";
             if (_file == null) return "Found";
             if (_lastUpdate < _infos.LastWriteTimeUtc && _file.fileSize == _infos.Length) return "Up to Date";
-            if (_file.fileSize != _infos.Length) return "Corrupted";
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.fileSize != _infos.Length) return "Corrupted";
             return "Update available";
         }
 
