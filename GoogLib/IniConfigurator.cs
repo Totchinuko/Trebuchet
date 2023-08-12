@@ -70,6 +70,7 @@ namespace GoogLib
 
             string content = GetIniFile(path);
             IniDocument document = IniParser.Parse(content, _parserConfiguration);
+            _iniDocuments.Add(path, document);
             return document;
         }
     }
