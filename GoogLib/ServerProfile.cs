@@ -9,7 +9,6 @@ namespace GoogLib
         private bool _log = false;
         private string _map = "/Game/Maps/ConanSandbox/ConanSandbox";
         private int _maxPlayers = 30;
-        private List<string> _modlist = new List<string>();
         private bool _restartWhenDown = false;
         private List<string> _sudoSuperAdmins = new List<string>();
         private bool _useAllCores = true;
@@ -22,8 +21,6 @@ namespace GoogLib
         public string Map { get => _map; set => _map = value; }
 
         public int MaxPlayers { get => _maxPlayers; set => _maxPlayers = value; }
-
-        public List<string> Modlist { get => _modlist; set => _modlist = value; }
 
         public bool RestartWhenDown { get => _restartWhenDown; set => _restartWhenDown = value; }
 
