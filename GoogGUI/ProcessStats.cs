@@ -40,13 +40,13 @@ namespace GoogGUI
 
         public virtual void SetProcess(Process process)
         {
-            if (_process != null) throw new Exception("Client stats already have a process.");
+            if (_process != null) throw new Exception("Stats already have a process.");
 
             _process = process;
             _process.EnableRaisingEvents = true;
             _process.Exited += OnProcessExited;
 
-            string processName = Path.GetFileNameWithoutExtension(Config.FileClientBin);
+            string processName = Path.GetFileNameWithoutExtension(_process.StartInfo.FileName);
 
             Task.Run(() => _memoryConsumptionCounter = new PerformanceCounter("Process V2", "Working Set", processName + ":" + process.Id)).ContinueWith(OnMemoryCounterCreated);
             Task.Run(() => _cpuUsageCounter = new PerformanceCounter("Process V2", "% Processor Time", processName + ":" + process.Id)).ContinueWith(OnCPUCounterCreated);
