@@ -12,7 +12,7 @@ namespace GoogLib
         public static void SetParameter(this IniSection section, string parameter, string value)
         {
             section.GetParameters(parameter).ForEach(section.Remove);
-            section.AddParameter(parameter, value);
+            section.InsertParameter(0,parameter, value);
         }
 
         public static IniSection GetSection(this IniDocument document, string section)
@@ -25,7 +25,7 @@ namespace GoogLib
 
         public static bool HasSection(this IniDocument document, string section)
         {
-            return document.GetSections().Count > 0;
+            return document.GetSections(section).Count > 0;
         }
     }
 }
