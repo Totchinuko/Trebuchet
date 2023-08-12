@@ -3,7 +3,7 @@
                     xmlns:local="clr-namespace:GoogGUI"
                     xmlns:Controls="clr-namespace:GoogGUI.Controls"
                     >
-    <DataTemplate x:Key="InstancesField">
-        <Controls:InstancesEditor Instances="{Binding Value, Mode=TwoWay}" Profiles="{Binding App.Profiles, RelativeSource={RelativeSource AncestorType=local:MainWindow}}" />
+    <DataTemplate x:Key="StringListFields">
+        <Controls:StringListEditor Values="{Binding Value, Mode=TwoWay}" />
     </DataTemplate>
 </ResourceDictionary>
