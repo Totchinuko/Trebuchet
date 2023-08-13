@@ -27,8 +27,9 @@ namespace Goog
             start = ManagementDateTimeConverter.ToDateTime(Convert.ToString(processData.GetPropertyValue("CreationDate")) ?? string.Empty).ToUniversalTime();
             string commandLine = Convert.ToString(processData.GetPropertyValue("CommandLine")) ?? string.Empty;
 
-            var arguments = commandLine.Split(" ", StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+            var arguments = Tools.SplitCommandLine(commandLine).ToArray();
             
+
             if (arguments.Length > 0)
                 filename = arguments[0].StartsWith("\"") ? arguments[0][1..^1] : arguments[0];
             else
