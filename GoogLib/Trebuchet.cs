@@ -64,8 +64,8 @@ namespace GoogLib
 
             _clientProcess = new ClientWatcher(_config, profile);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
-
             _clientProcess.ProcessStarted += OnClientProcessStarted;
+
             Task.Run(_clientProcess.StartProcessAsync);
         }
 
@@ -98,9 +98,9 @@ namespace GoogLib
 
             ServerWatcher watcher = new ServerWatcher(_config, profile, instance);
             watcher.ProcessExited += OnServerProcessTerminate;
+            watcher.ProcessStarted += OnServerProcessStarted;
             _serverProcesses.Add(instance, watcher);
 
-            watcher.ProcessStarted += OnServerProcessStarted;
             Task.Run(watcher.StartProcessAsync);
         }
 
@@ -182,8 +182,10 @@ namespace GoogLib
         private void OnClientProcessStarted(object? sender, ClientWatcher e)
         {
             if (e.Process == null) return;
-
-            ClientProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.Process));
+            AddDispatch(() =>
+            {
+                ClientProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.Process));
+            });
         }
 
         private void OnClientProcessTerminate(object? sender, ClientWatcher e)
@@ -199,7 +201,11 @@ namespace GoogLib
         private void OnServerProcessStarted(object? sender, ServerWatcher e)
         {
             if (e.Process == null) return;
-            ServerProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.Process, e.ServerInstance));
+
+            AddDispatch(() =>
+            {
+                ServerProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.Process, e.ServerInstance));
+            });
         }
 
         private void OnServerProcessTerminate(object? sender, ServerWatcher e)
