@@ -67,7 +67,7 @@
                         <ItemsControl ItemsSource="{Binding App.BottomTabs}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
                     </StackPanel>
                 </Grid>
-                <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12">
+                <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12,12,2,12">
                     <ContentPresenter Content="{Binding App.Panel}" ContentTemplateSelector="{StaticResource TemplateHolderSelector}" />
                 </Border>
             </Grid>

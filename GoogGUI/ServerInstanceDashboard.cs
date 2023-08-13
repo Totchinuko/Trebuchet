@@ -1,6 +1,5 @@
 ﻿using Goog;
 using GoogLib;
-using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -91,6 +90,46 @@ namespace GoogGUI
             }
         }
 
+        public void Close()
+        {
+            if (!_trebuchet.ServerProcesses.TryGetValue(_instance, out var watcher) || watcher.Process == null) return;
+
+            CloseCommand.Toggle(false);
+            watcher.Close();
+        }
+
+        public void Kill()
+        {
+            if (!_trebuchet.ServerProcesses.TryGetValue(_instance, out var watcher) || watcher.Process == null) return;
+
+            if (_uiConfig.DisplayWarningOnKill)
+            {
+                QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
+                    "Do you wish to continue ?");
+                question.ShowDialog();
+                if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+            }
+
+            KillCommand.Toggle(false);
+            CloseCommand.Toggle(false);
+            watcher.Kill();
+        }
+
+        public void Launch()
+        {
+            if (!CanUseDashboard) return;
+            if (_trebuchet.ServerProcesses.TryGetValue(_instance, out _)) return;
+
+            LaunchCommand.Toggle(false);
+
+            Process process = _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, _instance);
+            _processStats.SetProcess(process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
+
+            KillCommand.Toggle(true);
+            CloseCommand.Toggle(true);
+            OnPropertyChanged("ProcessRunning");
+        }
+
         public void RefreshSelection()
         {
             Resolve();
@@ -110,43 +149,19 @@ namespace GoogGUI
             OnPropertyChanged("Profiles");
         }
 
-        private void OnLaunched(object? obj)
-        {
-            if(_trebuchet.ServerProcesses.TryGetValue(_instance, out _)) return;
-
-            LaunchCommand.Toggle(false);
-
-            Process process = _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, _instance);
-            _processStats.SetProcess(process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
-
-            KillCommand.Toggle(true);
-            CloseCommand.Toggle(true);
-            OnPropertyChanged("ProcessRunning");
-        }
-
         private void OnClose(object? obj)
         {
-            if (!_trebuchet.ServerProcesses.TryGetValue(_instance, out var watcher) || watcher.Process == null) return;
-
-            CloseCommand.Toggle(false);
-            watcher.Close();
+            Close();
         }
 
         private void OnKilled(object? obj)
         {
-            if (!_trebuchet.ServerProcesses.TryGetValue(_instance, out var watcher) || watcher.Process == null) return;
+            Kill();
+        }
 
-            if (_uiConfig.DisplayWarningOnKill)
-            {
-                QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
-                    "Do you wish to continue ?");
-                question.ShowDialog();
-                if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
-            }
-
-            KillCommand.Toggle(false);
-            CloseCommand.Toggle(false);
-            watcher.Kill();
+        private void OnLaunched(object? obj)
+        {
+            Launch();
         }
 
         private void OnProcessTerminated(object? sender, int instance)

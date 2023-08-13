@@ -42,7 +42,7 @@ namespace GoogGUI
 
         public string MemoryConsumption { get; private set; }
 
-        public string Uptime => _process == null ? string.Empty : (DateTime.UtcNow - _start).ToString("c");
+        public string Uptime => _process == null ? string.Empty : (DateTime.UtcNow - _start).ToString("d'd.'h'h:'m'm:'s's'");
 
         public bool Running => _process != null;
 

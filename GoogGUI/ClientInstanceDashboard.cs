@@ -23,7 +23,7 @@ namespace GoogGUI
         public ClientInstanceDashboard(Config config, UIConfig uiConfig, Trebuchet trebuchet)
         {
             KillCommand = new SimpleCommand(OnKilled, false);
-            LaunchCommand = new TaskBlockedCommand(OnClientLaunched);
+            LaunchCommand = new TaskBlockedCommand(OnLaunched);
 
             _config = config;
             _trebuchet = trebuchet;
@@ -47,6 +47,11 @@ namespace GoogGUI
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        public bool CanUseDashboard => _config.IsInstallPathValid &&
+                File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
+                !string.IsNullOrEmpty(_config.ClientPath) &&
+                File.Exists(Path.Combine(_config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
+
         public SimpleCommand KillCommand { get; private set; }
 
         public TaskBlockedCommand LaunchCommand { get; private set; }
@@ -58,11 +63,6 @@ namespace GoogGUI
         public ProcessStats ProcessStats => _processStats;
 
         public List<string> Profiles => _profiles;
-
-        public bool CanUseDashboard => _config.IsInstallPathValid &&
-                File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
-                !string.IsNullOrEmpty(_config.ClientPath) &&
-                File.Exists(Path.Combine(_config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
 
         public string SelectedModlist
         {
@@ -86,6 +86,35 @@ namespace GoogGUI
             }
         }
 
+        public void Kill()
+        {
+            if (_trebuchet.ClientProcess?.Process == null) return;
+
+            if (_uiConfig.DisplayWarningOnKill)
+            {
+                QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
+                    "Do you wish to continue ?");
+                question.ShowDialog();
+                if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+            }
+
+            KillCommand.Toggle(false);
+            _trebuchet.ClientProcess?.Kill();
+        }
+
+        public void Launch()
+        {
+            if (_trebuchet.ClientProcess?.Process != null) return;
+
+            LaunchCommand.Toggle(false);
+
+            Process process = _trebuchet.CatapultClient(_selectedProfile, _selectedModlist);
+            _processStats.SetProcess(process, Path.GetFileNameWithoutExtension(Config.FileClientBin));
+
+            KillCommand.Toggle(true);
+            OnPropertyChanged("ProcessRunning");
+        }
+
         public void RefreshSelection()
         {
             Resolve();
@@ -107,31 +136,22 @@ namespace GoogGUI
 
         private void OnKilled(object? obj)
         {
-            if (_trebuchet.ClientProcess?.Process == null) return;
-
-            if (_uiConfig.DisplayWarningOnKill)
-            {
-                QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
-                    "Do you wish to continue ?");
-                question.ShowDialog();
-                if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
-            }
-
-            KillCommand.Toggle(false);
-            _trebuchet.ClientProcess?.Kill();
+            Kill();
         }
 
-        private void OnClientLaunched(object? obj)
+        private void OnLaunched(object? obj)
         {
-            if (_trebuchet.ClientProcess?.Process != null) return;
+            Launch();
+        }
 
-            LaunchCommand.Toggle(false);
-
-            Process process = _trebuchet.CatapultClient(_selectedProfile, _selectedModlist);
-            _processStats.SetProcess(process, Path.GetFileNameWithoutExtension(Config.FileClientBin));
-
-            KillCommand.Toggle(true);
-            OnPropertyChanged("ProcessRunning");
+        private void OnProcessTerminated(object? sender, EventArgs e)
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                KillCommand.Toggle(false);
+                LaunchCommand.Toggle(true);
+                OnPropertyChanged("ProcessRunning");
+            });
         }
 
         private void Resolve()
@@ -144,17 +164,6 @@ namespace GoogGUI
             _uiConfig.SaveFile();
             OnPropertyChanged("SelectedModlist");
             OnPropertyChanged("SelectedProfile");
-        }
-
-
-        private void OnProcessTerminated(object? sender, EventArgs e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                KillCommand.Toggle(false);
-                LaunchCommand.Toggle(true);
-                OnPropertyChanged("ProcessRunning");
-            });
         }
     }
 }
