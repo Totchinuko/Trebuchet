@@ -179,7 +179,7 @@ namespace Goog
             string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             if (appFolder == null)
                 throw new Exception("App is installed in an invalid folder.");
-            string GoogCMD = Path.Combine(appFolder, "Goog.exe");
+            string GoogCMD = Path.Combine(appFolder, "GoogCMD", "Goog.exe");
             if (!File.Exists(GoogCMD))
                 throw new FileNotFoundException($"{GoogCMD} was not found.");
             return GoogCMD;

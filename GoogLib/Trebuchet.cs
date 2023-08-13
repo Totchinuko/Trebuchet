@@ -1,38 +1,43 @@
 ﻿using Goog;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Text.RegularExpressions;
 
 namespace GoogLib
 {
     public sealed class Trebuchet
     {
-        private ClientWatcher? _clientProcesses;
+        private static Regex _instanceRegex = new Regex(@"-TotInstance=([0-9+])");
+        private ClientWatcher? _clientProcess;
         private Config _config;
         private Dictionary<int, ServerWatcher> _serverProcesses = new Dictionary<int, ServerWatcher>();
 
         public Trebuchet(Config config)
         {
             _config = config;
-
-            FindExistingClient();
-            FindExistingServers();
         }
+
+        public event EventHandler<TrebuchetStartEventArgs>? ClientProcessStarted;
 
         public event EventHandler? ClientTerminated;
 
-        public event EventHandler<int>? ServerRestarted;
+        public event EventHandler<Action>? DispatcherRequest;
+
+        public event EventHandler<TrebuchetStartEventArgs>? ServerProcessStarted;
 
         public event EventHandler<int>? ServerTerminated;
 
-        public event EventHandler<Action> DispatcherRequest;
-
-        public ClientWatcher? ClientProcess => _clientProcesses;
-
-        public ReadOnlyDictionary<int, ServerWatcher> ServerProcesses => _serverProcesses.AsReadOnly();
-
-        public Process CatapultClient(string profileName, string modlistName)
+        public static bool GetInstance(string path, out int instance)
         {
-            if (_clientProcesses != null)
+            instance = 0;
+            var match = _instanceRegex.Match(path);
+            if (!match.Success) return false;
+
+            return int.TryParse(match.Groups[1].Value, out instance);
+        }
+
+        public void CatapultClient(string profileName, string modlistName)
+        {
+            if (_clientProcess != null)
                 throw new Exception("Client is already running.");
 
             string profilePath = ClientProfile.GetPath(_config, profileName);
@@ -57,17 +62,14 @@ namespace GoogLib
             configurator.WriteIniConfigs(profile, _config.ClientPath);
             configurator.FlushConfigs();
 
-            _clientProcesses = new ClientWatcher(_config, profile);
-            _clientProcesses.ProcessExited += OnClientProcessTerminate;
-            _clientProcesses.StartProcess();
+            _clientProcess = new ClientWatcher(_config, profile);
+            _clientProcess.ProcessExited += OnClientProcessTerminate;
 
-            _config.ClientPastLaunch = new PastLaunch(_clientProcesses.Process.Id, profileName, modlistName);
-            _config.SaveFile();
-
-            return _clientProcesses.Process;
+            _clientProcess.ProcessStarted += OnClientProcessStarted;
+            Task.Run(_clientProcess.StartProcessAsync);
         }
 
-        public Process CatapultServer(string profileName, string modlistName, int instance)
+        public void CatapultServer(string profileName, string modlistName, int instance)
         {
             if (_serverProcesses.ContainsKey(instance))
                 throw new Exception("Server instance is already running.");
@@ -96,20 +98,34 @@ namespace GoogLib
 
             ServerWatcher watcher = new ServerWatcher(_config, profile, instance);
             watcher.ProcessExited += OnServerProcessTerminate;
-            watcher.ProcessRestarted += OnServerProcessRestarted;
-            watcher.StartProcess();
             _serverProcesses.Add(instance, watcher);
 
-            _config.SetServerPastLaunch(new PastLaunch(watcher.Process.Id, profileName, modlistName), instance);
-            _config.SaveFile();
-
-            return watcher.Process;
+            watcher.ProcessStarted += OnServerProcessStarted;
+            Task.Run(watcher.StartProcessAsync);
         }
+
+        public void CloseServer(int instance)
+        {
+            if (_serverProcesses.TryGetValue(instance, out var watcher))
+                watcher.Close();
+        }
+
+        public bool IsClientRunning() => _clientProcess?.Process != null;
+
+        public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.Process != null;
 
         public void KillAllServers()
         {
             foreach (ServerWatcher p in _serverProcesses.Values)
                 p.Kill();
+        }
+
+        public void KillClient() => _clientProcess?.Kill();
+
+        public void KillServer(int instance)
+        {
+            if (_serverProcesses.TryGetValue(instance, out var watcher))
+                watcher.Kill();
         }
 
         public void StopAllServers()
@@ -120,9 +136,12 @@ namespace GoogLib
 
         public void TickTrebuchet()
         {
+            FindExistingClient();
+            FindExistingServers();
+
             foreach (ServerWatcher servers in _serverProcesses.Values)
                 servers.ProcessRefresh();
-            _clientProcesses?.Process?.Refresh();
+            _clientProcess?.Process?.Refresh();
         }
 
         private void AddDispatch(Action callback)
@@ -132,81 +151,55 @@ namespace GoogLib
 
         private void FindExistingClient()
         {
-            if (_config.ClientPastLaunch == null) return;
+            if (_clientProcess != null) return;
 
-            Process process;
-            try
-            {
-                process = Process.GetProcessById(_config.ClientPastLaunch.Pid);
-            }
-            catch
-            {
-                _config.ClientPastLaunch = null;
-                return;
-            }
+            List<ProcessData> processes = Tools.GetProcessesWithName(Config.FileClientBin);
+            if (processes.Count == 0) return;
+            if (!processes[0].TryGetProcess(out Process? process)) return;
 
-            string profilePath = ClientProfile.GetPath(_config, _config.ClientPastLaunch.Profile);
-            if (!File.Exists(profilePath)) throw new Exception("Unknown game profile.");
-            ClientProfile profile = ClientProfile.LoadFile(profilePath);
-
-            _clientProcesses = new ClientWatcher(_config, profile);
-            _clientProcesses.SetRunningProcess(process);
-            _clientProcesses.ProcessExited += OnClientProcessTerminate;
-        }
-
-        private void FindExistingServer(int instance)
-        {
-            if (!_config.TryGetServerPastLaunch(instance, out PastLaunch? pastLaunch)) return;
-
-            Process process;
-            try
-            {
-                process = Process.GetProcessById(pastLaunch.Pid);
-            }
-            catch
-            {
-                _config.ClientPastLaunch = null;
-                return;
-            }
-
-            string profilePath = ClientProfile.GetPath(_config, pastLaunch.Profile);
-            if (!File.Exists(profilePath)) throw new Exception("Unknown game profile.");
-            ServerProfile profile = ServerProfile.LoadFile(profilePath);
-
-            ServerWatcher watcher = new ServerWatcher(_config, profile, instance);
-            watcher.SetRunningProcess(process);
-            watcher.ProcessExited += OnServerProcessTerminate;
-            watcher.ProcessRestarted += OnServerProcessRestarted;
-            _serverProcesses.Add(instance, watcher);
+            _clientProcess = new ClientWatcher(process);
+            _clientProcess.ProcessExited += OnClientProcessTerminate;
+            OnClientProcessStarted(this, _clientProcess);
         }
 
         private void FindExistingServers()
         {
-            for (int i = 0; i < _config.ServerInstanceCount; i++)
-                FindExistingServer(i);
+            List<ProcessData> processes = Tools.GetProcessesWithName(Config.FileServerBin);
+
+            foreach (var p in processes)
+            {
+                if (!GetInstance(p.args, out int instance)) continue;
+                if (_serverProcesses.ContainsKey(instance)) continue;
+                if (!p.TryGetProcess(out Process? process)) continue;
+
+                ServerWatcher watcher = new ServerWatcher(_config, process, p.filename, p.args, instance);
+                watcher.ProcessExited += OnServerProcessTerminate;
+                _serverProcesses.Add(instance, watcher);
+                OnServerProcessStarted(this, watcher);
+            }
+        }
+
+        private void OnClientProcessStarted(object? sender, ClientWatcher e)
+        {
+            if (e.Process == null) return;
+
+            ClientProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.Process));
         }
 
         private void OnClientProcessTerminate(object? sender, ClientWatcher e)
         {
             AddDispatch(() =>
             {
-                if (_clientProcesses != e) return;
-                _clientProcesses = null;
-                _config.ClientPastLaunch = null;
-                _config.SaveFile();
+                if (_clientProcess != e) return;
+                _clientProcess = null;
                 ClientTerminated?.Invoke(this, EventArgs.Empty);
             });
         }
 
-        private void OnServerProcessRestarted(object? sender, ServerWatcher e)
+        private void OnServerProcessStarted(object? sender, ServerWatcher e)
         {
-            AddDispatch(() =>
-            {
-                _config.SetServerPastLaunch(new PastLaunch(e.Process?.Id ?? -1, e.Profile.ProfileName, string.Empty), e.ServerInstance);
-                _config.SaveFile();
-
-                ServerRestarted?.Invoke(this, e.ServerInstance);
-            });            
+            if (e.Process == null) return;
+            ServerProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.Process, e.ServerInstance));
         }
 
         private void OnServerProcessTerminate(object? sender, ServerWatcher e)
@@ -216,11 +209,17 @@ namespace GoogLib
                 if (!_serverProcesses.ContainsKey(e.ServerInstance)) return;
                 _serverProcesses.Remove(e.ServerInstance);
 
-                _config.SetServerPastLaunch(null, e.ServerInstance);
-                _config.SaveFile();
-
-                ServerTerminated?.Invoke(this, e.ServerInstance);
-            });            
+                if (!e.Closed && _config.RestartWhenDown)
+                {
+                    var watcher = new ServerWatcher(_config, e.Filename, e.Args, e.ServerInstance);
+                    _serverProcesses.Add(watcher.ServerInstance, watcher);
+                    watcher.ProcessStarted += OnServerProcessStarted;
+                    watcher.ProcessExited += OnServerProcessTerminate;
+                    Task.Run(watcher.StartProcessAsync);
+                }
+                else
+                    ServerTerminated?.Invoke(this, e.ServerInstance);
+            });
         }
 
         private void SetupJunction(string gamePath, string targetPath)

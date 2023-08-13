@@ -1,6 +1,4 @@
-﻿using GoogLib;
-using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
+﻿using System.Reflection;
 
 namespace Goog
 {
@@ -28,6 +26,7 @@ namespace Goog
         public const string FileMapJson = "Json\\Maps.json";
         public const string FileProfileConfig = "profile.json";
         public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
+        public const string FileServerProxyBin = "ConanSandboxServer.exe";
         public const string FileSteamCMDBin = "steamcmd.exe";
         public const string FolderClientProfiles = "ClientProfiles";
         public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
@@ -47,17 +46,16 @@ namespace Goog
 
         #endregion constants
 
-        private PastLaunch? _clientPastLaunch = null;
         private string _clientPath = string.Empty;
         private bool _displayCMD = false;
         private string _installPath = string.Empty;
+        private bool _killZombies = false;
+        private bool _restartWhenDown = false;
         private int _serverInstanceCount = 0;
-        private PastLaunch?[] _serverPastLaunch = new PastLaunch[0];
         private string _steamAPIKey = string.Empty;
+        private int _zombieCheckSeconds = 300;
 
         public string ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
-
-        public PastLaunch? ClientPastLaunch { get => _clientPastLaunch; set => _clientPastLaunch = value; }
 
         public string ClientPath { get => _clientPath; set => _clientPath = value; }
 
@@ -69,6 +67,10 @@ namespace Goog
 
         public bool IsTestLive => Path.GetFileName(Path.GetDirectoryName(FilePath)) == FolderTestLive;
 
+        public bool KillZombies { get => _killZombies; set => _killZombies = value; }
+
+        public bool RestartWhenDown { get => _restartWhenDown; set => _restartWhenDown = value; }
+
         public string ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
         public int ServerInstanceCount { get => _serverInstanceCount; set => _serverInstanceCount = value; }
@@ -76,6 +78,8 @@ namespace Goog
         public string SteamAPIKey { get => _steamAPIKey; set => _steamAPIKey = value; }
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
+
+        public int ZombieCheckSeconds { get => _zombieCheckSeconds; set => _zombieCheckSeconds = value; }
 
         public static string GetPath(bool testlive)
         {
@@ -170,13 +174,6 @@ namespace Goog
             }
         }
 
-        public void SetServerPastLaunch(PastLaunch? pastLaunch, int instance)
-        {
-            if (_serverPastLaunch.Length <= instance)
-                Array.Resize(ref _serverPastLaunch, instance + 1);
-            _serverPastLaunch[instance] = pastLaunch;
-        }
-
         public bool TryGetFirstProfile(out string profileName)
         {
             profileName = string.Empty;
@@ -193,14 +190,6 @@ namespace Goog
             }
             profileName = Path.GetFileName(directories[0]);
             return !string.IsNullOrEmpty(profileName);
-        }
-
-        public bool TryGetServerPastLaunch(int instance, [NotNullWhen(true)] out PastLaunch? pastLaunch)
-        {
-            pastLaunch = null;
-            if (_serverPastLaunch.Length <= instance) return false;
-            pastLaunch = _serverPastLaunch[instance];
-            return pastLaunch != null;
         }
     }
 }

@@ -26,10 +26,11 @@ namespace GoogGUI
             _trebuchet = new Trebuchet(config);
             _trebuchet.DispatcherRequest += OnTrebuchetRequestDispatcher;
             _timer = new DispatcherTimer(TimeSpan.FromSeconds(2), DispatcherPriority.Background, OnDispatcherTick, Application.Current.Dispatcher);
-            _timer.Start();
 
             _client = new ClientInstanceDashboard(_config, _uiConfig, _trebuchet);
             FillServerInstances();
+
+            _timer.Start();
         }
 
         public ClientInstanceDashboard Client => _client;

@@ -6,18 +6,35 @@ namespace GoogLib
 {
     public class ClientWatcher
     {
-        private Config _config;
-        private ClientProfile _profile;
-        private string _profileFolder;
+        private string _filename = string.Empty;
+        private string _args = string.Empty;
 
         public ClientWatcher(Config config, ClientProfile profile)
         {
-            _config = config;
-            _profile = profile;
-            _profileFolder = Path.GetDirectoryName(_profile.FilePath) ?? throw new Exception("Invalid folder directory.");
+            string profileFolder = Path.GetDirectoryName(profile.FilePath) ?? throw new Exception("Invalid folder directory.");
+
+            _filename = Path.Combine(config.ClientPath,
+                Config.FolderGameBinaries,
+                (profile.UseBattleEye ? Config.FileClientBEBin : Config.FileClientBin));
+
+            List<string> args = new List<string>();
+            if (profile.Log) args.Add(Config.GameArgsLog);
+            if (profile.UseAllCores) args.Add(Config.GameArgsUseAllCore);
+            args.Add(string.Format(Config.GameArgsModList, Path.Combine(profileFolder, Config.FileGeneratedModlist)));
+
+            _args = string.Join(" ", args);
+        }
+
+        public ClientWatcher(Process process)
+        {
+            Process = process;
+            Process.EnableRaisingEvents = true;
+            Process.Exited -= OnProcessExited;
+            Process.Exited += OnProcessExited;
         }
 
         public event EventHandler<ClientWatcher>? ProcessExited;
+        public event EventHandler<ClientWatcher>? ProcessStarted;
         public Process? Process { get; private set; }
 
         public void Close()
@@ -30,47 +47,41 @@ namespace GoogLib
             Process?.Kill();
         }
 
-        [MemberNotNull("Process")]
-        public void StartProcess()
+        public async Task StartProcessAsync()
         {
             if (Process != null)
                 throw new Exception("Cannot start a process already started.");
 
-            Process = new Process();
-            Process.StartInfo.FileName = Path.Combine(_config.ClientPath,
-                Config.FolderGameBinaries,
-                (_profile.UseBattleEye ? Config.FileClientBEBin : Config.FileClientBin));
+            string? dir = Path.GetDirectoryName(_filename);
+            if (dir == null) throw new Exception($"Failed to restart process, invalid directory {_filename}");
 
-            Process.StartInfo.WorkingDirectory = Path.Combine(_config.ClientPath,
-                Config.FolderGameBinaries);
+            Process process = new Process();
+            process.StartInfo.FileName = _filename;
 
-            List<string> args = new List<string>();
-            if (_profile.Log) args.Add(Config.GameArgsLog);
-            if (_profile.UseAllCores) args.Add(Config.GameArgsUseAllCore);
-            args.Add(string.Format(Config.GameArgsModList, Path.Combine(_profileFolder, Config.FileGeneratedModlist)));
+            process.StartInfo.WorkingDirectory = dir;
 
-            Process.StartInfo.Arguments = string.Join(" ", args);
-            Process.StartInfo.UseShellExecute = false;
-            Process.EnableRaisingEvents = true;
-            Process.Exited += OnProcessExited;
-            Process.Start();
-        }
-
-        [MemberNotNull("Process")]
-        public void SetRunningProcess(Process process)
-        {
-            if (Process != null)
-                throw new Exception("Cannot start a process already started.");
-
+            process.StartInfo.Arguments = _args;
+            process.StartInfo.UseShellExecute = false;
+            process.EnableRaisingEvents = true;
+            process.Exited += OnProcessExited;
             Process = process;
-            Process.EnableRaisingEvents = true;
-            Process.Exited -= OnProcessExited;
-            Process.Exited += OnProcessExited;
+            await Task.Run(() => {
+                Process.Start();
+                OnProcessStarted();
+            });
         }
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)
         {
+            if (Process == null) return;
+            Process.Dispose();
+            Process = null;
             ProcessExited?.Invoke(sender, this);
+        }
+
+        protected virtual void OnProcessStarted()
+        {
+            ProcessStarted?.Invoke(this, this);
         }
     }
 }

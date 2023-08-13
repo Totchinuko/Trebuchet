@@ -1,4 +1,5 @@
 ﻿using Goog;
+using GoogLib;
 using System;
 using System.ComponentModel;
 using System.Diagnostics;
@@ -15,7 +16,7 @@ namespace GoogGUI
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
         protected const string CPUFormat = "{0}%";
 
-        protected Process? _process;
+        protected ProcessData _process;
         private int _cpuUsage = 0;
         private PerformanceCounter? _cpuUsageCounter;
 
@@ -31,7 +32,7 @@ namespace GoogGUI
 
         public ProcessStats()
         {
-            _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnTick, Application.Current.Dispatcher);
+            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(1000), DispatcherPriority.Background, OnTick, Application.Current.Dispatcher);
             CpuUsage = string.Empty;
             MemoryConsumption = string.Empty;
         }
@@ -42,34 +43,34 @@ namespace GoogGUI
 
         public string MemoryConsumption { get; private set; }
 
-        public string Uptime => _process == null ? string.Empty : (DateTime.UtcNow - _start).ToString("d'd.'h'h:'m'm:'s's'");
+        public string Uptime => _process.IsEmpty ? string.Empty : (DateTime.UtcNow - _start).ToString("d'd.'h'h:'m'm:'s's'");
 
-        public bool Running => _process != null;
+        public bool Running => !_process.IsEmpty;
 
-        public virtual void SetProcess(Process process, string processName)
+        public virtual void StartStats(ProcessData process, string processName)
         {
-            if (_process != null) throw new Exception("Stats already have a process.");
+            if (!_process.IsEmpty) throw new Exception("Stats already have a process.");
 
             _process = process;
-            _process.EnableRaisingEvents = true;
-            _process.Exited += OnProcessExited;
-
-            _start = DateTime.UtcNow;
+            _start = _process.start;
 
             _source = new CancellationTokenSource();
-            Task.Run(() => RunCounters(process.Id, processName, _source.Token));
+            Task.Run(() => RunCounters(_process.pid, Path.GetFileNameWithoutExtension(process.filename), _source.Token));
 
             _timer.Start();
             OnPropertyChanged("Running");
         }
 
-        protected virtual void OnProcessExited(object? sender, EventArgs e)
+        public virtual void StopStats()
         {
-            _process = null;
+            _process = ProcessData.Empty;
             _source?.Cancel();
+            _source?.Dispose();
+            _source = null;
             _timer.Stop();
             OnPropertyChanged("Running");
         }
+
 
         protected virtual void OnPropertyChanged(string name)
         {
@@ -78,7 +79,7 @@ namespace GoogGUI
 
         protected virtual void OnTick(object? sender, EventArgs e)
         {
-            if (_process == null) return;
+            if (_process.IsEmpty) return;
 
             lock(theLock)
             {
@@ -109,7 +110,7 @@ namespace GoogGUI
                     _cpuUsage = cpu;
                 }
 
-                await Task.Delay(1000);
+                await Task.Delay(900);
             }
 
             _memoryConsumptionCounter?.Dispose();

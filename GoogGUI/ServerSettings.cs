@@ -93,39 +93,6 @@ namespace GoogGUI
                 OnValueChanged();
             }
         }
-
-        [IntField("Zombie Check (Sec)", min: 30, defaultValue: 300, Sort = 50)]
-        public int ZombieCheckSeconds
-        {
-            get => _profile.ZombieCheckSeconds;
-            set
-            {
-                _profile.ZombieCheckSeconds = value;
-                OnValueChanged();
-            }
-        }
-
-        [ToggleField("Kill Zombies", false, Sort = 40)]
-        public bool KillZombies
-        {
-            get => _profile.KillZombies;
-            set
-            {
-                _profile.KillZombies = value;
-                OnValueChanged();
-            }
-        }
-
-        [ToggleField("Restart When Down", false, Sort = 40)]
-        public bool RestartWhenDown
-        {
-            get => _profile.RestartWhenDown;
-            set
-            {
-                _profile.RestartWhenDown = value;
-                OnValueChanged();
-            }
-        }
         #endregion Fields
 
 

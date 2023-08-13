@@ -1,9 +1,13 @@
 ﻿using Goog;
 using GoogLib;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
+using System.Runtime.InteropServices;
+using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace GoogGUI
@@ -32,13 +36,7 @@ namespace GoogGUI
             _uiConfig = uiConfig;
 
             _trebuchet.ServerTerminated += OnProcessTerminated;
-
-            if (_trebuchet.ServerProcesses.TryGetValue(_instance, out var watcher) && watcher.Process != null)
-            {
-                _processStats.SetProcess(watcher.Process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
-                KillCommand.Toggle(true);
-                LaunchCommand.Toggle(false);
-            }
+            _trebuchet.ServerProcessStarted += OnProcessStarted;
 
             _uiConfig.GetInstanceParameters(_instance, out _selectedModlist, out _selectedProfile);
 
@@ -62,7 +60,7 @@ namespace GoogGUI
 
         public List<string> Modlists => _modlists;
 
-        public bool ProcessRunning => _trebuchet.ServerProcesses.TryGetValue(_instance, out _);
+        public bool ProcessRunning => _trebuchet.IsServerRunning(_instance);
 
         public ProcessStats ProcessStats => _processStats;
 
@@ -92,15 +90,15 @@ namespace GoogGUI
 
         public void Close()
         {
-            if (!_trebuchet.ServerProcesses.TryGetValue(_instance, out var watcher) || watcher.Process == null) return;
+            if (!_trebuchet.IsServerRunning(_instance)) return;
 
             CloseCommand.Toggle(false);
-            watcher.Close();
+            _trebuchet.CloseServer(_instance);
         }
 
         public void Kill()
         {
-            if (!_trebuchet.ServerProcesses.TryGetValue(_instance, out var watcher) || watcher.Process == null) return;
+            if (!_trebuchet.IsServerRunning(_instance)) return;
 
             if (_uiConfig.DisplayWarningOnKill)
             {
@@ -112,18 +110,17 @@ namespace GoogGUI
 
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
-            watcher.Kill();
+            _trebuchet.KillServer(_instance);
         }
 
         public void Launch()
         {
             if (!CanUseDashboard) return;
-            if (_trebuchet.ServerProcesses.TryGetValue(_instance, out _)) return;
+            if (_trebuchet.IsServerRunning(_instance)) return;
 
             LaunchCommand.Toggle(false);
 
-            Process process = _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, _instance);
-            _processStats.SetProcess(process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
+            _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, _instance);
 
             KillCommand.Toggle(true);
             CloseCommand.Toggle(true);
@@ -164,17 +161,26 @@ namespace GoogGUI
             Launch();
         }
 
+        private void OnProcessStarted(object? sender, TrebuchetStartEventArgs e)
+        {
+            if (_instance != e.intance) return;
+
+            LaunchCommand.Toggle(false);
+            KillCommand.Toggle(true);
+            CloseCommand.Toggle(true);
+            OnPropertyChanged("ProcessRunning");
+            _processStats.StartStats(e.process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
+        }
+
         private void OnProcessTerminated(object? sender, int instance)
         {
             if (_instance != instance) return;
 
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                KillCommand.Toggle(false);
-                CloseCommand.Toggle(false);
-                LaunchCommand.Toggle(true);
-                OnPropertyChanged("ProcessRunning");
-            });
+            _processStats.StopStats();
+            KillCommand.Toggle(false);
+            CloseCommand.Toggle(false);
+            LaunchCommand.Toggle(true);
+            OnPropertyChanged("ProcessRunning");
         }
 
         private void Resolve()

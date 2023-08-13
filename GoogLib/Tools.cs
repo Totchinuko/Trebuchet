@@ -1,5 +1,7 @@
-﻿using System.Diagnostics;
+﻿using GoogLib;
+using System.Diagnostics;
 using System.IO.Compression;
+using System.Management;
 
 namespace Goog
 {
@@ -148,6 +150,54 @@ namespace Goog
             if (profiles.Length == 0)
                 return string.Empty;
             return Path.GetFileNameWithoutExtension(profiles[0]);
+        }
+
+        public static List<ProcessData> GetChildProcesses(int parentId)
+        {
+            var query = $"Select * From Win32_Process Where ParentProcessId = {parentId}";
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+            ManagementObjectCollection processList = searcher.Get();
+
+            return PackData(processList);
+        }
+
+        public static ProcessData GetFirstChildProcesses(int parentId)
+        {
+            var query = $"Select * From Win32_Process Where ParentProcessId = {parentId}";
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+            ManagementObjectCollection processList = searcher.Get();
+
+            if (processList.Count == 0) return ProcessData.Empty;
+
+            return new ProcessData(processList.Cast<ManagementObject>().First());
+        }
+
+        public static ProcessData GetProcess(int processId)
+        {
+            var query = $"Select * From Win32_Process Where ProcessId = {processId}";
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+            ManagementObjectCollection processList = searcher.Get();
+
+            if (processList.Count == 0) return ProcessData.Empty;
+
+            return new ProcessData(processList.Cast<ManagementObject>().First());
+        }
+
+        public static List<ProcessData> GetProcessesWithName(string processName)
+        {
+            var query = $"Select * From Win32_Process Where Name='{processName}'";
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+            ManagementObjectCollection processList = searcher.Get();
+
+            return PackData(processList);
+        }
+
+        public static List<ProcessData> PackData(ManagementObjectCollection collection)
+        {
+            List<ProcessData> data = new List<ProcessData>(collection.Count);
+            foreach (var process in collection)
+                data.Add(new ProcessData(process));
+            return data;
         }
     }
 }

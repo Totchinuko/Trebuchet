@@ -89,6 +89,39 @@ namespace GoogGUI
                 OnValueChanged();
             }
         }
+
+        [IntField("Zombie Check (Sec)", min: 30, defaultValue: 300, Sort = 50)]
+        public int ZombieCheckSeconds
+        {
+            get => _config.ZombieCheckSeconds;
+            set
+            {
+                _config.ZombieCheckSeconds = value;
+                OnValueChanged();
+            }
+        }
+
+        [ToggleField("Kill Zombies", false, Sort = 40)]
+        public bool KillZombies
+        {
+            get => _config.KillZombies;
+            set
+            {
+                _config.KillZombies = value;
+                OnValueChanged();
+            }
+        }
+
+        [ToggleField("Restart When Down", false, Sort = 40)]
+        public bool RestartWhenDown
+        {
+            get => _config.RestartWhenDown;
+            set
+            {
+                _config.RestartWhenDown = value;
+                OnValueChanged();
+            }
+        }
         #endregion
 
         private void HandleTaskErrors(Task<int> task)
