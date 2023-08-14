@@ -12,8 +12,9 @@ namespace GoogGUI
     {
         private List<object> _bottomTabs = new List<object>();
         private Config _config;
-        private Panel? _panel;
+        private Panel? _activePanel;
         private List<object> _topTabs = new List<object>();
+        private List<Panel> _panels = new List<Panel>();
         private UIConfig _uiConfig;
 
         public GoogApp(Config config, UIConfig uiConfig)
@@ -28,17 +29,17 @@ namespace GoogGUI
 
         public List<object> BottomTabs { get => _bottomTabs; }
 
-        public Panel? Panel
+        public Panel? ActivePanel
         {
-            get => _panel;
+            get => _activePanel;
             set
             {
-                if (_panel != null)
-                    _panel.Active = false;
-                _panel = value;
-                if (_panel != null)
-                    _panel.Active = true;
-                OnPropertyChanged("Panel");
+                if (_activePanel != null)
+                    _activePanel.Active = false;
+                _activePanel = value;
+                if (_activePanel != null)
+                    _activePanel.Active = true;
+                OnPropertyChanged("ActivePanel");
             }
         }
 
@@ -53,9 +54,16 @@ namespace GoogGUI
                 new MessageModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles").ShowDialog();
 
             if (!_config.IsInstallPathValid)
-                Panel = (Panel)_bottomTabs.Where(x => x.GetType() == typeof(Settings)).First();
+                ActivePanel = (Panel)_bottomTabs.Where(x => x.GetType() == typeof(Settings)).First();
             else
-                Panel = (Panel)_bottomTabs.Where(x => x.GetType() == typeof(Dashboard)).First();
+                ActivePanel = (Panel)_bottomTabs.Where(x => x.GetType() == typeof(Dashboard)).First();
+        }
+
+        public T GetPanel<T>() where T : Panel
+        {
+            T panel = (T)_panels.Where(p => p.GetType() == typeof(T)).First();
+            if (panel == null) throw new Exception("Unknown Panel.");
+            return panel;
         }
 
         protected virtual void BuildTabs()
@@ -75,6 +83,8 @@ namespace GoogGUI
                 PanelAttribute? attr = t.GetCustomAttribute<PanelAttribute>();
                 if (attr == null) continue;
 
+                panel.AppConfigurationChanged += OnAppConfigurationChanged;
+
                 if (attr.Group != group)
                 {
                     group = attr.Group;
@@ -91,7 +101,13 @@ namespace GoogGUI
                     _bottomTabs.Add(panel);
                 else
                     _topTabs.Add(panel);
+                _panels.Add(panel);
             }
+        }
+
+        private void OnAppConfigurationChanged(object? sender, EventArgs e)
+        {
+            _panels.ForEach(p => p.RefreshPanel());
         }
 
         protected virtual void OnPropertyChanged(string property)

@@ -12,7 +12,7 @@ using System.Windows.Input;
 
 namespace GoogGUI
 {
-    [Panel("Settings", "/Icons/Server.png", false, 200, group: "Server")]
+    [Panel("Profiles", "/Icons/Server.png", false, 200, group: "Server")]
     public class ServerSettings : FieldEditorPanel
     {
         private ServerProfile _profile;
@@ -22,13 +22,7 @@ namespace GoogGUI
 
         public ServerSettings(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
-            _config.FileSaved += OnConfigSaved;
-            _uiConfig.FileSaved += OnUIConfigSaved;
-
-            _selectedProfile = _uiConfig.CurrentServerProfile;
-            ServerProfile.ResolveProfile(_config, ref _selectedProfile);
-            LoadProfileList();
-            LoadProfile();
+            LoadPanel();
         }
 
         #region Fields
@@ -125,6 +119,17 @@ namespace GoogGUI
                    _config.ServerInstanceCount > 0;
         }
 
+        [MemberNotNull("_selectedProfile", "_profile")]
+        private void LoadPanel()
+        {
+            _selectedProfile = _uiConfig.CurrentServerProfile;
+            ServerProfile.ResolveProfile(_config, ref _selectedProfile);
+
+            OnPropertyChanged("SelectedProfile");
+            LoadProfileList();
+            LoadProfile();
+        }
+
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
@@ -141,11 +146,6 @@ namespace GoogGUI
         {
             _profiles = new ObservableCollection<string>(ServerProfile.ListProfiles(_config));
             OnPropertyChanged("Profiles");
-        }
-
-        private void OnConfigSaved(object? sender, Config e)
-        {
-            OnCanExecuteChanged();
         }
 
         private void OnOpenFolderProfile(object? obj)
@@ -226,10 +226,10 @@ namespace GoogGUI
             OnValueChanged();
         }
 
-        private void OnUIConfigSaved(object? sender, UIConfig e)
+        public override void RefreshPanel()
         {
-            if (_uiConfig.CurrentServerProfile != _selectedProfile)
-                SelectedProfile = _uiConfig.CurrentServerProfile;
+            OnCanExecuteChanged();
+            LoadPanel();
         }
 
 

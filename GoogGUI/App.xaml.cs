@@ -19,6 +19,12 @@ namespace GoogGUI
 
         public static void Crash() => HasCrashed = true;
 
+        public GoogApp GetApp()
+        {
+            if (MainWindow is not MainWindow window) throw new Exception("MainWindow is not valid.");
+            return window.App;
+        }
+
         protected override void OnExit(ExitEventArgs e)
         {
             IsShutingDown = true;

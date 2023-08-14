@@ -3,6 +3,7 @@ using GoogGUI.Attributes;
 using System;
 using System.ComponentModel;
 using System.Reflection;
+using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -31,6 +32,8 @@ namespace GoogGUI
 
         public event EventHandler? CanExecuteChanged;
 
+        public event EventHandler? AppConfigurationChanged;
+
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool Active
@@ -57,7 +60,7 @@ namespace GoogGUI
         public virtual void Execute(object? parameter)
         {
             if(CanExecute(parameter))
-                ((MainWindow)Application.Current.MainWindow).App.Panel = this;
+                ((MainWindow)Application.Current.MainWindow).App.ActivePanel = this;
         }
 
         protected virtual void OnPropertyChanged(string name)
@@ -68,6 +71,15 @@ namespace GoogGUI
         protected virtual void OnCanExecuteChanged()
         {
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected virtual void OnAppConfigurationChanged()
+        {
+            AppConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        public virtual void RefreshPanel()
+        {
         }
     }
 }

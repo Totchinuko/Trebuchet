@@ -18,9 +18,7 @@ namespace GoogGUI
     {
         public Settings(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
-            _config.FileSaved += OnConfigSaved;
-            BuildFields();
-            UpdateRequiredActions();
+            LoadPanel();
         }
 
         #region Fields
@@ -32,6 +30,7 @@ namespace GoogGUI
             {
                 _config.InstallPath = value;
                 OnValueChanged();
+                OnAppConfigurationChanged();
             }
         }
 
@@ -43,6 +42,7 @@ namespace GoogGUI
             {
                 _config.ClientPath = value;
                 OnValueChanged();
+                OnAppConfigurationChanged();
             }
         }
 
@@ -54,6 +54,7 @@ namespace GoogGUI
             {
                 _config.ServerInstanceCount = value;
                 OnValueChanged();
+                OnAppConfigurationChanged();
             }
         }
 
@@ -124,6 +125,15 @@ namespace GoogGUI
         }
         #endregion
 
+        private void LoadPanel()
+        {
+            if (Fields.Count == 0)
+                BuildFields();
+            else
+                Fields.ForEach(f => f.RefreshValue());
+            UpdateRequiredActions();
+        }
+
         private void HandleTaskErrors(Task<int> task)
         {
             if (task.IsFaulted && task.Exception != null)
@@ -138,9 +148,10 @@ namespace GoogGUI
             System.Windows.Application.Current.Shutdown();
         }
 
-        private void OnConfigSaved(object? sender, Config e)
+        public override void RefreshPanel()
         {
             OnCanExecuteChanged();
+            LoadPanel();
         }
 
         private void OnInstallSteam(object? obj)
@@ -158,7 +169,7 @@ namespace GoogGUI
                 Setup.DeleteSteamCMD(_config);
 
             App.TaskBlocker.ReleaseMain();
-            UpdateRequiredActions();
+            OnAppConfigurationChanged();
         }
 
         private void OnServerInstanceInstall(object? obj)
@@ -178,7 +189,7 @@ namespace GoogGUI
         {
             HandleTaskErrors(task);
             App.TaskBlocker.ReleaseMain();
-            UpdateRequiredActions();
+            OnAppConfigurationChanged();
         }
 
         private async Task<int> OnServerInstanceInstallTask(CancellationToken token)

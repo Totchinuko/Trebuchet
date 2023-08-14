@@ -34,15 +34,9 @@ namespace GoogGUI
 
         public ModlistHandler(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
-            _config.FileSaved += OnConfigFileChanged;
-
             _api = new SteamWorkWebAPI(_config.SteamAPIKey);
-            SetupFileWatcher();
 
-            _selectedModlist = _uiConfig.CurrentModlistProfile;
-            ModListProfile.ResolveProfile(_config, ref _selectedModlist);
-            LoadProfile();
-            RefreshProfiles();
+            LoadPanel();
         }
 
         public ICommand CreateModlistCommand => new SimpleCommand(OnModlistCreate);
@@ -108,6 +102,12 @@ namespace GoogGUI
             return _config.IsInstallPathValid && File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin));
         }
 
+        public override void RefreshPanel()
+        {
+            OnCanExecuteChanged();
+            LoadPanel();
+        }
+
         private void FetchJsonList(UriBuilder builder)
         {
             if (App.TaskBlocker.IsSet(FetchModlist)) return;
@@ -157,6 +157,19 @@ namespace GoogGUI
             _modlist.CollectionChanged += OnModlistCollectionChanged;
             OnPropertyChanged("Modlist");
             LoadManifests();
+        }
+
+        [MemberNotNull("_profile")]
+        private void LoadPanel()
+        {
+            SetupFileWatcher();
+
+            _selectedModlist = _uiConfig.CurrentModlistProfile;
+            ModListProfile.ResolveProfile(_config, ref _selectedModlist);
+
+            OnPropertyChanged("SelectedModlist");
+            LoadProfile();
+            RefreshProfiles();
         }
 
         [MemberNotNull("_profile")]
@@ -546,7 +559,12 @@ namespace GoogGUI
 
         private void SetupFileWatcher()
         {
-            if (_modWatcher != null) return;
+            if (_modWatcher != null)
+            {
+                _modWatcher.Dispose();
+                _modWatcher = null;
+            }
+
             string path = Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, _config.ClientAppID);
             if (!Directory.Exists(path)) return;
 

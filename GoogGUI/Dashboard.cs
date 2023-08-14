@@ -54,7 +54,7 @@ namespace GoogGUI
 
         public override void Execute(object? parameter)
         {
-            if (CanExecute(parameter) && ((MainWindow)Application.Current.MainWindow).App.Panel != this)
+            if (CanExecute(parameter) && ((MainWindow)Application.Current.MainWindow).App.ActivePanel != this)
             {
                 _client.RefreshSelection();
                 foreach (var i in _instances)

@@ -11,7 +11,7 @@ using System.Windows.Input;
 
 namespace GoogGUI
 {
-    [Panel("Settings", "/Icons/Game.png", false, 100, group: "Game")]
+    [Panel("Profiles", "/Icons/Game.png", false, 100, group: "Game")]
     public class ClientSettings : FieldEditorPanel
     {
         private ClientProfile _profile;
@@ -20,14 +20,7 @@ namespace GoogGUI
 
         public ClientSettings(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
-            _config.FileSaved += OnConfigSaved;
-            _uiConfig.FileSaved += OnUIConfigSaved;
-
-            MoveOriginalSavedFolder();
-            _selectedProfile = _uiConfig.CurrentClientProfile;
-            ClientProfile.ResolveProfile(_config, ref _selectedProfile);
-            LoadProfileList();
-            LoadProfile();
+            LoadPanel();
         }
 
         #region Fields
@@ -140,6 +133,18 @@ namespace GoogGUI
                 File.Exists(Path.Combine(_config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
         }
 
+        [MemberNotNull("_profile", "_selectedProfile")]
+        private void LoadPanel()
+        {
+            MoveOriginalSavedFolder();
+            _selectedProfile = _uiConfig.CurrentClientProfile;
+            ClientProfile.ResolveProfile(_config, ref _selectedProfile);
+
+            OnPropertyChanged("SelectedProfile");
+            LoadProfileList();
+            LoadProfile();
+        }
+
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
@@ -182,12 +187,6 @@ namespace GoogGUI
             Original.SaveFile();
             string profileFolder = Path.GetDirectoryName(Original.FilePath) ?? throw new DirectoryNotFoundException($"{Original.FilePath} path is invalid");
             Tools.DeepCopy(newPath, profileFolder);
-        }
-
-        private void OnConfigSaved(object? sender, Config e)
-        {
-            OnCanExecuteChanged();
-            MoveOriginalSavedFolder();
         }
 
         private void OnOpenFolderProfile(object? obj)
@@ -267,10 +266,10 @@ namespace GoogGUI
             _profile.SaveFile();
         }
 
-        private void OnUIConfigSaved(object? sender, UIConfig e)
+        public override void RefreshPanel()
         {
-            if (_uiConfig.CurrentClientProfile != _selectedProfile)
-                SelectedProfile = _uiConfig.CurrentClientProfile;
+            OnCanExecuteChanged();
+            LoadPanel();
         }
     }
 }
