@@ -1,0 +1,72 @@
+[
+  {
+    "$type": "Directory",
+    "Property": "InstallPath",
+    "Name": "Trebuchet Installation Directory",
+    "Default": "",
+    "Description": "",
+    "RefreshApp": true
+  },
+  {
+    "$type": "Directory",
+    "Property": "ClientPath",
+    "Name": "Conan Exile Installation Directory",
+    "Default": "",
+    "Description": "",
+    "RefreshApp": true
+  },
+  {
+    "$type": "IntSlider",
+    "Property": "ServerInstanceCount",
+    "Name": "Server Instance Amount",
+    "Description": "",
+    "Minimum": 0,
+    "Maximum": 6,
+    "Frequency": 1,
+    "Default": 0,
+    "RefreshApp": true
+  },
+  {
+    "$type": "Toggle",
+    "Property": "DisplayCMD",
+    "Name": "Display Steam Commande Line",
+    "Description": "",
+    "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "UseHardwareAcceleration",
+    "Name": "Use Hardware Acceleration",
+    "Description": "",
+    "Default": true
+  },
+  {
+    "$type": "Toggle",
+    "Property": "DisplayWarningOnKill",
+    "Name": "Display Warning On Kill",
+    "Description": "",
+    "Default": true
+  },
+  {
+    "$type": "Toggle",
+    "Property": "KillZombies",
+    "Name": "Kill Zombie Servers",
+    "Description": "",
+    "Default": false
+  },
+  {
+    "$type": "Int",
+    "Property": "ZombieCheckSeconds",
+    "Name": "Zombie Check Duration (Seconds)",
+    "Description": "",
+    "Default": 300,
+    "Minimum": 30
+  },
+  {
+    "$type": "Toggle",
+    "Property": "RestartWhenDown",
+    "Name": "Restart Servers When Down",
+    "Description": "",
+    "Default": false
+  }
+]
