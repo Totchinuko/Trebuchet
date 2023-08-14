@@ -97,6 +97,11 @@ namespace GoogGUI
         public void Launch()
         {
             if (_trebuchet.IsClientRunning()) return;
+            if(_trebuchet.IsFolderLocked(ClientProfile.GetFolder(_config, _selectedProfile)))
+            {
+                new ErrorModal("Locked", "This profile is currently used by another process. Only one process can use a profile at a time.").ShowDialog();
+                return;
+            }
 
             LaunchCommand.Toggle(false);
 

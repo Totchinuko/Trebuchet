@@ -10,6 +10,7 @@ namespace GoogLib
         private ClientProcess? _clientProcess;
         private Config _config;
         private Dictionary<int, ServerProcess> _serverProcesses = new Dictionary<int, ServerProcess>();
+        private HashSet<string> _lockedFolders = new HashSet<string>();
 
         public Trebuchet(Config config)
         {
@@ -44,19 +45,20 @@ namespace GoogLib
             if (!File.Exists(profilePath)) throw new Exception("Unknown game profile.");
             ClientProfile profile = ClientProfile.LoadFile(profilePath);
 
+            if(_lockedFolders.Contains(profile.ProfileFolder))
+                throw new Exception("Profile folder is currently locked by another process.");
+
             string modlistPath = ModListProfile.GetPath(_config, modlistName);
             if (!File.Exists(modlistPath)) throw new Exception("Unknown Mod List.");
             ModListProfile modlist = ModListProfile.LoadFile(modlistPath);
-
-            string profileFolder = Path.GetDirectoryName(profile.FilePath) ?? throw new Exception();
 
             _config.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
             if (errors.Count > 0)
                 throw new Exception("Some mods path could not be resolved.");
 
-            File.WriteAllLines(Path.Combine(profileFolder, Config.FileGeneratedModlist), result);
+            File.WriteAllLines(Path.Combine(profile.ProfileFolder, Config.FileGeneratedModlist), result);
 
-            SetupJunction(_config.ClientPath, profileFolder);
+            SetupJunction(_config.ClientPath, profile.ProfileFolder);
 
             IniConfigurator configurator = new IniConfigurator(_config);
             configurator.WriteIniConfigs(profile, _config.ClientPath);
@@ -66,6 +68,7 @@ namespace GoogLib
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             _clientProcess.ProcessStarted += OnClientProcessStarted;
 
+            _lockedFolders.Add(GetCurrentClientJunction());
             Task.Run(_clientProcess.StartProcessAsync);
         }
 
@@ -78,19 +81,20 @@ namespace GoogLib
             if (!File.Exists(profilePath)) throw new Exception("Unknown server profile.");
             ServerProfile profile = ServerProfile.LoadFile(profilePath);
 
+            if (_lockedFolders.Contains(profile.ProfileFolder))
+                throw new Exception("Profile folder is currently locked by another process.");
+
             string modlistPath = ModListProfile.GetPath(_config, modlistName);
             if (!File.Exists(modlistPath)) throw new Exception("Unknown Mod List.");
             ModListProfile modlist = ModListProfile.LoadFile(modlistPath);
-
-            string profileFolder = Path.GetDirectoryName(profile.FilePath) ?? throw new Exception();
 
             _config.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
             if (errors.Count > 0)
                 throw new Exception("Some mods path could not be resolved.");
 
-            File.WriteAllLines(Path.Combine(profileFolder, Config.FileGeneratedModlist), result);
+            File.WriteAllLines(Path.Combine(profile.ProfileFolder, Config.FileGeneratedModlist), result);
 
-            SetupJunction(_config.GetInstancePath(instance), profileFolder);
+            SetupJunction(_config.GetInstancePath(instance), profile.ProfileFolder);
 
             IniConfigurator configurator = new IniConfigurator(_config);
             configurator.WriteIniConfigs(profile, _config.GetInstancePath(instance));
@@ -101,6 +105,7 @@ namespace GoogLib
             watcher.ProcessStarted += OnServerProcessStarted;
             _serverProcesses.Add(instance, watcher);
 
+            _lockedFolders.Add(GetCurrentServerJunction(instance));
             Task.Run(watcher.StartProcessAsync);
         }
 
@@ -115,6 +120,8 @@ namespace GoogLib
         public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.Process != null;
 
         public bool IsAnyServerRunning() => _serverProcesses.Count > 0;
+
+        public bool IsFolderLocked(string folder) => _lockedFolders.Contains(folder);
 
         public void KillAllServers()
         {
@@ -202,6 +209,7 @@ namespace GoogLib
                 if (_clientProcess != e) return;
                 _clientProcess = null;
                 ClientTerminated?.Invoke(this, EventArgs.Empty);
+                _lockedFolders.Remove(GetCurrentClientJunction());
             });
         }
 
@@ -231,7 +239,10 @@ namespace GoogLib
                     Task.Run(watcher.StartProcessAsync);
                 }
                 else
+                {
                     ServerTerminated?.Invoke(this, e.ServerInstance);
+                    _lockedFolders.Remove(GetCurrentServerJunction(e.ServerInstance));
+                }
             });
         }
 
@@ -240,6 +251,22 @@ namespace GoogLib
             string junction = Path.Combine(gamePath, Config.FolderGameSave);
             Tools.RemoveSymboliclink(junction);
             Tools.SetupSymboliclink(junction, targetPath);
+        }
+
+        private string GetCurrentServerJunction(int instance)
+        {
+            string path = Path.Combine(_config.GetInstancePath(instance), Config.FolderGameSave);
+            if (JunctionPoint.Exists(path))
+                return JunctionPoint.GetTarget(path);
+            else return string.Empty;
+        }
+
+        private string GetCurrentClientJunction()
+        {
+            string path = Path.Combine(_config.ClientPath, Config.FolderGameSave);
+            if (JunctionPoint.Exists(path))
+                return JunctionPoint.GetTarget(path);
+            else return string.Empty;
         }
     }
 }

@@ -41,8 +41,13 @@ namespace GoogGUI
 
         private void OnFieldPropertyChanged(object? sender, PropertyChangedEventArgs e)
         {
-            if (e.PropertyName == "Value" && sender is Field field)
-                OnValueChanged(field.Property);
+            if (e.PropertyName != "Value") return;
+            if (sender is not Field field) return;
+
+            OnValueChanged(field.Property);
+
+            if (field.RefreshApp)
+                OnAppConfigurationChanged();
         }
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["FieldEditor"];

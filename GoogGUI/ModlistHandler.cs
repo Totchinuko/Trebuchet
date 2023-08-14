@@ -53,7 +53,7 @@ namespace GoogGUI
 
         public ICommand ExportToTxtCommand => new SimpleCommand(OnExportToTxt);
 
-        public ICommand FetchCommand => new TaskBlockedCommand(OnFetchClicked, FetchModlist);
+        public ICommand FetchCommand => new TaskBlockedCommand(OnFetchClicked, true, FetchModlist);
 
         public ICommand ImportFromFileCommand => new SimpleCommand(OnImportFromFile);
 
@@ -61,7 +61,7 @@ namespace GoogGUI
 
         public object ItemTemplate => Application.Current.Resources["ModlistItems"];
 
-        public ICommand ModFilesDownloadCommand => new TaskBlockedCommand(OnModFilesDownload);
+        public ICommand ModFilesDownloadCommand => new TaskBlockedCommand(OnModFilesDownload, true, TaskBlocker.MainTask, Dashboard.GameTask);
 
         public TrulyObservableCollection<ModFile> Modlist
         {
@@ -85,7 +85,7 @@ namespace GoogGUI
 
         public ObservableCollection<string> Profiles { get => _profiles; set => _profiles = value; }
 
-        public ICommand RefreshModlistCommand => new TaskBlockedCommand(OnModlistRefresh, FetchManifests);
+        public ICommand RefreshModlistCommand => new TaskBlockedCommand(OnModlistRefresh, true, FetchManifests);
 
         public string SelectedModlist
         {

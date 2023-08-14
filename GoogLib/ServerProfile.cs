@@ -45,6 +45,9 @@ namespace GoogLib
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
 
+        [JsonIgnore]
+        public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
+
         public static Dictionary<string, string> GetMapList()
         {
             string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -60,6 +63,8 @@ namespace GoogLib
         }
 
         public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
+
+        public static string GetFolder(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name);
 
         public static List<string> ListProfiles(Config config)
         {

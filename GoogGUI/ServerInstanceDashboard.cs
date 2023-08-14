@@ -117,6 +117,11 @@ namespace GoogGUI
         {
             if (!CanUseDashboard) return;
             if (_trebuchet.IsServerRunning(_instance)) return;
+            if (_trebuchet.IsFolderLocked(ServerProfile.GetFolder(_config, _selectedProfile)))
+            {
+                new ErrorModal("Locked", "This profile is currently used by another process. Only one process can use a profile at a time.").ShowDialog();
+                return;
+            }
 
             LaunchCommand.Toggle(false);
 

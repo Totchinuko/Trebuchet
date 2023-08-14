@@ -34,6 +34,7 @@ namespace GoogGUI
         protected override void OnValueChanged(string property)
         {
             _config.SaveFile();
+            UpdateRequiredActions();
         }
 
         private void HandleTaskErrors(Task<int> task)
@@ -114,23 +115,17 @@ namespace GoogGUI
             return 0;
         }
 
-        private void OnValueChanged()
-        {
-            _config.SaveFile();
-            UpdateRequiredActions();
-        }
-
         private void UpdateRequiredActions()
         {
             RequiredActions.Clear();
 
             int installed = _config.GetInstalledInstances();
             if (Directory.Exists(_config.InstallPath) && !File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)))
-                RequiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, true));
+                RequiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, TaskBlocker.MainTask));
             else if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)
-                RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, true));
+                RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, TaskBlocker.MainTask));
             if (App.UseSoftwareRendering == _uiConfig.UseHardwareAcceleration)
-                RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, true));
+                RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, TaskBlocker.MainTask));
         }
     }
 }

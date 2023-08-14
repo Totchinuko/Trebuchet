@@ -12,6 +12,7 @@ namespace GoogGUI
     [Panel("Dashboard", "/Icons/Dashboard.png", true, 0, "Dashboard")]
     public class Dashboard : Panel
     {
+        public const string GameTask = "GameRunning";
         private ClientInstanceDashboard _client;
         private ObservableCollection<ServerInstanceDashboard> _instances = new ObservableCollection<ServerInstanceDashboard>();
         private DispatcherTimer _timer;
@@ -25,13 +26,18 @@ namespace GoogGUI
 
             _trebuchet = new Trebuchet(config);
             _trebuchet.DispatcherRequest += OnTrebuchetRequestDispatcher;
-            _timer = new DispatcherTimer(TimeSpan.FromSeconds(2), DispatcherPriority.Background, OnDispatcherTick, Application.Current.Dispatcher);
+            _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnDispatcherTick, Application.Current.Dispatcher);
 
             _client = new ClientInstanceDashboard(_config, _uiConfig, _trebuchet);
             FillServerInstances();
 
+            OnDispatcherTick(this, EventArgs.Empty);
             _timer.Start();
         }
+
+        public bool CanDisplayServers => _config.IsInstallPathValid &&
+                File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
+                _config.ServerInstanceCount > 0;
 
         public ClientInstanceDashboard Client => _client;
 
@@ -42,10 +48,6 @@ namespace GoogGUI
         public SimpleCommand KillAllCommand { get; private set; }
 
         public TaskBlockedCommand LaunchAllCommand { get; private set; }
-
-        public bool CanDisplayServers => _config.IsInstallPathValid &&
-                File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
-                _config.ServerInstanceCount > 0;
 
         public override bool CanExecute(object? parameter)
         {
@@ -87,17 +89,17 @@ namespace GoogGUI
         {
             _trebuchet.TickTrebuchet();
 
-            if ((_trebuchet.IsClientRunning() || _trebuchet.IsAnyServerRunning()) && !App.TaskBlocker.IsSet(TaskBlocker.MainTask))
-                App.TaskBlocker.Set(TaskBlocker.MainTask);
+            if ((_trebuchet.IsClientRunning() || _trebuchet.IsAnyServerRunning()) && !App.TaskBlocker.IsSet(GameTask))
+                App.TaskBlocker.Set(GameTask);
 
-            if(!_trebuchet.IsClientRunning() && !_trebuchet.IsAnyServerRunning() && App.TaskBlocker.IsSet(TaskBlocker.MainTask))
-                App.TaskBlocker.Release(TaskBlocker.MainTask);
+            if (!_trebuchet.IsClientRunning() && !_trebuchet.IsAnyServerRunning() && App.TaskBlocker.IsSet(GameTask))
+                App.TaskBlocker.Release(GameTask);
         }
 
         private void OnKillAll(object? obj)
         {
             foreach (var i in Instances)
-                i.Kill();            
+                i.Kill();
         }
 
         private void OnLaunchAll(object? obj)

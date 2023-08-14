@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Windows.Input;
 
 namespace GoogGUI
@@ -10,15 +11,15 @@ namespace GoogGUI
         private Action<object?> _callback;
         private bool _launched;
         private string _message;
-        private bool _taskBlockerDisabled;
+        private string[] _tasks;
 
-        public RequiredCommand(string message, string button, Action<object?> callback, bool taskBlockerDisabled = false)
+        public RequiredCommand(string message, string button, Action<object?> callback, params string[] tasks)
         {
+            _tasks = tasks;
             _callback = callback;
             _message = message;
             _button = button;
-            _taskBlockerDisabled = taskBlockerDisabled;
-            if (_taskBlockerDisabled)
+            if (_tasks.Length > 0)
                 App.TaskBlocker.PropertyChanged += OnTaskBlockerPropertyChanged;
         }
 
@@ -32,7 +33,7 @@ namespace GoogGUI
 
         public bool CanExecute(object? parameter)
         {
-            return (!_taskBlockerDisabled || App.TaskBlocker.IsAvailable) && !_launched;
+            return !_tasks.Any(App.TaskBlocker.IsSet) && !_launched;
         }
 
         public void Execute(object? parameter)

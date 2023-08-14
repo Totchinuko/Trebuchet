@@ -9,23 +9,23 @@ namespace GoogGUI
 {
     public class TaskBlockedCommand : ICommand
     {
-        private string _taskKey = string.Empty;
+        private string[] _tasks = new string[0];
         private Action<object?> _command;
         private bool _enabled;
 
         public event EventHandler? CanExecuteChanged;
 
-        public TaskBlockedCommand(Action<object?> command, string taskKey = TaskBlocker.MainTask, bool enabled = true)
+        public TaskBlockedCommand(Action<object?> command, bool enabled = true, params string[] tasks)
         {
             _command = command;
-            _taskKey = taskKey;
+            _tasks = tasks;
             _enabled = enabled;
             App.TaskBlocker.TaskSourceChanged += OnTaskSourceChanged;
         }
 
         private void OnTaskSourceChanged(object? sender, string e)
         {
-            if (_taskKey == e)
+            if (_tasks.Contains(e))
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -37,7 +37,7 @@ namespace GoogGUI
 
         public bool CanExecute(object? parameter)
         {
-            return !App.TaskBlocker.IsSet(_taskKey) && _enabled;
+            return !_tasks.Any(App.TaskBlocker.IsSet) && _enabled;
         }
 
         public void Execute(object? parameter)
