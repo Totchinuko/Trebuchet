@@ -238,5 +238,25 @@ namespace Goog
 
             yield return str.Substring(nextPiece);
         }
+
+        public static long DirectorySize(string folder) => DirectorySize(new DirectoryInfo(folder));
+
+        public static long DirectorySize(DirectoryInfo folder)
+        {
+            long size = 0;
+            // Add file sizes.
+            FileInfo[] fis = folder.GetFiles();
+            foreach (FileInfo fi in fis)
+            {
+                size += fi.Length;
+            }
+            // Add subdirectory sizes.
+            DirectoryInfo[] dis = folder.GetDirectories();
+            foreach (DirectoryInfo di in dis)
+            {
+                size += DirectorySize(di);
+            }
+            return size;
+        }
     }
 }

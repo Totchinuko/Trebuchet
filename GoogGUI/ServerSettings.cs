@@ -47,6 +47,8 @@ namespace GoogGUI
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ClientSettings"];
 
+        public string ProfileSize => (Tools.DirectorySize(_profile.ProfileFolder) / 1024 / 1024).ToString() + "MB";
+
         public override bool CanExecute(object? parameter)
         {
             return _config.IsInstallPathValid &&
@@ -80,7 +82,7 @@ namespace GoogGUI
         private void LoadProfile()
         {
             _profile = ServerProfile.LoadFile(ServerProfile.GetPath(_config, _selectedProfile));
-
+            OnPropertyChanged("ProfileSize");
             RefreshFields();
         }
 
