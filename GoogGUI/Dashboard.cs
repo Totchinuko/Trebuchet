@@ -21,7 +21,7 @@ namespace GoogGUI
         {
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
-            LaunchAllCommand = new SimpleCommand(OnLaunchAll);
+            LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll);
 
             _trebuchet = new Trebuchet(config);
             _trebuchet.DispatcherRequest += OnTrebuchetRequestDispatcher;
@@ -41,7 +41,7 @@ namespace GoogGUI
 
         public SimpleCommand KillAllCommand { get; private set; }
 
-        public SimpleCommand LaunchAllCommand { get; private set; }
+        public TaskBlockedCommand LaunchAllCommand { get; private set; }
 
         public bool CanDisplayServers => _config.IsInstallPathValid &&
                 File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
@@ -86,6 +86,12 @@ namespace GoogGUI
         private void OnDispatcherTick(object? sender, EventArgs e)
         {
             _trebuchet.TickTrebuchet();
+
+            if ((_trebuchet.IsClientRunning() || _trebuchet.IsAnyServerRunning()) && !App.TaskBlocker.IsSet(TaskBlocker.MainTask))
+                App.TaskBlocker.Set(TaskBlocker.MainTask);
+
+            if(!_trebuchet.IsClientRunning() && !_trebuchet.IsAnyServerRunning() && App.TaskBlocker.IsSet(TaskBlocker.MainTask))
+                App.TaskBlocker.Release(TaskBlocker.MainTask);
         }
 
         private void OnKillAll(object? obj)

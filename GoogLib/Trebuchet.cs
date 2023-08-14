@@ -114,6 +114,8 @@ namespace GoogLib
 
         public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.Process != null;
 
+        public bool IsAnyServerRunning() => _serverProcesses.Count > 0;
+
         public void KillAllServers()
         {
             foreach (ServerProcess p in _serverProcesses.Values)
