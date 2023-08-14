@@ -24,6 +24,7 @@
     <Style TargetType="TextBlock">
         <Setter Property="Foreground" Value="White" />
         <Setter Property="FontSize" Value="12" />
+        <Setter Property="TextWrapping" Value="Wrap" />
     </Style>
     <Style TargetType="TextBlock" x:Key="TitleText">
         <Setter Property="Foreground" Value="{StaticResource GBlue}" />
@@ -123,28 +124,20 @@
 
     <Style TargetType="ToolTip">
         <Setter Property="Background" Value="{StaticResource GBackground}" />
-        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderBrush" Value="{StaticResource GPanel}" />
         <Setter Property="Padding" Value="6" />
-    </Style>
-
-    <Style TargetType="Separator">
-        
-    </Style>
-
-    <Style TargetType="Separator" x:Key="VerticalSeparator">
-        <Setter Property="LayoutTransform">
+        <Setter Property="MaxWidth" Value="350" />
+        <Setter Property="ToolTipService.InitialShowDelay" Value="0" />
+        <Setter Property="Template">
             <Setter.Value>
-                <TransformGroup>
-                    <TransformGroup.Children>
-                        <TransformCollection>
-                            <RotateTransform Angle="90"/>
-                        </TransformCollection>
-                    </TransformGroup.Children>
-                </TransformGroup>
+                <ControlTemplate TargetType="ToolTip">
+                    <Border Background="{TemplateBinding Background}" Padding="3" CornerRadius="3" BorderThickness="{TemplateBinding BorderThickness}" BorderBrush="{TemplateBinding BorderBrush}">
+                        <ContentPresenter />
+                    </Border>
+                </ControlTemplate>
             </Setter.Value>
         </Setter>
-        <Setter Property="Width" Value="25" />
-        <Setter Property="Background" Value="White" />
     </Style>
 
     <Style TargetType="Border" x:Key="HorizontalSep">
