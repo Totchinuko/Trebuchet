@@ -96,7 +96,7 @@ namespace GoogLib
                 if (File.Exists(path)) return;
             }
 
-            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles), "*");
+            profileName = Tools.GetFirstDirectoryName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles), "*");
             if (!string.IsNullOrEmpty(profileName)) return;
 
             profileName = "Default";

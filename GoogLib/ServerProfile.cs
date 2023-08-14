@@ -82,7 +82,7 @@ namespace GoogLib
                 if (File.Exists(path)) return;
             }
 
-            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles), "*");
+            profileName = Tools.GetFirstDirectoryName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles), "*");
             if (!string.IsNullOrEmpty(profileName)) return;
 
             profileName = "Default";
