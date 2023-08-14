@@ -24,15 +24,5 @@ namespace GoogGUI
         public static implicit operator ObservableString(string value) => new ObservableString { value = value };
 
         public static implicit operator string(ObservableString value) => value.value;
-
-        public static List<string> ToList(TrulyObservableCollection<ObservableString> value)
-        {
-            return value.ToList().ConvertAll((x) => x.value);
-        }
-
-        public static TrulyObservableCollection<ObservableString> ToObservableList(List<string> value)
-        {
-            return new TrulyObservableCollection<ObservableString>(value.ConvertAll((x) => new ObservableString { value = x }));
-        }
     }
 }

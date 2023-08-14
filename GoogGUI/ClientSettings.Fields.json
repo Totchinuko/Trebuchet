@@ -1,0 +1,47 @@
+[
+  {
+    "$type": "Toggle",
+    "Property": "BackgroundSound",
+    "Name": "Background Sound",
+    "Description": "Keep the sound of the game up when tabbing out to another window.",
+    "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "Log",
+    "Name": "Display Log Console",
+    "Description": "Display live game logs as the game is running.",
+    "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "RemoveIntroVideo",
+    "Name": "Remove Intro Videos",
+    "Description": "Instead of displaying the intro video, you will have black screen that will swap to the main menu once the game is loaded.",
+    "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "UseAllCores",
+    "Name": "Use All Cores",
+    "Description": "Supposed to improve performance on machines with lots of cores, unverified. Probably black magic.",
+    "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "UltraAnisotropy",
+    "Name": "Better Textures on Ultra",
+    "Description": "Increase the sharpness of angled textures on Ultra settings. This can have a performance hit depending on your hardware.",
+    "Default": false
+  },
+  {
+    "$type": "IntSlider",
+    "Property": "AddedTexturePool",
+    "Name": "Extra Texture Streaming Pool on Ultra (MB)",
+    "Default": 0,
+    "Description": "In order to not saturate your GPU memory with textures, the game constantly swap textures it does not need for the ones it needs. For that it reserve a portion of your memory to swap things out. By default on Ultra, that pool is 1500 MB in size. It's fine for the vanilla game, but with modded games it can be short when you are in an intensive area with lots of decorations, showing blurry textures more often. You can increase the base 1500 with this slider. Keep in mind that adding too much could have performance impact on your game.",
+    "Minimum": 0,
+    "Maximum": 4000,
+    "Frequency": 100
+  }
+]

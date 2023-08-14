@@ -1,7 +1,6 @@
 ﻿using Goog;
 using GoogGUI.Attributes;
 using GoogLib;
-using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -23,86 +22,6 @@ namespace GoogGUI
             LoadPanel();
         }
 
-        #region Fields
-
-        [IntSliderField("Texture Streaming Pool (MB)", 0, 4000, 0, Frequency = 100, Sort = 40)]
-        public int AddedTexturePool
-        {
-            get => _profile.AddedTexturePool;
-            set
-            {
-                _profile.AddedTexturePool = value;
-                OnValueChanged();
-            }
-        }
-
-        [ToggleField("Background Sound", false, Sort = 10)]
-        public bool BackgroundSound
-        {
-            get => _profile.BackgroundSound;
-            set
-            {
-                _profile.BackgroundSound = value;
-                OnValueChanged();
-            }
-        }
-
-        [ToggleField("Display Log Console", false, Sort = 30)]
-        public bool Log
-        {
-            get => _profile.Log;
-            set
-            {
-                _profile.Log = value;
-                OnValueChanged();
-            }
-        }
-
-        [ToggleField("Remove Intro Video", false, Sort = 0)]
-        public bool RemoveIntroVideo
-        {
-            get => _profile.RemoveIntroVideo;
-            set
-            {
-                _profile.RemoveIntroVideo = value;
-                OnValueChanged();
-            }
-        }
-
-        [ToggleField("Use All Cores", false, Sort = 20)]
-        public bool UseAllCores
-        {
-            get => _profile.UseAllCores;
-            set
-            {
-                _profile.UseAllCores = value;
-                OnValueChanged();
-            }
-        }
-
-        [ToggleField("Use Battle Eye", false, Sort = -10)]
-        public bool UseBattleEye
-        {
-            get => _profile.UseBattleEye;
-            set
-            {
-                _profile.UseBattleEye = value;
-                OnValueChanged();
-            }
-        }
-
-        [ToggleField("Better Texture on Ultra", false, Sort = 50)]
-        public bool UltraAnisotropy
-        {
-            get => _profile.UltraAnisotropy;
-            set
-            {
-                _profile.UltraAnisotropy = value;
-                OnValueChanged();
-            }
-        }
-        #endregion Fields
-
         public ICommand CreateProfileCommand => new SimpleCommand(OnProfileCreate);
 
         public ICommand DeleteProfileCommand => new SimpleCommand(OnProfileDelete);
@@ -110,6 +29,8 @@ namespace GoogGUI
         public ICommand DuplicateProfileCommand => new SimpleCommand(OnProfileDuplicate);
 
         public ICommand OpenFolderProfileCommand => new SimpleCommand(OnOpenFolderProfile);
+
+        public ClientProfile Profile => _profile;
 
         public ObservableCollection<string> Profiles { get => _profiles; }
 
@@ -133,6 +54,22 @@ namespace GoogGUI
                 File.Exists(Path.Combine(_config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
         }
 
+        public override void RefreshPanel()
+        {
+            OnCanExecuteChanged();
+            LoadPanel();
+        }
+
+        protected override void BuildFields()
+        {
+            BuildFields("GoogGUI.ClientSettings.Fields.json", this, "Profile");
+        }
+
+        protected override void OnValueChanged(string property)
+        {
+            _profile.SaveFile();
+        }
+
         [MemberNotNull("_profile", "_selectedProfile")]
         private void LoadPanel()
         {
@@ -149,11 +86,7 @@ namespace GoogGUI
         private void LoadProfile()
         {
             _profile = ClientProfile.LoadFile(ClientProfile.GetPath(_config, _selectedProfile));
-
-            if (Fields.Count == 0)
-                BuildFields();
-            else
-                Fields.ForEach(field => field.RefreshValue());
+            RefreshFields();
         }
 
         private void LoadProfileList()
@@ -259,17 +192,6 @@ namespace GoogGUI
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
-        }
-
-        private void OnValueChanged()
-        {
-            _profile.SaveFile();
-        }
-
-        public override void RefreshPanel()
-        {
-            OnCanExecuteChanged();
-            LoadPanel();
         }
     }
 }

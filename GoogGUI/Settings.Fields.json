@@ -3,62 +3,53 @@
     "$type": "Directory",
     "Property": "InstallPath",
     "Name": "Trebuchet Installation Directory",
-    "Default": "",
-    "Description": "",
+    "Description": "Folder for all the data needed by trebuchet. This will contains your mods, logs, saves, and most of your configurations.",
     "RefreshApp": true
   },
   {
     "$type": "Directory",
     "Property": "ClientPath",
     "Name": "Conan Exile Installation Directory",
-    "Default": "",
-    "Description": "",
+    "Description": "This is the path to your game. Leave it empty if you do not wish trebuchet to handle game launch.",
     "RefreshApp": true
   },
   {
     "$type": "IntSlider",
     "Property": "ServerInstanceCount",
     "Name": "Server Instance Amount",
-    "Description": "",
+    "Description": "The amount of server instance to be handle by this trebuchet. Leave it at 0 if you do not wish trebuchet to handle server launch.",
     "Minimum": 0,
     "Maximum": 6,
     "Frequency": 1,
-    "Default": 0,
     "RefreshApp": true
+  },
+  {
+    "$type": "Text",
+    "Property": "SteamAPIKey",
+    "Name": "Steam API Key",
+    "Description": "In order to use the mod navigator directly from this app, you need a steam API key. You can have one per steam account. Use the link below to request one. DO NOT SHARE IT. Steam API key allow to access the steam API in your name.",
+    "Hyperlink": "https://steamcommunity.com/dev/apikey"
+
   },
   {
     "$type": "Toggle",
     "Property": "DisplayCMD",
     "Name": "Display Steam Commande Line",
-    "Description": "",
+    "Description": "Display the command line console when updating the server intances or your mods. Useful for troubleshooting.",
     "Default": false
-  },
-  {
-    "$type": "Toggle",
-    "Property": "UseHardwareAcceleration",
-    "Name": "Use Hardware Acceleration",
-    "Description": "",
-    "Default": true
-  },
-  {
-    "$type": "Toggle",
-    "Property": "DisplayWarningOnKill",
-    "Name": "Display Warning On Kill",
-    "Description": "",
-    "Default": true
   },
   {
     "$type": "Toggle",
     "Property": "KillZombies",
     "Name": "Kill Zombie Servers",
-    "Description": "",
+    "Description": "Kill server instances that have stopped responding (frozen) for a period of time.",
     "Default": false
   },
   {
     "$type": "Int",
     "Property": "ZombieCheckSeconds",
     "Name": "Zombie Check Duration (Seconds)",
-    "Description": "",
+    "Description": "Amount of time given to a server instance to respond before getting killed by trebuchet",
     "Default": 300,
     "Minimum": 30
   },
@@ -66,7 +57,7 @@
     "$type": "Toggle",
     "Property": "RestartWhenDown",
     "Name": "Restart Servers When Down",
-    "Description": "",
+    "Description": "Automatically restart a server instance that have stopped unexpectedly.",
     "Default": false
   }
 ]

@@ -1,85 +1,133 @@
-﻿using System;
+﻿using GoogGUI.SettingFields;
+using System;
+using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Reflection;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
 
 namespace GoogGUI
 {
-    public class Field<T> : INotifyPropertyChanged, IField
+    [JsonDerivedType(typeof(IntField), "Int")]
+    [JsonDerivedType(typeof(ToggleField), "Toggle")]
+    [JsonDerivedType(typeof(IntSliderField), "IntSlider")]
+    [JsonDerivedType(typeof(TextField), "Text")]
+    [JsonDerivedType(typeof(TextListField), "TextList")]
+    [JsonDerivedType(typeof(DirectoryField), "Directory")]
+    [JsonDerivedType(typeof(MapField), "Map")]
+    public abstract class Field : INotifyPropertyChanged
     {
-        private string _fieldName = string.Empty;
-        private Func<T?>? _getDefault;
-        private Func<T?, bool>? _isDefault;
-        private PropertyInfo _property;
-        private object _target;
-        private object _template;
+        private static JsonSerializerOptions _options = new JsonSerializerOptions();
 
-        public Field(string name, PropertyInfo property, object target, string template)
-        {
-            ResetCommand = new SimpleCommand(OnReset);
-
-            _fieldName = name;
-            _property = property;
-            _template = Application.Current.Resources[template];
-            _target = target;
-
-            if (string.IsNullOrEmpty(template))
-                throw new ArgumentException($"Missing template for {_fieldName}");
-
-            if (_template == null)
-                throw new Exception($"Template {template} not found");
-
-            AddCollectionEvent();
-        }
+        private string _description = string.Empty;
+        private string _hyperlink = string.Empty;
+        private string _name = string.Empty;
+        private string _property = string.Empty;
+        private bool _refreshApp = false;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public string FieldName { get => _fieldName; set => _fieldName = value; }
+        public string Description { get => _description; set => _description = value; }
 
-        public bool IsDefault => _isDefault?.Invoke((T?)Value) ?? true;
+        public virtual bool DisplayGenericDescription => true;
+
+        public string Hyperlink { get => _hyperlink; set => _hyperlink = value; }
+
+        public string Name { get => _name; set => _name = value; }
+
+        public string Property { get => _property; set => _property = value; }
+
+        public bool RefreshApp { get => _refreshApp; set => _refreshApp = value; }
+
+        public static List<Field> BuildFieldList(string json, object target, PropertyInfo? property = null)
+        {
+            List<Field>? fields = JsonSerializer.Deserialize<List<Field>>(json, _options);
+            if (fields == null) throw new Exception("Could not deserialize json fields definition.");
+
+            foreach (var field in fields)
+                field.SetTarget(target, property);
+            return fields;
+        }
+
+        public abstract void RefreshValue();
+
+        public abstract void SetTarget(object target, PropertyInfo? property = null);
+
+        protected virtual void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+    }
+
+    public abstract class Field<T, D> : Field, ITemplateHolder
+    {
+        private D? _default = default;
+        private PropertyInfo? _propertyInfos;
+        private object? _target;
+        private PropertyInfo? _targetProperty;
+
+        public Field()
+        {
+            ResetCommand = new SimpleCommand(OnReset);
+            HyperlinkCommand = new SimpleCommand(OnHyperlinkClicked);
+        }
+
+        public D? Default { get => _default; set => _default = value; }
+
+        public ICommand HyperlinkCommand { get; private set; }
+
+        public abstract bool IsDefault { get; }
 
         public ICommand ResetCommand { get; private set; }
 
-        public object Template { get => _template; set => _template = value; }
+        public abstract DataTemplate Template { get; }
 
-        public object? Value
+        public T? Value
         {
-            get => (T?)_property.GetValue(_target);
+            get
+            {
+                if (_propertyInfos == null) throw new System.Exception($"Missing property information for {Property}.");
+                return GetConvert(_propertyInfos.GetValue(GetTarget()));
+            }
             set
             {
+                if (_propertyInfos == null) throw new System.Exception($"Missing property information for {Property}.");
                 RemoveCollectionEvent();
-                _property.SetValue(_target, (T?)value);
+                _propertyInfos.SetValue(GetTarget(), SetConvert(value));
                 AddCollectionEvent();
                 OnPropertyChanged("Value");
                 OnPropertyChanged("IsDefault");
             }
         }
 
-        public void RefreshValue()
+        public override void RefreshValue()
         {
             OnPropertyChanged("Value");
             OnPropertyChanged("IsDefault");
         }
 
-        public static bool IsNullOrEmpty(object? value)
+        public override void SetTarget(object target, PropertyInfo? property = null)
         {
-            if (value == null) return true;
-            if (value is not string svalue) return false;
-            return string.IsNullOrEmpty(svalue);
+            _targetProperty = property;
+            _target = target;
+            _propertyInfos = GetTarget().GetType().GetProperty(Property);
+            AddCollectionEvent();
         }
 
-        public Field<T> WithDefault(Func<T?, bool> isDefault, Func<T?> getDefault)
-        {
-            _isDefault = isDefault;
-            _getDefault = getDefault;
-            return this;
-        }
+        protected abstract T? GetConvert(object? value);
 
-        protected virtual void OnPropertyChanged(string name)
+        protected abstract void ResetToDefault();
+
+        protected abstract object? SetConvert(T? value);
+
+        private void AddCollectionEvent()
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            if (Value is INotifyCollectionChanged collection)
+                collection.CollectionChanged += OnCollectionChanged;
         }
 
         private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -88,22 +136,33 @@ namespace GoogGUI
             OnPropertyChanged("IsDefault");
         }
 
+        private void OnHyperlinkClicked(object? obj)
+        {
+            using(Process process = new Process())
+            {
+                process.StartInfo.UseShellExecute = true;
+                process.StartInfo.FileName = Hyperlink;
+                process.Start();
+            }
+        }
+
+        private object GetTarget()
+        {
+            if (_targetProperty == null)
+                return _target ?? throw new NullReferenceException("Target is not set to a value.");
+            else
+                return _targetProperty.GetValue(_target) ?? throw new NullReferenceException("Target is not set to a value.");
+        }
+
         private void OnReset(object? obj)
         {
-            if (_getDefault != null)
-                Value = _getDefault.Invoke();
+            ResetToDefault();
         }
 
         private void RemoveCollectionEvent()
         {
             if (Value is INotifyCollectionChanged collection)
                 collection.CollectionChanged -= OnCollectionChanged;
-        }
-
-        private void AddCollectionEvent()
-        {
-            if (Value is INotifyCollectionChanged collection)
-                collection.CollectionChanged += OnCollectionChanged;
         }
     }
 }

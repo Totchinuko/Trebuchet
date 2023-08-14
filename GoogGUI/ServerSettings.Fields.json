@@ -1,0 +1,38 @@
+[
+  {
+    "$type": "Map",
+    "Property": "Map",
+    "Name": "Game Map",
+    "Description": "Starting path of the map you want to load on your server intance. The button contain a few known map path for easier setup.",
+    "Default": "/Game/Maps/ConanSandbox/ConanSandbox"
+  },
+  {
+    "$type": "Int",
+    "Property": "MaxPlayers",
+    "Name": "Max Player Count",
+    "Description": "Maximum authorized amount of playes on your server instance.",
+    "Default": 30,
+    "Minimum": 0
+  },
+  {
+    "$type": "TextList",
+    "Property": "SudoSuperAdmins",
+    "Name": "Sudo Super Admin List",
+    "Description": "List of steam ID to be Sudo super admins on your servers. Leave it empty if you do not use Sudo.",
+    "Default": 0
+  },
+  {
+    "$type": "Toggle",
+    "Property": "Log",
+    "Name": "Display Log Console",
+    "Description": "Display server live logs instead of a blank window.",
+    "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "UseAllCores",
+    "Name": "Use All Cores",
+    "Description": "Supposed to improve performance on machines with lots of cores, unverified. Probably black magic.",
+    "Default": false
+  }
+]

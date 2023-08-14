@@ -3,11 +3,20 @@
                     xmlns:Controls="clr-namespace:GoogGUI.Controls"
                     xmlns:local="clr-namespace:GoogGUI">
     <DataTemplate x:Key="FieldRow">
-        <Border Style="{StaticResource Panel}" CornerRadius="3" Padding="0,6" Margin="0,0,0,12">
+        <Border CornerRadius="3" Padding="0,12" Margin="0,0,0,12">
+            <Border.Style>
+                <Style TargetType="Border" BasedOn="{StaticResource Panel}">
+                    <Setter Property="Background" Value="{StaticResource GPanel}"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter Property="Background" Value="#20FFFFFF" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </Border.Style>
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="200" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
@@ -22,17 +31,34 @@
                         </Style>
                     </Border.Style>
                 </Border>
-                <Border Grid.Column="1" Height="38" VerticalAlignment="Top" Margin="6,3">
-                    <TextBlock  Foreground="White" VerticalAlignment="Center">
-                    <Run Text="{Binding FieldName}" />
-                    </TextBlock>
-                </Border>               
-                <ContentPresenter Grid.Column="2" Content="{Binding .}" ContentTemplate="{Binding Template}" />
-                <Button Grid.Column="3"
+                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                    <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" Margin="0,0,0,6"/>
+                    <Border  Margin="0,0,0,6" MinHeight="0">
+                        <Border.Style>
+                            <Style TargetType="Border">
+                                <Setter Property="Visibility" Value="{Binding Description, Converter={StaticResource Null2Collapsed}}" />
+                                <Style.Triggers>
+                                    <DataTrigger Binding="{Binding DisplayGenericDescription}" Value="False">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                    </DataTrigger>
+                                </Style.Triggers>
+                            </Style>
+                        </Border.Style>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Foreground="{StaticResource GDescription}" FontWeight="Normal"/>
+                            <TextBlock Visibility="{Binding Hyperlink, Converter={StaticResource Null2Collapsed}}">
+                                <Hyperlink NavigateUri="{Binding Hyperlink}" Command="{Binding HyperlinkCommand}"><Run Text="{Binding Hyperlink}" /></Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding Template}" />
+                </StackPanel>
+                <Button Grid.Column="2"
                         ToolTip="Reset to default"
+                        ToolTipService.InitialShowDelay="0"
                         x:Name="Reset"
                         VerticalAlignment="Top"
-                        Margin="3"
+                        Margin="12,0,3,0"
                         Command="{Binding ResetCommand}">
                     <Image Source="pack://application:,,,/GoogGui;component/Icons/Reset.png" Width="16" Height="16" />
                     <Button.Style>
@@ -45,6 +71,7 @@
                         </Style>
                     </Button.Style>
                 </Button>
+
             </Grid>
         </Border>
     </DataTemplate>

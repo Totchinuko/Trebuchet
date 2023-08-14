@@ -1,15 +1,9 @@
 ﻿using Goog;
 using GoogGUI.Attributes;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Reflection;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
@@ -21,13 +15,25 @@ namespace GoogGUI
             LoadPanel();
         }
 
-        private void LoadPanel()
+        public Config Config => _config;
+
+        public UIConfig UIConfig => _uiConfig;
+
+        public override void RefreshPanel()
         {
-            if (Fields.Count == 0)
-                BuildFields();
-            else
-                Fields.ForEach(f => f.RefreshValue());
-            UpdateRequiredActions();
+            OnCanExecuteChanged();
+            LoadPanel();
+        }
+
+        protected override void BuildFields()
+        {
+            BuildFields("GoogGUI.Settings.Fields.json", this, "Config");
+            BuildFields("GoogGUI.Settings.UI.Fields.json", this, "UIConfig");
+        }
+
+        protected override void OnValueChanged(string property)
+        {
+            _config.SaveFile();
         }
 
         private void HandleTaskErrors(Task<int> task)
@@ -38,16 +44,16 @@ namespace GoogGUI
                 new ErrorModal("Steam CMD", "Steam CMD terminated with an error code.", false).ShowDialog();
         }
 
+        private void LoadPanel()
+        {
+            RefreshFields();
+            UpdateRequiredActions();
+        }
+
         private void OnAppRestart(object? obj)
         {
             System.Windows.Forms.Application.Restart();
             System.Windows.Application.Current.Shutdown();
-        }
-
-        public override void RefreshPanel()
-        {
-            OnCanExecuteChanged();
-            LoadPanel();
         }
 
         private void OnInstallSteam(object? obj)
