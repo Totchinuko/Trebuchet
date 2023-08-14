@@ -22,13 +22,11 @@ namespace GoogLib
 
         public int MaxPlayers { get => _maxPlayers; set => _maxPlayers = value; }
 
-
         public List<string> SudoSuperAdmins { get => _sudoSuperAdmins; set => _sudoSuperAdmins = value; }
 
         public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
 
-
-        #endregion
+        #endregion Settings
 
         #region IniSettings
 
@@ -42,28 +40,26 @@ namespace GoogLib
                 section.InsertParameter(0, "+SuperAdminSteamIDs", id);
         }
 
-        #endregion
+        #endregion IniSettings
 
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
 
-        public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
-
-        public static void ResolveProfile(Config config, ref string profileName)
+        public static Dictionary<string, string> GetMapList()
         {
-            if(!string.IsNullOrEmpty(profileName))
-            {
-                string path = GetPath(config, profileName);
-                if (File.Exists(path)) return;
-            }
+            string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            if (string.IsNullOrEmpty(appFolder)) throw new Exception("Path to assembly is invalid.");
 
-            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles), "*");
-            if (!string.IsNullOrEmpty(profileName)) return;
+            string file = Path.Combine(appFolder, Config.FileMapJson);
+            if (!File.Exists(file)) throw new Exception("Map list file is missing.");
 
-            profileName = "Default";
-            if (!File.Exists(GetPath(config, profileName)))
-                CreateFile(GetPath(config, profileName)).SaveFile();
+            var data = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
+            if (data == null) throw new Exception("Map list could ne be parsed.");
+
+            return data;
         }
+
+        public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
 
         public static List<string> ListProfiles(Config config)
         {
@@ -78,18 +74,34 @@ namespace GoogLib
             return list;
         }
 
-        public static Dictionary<string, string> GetMapList()
+        public static void ResolveProfile(Config config, ref string profileName)
         {
-            string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (string.IsNullOrEmpty(appFolder)) throw new Exception("Path to assembly is invalid.");
+            if (!string.IsNullOrEmpty(profileName))
+            {
+                string path = GetPath(config, profileName);
+                if (File.Exists(path)) return;
+            }
 
-            string file = Path.Combine(appFolder, Config.FileMapJson);
-            if (!File.Exists(file)) throw new Exception("Map list file is missing.");
+            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles), "*");
+            if (!string.IsNullOrEmpty(profileName)) return;
 
-            var data = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
-            if (data == null) throw new Exception("Map list could ne be parsed.");
+            profileName = "Default";
+            if (!File.Exists(GetPath(config, profileName)))
+                CreateFile(GetPath(config, profileName)).SaveFile();
+        }
 
-            return data;
+        public string GetServerArgs(int instance)
+        {
+            string? profileFolder = Path.GetDirectoryName(FilePath) ?? throw new Exception("Invalid folder directory.");
+
+            List<string> args = new List<string>() { Map };
+            if (Log) args.Add(Config.GameArgsLog);
+            if (UseAllCores) args.Add(Config.GameArgsUseAllCore);
+            args.Add(string.Format(Config.ServerArgsMaxPlayers, 10));
+            args.Add(string.Format(Config.GameArgsModList, Path.Combine(profileFolder, Config.FileGeneratedModlist)));
+            args.Add($"-TotInstance={instance}");
+
+            return string.Join(" ", args);
         }
     }
 }

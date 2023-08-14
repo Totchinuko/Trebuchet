@@ -7,9 +7,9 @@ namespace GoogLib
     public sealed class Trebuchet
     {
         private static Regex _instanceRegex = new Regex(@"-TotInstance=([0-9+])");
-        private ClientWatcher? _clientProcess;
+        private ClientProcess? _clientProcess;
         private Config _config;
-        private Dictionary<int, ServerWatcher> _serverProcesses = new Dictionary<int, ServerWatcher>();
+        private Dictionary<int, ServerProcess> _serverProcesses = new Dictionary<int, ServerProcess>();
 
         public Trebuchet(Config config)
         {
@@ -62,7 +62,7 @@ namespace GoogLib
             configurator.WriteIniConfigs(profile, _config.ClientPath);
             configurator.FlushConfigs();
 
-            _clientProcess = new ClientWatcher(_config, profile);
+            _clientProcess = new ClientProcess(_config.GetClientBinaryPath(profile.UseBattleEye), profile.GetClientArgs());
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             _clientProcess.ProcessStarted += OnClientProcessStarted;
 
@@ -96,7 +96,7 @@ namespace GoogLib
             configurator.WriteIniConfigs(profile, _config.GetInstancePath(instance));
             configurator.FlushConfigs();
 
-            ServerWatcher watcher = new ServerWatcher(_config, profile, instance);
+            ServerProcess watcher = new ServerProcess(_config.GetServerIntanceBinary(instance), profile.GetServerArgs(instance), instance);
             watcher.ProcessExited += OnServerProcessTerminate;
             watcher.ProcessStarted += OnServerProcessStarted;
             _serverProcesses.Add(instance, watcher);
@@ -116,7 +116,7 @@ namespace GoogLib
 
         public void KillAllServers()
         {
-            foreach (ServerWatcher p in _serverProcesses.Values)
+            foreach (ServerProcess p in _serverProcesses.Values)
                 p.Kill();
         }
 
@@ -130,7 +130,7 @@ namespace GoogLib
 
         public void StopAllServers()
         {
-            foreach (ServerWatcher p in _serverProcesses.Values)
+            foreach (ServerProcess p in _serverProcesses.Values)
                 p.Close();
         }
 
@@ -139,8 +139,13 @@ namespace GoogLib
             FindExistingClient();
             FindExistingServers();
 
-            foreach (ServerWatcher servers in _serverProcesses.Values)
-                servers.ProcessRefresh();
+            foreach (ServerProcess server in _serverProcesses.Values)
+            {
+                server.ProcessRefresh();
+                if ((server.LastResponsive + TimeSpan.FromSeconds(_config.ZombieCheckSeconds)) < DateTime.UtcNow && _config.KillZombies)
+                    server.Kill();
+            }
+
             _clientProcess?.Process?.Refresh();
         }
 
@@ -157,7 +162,7 @@ namespace GoogLib
             if (processes.Count == 0) return;
             if (!processes[0].TryGetProcess(out Process? process)) return;
 
-            _clientProcess = new ClientWatcher(process);
+            _clientProcess = new ClientProcess(process);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             OnClientProcessStarted(this, _clientProcess);
         }
@@ -172,14 +177,14 @@ namespace GoogLib
                 if (_serverProcesses.ContainsKey(instance)) continue;
                 if (!p.TryGetProcess(out Process? process)) continue;
 
-                ServerWatcher watcher = new ServerWatcher(_config, process, p.filename, p.args, instance);
+                ServerProcess watcher = new ServerProcess(process, p.filename, p.args, instance);
                 watcher.ProcessExited += OnServerProcessTerminate;
                 _serverProcesses.Add(instance, watcher);
                 OnServerProcessStarted(this, watcher);
             }
         }
 
-        private void OnClientProcessStarted(object? sender, ClientWatcher e)
+        private void OnClientProcessStarted(object? sender, ClientProcess e)
         {
             if (e.Process == null) return;
             AddDispatch(() =>
@@ -188,7 +193,7 @@ namespace GoogLib
             });
         }
 
-        private void OnClientProcessTerminate(object? sender, ClientWatcher e)
+        private void OnClientProcessTerminate(object? sender, ClientProcess e)
         {
             AddDispatch(() =>
             {
@@ -198,7 +203,7 @@ namespace GoogLib
             });
         }
 
-        private void OnServerProcessStarted(object? sender, ServerWatcher e)
+        private void OnServerProcessStarted(object? sender, ServerProcess e)
         {
             if (e.Process == null) return;
 
@@ -208,7 +213,7 @@ namespace GoogLib
             });
         }
 
-        private void OnServerProcessTerminate(object? sender, ServerWatcher e)
+        private void OnServerProcessTerminate(object? sender, ServerProcess e)
         {
             AddDispatch(() =>
             {
@@ -217,7 +222,7 @@ namespace GoogLib
 
                 if (!e.Closed && _config.RestartWhenDown)
                 {
-                    var watcher = new ServerWatcher(_config, e.Filename, e.Args, e.ServerInstance);
+                    var watcher = new ServerProcess(e.Filename, e.Args, e.ServerInstance);
                     _serverProcesses.Add(watcher.ServerInstance, watcher);
                     watcher.ProcessStarted += OnServerProcessStarted;
                     watcher.ProcessExited += OnServerProcessTerminate;

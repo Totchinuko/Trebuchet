@@ -75,22 +75,6 @@ namespace GoogLib
 
         public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles, name, Config.FileProfileConfig);
 
-        public static void ResolveProfile(Config config, ref string profileName)
-        {
-            if (!string.IsNullOrEmpty(profileName))
-            {
-                string path = GetPath(config, profileName);
-                if (File.Exists(path)) return;
-            }
-
-            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles), "*");
-            if (!string.IsNullOrEmpty(profileName)) return;
-
-            profileName = "Default";
-            if(!File.Exists(GetPath(config, profileName)))
-                CreateFile(GetPath(config, profileName)).SaveFile();
-        }
-
         public static List<string> ListProfiles(Config config)
         {
             List<string> list = new List<string>();
@@ -104,5 +88,32 @@ namespace GoogLib
             return list;
         }
 
+        public static void ResolveProfile(Config config, ref string profileName)
+        {
+            if (!string.IsNullOrEmpty(profileName))
+            {
+                string path = GetPath(config, profileName);
+                if (File.Exists(path)) return;
+            }
+
+            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles), "*");
+            if (!string.IsNullOrEmpty(profileName)) return;
+
+            profileName = "Default";
+            if (!File.Exists(GetPath(config, profileName)))
+                CreateFile(GetPath(config, profileName)).SaveFile();
+        }
+
+        public string GetClientArgs()
+        {
+            string profileFolder = Path.GetDirectoryName(FilePath) ?? throw new Exception("Invalid folder directory.");
+
+            List<string> args = new List<string>();
+            if (Log) args.Add(Config.GameArgsLog);
+            if (UseAllCores) args.Add(Config.GameArgsUseAllCore);
+            args.Add(string.Format(Config.GameArgsModList, Path.Combine(profileFolder, Config.FileGeneratedModlist)));
+
+            return string.Join(" ", args);
+        }
     }
 }

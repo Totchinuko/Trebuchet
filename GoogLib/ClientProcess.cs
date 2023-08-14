@@ -1,31 +1,19 @@
-﻿    using Goog;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics;
 
 namespace GoogLib
 {
-    public class ClientWatcher
+    public class ClientProcess
     {
-        private string _filename = string.Empty;
         private string _args = string.Empty;
+        private string _filename = string.Empty;
 
-        public ClientWatcher(Config config, ClientProfile profile)
+        public ClientProcess(string filename, string args)
         {
-            string profileFolder = Path.GetDirectoryName(profile.FilePath) ?? throw new Exception("Invalid folder directory.");
-
-            _filename = Path.Combine(config.ClientPath,
-                Config.FolderGameBinaries,
-                (profile.UseBattleEye ? Config.FileClientBEBin : Config.FileClientBin));
-
-            List<string> args = new List<string>();
-            if (profile.Log) args.Add(Config.GameArgsLog);
-            if (profile.UseAllCores) args.Add(Config.GameArgsUseAllCore);
-            args.Add(string.Format(Config.GameArgsModList, Path.Combine(profileFolder, Config.FileGeneratedModlist)));
-
-            _args = string.Join(" ", args);
+            _filename = filename;
+            _args = args;
         }
 
-        public ClientWatcher(Process process)
+        public ClientProcess(Process process)
         {
             Process = process;
             Process.EnableRaisingEvents = true;
@@ -33,14 +21,11 @@ namespace GoogLib
             Process.Exited += OnProcessExited;
         }
 
-        public event EventHandler<ClientWatcher>? ProcessExited;
-        public event EventHandler<ClientWatcher>? ProcessStarted;
-        public Process? Process { get; private set; }
+        public event EventHandler<ClientProcess>? ProcessExited;
 
-        public void Close()
-        {
-            Process?.CloseMainWindow();
-        }
+        public event EventHandler<ClientProcess>? ProcessStarted;
+
+        public Process? Process { get; private set; }
 
         public void Kill()
         {
@@ -65,7 +50,8 @@ namespace GoogLib
             process.EnableRaisingEvents = true;
             process.Exited += OnProcessExited;
             Process = process;
-            await Task.Run(() => {
+            await Task.Run(() =>
+            {
                 Process.Start();
                 OnProcessStarted();
             });

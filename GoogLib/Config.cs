@@ -102,6 +102,11 @@ namespace Goog
             }
         }
 
+        public string GetClientBinaryPath(bool battleEye)
+        {
+            return Path.Combine(ClientPath, FolderGameBinaries, (battleEye ? FileClientBEBin : FileClientBin));
+        }
+
         public int GetInstalledInstances()
         {
             int count = 0;
@@ -124,6 +129,11 @@ namespace Goog
         public string GetInstancePath(int instance)
         {
             return Path.Combine(InstallPath, VersionFolder, FolderServerInstances, string.Format(FolderInstancePattern, instance));
+        }
+
+        public string GetServerIntanceBinary(int instance)
+        {
+            return Path.Combine(InstallPath, VersionFolder, FolderServerInstances, string.Format(FolderInstancePattern, instance), FileServerProxyBin);
         }
 
         public void RemoveAllSymbolicLinks()

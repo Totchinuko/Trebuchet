@@ -1,59 +1,19 @@
 ﻿using Goog;
-using System.Collections.Immutable;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GoogLib
 {
-    public class ServerWatcher
+    public class ServerProcess
     {
-        private bool _closed;
-        private DateTime _lastResponsive;
-
-        private string _filename = string.Empty;
         private string _args = string.Empty;
-
-        private bool _zombieCheck;
-        private int _zombieCheckDuration;
-
+        private bool _closed;
+        private string _filename = string.Empty;
+        private DateTime _lastResponsive;
         private int _serverInstance;
 
-        public string Filename => _filename;
-        public string Args => _args;
-
-        public bool Closed => _closed;
-
-        public ServerWatcher(Config config, ServerProfile profile, int instance)
+        public ServerProcess(Process process, string filename, string args, int instance)
         {
             _lastResponsive = DateTime.UtcNow;
-            _zombieCheck = config.KillZombies;
-            _zombieCheckDuration = config.ZombieCheckSeconds;
-            _serverInstance = instance;
-
-            _filename = Path.Combine(config.InstallPath,
-                config.VersionFolder,
-                Config.FolderServerInstances,
-                string.Format(Config.FolderInstancePattern, instance),
-                Config.FileServerProxyBin);
-
-            string? profileFolder = Path.GetDirectoryName(profile.FilePath) ?? throw new Exception("Invalid folder directory.");
-
-            List<string> args = new List<string>() { profile.Map };
-            if (profile.Log) args.Add(Config.GameArgsLog);
-            if (profile.UseAllCores) args.Add(Config.GameArgsUseAllCore);
-            args.Add(string.Format(Config.ServerArgsMaxPlayers, 10));
-            args.Add(string.Format(Config.GameArgsModList, Path.Combine(profileFolder, Config.FileGeneratedModlist)));
-            args.Add($"-TotInstance={instance}");
-
-            _args = string.Join(" ", args);
-        }
-
-        public ServerWatcher(Config config, Process process, string filename, string args, int instance)
-        {
-            _lastResponsive = DateTime.UtcNow;
-            _zombieCheck = config.KillZombies;
-            _zombieCheckDuration = config.ZombieCheckSeconds;
             _serverInstance = instance;
 
             _filename = filename;
@@ -65,22 +25,26 @@ namespace GoogLib
             Process.Exited += OnProcessExited;
         }
 
-        public ServerWatcher(Config config, string filename, string args, int instance)
+        public ServerProcess(string filename, string args, int instance)
         {
             _lastResponsive = DateTime.UtcNow;
-            _zombieCheck = config.KillZombies;
-            _zombieCheckDuration = config.ZombieCheckSeconds;
             _serverInstance = instance;
 
             _args = args;
             _filename = filename;
         }
 
-        public event EventHandler<ServerWatcher>? ProcessExited;
+        public event EventHandler<ServerProcess>? ProcessExited;
 
-        public event EventHandler<ServerWatcher>? ProcessStarted;
+        public event EventHandler<ServerProcess>? ProcessStarted;
 
-        public bool IsZombie { get => (_lastResponsive + TimeSpan.FromSeconds(_zombieCheckDuration)) < DateTime.UtcNow; }
+        public string Args => _args;
+
+        public bool Closed => _closed;
+
+        public string Filename => _filename;
+
+        public DateTime LastResponsive => _lastResponsive;
 
         public Process? Process { get; private set; }
 
@@ -109,8 +73,6 @@ namespace GoogLib
 
             if (Process.Responding)
                 _lastResponsive = DateTime.UtcNow;
-            if (IsZombie && _zombieCheck)
-                Process.Kill();
         }
 
         public async Task StartProcessAsync()
@@ -128,6 +90,21 @@ namespace GoogLib
             process.Exited += OnProcessExited;
 
             await StartProcessInternal(process);
+        }
+
+        protected virtual void OnProcessExited(object? sender, EventArgs e)
+        {
+            if (Process == null) return;
+
+            Process.Exited -= OnProcessExited;
+            Process.Dispose();
+            Process = null;
+            ProcessExited?.Invoke(sender, this);
+        }
+
+        protected virtual void OnProcessStarted()
+        {
+            ProcessStarted?.Invoke(this, this);
         }
 
         // Why do we do this ? To avoid app freeze we start the server with the root server boot exe. That create the actual server process in a child process so we need to retreve it.
@@ -148,21 +125,6 @@ namespace GoogLib
 
             Process = childProcess;
             OnProcessStarted();
-        }
-
-        protected virtual void OnProcessExited(object? sender, EventArgs e)
-        {
-            if (Process == null) return;
-
-            Process.Exited -= OnProcessExited;
-            Process.Dispose();
-            Process = null;
-            ProcessExited?.Invoke(sender, this);
-        }
-
-        protected virtual void OnProcessStarted() 
-        {
-            ProcessStarted?.Invoke(this, this);
         }
     }
 }
