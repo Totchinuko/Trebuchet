@@ -24,7 +24,7 @@ namespace GoogGUI
             var fields = Field.BuildFieldList(GuiExtensions.GetEmbededTextFile(path), target, string.IsNullOrEmpty(property) ? null : target.GetType().GetProperty(property));
             foreach(var field in fields)
             {
-                field.PropertyChanged += OnFieldPropertyChanged;
+                field.ValueChanged += OnFieldValueChanged;
                 _fields.Add(field);
             }
         }
@@ -39,14 +39,11 @@ namespace GoogGUI
                 _fields.ForEach(f => f.RefreshValue());
         }
 
-        private void OnFieldPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void OnFieldValueChanged(object? sender, Field e)
         {
-            if (e.PropertyName != "Value") return;
-            if (sender is not Field field) return;
+            OnValueChanged(e.Property);
 
-            OnValueChanged(field.Property);
-
-            if (field.RefreshApp)
+            if (e.RefreshApp)
                 OnAppConfigurationChanged();
         }
 

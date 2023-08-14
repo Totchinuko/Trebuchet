@@ -31,6 +31,8 @@ namespace GoogGUI
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
+        public event EventHandler<Field>? ValueChanged;
+
         public string Description { get => _description; set => _description = value; }
 
         public virtual bool DisplayGenericDescription => true;
@@ -56,6 +58,11 @@ namespace GoogGUI
         public abstract void RefreshValue();
 
         public abstract void SetTarget(object target, PropertyInfo? property = null);
+
+        protected virtual void OnValueChanged()
+        {
+            ValueChanged?.Invoke(this, this);
+        }
 
         protected virtual void OnPropertyChanged(string name)
         {
