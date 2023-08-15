@@ -10,10 +10,12 @@ namespace GoogGUI
 {
     internal class ModFile : INotifyPropertyChanged
     {
-        private PublishedFile? _file;
         private FileInfo _infos;
         private DateTime _lastUpdate;
         private ulong _publishedFileID = 0;
+        private string _title = string.Empty;
+        private long _size = 0;
+
 
         public ModFile(string path)
         {
@@ -23,6 +25,15 @@ namespace GoogGUI
         public ModFile(ulong publishedFileID, string path)
         {
             _publishedFileID = publishedFileID;
+            _infos = new FileInfo(path);
+        }
+
+        public ModFile(WorkshopSearchResult search, string path)
+        {
+            _title = search.Title;
+            _publishedFileID = search.PublishedFileID;
+            _size = search.Size;
+            _lastUpdate = search.LastUpdate;
             _infos = new FileInfo(path);
         }
 
@@ -41,7 +52,7 @@ namespace GoogGUI
                     return "Last Modified : " + lastModified.ToShortDateString() + " " + lastModified.ToShortTimeString();
                 }
 
-                if (_file == null) return "Loading...";
+                if (_lastUpdate == default) return "Loading...";
                 DateTime local = _lastUpdate.ToLocalTime();
                 return "Last Update : " + local.ToShortDateString() + " " + local.ToShortTimeString();
             }
@@ -53,15 +64,13 @@ namespace GoogGUI
         {
             get
             {
-                if (_file != null)
-                    return _file.Title;
+                if (!string.IsNullOrEmpty(_title))
+                    return _title;
                 if (IsPublished)
                     return _publishedFileID.ToString();
                 return _infos.Name;
             }
         }
-
-        public PublishedFile? PublishedFile => _file;
 
         public Brush StatusColor => GetStatusBrush();
 
@@ -71,9 +80,10 @@ namespace GoogGUI
         {
             if (!IsPublished)
                 throw new Exception("Cannot set a manifest on a local mod.");
-            _file = file;
-            _lastUpdate = Tools.UnixTimeStampToDateTime(_file.TimeUpdated);
-            OnPropertyChanged("ModName");
+            _lastUpdate = Tools.UnixTimeStampToDateTime(file.TimeUpdated);
+            _title = file.Title;
+            _size = file.FileSize;
+            OnPropertyChanged("Title");
             OnPropertyChanged("LastUpdate");
             OnPropertyChanged("StatusColor");
             OnPropertyChanged("StatusTooltip");
@@ -89,18 +99,18 @@ namespace GoogGUI
         protected virtual Brush GetStatusBrush()
         {
             if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
-            if (_file == null) return (Brush)Application.Current.Resources["GDimBlue"];
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.FileSize == _infos.Length) return (Brush)Application.Current.Resources["GDimGreen"];
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.FileSize != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
+            if (_size == 0) return (Brush)Application.Current.Resources["GDimBlue"];
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _size == _infos.Length) return (Brush)Application.Current.Resources["GDimGreen"];
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
             return (Brush)Application.Current.Resources["GDimYellow"];
         }
 
         protected virtual string GetStatusText()
         {
             if (!_infos.Exists) return "Missing";
-            if (_file == null) return "Found";
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.FileSize == _infos.Length) return "Up to Date";
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.FileSize != _infos.Length) return "Corrupted";
+            if (_size == 0) return "Found";
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _size == _infos.Length) return "Up to Date";
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return "Corrupted";
             return "Update available";
         }
 

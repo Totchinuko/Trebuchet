@@ -4,7 +4,7 @@ namespace SteamWorksWebAPI
 {
     public class CollectionDetailsResponse
     {
-        public List<CollectionDetails> CollectionDetails { get; set; } = new List<CollectionDetails>();
+        public CollectionDetails[] CollectionDetails { get; set; } = new CollectionDetails[0];
         public int Result { get; set; } = 0;
         public int ResultCount { get; set; } = 0;
     }

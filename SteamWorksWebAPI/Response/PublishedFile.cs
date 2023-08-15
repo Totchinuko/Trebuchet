@@ -29,6 +29,7 @@ namespace SteamWorksWebAPI
         public ulong LifetimeSubscriptions { get; set; } = 0;
         [JsonPropertyName("preview_url")]
         public string PreviewUrl { get; set; } = string.Empty;
+        [JsonNumberHandling(JsonNumberHandling.AllowReadingFromString)]
         public ulong PublishedFileID { get; set; } = 0;
         public uint Result { get; set; } = 0;
         public ulong Subscriptions { get; set; } = 0;

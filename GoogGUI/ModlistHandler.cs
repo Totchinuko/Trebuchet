@@ -27,7 +27,6 @@ namespace GoogGUI
         private const string FetchModlist = "FetchModlist";
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
         private string _modlistURL = string.Empty;
-        private Dictionary<ulong, PublishedFile> _modManifests = new Dictionary<ulong, PublishedFile>();
         private FileSystemWatcher? _modWatcher;
         private ModListProfile _profile;
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
@@ -138,7 +137,7 @@ namespace GoogGUI
 
             IEnumerable<ulong> list =
                 from mod in _modlist
-                where mod.IsPublished && !_modManifests.ContainsKey(mod.PublishedFileID)
+                where mod.IsPublished
                 select mod.PublishedFileID;
 
             var ct = App.TaskBlocker.Set(FetchManifests, 15 * 1000);
@@ -241,7 +240,7 @@ namespace GoogGUI
         private void OnExploreWorkshop(object? obj)
         {
             if (_searchWindow != null) return;
-            _searchWindow = new WorkshopSearch();
+            _searchWindow = new WorkshopSearch(_config);
             _searchWindow.Closing += OnSearchClosing;
             _searchWindow.ModAdded += OnModAdded;
             _searchWindow.Show();
@@ -370,13 +369,10 @@ namespace GoogGUI
                 return;
             }
 
-            foreach (var file in task.Result.PublishedFileDetails)
-                _modManifests[file.PublishedFileID] = file;
-
             var update = from file in _modlist
                          where file.IsPublished
-                         join man in _modManifests on file.PublishedFileID equals man.Key
-                         select new KeyValuePair<ModFile, PublishedFile>(file, man.Value);
+                         join details in task.Result.PublishedFileDetails on file.PublishedFileID equals details.PublishedFileID
+                         select new KeyValuePair<ModFile, PublishedFile>(file, details);
 
             foreach (var u in update)
                 u.Key.SetManifest(u.Value);
@@ -384,10 +380,10 @@ namespace GoogGUI
 
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
         {
-            if (_modlist.Where((x) => x.IsPublished && x.PublishedFileID == mod.PublishedFile.publishedFileID).Any()) return;
+            if (_modlist.Where((x) => x.IsPublished && x.PublishedFileID == mod.PublishedFileID).Any()) return;
             string path = mod.PublishedFileID.ToString();
             _config.ResolveMod(ref path);
-            ModFile file = new ModFile(mod.PublishedFile.publishedFileID, path);
+            ModFile file = new ModFile(mod, path);
             _modlist.Add(file);
             LoadManifests();
         }
@@ -521,7 +517,6 @@ namespace GoogGUI
 
         private void OnModlistRefresh(object? obj)
         {
-            _modManifests.Clear();
             LoadModlist();
         }
 
@@ -573,7 +568,7 @@ namespace GoogGUI
                 _modWatcher = null;
             }
 
-            string path = Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, _config.ClientAppID);
+            string path = Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, _config.ClientAppID.ToString());
             if (!Directory.Exists(path)) return;
 
             _modWatcher = new FileSystemWatcher(path);
@@ -589,7 +584,6 @@ namespace GoogGUI
             _modWatcher.Created += OnModFileChanged;
             _modWatcher.Deleted += OnModFileChanged;
             _modWatcher.Renamed += OnModFileChanged;
-            //  watcher.Filter = "*.pak";
             _modWatcher.IncludeSubdirectories = false;
             _modWatcher.EnableRaisingEvents = true;
         }

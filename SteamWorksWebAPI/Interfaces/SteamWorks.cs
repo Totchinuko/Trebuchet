@@ -51,12 +51,8 @@ namespace SteamWorksWebAPI
             {
                 client.Timeout = TimeSpan.FromSeconds(15);
 
-                NameValueCollection urlQuery = new NameValueCollection();
-                foreach (var q in query.GetQueryArguments())
-                    urlQuery.Add(q.Key, q.Value);
-
                 UriBuilder builder = new UriBuilder(url);
-                builder.Query = urlQuery.ToString();
+                builder.Query = query.GetFlatQuery();
 
                 using (var response = await client.GetAsync(builder.Uri, token))
                 {

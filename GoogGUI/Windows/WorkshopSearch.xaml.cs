@@ -1,8 +1,11 @@
 ﻿using Goog;
-using GoogLib;
+using SteamWorksWebAPI;
+using SteamWorksWebAPI.Interfaces;
+using SteamWorksWebAPI.Response;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -16,13 +19,17 @@ namespace GoogGUI
     /// </summary>
     public partial class WorkshopSearch : Window, INotifyPropertyChanged
     {
-        private List<WorkshopSearchResult>? _searchResults = null;
+        public const string SearchTask = "WorkshopSearchTask";
+
+        private Config _config;
+        private List<WorkshopSearchResult> _searchResults = new List<WorkshopSearchResult>();
         private string _searchTerm = string.Empty;
         private CancellationTokenSource? _source;
 
-        public WorkshopSearch()
+        public WorkshopSearch(Config config)
         {
-            SearchCommand = new SimpleCommand(OnSearch);
+            _config = config;
+            SearchCommand = new TaskBlockedCommand(OnSearch, true, SearchTask);
             AddModCommand = new SimpleCommand(OnModAdded);
             InitializeComponent();
             DataContext = this;
@@ -34,11 +41,17 @@ namespace GoogGUI
 
         public ICommand AddModCommand { get; private set; }
 
-        public bool IsSearching => _source != null;
-
         public ICommand SearchCommand { get; private set; }
 
-        public List<WorkshopSearchResult>? SearchResults { get => _searchResults; set => _searchResults = value; }
+        public List<WorkshopSearchResult> SearchResults
+        {
+            get => _searchResults;
+            set
+            {
+                _searchResults = value;
+                OnPropertyChanged("SearchResults");
+            }
+        }
 
         public string SearchTerm { get => _searchTerm; set => _searchTerm = value; }
 
@@ -63,35 +76,59 @@ namespace GoogGUI
             base.OnSourceInitialized(e);
         }
 
-        private void OnSearch(object? obj)
+        private void OnCreatorSearchComplete(Task<GetPlayerSummariesResponse> task)
         {
-            if (string.IsNullOrEmpty(_searchTerm) || _source != null)
-                return;
-            _searchResults?.Clear();
-            OnPropertyChanged("SearchResults");
+            App.TaskBlocker.Release(SearchTask);
+            if (task.Result.Players.Length == 0) return;
 
-            _source = new CancellationTokenSource();
-            OnPropertyChanged("IsSearching");
-            Task.Run(() => _api.ExtractWebSearch(_searchTerm, _source.Token)).ContinueWith(OnSearchCompleted);
+            var enumeration =
+                from result in SearchResults
+                join player in task.Result.Players on result.CreatorID equals player.SteamID
+                select new KeyValuePair<WorkshopSearchResult, PlayerSummary>(result, player);
+            foreach (var e in enumeration)
+                e.Key.SetCreator(e.Value);
         }
 
-        private void OnSearchCompleted(Task<List<SteamWebSearchResult>> task)
+        private void OnSearch(object? obj)
         {
-            _source?.Dispose();
-            _source = null;
-            Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("IsSearching"));
+            if (App.TaskBlocker.IsSet(SearchTask)) return;
+            if (string.IsNullOrEmpty(_searchTerm)) return;
 
-            if (task.Result == null || task.Result.Count == 0)
+            var query = new QueryFilesQuery(App.APIKey)
             {
-                _searchResults = null;
-                Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("SearchResults"));
-                return;
-            }
+                Page = 0,
+                SearchText = _searchTerm,
+                AppId = _config.IsTestLive ? Config.AppIDTestLiveClient : Config.AppIDLiveClient,
+                FileType = PublishedFileType.Items_ReadyToUse,
+                NumPerPage = 20,
+                StripDescriptionBBcode = true,
+                ReturnDetails = true,
+                QueryType = PublishedFileQueryType.RankedByTextSearch,
+                ReturnVoteData = true,
+                ReturnShortDescription = true
+            };
 
-            _searchResults = new List<WorkshopSearchResult>();
-            foreach (var data in task.Result)
-                _searchResults.Add(new WorkshopSearchResult(data));
-            Application.Current.Dispatcher.Invoke(() => OnPropertyChanged("SearchResults"));
+            var ct = App.TaskBlocker.Set(SearchTask, 15 * 1000);
+            Task.Run(() => PublishedFileService.QueryFiles(query, ct), ct)
+                .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnSearchCompleted(x)))
+                .ContinueWith((x) => OnSearchCreators(ct), ct)
+                .Unwrap().ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCreatorSearchComplete(x)));
+        }
+
+        private void OnSearchCompleted(Task<QueryFilesResponse> task)
+        {
+            if (task.Result.Total == 0)
+                SearchResults = new List<WorkshopSearchResult>();
+            else
+                SearchResults = task.Result.PublishedFileDetails.Select(file => new WorkshopSearchResult(file)).ToList();
+        }
+
+        private async Task<GetPlayerSummariesResponse> OnSearchCreators(CancellationToken ct)
+        {
+            if (SearchResults.Count == 0) return new GetPlayerSummariesResponse();
+
+            var query = new GetPlayerSummariesQuery(App.APIKey, SearchResults.Select(r => r.CreatorID));
+            return await SteamUser.GetPlayerSummaries(query, ct);
         }
 
         private void TextBox_KeyDown(object sender, KeyEventArgs e)

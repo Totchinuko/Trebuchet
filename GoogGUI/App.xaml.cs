@@ -1,5 +1,6 @@
-﻿using Goog;
-using System;
+﻿using System;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
@@ -11,11 +12,15 @@ namespace GoogGUI
     /// </summary>
     public partial class App : Application
     {
-        public bool IsShutingDown { get; private set; }
+        public static readonly TaskBlocker TaskBlocker = new TaskBlocker();
+
         public static bool UseSoftwareRendering = true;
+
         public static bool HasCrashed { get; private set; }
 
-        public static readonly TaskBlocker TaskBlocker = new TaskBlocker();
+        public bool IsShutingDown { get; private set; }
+
+        public static string APIKey { get; private set; } = string.Empty;
 
         public static void Crash() => HasCrashed = true;
 
@@ -33,6 +38,8 @@ namespace GoogGUI
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            ReadSettings();
+
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(OnUnhandledException);
             System.Windows.Forms.Application.ThreadException += new ThreadExceptionEventHandler(OnApplicationThreadException);
             Current.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(OnDispatcherUnhandledException);
@@ -59,6 +66,14 @@ namespace GoogGUI
         {
             new ExceptionModal(((Exception)e.ExceptionObject)).ShowDialog();
             IsShutingDown = true;
+        }
+
+        private void ReadSettings()
+        {
+            var node = JsonSerializer.Deserialize<JsonNode>(GuiExtensions.GetEmbededTextFile("GoogGUI.AppSettings.json"));
+            if (node == null) return;
+
+            APIKey = node["apikey"]?.GetValue<string>() ?? string.Empty;
         }
     }
 }

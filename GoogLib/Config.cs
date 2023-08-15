@@ -6,10 +6,10 @@ namespace Goog
     {
         #region constants
 
-        public const string AppIDLiveClient = "440900";
-        public const string AppIDLiveServer = "443030";
-        public const string AppIDTestLiveClient = "931180";
-        public const string AppIDTestLiveServer = "931580";
+        public const uint AppIDLiveClient = 440900;
+        public const uint AppIDLiveServer = 443030;
+        public const uint AppIDTestLiveClient = 931180;
+        public const uint AppIDTestLiveServer = 931580;
         public const string CmdArgAppUpdate = "+app_update {0}";
         public const string CmdArgForceInstallDir = "+force_install_dir \"{0}\"";
         public const string CmdArgLogin = "+login \"{0}\" \"{1}\"";
@@ -55,7 +55,7 @@ namespace Goog
         private string _steamAPIKey = string.Empty;
         private int _zombieCheckSeconds = 300;
 
-        public string ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
+        public uint ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
         public string ClientPath { get => _clientPath; set => _clientPath = value; }
 
@@ -71,7 +71,7 @@ namespace Goog
 
         public bool RestartWhenDown { get => _restartWhenDown; set => _restartWhenDown = value; }
 
-        public string ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
+        public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
         public int ServerInstanceCount { get => _serverInstanceCount; set => _serverInstanceCount = value; }
 
@@ -150,7 +150,7 @@ namespace Goog
         {
             string file = mod;
             if (long.TryParse(mod, out _))
-                file = Path.Combine(InstallPath, FolderSteam, FolderSteamMods, ClientAppID, mod, "none");
+                file = Path.Combine(InstallPath, FolderSteam, FolderSteamMods, ClientAppID.ToString(), mod, "none");
 
             string? folder = Path.GetDirectoryName(file);
             if (folder == null)

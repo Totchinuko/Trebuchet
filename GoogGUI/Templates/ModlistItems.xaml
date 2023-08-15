@@ -15,7 +15,7 @@
                         <Setter Property="Source" Value="pack://application:,,,/GoogGui;component/Icons/Steam.png" />
                         <Setter Property="ToolTip" Value="Steam Workshop" />
                         <Style.Triggers>
-                            <DataTrigger Binding="{Binding IsID}" Value="False">
+                            <DataTrigger Binding="{Binding IsPublished}" Value="False">
                                 <Setter Property="Source" Value="pack://application:,,,/GoogGui;component/Icons/File.png" />
                                 <Setter Property="ToolTip" Value="Local File" />
                             </DataTrigger>
@@ -29,7 +29,7 @@
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <TextBlock VerticalAlignment="Center">
-                    <Run Text="{Binding ModName, Mode=OneWay}" />
+                    <Run Text="{Binding Title, Mode=OneWay}" />
                 </TextBlock>
                 <Border Grid.Column="1" Background="{Binding StatusColor}" Margin="0,0,12,0" CornerRadius="3" Padding="8">
                     <TextBlock Text="{Binding StatusTooltip}" />

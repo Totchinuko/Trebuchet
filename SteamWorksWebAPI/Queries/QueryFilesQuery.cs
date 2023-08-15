@@ -4,6 +4,11 @@ namespace SteamWorksWebAPI
 {
     public class QueryFilesQuery : Query
     {
+        public QueryFilesQuery(string ApiKey)
+        {
+            Key = ApiKey;
+        }
+
         /// <summary>
         /// App that consumes the files
         /// </summary>
@@ -71,7 +76,7 @@ namespace SteamWorksWebAPI
         /// <summary>
         /// (Optional) The number of results, per page to return.
         /// </summary>
-        public uint NumberPage { get; set; } = 0;
+        public uint NumPerPage { get; set; } = 0;
 
         /// <summary>
         /// Flags that must not be set on any returned items

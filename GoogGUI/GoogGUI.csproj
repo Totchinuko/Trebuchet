@@ -10,6 +10,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="AppSettings.json" />
     <None Remove="ClientSettings.Fields.json" />
     <None Remove="Icons\Add.png" />
     <None Remove="Icons\BugWindow.png" />
@@ -81,6 +82,7 @@
     <Resource Include="Icons\Trash.png" />
     <Resource Include="Icons\Upload.png" />
     <Resource Include="Icons\Window.png" />
+    <EmbeddedResource Include="AppSettings.json" />
     <EmbeddedResource Include="ClientSettings.Fields.json" />
     <EmbeddedResource Include="ServerSettings.Fields.json" />
     <EmbeddedResource Include="Settings.UI.Fields.json" />

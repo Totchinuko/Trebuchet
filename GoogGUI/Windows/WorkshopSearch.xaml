@@ -40,20 +40,7 @@
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox VerticalContentAlignment="Center" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" MinWidth="300" MaxWidth="400" Margin="0,0,12,0" VerticalAlignment="center" Height="25" KeyDown="TextBox_KeyDown" />
-                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90">
-                                <Button.Style>
-                                    <Style TargetType="Button" BasedOn="{StaticResource ButtonIconBlue}">
-                                        <Setter Property="IsEnabled" Value="True" />
-                                        <Setter Property="Content" Value="Search" />
-                                        <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSearching}" Value="True">
-                                                <Setter Property="Content" Value="Searching..." />
-                                                <Setter Property="IsEnabled" Value="False" />
-                                            </DataTrigger>
-                                        </Style.Triggers>
-                                    </Style>
-                                </Button.Style>
-                            </Button>
+                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90" Content="Search" Style="{StaticResource ButtonIconBlue}"/>
                         </Grid>
                     </Border>
                     <Border Padding="0,12,0,0" Grid.Row="1">
@@ -62,30 +49,47 @@
                                 <ItemsControl ItemsSource="{Binding SearchResults}" x:Name="ResultList" Visibility="{Binding SearchResults, Converter={StaticResource Null2Hidden}}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <WrapPanel Orientation="Horizontal" />
+                                            <StackPanel Orientation="Vertical" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
                                     <ItemsControl.ItemTemplate>
                                         <DataTemplate>
-                                            <Border Style="{StaticResource Panel}" Padding="8" CornerRadius="3" Margin="3" Height="auto" Width="200">
+                                            <Border Style="{StaticResource Panel}" Padding="8" CornerRadius="3" Margin="3" Height="auto">
                                                 <Grid>
-                                                    <Grid.RowDefinitions>
-                                                        <RowDefinition Height="150" />
-                                                        <RowDefinition Height="auto" />
-                                                        <RowDefinition Height="auto" />
-                                                        <RowDefinition Height="auto" />
-                                                    </Grid.RowDefinitions>
-                                                    <Image Source="{Binding ImageURL, Mode=OneWay}" />
-                                                    <TextBlock Style="{StaticResource TitleText}" Margin="0,0,3,0" FontSize="16" Grid.Row="1" TextWrapping="NoWrap"><Run Text="{Binding Title, Mode=OneWay}" /></TextBlock>
-                                                    <TextBlock Grid.Row="2"><Run Text="By "/><Run Text="{Binding AuthorName, Mode=OneWay}" /></TextBlock>
-                                                    <Button Style="{StaticResource ButtonIconGreen}"
-                                                            Grid.Row="3"
-                                                            HorizontalAlignment="Right"
-                                                            Command="{Binding AddModCommand, RelativeSource={RelativeSource AncestorType=local:WorkshopSearch}}"
-                                                            CommandParameter="{Binding .}"
-                                                            Padding="8">
-                                                        <Image Source="pack://application:,,,/GoogGui;component/Icons/Add.png" Width="16" Height="16" />
-                                                    </Button>
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="150" />
+                                                        <ColumnDefinition Width="*" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,12,0">
+                                                        <Image Source="{Binding PreviewURL, Mode=OneWay}" Margin="0,0,0,12" />
+                                                        <Button Style="{StaticResource LaunchButton}"
+                                                                HorizontalAlignment="Right"
+                                                                Command="{Binding AddModCommand, RelativeSource={RelativeSource AncestorType=local:WorkshopSearch}}"
+                                                                CommandParameter="{Binding .}"
+                                                                Padding="8">
+                                                            <StackPanel Orientation="Horizontal">
+                                                                <Image Source="pack://application:,,,/GoogGui;component/Icons/Add.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                                                <TextBlock Text="Add to Mod List" />
+                                                            </StackPanel>
+                                                        </Button>
+                                                    </StackPanel>
+                                                    <StackPanel Orientation="Vertical" Grid.Column="1">
+                                                        <TextBlock TextWrapping="Wrap" Margin="0,0,3,0" FontSize="16" Grid.Row="1">
+                                                            <Run Text="{Binding Title, Mode=OneWay}" Style="{StaticResource TitleRun}" /><Run Text=" By "/><Run Text="{Binding Creator, Mode=OneWay}" />
+                                                        </TextBlock>
+                                                        <TextBlock Foreground="{StaticResource GDescription}">
+                                                            <Run Text="Last Update: " Foreground="{StaticResource GDescription}" />
+                                                            <Run Text="{Binding LastUpdateReadable, Mode=OneWay}" Foreground="{StaticResource GDescription}" />
+                                                            <Run Foreground="{StaticResource GGreen}" Text=" +"/>
+                                                            <Run Foreground="{StaticResource GGreen}" Text="{Binding VoteUp, Mode=OneWay}"/>
+                                                            <Run Foreground="{StaticResource GRed}" Text=" -"/>
+                                                            <Run Foreground="{StaticResource GRed}" Text="{Binding VoteDown, Mode=OneWay}"/>
+                                                            <Run Foreground="{StaticResource GRed}" Text=" "/>
+                                                            <Run Foreground="{StaticResource GDescription}" Text="{Binding Subs, Mode=OneWay}"/>
+                                                            <Run Foreground="{StaticResource GDescription}" Text=" Subscriptions"/>
+                                                        </TextBlock>
+                                                        <TextBlock Foreground="{StaticResource GDescription}" Text="{Binding ShortDescription, Mode=OneWay}" />
+                                                    </StackPanel>
                                                 </Grid>
                                             </Border>
                                         </DataTemplate>
