@@ -26,7 +26,10 @@
                         </Button>
                     </WrapPanel>
                 </Border>
-                <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,0" ToolTip="Total size of your profile on disk. Profiles not only store your settings, but also your server saves and logs">
+                <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,0" >
+                    <Border.ToolTip>
+                        <TextBlock TextWrapping="Wrap" Text="Total size of your profile on disk. Profiles not only store your settings, but also your server saves and logs" />
+                    </Border.ToolTip>
                     <StackPanel Orientation="Vertical">
                         <TextBlock Text="Profile Size" FontWeight="Bold" />
                         <TextBlock Text="{Binding ProfileSize}" />

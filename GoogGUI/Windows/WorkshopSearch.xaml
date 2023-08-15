@@ -88,7 +88,7 @@
                                                             <Run Foreground="{StaticResource GDescription}" Text="{Binding Subs, Mode=OneWay}"/>
                                                             <Run Foreground="{StaticResource GDescription}" Text=" Subscriptions"/>
                                                         </TextBlock>
-                                                        <TextBlock Foreground="{StaticResource GDescription}" Text="{Binding ShortDescription, Mode=OneWay}" />
+                                                        <TextBlock Foreground="{StaticResource GDescription}" TextWrapping="Wrap" Text="{Binding ShortDescription, Mode=OneWay}" />
                                                     </StackPanel>
                                                 </Grid>
                                             </Border>
