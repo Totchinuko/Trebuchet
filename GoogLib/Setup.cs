@@ -78,16 +78,14 @@ namespace Goog
 
             ModListProfile modlistProfile = ModListProfile.LoadFile(modlistFile);
 
-            List<string> list = modlistProfile.GetModIDList();
-            if (list.Count == 0)
-                Tools.WriteColoredLine("Nothing to update", ConsoleColor.Cyan);
-
-            List<string> updates = new List<string>();
-            list.ForEach(x => updates.Add(string.Format(Config.CmdArgWorkshopUpdate, config.ClientAppID, x)));
+            var list = modlistProfile.GetModIDList().Select(mod => string.Format(Config.CmdArgWorkshopUpdate, config.ClientAppID, mod));
+            var update = string.Join(" ", list);
+ 
+            if (update.Length == 0) return 0;
 
             string steamArgs = string.Join(" ",
                     Config.CmdArgLoginAnonymous,
-                    string.Join(" ", updates.ToArray()),
+                    update,
                     Config.CmdArgQuit
                 );
 

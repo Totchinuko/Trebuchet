@@ -18,7 +18,7 @@ namespace GoogGUI
 
         public string ImageURL => _result.previewURL;
 
-        public string ModID => _result.modID;
+        public ulong PublishedFileID => _result.modID;
 
         public SteamPublishedFile PublishedFile
         {

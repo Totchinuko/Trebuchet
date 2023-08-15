@@ -1,6 +1,8 @@
 ﻿using Goog;
 using GoogGUI.Attributes;
 using GoogLib;
+using SteamWorksWebAPI;
+using SteamWorksWebAPI.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -14,6 +16,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Input;
+using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace GoogGUI
 {
@@ -22,10 +25,9 @@ namespace GoogGUI
     {
         private const string FetchManifests = "FetchManifests";
         private const string FetchModlist = "FetchModlist";
-        private SteamWorkWebAPI _api;
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
         private string _modlistURL = string.Empty;
-        private Dictionary<string, SteamPublishedFile> _modManifests = new Dictionary<string, SteamPublishedFile>();
+        private Dictionary<ulong, PublishedFile> _modManifests = new Dictionary<ulong, PublishedFile>();
         private FileSystemWatcher? _modWatcher;
         private ModListProfile _profile;
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
@@ -34,8 +36,6 @@ namespace GoogGUI
 
         public ModlistHandler(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
-            _api = new SteamWorkWebAPI(_config.SteamAPIKey);
-
             LoadPanel();
         }
 
@@ -121,13 +121,14 @@ namespace GoogGUI
 
             var query = HttpUtility.ParseQueryString(builder.Query);
             var id = query.Get("id");
-            if (id == null || !long.TryParse(id, out _))
+            if (id == null || !ulong.TryParse(id, out ulong collectionID))
             {
                 new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").ShowDialog();
                 return;
             }
-            var token = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
-            Task.Run(() => _api.GetCollectionDetails(new HashSet<string> { id }, token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCollectionDownloaded(x)));
+            var ct = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
+            Task.Run(() => SteamRemoteStorage.GetCollectionDetails( new GetCollectionDetailsQuery(collectionID), ct), ct)
+                .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCollectionDownloaded(x)));
         }
 
         private void LoadManifests()
@@ -135,24 +136,30 @@ namespace GoogGUI
             if (App.TaskBlocker.IsSet(FetchManifests)) return;
             if (_modlist.Count == 0) return;
 
-            var token = App.TaskBlocker.Set(FetchManifests, 15 * 1000);
-            HashSet<string> requested = new HashSet<string>();
-            foreach (ModFile file in _modlist)
-                if (file.IsID && !_modManifests.ContainsKey(file.Mod))
-                    requested.Add(file.Mod);
+            IEnumerable<ulong> list =
+                from mod in _modlist
+                where mod.IsPublished && !_modManifests.ContainsKey(mod.PublishedFileID)
+                select mod.PublishedFileID;
 
-            Task.Run(() => _api.GetPublishedFiles(requested, token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnManifestsLoaded(x)));
+            var ct = App.TaskBlocker.Set(FetchManifests, 15 * 1000);
+            Task.Run(() => SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), ct), ct)
+                .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnManifestsLoaded(x)));
         }
 
         private void LoadModlist()
         {
             _modlist.CollectionChanged -= OnModlistCollectionChanged;
             _modlist.Clear();
-            foreach (string m in _profile.Modlist)
+
+            foreach (string mod in _profile.Modlist)
             {
-                string path = m;
+                string path = mod;
                 _config.ResolveMod(ref path);
-                _modlist.Add(new ModFile(m, path));
+
+                if(ulong.TryParse(mod, out var publishedFileID))
+                    _modlist.Add(new ModFile(publishedFileID, path));
+                else
+                    _modlist.Add(new ModFile(path));
             }
             _modlist.CollectionChanged += OnModlistCollectionChanged;
             OnPropertyChanged("Modlist");
@@ -182,7 +189,7 @@ namespace GoogGUI
             LoadModlist();
         }
 
-        private void OnCollectionDownloaded(Task<Dictionary<string, SteamCollectionDetails>> task)
+        private void OnCollectionDownloaded(Task<CollectionDetailsResponse> task)
         {
             App.TaskBlocker.Release(FetchModlist);
             OnPropertyChanged("IsLoading");
@@ -191,21 +198,20 @@ namespace GoogGUI
                 new ErrorModal("Failed", $"Could not download the collection. ({(task.Exception?.Message ?? "Unknown Error")})").ShowDialog();
                 return;
             }
-            if (task.Result.Count == 0)
+            if (task.Result.ResultCount == 0)
             {
                 new ErrorModal("Not Found", "Collection could not be found.");
                 return;
             }
-            if (task.Result.First().Value.children.Length == 0)
-                if (task.Result.Count == 0)
-                {
-                    new ErrorModal("Empty", "Collection is empty.");
-                    return;
-                }
+            if (task.Result.CollectionDetails.First().Children.Length == 0)
+            {
+                new ErrorModal("Empty", "Collection is empty.");
+                return;
+            }
 
             List<string> modlist = new List<string>();
-            foreach (var child in task.Result.First().Value.children)
-                modlist.Add(child.publishedFileId);
+            foreach (var child in task.Result.CollectionDetails.First().Children)
+                modlist.Add(child.PublishedFileId);
             _profile.Modlist = modlist;
             LoadModlist();
         }
@@ -228,14 +234,14 @@ namespace GoogGUI
             if (result == System.Windows.Forms.DialogResult.OK)
             {
                 var path = Path.GetFullPath(dialog.FileName);
-                _modlist.Add(new ModFile(path, path));
+                _modlist.Add(new ModFile(path));
             }
         }
 
         private void OnExploreWorkshop(object? obj)
         {
             if (_searchWindow != null) return;
-            _searchWindow = new WorkshopSearch(_api);
+            _searchWindow = new WorkshopSearch();
             _searchWindow.Closing += OnSearchClosing;
             _searchWindow.ModAdded += OnModAdded;
             _searchWindow.Show();
@@ -265,7 +271,7 @@ namespace GoogGUI
             if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
 
             UriBuilder builder = new UriBuilder(_modlistURL);
-            if (SteamWorkWebAPI.SteamHost == builder.Host)
+            if (SteamWorks.SteamCommunityHost == builder.Host)
                 FetchSteamCollection(builder);
             else
                 FetchJsonList(builder);
@@ -325,8 +331,8 @@ namespace GoogGUI
             }
             catch
             {
-                modlist = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-                ModListProfile.TryParseModList(ref modlist);
+                var split = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+                modlist = ModListProfile.ParseModList(split).ToList();
             }
 
             if (modlist == null)
@@ -345,14 +351,13 @@ namespace GoogGUI
 
         private void OnImportFromTxtFile(string text)
         {
-            List<string> modlist = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-            ModListProfile.TryParseModList(ref modlist);
-            _profile.Modlist = modlist;
+            var split = text.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries);
+            _profile.Modlist = ModListProfile.ParseModList(split).ToList();
             _profile.SaveFile();
             LoadModlist();
         }
 
-        private void OnManifestsLoaded(Task<Dictionary<string, SteamPublishedFile>> task)
+        private void OnManifestsLoaded(Task<PublishedFilesResponse> task)
         {
             App.TaskBlocker.Release(FetchManifests);
             OnPropertyChanged("IsLoading");
@@ -365,18 +370,22 @@ namespace GoogGUI
                 return;
             }
 
-            foreach (var data in task.Result)
-                _modManifests[data.Key] = data.Value;
+            foreach (var file in task.Result.PublishedFileDetails)
+                _modManifests[file.PublishedFileID] = file;
 
-            foreach (ModFile file in _modlist)
-                if (file.IsID && _modManifests.TryGetValue(file.Mod, out var value))
-                    file.SetManifest(value);
+            var update = from file in _modlist
+                         where file.IsPublished
+                         join man in _modManifests on file.PublishedFileID equals man.Key
+                         select new KeyValuePair<ModFile, PublishedFile>(file, man.Value);
+
+            foreach (var u in update)
+                u.Key.SetManifest(u.Value);
         }
 
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
         {
-            if (_modlist.Where((x) => x.IsID && x.Mod == mod.PublishedFile.publishedFileID).Any()) return;
-            string path = mod.ModID;
+            if (_modlist.Where((x) => x.IsPublished && x.PublishedFileID == mod.PublishedFile.publishedFileID).Any()) return;
+            string path = mod.PublishedFileID.ToString();
             _config.ResolveMod(ref path);
             ModFile file = new ModFile(mod.PublishedFile.publishedFileID, path);
             _modlist.Add(file);
@@ -385,13 +394,13 @@ namespace GoogGUI
 
         private void OnModFileChanged(object sender, FileSystemEventArgs e)
         {
-            if (!ModListProfile.TryParseDirectory2ModID(e.FullPath, out string id)) return;
+            if (!ModListProfile.TryParseDirectory2ModID(e.FullPath, out ulong id)) return;
 
             Application.Current.Dispatcher.Invoke(() =>
             {
-                foreach (var file in _modlist.Where(file => file.Mod == id))
+                foreach (var file in _modlist.Where(file => file.PublishedFileID == id))
                 {
-                    string path = file.Mod;
+                    string path = file.PublishedFileID.ToString();
                     _config.ResolveMod(ref path);
                     file.RefreshFile(path);
                 }
@@ -425,8 +434,9 @@ namespace GoogGUI
         private void OnModlistChanged()
         {
             _profile.Modlist.Clear();
-            foreach (ModFile file in _modlist)
-                _profile.Modlist.Add(file.Mod);
+            _profile.Modlist.AddRange(
+                _modlist.Select(file=> file.PublishedFileID.ToString())
+                );
             _profile.SaveFile();
         }
 
@@ -471,7 +481,7 @@ namespace GoogGUI
             }
         }
 
-        private void OnModlistDownloaded(Task<List<string>> task)
+        private void OnModlistDownloaded(Task<ModlistExport> task)
         {
             App.TaskBlocker.Release(FetchModlist);
             if (!task.IsCompleted || task.Exception != null)
@@ -479,15 +489,13 @@ namespace GoogGUI
                 new ErrorModal("Failed", $"Could not download the file. ({(task.Exception?.Message ?? "Unknown Error")})").ShowDialog();
                 return;
             }
-            if (task.Result.Count == 0)
+            if (task.Result.Modlist.Count == 0)
             {
                 new ErrorModal("Empty", "Downloaded list is empty.");
                 return;
             }
 
-            List<string> modlist = task.Result;
-            ModListProfile.TryParseModList(ref modlist);
-            _profile.Modlist = modlist;
+            _profile.Modlist = ModListProfile.ParseModList(task.Result.Modlist).ToList();
             LoadModlist();
         }
 
@@ -545,7 +553,7 @@ namespace GoogGUI
         {
             foreach (ModFile file in _modlist)
             {
-                string path = file.Mod;
+                string path = file.PublishedFileID.ToString();
                 _config.ResolveMod(ref path);
                 file.RefreshFile(path);
             }

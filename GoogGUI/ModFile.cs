@@ -1,4 +1,5 @@
 ﻿using Goog;
+using SteamWorksWebAPI;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -9,33 +10,32 @@ namespace GoogGUI
 {
     internal class ModFile : INotifyPropertyChanged
     {
-        private SteamPublishedFile? _file;
+        private PublishedFile? _file;
         private FileInfo _infos;
-        private bool _isID;
-        private bool _isValid;
         private DateTime _lastUpdate;
-        private string _mod = string.Empty;
+        private ulong _publishedFileID = 0;
 
-        public ModFile(string mod, string path)
+        public ModFile(string path)
         {
-            _mod = mod;
-            _isID = long.TryParse(_mod, out _);
-            _isValid = _isID || File.Exists(_mod);
+            _infos = new FileInfo(path);
+        }
+
+        public ModFile(ulong publishedFileID, string path)
+        {
+            _publishedFileID = publishedFileID;
             _infos = new FileInfo(path);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public bool IsID => _isID;
-
-        public bool IsValid => _isValid;
+        public bool IsPublished => _publishedFileID > 0;
 
         public string LastUpdate
         {
             get
             {
-                if (!_isID && !_isValid) return string.Empty;
-                if(!_isID)
+                if (!IsPublished && !_infos.Exists) return string.Empty;
+                if(!IsPublished)
                 {
                     DateTime lastModified = _infos.LastWriteTime;
                     return "Last Modified : " + lastModified.ToShortDateString() + " " + lastModified.ToShortTimeString();
@@ -47,32 +47,32 @@ namespace GoogGUI
             }
         }
 
-        public string Mod => _mod;
+        public ulong PublishedFileID => _publishedFileID;
 
-        public string ModName
+        public string Title
         {
             get
             {
                 if (_file != null)
-                    return _file.title;
-                if (_isID)
-                    return _mod;
-                return Path.GetFileName(_mod);
+                    return _file.Title;
+                if (IsPublished)
+                    return _publishedFileID.ToString();
+                return _infos.Name;
             }
         }
 
-        public SteamPublishedFile? PublishedFile => _file;
+        public PublishedFile? PublishedFile => _file;
 
         public Brush StatusColor => GetStatusBrush();
 
         public string StatusTooltip => GetStatusText();
 
-        public void SetManifest(SteamPublishedFile file)
+        public void SetManifest(PublishedFile file)
         {
-            if (!_isID)
+            if (!IsPublished)
                 throw new Exception("Cannot set a manifest on a local mod.");
             _file = file;
-            _lastUpdate = Tools.UnixTimeStampToDateTime(_file.timeUpdated);
+            _lastUpdate = Tools.UnixTimeStampToDateTime(_file.TimeUpdated);
             OnPropertyChanged("ModName");
             OnPropertyChanged("LastUpdate");
             OnPropertyChanged("StatusColor");
@@ -90,8 +90,8 @@ namespace GoogGUI
         {
             if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
             if (_file == null) return (Brush)Application.Current.Resources["GDimBlue"];
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.fileSize == _infos.Length) return (Brush)Application.Current.Resources["GDimGreen"];
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.fileSize != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.FileSize == _infos.Length) return (Brush)Application.Current.Resources["GDimGreen"];
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.FileSize != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
             return (Brush)Application.Current.Resources["GDimYellow"];
         }
 
@@ -99,8 +99,8 @@ namespace GoogGUI
         {
             if (!_infos.Exists) return "Missing";
             if (_file == null) return "Found";
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.fileSize == _infos.Length) return "Up to Date";
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.fileSize != _infos.Length) return "Corrupted";
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.FileSize == _infos.Length) return "Up to Date";
+            if (_lastUpdate < _infos.LastWriteTimeUtc && _file.FileSize != _infos.Length) return "Corrupted";
             return "Update available";
         }
 

@@ -16,14 +16,12 @@ namespace GoogGUI
     /// </summary>
     public partial class WorkshopSearch : Window, INotifyPropertyChanged
     {
-        private SteamWorkWebAPI _api;
         private List<WorkshopSearchResult>? _searchResults = null;
         private string _searchTerm = string.Empty;
         private CancellationTokenSource? _source;
 
-        public WorkshopSearch(SteamWorkWebAPI api)
+        public WorkshopSearch()
         {
-            _api = api;
             SearchCommand = new SimpleCommand(OnSearch);
             AddModCommand = new SimpleCommand(OnModAdded);
             InitializeComponent();

@@ -53,6 +53,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\GoogLib\GoogLib.csproj" />
+    <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
   </ItemGroup>
 
   <ItemGroup>

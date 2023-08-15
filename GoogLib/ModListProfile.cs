@@ -19,7 +19,7 @@ namespace GoogLib
 
         public string SyncURL { get => _syncURL; set => _syncURL = value; }
 
-        public static async Task<List<string>> DownloadModList(string url, CancellationToken cancellationToken)
+        public static async Task<ModlistExport> DownloadModList(string url, CancellationToken cancellationToken)
         {
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentException("Sync URL is invalid");
@@ -38,7 +38,7 @@ namespace GoogLib
 
                     using (var download = await response.Content.ReadAsStreamAsync())
                     {
-                        return await JsonSerializer.DeserializeAsync<List<string>>(download, _jsonOptions) ?? new List<string>();
+                        return await JsonSerializer.DeserializeAsync<ModlistExport>(download, _jsonOptions) ?? new ModlistExport();
                     }
                 }
             }
@@ -78,14 +78,11 @@ namespace GoogLib
                 CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
-        public static bool TryParseModID(string path, out string id)
+        public static bool TryParseModID(string path, out ulong id)
         {
-            id = string.Empty;
-            if (long.TryParse(path, out _))
-            {
-                id = path;
+            id = 0;
+            if (ulong.TryParse(path, out id))
                 return true;
-            }
 
             if (Path.GetExtension(path) == ".pak")
                 return TryParseFile2ModID(path, out id);
@@ -93,55 +90,45 @@ namespace GoogLib
                 return TryParseDirectory2ModID(path, out id);
         }
 
-        public static bool TryParseFile2ModID(string path, out string id)
+        public static bool TryParseFile2ModID(string path, out ulong id)
         {
-            id = string.Empty;
-
+            id = 0;
             string? folder = Path.GetDirectoryName(path);
             if (folder == null)
                 return false;
-            if (!long.TryParse(Path.GetFileName(folder), out _))
-                return false;
-            id = Path.GetFileName(folder);
-            return true;
+            if (ulong.TryParse(Path.GetFileName(folder), out id))
+                return true;
+
+            return false;
         }
 
-        public static bool TryParseDirectory2ModID(string path, out string id)
+        public static bool TryParseDirectory2ModID(string path, out ulong id)
         {
-            id = string.Empty;
-            if(long.TryParse(Path.GetFileName(path), out _))
-            {
-                id = Path.GetFileName(path);
+            id = 0;
+            if(ulong.TryParse(Path.GetFileName(path), out id))
                 return true;
-            }
 
             string? parent = Path.GetDirectoryName(path);
-            if(parent != null && long.TryParse(Path.GetFileName(parent), out _))
-            {
-                id = Path.GetFileName(parent);
+            if(parent != null && ulong.TryParse(Path.GetFileName(parent), out id))
                 return true;
-            }
+
             return false;                
         }
 
-        public static void TryParseModList(ref List<string> modlist)
+        public static IEnumerable<string> ParseModList(IEnumerable<string> modlist)
         {
-            for (int i = 0; i < modlist.Count; i++)
-            {
-                if (TryParseModID(modlist[i], out string id))
-                    modlist[i] = id;
-            }
+            foreach (var mod in modlist)
+                if (TryParseModID(mod, out ulong id))
+                    yield return id.ToString();
+                else
+                    yield return mod;
         }
 
-        public List<string> GetModIDList()
+        public IEnumerable<ulong> GetModIDList()
         {
-            List<string> list = new List<string>();
-
             foreach (string mod in Modlist)
-                if (TryParseModID(mod, out string id))
-                    list.Add(id);
-
-            return list;
+                if (TryParseModID(mod, out ulong id))
+                    yield return id;
         }
 
         public string GetModList()
