@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
+using System.Linq;
 
 namespace GoogGUI
 {
@@ -124,8 +125,8 @@ namespace GoogGUI
 
         private void ListProfiles()
         {
-            _modlists = ModListProfile.ListProfiles(_config);
-            _profiles = ClientProfile.ListProfiles(_config);
+            _modlists = ModListProfile.ListProfiles(_config).ToList();
+            _profiles = ClientProfile.ListProfiles(_config).ToList();
             OnPropertyChanged("Modlists");
             OnPropertyChanged("Profiles");
         }

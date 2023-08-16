@@ -66,17 +66,15 @@ namespace GoogLib
 
         public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
 
-        public static List<string> ListProfiles(Config config)
+        public static IEnumerable<string> ListProfiles(Config config)
         {
-            List<string> list = new List<string>();
             string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles);
             if (!Directory.Exists(folder))
-                return list;
+                yield break;
 
             string[] profiles = Directory.GetDirectories(folder, "*");
             foreach (string p in profiles)
-                list.Add(Path.GetFileName(p));
-            return list;
+                yield return Path.GetFileName(p);
         }
 
         public static void ResolveProfile(Config config, ref string profileName)

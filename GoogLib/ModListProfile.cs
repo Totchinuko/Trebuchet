@@ -56,17 +56,15 @@ namespace GoogLib
             return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles, modlistName + ".json");
         }
 
-        public static List<string> ListProfiles(Config config)
+        public static IEnumerable<string> ListProfiles(Config config)
         {
-            List<string> list = new List<string>();
             string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles);
             if (!Directory.Exists(folder))
-                return list;
+                yield break;
 
             string[] profiles = Directory.GetFiles(folder, "*.json");
             foreach (string p in profiles)
-                list.Add(Path.GetFileNameWithoutExtension(p));
-            return list;
+                yield return Path.GetFileNameWithoutExtension(p);
         }
 
         public static IEnumerable<string> ParseModList(IEnumerable<string> modlist)
