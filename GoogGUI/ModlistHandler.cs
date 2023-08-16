@@ -215,12 +215,6 @@ namespace GoogGUI
             LoadModlist();
         }
 
-        private void OnConfigFileChanged(object? sender, Config e)
-        {
-            SetupFileWatcher();
-            OnCanExecuteChanged();
-        }
-
         private void OnExploreLocal(object? obj)
         {
             System.Windows.Forms.OpenFileDialog dialog = new System.Windows.Forms.OpenFileDialog();
