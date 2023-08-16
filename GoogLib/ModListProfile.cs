@@ -6,18 +6,15 @@ namespace GoogLib
 {
     public sealed class ModListProfile : ProfileFile<ModListProfile>
     {
-        private List<string> _modlist = new List<string>();
-        private string _syncURL = string.Empty;
-
         private ModListProfile()
         { }
 
-        public List<string> Modlist { get => _modlist; set => _modlist = value; }
+        public List<string> Modlist { get; set; } = new List<string>();
 
         [JsonIgnore]
         public string ProfileName => Path.GetFileNameWithoutExtension(FilePath) ?? string.Empty;
 
-        public string SyncURL { get => _syncURL; set => _syncURL = value; }
+        public string SyncURL { get; set; } = string.Empty;
 
         public static async Task<ModlistExport> DownloadModList(string url, CancellationToken cancellationToken)
         {

@@ -6,17 +6,15 @@ namespace GoogLib
 {
     public sealed class ClientProfile : ProfileFile<ClientProfile>
     {
-        private int _addedTexturePool = 0;
-        private bool _backgroundSound = false;
-        private bool _log = false;
-        private bool _removeIntroVideo = false;
-        private bool _ultraAnisotropy;
-        private bool _useAllCores = false;
-        private bool _useBattleEye = false;
-
         private ClientProfile()
         {
         }
+
+        public int AddedTexturePool { get; set; } = 0;
+
+        public bool BackgroundSound { get; set; } = false;
+
+        public bool Log { get; set; } = false;
 
         [JsonIgnore]
         public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
@@ -24,23 +22,13 @@ namespace GoogLib
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? throw new Exception($"Invalid directory for {FilePath}.");
 
-        #region Settings
+        public bool RemoveIntroVideo { get; set; } = false;
 
-        public int AddedTexturePool { get => _addedTexturePool; set => _addedTexturePool = value; }
+        public bool UltraAnisotropy { get; set; }
 
-        public bool BackgroundSound { get => _backgroundSound; set => _backgroundSound = value; }
+        public bool UseAllCores { get; set; } = false;
 
-        public bool Log { get => _log; set => _log = value; }
-
-        public bool RemoveIntroVideo { get => _removeIntroVideo; set => _removeIntroVideo = value; }
-
-        public bool UltraAnisotropy { get => _ultraAnisotropy; set => _ultraAnisotropy = value; }
-
-        public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
-
-        public bool UseBattleEye { get => _useBattleEye; set => _useBattleEye = value; }
-
-        #endregion Settings
+        public bool UseBattleEye { get; set; } = false;
 
         #region IniConfig
 

@@ -48,37 +48,30 @@ namespace Goog
 
         #endregion constants
 
-        private string _clientPath = string.Empty;
-        private bool _displayCMD = false;
-        private string _installPath = string.Empty;
-        private bool _killZombies = false;
-        private bool _restartWhenDown = false;
-        private int _serverInstanceCount = 0;
-        private int _zombieCheckSeconds = 300;
 
         public uint ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
-        public string ClientPath { get => _clientPath; set => _clientPath = value; }
+        public string ClientPath { get; set; } = string.Empty;
 
-        public bool DisplayCMD { get => _displayCMD; set => _displayCMD = value; }
+        public bool DisplayCMD { get; set; } = false;
 
-        public string InstallPath { get => _installPath; set => _installPath = value; }
+        public string InstallPath { get; set; } = string.Empty;
 
-        public bool IsInstallPathValid => !string.IsNullOrEmpty(_installPath) && Directory.Exists(_installPath);
+        public bool IsInstallPathValid => !string.IsNullOrEmpty(InstallPath) && Directory.Exists(InstallPath);
 
         public bool IsTestLive => Path.GetFileName(Path.GetDirectoryName(FilePath)) == FolderTestLive;
 
-        public bool KillZombies { get => _killZombies; set => _killZombies = value; }
+        public bool KillZombies { get; set; } = false;
 
-        public bool RestartWhenDown { get => _restartWhenDown; set => _restartWhenDown = value; }
+        public bool RestartWhenDown { get; set; } = false;
 
         public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
-        public int ServerInstanceCount { get => _serverInstanceCount; set => _serverInstanceCount = value; }
+        public int ServerInstanceCount { get; set; } = 0;
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 
-        public int ZombieCheckSeconds { get => _zombieCheckSeconds; set => _zombieCheckSeconds = value; }
+        public int ZombieCheckSeconds { get; set; } = 300;
 
         public static string GetPath(bool testlive)
         {

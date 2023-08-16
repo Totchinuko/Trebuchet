@@ -8,25 +8,16 @@ namespace GoogLib
 {
     public class ServerProfile : ProfileFile<ServerProfile>
     {
-        private bool _log = false;
-        private string _map = "/Game/Maps/ConanSandbox/ConanSandbox";
-        private int _maxPlayers = 30;
-        private List<string> _sudoSuperAdmins = new List<string>();
-        private bool _useAllCores = true;
 
-        #region Settings
+        public bool Log { get; set; } = false;
 
-        public bool Log { get => _log; set => _log = value; }
+        public string Map { get; set; } = "/Game/Maps/ConanSandbox/ConanSandbox";
 
-        public string Map { get => _map; set => _map = value; }
+        public int MaxPlayers { get; set; } = 30;
 
-        public int MaxPlayers { get => _maxPlayers; set => _maxPlayers = value; }
+        public List<string> SudoSuperAdmins { get; set; } = new List<string>();
 
-        public List<string> SudoSuperAdmins { get => _sudoSuperAdmins; set => _sudoSuperAdmins = value; }
-
-        public bool UseAllCores { get => _useAllCores; set => _useAllCores = value; }
-
-        #endregion Settings
+        public bool UseAllCores { get; set; } = true;
 
         #region IniSettings
 
@@ -36,7 +27,7 @@ namespace GoogLib
             IniSection section = document.GetSection("/Game/Mods/ModAdmin/Auth/EA_MC_Auth.EA_MC_Auth_C");
             section.GetParameters("+SuperAdminSteamIDs").ForEach(section.Remove);
 
-            foreach (string id in _sudoSuperAdmins)
+            foreach (string id in SudoSuperAdmins)
                 section.InsertParameter(0, "+SuperAdminSteamIDs", id);
         }
 
