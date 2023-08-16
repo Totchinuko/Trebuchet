@@ -126,7 +126,12 @@ namespace GoogLib
 
         public IEnumerable<ulong> GetModIDList()
         {
-            foreach (string mod in Modlist)
+            return GetModIDList(Modlist);
+        }
+
+        public static IEnumerable<ulong> GetModIDList(IEnumerable<string> modlist)
+        {
+            foreach (string mod in modlist)
                 if (TryParseModID(mod, out ulong id))
                     yield return id;
         }

@@ -256,5 +256,14 @@ namespace Goog
             }
             return size;
         }
+
+        public static IEnumerable<KeyValuePair<ulong, FileInfo>> GetModFiles(IEnumerable<string> files)
+        {
+            foreach(var file in files)
+            {
+                if (ModListProfile.TryParseModID(file, out ulong id))
+                    yield return new KeyValuePair<ulong, FileInfo>(id, new FileInfo(file));
+            }
+        } 
     }
 }

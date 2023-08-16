@@ -1,9 +1,14 @@
 ﻿using Goog;
 using GoogGUI.Attributes;
 using GoogLib;
+using SteamWorksWebAPI;
+using SteamWorksWebAPI.Interfaces;
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -13,6 +18,7 @@ namespace GoogGUI
     public class Dashboard : Panel
     {
         public const string GameTask = "GameRunning";
+        public const string ModCheck = "ModCheck";
         private ClientInstanceDashboard _client;
         private ObservableCollection<ServerInstanceDashboard> _instances = new ObservableCollection<ServerInstanceDashboard>();
         private DispatcherTimer _timer;
@@ -85,6 +91,14 @@ namespace GoogGUI
                 i.Close();
         }
 
+        private void OnDetectModOutOfDate()
+        {
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                throw new NotImplementedException();
+            });
+        }
+
         private void OnDispatcherTick(object? sender, EventArgs e)
         {
             _trebuchet.TickTrebuchet();
@@ -106,6 +120,32 @@ namespace GoogGUI
         {
             foreach (var i in Instances)
                 i.Launch();
+        }
+
+        private void OnRunModCheck()
+        {
+            if (App.TaskBlocker.IsSet(ModCheck)) return;
+
+            var modfiles = Tools.GetModFiles(_trebuchet.GetServerActiveWorkshopMods()).ToDictionary(k=>k.Key, v=>v.Value);
+
+            var ct = App.TaskBlocker.Set(ModCheck);
+            var query = new GetPublishedFileDetailsQuery(modfiles.Select(x => x.Key));
+            Task.Run(() => SteamRemoteStorage.GetPublishedFileDetails(query, ct)).ContinueWith((x) => OnRunModCheckCompleted(x, modfiles));
+        }
+
+        private void OnRunModCheckCompleted(Task<PublishedFilesResponse> task, Dictionary<ulong, FileInfo> files)
+        {
+            if (task.Result.ResultCount == 0) return;
+            foreach (PublishedFile published in task.Result.PublishedFileDetails)
+            {
+                if(files.TryGetValue(published.PublishedFileID, out FileInfo? info) &&
+                    info.Exists && 
+                    Tools.UnixTimeStampToDateTime(published.TimeUpdated) <= info.LastWriteTimeUtc) 
+                    continue;
+
+                OnDetectModOutOfDate();
+                return;
+            }
         }
 
         private void OnTrebuchetRequestDispatcher(object? sender, Action e)

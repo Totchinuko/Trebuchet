@@ -1,5 +1,6 @@
 ﻿using Goog;
 using System.Diagnostics;
+using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace GoogLib
@@ -156,6 +157,20 @@ namespace GoogLib
             }
 
             _clientProcess?.Process?.Refresh();
+        }
+
+        public IEnumerable<string> GetServerActiveWorkshopMods()
+        {
+            return _serverProcesses.Values.Select(s => GetInstanceActiveWorkshopMods(s.ServerInstance)).SelectMany(x => x).Distinct();
+        }
+
+        public IEnumerable<string> GetInstanceActiveWorkshopMods(int instance)
+        {
+            string path = Path.Combine(_config.GetInstancePath(instance), Config.FolderGameSave, Config.FileGeneratedModlist);
+            if (File.Exists(path))
+                return File.ReadAllLines(path);
+            else
+                return Enumerable.Empty<string>();
         }
 
         private void AddDispatch(Action callback)
