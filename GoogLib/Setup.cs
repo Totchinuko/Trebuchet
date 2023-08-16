@@ -1,6 +1,7 @@
 ﻿using GoogLib;
 using System.Diagnostics;
 using System.Reflection;
+using System.Text.RegularExpressions;
 
 namespace Goog
 {
@@ -8,6 +9,9 @@ namespace Goog
     {
         public const string SteamCMDURL = "https://steamcdn-a.akamaihd.net/client/installer/steamcmd.zip";
         public const string steamCMDZipFile = "SteamCMD.zip";
+        public static readonly Regex AppInfoBuildID = new Regex("\"branches\"{\"public\"{\"buildid\"\"([0-9]+)\"\"timeupdated\"\"([0-9]+)\"}");
+        public static readonly Regex ManifestBuildID = new Regex("\"buildid\"\"([0-9]+)\"");
+
 
         public static async Task DownloadFile(string url, string file, CancellationToken token, IProgress<float>? progress = null)
         {
@@ -165,13 +169,39 @@ namespace Goog
             process.Start();
             while (!process.HasExited && !token.IsCancellationRequested)
                 await Task.Delay(200);
-            if (process.HasExited) return process.ExitCode != 0 && process.ExitCode != 7 ? 1 : 0;
+            if (process.HasExited)
+            {
+                process.Dispose();
+                return process.ExitCode != 0 && process.ExitCode != 7 ? 1 : 0;
+            }
             
             process.Kill(true);
             process.WaitForExit();
+            process.Dispose();
             return 0;
         }
 
+        public static async Task<string> WaitForProcessAnswer(Process process, CancellationToken ct)
+        {
+            process.Start();
+            string content = string.Empty;
+            while (!process.HasExited && !ct.IsCancellationRequested)
+            {
+                content += process.StandardOutput.ReadToEnd();
+                await Task.Delay(200);
+            }
+            if (process.HasExited)
+            {
+                process.Dispose();
+                return content;
+            }
+
+            process.Kill(true);
+            process.WaitForExit();
+            process.Dispose();
+            return content;
+        }
+             
         public static string GetGoogCMD()
         {
             string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -181,6 +211,74 @@ namespace Goog
             if (!File.Exists(GoogCMD))
                 throw new FileNotFoundException($"{GoogCMD} was not found.");
             return GoogCMD;
+        }
+
+        public static async Task<UpdateCheckEventArgs> GetServerUptoDate(Config config, CancellationToken ct)
+        {
+            if (config.ServerInstanceCount <= 0) return new UpdateCheckEventArgs();
+
+            ulong instance0 = GetInstanceBuildID(config, 0);
+            ulong steam = await GetSteamBuildID(config, ct);
+
+            return new UpdateCheckEventArgs
+            {
+                IsUpToDate = instance0 == steam,
+                steamBuildID = steam,
+                currentBuildID = instance0
+            };
+        }
+
+        public static ulong GetInstanceBuildID(Config config, int instance)
+        {
+            string manifest = Path.Combine(
+                config.InstallPath,
+                config.VersionFolder,
+                Config.FolderServerInstances,
+                string.Format(Config.FolderInstancePattern, instance),
+                string.Format(Config.FileSteamInstanceManifeste, config.ServerAppID.ToString()));
+
+            if (!File.Exists(manifest)) throw new Exception($"Server instance {instance} is not installed properly.");
+
+            string content = File.ReadAllText(manifest);
+            foreach (string search in new string[] { " ", "\n", "\r", "\n\r", "\t" })
+                content = content.Replace(search, string.Empty);
+            var match = ManifestBuildID.Match(content);
+
+            if (!match.Success) throw new Exception($"Could not parse the manifest to find a build id");
+
+            if (!ulong.TryParse(match.Groups[1].Value, out ulong buildID))
+                return buildID;
+            return 0;
+        }
+
+        public static async Task<ulong> GetSteamBuildID(Config config, CancellationToken ct)
+        {
+            string appinfo = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamAppInfo);
+
+            if (File.Exists(appinfo))
+                File.Move(appinfo, appinfo + ".changed");
+
+            Process process = new Process();
+            process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
+            process.StartInfo.Arguments = string.Join(" ",
+                    Config.CmdArgLoginAnonymous,
+                    "+app_info_update 1",
+                    "+app_info_print " + config.ServerAppID,
+                    Config.CmdArgQuit
+                );
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            string content = await WaitForProcessAnswer(process, ct);
+
+            foreach (string search in new string[] { " ", "\n", "\r", "\n\r", "\t" })
+                content = content.Replace(search, string.Empty);
+            var match = AppInfoBuildID.Match(content);
+
+            if (!match.Success) throw new Exception($"Could not parse the manifest to find a build id");
+            if (!ulong.TryParse(match.Groups[1].Value, out ulong buildID))
+                return buildID;
+            return 0;
         }
     }
 }

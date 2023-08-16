@@ -27,7 +27,9 @@ namespace Goog
         public const string FileProfileConfig = "profile.json";
         public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
         public const string FileServerProxyBin = "ConanSandboxServer.exe";
+        public const string FileSteamAppInfo = "appcache\\appinfo.vdf";
         public const string FileSteamCMDBin = "steamcmd.exe";
+        public const string FileSteamInstanceManifeste = "steamapps\\appmanifest_{0}.acf";
         public const string FolderClientProfiles = "ClientProfiles";
         public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
         public const string FolderGameSave = "ConanSandbox\\Saved";
