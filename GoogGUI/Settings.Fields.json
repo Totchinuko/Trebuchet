@@ -24,14 +24,6 @@
     "RefreshApp": true
   },
   {
-    "$type": "Text",
-    "Property": "SteamAPIKey",
-    "Name": "Steam API Key",
-    "Description": "In order to use the mod navigator directly from this app, you need a steam API key. You can have one per steam account. Use the link below to request one. DO NOT SHARE IT. Steam API key allow to access the steam API in your name.",
-    "Hyperlink": "https://steamcommunity.com/dev/apikey"
-
-  },
-  {
     "$type": "Toggle",
     "Property": "DisplayCMD",
     "Name": "Display Steam Commande Line",

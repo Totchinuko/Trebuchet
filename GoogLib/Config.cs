@@ -54,7 +54,6 @@ namespace Goog
         private bool _killZombies = false;
         private bool _restartWhenDown = false;
         private int _serverInstanceCount = 0;
-        private string _steamAPIKey = string.Empty;
         private int _zombieCheckSeconds = 300;
 
         public uint ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
@@ -76,8 +75,6 @@ namespace Goog
         public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
         public int ServerInstanceCount { get => _serverInstanceCount; set => _serverInstanceCount = value; }
-
-        public string SteamAPIKey { get => _steamAPIKey; set => _steamAPIKey = value; }
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 
