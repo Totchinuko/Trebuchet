@@ -6,7 +6,7 @@ using Yuu.Ini;
 
 namespace GoogLib
 {
-    public class ServerProfile : ConfigFile<ServerProfile>
+    public class ServerProfile : ProfileFile<ServerProfile>
     {
         private bool _log = false;
         private string _map = "/Game/Maps/ConanSandbox/ConanSandbox";
@@ -43,10 +43,12 @@ namespace GoogLib
         #endregion IniSettings
 
         [JsonIgnore]
-        public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
+        public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
 
         [JsonIgnore]
-        public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
+        public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
+
+        public static string GetFolder(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name);
 
         public static Dictionary<string, string> GetMapList()
         {
@@ -63,8 +65,6 @@ namespace GoogLib
         }
 
         public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
-
-        public static string GetFolder(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name);
 
         public static List<string> ListProfiles(Config config)
         {

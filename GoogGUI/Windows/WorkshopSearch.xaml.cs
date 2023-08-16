@@ -24,7 +24,6 @@ namespace GoogGUI
         private Config _config;
         private List<WorkshopSearchResult> _searchResults = new List<WorkshopSearchResult>();
         private string _searchTerm = string.Empty;
-        private CancellationTokenSource? _source;
 
         public WorkshopSearch(Config config)
         {

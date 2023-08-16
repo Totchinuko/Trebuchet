@@ -21,14 +21,14 @@ namespace Goog.Commands
             if (this.modlist == null)
                 throw new ArgumentException("modlist parameter is required.");
 
-            Config config = Config.LoadFile(Config.GetPath(testlive));
+            Config config = Config.LoadConfig(Config.GetPath(testlive));
             string modlistFile = ModListProfile.GetPath(config, this.modlist);
             if (!File.Exists(modlistFile))
                 throw new FileNotFoundException($"{this.modlist} is not found");
 
-            ModListProfile modlistProfile = ModListProfile.LoadFile(modlistFile);
+            ModListProfile modlistProfile = ModListProfile.LoadProfile(config, modlistFile);
 
-            config.ResolveModsPath(modlistProfile.Modlist, out List<string> modlist, out List<string> errors);
+            modlistProfile.ResolveModsPath(modlistProfile.Modlist, out List<string> modlist, out List<string> errors);
             modlistProfile.Modlist = modlist;
 
             modlistProfile.SaveFile();

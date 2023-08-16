@@ -153,7 +153,7 @@ namespace GoogGUI
             foreach (string mod in _profile.Modlist)
             {
                 string path = mod;
-                _config.ResolveMod(ref path);
+                _profile.ResolveMod(ref path);
 
                 if(ulong.TryParse(mod, out var publishedFileID))
                     _modlist.Add(new ModFile(publishedFileID, path));
@@ -181,7 +181,7 @@ namespace GoogGUI
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            _profile = ModListProfile.LoadFile(ModListProfile.GetPath(_config, _selectedModlist));
+            _profile = ModListProfile.LoadProfile(_config, ModListProfile.GetPath(_config, _selectedModlist));
             _modlistURL = _profile.SyncURL;
             OnPropertyChanged("ModlistURL");
 
@@ -254,7 +254,7 @@ namespace GoogGUI
 
         private void OnExportToTxt(object? obj)
         {
-            _config.ResolveModsPath(_profile.Modlist, out List<string> results, out List<string> error);
+            _profile.ResolveModsPath(_profile.Modlist, out List<string> results, out List<string> error);
             if (error.Count > 0)
                 new MessageModal("Invalid", "Some mods from your list are missing and could not be resolved").ShowDialog();
             new ModlistTextImport(string.Join("\r\n", results), true, FileType.Txt).ShowDialog();
@@ -382,7 +382,7 @@ namespace GoogGUI
         {
             if (_modlist.Where((x) => x.IsPublished && x.PublishedFileID == mod.PublishedFileID).Any()) return;
             string path = mod.PublishedFileID.ToString();
-            _config.ResolveMod(ref path);
+            _profile.ResolveMod(ref path);
             ModFile file = new ModFile(mod, path);
             _modlist.Add(file);
             LoadManifests();
@@ -397,7 +397,7 @@ namespace GoogGUI
                 foreach (var file in _modlist.Where(file => file.PublishedFileID == id))
                 {
                     string path = file.PublishedFileID.ToString();
-                    _config.ResolveMod(ref path);
+                    _profile.ResolveMod(ref path);
                     file.RefreshFile(path);
                 }
             });
@@ -453,7 +453,7 @@ namespace GoogGUI
                 return;
             }
 
-            _profile = ModListProfile.CreateFile(ModListProfile.GetPath(_config, name));
+            _profile = ModListProfile.CreateProfile(_config, ModListProfile.GetPath(_config, name));
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;
@@ -509,7 +509,7 @@ namespace GoogGUI
 
             string path = Path.Combine(ModListProfile.GetPath(_config, name));
             _profile.CopyFileTo(path);
-            _profile = ModListProfile.LoadFile(path);
+            _profile = ModListProfile.LoadProfile(_config, path);
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;
@@ -549,7 +549,7 @@ namespace GoogGUI
             foreach (ModFile file in _modlist)
             {
                 string path = file.PublishedFileID.ToString();
-                _config.ResolveMod(ref path);
+                _profile.ResolveMod(ref path);
                 file.RefreshFile(path);
             }
         }

@@ -4,7 +4,7 @@ using Yuu.Ini;
 
 namespace GoogLib
 {
-    public sealed class ClientProfile : ConfigFile<ClientProfile>
+    public sealed class ClientProfile : ProfileFile<ClientProfile>
     {
         private int _addedTexturePool = 0;
         private bool _backgroundSound = false;
@@ -15,7 +15,8 @@ namespace GoogLib
         private bool _useBattleEye = false;
 
         private ClientProfile()
-        { }
+        {
+        }
 
         [JsonIgnore]
         public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
@@ -107,6 +108,11 @@ namespace GoogLib
             profileName = "Default";
             if (!File.Exists(GetPath(config, profileName)))
                 CreateFile(GetPath(config, profileName)).SaveFile();
+        }
+
+        public string GetBinaryPath(bool battleEye)
+        {
+            return Path.Combine(Config.ClientPath, Config.FolderGameBinaries, (battleEye ? Config.FileClientBEBin : Config.FileClientBin));
         }
 
         public string GetClientArgs()

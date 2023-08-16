@@ -81,7 +81,7 @@ namespace GoogGUI
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            _profile = ServerProfile.LoadFile(ServerProfile.GetPath(_config, _selectedProfile));
+            _profile = ServerProfile.LoadProfile(_config, ServerProfile.GetPath(_config, _selectedProfile));
             OnPropertyChanged("ProfileSize");
             RefreshFields();
         }
@@ -120,7 +120,7 @@ namespace GoogGUI
                 return;
             }
 
-            _profile = ServerProfile.CreateFile(Path.Combine(ServerProfile.GetPath(_config, name)));
+            _profile = ServerProfile.CreateProfile(_config, Path.Combine(ServerProfile.GetPath(_config, name)));
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
@@ -158,7 +158,7 @@ namespace GoogGUI
 
             string path = Path.Combine(ServerProfile.GetPath(_config, name));
             _profile.CopyFolderTo(path);
-            _profile = ServerProfile.LoadFile(path);
+            _profile = ServerProfile.LoadProfile(_config, path);
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;

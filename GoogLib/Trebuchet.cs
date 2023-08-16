@@ -1,6 +1,5 @@
 ﻿using Goog;
 using System.Diagnostics;
-using System.Runtime.CompilerServices;
 using System.Text.RegularExpressions;
 
 namespace GoogLib
@@ -10,8 +9,8 @@ namespace GoogLib
         private static Regex _instanceRegex = new Regex(@"-TotInstance=([0-9+])");
         private ClientProcess? _clientProcess;
         private Config _config;
-        private Dictionary<int, ServerProcess> _serverProcesses = new Dictionary<int, ServerProcess>();
         private HashSet<string> _lockedFolders = new HashSet<string>();
+        private Dictionary<int, ServerProcess> _serverProcesses = new Dictionary<int, ServerProcess>();
 
         public Trebuchet(Config config)
         {
@@ -44,16 +43,16 @@ namespace GoogLib
 
             string profilePath = ClientProfile.GetPath(_config, profileName);
             if (!File.Exists(profilePath)) throw new Exception("Unknown game profile.");
-            ClientProfile profile = ClientProfile.LoadFile(profilePath);
+            ClientProfile profile = ClientProfile.LoadProfile(_config, profilePath);
 
-            if(_lockedFolders.Contains(profile.ProfileFolder))
+            if (_lockedFolders.Contains(profile.ProfileFolder))
                 throw new Exception("Profile folder is currently locked by another process.");
 
             string modlistPath = ModListProfile.GetPath(_config, modlistName);
             if (!File.Exists(modlistPath)) throw new Exception("Unknown Mod List.");
-            ModListProfile modlist = ModListProfile.LoadFile(modlistPath);
+            ModListProfile modlist = ModListProfile.LoadProfile(_config, modlistPath);
 
-            _config.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
+            modlist.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
             if (errors.Count > 0)
                 throw new Exception("Some mods path could not be resolved.");
 
@@ -65,7 +64,7 @@ namespace GoogLib
             configurator.WriteIniConfigs(profile, _config.ClientPath);
             configurator.FlushConfigs();
 
-            _clientProcess = new ClientProcess(_config.GetClientBinaryPath(profile.UseBattleEye), profile.GetClientArgs());
+            _clientProcess = new ClientProcess(profile.GetBinaryPath(profile.UseBattleEye), profile.GetClientArgs());
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             _clientProcess.ProcessStarted += OnClientProcessStarted;
 
@@ -80,28 +79,28 @@ namespace GoogLib
 
             string profilePath = ServerProfile.GetPath(_config, profileName);
             if (!File.Exists(profilePath)) throw new Exception("Unknown server profile.");
-            ServerProfile profile = ServerProfile.LoadFile(profilePath);
+            ServerProfile profile = ServerProfile.LoadProfile(_config, profilePath);
 
             if (_lockedFolders.Contains(profile.ProfileFolder))
                 throw new Exception("Profile folder is currently locked by another process.");
 
             string modlistPath = ModListProfile.GetPath(_config, modlistName);
             if (!File.Exists(modlistPath)) throw new Exception("Unknown Mod List.");
-            ModListProfile modlist = ModListProfile.LoadFile(modlistPath);
+            ModListProfile modlist = ModListProfile.LoadProfile(_config, modlistPath);
 
-            _config.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
+            modlist.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
             if (errors.Count > 0)
                 throw new Exception("Some mods path could not be resolved.");
 
             File.WriteAllLines(Path.Combine(profile.ProfileFolder, Config.FileGeneratedModlist), result);
 
-            SetupJunction(_config.GetInstancePath(instance), profile.ProfileFolder);
+            SetupJunction(GetInstancePath(instance), profile.ProfileFolder);
 
             IniConfigurator configurator = new IniConfigurator(_config);
-            configurator.WriteIniConfigs(profile, _config.GetInstancePath(instance));
+            configurator.WriteIniConfigs(profile, GetInstancePath(instance));
             configurator.FlushConfigs();
 
-            ServerProcess watcher = new ServerProcess(_config.GetServerIntanceBinary(instance), profile.GetServerArgs(instance), instance);
+            ServerProcess watcher = new ServerProcess(GetServerIntanceBinary(instance), profile.GetServerArgs(instance), instance);
             watcher.ProcessExited += OnServerProcessTerminate;
             watcher.ProcessStarted += OnServerProcessStarted;
             _serverProcesses.Add(instance, watcher);
@@ -116,13 +115,37 @@ namespace GoogLib
                 watcher.Close();
         }
 
-        public bool IsClientRunning() => _clientProcess?.Process != null;
+        public IEnumerable<string> GetInstanceActiveWorkshopMods(int instance)
+        {
+            string path = Path.Combine(GetInstancePath(instance), Config.FolderGameSave, Config.FileGeneratedModlist);
+            if (File.Exists(path))
+                return File.ReadAllLines(path);
+            else
+                return Enumerable.Empty<string>();
+        }
 
-        public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.Process != null;
+        public string GetInstancePath(int instance)
+        {
+            return Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance));
+        }
+
+        public IEnumerable<string> GetServerActiveWorkshopMods()
+        {
+            return _serverProcesses.Values.Select(s => GetInstanceActiveWorkshopMods(s.ServerInstance)).SelectMany(x => x).Distinct();
+        }
+
+        public string GetServerIntanceBinary(int instance)
+        {
+            return Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance), Config.FileServerProxyBin);
+        }
 
         public bool IsAnyServerRunning() => _serverProcesses.Count > 0;
 
+        public bool IsClientRunning() => _clientProcess?.Process != null;
+
         public bool IsFolderLocked(string folder) => _lockedFolders.Contains(folder);
+
+        public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.Process != null;
 
         public void KillAllServers()
         {
@@ -159,20 +182,6 @@ namespace GoogLib
             _clientProcess?.Process?.Refresh();
         }
 
-        public IEnumerable<string> GetServerActiveWorkshopMods()
-        {
-            return _serverProcesses.Values.Select(s => GetInstanceActiveWorkshopMods(s.ServerInstance)).SelectMany(x => x).Distinct();
-        }
-
-        public IEnumerable<string> GetInstanceActiveWorkshopMods(int instance)
-        {
-            string path = Path.Combine(_config.GetInstancePath(instance), Config.FolderGameSave, Config.FileGeneratedModlist);
-            if (File.Exists(path))
-                return File.ReadAllLines(path);
-            else
-                return Enumerable.Empty<string>();
-        }
-
         private void AddDispatch(Action callback)
         {
             DispatcherRequest?.Invoke(this, callback);
@@ -205,6 +214,22 @@ namespace GoogLib
                 _serverProcesses.Add(instance, watcher);
                 OnServerProcessStarted(this, watcher);
             }
+        }
+
+        private string GetCurrentClientJunction()
+        {
+            string path = Path.Combine(_config.ClientPath, Config.FolderGameSave);
+            if (JunctionPoint.Exists(path))
+                return JunctionPoint.GetTarget(path);
+            else return string.Empty;
+        }
+
+        private string GetCurrentServerJunction(int instance)
+        {
+            string path = Path.Combine(GetInstancePath(instance), Config.FolderGameSave);
+            if (JunctionPoint.Exists(path))
+                return JunctionPoint.GetTarget(path);
+            else return string.Empty;
         }
 
         private void OnClientProcessStarted(object? sender, ClientProcess e)
@@ -265,22 +290,6 @@ namespace GoogLib
             string junction = Path.Combine(gamePath, Config.FolderGameSave);
             Tools.RemoveSymboliclink(junction);
             Tools.SetupSymboliclink(junction, targetPath);
-        }
-
-        private string GetCurrentServerJunction(int instance)
-        {
-            string path = Path.Combine(_config.GetInstancePath(instance), Config.FolderGameSave);
-            if (JunctionPoint.Exists(path))
-                return JunctionPoint.GetTarget(path);
-            else return string.Empty;
-        }
-
-        private string GetCurrentClientJunction()
-        {
-            string path = Path.Combine(_config.ClientPath, Config.FolderGameSave);
-            if (JunctionPoint.Exists(path))
-                return JunctionPoint.GetTarget(path);
-            else return string.Empty;
         }
     }
 }

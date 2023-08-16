@@ -37,7 +37,7 @@ namespace GoogGUI
 
         public bool CanExecute(object? parameter)
         {
-            return !_tasks.Any(App.TaskBlocker.IsSet) && _enabled;
+            return !App.TaskBlocker.IsSet(_tasks) && _enabled;
         }
 
         public void Execute(object? parameter)

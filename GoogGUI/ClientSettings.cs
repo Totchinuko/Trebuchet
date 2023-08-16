@@ -87,7 +87,7 @@ namespace GoogGUI
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            _profile = ClientProfile.LoadFile(ClientProfile.GetPath(_config, _selectedProfile));
+            _profile = ClientProfile.LoadProfile(_config, ClientProfile.GetPath(_config, _selectedProfile));
             OnPropertyChanged("ProfileSize");
             RefreshFields();
         }
@@ -119,7 +119,7 @@ namespace GoogGUI
 
             string newPath = savedFolder + "_Original";
             Directory.Move(savedFolder, newPath);
-            ClientProfile Original = ClientProfile.CreateFile(ClientProfile.GetPath(_config, "_Original"));
+            ClientProfile Original = ClientProfile.CreateProfile(_config, ClientProfile.GetPath(_config, "_Original"));
             Original.SaveFile();
             string profileFolder = Path.GetDirectoryName(Original.FilePath) ?? throw new DirectoryNotFoundException($"{Original.FilePath} path is invalid");
             Tools.DeepCopy(newPath, profileFolder);
@@ -153,7 +153,7 @@ namespace GoogGUI
                 return;
             }
 
-            _profile = ClientProfile.CreateFile(Path.Combine(ClientProfile.GetPath(_config, name)));
+            _profile = ClientProfile.CreateProfile(_config, Path.Combine(ClientProfile.GetPath(_config, name)));
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
@@ -191,7 +191,7 @@ namespace GoogGUI
 
             string path = Path.Combine(ClientProfile.GetPath(_config, name));
             _profile.CopyFolderTo(path);
-            _profile = ClientProfile.LoadFile(path);
+            _profile = ClientProfile.LoadProfile(_config, path);
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;

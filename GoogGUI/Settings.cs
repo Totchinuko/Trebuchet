@@ -80,7 +80,7 @@ namespace GoogGUI
             if (_config.ServerInstanceCount <= 0) return;
             if (!App.TaskBlocker.IsAvailable) return;
 
-            int installed = _config.GetInstalledInstances();
+            int installed = Setup.GetInstalledInstances(_config);
             if (installed >= _config.ServerInstanceCount)
                 return;
 
@@ -119,7 +119,7 @@ namespace GoogGUI
         {
             RequiredActions.Clear();
 
-            int installed = _config.GetInstalledInstances();
+            int installed = Setup.GetInstalledInstances(_config);
             if (Directory.Exists(_config.InstallPath) && !File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)))
                 RequiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, TaskBlocker.MainTask));
             else if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)

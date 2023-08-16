@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace GoogLib
 {
-    public sealed class ModListProfile : ConfigFile<ModListProfile>
+    public sealed class ModListProfile : ProfileFile<ModListProfile>
     {
         private List<string> _modlist = new List<string>();
         private string _syncURL = string.Empty;
@@ -44,6 +44,13 @@ namespace GoogLib
             }
         }
 
+        public static IEnumerable<ulong> GetModIDList(IEnumerable<string> modlist)
+        {
+            foreach (string mod in modlist)
+                if (TryParseModID(mod, out ulong id))
+                    yield return id;
+        }
+
         public static string GetPath(Config config, string modlistName)
         {
             return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles, modlistName + ".json");
@@ -62,9 +69,18 @@ namespace GoogLib
             return list;
         }
 
+        public static IEnumerable<string> ParseModList(IEnumerable<string> modlist)
+        {
+            foreach (var mod in modlist)
+                if (TryParseModID(mod, out ulong id))
+                    yield return id.ToString();
+                else
+                    yield return mod;
+        }
+
         public static void ResolveProfile(Config config, ref string profileName)
         {
-            if(!string.IsNullOrEmpty(profileName))
+            if (!string.IsNullOrEmpty(profileName))
             {
                 string path = GetPath(config, profileName);
                 if (File.Exists(path)) return;
@@ -78,16 +94,17 @@ namespace GoogLib
                 CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
-        public static bool TryParseModID(string path, out ulong id)
+        public static bool TryParseDirectory2ModID(string path, out ulong id)
         {
             id = 0;
-            if (ulong.TryParse(path, out id))
+            if (ulong.TryParse(Path.GetFileName(path), out id))
                 return true;
 
-            if (Path.GetExtension(path) == ".pak")
-                return TryParseFile2ModID(path, out id);
-            else
-                return TryParseDirectory2ModID(path, out id);
+            string? parent = Path.GetDirectoryName(path);
+            if (parent != null && ulong.TryParse(Path.GetFileName(parent), out id))
+                return true;
+
+            return false;
         }
 
         public static bool TryParseFile2ModID(string path, out ulong id)
@@ -102,26 +119,16 @@ namespace GoogLib
             return false;
         }
 
-        public static bool TryParseDirectory2ModID(string path, out ulong id)
+        public static bool TryParseModID(string path, out ulong id)
         {
             id = 0;
-            if(ulong.TryParse(Path.GetFileName(path), out id))
+            if (ulong.TryParse(path, out id))
                 return true;
 
-            string? parent = Path.GetDirectoryName(path);
-            if(parent != null && ulong.TryParse(Path.GetFileName(parent), out id))
-                return true;
-
-            return false;                
-        }
-
-        public static IEnumerable<string> ParseModList(IEnumerable<string> modlist)
-        {
-            foreach (var mod in modlist)
-                if (TryParseModID(mod, out ulong id))
-                    yield return id.ToString();
-                else
-                    yield return mod;
+            if (Path.GetExtension(path) == ".pak")
+                return TryParseFile2ModID(path, out id);
+            else
+                return TryParseDirectory2ModID(path, out id);
         }
 
         public IEnumerable<ulong> GetModIDList()
@@ -129,16 +136,47 @@ namespace GoogLib
             return GetModIDList(Modlist);
         }
 
-        public static IEnumerable<ulong> GetModIDList(IEnumerable<string> modlist)
-        {
-            foreach (string mod in modlist)
-                if (TryParseModID(mod, out ulong id))
-                    yield return id;
-        }
-
         public string GetModList()
         {
             return string.Join("\r\n", Modlist);
+        }
+
+        public bool ResolveMod(ref string mod)
+        {
+            string file = mod;
+            if (long.TryParse(mod, out _))
+                file = Path.Combine(Config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, Config.ClientAppID.ToString(), mod, "none");
+
+            string? folder = Path.GetDirectoryName(file);
+            if (folder == null)
+                return false;
+
+            if (!long.TryParse(Path.GetFileName(folder), out _))
+                return File.Exists(file);
+
+            if (!Directory.Exists(folder))
+                return false;
+
+            string[] files = Directory.GetFiles(folder, "*.pak", SearchOption.TopDirectoryOnly);
+            if (files.Length == 0)
+                return false;
+
+            mod = files[0];
+            return true;
+        }
+
+        public void ResolveModsPath(List<string> modlist, out List<string> result, out List<string> errors)
+        {
+            result = new List<string>();
+            errors = new List<string>();
+
+            foreach (string mod in modlist)
+            {
+                string path = mod;
+                if (!ResolveMod(ref path))
+                    errors.Add(path);
+                result.Add(path);
+            }
         }
 
         public void SetModList(string modlist)
