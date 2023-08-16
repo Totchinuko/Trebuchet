@@ -167,9 +167,9 @@ namespace GoogLib
         {
             if (_clientProcess != null) return;
 
-            List<ProcessData> processes = Tools.GetProcessesWithName(Config.FileClientBin);
-            if (processes.Count == 0) return;
-            if (!processes[0].TryGetProcess(out Process? process)) return;
+            var data = Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
+            if (data.IsEmpty) return;
+            if (!data.TryGetProcess(out Process? process)) return;
 
             _clientProcess = new ClientProcess(process);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
@@ -178,8 +178,7 @@ namespace GoogLib
 
         private void FindExistingServers()
         {
-            List<ProcessData> processes = Tools.GetProcessesWithName(Config.FileServerBin);
-
+            var processes = Tools.GetProcessesWithName(Config.FileServerBin);
             foreach (var p in processes)
             {
                 if (!GetInstance(p.args, out int instance)) continue;

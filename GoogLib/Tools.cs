@@ -152,13 +152,13 @@ namespace Goog
             return Path.GetFileNameWithoutExtension(profiles[0]);
         }
 
-        public static List<ProcessData> GetChildProcesses(int parentId)
+        public static IEnumerable<ProcessData> GetChildProcesses(int parentId)
         {
             var query = $"Select * From Win32_Process Where ParentProcessId = {parentId}";
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
             ManagementObjectCollection processList = searcher.Get();
 
-            return PackData(processList);
+            return processList.EnumerateData();
         }
 
         public static ProcessData GetFirstChildProcesses(int parentId)
@@ -183,21 +183,19 @@ namespace Goog
             return new ProcessData(processList.Cast<ManagementObject>().First());
         }
 
-        public static List<ProcessData> GetProcessesWithName(string processName)
+        public static IEnumerable<ProcessData> GetProcessesWithName(string processName)
         {
             var query = $"Select * From Win32_Process Where Name='{processName}'";
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
             ManagementObjectCollection processList = searcher.Get();
 
-            return PackData(processList);
+            return processList.EnumerateData();
         }
 
-        public static List<ProcessData> PackData(ManagementObjectCollection collection)
+        public static IEnumerable<ProcessData> EnumerateData(this ManagementObjectCollection collection)
         {
-            List<ProcessData> data = new List<ProcessData>(collection.Count);
             foreach (var process in collection)
-                data.Add(new ProcessData(process));
-            return data;
+                yield return new ProcessData(process);
         }
 
         public static string TrimMatchingQuotes(this string input, char quote)
