@@ -185,23 +185,5 @@ namespace Goog
                 result.Add(path);
             }
         }
-
-        public bool TryGetFirstProfile(out string profileName)
-        {
-            profileName = string.Empty;
-            string folder = Path.Combine(InstallPath, VersionFolder, FolderServerProfiles);
-            if (!Directory.Exists(folder))
-                return false;
-            string[] directories = Directory.GetDirectories(folder);
-            if (directories.Length == 0)
-                return false;
-            if (directories.Contains(Path.Combine(folder, "Default")))
-            {
-                profileName = "Default";
-                return true;
-            }
-            profileName = Path.GetFileName(directories[0]);
-            return !string.IsNullOrEmpty(profileName);
-        }
     }
 }
