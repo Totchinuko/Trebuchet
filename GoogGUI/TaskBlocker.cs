@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Linq;
 using System.Threading;
 using System.Windows.Input;
 
@@ -43,9 +44,9 @@ namespace GoogGUI
                 source.Cancel();
         }
 
-        public bool IsSet(string key)
+        public bool IsSet(params string[] key)
         {
-            return _taskSources.ContainsKey(key);
+            return key.Any(_taskSources.ContainsKey);
         }
 
         public void Release(string key)
