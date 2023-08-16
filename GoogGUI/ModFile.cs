@@ -118,5 +118,10 @@ namespace GoogGUI
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
+
+        public override string ToString()
+        {
+            return IsPublished ? PublishedFileID.ToString() : _infos.FullName;
+        }
     }
 }

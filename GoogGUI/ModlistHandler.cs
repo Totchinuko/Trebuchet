@@ -431,7 +431,7 @@ namespace GoogGUI
         {
             _profile.Modlist.Clear();
             _profile.Modlist.AddRange(
-                _modlist.Select(file=> file.PublishedFileID.ToString())
+                _modlist.Select(file=> file.ToString())
                 );
             _profile.SaveFile();
         }
