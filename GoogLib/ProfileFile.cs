@@ -4,7 +4,7 @@ namespace GoogLib
 {
     public abstract class ProfileFile<T> : JsonFile<T> where T : ProfileFile<T>
     {
-        public Config Config { get; protected set; } = default!;
+        protected Config Config { get; set; } = default!;
 
         public static T CreateProfile(Config config, string path)
         {

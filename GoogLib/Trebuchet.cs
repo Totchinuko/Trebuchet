@@ -1,5 +1,6 @@
 ﻿using Goog;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace GoogLib
@@ -36,76 +37,48 @@ namespace GoogLib
             return int.TryParse(match.Groups[1].Value, out instance);
         }
 
-        public void CatapultClient(string profileName, string modlistName)
+        public void CatapultClient(string profileName, string modlistName, bool isBattleEye)
         {
             if (_clientProcess != null)
                 throw new Exception("Client is already running.");
 
-            string profilePath = ClientProfile.GetPath(_config, profileName);
-            if (!File.Exists(profilePath)) throw new Exception("Unknown game profile.");
-            ClientProfile profile = ClientProfile.LoadProfile(_config, profilePath);
+            if (!ClientProfile.TryLoadProfile(_config, profileName, out ClientProfile? profile))
+                throw new Exception("Unknown Profile.");
+            if (!ModListProfile.TryLoadProfile(_config, modlistName, out ModListProfile? modlist))
+                throw new Exception("Unknown Mod List.");
 
             if (_lockedFolders.Contains(profile.ProfileFolder))
                 throw new Exception("Profile folder is currently locked by another process.");
-
-            string modlistPath = ModListProfile.GetPath(_config, modlistName);
-            if (!File.Exists(modlistPath)) throw new Exception("Unknown Mod List.");
-            ModListProfile modlist = ModListProfile.LoadProfile(_config, modlistPath);
-
-            modlist.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
-            if (errors.Count > 0)
-                throw new Exception("Some mods path could not be resolved.");
-
-            File.WriteAllLines(Path.Combine(profile.ProfileFolder, Config.FileGeneratedModlist), result);
+            _lockedFolders.Add(GetCurrentClientJunction());
 
             SetupJunction(_config.ClientPath, profile.ProfileFolder);
 
-            IniConfigurator configurator = new IniConfigurator(_config);
-            configurator.WriteIniConfigs(profile, _config.ClientPath);
-            configurator.FlushConfigs();
-
-            _clientProcess = new ClientProcess(profile.GetBinaryPath(profile.UseBattleEye), profile.GetClientArgs());
+            _clientProcess = new ClientProcess(profile, modlist, isBattleEye);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             _clientProcess.ProcessStarted += OnClientProcessStarted;
-
-            _lockedFolders.Add(GetCurrentClientJunction());
             Task.Run(_clientProcess.StartProcessAsync);
         }
 
         public void CatapultServer(string profileName, string modlistName, int instance)
         {
-            if (_serverProcesses.ContainsKey(instance))
-                throw new Exception("Server instance is already running.");
+            if (_serverProcesses.ContainsKey(instance)) return;
 
-            string profilePath = ServerProfile.GetPath(_config, profileName);
-            if (!File.Exists(profilePath)) throw new Exception("Unknown server profile.");
-            ServerProfile profile = ServerProfile.LoadProfile(_config, profilePath);
+            if (!ServerProfile.TryLoadProfile(_config, profileName, out ServerProfile? profile))
+                throw new Exception("Unknown Profile.");
+            if (!ModListProfile.TryLoadProfile(_config, modlistName, out ModListProfile? modlist))
+                throw new Exception("Unknown Mod List.");
 
             if (_lockedFolders.Contains(profile.ProfileFolder))
                 throw new Exception("Profile folder is currently locked by another process.");
+            _lockedFolders.Add(GetCurrentServerJunction(instance));
 
-            string modlistPath = ModListProfile.GetPath(_config, modlistName);
-            if (!File.Exists(modlistPath)) throw new Exception("Unknown Mod List.");
-            ModListProfile modlist = ModListProfile.LoadProfile(_config, modlistPath);
+            SetupJunction(ServerProfile.GetInstancePath(_config, instance), profile.ProfileFolder);
 
-            modlist.ResolveModsPath(modlist.Modlist, out List<string> result, out List<string> errors);
-            if (errors.Count > 0)
-                throw new Exception("Some mods path could not be resolved.");
-
-            File.WriteAllLines(Path.Combine(profile.ProfileFolder, Config.FileGeneratedModlist), result);
-
-            SetupJunction(GetInstancePath(instance), profile.ProfileFolder);
-
-            IniConfigurator configurator = new IniConfigurator(_config);
-            configurator.WriteIniConfigs(profile, GetInstancePath(instance));
-            configurator.FlushConfigs();
-
-            ServerProcess watcher = new ServerProcess(GetServerIntanceBinary(instance), profile.GetServerArgs(instance), instance);
+            ServerProcess watcher = new ServerProcess(profile, modlist, instance);
             watcher.ProcessExited += OnServerProcessTerminate;
             watcher.ProcessStarted += OnServerProcessStarted;
             _serverProcesses.Add(instance, watcher);
 
-            _lockedFolders.Add(GetCurrentServerJunction(instance));
             Task.Run(watcher.StartProcessAsync);
         }
 
@@ -115,37 +88,13 @@ namespace GoogLib
                 watcher.Close();
         }
 
-        public IEnumerable<string> GetInstanceActiveWorkshopMods(int instance)
-        {
-            string path = Path.Combine(GetInstancePath(instance), Config.FolderGameSave, Config.FileGeneratedModlist);
-            if (File.Exists(path))
-                return File.ReadAllLines(path);
-            else
-                return Enumerable.Empty<string>();
-        }
-
-        public string GetInstancePath(int instance)
-        {
-            return Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance));
-        }
-
-        public IEnumerable<string> GetServerActiveWorkshopMods()
-        {
-            return _serverProcesses.Values.Select(s => GetInstanceActiveWorkshopMods(s.ServerInstance)).SelectMany(x => x).Distinct();
-        }
-
-        public string GetServerIntanceBinary(int instance)
-        {
-            return Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance), Config.FileServerProxyBin);
-        }
-
         public bool IsAnyServerRunning() => _serverProcesses.Count > 0;
 
-        public bool IsClientRunning() => _clientProcess?.Process != null;
+        public bool IsClientRunning() => _clientProcess != null && _clientProcess.IsRunning;
 
         public bool IsFolderLocked(string folder) => _lockedFolders.Contains(folder);
 
-        public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.Process != null;
+        public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.IsRunning;
 
         public void KillAllServers()
         {
@@ -178,8 +127,6 @@ namespace GoogLib
                 if ((server.LastResponsive + TimeSpan.FromSeconds(_config.ZombieCheckSeconds)) < DateTime.UtcNow && _config.KillZombies)
                     server.Kill();
             }
-
-            _clientProcess?.Process?.Refresh();
         }
 
         private void AddDispatch(Action callback)
@@ -193,9 +140,10 @@ namespace GoogLib
 
             var data = Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
             if (data.IsEmpty) return;
+            if(!TrebuchetLaunch.TryLoadPreviousLaunch(_config, out ClientProfile? profile, out ModListProfile? modlist)) return;
             if (!data.TryGetProcess(out Process? process)) return;
 
-            _clientProcess = new ClientProcess(process);
+            _clientProcess = new ClientProcess(profile, modlist, false);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             OnClientProcessStarted(this, _clientProcess);
         }
@@ -208,11 +156,12 @@ namespace GoogLib
                 if (!GetInstance(p.args, out int instance)) continue;
                 if (_serverProcesses.ContainsKey(instance)) continue;
                 if (!p.TryGetProcess(out Process? process)) continue;
+                if (!TrebuchetLaunch.TryLoadPreviousLaunch(_config, instance, out ServerProfile? profile, out ModListProfile? modlist)) continue;
 
-                ServerProcess watcher = new ServerProcess(process, p.filename, p.args, instance);
+                var watcher = new ServerProcess(profile, modlist, instance, process, p);
                 watcher.ProcessExited += OnServerProcessTerminate;
                 _serverProcesses.Add(instance, watcher);
-                OnServerProcessStarted(this, watcher);
+                OnServerProcessStarted(this, watcher);                
             }
         }
 
@@ -226,7 +175,7 @@ namespace GoogLib
 
         private string GetCurrentServerJunction(int instance)
         {
-            string path = Path.Combine(GetInstancePath(instance), Config.FolderGameSave);
+            string path = Path.Combine(ServerProfile.GetInstancePath(_config, instance), Config.FolderGameSave);
             if (JunctionPoint.Exists(path))
                 return JunctionPoint.GetTarget(path);
             else return string.Empty;
@@ -234,10 +183,10 @@ namespace GoogLib
 
         private void OnClientProcessStarted(object? sender, ClientProcess e)
         {
-            if (e.Process == null) return;
+            if (!e.IsRunning) return;
             AddDispatch(() =>
             {
-                ClientProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.Process));
+                ClientProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.ProcessData));
             });
         }
 
@@ -254,11 +203,11 @@ namespace GoogLib
 
         private void OnServerProcessStarted(object? sender, ServerProcess e)
         {
-            if (e.Process == null) return;
+            if (!e.IsRunning) return;
 
             AddDispatch(() =>
             {
-                ServerProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.Process, e.ServerInstance));
+                ServerProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.ProcessData, e.ServerInstance));
             });
         }
 
@@ -271,7 +220,7 @@ namespace GoogLib
 
                 if (!e.Closed && _config.RestartWhenDown)
                 {
-                    var watcher = new ServerProcess(e.Filename, e.Args, e.ServerInstance);
+                    var watcher = new ServerProcess(e.Profile, e.Modlist, e.ServerInstance);
                     _serverProcesses.Add(watcher.ServerInstance, watcher);
                     watcher.ProcessStarted += OnServerProcessStarted;
                     watcher.ProcessExited += OnServerProcessTerminate;

@@ -1,4 +1,5 @@
 ﻿using Goog;
+using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -8,12 +9,17 @@ namespace GoogLib
 {
     public class ServerProfile : ProfileFile<ServerProfile>
     {
-
         public bool Log { get; set; } = false;
 
         public string Map { get; set; } = "/Game/Maps/ConanSandbox/ConanSandbox";
 
         public int MaxPlayers { get; set; } = 30;
+
+        [JsonIgnore]
+        public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
+
+        [JsonIgnore]
+        public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
 
         public List<string> SudoSuperAdmins { get; set; } = new List<string>();
 
@@ -33,13 +39,28 @@ namespace GoogLib
 
         #endregion IniSettings
 
-        [JsonIgnore]
-        public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
-
-        [JsonIgnore]
-        public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
-
         public static string GetFolder(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name);
+
+        public static string GetInstancePath(Config config, int instance)
+        {
+            return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance));
+        }
+
+        public string GetInstancePath(int instance)
+        {
+            return GetInstancePath(Config, instance);
+        }
+
+        public static string GetIntanceBinary(Config config, int instance)
+        {
+            return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance), Config.FileServerProxyBin);
+        }
+
+        public string GetIntanceBinary(int instance)
+        {
+            return GetIntanceBinary(Config, instance);
+        }
+
 
         public static Dictionary<string, string> GetMapList()
         {
@@ -84,6 +105,19 @@ namespace GoogLib
                 CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
+        public static bool TryLoadProfile(Config config, string name, [NotNullWhen(true)] out ServerProfile? profile)
+        {
+            profile = null;
+            string profilePath = GetPath(config, name);
+            if (!File.Exists(profilePath)) return false;
+            try
+            {
+                profile = LoadProfile(config, profilePath);
+                return true;
+            }
+            catch { return false; }
+        }
+
         public string GetServerArgs(int instance)
         {
             string? profileFolder = Path.GetDirectoryName(FilePath) ?? throw new Exception("Invalid folder directory.");
@@ -96,6 +130,28 @@ namespace GoogLib
             args.Add($"-TotInstance={instance}");
 
             return string.Join(" ", args);
+        }
+
+        public void WriteIniFiles(int instance)
+        {
+            Dictionary<string, IniDocument> documents = new Dictionary<string, IniDocument>();
+
+            foreach (var method in Tools.GetIniMethod(this))
+            {
+                IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
+                if (!documents.TryGetValue(attr.Path, out IniDocument? document))
+                {
+                    document = IniParser.Parse(Tools.GetFileContent(Path.Combine(GetInstancePath(instance), attr.Path)));
+                    documents.Add(attr.Path, document);
+                }
+                method.Invoke(this, new object?[] { document });
+            }
+
+            foreach (var document in documents)
+            {
+                document.Value.MergeDuplicateSections();
+                Tools.SetFileContent(Path.Combine(GetInstancePath(instance), document.Key), document.Value.ToString());
+            }
         }
     }
 }

@@ -1,73 +1,110 @@
-﻿using System.Diagnostics;
+﻿using Goog;
+using System.Diagnostics;
 
 namespace GoogLib
 {
     public class ClientProcess
     {
-        private string _args = string.Empty;
-        private string _filename = string.Empty;
+        private Process? _process;
 
-        public ClientProcess(string filename, string args)
+        public ClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye)
         {
-            _filename = filename;
-            _args = args;
+            Profile = profile;
+            Modlist = modlist;
+            IsBattleEye = isBattleEye;
+
         }
 
-        public ClientProcess(Process process)
+        public ClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye, Process process, ProcessData data)
         {
-            Process = process;
-            Process.EnableRaisingEvents = true;
-            Process.Exited -= OnProcessExited;
-            Process.Exited += OnProcessExited;
+            Profile = profile;
+            Modlist = modlist;
+            IsBattleEye = isBattleEye;
+            ProcessData = data;
+
+            _process = process;
+            _process.EnableRaisingEvents = true;
+            _process.Exited -= OnProcessExited;
+            _process.Exited += OnProcessExited;
         }
 
         public event EventHandler<ClientProcess>? ProcessExited;
 
         public event EventHandler<ClientProcess>? ProcessStarted;
 
-        public Process? Process { get; private set; }
+        public ModListProfile Modlist { get; }
+
+        public ClientProfile Profile { get; }
+
+        public bool IsBattleEye { get; }
+
+        public ProcessData ProcessData { get; private set; }
+
+        public bool IsRunning => _process != null;
 
         public void Kill()
         {
-            Process?.Kill();
+            _process?.Kill();
         }
 
         public async Task StartProcessAsync()
         {
-            if (Process != null)
+            if (_process != null)
                 throw new Exception("Cannot start a process already started.");
 
-            string? dir = Path.GetDirectoryName(_filename);
-            if (dir == null) throw new Exception($"Failed to restart process, invalid directory {_filename}");
+            string filename = Profile.GetBinaryPath(IsBattleEye);
+            string args = Profile.GetClientArgs();
+
+            string? dir = Path.GetDirectoryName(filename);
+            if (dir == null) throw new Exception($"Failed to restart process, invalid directory {filename}");
 
             Process process = new Process();
-            process.StartInfo.FileName = _filename;
+            process.StartInfo.FileName = filename;
 
             process.StartInfo.WorkingDirectory = dir;
 
-            process.StartInfo.Arguments = _args;
+            process.StartInfo.Arguments = args;
             process.StartInfo.UseShellExecute = false;
             process.EnableRaisingEvents = true;
             process.Exited += OnProcessExited;
-            Process = process;
-            await Task.Run(() =>
-            {
-                Process.Start();
-                OnProcessStarted();
-            });
+            await StartProcessInternal(process);
         }
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)
         {
-            if (Process == null) return;
-            Process.Dispose();
-            Process = null;
+            if (_process == null) return;
+            _process.Dispose();
+            _process = null;
             ProcessExited?.Invoke(sender, this);
         }
 
         protected virtual void OnProcessStarted()
         {
             ProcessStarted?.Invoke(this, this);
+        }
+
+        //If we start with battle eye, launched process is not going to be the actual game.
+        protected virtual async Task StartProcessInternal(Process process)
+        {
+            File.WriteAllLines(Path.Combine(Profile.ProfileFolder, Config.FileGeneratedModlist), Modlist.GetResolvedModlist());
+            Profile.WriteIniFiles();
+            TrebuchetLaunch.WriteConfig(Profile, Modlist);
+
+            process.Start();
+
+            ProcessData target = ProcessData.Empty;
+            while (target.IsEmpty && !process.HasExited)
+            {
+                target = Tools.GetProcessesWithName(Config.FileClientBin).First();
+                await Task.Delay(50);
+            }
+
+            if (target.IsEmpty) return;
+            if (!target.TryGetProcess(out Process? targetProcess)) return;
+
+            _process = targetProcess;
+            ProcessData = target;
+            OnProcessStarted();
         }
     }
 }

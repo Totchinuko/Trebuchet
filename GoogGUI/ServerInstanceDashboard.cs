@@ -169,7 +169,7 @@ namespace GoogGUI
 
         private void OnProcessStarted(object? sender, TrebuchetStartEventArgs e)
         {
-            if (_instance != e.intance) return;
+            if (_instance != e.instance) return;
 
             LaunchCommand.Toggle(false);
             KillCommand.Toggle(true);

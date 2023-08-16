@@ -1,4 +1,6 @@
 ﻿using Goog;
+using System.Diagnostics.CodeAnalysis;
+using System.Reflection;
 using System.Text.Json.Serialization;
 using Yuu.Ini;
 
@@ -101,6 +103,11 @@ namespace GoogLib
             return Path.Combine(Config.ClientPath, Config.FolderGameBinaries, (battleEye ? Config.FileClientBEBin : Config.FileClientBin));
         }
 
+        public string GetClientPath()
+        {
+            return Config.ClientPath;
+        }
+
         public string GetClientArgs()
         {
             string profileFolder = Path.GetDirectoryName(FilePath) ?? throw new Exception("Invalid folder directory.");
@@ -111,6 +118,42 @@ namespace GoogLib
             args.Add(string.Format(Config.GameArgsModList, Path.Combine(profileFolder, Config.FileGeneratedModlist)));
 
             return string.Join(" ", args);
+        }
+
+        public static bool TryLoadProfile(Config config, string name, [NotNullWhen(true)] out ClientProfile? profile)
+        {
+            profile = null;
+            string profilePath = GetPath(config, name);
+            if (!File.Exists(profilePath)) return false;
+            try
+            {
+                profile = LoadProfile(config, profilePath);
+                return true;
+
+            }
+            catch { return false; }
+        }
+
+        public void WriteIniFiles()
+        {
+            Dictionary<string, IniDocument> documents = new Dictionary<string, IniDocument>();
+
+            foreach (var method in Tools.GetIniMethod(this))
+            {
+                IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
+                if(!documents.TryGetValue(attr.Path, out IniDocument? document))
+                {
+                    document = IniParser.Parse(Tools.GetFileContent(Path.Combine(GetClientPath(), attr.Path)));
+                    documents.Add(attr.Path, document);
+                }
+                method.Invoke(this, new object?[] { document });
+            }
+
+            foreach (var document in documents)
+            {
+                document.Value.MergeDuplicateSections();
+                Tools.SetFileContent(Path.Combine(GetClientPath(), document.Key), document.Value.ToString());
+            }
         }
     }
 }

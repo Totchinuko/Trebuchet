@@ -248,10 +248,15 @@ namespace GoogGUI
 
         private void OnExportToTxt(object? obj)
         {
-            _profile.ResolveModsPath(_profile.Modlist, out List<string> results, out List<string> error);
-            if (error.Count > 0)
-                new MessageModal("Invalid", "Some mods from your list are missing and could not be resolved").ShowDialog();
-            new ModlistTextImport(string.Join("\r\n", results), true, FileType.Txt).ShowDialog();
+            try
+            {
+                string content = string.Join("\r\n", _profile.GetResolvedModlist());
+                new ModlistTextImport(content, true, FileType.Txt).ShowDialog();
+            } catch
+            {
+                new ErrorModal("Error", "Some of the mods path cannot be resolved because the mod file was not found. " +
+                    "In order to export your modlist, please unsure that all of the mods are not marked as missing.").ShowDialog();
+            }
         }
 
         private void OnFetchClicked(object? obj)

@@ -95,7 +95,7 @@ namespace GoogGUI
             _trebuchet.KillClient();
         }
 
-        public void Launch()
+        public void Launch(bool isBattleEye)
         {
             if (_trebuchet.IsClientRunning()) return;
             if(_trebuchet.IsFolderLocked(ClientProfile.GetFolder(_config, _selectedProfile)))
@@ -106,7 +106,7 @@ namespace GoogGUI
 
             LaunchCommand.Toggle(false);
 
-            _trebuchet.CatapultClient(_selectedProfile, _selectedModlist);
+            _trebuchet.CatapultClient(_selectedProfile, _selectedModlist, isBattleEye);
 
             KillCommand.Toggle(true);
             OnPropertyChanged("ProcessRunning");
@@ -138,7 +138,7 @@ namespace GoogGUI
 
         private void OnLaunched(object? obj)
         {
-            Launch();
+            Launch(false);
         }
 
         private void OnProcessStarted(object? sender, TrebuchetStartEventArgs e)

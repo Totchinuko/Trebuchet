@@ -1,4 +1,5 @@
 ﻿using Goog;
+using System.Diagnostics.CodeAnalysis;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -160,23 +161,34 @@ namespace GoogLib
             return true;
         }
 
-        public void ResolveModsPath(List<string> modlist, out List<string> result, out List<string> errors)
+        public IEnumerable<string> GetResolvedModlist()
         {
-            result = new List<string>();
-            errors = new List<string>();
-
-            foreach (string mod in modlist)
+            foreach (string mod in Modlist)
             {
                 string path = mod;
                 if (!ResolveMod(ref path))
-                    errors.Add(path);
-                result.Add(path);
+                    throw new Exception($"Could not resolve mod {path}.");
+                yield return path;
             }
         }
 
         public void SetModList(string modlist)
         {
             Modlist = modlist.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
+        }
+
+        public static bool TryLoadProfile(Config config, string name, [NotNullWhen(true)] out ModListProfile? profile)
+        {
+            profile = null;
+            string profilePath = GetPath(config, name);
+            if (!File.Exists(profilePath)) return false;
+            try
+            {
+                profile = LoadProfile(config, profilePath);
+                return true;
+
+            }
+            catch { return false; }
         }
     }
 }

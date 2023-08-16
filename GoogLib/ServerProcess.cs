@@ -1,90 +1,89 @@
 ﻿using Goog;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GoogLib
 {
     public class ServerProcess
     {
-        private string _args = string.Empty;
-        private bool _closed;
-        private string _filename = string.Empty;
-        private DateTime _lastResponsive;
-        private int _serverInstance;
+        private Process? _process;
 
-        public ServerProcess(Process process, string filename, string args, int instance)
+        public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance)
         {
-            _lastResponsive = DateTime.UtcNow;
-            _serverInstance = instance;
-
-            _filename = filename;
-            _args = args;
-
-            Process = process;
-            Process.EnableRaisingEvents = true;
-            Process.Exited -= OnProcessExited;
-            Process.Exited += OnProcessExited;
+            ServerInstance = instance;
+            Profile = profile;
+            Modlist = modlist;
         }
 
-        public ServerProcess(string filename, string args, int instance)
+        public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance, Process process, ProcessData data)
         {
-            _lastResponsive = DateTime.UtcNow;
-            _serverInstance = instance;
+            ServerInstance = instance;
+            Profile = profile;
+            Modlist = modlist;
 
-            _args = args;
-            _filename = filename;
+            _process = process;
+            _process.EnableRaisingEvents = true;
+            _process.Exited -= OnProcessExited;
+            _process.Exited += OnProcessExited;
         }
 
         public event EventHandler<ServerProcess>? ProcessExited;
 
         public event EventHandler<ServerProcess>? ProcessStarted;
 
-        public string Args => _args;
+        public bool Closed { get; private set; }
 
-        public bool Closed => _closed;
+        public DateTime LastResponsive { get; private set; }
 
-        public string Filename => _filename;
+        public int ServerInstance { get; }
 
-        public DateTime LastResponsive => _lastResponsive;
+        public ServerProfile Profile { get; }
 
-        public Process? Process { get; private set; }
+        public ModListProfile Modlist { get; }
 
-        public int ServerInstance { get => _serverInstance; }
+        public ProcessData ProcessData { get; private set; }
+
+        public bool IsRunning => _process != null;
 
         public void Close()
         {
-            if (Process == null) return;
+            if (_process == null) return;
 
-            _closed = true;
-            Process.CloseMainWindow();
+            Closed = true;
+            _process.CloseMainWindow();
         }
 
         public void Kill()
         {
-            if (Process == null) return;
+            if (_process == null) return;
 
-            _closed = true;
-            Process.Kill();
+            Closed = true;
+            _process.Kill();
         }
 
         public void ProcessRefresh()
         {
-            if (Process == null) return;
-            Process.Refresh();
+            if (_process == null) return;
+            _process.Refresh();
 
-            if (Process.Responding)
-                _lastResponsive = DateTime.UtcNow;
+            if (_process.Responding)
+                LastResponsive = DateTime.UtcNow;
         }
 
         public async Task StartProcessAsync()
         {
             Process process = new Process();
 
-            string? dir = Path.GetDirectoryName(_filename);
-            if (dir == null) throw new Exception($"Failed to restart process, invalid directory {_filename}");
+            string filename = Profile.GetIntanceBinary(ServerInstance);
+            string args = Profile.GetServerArgs(ServerInstance);
 
-            process.StartInfo.FileName = _filename;
+            string? dir = Path.GetDirectoryName(filename);
+            if (dir == null) throw new Exception($"Failed to restart process, invalid directory {filename}");
+
+            process.StartInfo.FileName = filename;
             process.StartInfo.WorkingDirectory = dir;
-            process.StartInfo.Arguments = _args;
+            process.StartInfo.Arguments = args;
             process.StartInfo.UseShellExecute = false;
             process.EnableRaisingEvents = true;
             process.Exited += OnProcessExited;
@@ -94,11 +93,11 @@ namespace GoogLib
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)
         {
-            if (Process == null) return;
+            if (_process == null) return;
 
-            Process.Exited -= OnProcessExited;
-            Process.Dispose();
-            Process = null;
+            _process.Exited -= OnProcessExited;
+            _process.Dispose();
+            _process = null;
             ProcessExited?.Invoke(sender, this);
         }
 
@@ -111,6 +110,11 @@ namespace GoogLib
         // Its usually done in an instant, but since I'm not sure that this could be prone to race condition, I'm waiting for it just in case.
         protected virtual async Task StartProcessInternal(Process process)
         {
+            File.WriteAllLines(Path.Combine(Profile.ProfileFolder, Config.FileGeneratedModlist), Modlist.GetResolvedModlist());
+            Profile.WriteIniFiles(ServerInstance);
+            TrebuchetLaunch.WriteConfig(Profile, Modlist, ServerInstance);
+
+            LastResponsive = DateTime.UtcNow;
             process.Start();
 
             ProcessData child = ProcessData.Empty;
@@ -123,7 +127,8 @@ namespace GoogLib
             if (child.IsEmpty) return;
             if (!child.TryGetProcess(out Process? childProcess)) return;
 
-            Process = childProcess;
+            _process = childProcess;
+            ProcessData = child;
             OnProcessStarted();
         }
     }

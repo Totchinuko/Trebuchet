@@ -30,6 +30,7 @@ namespace Goog
         public const string FileSteamAppInfo = "appcache\\appinfo.vdf";
         public const string FileSteamCMDBin = "steamcmd.exe";
         public const string FileSteamInstanceManifeste = "steamapps\\appmanifest_{0}.acf";
+        public const string FileTrebuchetLaunch = "trebuchet.json";
         public const string FolderClientProfiles = "ClientProfiles";
         public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
         public const string FolderGameSave = "ConanSandbox\\Saved";
@@ -47,7 +48,6 @@ namespace Goog
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
 
         #endregion constants
-
 
         public uint ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 

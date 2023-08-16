@@ -4,13 +4,13 @@ namespace Goog
 {
     public class TrebuchetStartEventArgs : EventArgs
     {
-        public int intance;
+        public int instance;
         public ProcessData process;
 
-        public TrebuchetStartEventArgs(Process process, int instance = -1)
+        public TrebuchetStartEventArgs(ProcessData process, int instance = -1)
         {
-            this.intance = instance;
-            this.process = Tools.GetProcess(process.Id);
+            this.instance = instance;
+            this.process = process;
         }
     }
 }

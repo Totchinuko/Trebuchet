@@ -1,7 +1,10 @@
 ﻿using GoogLib;
 using System.Diagnostics;
+using System.IO;
 using System.IO.Compression;
 using System.Management;
+using System.Reflection;
+using Yuu.Ini;
 
 namespace Goog
 {
@@ -265,5 +268,26 @@ namespace Goog
                     yield return new KeyValuePair<ulong, FileInfo>(id, new FileInfo(file));
             }
         } 
+
+        public static IEnumerable<MethodInfo> GetIniMethod(object target)
+        {
+            return target.GetType().GetMethods()
+                .Where(meth => meth.GetCustomAttributes(typeof(IniSettingAttribute), true).Any())
+                .Where(meth => meth.GetParameters().Length == 1 && meth.GetParameters()[0].ParameterType == typeof(IniDocument));
+        }
+
+        public static string GetFileContent(string path)
+        {
+            if (!File.Exists(path)) return string.Empty;
+            return File.ReadAllText(path);
+        }
+
+        public static void SetFileContent(string path, string content)
+        {
+            string? folder = Path.GetDirectoryName(path);
+            if (folder == null) throw new Exception($"Invalid folder for {path}.");
+            CreateDir(folder);
+            File.WriteAllText(path, content);
+        }
     }
 }

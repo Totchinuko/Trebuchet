@@ -91,14 +91,6 @@ namespace GoogGUI
                 i.Close();
         }
 
-        private void OnDetectModOutOfDate()
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                throw new NotImplementedException();
-            });
-        }
-
         private void OnDispatcherTick(object? sender, EventArgs e)
         {
             _trebuchet.TickTrebuchet();
@@ -120,32 +112,6 @@ namespace GoogGUI
         {
             foreach (var i in Instances)
                 i.Launch();
-        }
-
-        private void OnRunModCheck()
-        {
-            if (App.TaskBlocker.IsSet(ModCheck)) return;
-
-            var modfiles = Tools.GetModFiles(_trebuchet.GetServerActiveWorkshopMods()).ToDictionary(k=>k.Key, v=>v.Value);
-
-            var ct = App.TaskBlocker.Set(ModCheck);
-            var query = new GetPublishedFileDetailsQuery(modfiles.Select(x => x.Key));
-            Task.Run(() => SteamRemoteStorage.GetPublishedFileDetails(query, ct)).ContinueWith((x) => OnRunModCheckCompleted(x, modfiles));
-        }
-
-        private void OnRunModCheckCompleted(Task<PublishedFilesResponse> task, Dictionary<ulong, FileInfo> files)
-        {
-            if (task.Result.ResultCount == 0) return;
-            foreach (PublishedFile published in task.Result.PublishedFileDetails)
-            {
-                if(files.TryGetValue(published.PublishedFileID, out FileInfo? info) &&
-                    info.Exists && 
-                    Tools.UnixTimeStampToDateTime(published.TimeUpdated) <= info.LastWriteTimeUtc) 
-                    continue;
-
-                OnDetectModOutOfDate();
-                return;
-            }
         }
 
         private void OnTrebuchetRequestDispatcher(object? sender, Action e)
