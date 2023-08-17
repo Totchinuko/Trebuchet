@@ -21,6 +21,7 @@ namespace GoogLib
             ServerInstance = instance;
             Profile = profile;
             Modlist = modlist;
+            ProcessData = data;
 
             _process = process;
             _process.EnableRaisingEvents = true;
