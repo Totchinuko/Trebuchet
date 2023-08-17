@@ -49,13 +49,14 @@ namespace GoogLib
 
             if (_lockedFolders.Contains(profile.ProfileFolder))
                 throw new Exception("Profile folder is currently locked by another process.");
-            _lockedFolders.Add(GetCurrentClientJunction());
 
             SetupJunction(_config.ClientPath, profile.ProfileFolder);
 
             _clientProcess = new ClientProcess(profile, modlist, isBattleEye);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             _clientProcess.ProcessStarted += OnClientProcessStarted;
+
+            _lockedFolders.Add(GetCurrentClientJunction());
             Task.Run(_clientProcess.StartProcessAsync);
         }
 
@@ -70,7 +71,6 @@ namespace GoogLib
 
             if (_lockedFolders.Contains(profile.ProfileFolder))
                 throw new Exception("Profile folder is currently locked by another process.");
-            _lockedFolders.Add(GetCurrentServerJunction(instance));
 
             SetupJunction(ServerProfile.GetInstancePath(_config, instance), profile.ProfileFolder);
 
@@ -79,6 +79,7 @@ namespace GoogLib
             watcher.ProcessStarted += OnServerProcessStarted;
             _serverProcesses.Add(instance, watcher);
 
+            _lockedFolders.Add(GetCurrentServerJunction(instance));
             Task.Run(watcher.StartProcessAsync);
         }
 
