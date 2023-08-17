@@ -19,13 +19,9 @@
     <SolidColorBrush x:Key="GDimYellow" Color="#AAffb300" />
     <SolidColorBrush x:Key="GYellow" Color="#FFffb300" />
     <SolidColorBrush x:Key="GDimBlue" Color="{StaticResource CDimBlue}" />
-    <SolidColorBrush x:Key="GBlue" Color="#FF3a8eda" />  
+    <SolidColorBrush x:Key="GBlue" Color="#FF3a8eda" />
 
     <Style TargetType="TextBlock">
-        <Setter Property="Foreground" Value="White" />
-        <Setter Property="FontSize" Value="12" />
-    </Style>
-    <Style TargetType="Run">
         <Setter Property="Foreground" Value="White" />
         <Setter Property="FontSize" Value="12" />
     </Style>
