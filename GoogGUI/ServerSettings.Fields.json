@@ -34,5 +34,11 @@
     "Name": "Use All Cores",
     "Description": "Supposed to improve performance on machines with lots of cores, unverified. Probably black magic.",
     "Default": false
+  },
+  {
+    "$type": "CPUAffinity",
+    "Property": "CPUThreadAffinity",
+    "Name": "CPU Thread Affinity",
+    "Description": "CPU Thread Affinity help to assign specific cores to the server process."
   }
 ]
