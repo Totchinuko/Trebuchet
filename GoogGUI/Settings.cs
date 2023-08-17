@@ -84,35 +84,7 @@ namespace GoogGUI
             if (installed >= _config.ServerInstanceCount)
                 return;
 
-            var token = App.TaskBlocker.SetMain("Updating server instances...");
-            var task = Task.Run(() => OnServerInstanceInstallTask(token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnServerInstanceInstallComplete(x)));
-        }
-
-        private void OnServerInstanceInstallComplete(Task<int> task)
-        {
-            HandleTaskErrors(task);
-            App.TaskBlocker.ReleaseMain();
-            OnAppConfigurationChanged();
-        }
-
-        private async Task<int> OnServerInstanceInstallTask(CancellationToken token)
-        {
-            int count = _config.ServerInstanceCount;
-            for (int i = 0; i < count; i++)
-            {
-                Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = $"Updating server instance {i}...");
-                if (i == 0)
-                {
-                    int code = await Setup.UpdateServer(_config, i, token, false);
-                    if (code != 0)
-                        return code;
-                }
-                else
-                {
-                    await Setup.UpdateServerFromInstance0(_config, i, token);
-                }
-            }
-            return 0;
+            App.GetApp().GetPanel<Dashboard>().UpdateServer();
         }
 
         private void UpdateRequiredActions()

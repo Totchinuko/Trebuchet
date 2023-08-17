@@ -6,10 +6,27 @@
                 <Grid.RowDefinitions>
                     <RowDefinition Height="auto" />
                     <RowDefinition Height="auto" />
+                    <RowDefinition Height="auto" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <ContentPresenter ContentTemplate="{StaticResource ClientDashboard}" Content="{Binding Client}" />
-                <Border Grid.Row="1" Margin="0,12" CornerRadius="3">
+                <Border Grid.Row="0" Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="12" Margin="0,0,12,12">
+                    <WrapPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding UpdateServerCommand}" Margin="0,0,6,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="pack://application:,,,/GoogGui;component/Icons/Server.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                <TextBlock Text="Update Instances" />
+                            </StackPanel>
+                        </Button>
+                        <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding UpdateAllModsCommand}" Margin="0,0,6,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="pack://application:,,,/GoogGui;component/Icons/List.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                <TextBlock Text="Update All Mods" />
+                            </StackPanel>
+                        </Button>
+                    </WrapPanel>
+                </Border>
+                <ContentPresenter Grid.Row="1" ContentTemplate="{StaticResource ClientDashboard}" Content="{Binding Client}" />
+                <Border Grid.Row="2" Margin="0,12" CornerRadius="3">
                     <Border.Style>
                         <Style TargetType="Border" BasedOn="{StaticResource Panel}">
                             <Style.Triggers>
@@ -43,7 +60,7 @@
                         </WrapPanel>
                     </Grid>
                 </Border>
-                <Border Grid.Row="2" Padding="24,0,0,0">
+                <Border Grid.Row="3" Padding="24,0,0,0">
                     <ItemsControl ItemsSource="{Binding Instances}" ItemTemplate="{StaticResource ServerDashboard}"/>
                 </Border>
             </Grid>

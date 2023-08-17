@@ -181,6 +181,13 @@ namespace Goog
             return await UpdateSteamCMD(config, token);
         }
 
+        /// <summary>
+        /// Performs a steamcmd update on the provided modlist and wait for the process to finish. Returns 1 if the opperation failed.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="modlist">Existing modlist name</param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public static async Task<int> UpdateMods(Config config, string modlist, CancellationToken token)
         {
             string modlistFile = ModListProfile.GetPath(config, modlist);
@@ -208,6 +215,41 @@ namespace Goog
             return await WaitForProcess(process, token);
         }
 
+        /// <summary>
+        /// Performs a steamcmd update on the provided modlist and wait for the process to finish. Returns 1 if the opperation failed.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="ids"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        public static async Task<int> UpdateMods(Config config, IEnumerable<ulong> ids, CancellationToken ct)
+        {
+            var update = string.Join(" ", ids.Select(i => string.Format(Config.CmdArgWorkshopUpdate, config.ClientAppID, i.ToString())));
+
+            if (update.Length == 0) return 0;
+
+            string steamArgs = string.Join(" ",
+                    Config.CmdArgLoginAnonymous,
+                    update,
+                    Config.CmdArgQuit
+                );
+
+            Process process = new Process();
+            process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
+            process.StartInfo.Arguments = steamArgs;
+            process.StartInfo.CreateNoWindow = !config.DisplayCMD;
+            process.StartInfo.UseShellExecute = false;
+            return await WaitForProcess(process, ct);
+        }
+
+        /// <summary>
+        /// Performs a server update on a targeted instance.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="instanceNumber"></param>
+        /// <param name="token"></param>
+        /// <param name="reinstall"></param>
+        /// <returns></returns>
         public static async Task<int> UpdateServer(Config config, int instanceNumber, CancellationToken token, bool reinstall = false)
         {
             if (config.ServerInstanceCount <= 0) return 0;
@@ -237,6 +279,15 @@ namespace Goog
             return await WaitForProcess(process, token);
         }
 
+        /// <summary>
+        /// Update a server instance other than 0, from the content of instance 0.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="instanceNumber"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
         public static async Task UpdateServerFromInstance0(Config config, int instanceNumber, CancellationToken token)
         {
             if (config.ServerInstanceCount <= 0) return;
@@ -249,11 +300,37 @@ namespace Goog
             if (!Directory.Exists(instance0))
                 throw new DirectoryNotFoundException($"{instance0} was not found.");
 
+            Tools.RemoveSymboliclink(Path.Combine(instance0, Config.FolderGameSave));
             Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
             Tools.DeleteIfExists(instance);
             Tools.CreateDir(instance);
 
             await Tools.DeepCopyAsync(instance0, instance, token);
+        }
+
+        /// <summary>
+        /// Update instance 0 using steamcmd, then copy the files of instance0 to update other instances.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        public static async Task<int> UpdateServerInstances(Config config, CancellationToken token)
+        {
+            int count = config.ServerInstanceCount;
+            for (int i = 0; i < count; i++)
+            {
+                if (i == 0)
+                {
+                    int code = await UpdateServer(config, i, token, false);
+                    if (code != 0)
+                        return code;
+                }
+                else
+                {
+                    await UpdateServerFromInstance0(config, i, token);
+                }
+            }
+            return 0;
         }
 
         public static async Task<int> UpdateSteamCMD(Config config, CancellationToken token)
