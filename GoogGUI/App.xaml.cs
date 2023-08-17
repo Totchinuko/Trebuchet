@@ -25,9 +25,9 @@ namespace GoogGUI
 
         public static void Crash() => HasCrashed = true;
 
-        public GoogApp GetApp()
+        public static GoogApp GetApp()
         {
-            if (MainWindow is not MainWindow window) throw new Exception("MainWindow is not valid.");
+            if (Current.MainWindow is not MainWindow window) throw new Exception("MainWindow is not valid.");
             return window.App;
         }
 
