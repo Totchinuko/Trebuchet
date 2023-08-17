@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Goog;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -47,11 +48,11 @@ namespace GoogGUI.Controls
         {
             get
             {
-                return FilterOutUnavailableCores((long)GetValue(CPUAffinityProperty));
+                return Tools.Clamp2CPUThreads((long)GetValue(CPUAffinityProperty));
             }
             set
             {
-                SetValue(CPUAffinityProperty, FilterOutUnavailableCores(value));
+                SetValue(CPUAffinityProperty, Tools.Clamp2CPUThreads(value));
             }
         }
 
@@ -79,15 +80,6 @@ namespace GoogGUI.Controls
         {
             if (sender is CheckBox checkBox)
                 CPUAffinity &= ~(1L << (int)checkBox.Tag);
-        }
-
-        private long FilterOutUnavailableCores(long value)
-        {
-            int maxCPU = Environment.ProcessorCount;
-            for (int i = 0; i < 64; i++)
-                if (i >= maxCPU)
-                    value &= ~(1L << i);
-            return value;
         }
     }
 }

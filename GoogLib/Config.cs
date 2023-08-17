@@ -46,6 +46,7 @@ namespace Goog
         public const string GameArgsModList = "-modlist=\"{0}\"";
         public const string GameArgsUseAllCore = "-useallavailablecores";
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
+        public const string ServerArgsMultiHome = "-MULTIHOME={0}";
 
         #endregion constants
 

@@ -315,5 +315,13 @@ namespace Goog
                 }
             }
         }
+        public static long Clamp2CPUThreads(long value)
+        {
+            int maxCPU = Environment.ProcessorCount;
+            for (int i = 0; i < 64; i++)
+                if (i >= maxCPU)
+                    value &= ~(1L << i);
+            return value;
+        }
     }
 }
