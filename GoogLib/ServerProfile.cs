@@ -118,19 +118,41 @@ namespace GoogLib
             section.SetParameter("IsVACEnabled", EnableVAC.ToString());
         }
         #endregion IniSettings
-
+        /// <summary>
+        /// Get the folder of a server profile.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static string GetFolder(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name);
 
+        /// <summary>
+        /// Get the path of a server instance.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="instance"></param>
+        /// <returns></returns>
         public static string GetInstancePath(Config config, int instance)
         {
             return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance));
         }
 
+        /// <summary>
+        /// Get the executable of a server instance.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="instance"></param>
+        /// <returns></returns>
         public static string GetIntanceBinary(Config config, int instance)
         {
             return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance), Config.FileServerProxyBin);
         }
 
+        /// <summary>
+        /// Get the map preset list saved in JSon/Maps.json.
+        /// </summary>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static Dictionary<string, string> GetMapList()
         {
             string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -145,8 +167,19 @@ namespace GoogLib
             return data;
         }
 
+        /// <summary>
+        /// Get the path of the json file of a server profile.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
 
+        /// <summary>
+        /// List all the server profiles in the installation folder.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
         public static IEnumerable<string> ListProfiles(Config config)
         {
             string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles);
@@ -158,6 +191,11 @@ namespace GoogLib
                 yield return Path.GetFileName(p);
         }
 
+        /// <summary>
+        /// Resolve a server profile name, if it is not valid, it will be set to the first profile found, if no profile is found, it will be set to "Default" and a new profile will be created.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="profileName"></param>
         public static void ResolveProfile(Config config, ref string profileName)
         {
             if (!string.IsNullOrEmpty(profileName))
@@ -174,6 +212,13 @@ namespace GoogLib
                 CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
+        /// <summary>
+        /// Try to load a profile, if it fails, it will return false.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="name"></param>
+        /// <param name="profile"></param>
+        /// <returns></returns>
         public static bool TryLoadProfile(Config config, string name, [NotNullWhen(true)] out ServerProfile? profile)
         {
             profile = null;
@@ -187,16 +232,32 @@ namespace GoogLib
             catch { return false; }
         }
 
+        /// <summary>
+        /// Get the path of a server instance.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
         public string GetInstancePath(int instance)
         {
             return GetInstancePath(Config, instance);
         }
 
+        /// <summary>
+        /// Get the executable of a server instance.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
         public string GetIntanceBinary(int instance)
         {
             return GetIntanceBinary(Config, instance);
         }
 
+        /// <summary>
+        /// Generate the server arguments for a server instance.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public string GetServerArgs(int instance)
         {
             string? profileFolder = Path.GetDirectoryName(FilePath) ?? throw new Exception("Invalid folder directory.");
@@ -211,6 +272,11 @@ namespace GoogLib
             return string.Join(" ", args);
         }
 
+        /// <summary>
+        /// Write the server configuration to the related ini files.
+        /// </summary>
+        /// <param name="instance"></param>
+        /// <exception cref="Exception"></exception>
         public void WriteIniFiles(int instance)
         {
             Dictionary<string, IniDocument> documents = new Dictionary<string, IniDocument>();
