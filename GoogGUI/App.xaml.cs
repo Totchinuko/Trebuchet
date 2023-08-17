@@ -2,6 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -41,18 +42,22 @@ namespace GoogGUI
             ReadSettings();
 
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(OnUnhandledException);
-            System.Windows.Forms.Application.ThreadException += new ThreadExceptionEventHandler(OnApplicationThreadException);
+            Dispatcher.UnhandledException += new DispatcherUnhandledExceptionEventHandler(OnDispatcherUnhandledException);
             Current.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(OnDispatcherUnhandledException);
+            TaskScheduler.UnobservedTaskException += new EventHandler<UnobservedTaskExceptionEventArgs>(OnUnobservedTaskException);
 
             TestliveModal modal = new TestliveModal();
             Current.MainWindow = modal.Window;
             modal.ShowDialog();
         }
 
-        private void OnApplicationThreadException(object sender, ThreadExceptionEventArgs e)
+        private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
         {
-            new ExceptionModal(e.Exception).ShowDialog();
-            IsShutingDown = true;
+            Current.Dispatcher.Invoke(() =>
+            {
+                new ExceptionModal(e.Exception).ShowDialog();
+                IsShutingDown = true;
+            });
         }
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
@@ -64,8 +69,11 @@ namespace GoogGUI
 
         private void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
-            new ExceptionModal(((Exception)e.ExceptionObject)).ShowDialog();
-            IsShutingDown = true;
+            Current.Dispatcher.Invoke(() =>
+            {
+                new ExceptionModal(((Exception)e.ExceptionObject)).ShowDialog();
+                IsShutingDown = true;
+            });
         }
 
         private void ReadSettings()
