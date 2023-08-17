@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 
-namespace GoogGUI.SettingFields
+namespace GoogGUI
 {
     public class CPUAffinityField : Field<long, long>
     {

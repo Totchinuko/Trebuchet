@@ -20,6 +20,7 @@ namespace GoogGUI
     [JsonDerivedType(typeof(DirectoryField), "Directory")]
     [JsonDerivedType(typeof(MapField), "Map")]
     [JsonDerivedType(typeof(CPUAffinityField), "CPUAffinity")]
+    [JsonDerivedType(typeof(ComboBoxField), "ComboBox")]
     public abstract class Field : INotifyPropertyChanged
     {
         private static JsonSerializerOptions _options = new JsonSerializerOptions();

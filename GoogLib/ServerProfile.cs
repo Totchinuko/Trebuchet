@@ -33,7 +33,7 @@ namespace GoogLib
 
         public string MultiHomeAddress { get; set; } = string.Empty;
 
-        public ProcessPriority ProcessPriority { get; set; } = ProcessPriority.Normal;
+        public int ProcessPriority { get; set; } = 0;
 
         [JsonIgnore]
         public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
@@ -53,7 +53,7 @@ namespace GoogLib
 
         public string ServerPassword { get; set; } = string.Empty;
 
-        public ServerRegion ServerRegion { get; set; } = ServerRegion.Europe;
+        public int ServerRegion { get; set; } = 0;
 
         public int SourceQueryPort { get; set; } = 27015;
 

@@ -14,6 +14,7 @@
                 <ResourceDictionary Source="Templates\FieldRow.xaml" />
                 <ResourceDictionary Source="Templates\CPUAffinityField.xaml" />
                 <ResourceDictionary Source="Templates\DirectoryField.xaml" />
+                <ResourceDictionary Source="Templates\ComboBoxField.xaml" />
                 <ResourceDictionary Source="Templates\RequiredAction.xaml" />
                 <ResourceDictionary Source="Templates\FieldEditor.xaml" />
                 <ResourceDictionary Source="Templates\ToggleField.xaml" />

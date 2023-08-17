@@ -40,5 +40,20 @@
     "Property": "CPUThreadAffinity",
     "Name": "CPU Thread Affinity",
     "Description": "CPU Thread Affinity help to assign specific cores to the server process."
+  },
+  {
+    "$type": "ComboBox",
+    "Property": "ServerRegion",
+    "Name": "Server Region",
+    "Description": "Server region to be displayed in the server browser.",
+    "Default": 0,
+    "Options": [
+      "Europe",
+      "North America",
+      "Asia",
+      "Australia",
+      "South America",
+      "Japan"
+    ]
   }
 ]
