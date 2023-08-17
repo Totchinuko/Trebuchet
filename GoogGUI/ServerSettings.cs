@@ -35,6 +35,8 @@ namespace GoogGUI
 
         public ObservableCollection<string> Profiles { get => _profiles; }
 
+        public string ProfileSize => (Tools.DirectorySize(_profile.ProfileFolder) / 1024 / 1024).ToString() + "MB";
+
         public string SelectedProfile
         {
             get => _selectedProfile;
@@ -46,8 +48,6 @@ namespace GoogGUI
         }
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ClientSettings"];
-
-        public string ProfileSize => (Tools.DirectorySize(_profile.ProfileFolder) / 1024 / 1024).ToString() + "MB";
 
         public override bool CanExecute(object? parameter)
         {
@@ -65,6 +65,11 @@ namespace GoogGUI
         protected override void BuildFields()
         {
             BuildFields("GoogGUI.ServerSettings.Fields.json", this, "Profile");
+        }
+
+        protected override void OnValueChanged(string property)
+        {
+            _profile.SaveFile();
         }
 
         [MemberNotNull("_selectedProfile", "_profile")]
@@ -162,11 +167,6 @@ namespace GoogGUI
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
-        }
-
-        private void OnValueChanged()
-        {
-            _profile.SaveFile();
         }
     }
 }

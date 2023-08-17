@@ -107,6 +107,7 @@ namespace GoogGUI
                 RemoveCollectionEvent();
                 _propertyInfos.SetValue(GetTarget(), SetConvert(value));
                 AddCollectionEvent();
+                OnValueChanged();
                 OnPropertyChanged("Value");
                 OnPropertyChanged("IsDefault");
             }
