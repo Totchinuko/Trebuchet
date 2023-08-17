@@ -11,7 +11,9 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
@@ -111,7 +113,7 @@ namespace GoogGUI
         {
             if (App.TaskBlocker.IsSet(FetchModlist)) return;
             var token = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
-            Task.Run(() => ModListProfile.DownloadModList(builder.ToString(), token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModlistDownloaded(x)));
+            Task.Run(() => Tools.DownloadModList(builder.ToString(), token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModlistDownloaded(x)));
         }
 
         private void FetchSteamCollection(UriBuilder builder)
@@ -586,5 +588,7 @@ namespace GoogGUI
             _modWatcher.IncludeSubdirectories = false;
             _modWatcher.EnableRaisingEvents = true;
         }
+
+
     }
 }

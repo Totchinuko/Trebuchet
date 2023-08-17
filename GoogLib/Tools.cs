@@ -4,6 +4,7 @@ using System.IO;
 using System.IO.Compression;
 using System.Management;
 using System.Reflection;
+using System.Text.Json;
 using Yuu.Ini;
 
 namespace Goog
@@ -288,6 +289,31 @@ namespace Goog
             if (folder == null) throw new Exception($"Invalid folder for {path}.");
             CreateDir(folder);
             File.WriteAllText(path, content);
+        }
+
+        public static async Task<ModlistExport> DownloadModList(string url, CancellationToken ct)
+        {
+            if (string.IsNullOrEmpty(url))
+                throw new ArgumentException("Sync URL is invalid");
+
+            using (var client = new HttpClient())
+            {
+                client.Timeout = TimeSpan.FromSeconds(15);
+
+                using (var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct))
+                {
+                    var contentLength = response.Content.Headers.ContentLength;
+                    if (response.Content.Headers.ContentLength > 1024 * 1024 * 10)
+                        throw new Exception("Content was too big.");
+                    if (response.Content.Headers.ContentType?.MediaType != "application/json")
+                        throw new Exception("Content was not json.");
+
+                    using (var download = await response.Content.ReadAsStreamAsync(ct))
+                    {
+                        return await JsonSerializer.DeserializeAsync<ModlistExport>(download, new JsonSerializerOptions(), ct) ?? new ModlistExport();
+                    }
+                }
+            }
         }
     }
 }
