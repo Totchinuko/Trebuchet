@@ -278,8 +278,9 @@ namespace Goog
                 await Task.Delay(200);
             if (process.HasExited)
             {
+                int error = process.ExitCode;
                 process.Dispose();
-                return process.ExitCode != 0 && process.ExitCode != 7 ? 1 : 0;
+                return error != 0 && error != 7 ? 1 : 0;
             }
 
             process.Kill(true);
