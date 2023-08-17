@@ -21,31 +21,30 @@ namespace GoogGUI
     [JsonDerivedType(typeof(MapField), "Map")]
     [JsonDerivedType(typeof(CPUAffinityField), "CPUAffinity")]
     [JsonDerivedType(typeof(ComboBoxField), "ComboBox")]
+    [JsonDerivedType(typeof(TitleField), "Title")]
     public abstract class Field : INotifyPropertyChanged
     {
         private static JsonSerializerOptions _options = new JsonSerializerOptions();
-
-        private string _description = string.Empty;
-        private string _hyperlink = string.Empty;
-        private string _name = string.Empty;
-        private string _property = string.Empty;
-        private bool _refreshApp = false;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public event EventHandler<Field>? ValueChanged;
 
-        public string Description { get => _description; set => _description = value; }
+        public string Description { get; set; } = string.Empty;
 
         public virtual bool DisplayGenericDescription => true;
 
-        public string Hyperlink { get => _hyperlink; set => _hyperlink = value; }
+        public string Hyperlink { get; set; } = string.Empty;
 
-        public string Name { get => _name; set => _name = value; }
+        public string Name { get; set; } = string.Empty;
 
-        public string Property { get => _property; set => _property = value; }
+        public string Property { get; set; } = string.Empty;
 
-        public bool RefreshApp { get => _refreshApp; set => _refreshApp = value; }
+        public bool RefreshApp { get; set; } = false;
+
+        public abstract DataTemplate Template { get; }
+
+        public virtual bool UseFieldRow => true;
 
         public static List<Field> BuildFieldList(string json, object target, PropertyInfo? property = null)
         {
@@ -61,20 +60,19 @@ namespace GoogGUI
 
         public abstract void SetTarget(object target, PropertyInfo? property = null);
 
-        protected virtual void OnValueChanged()
-        {
-            ValueChanged?.Invoke(this, this);
-        }
-
         protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        protected virtual void OnValueChanged()
+        {
+            ValueChanged?.Invoke(this, this);
         }
     }
 
     public abstract class Field<T, D> : Field, ITemplateHolder
     {
-        private D? _default = default;
         private PropertyInfo? _propertyInfos;
         private object? _target;
         private PropertyInfo? _targetProperty;
@@ -85,15 +83,18 @@ namespace GoogGUI
             HyperlinkCommand = new SimpleCommand(OnHyperlinkClicked);
         }
 
-        public D? Default { get => _default; set => _default = value; }
+        public D? Default { get; set; } = default;
+
+        public string Dependancy { get; set; } = string.Empty;
+
+        public object? DependancyValue { get; set; } = null;
 
         public ICommand HyperlinkCommand { get; private set; }
 
         public abstract bool IsDefault { get; }
 
-        public ICommand ResetCommand { get; private set; }
 
-        public abstract DataTemplate Template { get; }
+        public ICommand ResetCommand { get; private set; }
 
         public T? Value
         {
@@ -140,6 +141,14 @@ namespace GoogGUI
                 collection.CollectionChanged += OnCollectionChanged;
         }
 
+        private object GetTarget()
+        {
+            if (_targetProperty == null)
+                return _target ?? throw new NullReferenceException("Target is not set to a value.");
+            else
+                return _targetProperty.GetValue(_target) ?? throw new NullReferenceException("Target is not set to a value.");
+        }
+
         private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
             OnPropertyChanged("Value");
@@ -148,20 +157,12 @@ namespace GoogGUI
 
         private void OnHyperlinkClicked(object? obj)
         {
-            using(Process process = new Process())
+            using (Process process = new Process())
             {
                 process.StartInfo.UseShellExecute = true;
                 process.StartInfo.FileName = Hyperlink;
                 process.Start();
             }
-        }
-
-        private object GetTarget()
-        {
-            if (_targetProperty == null)
-                return _target ?? throw new NullReferenceException("Target is not set to a value.");
-            else
-                return _targetProperty.GetValue(_target) ?? throw new NullReferenceException("Target is not set to a value.");
         }
 
         private void OnReset(object? obj)

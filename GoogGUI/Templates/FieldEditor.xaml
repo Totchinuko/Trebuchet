@@ -8,7 +8,7 @@
             </Grid.RowDefinitions>
             <ItemsControl ItemsSource="{Binding RequiredActions}" ItemTemplate="{StaticResource RequiredAction}" />
             <ScrollViewer Grid.Row="1">
-                <ItemsControl ItemsSource="{Binding Fields}" ItemTemplate="{StaticResource FieldRow}" Margin="0,0,6,0" />
+                <ItemsControl ItemsSource="{Binding Fields}" ItemTemplateSelector="{StaticResource FieldRowSelector}" Margin="0,0,6,0" />
             </ScrollViewer>
         </Grid>        
     </DataTemplate>
