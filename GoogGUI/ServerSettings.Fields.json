@@ -81,6 +81,19 @@
     "Default": false
   },
   {
+    "$type": "ComboBox",
+    "Property": "ProcessPriority",
+    "Name": "Process Priority",
+    "Description": "Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness.",
+    "Default": 0,
+    "Options": [
+          "Normal",
+          "Above Normal",
+          "High",
+          "Realtime (Not Recommanded)"
+        ]
+  },
+  {
     "$type": "CPUAffinity",
     "Property": "CPUThreadAffinity",
     "Name": "CPU Thread Affinity",
