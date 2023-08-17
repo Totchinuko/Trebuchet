@@ -36,6 +36,8 @@ namespace GoogGUI
 
         public string Hyperlink { get; set; } = string.Empty;
 
+        public bool IsEnabled { get; set; } = true;
+
         public string Name { get; set; } = string.Empty;
 
         public string Property { get; set; } = string.Empty;
@@ -85,9 +87,9 @@ namespace GoogGUI
             HyperlinkCommand = new SimpleCommand(OnHyperlinkClicked);
         }
 
-        public D? Default { get; set; } = default;
-
         public FieldCondition? Condition { get; set; } = null;
+
+        public D? Default { get; set; } = default;
 
         public ICommand HyperlinkCommand { get; private set; }
 

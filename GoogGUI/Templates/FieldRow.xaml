@@ -51,7 +51,17 @@
                             </TextBlock>
                         </StackPanel>
                     </Border>
-                    <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding Template}" />
+                    <ContentPresenter IsEnabled="{Binding IsEnabled}" Content="{Binding .}" ContentTemplate="{Binding Template}">
+                        <ContentPresenter.Style>
+                            <Style TargetType="ContentPresenter">
+                                <Style.Triggers>
+                                    <Trigger Property="IsEnabled" Value="False">
+                                        <Setter Property="Opacity" Value="0.5" />
+                                    </Trigger>
+                                </Style.Triggers>
+                            </Style>
+                        </ContentPresenter.Style>
+                    </ContentPresenter>
                 </StackPanel>
                 <Button Grid.Column="2"
                         ToolTip="Reset to default"
