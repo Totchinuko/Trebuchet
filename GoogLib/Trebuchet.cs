@@ -146,6 +146,7 @@ namespace GoogLib
 
             _clientProcess = new ClientProcess(profile, modlist, false);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
+            _lockedFolders.Add(GetCurrentClientJunction());
             OnClientProcessStarted(this, _clientProcess);
         }
 
@@ -162,6 +163,7 @@ namespace GoogLib
                 var watcher = new ServerProcess(profile, modlist, instance, process, p);
                 watcher.ProcessExited += OnServerProcessTerminate;
                 _serverProcesses.Add(instance, watcher);
+                _lockedFolders.Add(GetCurrentServerJunction(instance));
                 OnServerProcessStarted(this, watcher);                
             }
         }
