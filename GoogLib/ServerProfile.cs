@@ -40,7 +40,9 @@ namespace GoogLib
 
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
-
+        /// <summary>
+        /// Unused. Kept for Information.
+        /// </summary>
         public int RawUPDPort { get; set; } = 7779;
 
         public int RConMaxKarma { get; set; } = 60;
@@ -69,10 +71,52 @@ namespace GoogLib
             IniSection section = document.GetSection("/Game/Mods/ModAdmin/Auth/EA_MC_Auth.EA_MC_Auth_C");
             section.GetParameters("+SuperAdminSteamIDs").ForEach(section.Remove);
 
-            foreach (string id in SudoSuperAdmins)
-                section.InsertParameter(0, "+SuperAdminSteamIDs", id);
+            if (SudoSuperAdmins.Count != 0)
+                foreach (string id in SudoSuperAdmins)
+                    section.InsertParameter(0, "+SuperAdminSteamIDs", id);
+            else
+                document.Remove(section);
         }
 
+        [IniSetting(Config.FileIniUser, "Engine")]
+        public void ApplyEngineSettings(IniDocument document)
+        {
+            IniSection section = document.GetSection("OnlineSubsystem");
+            section.SetParameter("ServerName", ServerName);
+            section.SetParameter("ServerPassword", ServerPassword);
+
+            section = document.GetSection("URL");
+            section.SetParameter("Port", GameClientPort.ToString());
+
+            section = document.GetSection("OnlineSubsystemSteam");
+            section.SetParameter("GameServerQueryPort", SourceQueryPort.ToString());
+
+            section = document.GetSection("/Script/OnlineSubsystemUtils.IpNetDriver");
+            section.SetParameter("NetServerMaxTickRate", MaximumTickRate.ToString());
+        }
+
+        [IniSetting(Config.FileIniUser, "Game")]
+        public void ApplyGameSettings(IniDocument document)
+        {
+            IniSection section = document.GetSection("/Script/Engine.GameSession");
+            section.SetParameter("MaxPlayers", MaxPlayers.ToString());
+
+            section = document.GetSection("RconPlugin");
+            section.SetParameter("RconEnabled", EnableRCon.ToString());
+            section.SetParameter("RconPort", RConPort.ToString());
+            section.SetParameter("RconPassword", RConPassword);
+            section.SetParameter("RconMaxKarma", RConMaxKarma.ToString());
+        }
+
+        [IniSetting(Config.FileIniUser, "ServerSettings")]
+        public void ApplyServerSettings(IniDocument document)
+        {
+            IniSection section = document.GetSection("ServerSettings");
+            section.SetParameter("ServerRegion", ServerRegion.ToString());
+            section.SetParameter("AdminPassword", AdminPassword);
+            section.SetParameter("IsBattlEyeEnabled", EnableBattleEye.ToString());
+            section.SetParameter("IsVACEnabled", EnableVAC.ToString());
+        }
         #endregion IniSettings
 
         public static string GetFolder(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name);
