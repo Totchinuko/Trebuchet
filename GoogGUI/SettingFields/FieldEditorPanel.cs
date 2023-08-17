@@ -42,7 +42,7 @@ namespace GoogGUI
         private void OnFieldValueChanged(object? sender, Field e)
         {
             OnValueChanged(e.Property);
-
+            _fields.ForEach(f => f.RefreshVisibility());
             if (e.RefreshApp)
                 OnAppConfigurationChanged();
         }

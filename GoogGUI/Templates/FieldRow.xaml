@@ -3,7 +3,7 @@
                     xmlns:Controls="clr-namespace:GoogGUI.Controls"
                     xmlns:local="clr-namespace:GoogGUI">
     <DataTemplate x:Key="FieldRow">
-        <Border CornerRadius="3" Padding="0,12" Margin="0,0,0,12">
+        <Border CornerRadius="3" Padding="0,12" Margin="0,0,0,12" Visibility="{Binding IsVisible}">
             <Border.Style>
                 <Style TargetType="Border" BasedOn="{StaticResource Panel}">
                     <Setter Property="Background" Value="{StaticResource GPanel}"/>

@@ -58,6 +58,8 @@ namespace GoogGUI
 
         public abstract void RefreshValue();
 
+        public abstract void RefreshVisibility();
+
         public abstract void SetTarget(object target, PropertyInfo? property = null);
 
         protected virtual void OnPropertyChanged(string name)
@@ -85,14 +87,13 @@ namespace GoogGUI
 
         public D? Default { get; set; } = default;
 
-        public string Dependancy { get; set; } = string.Empty;
-
-        public object? DependancyValue { get; set; } = null;
+        public FieldCondition? Condition { get; set; } = null;
 
         public ICommand HyperlinkCommand { get; private set; }
 
         public abstract bool IsDefault { get; }
 
+        public Visibility IsVisible => Condition == null ? Visibility.Visible : Condition.IsVisible(GetTarget()) ? Visibility.Visible : Visibility.Collapsed;
 
         public ICommand ResetCommand { get; private set; }
 
@@ -119,6 +120,11 @@ namespace GoogGUI
         {
             OnPropertyChanged("Value");
             OnPropertyChanged("IsDefault");
+        }
+
+        public override void RefreshVisibility()
+        {
+            OnPropertyChanged("IsVisible");
         }
 
         public override void SetTarget(object target, PropertyInfo? property = null)
