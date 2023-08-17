@@ -9,17 +9,53 @@ namespace GoogLib
 {
     public class ServerProfile : ProfileFile<ServerProfile>
     {
+        public string AdminPassword { get; set; } = string.Empty;
+
+        public long CPUThreadAffinity { get; set; } = 0xffffffffffff;
+
+        public bool EnableBattleEye { get; set; } = false;
+
+        public bool EnableMultiHome { get; set; } = false;
+
+        public bool EnableRCon { get; set; } = false;
+
+        public bool EnableVAC { get; set; } = false;
+
+        public int GameClientPort { get; set; } = 7777;
+
         public bool Log { get; set; } = false;
 
         public string Map { get; set; } = "/Game/Maps/ConanSandbox/ConanSandbox";
 
+        public int MaximumTickRate { get; set; } = 30;
+
         public int MaxPlayers { get; set; } = 30;
+
+        public string MultiHomeAddress { get; set; } = string.Empty;
+
+        public ProcessPriority ProcessPriority { get; set; } = ProcessPriority.Normal;
 
         [JsonIgnore]
         public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
 
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
+
+        public int RawUPDPort { get; set; } = 7779;
+
+        public int RconMaxKarma { get; set; } = 60;
+
+        public string RconPassword { get; set; } = string.Empty;
+
+        public int RConPort { get; set; } = 25575;
+
+        public string ServerName { get; set; } = string.Empty;
+
+        public string ServerPassword { get; set; } = string.Empty;
+
+        public ServerRegion ServerRegion { get; set; } = ServerRegion.Europe;
+
+        public int SourceQueryPort { get; set; } = 27015;
 
         public List<string> SudoSuperAdmins { get; set; } = new List<string>();
 
@@ -46,21 +82,10 @@ namespace GoogLib
             return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance));
         }
 
-        public string GetInstancePath(int instance)
-        {
-            return GetInstancePath(Config, instance);
-        }
-
         public static string GetIntanceBinary(Config config, int instance)
         {
             return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance), Config.FileServerProxyBin);
         }
-
-        public string GetIntanceBinary(int instance)
-        {
-            return GetIntanceBinary(Config, instance);
-        }
-
 
         public static Dictionary<string, string> GetMapList()
         {
@@ -116,6 +141,16 @@ namespace GoogLib
                 return true;
             }
             catch { return false; }
+        }
+
+        public string GetInstancePath(int instance)
+        {
+            return GetInstancePath(Config, instance);
+        }
+
+        public string GetIntanceBinary(int instance)
+        {
+            return GetIntanceBinary(Config, instance);
         }
 
         public string GetServerArgs(int instance)
