@@ -1,18 +1,16 @@
 [
   {
+    "$type": "Title",
+    "Name": "General"
+  },
+  {
     "$type": "Toggle",
     "Property": "BackgroundSound",
     "Name": "Background Sound",
     "Description": "Keep the sound of the game up when tabbing out to another window.",
     "Default": false
   },
-  {
-    "$type": "Toggle",
-    "Property": "Log",
-    "Name": "Display Log Console",
-    "Description": "Display live game logs as the game is running.",
-    "Default": false
-  },
+
   {
     "$type": "Toggle",
     "Property": "RemoveIntroVideo",
@@ -21,11 +19,38 @@
     "Default": false
   },
   {
+    "$type": "Title",
+    "Name": "Process Performance"
+  },
+  {
     "$type": "Toggle",
     "Property": "UseAllCores",
     "Name": "Use All Cores",
     "Description": "Supposed to improve performance on machines with lots of cores, unverified. Probably black magic.",
     "Default": false
+  },
+  {
+    "$type": "ComboBox",
+    "Property": "ProcessPriority",
+    "Name": "Process Priority",
+    "Description": "Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness.",
+    "Default": 0,
+    "Options": [
+      "Normal",
+      "Above Normal",
+      "High",
+      "Realtime (Not Recommanded)"
+    ]
+  },
+  {
+    "$type": "CPUAffinity",
+    "Property": "CPUThreadAffinity",
+    "Name": "CPU Thread Affinity",
+    "Description": "CPU Thread Affinity help to assign specific cores to the server process."
+  },
+  {
+    "$type": "Title",
+    "Name": "Graphics"
   },
   {
     "$type": "Toggle",
@@ -43,5 +68,16 @@
     "Minimum": 0,
     "Maximum": 4000,
     "Frequency": 100
+  },
+  {
+    "$type": "Title",
+    "Name": "Misc"
+  },
+  {
+    "$type": "Toggle",
+    "Property": "Log",
+    "Name": "Display Log Console",
+    "Description": "Display live game logs as the game is running.",
+    "Default": false
   }
 ]

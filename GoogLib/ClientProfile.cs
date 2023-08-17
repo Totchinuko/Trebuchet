@@ -16,7 +16,11 @@ namespace GoogLib
 
         public bool BackgroundSound { get; set; } = false;
 
+        public long CPUThreadAffinity { get; set; } = 0xffffffffffff;
+
         public bool Log { get; set; } = false;
+
+        public int ProcessPriority { get; set; } = 0;
 
         [JsonIgnore]
         public string ProfileFolder => Path.GetDirectoryName(FilePath) ?? throw new Exception($"Invalid directory for {FilePath}.");
@@ -96,14 +100,22 @@ namespace GoogLib
                 CreateFile(GetPath(config, profileName)).SaveFile();
         }
 
+        public static bool TryLoadProfile(Config config, string name, [NotNullWhen(true)] out ClientProfile? profile)
+        {
+            profile = null;
+            string profilePath = GetPath(config, name);
+            if (!File.Exists(profilePath)) return false;
+            try
+            {
+                profile = LoadProfile(config, profilePath);
+                return true;
+            }
+            catch { return false; }
+        }
+
         public string GetBinaryPath(bool battleEye)
         {
             return Path.Combine(Config.ClientPath, Config.FolderGameBinaries, (battleEye ? Config.FileClientBEBin : Config.FileClientBin));
-        }
-
-        public string GetClientPath()
-        {
-            return Config.ClientPath;
         }
 
         public string GetClientArgs()
@@ -118,18 +130,9 @@ namespace GoogLib
             return string.Join(" ", args);
         }
 
-        public static bool TryLoadProfile(Config config, string name, [NotNullWhen(true)] out ClientProfile? profile)
+        public string GetClientPath()
         {
-            profile = null;
-            string profilePath = GetPath(config, name);
-            if (!File.Exists(profilePath)) return false;
-            try
-            {
-                profile = LoadProfile(config, profilePath);
-                return true;
-
-            }
-            catch { return false; }
+            return Config.ClientPath;
         }
 
         public void WriteIniFiles()
@@ -139,7 +142,7 @@ namespace GoogLib
             foreach (var method in Tools.GetIniMethod(this))
             {
                 IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
-                if(!documents.TryGetValue(attr.Path, out IniDocument? document))
+                if (!documents.TryGetValue(attr.Path, out IniDocument? document))
                 {
                     document = IniParser.Parse(Tools.GetFileContent(Path.Combine(GetClientPath(), attr.Path)));
                     documents.Add(attr.Path, document);

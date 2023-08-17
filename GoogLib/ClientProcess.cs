@@ -104,6 +104,25 @@ namespace GoogLib
 
             _process = targetProcess;
             ProcessData = target;
+
+            switch (Profile.ProcessPriority)
+            {
+                case 1:
+                    _process.PriorityClass = ProcessPriorityClass.AboveNormal;
+                    break;
+                case 2:
+                    _process.PriorityClass = ProcessPriorityClass.High;
+                    break;
+                case 3:
+                    _process.PriorityClass = ProcessPriorityClass.RealTime;
+                    break;
+                default:
+                    _process.PriorityClass = ProcessPriorityClass.Normal;
+                    break;
+            }
+
+            _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
+
             OnProcessStarted();
         }
     }
