@@ -66,7 +66,7 @@ namespace GoogLib
         #region IniSettings
 
         [IniSetting(Config.FileIniDefault, "Engine")]
-        public void ApplySudoSettings(IniDocument document)
+        protected void ApplySudoSettings(IniDocument document)
         {
             IniSection section = document.GetSection("/Game/Mods/ModAdmin/Auth/EA_MC_Auth.EA_MC_Auth_C");
             section.GetParameters("+SuperAdminSteamIDs").ForEach(section.Remove);
@@ -78,8 +78,8 @@ namespace GoogLib
                 document.Remove(section);
         }
 
-        [IniSetting(Config.FileIniUser, "Engine")]
-        public void ApplyEngineSettings(IniDocument document)
+        [IniSetting(Config.FileIniServer, "Engine")]
+        protected void ApplyEngineSettings(IniDocument document)
         {
             IniSection section = document.GetSection("OnlineSubsystem");
             section.SetParameter("ServerName", ServerName);
@@ -95,8 +95,8 @@ namespace GoogLib
             section.SetParameter("NetServerMaxTickRate", MaximumTickRate.ToString());
         }
 
-        [IniSetting(Config.FileIniUser, "Game")]
-        public void ApplyGameSettings(IniDocument document)
+        [IniSetting(Config.FileIniServer, "Game")]
+        protected void ApplyGameSettings(IniDocument document)
         {
             IniSection section = document.GetSection("/Script/Engine.GameSession");
             section.SetParameter("MaxPlayers", MaxPlayers.ToString());
@@ -108,8 +108,8 @@ namespace GoogLib
             section.SetParameter("RconMaxKarma", RConMaxKarma.ToString());
         }
 
-        [IniSetting(Config.FileIniUser, "ServerSettings")]
-        public void ApplyServerSettings(IniDocument document)
+        [IniSetting(Config.FileIniServer, "ServerSettings")]
+        protected void ApplyServerSettings(IniDocument document)
         {
             IniSection section = document.GetSection("ServerSettings");
             section.SetParameter("ServerRegion", ServerRegion.ToString());

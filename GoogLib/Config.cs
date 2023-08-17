@@ -23,6 +23,7 @@ namespace Goog
         public const string FileIniBase = "Engine\\Config\\Base{0}.ini";
         public const string FileIniDefault = "ConanSandbox\\Config\\Default{0}.ini";
         public const string FileIniUser = "ConanSandbox\\Saved\\Config\\WindowsNoEditor\\{0}.ini";
+        public const string FileIniServer = "ConanSandbox\\Saved\\Config\\WindowsServer\\{0}.ini";
         public const string FileMapJson = "Json\\Maps.json";
         public const string FileProfileConfig = "profile.json";
         public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
