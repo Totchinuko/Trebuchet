@@ -43,9 +43,9 @@ namespace GoogLib
 
         public int RawUPDPort { get; set; } = 7779;
 
-        public int RconMaxKarma { get; set; } = 60;
+        public int RConMaxKarma { get; set; } = 60;
 
-        public string RconPassword { get; set; } = string.Empty;
+        public string RConPassword { get; set; } = string.Empty;
 
         public int RConPort { get; set; } = 25575;
 

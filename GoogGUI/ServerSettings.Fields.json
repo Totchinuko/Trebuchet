@@ -88,6 +88,50 @@
   },
   {
     "$type": "Title",
+    "Name": "Ports"
+  },
+  {
+    "$type": "Int",
+    "Property": "GameClientPort",
+    "Name": "Game Client Port",
+    "Description": "Port used by the game client to connect to your server instance.",
+    "Default": 7777
+  },
+  {
+    "$type": "Int",
+    "Property": "RawUPDPort",
+    "Name": "Raw UDP Port",
+    "Default": 7779,
+    "IsEnabled": false
+  },
+  {
+    "$type": "Int",
+    "Property": "SourceQueryPort",
+    "Name": "Source Query Port",
+    "Description": "Port used by the server browser to query your server instance.",
+    "Default": 27015
+  },
+  {
+    "$type": "Toggle",
+    "Property": "EnableMultiHome",
+    "Name": "Enable Multi Home",
+    "Description": "Enable Multi Home to allow multiple IP to connect to your server instance.",
+    "Default": false
+  },
+  {
+    "$type": "Text",
+    "Property": "MultiHomeAddress",
+    "Name": "Multi Home Address",
+    "Description": "IP address to be used by Multi Home. Usually your local IP.",
+    "Default": "",
+    "Condition": {
+      "$type": "Toggle",
+      "Property": "EnableMultiHome",
+      "Value": true
+    }
+  },
+  {
+    "$type": "Title",
     "Name": "RCON"
   },
   {
@@ -117,5 +161,48 @@
       "Property": "EnableRCon",
       "Value": true
     }
+  },
+  {
+    "$type": "Text",
+    "Property": "RConPassword",
+    "Name": "RCON Password",
+    "Description": "Password used by RCON.",
+    "Default": "",
+    "Condition": {
+      "$type": "Toggle",
+      "Property": "EnableRCon",
+      "Value": true
+    }
+  },
+  {
+    "$type": "Int",
+    "Property": "RConMaxKarma",
+    "Name": "RCON Max Karma",
+    "Description": "Maximum karma value for RCON.",
+    "Default": 60,
+    "Minimum": 0,
+    "Condition": {
+      "$type": "Toggle",
+      "Property": "EnableRCon",
+      "Value": true
+    }
+  },
+  {
+    "$type": "Title",
+    "Name": "Anti-Cheat"
+  },
+  {
+    "$type": "Toggle",
+    "Property": "EnableVAC",
+    "Name": "Enable Valve Anti Cheat",
+    "Description": "Enable Valve Anti Cheat on your server instance.",
+    "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "EnableBattleEye",
+    "Name": "Enable Battle Eye",
+    "Description": "Enable Battle Eye on your server instance.",
+    "Default": false
   }
 ]
