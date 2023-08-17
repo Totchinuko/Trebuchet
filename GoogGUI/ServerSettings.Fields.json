@@ -1,10 +1,28 @@
 [
   {
-    "$type": "Map",
-    "Property": "Map",
-    "Name": "Game Map",
-    "Description": "Starting path of the map you want to load on your server intance. The button contain a few known map path for easier setup.",
-    "Default": "/Game/Maps/ConanSandbox/ConanSandbox"
+    "$type": "Title",
+    "Name": "Server Settings"
+  },
+  {
+    "$type": "Text",
+    "Property": "ServerName",
+    "Name": "Server Name",
+    "Description": "Name of your server instance.",
+    "Default": "Conan Exiles Dedicated Server"
+  },
+  {
+    "$type": "Text",
+    "Property": "ServerPassword",
+    "Name": "Server Password",
+    "Description": "Password of your server instance.",
+    "Default": ""
+  },
+  {
+    "$type": "Text",
+    "Property": "AdminPassword",
+    "Name": "Admin Password",
+    "Description": "Admin password of your server instance.",
+    "Default": ""
   },
   {
     "$type": "Int",
@@ -13,33 +31,6 @@
     "Description": "Maximum authorized amount of playes on your server instance.",
     "Default": 30,
     "Minimum": 0
-  },
-  {
-    "$type": "TextList",
-    "Property": "SudoSuperAdmins",
-    "Name": "Sudo Super Admin List",
-    "Description": "List of steam ID to be Sudo super admins on your servers. Leave it empty if you do not use Sudo.",
-    "Default": 0
-  },
-  {
-    "$type": "Toggle",
-    "Property": "Log",
-    "Name": "Display Log Console",
-    "Description": "Display server live logs instead of a blank window.",
-    "Default": false
-  },
-  {
-    "$type": "Toggle",
-    "Property": "UseAllCores",
-    "Name": "Use All Cores",
-    "Description": "Supposed to improve performance on machines with lots of cores, unverified. Probably black magic.",
-    "Default": false
-  },
-  {
-    "$type": "CPUAffinity",
-    "Property": "CPUThreadAffinity",
-    "Name": "CPU Thread Affinity",
-    "Description": "CPU Thread Affinity help to assign specific cores to the server process."
   },
   {
     "$type": "ComboBox",
@@ -55,5 +46,76 @@
       "South America",
       "Japan"
     ]
+  },
+  {
+    "$type": "Map",
+    "Property": "Map",
+    "Name": "Game Map",
+    "Description": "Starting path of the map you want to load on your server intance. The button contain a few known map path for easier setup.",
+    "Default": "/Game/Maps/ConanSandbox/ConanSandbox"
+  },
+  {
+    "$type": "TextList",
+    "Property": "SudoSuperAdmins",
+    "Name": "Sudo Super Admin List",
+    "Description": "List of steam ID to be Sudo super admins on your servers. Leave it empty if you do not use Sudo.",
+    "Default": 0
+  },
+  {
+    "$type": "Title",
+    "Name": "Performance"
+  },
+  {
+    "$type": "Int",
+    "Property": "MaximumTickRate",
+    "Name": "Maximum Tick Rate",
+    "Description": "Maximum tick rate of your server instance.",
+    "Default": 30,
+    "Minimum": 10
+  },
+  {
+    "$type": "Toggle",
+    "Property": "UseAllCores",
+    "Name": "Use All Cores",
+    "Description": "Supposed to improve performance on machines with lots of cores, unverified. Probably black magic.",
+    "Default": false
+  },
+  {
+    "$type": "CPUAffinity",
+    "Property": "CPUThreadAffinity",
+    "Name": "CPU Thread Affinity",
+    "Description": "CPU Thread Affinity help to assign specific cores to the server process."
+  },
+  {
+    "$type": "Title",
+    "Name": "RCON"
+  },
+  {
+    "$type": "Toggle",
+    "Property": "Log",
+    "Name": "Display Log Console",
+    "Description": "Display server live logs instead of a blank window.",
+    "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "EnableRCon",
+    "Name": "Enable RCON",
+    "Description": "Enable RCON on your server instance.",
+    "Default": false
+  },
+  {
+    "$type": "Int",
+    "Property": "RConPort",
+    "Name": "RCON Port",
+    "Description": "Port used by RCON.",
+    "Default": 25575,
+    "Minimum": 0,
+    "Maximum": 65535,
+    "Condition": {
+      "$type": "Toggle",
+      "Property": "EnableRCon",
+      "Value": true
+    }
   }
 ]
