@@ -11,9 +11,6 @@ namespace GoogGUI
     public class ClientInstanceDashboard : INotifyPropertyChanged
     {
         private Config _config;
-        private List<string> _modlists = new List<string>();
-        private ProcessStats _processStats = new ProcessStats();
-        private List<string> _profiles = new List<string>();
         private string _selectedModlist = string.Empty;
         private string _selectedProfile = string.Empty;
         private Trebuchet _trebuchet;
@@ -23,6 +20,7 @@ namespace GoogGUI
         {
             KillCommand = new SimpleCommand(OnKilled, false);
             LaunchCommand = new TaskBlockedCommand(OnLaunched);
+            LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched);
 
             _config = config;
             _trebuchet = trebuchet;
@@ -47,15 +45,17 @@ namespace GoogGUI
 
         public SimpleCommand KillCommand { get; private set; }
 
+        public TaskBlockedCommand LaunchBattleEyeCommand { get; private set; }
+
         public TaskBlockedCommand LaunchCommand { get; private set; }
 
-        public List<string> Modlists => _modlists;
+        public List<string> Modlists { get; private set; } = new List<string>();
 
         public bool ProcessRunning => _trebuchet.IsClientRunning();
 
-        public ProcessStats ProcessStats => _processStats;
+        public ProcessStats ProcessStats { get; } = new ProcessStats();
 
-        public List<string> Profiles => _profiles;
+        public List<string> Profiles { get; private set; } = new List<string>();
 
         public string SelectedModlist
         {
@@ -98,18 +98,26 @@ namespace GoogGUI
         public void Launch(bool isBattleEye)
         {
             if (_trebuchet.IsClientRunning()) return;
-            if(_trebuchet.IsFolderLocked(ClientProfile.GetFolder(_config, _selectedProfile)))
+            if (_trebuchet.IsFolderLocked(ClientProfile.GetFolder(_config, _selectedProfile)))
             {
                 new ErrorModal("Locked", "This profile is currently used by another process. Only one process can use a profile at a time.").ShowDialog();
                 return;
             }
 
             LaunchCommand.Toggle(false);
+            LaunchBattleEyeCommand.Toggle(false);
 
-            _trebuchet.CatapultClient(_selectedProfile, _selectedModlist, isBattleEye);
-
-            KillCommand.Toggle(true);
-            OnPropertyChanged("ProcessRunning");
+            try
+            {
+                _trebuchet.CatapultClient(_selectedProfile, _selectedModlist, isBattleEye);
+                OnPropertyChanged("ProcessRunning");
+            }
+            catch(Exception ex)
+            {
+                LaunchCommand.Toggle(true);
+                LaunchBattleEyeCommand.Toggle(true);
+                new ErrorModal("Error", ex.Message).ShowDialog();
+            }
         }
 
         public void RefreshSelection()
@@ -125,10 +133,15 @@ namespace GoogGUI
 
         private void ListProfiles()
         {
-            _modlists = ModListProfile.ListProfiles(_config).ToList();
-            _profiles = ClientProfile.ListProfiles(_config).ToList();
+            Modlists = ModListProfile.ListProfiles(_config).ToList();
+            Profiles = ClientProfile.ListProfiles(_config).ToList();
             OnPropertyChanged("Modlists");
             OnPropertyChanged("Profiles");
+        }
+
+        private void OnBattleEyeLaunched(object? obj)
+        {
+            Launch(true);
         }
 
         private void OnKilled(object? obj)
@@ -144,16 +157,18 @@ namespace GoogGUI
         private void OnProcessStarted(object? sender, TrebuchetStartEventArgs e)
         {
             LaunchCommand.Toggle(false);
+            LaunchBattleEyeCommand.Toggle(false);
             KillCommand.Toggle(true);
             OnPropertyChanged("ProcessRunning");
-            _processStats.StartStats(e.process, Path.GetFileNameWithoutExtension(Config.FileClientBin));
+            ProcessStats.StartStats(e.process, Path.GetFileNameWithoutExtension(Config.FileClientBin));
         }
 
         private void OnProcessTerminated(object? sender, EventArgs e)
         {
-            _processStats.StopStats();
+            ProcessStats.StopStats();
             KillCommand.Toggle(false);
             LaunchCommand.Toggle(true);
+            LaunchBattleEyeCommand.Toggle(true);
             OnPropertyChanged("ProcessRunning");
         }
 

@@ -30,8 +30,6 @@ namespace GoogLib
 
         public bool UseAllCores { get; set; } = false;
 
-        public bool UseBattleEye { get; set; } = false;
-
         #region IniConfig
 
         [IniSetting(Config.FileIniDefault, "Game")]

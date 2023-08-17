@@ -95,7 +95,7 @@ namespace GoogLib
             ProcessData target = ProcessData.Empty;
             while (target.IsEmpty && !process.HasExited)
             {
-                target = Tools.GetProcessesWithName(Config.FileClientBin).First();
+                target = Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
                 await Task.Delay(50);
             }
 

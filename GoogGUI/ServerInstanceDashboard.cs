@@ -124,13 +124,18 @@ namespace GoogGUI
                 return;
             }
 
+
             LaunchCommand.Toggle(false);
-
-            _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, _instance);
-
-            KillCommand.Toggle(true);
-            CloseCommand.Toggle(true);
-            OnPropertyChanged("ProcessRunning");
+            try
+            {
+                _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, _instance);
+                OnPropertyChanged("ProcessRunning");
+            }
+            catch (Exception ex)
+            {
+                LaunchCommand.Toggle(true);
+                new ErrorModal("Error", ex.Message).ShowDialog();
+            }
         }
 
         public void RefreshSelection()

@@ -55,7 +55,7 @@ namespace GoogGUI
             _start = _process.start;
 
             _source = new CancellationTokenSource();
-            Task.Run(() => RunCounters(_process.pid, Path.GetFileNameWithoutExtension(process.filename), _source.Token));
+            Task.Run(() => RunCounters(_process.pid, processName, _source.Token));
 
             _timer.Start();
             OnPropertyChanged("Running");
