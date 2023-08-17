@@ -7,4 +7,5 @@
     <local:ObservableIntanceListConverter x:Key="ObservableIntanceList" />
     <local:DataTypeConverter x:Key="DataType" />
     <local:IntDoubleConverter x:Key="IntDouble" />
+    <local:InvBooleanConveter x:Key="InvBoolean" />
 </ResourceDictionary>
