@@ -72,7 +72,7 @@ namespace GoogLib
                 LastResponsive = DateTime.UtcNow;
 
             if ((LastResponsive + TimeSpan.FromSeconds(Profile.ZombieCheckSeconds)) < DateTime.UtcNow && Profile.KillZombies)
-                Kill();
+                _process.Kill();
         }
 
         public async Task StartProcessAsync()
