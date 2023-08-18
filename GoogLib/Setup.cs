@@ -88,17 +88,22 @@ namespace Goog
 
         public static async Task<UpdateCheckEventArgs> GetServerUptoDate(Config config, CancellationToken ct)
         {
-            if (config.ServerInstanceCount <= 0) return new UpdateCheckEventArgs();
+            if (config.ServerInstanceCount <= 0) 
+                throw new Exception("No server instance is configured.");
 
-            ulong instance0 = GetInstanceBuildID(config, 0);
-            ulong steam = await GetSteamBuildID(config, ct);
-
-            return new UpdateCheckEventArgs
+            ulong instance0;
+            ulong steam;
+            try
             {
-                IsUpToDate = instance0 == steam,
-                steamBuildID = steam,
-                currentBuildID = instance0
-            };
+                instance0 = GetInstanceBuildID(config, 0);
+                steam = await GetSteamBuildID(config, ct);
+            }
+            catch (Exception ex)
+            {
+                return new UpdateCheckEventArgs(0, 0, ex);
+            }
+
+            return new UpdateCheckEventArgs(instance0, steam);
         }
 
         public static async Task<ulong> GetSteamBuildID(Config config, CancellationToken ct)
@@ -141,7 +146,7 @@ namespace Goog
                 Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
         }
 
-        public static async Task SetupApp(Config config, CancellationToken token, bool reinstall = false)
+        public static async Task SetupApp(Config config, CancellationToken token)
         {
             if (string.IsNullOrEmpty(config.InstallPath))
                 throw new Exception("install-path is not configured properly.");
@@ -151,8 +156,6 @@ namespace Goog
 
             string steamFolder = Path.Join(config.InstallPath, Config.FolderSteam);
             string steamCMD = Path.Join(steamFolder, Config.FileSteamCMDBin);
-            if (File.Exists(steamCMD) && !reinstall)
-                throw new Exception("Install already exists.");
 
             var installPath = config.InstallPath;
             Tools.CreateDir(installPath);
@@ -175,9 +178,9 @@ namespace Goog
             Tools.DeleteIfExists(steamCmdZip);
         }
 
-        public static async Task<int> SetupAppAndSteam(Config config, CancellationToken token, bool reinstall = false)
+        public static async Task<int> SetupAppAndSteam(Config config, CancellationToken token)
         {
-            await SetupApp(config, token, reinstall);
+            await SetupApp(config, token);
             return await UpdateSteamCMD(config, token);
         }
 
