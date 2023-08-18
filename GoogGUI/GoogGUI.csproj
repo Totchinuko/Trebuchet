@@ -16,9 +16,11 @@
     <None Remove="Icons\BugWindow.png" />
     <None Remove="Icons\Close.png" />
     <None Remove="Icons\Dashboard.png" />
+    <None Remove="Icons\Discord.png" />
     <None Remove="Icons\Download.png" />
     <None Remove="Icons\Duplicate.png" />
     <None Remove="Icons\FIle.png" />
+    <None Remove="Icons\Filter.png" />
     <None Remove="Icons\Folder.png" />
     <None Remove="Icons\Game.png" />
     <None Remove="Icons\List.png" />
@@ -49,6 +51,7 @@
 
   <ItemGroup>
     <Resource Include="Icons\Dashboard.png" />
+    <Resource Include="Icons\Discord.png" />
     <Resource Include="Icons\Download.png" />
   </ItemGroup>
 
@@ -63,6 +66,7 @@
     <Resource Include="Icons\Close.png" />
     <Resource Include="Icons\Duplicate.png" />
     <Resource Include="Icons\FIle.png" />
+    <Resource Include="Icons\Filter.png" />
     <Resource Include="Icons\Folder.png" />
     <Resource Include="Icons\Game.png" />
     <Resource Include="Icons\List.png" />

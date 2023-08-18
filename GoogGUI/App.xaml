@@ -43,6 +43,7 @@
                 <ResourceDictionary Source="Templates\ServerDashboard.xaml" />
                 <ResourceDictionary Source="Templates\Dashboard.xaml" />
                 <ResourceDictionary Source="Templates\RconPanel.xaml" />
+                <ResourceDictionary Source="Templates\LogFilterPanel.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
