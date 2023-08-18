@@ -13,12 +13,10 @@ namespace GoogLib
             TypeInfoResolver = new PrivateConstructorContractResolver()
         };
 
-        private string _filePath = string.Empty;
-
         public event EventHandler<T>? FileSaved;
 
         [JsonIgnore]
-        public string FilePath { get => _filePath; private set => _filePath = value; }
+        public string FilePath { get; protected set; } = string.Empty;
 
         public void CopyFileTo(string path)
         {
