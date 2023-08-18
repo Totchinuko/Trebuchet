@@ -420,7 +420,7 @@ namespace Goog
             {
                 int error = process.ExitCode;
                 process.Dispose();
-                Log.Write($"SteamCMD exited with code {error}", (error != 7 || error != 0 ? LogSeverity.Warning : LogSeverity.Info));
+                Log.Write($"SteamCMD exited with code {error}", (error != 7 && error != 0 ? LogSeverity.Warning : LogSeverity.Info));
                 return error != 0 && error != 7 ? 1 : 0;
             }
 
@@ -448,7 +448,7 @@ namespace Goog
             }
             if (process.HasExited)
             {
-                Log.Write($"SteamCMD exited with code {process.ExitCode}", (process.ExitCode != 7 || process.ExitCode != 0 ? LogSeverity.Warning : LogSeverity.Info));
+                Log.Write($"SteamCMD exited with code {process.ExitCode}", (process.ExitCode != 7 && process.ExitCode != 0 ? LogSeverity.Warning : LogSeverity.Info));
                 process.Dispose();
                 return content;
             }
