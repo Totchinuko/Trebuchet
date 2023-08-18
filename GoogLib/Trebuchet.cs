@@ -31,6 +31,17 @@ namespace GoogLib
 
         public event EventHandler<int>? ServerTerminated;
 
+
+        /// <summary>
+        /// Get the server port informations for all the running server processes.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ServerInstanceInformation> GetInstancesInformations()
+        {
+            foreach (ServerProcess p in _serverProcesses.Values)
+                yield return p.Information;
+        }
+
         /// <summary>
         /// Launch a client process while taking care of everything. Generate the modlist, generate the ini settings, etc.
         /// Process is created on a separate thread, and fire the event ClientProcessStarted when the process is running.

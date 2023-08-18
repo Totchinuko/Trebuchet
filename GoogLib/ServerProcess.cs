@@ -1,5 +1,6 @@
 ﻿using Goog;
 using System.Diagnostics;
+using Yuu.Ini;
 
 namespace GoogLib
 {
@@ -12,6 +13,7 @@ namespace GoogLib
             ServerInstance = instance;
             Profile = profile;
             Modlist = modlist;
+            Information = new ServerInstanceInformation(ServerInstance, profile.ServerName, profile.GameClientPort, profile.SourceQueryPort, profile.RConPort);
         }
 
         public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance, Process process, ProcessData data)
@@ -20,6 +22,7 @@ namespace GoogLib
             Profile = profile;
             Modlist = modlist;
             ProcessData = data;
+            Information = GetInformationFromInit(profile, instance);
 
             _process = process;
             _process.EnableRaisingEvents = true;
@@ -46,6 +49,8 @@ namespace GoogLib
         public ServerProfile Profile { get; }
 
         public int ServerInstance { get; }
+
+        public ServerInstanceInformation Information { get; }
 
         public void Close()
         {
@@ -159,6 +164,34 @@ namespace GoogLib
 
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
             OnProcessStarted(ProcessData);
+        }
+
+        private ServerInstanceInformation GetInformationFromInit(ServerProfile profile, int instance)
+        {
+            string instancePath = profile.GetInstancePath(instance);
+            string initPath = Path.Combine(instancePath, string.Format(Config.FileIniServer, "Engine"));
+            IniDocument document = IniParser.Parse(Tools.GetFileContent(initPath));
+
+            IniSection section = document.GetSection("OnlineSubsystem");
+            string title = section.GetValue("ServerName", "Conan Exile Dedicated Server");
+            
+            section = document.GetSection("URL");
+            int port;
+            if(!int.TryParse(section.GetValue("Port", "7777"), out port))
+                port = 7777;
+
+            section = document.GetSection("OnlineSubsystemSteam");
+            int queryPort;
+            if(!int.TryParse(section.GetValue("GameServerQueryPort", "27015"), out queryPort))
+                queryPort = 27015;
+
+            document = IniParser.Parse(Tools.GetFileContent(Path.Combine(instancePath, string.Format(Config.FileIniServer, "Game"))));
+            section = document.GetSection("RconPlugin");
+            int rconPort;
+            if (!int.TryParse(section.GetValue("Port", "25575"), out rconPort))
+                rconPort = 25575;
+
+            return new ServerInstanceInformation(instance, title, port, queryPort, rconPort);
         }
     }
 }
