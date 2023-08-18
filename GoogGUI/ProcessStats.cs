@@ -18,10 +18,8 @@ namespace GoogGUI
 
         protected ProcessData _process;
         private int _cpuUsage = 0;
-        private PerformanceCounter? _cpuUsageCounter;
 
         private long _memoryConsumption = 0;
-        private PerformanceCounter? _memoryConsumptionCounter;
         private long _peakMemoryConsumption = 0;
         private DateTime _start;
 
@@ -55,7 +53,7 @@ namespace GoogGUI
             _start = _process.start;
 
             _source = new CancellationTokenSource();
-            Task.Run(() => RunCounters(_process.pid, processName, _source.Token));
+            Task.Run(() => RunCounters(_process.pid, processName, _source.Token), _source.Token);
 
             _timer.Start();
             OnPropertyChanged("Running");
@@ -68,6 +66,7 @@ namespace GoogGUI
             _source?.Dispose();
             _source = null;
             _timer.Stop();
+            _peakMemoryConsumption = 0;
             OnPropertyChanged("Running");
         }
 
@@ -96,13 +95,23 @@ namespace GoogGUI
 
         protected virtual async Task RunCounters(int processID, string processName, CancellationToken token)
         {
-            _memoryConsumptionCounter = await Task.Run(() => new PerformanceCounter("Process V2", "Working Set", processName + ":" + processID));
-            _cpuUsageCounter = await Task.Run(() => new PerformanceCounter("Process V2", "% Processor Time", processName + ":" + processID));
+            PerformanceCounter memoryConsumptionCounter = await Task.Run(() => new PerformanceCounter("Process V2", "Working Set", processName + ":" + processID));
+            PerformanceCounter cpuUsageCounter = await Task.Run(() => new PerformanceCounter("Process V2", "% Processor Time", processName + ":" + processID));
 
             while(!token.IsCancellationRequested)
             {
-                long memory = (long)(_memoryConsumptionCounter?.NextValue() ?? 0f);
-                int cpu = (int)(_cpuUsageCounter?.NextValue() / Environment.ProcessorCount ?? 0f);
+                if (Tools.GetProcess(processID).IsEmpty)
+                    break;
+
+                long memory = 0;
+                int cpu = 0;
+                try
+                {
+                    memory = (long)(memoryConsumptionCounter?.NextValue() ?? 0f);
+                    cpu = (int)(cpuUsageCounter?.NextValue() / Environment.ProcessorCount ?? 0f);
+                }
+                catch { break; }
+                
 
                 lock (theLock)
                 {
@@ -113,10 +122,8 @@ namespace GoogGUI
                 await Task.Delay(900);
             }
 
-            _memoryConsumptionCounter?.Dispose();
-            _cpuUsageCounter?.Dispose();
-            _memoryConsumptionCounter = null;
-            _cpuUsageCounter = null;
+            memoryConsumptionCounter?.Dispose();
+            cpuUsageCounter?.Dispose();
         }
     }
 }
