@@ -175,13 +175,6 @@
   },
   {
     "$type": "Toggle",
-    "Property": "Log",
-    "Name": "Display Log Console",
-    "Description": "Display server live logs instead of a blank window.",
-    "Default": false
-  },
-  {
-    "$type": "Toggle",
     "Property": "EnableRCon",
     "Name": "Enable RCON",
     "Description": "Enable RCON on your server instance.",
@@ -242,6 +235,17 @@
     "Property": "EnableBattleEye",
     "Name": "Enable Battle Eye",
     "Description": "Enable Battle Eye on your server instance.",
+    "Default": false
+  },
+  {
+    "$type": "Title",
+    "Name": "Miscellaneous"
+  },
+  {
+    "$type": "Toggle",
+    "Property": "Log",
+    "Name": "Display Log Console",
+    "Description": "Display server live logs instead of a blank window. WARNING: This might render the zombie process detection ineffective. I don't advise using this on a production server.",
     "Default": false
   }
 ]
