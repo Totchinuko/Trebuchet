@@ -23,6 +23,14 @@ namespace GoogLib
             return document.GetSections(section)[0];
         }
 
+        public static string GetValue(this IniSection section, string parameter, string defaultValue = "")
+        {
+            var parameters = section.GetParameters(parameter);            
+            if (parameters.Count == 0)
+                return defaultValue;
+            return parameters[parameters.Count - 1].Value;
+        }
+
         public static bool HasSection(this IniDocument document, string section)
         {
             return document.GetSections(section).Count > 0;
