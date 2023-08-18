@@ -1,10 +1,4 @@
 ﻿using Goog;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Input;
 
@@ -13,7 +7,6 @@ namespace GoogGUI
     public class TestliveModal : BaseModal
     {
         private bool _madeASelection;
-        private bool _testlive = false;
 
         public TestliveModal() : base()
         {
@@ -21,17 +14,30 @@ namespace GoogGUI
             TestLiveCommand = new SimpleCommand(OnTestLiveClicked);
         }
 
+        public override bool CloseDisabled => false;
+
         public ICommand LiveCommand { get; private set; }
+
         public override int ModalHeight => 400;
 
         public override string ModalTitle => "Game Build";
 
-        public override bool CloseDisabled => false;
-
         public override int ModalWidth => 400;
+
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["TestliveSelection"];
-        public bool Testlive { get => _testlive; private set => _testlive = value; }
+
         public ICommand TestLiveCommand { get; private set; }
+
+        public static void OpenApp(bool testlive)
+        {
+            Config config = Config.LoadConfig(Config.GetPath(testlive));
+            UIConfig uiConfig = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
+            App.UseSoftwareRendering = !uiConfig.UseHardwareAcceleration;
+
+            MainWindow mainWindow = new MainWindow(config, uiConfig);
+            Application.Current.MainWindow = mainWindow;
+            mainWindow.Show();
+        }
 
         public override void OnWindowClose()
         {
@@ -42,25 +48,14 @@ namespace GoogGUI
         private void OnLiveClicked(object? obj)
         {
             _madeASelection = true;
-            OpenApp();
+            OpenApp(false);
+            _window.Close();
         }
 
         private void OnTestLiveClicked(object? obj)
         {
             _madeASelection = true;
-            _testlive = true;
-            OpenApp();
-        }
-
-        private void OpenApp()
-        {
-            Config config = Config.LoadConfig(Config.GetPath(Testlive));
-            UIConfig uiConfig = UIConfig.LoadConfig(UIConfig.GetPath(Testlive));
-            App.UseSoftwareRendering = !uiConfig.UseHardwareAcceleration;
-
-            MainWindow mainWindow = new MainWindow(config, uiConfig);
-            Application.Current.MainWindow = mainWindow;
-            mainWindow.Show();
+            OpenApp(true);
             _window.Close();
         }
     }
