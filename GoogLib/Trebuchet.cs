@@ -275,21 +275,14 @@ namespace GoogLib
             {
                 if (sender is not ServerProcess process) return;
                 if (!_serverProcesses.ContainsKey(process.ServerInstance)) return;
+                
                 _serverProcesses.Remove(process.ServerInstance);
+                _lockedFolders.Remove(GetCurrentServerJunction(process.ServerInstance));
 
                 if (!process.Closed && _config.RestartWhenDown)
-                {
-                    var watcher = new ServerProcess(process.Profile, process.Modlist, process.ServerInstance);
-                    _serverProcesses.Add(watcher.ServerInstance, watcher);
-                    watcher.ProcessStarted += OnServerProcessStarted;
-                    watcher.ProcessExited += OnServerProcessTerminate;
-                    Task.Run(watcher.StartProcessAsync);
-                }
+                    CatapultServer(process.Profile.ProfileName, process.Modlist.ProfileName, process.ServerInstance);
                 else
-                {
-                    _lockedFolders.Remove(GetCurrentServerJunction(process.ServerInstance));
                     ServerTerminated?.Invoke(this, process.ServerInstance);
-                }
             });
         }
 
