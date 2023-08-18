@@ -1,7 +1,5 @@
 ﻿using Goog;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace GoogLib
 {
@@ -29,23 +27,25 @@ namespace GoogLib
             _process.Exited += OnProcessExited;
         }
 
-        public event EventHandler<ServerProcess>? ProcessExited;
+        public event EventHandler? ProcessExited;
 
-        public event EventHandler<ServerProcess>? ProcessStarted;
+        public event EventHandler<TrebuchetFailEventArgs>? ProcessFailed;
+
+        public event EventHandler<TrebuchetStartEventArgs>? ProcessStarted;
 
         public bool Closed { get; private set; }
 
+        public bool IsRunning => _process != null;
+
         public DateTime LastResponsive { get; private set; }
-
-        public int ServerInstance { get; }
-
-        public ServerProfile Profile { get; }
 
         public ModListProfile Modlist { get; }
 
         public ProcessData ProcessData { get; private set; }
 
-        public bool IsRunning => _process != null;
+        public ServerProfile Profile { get; }
+
+        public int ServerInstance { get; }
 
         public void Close()
         {
@@ -80,7 +80,8 @@ namespace GoogLib
             string args = Profile.GetServerArgs(ServerInstance);
 
             string? dir = Path.GetDirectoryName(filename);
-            if (dir == null) throw new Exception($"Failed to restart process, invalid directory {filename}");
+            if (dir == null) 
+                throw new Exception($"Failed to restart process, invalid directory {filename}");
 
             process.StartInfo.FileName = filename;
             process.StartInfo.WorkingDirectory = dir;
@@ -99,16 +100,19 @@ namespace GoogLib
             _process.Exited -= OnProcessExited;
             _process.Dispose();
             _process = null;
-            ProcessExited?.Invoke(sender, this);
+            ProcessExited?.Invoke(sender, EventArgs.Empty);
         }
 
-        protected virtual void OnProcessStarted()
+        protected virtual void OnProcessFailed(Exception exception)
         {
-            ProcessStarted?.Invoke(this, this);
+            ProcessFailed?.Invoke(this, new TrebuchetFailEventArgs(exception));
         }
 
-        // Why do we do this ? To avoid app freeze we start the server with the root server boot exe. That create the actual server process in a child process so we need to retreve it.
-        // Its usually done in an instant, but since I'm not sure that this could be prone to race condition, I'm waiting for it just in case.
+        protected virtual void OnProcessStarted(ProcessData data)
+        {
+            ProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(data, ServerInstance));
+        }
+
         protected virtual async Task StartProcessInternal(Process process)
         {
             File.WriteAllLines(Path.Combine(Profile.ProfileFolder, Config.FileGeneratedModlist), Modlist.GetResolvedModlist());
@@ -136,19 +140,22 @@ namespace GoogLib
                 case 1:
                     _process.PriorityClass = ProcessPriorityClass.AboveNormal;
                     break;
+
                 case 2:
                     _process.PriorityClass = ProcessPriorityClass.High;
                     break;
+
                 case 3:
                     _process.PriorityClass = ProcessPriorityClass.RealTime;
                     break;
+
                 default:
                     _process.PriorityClass = ProcessPriorityClass.Normal;
                     break;
             }
 
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
-            OnProcessStarted();
+            OnProcessStarted(ProcessData);
         }
     }
 }

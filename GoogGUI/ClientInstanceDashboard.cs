@@ -27,7 +27,7 @@ namespace GoogGUI
             _uiConfig = uiConfig;
 
             _trebuchet.ClientTerminated += OnProcessTerminated;
-            _trebuchet.ClientProcessStarted += OnProcessStarted;
+            _trebuchet.ClientStarted += OnProcessStarted;
 
             _selectedProfile = _uiConfig.DashboardClientProfile;
             _selectedModlist = _uiConfig.DashboardClientModlist;

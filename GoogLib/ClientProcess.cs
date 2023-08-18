@@ -12,7 +12,6 @@ namespace GoogLib
             Profile = profile;
             Modlist = modlist;
             IsBattleEye = isBattleEye;
-
         }
 
         public ClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye, Process process, ProcessData data)
@@ -28,19 +27,21 @@ namespace GoogLib
             _process.Exited += OnProcessExited;
         }
 
-        public event EventHandler<ClientProcess>? ProcessExited;
+        public event EventHandler? ProcessExited;
 
-        public event EventHandler<ClientProcess>? ProcessStarted;
+        public event EventHandler<TrebuchetFailEventArgs>? ProcessFailed;
 
-        public ModListProfile Modlist { get; }
-
-        public ClientProfile Profile { get; }
+        public event EventHandler<TrebuchetStartEventArgs>? ProcessStarted;
 
         public bool IsBattleEye { get; }
 
+        public bool IsRunning => _process != null;
+
+        public ModListProfile Modlist { get; }
+
         public ProcessData ProcessData { get; private set; }
 
-        public bool IsRunning => _process != null;
+        public ClientProfile Profile { get; }
 
         public void Kill()
         {
@@ -56,7 +57,8 @@ namespace GoogLib
             string args = Profile.GetClientArgs();
 
             string? dir = Path.GetDirectoryName(filename);
-            if (dir == null) throw new Exception($"Failed to restart process, invalid directory {filename}");
+            if (dir == null) 
+                throw new Exception($"Failed to restart process, invalid directory {filename}");
 
             Process process = new Process();
             process.StartInfo.FileName = filename;
@@ -67,7 +69,16 @@ namespace GoogLib
             process.StartInfo.UseShellExecute = false;
             process.EnableRaisingEvents = true;
             process.Exited += OnProcessExited;
-            await StartProcessInternal(process);
+
+            try
+            {
+                await StartProcessInternal(process);
+            }
+            catch (Exception ex)
+            {
+                process.Dispose();
+                OnProcessFailed(ex);
+            }
         }
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)
@@ -75,12 +86,17 @@ namespace GoogLib
             if (_process == null) return;
             _process.Dispose();
             _process = null;
-            ProcessExited?.Invoke(sender, this);
+            ProcessExited?.Invoke(sender, EventArgs.Empty);
         }
 
-        protected virtual void OnProcessStarted()
+        protected virtual void OnProcessFailed(Exception exception)
         {
-            ProcessStarted?.Invoke(this, this);
+            ProcessFailed?.Invoke(this, new TrebuchetFailEventArgs(exception));
+        }
+
+        protected virtual void OnProcessStarted(ProcessData data)
+        {
+            ProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(data));
         }
 
         //If we start with battle eye, launched process is not going to be the actual game.
@@ -110,12 +126,15 @@ namespace GoogLib
                 case 1:
                     _process.PriorityClass = ProcessPriorityClass.AboveNormal;
                     break;
+
                 case 2:
                     _process.PriorityClass = ProcessPriorityClass.High;
                     break;
+
                 case 3:
                     _process.PriorityClass = ProcessPriorityClass.RealTime;
                     break;
+
                 default:
                     _process.PriorityClass = ProcessPriorityClass.Normal;
                     break;
@@ -123,7 +142,7 @@ namespace GoogLib
 
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
 
-            OnProcessStarted();
+            OnProcessStarted(ProcessData);
         }
     }
 }

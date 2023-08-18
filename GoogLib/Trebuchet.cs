@@ -1,6 +1,5 @@
 ﻿using Goog;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Text.RegularExpressions;
 
 namespace GoogLib
@@ -18,71 +17,89 @@ namespace GoogLib
             _config = config;
         }
 
-        public event EventHandler<TrebuchetStartEventArgs>? ClientProcessStarted;
+        public event EventHandler<TrebuchetFailEventArgs>? ClientFailed;
+
+        public event EventHandler<TrebuchetStartEventArgs>? ClientStarted;
 
         public event EventHandler? ClientTerminated;
 
         public event EventHandler<Action>? DispatcherRequest;
 
-        public event EventHandler<TrebuchetStartEventArgs>? ServerProcessStarted;
+        public event EventHandler<TrebuchetFailEventArgs>? ServerFailed;
+
+        public event EventHandler<TrebuchetStartEventArgs>? ServerStarted;
 
         public event EventHandler<int>? ServerTerminated;
 
-        public static bool GetInstance(string path, out int instance)
-        {
-            instance = 0;
-            var match = _instanceRegex.Match(path);
-            if (!match.Success) return false;
-
-            return int.TryParse(match.Groups[1].Value, out instance);
-        }
-
+        /// <summary>
+        /// Launch a client process while taking care of everything. Generate the modlist, generate the ini settings, etc.
+        /// Process is created on a separate thread, and fire the event ClientProcessStarted when the process is running.
+        /// </summary>
+        /// <param name="profileName"></param>
+        /// <param name="modlistName"></param>
+        /// <param name="isBattleEye">Launch with BattlEye anti cheat.</param>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="ArgumentException">Profiles can only be used by one process at a times, since they contain the db of the game.</exception>
         public void CatapultClient(string profileName, string modlistName, bool isBattleEye)
         {
-            if (_clientProcess != null)
-                throw new Exception("Client is already running.");
+            if (_clientProcess != null) return;
 
             if (!ClientProfile.TryLoadProfile(_config, profileName, out ClientProfile? profile))
-                throw new Exception("Unknown Profile.");
+                throw new FileNotFoundException($"{profileName} profile not found.");
             if (!ModListProfile.TryLoadProfile(_config, modlistName, out ModListProfile? modlist))
-                throw new Exception("Unknown Mod List.");
+                throw new FileNotFoundException($"{modlistName} modlist not found.");
 
             if (_lockedFolders.Contains(profile.ProfileFolder))
-                throw new Exception("Profile folder is currently locked by another process.");
+                throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
 
             SetupJunction(_config.ClientPath, profile.ProfileFolder);
 
             _clientProcess = new ClientProcess(profile, modlist, isBattleEye);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             _clientProcess.ProcessStarted += OnClientProcessStarted;
+            _clientProcess.ProcessFailed += OnClientProcessFailed;
 
             _lockedFolders.Add(GetCurrentClientJunction());
             Task.Run(_clientProcess.StartProcessAsync);
         }
 
+        /// <summary>
+        /// Launch a server process while taking care of everything. Generate the modlist, generate the ini settings, etc.
+        /// Process is created on a separate thread, and fire the event ServerProcessStarted when the process is running.
+        /// </summary>
+        /// <param name="profileName"></param>
+        /// <param name="modlistName"></param>
+        /// <param name="instance">Index of the instance you want to launch</param>
+        /// <exception cref="FileNotFoundException"></exception>
+        /// <exception cref="ArgumentException">Profiles can only be used by one process at a times, since they contain the db of the game.</exception>
         public void CatapultServer(string profileName, string modlistName, int instance)
         {
             if (_serverProcesses.ContainsKey(instance)) return;
 
             if (!ServerProfile.TryLoadProfile(_config, profileName, out ServerProfile? profile))
-                throw new Exception("Unknown Profile.");
+                throw new FileNotFoundException($"{profileName} profile not found.");
             if (!ModListProfile.TryLoadProfile(_config, modlistName, out ModListProfile? modlist))
-                throw new Exception("Unknown Mod List.");
+                throw new FileNotFoundException($"{modlistName} modlist not found.");
 
             if (_lockedFolders.Contains(profile.ProfileFolder))
-                throw new Exception("Profile folder is currently locked by another process.");
+                throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
 
             SetupJunction(ServerProfile.GetInstancePath(_config, instance), profile.ProfileFolder);
 
             ServerProcess watcher = new ServerProcess(profile, modlist, instance);
             watcher.ProcessExited += OnServerProcessTerminate;
             watcher.ProcessStarted += OnServerProcessStarted;
+            watcher.ProcessFailed += OnServerProcessFailed;
             _serverProcesses.Add(instance, watcher);
 
             _lockedFolders.Add(GetCurrentServerJunction(instance));
             Task.Run(watcher.StartProcessAsync);
         }
 
+        /// <summary>
+        /// Ask a particular server instance to close. If the process is borked, this will not work.
+        /// </summary>
+        /// <param name="instance"></param>
         public void CloseServer(int instance)
         {
             if (_serverProcesses.TryGetValue(instance, out var watcher))
@@ -93,30 +110,46 @@ namespace GoogLib
 
         public bool IsClientRunning() => _clientProcess != null && _clientProcess.IsRunning;
 
-        public bool IsFolderLocked(string folder) => _lockedFolders.Contains(folder);
+        public bool IsFolderLocked(string path) => _lockedFolders.Where(path.StartsWith).Any();
 
         public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.IsRunning;
 
+        /// <summary>
+        /// Terminate all active server processes.
+        /// </summary>
         public void KillAllServers()
         {
             foreach (ServerProcess p in _serverProcesses.Values)
                 p.Kill();
         }
 
+        /// <summary>
+        /// Kill the client process.
+        /// </summary>
         public void KillClient() => _clientProcess?.Kill();
 
+        /// <summary>
+        /// Kill a particular server instance.
+        /// </summary>
+        /// <param name="instance"></param>
         public void KillServer(int instance)
         {
             if (_serverProcesses.TryGetValue(instance, out var watcher))
                 watcher.Kill();
         }
 
+        /// <summary>
+        /// Request a gracefull shutdown of all active server processes.
+        /// </summary>
         public void StopAllServers()
         {
             foreach (ServerProcess p in _serverProcesses.Values)
                 p.Close();
         }
 
+        /// <summary>
+        /// Tick the trebuchet. This will check if client or any server is already running and catch them if they where started by trebuchet. It also check for zombie processes.
+        /// </summary>
         public void TickTrebuchet()
         {
             FindExistingClient();
@@ -130,6 +163,15 @@ namespace GoogLib
             }
         }
 
+        private static bool GetInstance(string path, out int instance)
+        {
+            instance = 0;
+            var match = _instanceRegex.Match(path);
+            if (!match.Success) return false;
+
+            return int.TryParse(match.Groups[1].Value, out instance);
+        }
+
         private void AddDispatch(Action callback)
         {
             DispatcherRequest?.Invoke(this, callback);
@@ -141,13 +183,13 @@ namespace GoogLib
 
             var data = Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
             if (data.IsEmpty) return;
-            if(!TrebuchetLaunch.TryLoadPreviousLaunch(_config, out ClientProfile? profile, out ModListProfile? modlist)) return;
+            if (!TrebuchetLaunch.TryLoadPreviousLaunch(_config, out ClientProfile? profile, out ModListProfile? modlist)) return;
             if (!data.TryGetProcess(out Process? process)) return;
 
             _clientProcess = new ClientProcess(profile, modlist, false);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             _lockedFolders.Add(GetCurrentClientJunction());
-            OnClientProcessStarted(this, _clientProcess);
+            OnClientProcessStarted(this, new TrebuchetStartEventArgs(data));
         }
 
         private void FindExistingServers()
@@ -164,7 +206,7 @@ namespace GoogLib
                 watcher.ProcessExited += OnServerProcessTerminate;
                 _serverProcesses.Add(instance, watcher);
                 _lockedFolders.Add(GetCurrentServerJunction(instance));
-                OnServerProcessStarted(this, watcher);                
+                OnServerProcessStarted(this, new TrebuchetStartEventArgs(p, instance));
             }
         }
 
@@ -184,46 +226,60 @@ namespace GoogLib
             else return string.Empty;
         }
 
-        private void OnClientProcessStarted(object? sender, ClientProcess e)
+        private void OnClientProcessFailed(object? sender, TrebuchetFailEventArgs e)
         {
-            if (!e.IsRunning) return;
             AddDispatch(() =>
             {
-                ClientProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.ProcessData));
+                ClientFailed?.Invoke(this, e);
             });
         }
 
-        private void OnClientProcessTerminate(object? sender, ClientProcess e)
+        private void OnClientProcessStarted(object? sender, TrebuchetStartEventArgs e)
         {
             AddDispatch(() =>
             {
-                if (_clientProcess != e) return;
+                ClientStarted?.Invoke(this, e);
+            });
+        }
+
+        private void OnClientProcessTerminate(object? sender, EventArgs e)
+        {
+            AddDispatch(() =>
+            {
+                if (sender is not ClientProcess) return;
                 _clientProcess = null;
-                ClientTerminated?.Invoke(this, EventArgs.Empty);
                 _lockedFolders.Remove(GetCurrentClientJunction());
+                ClientTerminated?.Invoke(this, EventArgs.Empty);
             });
         }
 
-        private void OnServerProcessStarted(object? sender, ServerProcess e)
+        private void OnServerProcessFailed(object? sender, TrebuchetFailEventArgs e)
         {
-            if (!e.IsRunning) return;
-
             AddDispatch(() =>
             {
-                ServerProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(e.ProcessData, e.ServerInstance));
+                ServerFailed?.Invoke(this, e);
             });
         }
 
-        private void OnServerProcessTerminate(object? sender, ServerProcess e)
+        private void OnServerProcessStarted(object? sender, TrebuchetStartEventArgs e)
         {
             AddDispatch(() =>
             {
-                if (!_serverProcesses.ContainsKey(e.ServerInstance)) return;
-                _serverProcesses.Remove(e.ServerInstance);
+                ServerStarted?.Invoke(this, e);
+            });
+        }
 
-                if (!e.Closed && _config.RestartWhenDown)
+        private void OnServerProcessTerminate(object? sender, EventArgs e)
+        {
+            AddDispatch(() =>
+            {
+                if (sender is not ServerProcess process) return;
+                if (!_serverProcesses.ContainsKey(process.ServerInstance)) return;
+                _serverProcesses.Remove(process.ServerInstance);
+
+                if (!process.Closed && _config.RestartWhenDown)
                 {
-                    var watcher = new ServerProcess(e.Profile, e.Modlist, e.ServerInstance);
+                    var watcher = new ServerProcess(process.Profile, process.Modlist, process.ServerInstance);
                     _serverProcesses.Add(watcher.ServerInstance, watcher);
                     watcher.ProcessStarted += OnServerProcessStarted;
                     watcher.ProcessExited += OnServerProcessTerminate;
@@ -231,8 +287,8 @@ namespace GoogLib
                 }
                 else
                 {
-                    ServerTerminated?.Invoke(this, e.ServerInstance);
-                    _lockedFolders.Remove(GetCurrentServerJunction(e.ServerInstance));
+                    _lockedFolders.Remove(GetCurrentServerJunction(process.ServerInstance));
+                    ServerTerminated?.Invoke(this, process.ServerInstance);
                 }
             });
         }

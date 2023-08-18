@@ -37,7 +37,7 @@ namespace GoogGUI
             _uiConfig = uiConfig;
 
             _trebuchet.ServerTerminated += OnProcessTerminated;
-            _trebuchet.ServerProcessStarted += OnProcessStarted;
+            _trebuchet.ServerStarted += OnProcessStarted;
 
             _uiConfig.GetInstanceParameters(_instance, out _selectedModlist, out _selectedProfile);
 
