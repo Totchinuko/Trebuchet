@@ -11,10 +11,6 @@ namespace GoogGUI
     public class ServerInstanceDashboard : INotifyPropertyChanged
     {
         private Config _config;
-        private int _instance;
-        private List<string> _modlists = new List<string>();
-        private ProcessStats _processStats = new ProcessStats();
-        private List<string> _profiles = new List<string>();
         private string _selectedModlist = string.Empty;
         private string _selectedProfile = string.Empty;
         private Trebuchet _trebuchet;
@@ -28,14 +24,14 @@ namespace GoogGUI
 
             _config = config;
             _trebuchet = trebuchet;
-            _instance = instance;
+            Instance = instance;
             _uiConfig = uiConfig;
 
             _trebuchet.ServerTerminated += OnProcessTerminated;
             _trebuchet.ServerStarted += OnProcessStarted;
             _trebuchet.ServerFailed += OnProcessFailed;
 
-            _uiConfig.GetInstanceParameters(_instance, out _selectedModlist, out _selectedProfile);
+            _uiConfig.GetInstanceParameters(Instance, out _selectedModlist, out _selectedProfile);
 
             Resolve();
             ListProfiles();
@@ -45,23 +41,23 @@ namespace GoogGUI
 
         public bool CanUseDashboard => _config.IsInstallPathValid &&
                 File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
-                (_config.ServerInstanceCount > _instance || ProcessRunning);
+                (_config.ServerInstanceCount > Instance || ProcessRunning);
 
         public SimpleCommand CloseCommand { get; private set; }
 
-        public int Instance => _instance;
+        public int Instance { get; }
 
         public SimpleCommand KillCommand { get; private set; }
 
         public TaskBlockedCommand LaunchCommand { get; private set; }
 
-        public List<string> Modlists => _modlists;
+        public List<string> Modlists { get; private set; } = new List<string>();
 
-        public bool ProcessRunning => _trebuchet.IsServerRunning(_instance);
+        public bool ProcessRunning => _trebuchet.IsServerRunning(Instance);
 
-        public ProcessStats ProcessStats => _processStats;
+        public ProcessStats ProcessStats { get; } = new ProcessStats();
 
-        public List<string> Profiles => _profiles;
+        public List<string> Profiles { get; private set; } = new List<string>();
 
         public string SelectedModlist
         {
@@ -69,7 +65,7 @@ namespace GoogGUI
             set
             {
                 _selectedModlist = value;
-                _uiConfig.SetInstanceParameters(_instance, _selectedModlist, _selectedProfile);
+                _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
                 _uiConfig.SaveFile();
             }
         }
@@ -80,22 +76,22 @@ namespace GoogGUI
             set
             {
                 _selectedProfile = value;
-                _uiConfig.SetInstanceParameters(_instance, _selectedModlist, _selectedProfile);
+                _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
                 _uiConfig.SaveFile();
             }
         }
 
         public void Close()
         {
-            if (!_trebuchet.IsServerRunning(_instance)) return;
+            if (!_trebuchet.IsServerRunning(Instance)) return;
 
             CloseCommand.Toggle(false);
-            _trebuchet.CloseServer(_instance);
+            _trebuchet.CloseServer(Instance);
         }
 
         public void Kill()
         {
-            if (!_trebuchet.IsServerRunning(_instance)) return;
+            if (!_trebuchet.IsServerRunning(Instance)) return;
 
             if (_uiConfig.DisplayWarningOnKill)
             {
@@ -107,13 +103,13 @@ namespace GoogGUI
 
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
-            _trebuchet.KillServer(_instance);
+            _trebuchet.KillServer(Instance);
         }
 
         public void Launch()
         {
             if (!CanUseDashboard) return;
-            if (_trebuchet.IsServerRunning(_instance)) return;
+            if (_trebuchet.IsServerRunning(Instance)) return;
             if (_trebuchet.IsFolderLocked(ServerProfile.GetFolder(_config, _selectedProfile)))
             {
                 new ErrorModal("Locked", "This profile is currently used by another process. Only one process can use a profile at a time.").ShowDialog();
@@ -123,7 +119,7 @@ namespace GoogGUI
             LaunchCommand.Toggle(false);
             try
             {
-                _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, _instance);
+                _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, Instance);
                 OnPropertyChanged("ProcessRunning");
             }
             catch (Exception ex)
@@ -146,8 +142,8 @@ namespace GoogGUI
 
         private void ListProfiles()
         {
-            _modlists = ModListProfile.ListProfiles(_config).ToList();
-            _profiles = ServerProfile.ListProfiles(_config).ToList();
+            Modlists = ModListProfile.ListProfiles(_config).ToList();
+            Profiles = ServerProfile.ListProfiles(_config).ToList();
             OnPropertyChanged("Modlists");
             OnPropertyChanged("Profiles");
         }
@@ -174,20 +170,21 @@ namespace GoogGUI
 
         private void OnProcessStarted(object? sender, TrebuchetStartEventArgs e)
         {
-            if (_instance != e.instance) return;
+            if (Instance != e.instance) return;
 
             LaunchCommand.Toggle(false);
             KillCommand.Toggle(true);
             CloseCommand.Toggle(true);
             OnPropertyChanged("ProcessRunning");
-            _processStats.StartStats(e.process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
+
+            ProcessStats.StartStats(e.process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
         }
 
         private void OnProcessTerminated(object? sender, int instance)
         {
-            if (_instance != instance) return;
+            if (Instance != instance) return;
 
-            _processStats.StopStats();
+            ProcessStats.StopStats();
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
             LaunchCommand.Toggle(true);
@@ -199,7 +196,7 @@ namespace GoogGUI
             ServerProfile.ResolveProfile(_config, ref _selectedProfile);
             ModListProfile.ResolveProfile(_config, ref _selectedModlist);
 
-            _uiConfig.SetInstanceParameters(_instance, _selectedModlist, _selectedProfile);
+            _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
             _uiConfig.SaveFile();
             OnPropertyChanged("SelectedModlist");
             OnPropertyChanged("SelectedProfile");
