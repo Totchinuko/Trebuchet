@@ -45,6 +45,8 @@ namespace GoogGUI
 
         public bool Running => !_process.IsEmpty;
 
+        public int PID => _process.pid;
+
         public virtual void StartStats(ProcessData process, string processName)
         {
             if (!_process.IsEmpty) throw new Exception("Stats already have a process.");
@@ -57,6 +59,7 @@ namespace GoogGUI
 
             _timer.Start();
             OnPropertyChanged("Running");
+            OnPropertyChanged("PID");
         }
 
         public virtual void StopStats()
