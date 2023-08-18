@@ -3,13 +3,8 @@ using GoogLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows;
 
 namespace GoogGUI
 {
@@ -38,6 +33,7 @@ namespace GoogGUI
 
             _trebuchet.ServerTerminated += OnProcessTerminated;
             _trebuchet.ServerStarted += OnProcessStarted;
+            _trebuchet.ServerFailed += OnProcessFailed;
 
             _uiConfig.GetInstanceParameters(_instance, out _selectedModlist, out _selectedProfile);
 
@@ -124,7 +120,6 @@ namespace GoogGUI
                 return;
             }
 
-
             LaunchCommand.Toggle(false);
             try
             {
@@ -170,6 +165,11 @@ namespace GoogGUI
         private void OnLaunched(object? obj)
         {
             Launch();
+        }
+
+        private void OnProcessFailed(object? sender, TrebuchetFailEventArgs e)
+        {
+            new ErrorModal("Server failed to start", e.Exception.Message).ShowDialog();
         }
 
         private void OnProcessStarted(object? sender, TrebuchetStartEventArgs e)

@@ -28,6 +28,7 @@ namespace GoogGUI
 
             _trebuchet.ClientTerminated += OnProcessTerminated;
             _trebuchet.ClientStarted += OnProcessStarted;
+            _trebuchet.ClientFailed += OnProcessFailed;
 
             _selectedProfile = _uiConfig.DashboardClientProfile;
             _selectedModlist = _uiConfig.DashboardClientModlist;
@@ -112,7 +113,7 @@ namespace GoogGUI
                 _trebuchet.CatapultClient(_selectedProfile, _selectedModlist, isBattleEye);
                 OnPropertyChanged("ProcessRunning");
             }
-            catch(Exception ex)
+            catch (Exception ex)
             {
                 LaunchCommand.Toggle(true);
                 LaunchBattleEyeCommand.Toggle(true);
@@ -152,6 +153,11 @@ namespace GoogGUI
         private void OnLaunched(object? obj)
         {
             Launch(false);
+        }
+
+        private void OnProcessFailed(object? sender, TrebuchetFailEventArgs e)
+        {
+            new ErrorModal("Client failed to start", e.Exception.Message).ShowDialog();
         }
 
         private void OnProcessStarted(object? sender, TrebuchetStartEventArgs e)
