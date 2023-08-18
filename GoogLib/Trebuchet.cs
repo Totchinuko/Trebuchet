@@ -189,7 +189,7 @@ namespace GoogLib
             if (!TrebuchetLaunch.TryLoadPreviousLaunch(_config, out ClientProfile? profile, out ModListProfile? modlist)) return;
             if (!data.TryGetProcess(out Process? process)) return;
 
-            _clientProcess = new ClientProcess(profile, modlist, false);
+            _clientProcess = new ClientProcess(profile, modlist, false, process, data);
             _clientProcess.ProcessExited += OnClientProcessTerminate;
             _lockedFolders.Add(GetCurrentClientJunction());
             OnClientProcessStarted(this, new TrebuchetStartEventArgs(data));
