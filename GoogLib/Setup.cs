@@ -1,6 +1,5 @@
 ﻿using GoogLib;
 using System.Diagnostics;
-using System.Reflection;
 using System.Text.RegularExpressions;
 
 namespace Goog
@@ -100,7 +99,7 @@ namespace Goog
         /// <exception cref="Exception"></exception>
         public static async Task<UpdateCheckEventArgs> GetServerUptoDate(Config config, CancellationToken ct)
         {
-            if (config.ServerInstanceCount <= 0) 
+            if (config.ServerInstanceCount <= 0)
                 throw new Exception("No server instance is configured.");
 
             Log.Write("Checking for server updates...", LogSeverity.Info);
@@ -143,8 +142,6 @@ namespace Goog
                     Config.CmdArgQuit
                 );
             process.StartInfo.CreateNoWindow = true;
-            process.StartInfo.UseShellExecute = false;
-            process.StartInfo.RedirectStandardOutput = true;
             string content = await WaitForProcessAnswer(process, ct);
 
             foreach (string search in new string[] { " ", "\n", "\r", "\n\r", "\t" })
@@ -255,7 +252,6 @@ namespace Goog
             process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             process.StartInfo.Arguments = steamArgs;
             process.StartInfo.CreateNoWindow = !config.DisplayCMD;
-            process.StartInfo.UseShellExecute = false;
             return await WaitForProcess(process, token);
         }
 
@@ -283,7 +279,6 @@ namespace Goog
             process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             process.StartInfo.Arguments = steamArgs;
             process.StartInfo.CreateNoWindow = !config.DisplayCMD;
-            process.StartInfo.UseShellExecute = false;
             return await WaitForProcess(process, ct);
         }
 
@@ -323,7 +318,6 @@ namespace Goog
             process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             process.StartInfo.Arguments = steamArgs;
             process.StartInfo.CreateNoWindow = !config.DisplayCMD;
-            process.StartInfo.UseShellExecute = false;
             return await WaitForProcess(process, token);
         }
 
@@ -382,7 +376,7 @@ namespace Goog
             }
             return 0;
         }
-        
+
         /// <summary>
         /// Update steamcmd to the latest version.
         /// </summary>
@@ -400,7 +394,6 @@ namespace Goog
             Process process = new Process();
             process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             process.StartInfo.Arguments = steamArgs;
-            process.StartInfo.UseShellExecute = false;
             process.StartInfo.CreateNoWindow = !config.DisplayCMD;
             return await WaitForProcess(process, token);
         }
@@ -413,9 +406,16 @@ namespace Goog
         /// <returns>1 if the task failled, 0 otherwize</returns>
         public static async Task<int> WaitForProcess(Process process, CancellationToken token)
         {
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
             process.Start();
             while (!process.HasExited && !token.IsCancellationRequested)
+            {
+                string data = await process.StandardOutput.ReadToEndAsync();
+                if (!string.IsNullOrEmpty(data))
+                    Log.Write("Steam output" + Environment.NewLine + data, LogSeverity.Info);
                 await Task.Delay(200);
+            }
             if (process.HasExited)
             {
                 int error = process.ExitCode;
@@ -439,11 +439,13 @@ namespace Goog
         /// <returns></returns>
         public static async Task<string> WaitForProcessAnswer(Process process, CancellationToken ct)
         {
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
             process.Start();
             string content = string.Empty;
             while (!process.HasExited && !ct.IsCancellationRequested)
             {
-                content += process.StandardOutput.ReadToEnd();
+                content += await process.StandardOutput.ReadToEndAsync();
                 await Task.Delay(200);
             }
             if (process.HasExited)
