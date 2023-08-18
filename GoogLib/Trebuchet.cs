@@ -1,4 +1,5 @@
 ﻿using Goog;
+using System;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 
@@ -71,6 +72,8 @@ namespace GoogLib
             _clientProcess.ProcessFailed += OnClientProcessFailed;
 
             _lockedFolders.Add(GetCurrentClientJunction());
+            Log.Write($"Locking folder {profile.ProfileName}", LogSeverity.Debug);
+            Log.Write($"Launching client process with profile {profileName} and modlist {modlistName}", LogSeverity.Info);
             Task.Run(_clientProcess.StartProcessAsync);
         }
 
@@ -104,6 +107,8 @@ namespace GoogLib
             _serverProcesses.Add(instance, watcher);
 
             _lockedFolders.Add(GetCurrentServerJunction(instance));
+            Log.Write($"Locking folder {profile.ProfileName}", LogSeverity.Debug);
+            Log.Write($"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}", LogSeverity.Info);
             Task.Run(watcher.StartProcessAsync);
         }
 
@@ -237,6 +242,8 @@ namespace GoogLib
         {
             AddDispatch(() =>
             {
+                Log.Write($"Client process failed to start", LogSeverity.Error);
+                Log.Write(e.Exception);
                 ClientFailed?.Invoke(this, e);
             });
         }
@@ -245,6 +252,7 @@ namespace GoogLib
         {
             AddDispatch(() =>
             {
+                Log.Write($"Client process started ({e.process.pid})", LogSeverity.Info);
                 ClientStarted?.Invoke(this, e);
             });
         }
@@ -254,6 +262,7 @@ namespace GoogLib
             AddDispatch(() =>
             {
                 if (sender is not ClientProcess) return;
+                Log.Write($"Client process terminated", LogSeverity.Info);
                 _clientProcess = null;
                 _lockedFolders.Remove(GetCurrentClientJunction());
                 ClientTerminated?.Invoke(this, EventArgs.Empty);
@@ -264,6 +273,8 @@ namespace GoogLib
         {
             AddDispatch(() =>
             {
+                Log.Write($"Server process failed to start", LogSeverity.Error);
+                Log.Write(e.Exception);
                 ServerFailed?.Invoke(this, e);
             });
         }
@@ -272,6 +283,7 @@ namespace GoogLib
         {
             AddDispatch(() =>
             {
+                Log.Write($"Server instance {e.instance} started ({e.process.pid})", LogSeverity.Info);
                 ServerStarted?.Invoke(this, e);
             });
         }
@@ -285,9 +297,13 @@ namespace GoogLib
                 
                 _serverProcesses.Remove(process.ServerInstance);
                 _lockedFolders.Remove(GetCurrentServerJunction(process.ServerInstance));
+                Log.Write($"Server intance {process.ServerInstance} terminated", LogSeverity.Info);
 
                 if (!process.Closed && IsRestartWhenDown(process.Profile.ProfileName))
+                {
+                    Log.Write($"Restarting server instance {process.ServerInstance}", LogSeverity.Info);
                     CatapultServer(process.Profile.ProfileName, process.Modlist.ProfileName, process.ServerInstance);
+                }
                 else
                     ServerTerminated?.Invoke(this, process.ServerInstance);
             });

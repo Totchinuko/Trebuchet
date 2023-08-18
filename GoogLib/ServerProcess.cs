@@ -77,7 +77,10 @@ namespace GoogLib
                 LastResponsive = DateTime.UtcNow;
 
             if ((LastResponsive + TimeSpan.FromSeconds(Profile.ZombieCheckSeconds)) < DateTime.UtcNow && Profile.KillZombies)
+            {
+                Log.Write($"Killing zombie instance {ServerInstance} ({_process.Id})", LogSeverity.Warning);
                 _process.Kill();
+            }
         }
 
         public async Task StartProcessAsync()
