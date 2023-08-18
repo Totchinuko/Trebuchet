@@ -103,7 +103,7 @@ namespace GoogLib
             _process.Exited -= OnProcessExited;
             _process.Dispose();
             _process = null;
-            ProcessExited?.Invoke(sender, EventArgs.Empty);
+            ProcessExited?.Invoke(this, EventArgs.Empty);
         }
 
         protected virtual void OnProcessFailed(Exception exception)
