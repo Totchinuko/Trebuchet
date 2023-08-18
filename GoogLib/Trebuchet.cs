@@ -156,11 +156,7 @@ namespace GoogLib
             FindExistingServers();
 
             foreach (ServerProcess server in _serverProcesses.Values)
-            {
                 server.ProcessRefresh();
-                if ((server.LastResponsive + TimeSpan.FromSeconds(_config.ZombieCheckSeconds)) < DateTime.UtcNow && _config.KillZombies)
-                    server.Kill();
-            }
         }
 
         private static bool GetInstance(string path, out int instance)
@@ -279,7 +275,7 @@ namespace GoogLib
                 _serverProcesses.Remove(process.ServerInstance);
                 _lockedFolders.Remove(GetCurrentServerJunction(process.ServerInstance));
 
-                if (!process.Closed && _config.RestartWhenDown)
+                if (!process.Closed && IsRestartWhenDown(process.Profile.ProfileName))
                     CatapultServer(process.Profile.ProfileName, process.Modlist.ProfileName, process.ServerInstance);
                 else
                     ServerTerminated?.Invoke(this, process.ServerInstance);
@@ -291,6 +287,12 @@ namespace GoogLib
             string junction = Path.Combine(gamePath, Config.FolderGameSave);
             Tools.RemoveSymboliclink(junction);
             Tools.SetupSymboliclink(junction, targetPath);
+        }
+
+        private bool IsRestartWhenDown(string profileName)
+        {
+            if(!ServerProfile.TryLoadProfile(_config, profileName, out ServerProfile? profile)) return false;
+            return profile.RestartWhenDown;
         }
     }
 }

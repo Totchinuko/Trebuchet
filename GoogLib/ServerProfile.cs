@@ -23,6 +23,8 @@ namespace GoogLib
 
         public int GameClientPort { get; set; } = 7777;
 
+        public bool KillZombies { get; set; } = false;
+
         public bool Log { get; set; } = false;
 
         public string Map { get; set; } = "/Game/Maps/ConanSandbox/ConanSandbox";
@@ -40,6 +42,7 @@ namespace GoogLib
 
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? string.Empty;
+
         /// <summary>
         /// Unused. Kept for Information.
         /// </summary>
@@ -50,6 +53,8 @@ namespace GoogLib
         public string RConPassword { get; set; } = string.Empty;
 
         public int RConPort { get; set; } = 25575;
+
+        public bool RestartWhenDown { get; set; } = false;
 
         public string ServerName { get; set; } = string.Empty;
 
@@ -63,20 +68,9 @@ namespace GoogLib
 
         public bool UseAllCores { get; set; } = true;
 
+        public int ZombieCheckSeconds { get; set; } = 300;
+
         #region IniSettings
-
-        [IniSetting(Config.FileIniDefault, "Engine")]
-        protected void ApplySudoSettings(IniDocument document)
-        {
-            IniSection section = document.GetSection("/Game/Mods/ModAdmin/Auth/EA_MC_Auth.EA_MC_Auth_C");
-            section.GetParameters("+SuperAdminSteamIDs").ForEach(section.Remove);
-
-            if (SudoSuperAdmins.Count != 0)
-                foreach (string id in SudoSuperAdmins)
-                    section.InsertParameter(0, "+SuperAdminSteamIDs", id);
-            else
-                document.Remove(section);
-        }
 
         [IniSetting(Config.FileIniServer, "Engine")]
         protected void ApplyEngineSettings(IniDocument document)
@@ -117,7 +111,22 @@ namespace GoogLib
             section.SetParameter("IsBattlEyeEnabled", EnableBattleEye.ToString());
             section.SetParameter("IsVACEnabled", EnableVAC.ToString());
         }
+
+        [IniSetting(Config.FileIniDefault, "Engine")]
+        protected void ApplySudoSettings(IniDocument document)
+        {
+            IniSection section = document.GetSection("/Game/Mods/ModAdmin/Auth/EA_MC_Auth.EA_MC_Auth_C");
+            section.GetParameters("+SuperAdminSteamIDs").ForEach(section.Remove);
+
+            if (SudoSuperAdmins.Count != 0)
+                foreach (string id in SudoSuperAdmins)
+                    section.InsertParameter(0, "+SuperAdminSteamIDs", id);
+            else
+                document.Remove(section);
+        }
+
         #endregion IniSettings
+
         /// <summary>
         /// Get the folder of a server profile.
         /// </summary>
@@ -267,7 +276,7 @@ namespace GoogLib
             if (UseAllCores) args.Add(Config.GameArgsUseAllCore);
             args.Add(string.Format(Config.ServerArgsMaxPlayers, 10));
             args.Add(string.Format(Config.GameArgsModList, Path.Combine(profileFolder, Config.FileGeneratedModlist)));
-            if(EnableMultiHome) args.Add(string.Format(Config.ServerArgsMultiHome, MultiHomeAddress));
+            if (EnableMultiHome) args.Add(string.Format(Config.ServerArgsMultiHome, MultiHomeAddress));
             args.Add($"-TotInstance={instance}");
 
             return string.Join(" ", args);

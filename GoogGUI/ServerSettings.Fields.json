@@ -63,6 +63,32 @@
   },
   {
     "$type": "Title",
+    "Name": "Restart Settings"
+  },
+  {
+    "$type": "Toggle",
+    "Property": "KillZombies",
+    "Name": "Kill Zombie Servers",
+    "Description": "Kill server instances that have stopped responding (frozen) for a period of time.",
+    "Default": false
+  },
+  {
+    "$type": "Int",
+    "Property": "ZombieCheckSeconds",
+    "Name": "Zombie Check Duration (Seconds)",
+    "Description": "Amount of time given to a server instance to respond before getting killed by trebuchet",
+    "Default": 300,
+    "Minimum": 30
+  },
+  {
+    "$type": "Toggle",
+    "Property": "RestartWhenDown",
+    "Name": "Restart Servers When Down",
+    "Description": "Automatically restart a server instance that have stopped unexpectedly.",
+    "Default": false
+  },
+  {
+    "$type": "Title",
     "Name": "Performance"
   },
   {
@@ -87,11 +113,11 @@
     "Description": "Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness.",
     "Default": 0,
     "Options": [
-          "Normal",
-          "Above Normal",
-          "High",
-          "Realtime (Not Recommanded)"
-        ]
+      "Normal",
+      "Above Normal",
+      "High",
+      "Realtime (Not Recommanded)"
+    ]
   },
   {
     "$type": "CPUAffinity",

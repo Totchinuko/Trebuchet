@@ -22,8 +22,8 @@ namespace Goog
         public const string FileGeneratedModlist = "modlist.txt";
         public const string FileIniBase = "Engine\\Config\\Base{0}.ini";
         public const string FileIniDefault = "ConanSandbox\\Config\\Default{0}.ini";
-        public const string FileIniUser = "ConanSandbox\\Saved\\Config\\WindowsNoEditor\\{0}.ini";
         public const string FileIniServer = "ConanSandbox\\Saved\\Config\\WindowsServer\\{0}.ini";
+        public const string FileIniUser = "ConanSandbox\\Saved\\Config\\WindowsNoEditor\\{0}.ini";
         public const string FileMapJson = "Json\\Maps.json";
         public const string FileProfileConfig = "profile.json";
         public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
@@ -63,17 +63,11 @@ namespace Goog
 
         public bool IsTestLive => Path.GetFileName(Path.GetDirectoryName(FilePath)) == FolderTestLive;
 
-        public bool KillZombies { get; set; } = false;
-
-        public bool RestartWhenDown { get; set; } = false;
-
         public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
         public int ServerInstanceCount { get; set; } = 0;
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
-
-        public int ZombieCheckSeconds { get; set; } = 300;
 
         public static string GetPath(bool testlive)
         {
