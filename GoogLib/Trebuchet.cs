@@ -118,6 +118,7 @@ namespace GoogLib
         /// <param name="instance"></param>
         public void CloseServer(int instance)
         {
+            Log.Write($"Requesting server instance {instance} stop", LogSeverity.Info);
             if (_serverProcesses.TryGetValue(instance, out var watcher))
                 watcher.Close();
         }
@@ -131,18 +132,14 @@ namespace GoogLib
         public bool IsServerRunning(int instance) => _serverProcesses.TryGetValue(instance, out var watcher) && watcher.IsRunning;
 
         /// <summary>
-        /// Terminate all active server processes.
-        /// </summary>
-        public void KillAllServers()
-        {
-            foreach (ServerProcess p in _serverProcesses.Values)
-                p.Kill();
-        }
-
-        /// <summary>
         /// Kill the client process.
         /// </summary>
-        public void KillClient() => _clientProcess?.Kill();
+        public void KillClient()
+        {
+            if(_clientProcess == null) return;
+            Log.Write("Requesting client process kill", LogSeverity.Info);
+            _clientProcess.Kill();
+        }
 
         /// <summary>
         /// Kill a particular server instance.
@@ -151,16 +148,10 @@ namespace GoogLib
         public void KillServer(int instance)
         {
             if (_serverProcesses.TryGetValue(instance, out var watcher))
+            {
+                Log.Write($"Requesting server process kill on instance {instance}", LogSeverity.Info);
                 watcher.Kill();
-        }
-
-        /// <summary>
-        /// Request a gracefull shutdown of all active server processes.
-        /// </summary>
-        public void StopAllServers()
-        {
-            foreach (ServerProcess p in _serverProcesses.Values)
-                p.Close();
+            }
         }
 
         /// <summary>
