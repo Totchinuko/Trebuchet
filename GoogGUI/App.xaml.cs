@@ -1,4 +1,5 @@
-﻿using System;
+﻿using GoogLib;
+using System;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -39,6 +40,7 @@ namespace GoogGUI
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            Log.Write("Starting Trebuchet", LogSeverity.Info);
             ReadSettings();
 
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(OnUnhandledException);
@@ -55,6 +57,7 @@ namespace GoogGUI
         {
             Current.Dispatcher.Invoke(() =>
             {
+                Log.Write(e.Exception);
                 new ExceptionModal(e.Exception).ShowDialog();
                 IsShutingDown = true;
             });
@@ -63,6 +66,7 @@ namespace GoogGUI
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
             e.Handled = true;
+            Log.Write(e.Exception);
             new ExceptionModal(e.Exception).ShowDialog();
             IsShutingDown = true;
         }
@@ -71,6 +75,7 @@ namespace GoogGUI
         {
             Current.Dispatcher.Invoke(() =>
             {
+                Log.Write((Exception)e.ExceptionObject);
                 new ExceptionModal(((Exception)e.ExceptionObject)).ShowDialog();
                 IsShutingDown = true;
             });

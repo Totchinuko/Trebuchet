@@ -58,27 +58,27 @@
         /// </summary>
         /// <param name="message"></param>
         /// <param name="level"></param>
-        public void Log(string message, LogSeverity level)
+        public static void Write(string message, LogSeverity level)
         {
             if (level < MinimumSeverity)
                 return;
-            var logFile = GetLogFilePath();
+            var logFile = Instance.GetLogFilePath();
             File.AppendAllText(logFile, $"[{DateTime.Now}] {level}: {message}" + Environment.NewLine);
-            PurgeOldLogFiles();
+            Instance.PurgeOldLogFiles();
         }
 
         /// <summary>
         /// Log an exception to the most recent log file as error
         /// </summary>
         /// <param name="ex"></param>
-        public void Log(Exception ex)
+        public static void Write(Exception ex)
         {
-            var logFile = GetLogFilePath();
+            var logFile = Instance.GetLogFilePath();
             File.AppendAllText(logFile, $"[{DateTime.Now}] {LogSeverity.Critical}: {ex.Message}" + Environment.NewLine);
             File.AppendAllText(logFile, ex.StackTrace + Environment.NewLine);
             if (ex.InnerException != null)
-                Log(ex.InnerException);
-            PurgeOldLogFiles();
+                Write(ex.InnerException);
+            Instance.PurgeOldLogFiles();
         }
 
         private void PurgeOldLogFiles()
