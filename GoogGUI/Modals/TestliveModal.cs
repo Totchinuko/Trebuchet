@@ -1,4 +1,5 @@
 ﻿using Goog;
+using GoogLib;
 using System.Windows;
 using System.Windows.Input;
 
@@ -30,6 +31,7 @@ namespace GoogGUI
 
         public static void OpenApp(bool testlive)
         {
+            Log.Write($"Selecting {(testlive?"testlive":"live")}", LogSeverity.Info);
             Config config = Config.LoadConfig(Config.GetPath(testlive));
             UIConfig uiConfig = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
             App.UseSoftwareRendering = !uiConfig.UseHardwareAcceleration;

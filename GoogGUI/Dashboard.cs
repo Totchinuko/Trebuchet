@@ -38,6 +38,13 @@ namespace GoogGUI
 
             OnDispatcherTick(this, EventArgs.Empty);
             _timer.Start();
+
+            if(App.ImmediateServerCatapult)
+            {
+                Log.Write("Immediate server catapult requested.", LogSeverity.Info);
+                foreach (var i in Instances)
+                    i.Launch();
+            }
         }
 
         public bool CanDisplayServers => _config.IsInstallPathValid &&

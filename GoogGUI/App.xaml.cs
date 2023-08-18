@@ -1,5 +1,6 @@
 ﻿using GoogLib;
 using System;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading;
@@ -23,6 +24,8 @@ namespace GoogGUI
         public bool IsShutingDown { get; private set; }
 
         public static string APIKey { get; private set; } = string.Empty;
+
+        public static bool ImmediateServerCatapult { get; private set; } = false;
 
         public static void Crash() => HasCrashed = true;
 
@@ -48,6 +51,21 @@ namespace GoogGUI
             Current.DispatcherUnhandledException += new DispatcherUnhandledExceptionEventHandler(OnDispatcherUnhandledException);
             TaskScheduler.UnobservedTaskException += new EventHandler<UnobservedTaskExceptionEventArgs>(OnUnobservedTaskException);
 
+            if (e.Args.Length > 0)
+            {
+                if (e.Args.Contains("-catapult"))
+                    ImmediateServerCatapult = true;
+                if (e.Args.Contains("-testlive"))
+                {
+                    TestliveModal.OpenApp(true);
+                    return;
+                }
+                else if (e.Args.Contains("-live"))
+                {
+                    TestliveModal.OpenApp(false);
+                    return;                    
+                }
+            }
             TestliveModal modal = new TestliveModal();
             Current.MainWindow = modal.Window;
             modal.ShowDialog();
