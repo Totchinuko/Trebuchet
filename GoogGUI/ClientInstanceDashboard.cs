@@ -166,6 +166,7 @@ namespace GoogGUI
             LaunchBattleEyeCommand.Toggle(false);
             KillCommand.Toggle(true);
             OnPropertyChanged("ProcessRunning");
+            if (ProcessStats.Running) ProcessStats.StopStats();
             ProcessStats.StartStats(e.process, Path.GetFileNameWithoutExtension(Config.FileClientBin));
         }
 

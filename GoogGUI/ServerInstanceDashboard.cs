@@ -177,6 +177,7 @@ namespace GoogGUI
             CloseCommand.Toggle(true);
             OnPropertyChanged("ProcessRunning");
 
+            if(ProcessStats.Running) ProcessStats.StopStats();
             ProcessStats.StartStats(e.process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
         }
 
