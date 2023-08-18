@@ -43,6 +43,7 @@ namespace GoogGUI
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            Exit += OnApplicationExit;
             Log.Write("Starting Trebuchet", LogSeverity.Info);
             ReadSettings();
 
@@ -71,16 +72,11 @@ namespace GoogGUI
             modal.ShowDialog();
         }
 
-        protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+        private void OnApplicationExit(object sender, ExitEventArgs e)
         {
-            base.OnSessionEnding(e);
-
-            if(!e.Cancel)
-            {
-                IsShutingDown = true;
-                Log.Write("Trebuchet ending, shutting down.", LogSeverity.Info);
-                Log.Write("----------------------------------------", LogSeverity.Info);
-            }
+            IsShutingDown = true;
+            Log.Write("Trebuchet ending, shutting down.", LogSeverity.Info);
+            Log.Write("----------------------------------------", LogSeverity.Info);
         }
 
         private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
