@@ -60,14 +60,14 @@ namespace GoogGUI
             if (!App.TaskBlocker.IsAvailable) return;
 
             var token = App.TaskBlocker.SetMain("Installing steam CMD...");
-            var task = Task.Run(() => Setup.SetupAppAndSteam(_config, token, true), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnInstallSteamComplete(x)));
+            var task = Task.Run(() => Setup.SetupAppAndSteam(_config, token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnInstallSteamComplete(x)));
         }
 
         private void OnInstallSteamComplete(Task<int> task)
         {
             HandleTaskErrors(task);
             if (task.IsCanceled)
-                Setup.DeleteSteamCMD(_config);
+                Tools.DeleteIfExists(Path.Combine(_config.InstallPath, Config.FolderSteam));
 
             App.TaskBlocker.ReleaseMain();
             OnAppConfigurationChanged();

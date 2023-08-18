@@ -12,11 +12,15 @@ namespace Goog
         public static readonly Regex AppInfoBuildID = new Regex("\"branches\"{\"public\"{\"buildid\"\"([0-9]+)\"\"timeupdated\"\"([0-9]+)\"}");
         public static readonly Regex ManifestBuildID = new Regex("\"buildid\"\"([0-9]+)\"");
 
-        public static void DeleteSteamCMD(Config config)
-        {
-            Tools.DeleteIfExists(Path.Combine(config.InstallPath, Config.FolderSteam));
-        }
-
+        /// <summary>
+        /// Download a file from a url. This is mostly used once to download steam cmd during setup.
+        /// </summary>
+        /// <param name="url"></param>
+        /// <param name="file"></param>
+        /// <param name="token"></param>
+        /// <param name="progress"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentException"></exception>
         public static async Task DownloadFile(string url, string file, CancellationToken token, IProgress<float>? progress = null)
         {
             if (string.IsNullOrEmpty(url))
@@ -33,17 +37,11 @@ namespace Goog
             }
         }
 
-        public static string GetGoogCMD()
-        {
-            string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            if (appFolder == null)
-                throw new Exception("App is installed in an invalid folder.");
-            string GoogCMD = Path.Combine(appFolder, "GoogCMD", "Goog.exe");
-            if (!File.Exists(GoogCMD))
-                throw new FileNotFoundException($"{GoogCMD} was not found.");
-            return GoogCMD;
-        }
-
+        /// <summary>
+        /// Count the amount of instances currently installed. This does not verify if the files are valid, just the main binary.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <returns></returns>
         public static int GetInstalledInstances(Config config)
         {
             int count = 0;
@@ -63,6 +61,13 @@ namespace Goog
             return count;
         }
 
+        /// <summary>
+        /// Get the installed local build id of a specified instance
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="instance"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static ulong GetInstanceBuildID(Config config, int instance)
         {
             string manifest = Path.Combine(
@@ -86,10 +91,19 @@ namespace Goog
             return 0;
         }
 
+        /// <summary>
+        /// Check if the server is up to date
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static async Task<UpdateCheckEventArgs> GetServerUptoDate(Config config, CancellationToken ct)
         {
             if (config.ServerInstanceCount <= 0) 
                 throw new Exception("No server instance is configured.");
+
+            Log.Write("Checking for server updates...", LogSeverity.Info);
 
             ulong instance0;
             ulong steam;
@@ -106,6 +120,13 @@ namespace Goog
             return new UpdateCheckEventArgs(instance0, steam);
         }
 
+        /// <summary>
+        /// Request the current build id of the game on steam
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         public static async Task<ulong> GetSteamBuildID(Config config, CancellationToken ct)
         {
             string appinfo = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamAppInfo);
@@ -136,6 +157,10 @@ namespace Goog
             return 0;
         }
 
+        /// <summary>
+        /// Remove all junctions present in any server instance folder. Used before update to avoid crash du to copy error on junction folders.
+        /// </summary>
+        /// <param name="config"></param>
         public static void RemoveAllSymbolicLinks(Config config)
         {
             string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances);
@@ -146,8 +171,17 @@ namespace Goog
                 Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
         }
 
+        /// <summary>
+        /// Setup the server. This will download steamcmd and unzip it.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
+        /// <exception cref="FileNotFoundException"></exception>
         public static async Task SetupApp(Config config, CancellationToken token)
         {
+            Log.Write($"Download SteamCMD...", LogSeverity.Info);
             if (string.IsNullOrEmpty(config.InstallPath))
                 throw new Exception("install-path is not configured properly.");
 
@@ -178,6 +212,12 @@ namespace Goog
             Tools.DeleteIfExists(steamCmdZip);
         }
 
+        /// <summary>
+        /// Download steamcmd main binary and execute it for installation.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public static async Task<int> SetupAppAndSteam(Config config, CancellationToken token)
         {
             await SetupApp(config, token);
@@ -203,6 +243,7 @@ namespace Goog
             var update = string.Join(" ", list);
 
             if (update.Length == 0) return 0;
+            Log.Write($"Updating mods in list {modlist}", LogSeverity.Info);
 
             string steamArgs = string.Join(" ",
                     Config.CmdArgLoginAnonymous,
@@ -230,6 +271,7 @@ namespace Goog
             var update = string.Join(" ", ids.Select(i => string.Format(Config.CmdArgWorkshopUpdate, config.ClientAppID, i.ToString())));
 
             if (update.Length == 0) return 0;
+            Log.Write($"Updating {ids.Count()} mods...", LogSeverity.Info);
 
             string steamArgs = string.Join(" ",
                     Config.CmdArgLoginAnonymous,
@@ -255,7 +297,10 @@ namespace Goog
         /// <returns></returns>
         public static async Task<int> UpdateServer(Config config, int instanceNumber, CancellationToken token, bool reinstall = false)
         {
-            if (config.ServerInstanceCount <= 0) return 0;
+            if (config.ServerInstanceCount <= 0)
+                throw new Exception("No server instance is configured.");
+
+            Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info);
 
             string instance = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
 
@@ -293,6 +338,7 @@ namespace Goog
         /// <exception cref="DirectoryNotFoundException"></exception>
         public static async Task UpdateServerFromInstance0(Config config, int instanceNumber, CancellationToken token)
         {
+            Log.Write("Updating server instance {0} from instance 0.", LogSeverity.Info);
             if (config.ServerInstanceCount <= 0) return;
             if (instanceNumber == 0)
                 throw new Exception("Can't update instance 0 with itself.");
@@ -319,6 +365,7 @@ namespace Goog
         /// <returns></returns>
         public static async Task<int> UpdateServerInstances(Config config, CancellationToken token)
         {
+            Log.Write("Updating all server instances...", LogSeverity.Info);
             int count = config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
             {
@@ -335,9 +382,16 @@ namespace Goog
             }
             return 0;
         }
-
+        
+        /// <summary>
+        /// Update steamcmd to the latest version.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="token"></param>
+        /// <returns></returns>
         public static async Task<int> UpdateSteamCMD(Config config, CancellationToken token)
         {
+            Log.Write("Updating SteamCMD...", LogSeverity.Info);
             string steamArgs = string.Join(" ",
                     Config.CmdArgLoginAnonymous,
                     Config.CmdArgQuit
@@ -351,6 +405,12 @@ namespace Goog
             return await WaitForProcess(process, token);
         }
 
+        /// <summary>
+        /// Wait for a steamCMD process to exit, or kill it if the token is cancelled.
+        /// </summary>
+        /// <param name="process"></param>
+        /// <param name="token"></param>
+        /// <returns>1 if the task failled, 0 otherwize</returns>
         public static async Task<int> WaitForProcess(Process process, CancellationToken token)
         {
             process.Start();
@@ -360,15 +420,23 @@ namespace Goog
             {
                 int error = process.ExitCode;
                 process.Dispose();
+                Log.Write($"SteamCMD exited with code {error}", (error != 7 || error != 0 ? LogSeverity.Warning : LogSeverity.Info));
                 return error != 0 && error != 7 ? 1 : 0;
             }
 
+            Log.Write("SteamCMD process was killed by cancel.", LogSeverity.Warning);
             process.Kill(true);
             process.WaitForExit();
             process.Dispose();
             return 0;
         }
 
+        /// <summary>
+        /// Wait for a steam CMD process to exit while capturing its output, or kill it if the token is cancelled.
+        /// </summary>
+        /// <param name="process"></param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         public static async Task<string> WaitForProcessAnswer(Process process, CancellationToken ct)
         {
             process.Start();
@@ -380,10 +448,12 @@ namespace Goog
             }
             if (process.HasExited)
             {
+                Log.Write($"SteamCMD exited with code {process.ExitCode}", (process.ExitCode != 7 || process.ExitCode != 0 ? LogSeverity.Warning : LogSeverity.Info));
                 process.Dispose();
                 return content;
             }
 
+            Log.Write("SteamCMD process was killed by cancel.", LogSeverity.Warning);
             process.Kill(true);
             process.WaitForExit();
             process.Dispose();
