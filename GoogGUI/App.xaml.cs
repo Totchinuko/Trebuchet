@@ -71,6 +71,18 @@ namespace GoogGUI
             modal.ShowDialog();
         }
 
+        protected override void OnSessionEnding(SessionEndingCancelEventArgs e)
+        {
+            base.OnSessionEnding(e);
+
+            if(!e.Cancel)
+            {
+                IsShutingDown = true;
+                Log.Write("Trebuchet ending, shutting down.", LogSeverity.Info);
+                Log.Write("----------------------------------------", LogSeverity.Info);
+            }
+        }
+
         private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
         {
             Current.Dispatcher.Invoke(() =>
