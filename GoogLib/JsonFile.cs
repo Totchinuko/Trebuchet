@@ -18,6 +18,13 @@ namespace GoogLib
         [JsonIgnore]
         public string FilePath { get; protected set; } = string.Empty;
 
+        /// <summary>
+        /// Copy the file to the specified path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="Exception"></exception>
         public void CopyFileTo(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -37,6 +44,13 @@ namespace GoogLib
             File.Copy(FilePath, path);
         }
 
+        /// <summary>
+        /// Copy the file and its parent folder to the specified path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="Exception"></exception>
         public void CopyFolderTo(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -57,6 +71,10 @@ namespace GoogLib
             Tools.DeepCopy(dataFolder, folder);
         }
 
+        /// <summary>
+        /// Delete the file
+        /// </summary>
+        /// <exception cref="FileNotFoundException"></exception>
         public void DeleteFile()
         {
             if (!File.Exists(FilePath))
@@ -64,6 +82,10 @@ namespace GoogLib
             File.Delete(FilePath);
         }
 
+        /// <summary>
+        /// Delete file and its parent folder
+        /// </summary>
+        /// <exception cref="DirectoryNotFoundException"></exception>
         public void DeleteFolder()
         {
             string? folder = Path.GetDirectoryName(FilePath);
@@ -73,6 +95,13 @@ namespace GoogLib
             Directory.Delete(folder, true);
         }
 
+        /// <summary>
+        /// Move the file and its parent folder to the specified path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="Exception"></exception>
         public void MoveFolderTo(string path)
         {
             if (string.IsNullOrEmpty(path))
@@ -93,6 +122,10 @@ namespace GoogLib
             FilePath = path;
         }
 
+        /// <summary>
+        /// Save the file to disk as Json file
+        /// </summary>
+        /// <exception cref="Exception"></exception>
         public void SaveFile()
         {
             string json = JsonSerializer.Serialize(this, typeof(T), _jsonOptions);
@@ -104,6 +137,13 @@ namespace GoogLib
             OnFileSaved();
         }
 
+        /// <summary>
+        /// Create a new file to be saved at the specified path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="constructor"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         protected static T CreateFile(string path, params object[] constructor)
         {
             T? file = (T?)Activator.CreateInstance(typeof(T), constructor);
@@ -113,6 +153,13 @@ namespace GoogLib
             return file;
         }
 
+        /// <summary>
+        /// Load the file from json at the specified path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <param name="options"></param>
+        /// <returns></returns>
+        /// <exception cref="Exception"></exception>
         protected static T LoadFile(string path, JsonSerializerOptions? options = null)
         {
             if (!File.Exists(path))
