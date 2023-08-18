@@ -1,5 +1,4 @@
 ﻿using Goog;
-using GoogGUI.Attributes;
 using GoogLib;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
@@ -11,19 +10,16 @@ using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Net.Http;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Input;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace GoogGUI
 {
     [Panel("Mod Lists", "/Icons/List.png", false, 0, "ModlistEditor")]
-    internal class ModlistHandler : Panel
+    public class ModlistHandler : Panel
     {
         private const string FetchManifests = "FetchManifests";
         private const string FetchModlist = "FetchModlist";
@@ -128,7 +124,7 @@ namespace GoogGUI
                 return;
             }
             var ct = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
-            Task.Run(() => SteamRemoteStorage.GetCollectionDetails( new GetCollectionDetailsQuery(collectionID), ct), ct)
+            Task.Run(() => SteamRemoteStorage.GetCollectionDetails(new GetCollectionDetailsQuery(collectionID), ct), ct)
                 .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCollectionDownloaded(x)));
         }
 
@@ -157,7 +153,7 @@ namespace GoogGUI
                 string path = mod;
                 _profile.ResolveMod(ref path);
 
-                if(ulong.TryParse(mod, out var publishedFileID))
+                if (ulong.TryParse(mod, out var publishedFileID))
                     _modlist.Add(new ModFile(publishedFileID, path));
                 else
                     _modlist.Add(new ModFile(path));
@@ -254,7 +250,8 @@ namespace GoogGUI
             {
                 string content = string.Join("\r\n", _profile.GetResolvedModlist());
                 new ModlistTextImport(content, true, FileType.Txt).ShowDialog();
-            } catch
+            }
+            catch
             {
                 new ErrorModal("Error", "Some of the mods path cannot be resolved because the mod file was not found. " +
                     "In order to export your modlist, please unsure that all of the mods are not marked as missing.").ShowDialog();
@@ -432,7 +429,7 @@ namespace GoogGUI
         {
             _profile.Modlist.Clear();
             _profile.Modlist.AddRange(
-                _modlist.Select(file=> file.ToString())
+                _modlist.Select(file => file.ToString())
                 );
             _profile.SaveFile();
         }
@@ -588,7 +585,5 @@ namespace GoogGUI
             _modWatcher.IncludeSubdirectories = false;
             _modWatcher.EnableRaisingEvents = true;
         }
-
-
     }
 }

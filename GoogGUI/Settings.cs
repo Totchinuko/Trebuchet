@@ -1,7 +1,5 @@
 ﻿using Goog;
-using GoogGUI.Attributes;
 using System.IO;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 

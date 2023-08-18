@@ -1,9 +1,7 @@
 ﻿using Goog;
-using GoogGUI.Attributes;
 using System;
 using System.ComponentModel;
 using System.Reflection;
-using System.Security.Cryptography;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -14,9 +12,6 @@ namespace GoogGUI
     public abstract class Panel : ICommand, INotifyPropertyChanged, ITemplateHolder
     {
         protected bool _active;
-        protected string _icon;
-        protected string _label;
-        protected string _template;
         protected Config _config;
         protected UIConfig _uiConfig;
 
@@ -24,15 +19,16 @@ namespace GoogGUI
         {
             _config = config;
             _uiConfig = uiConfig;
+
             PanelAttribute attr = GetType().GetCustomAttribute<PanelAttribute>() ?? throw new Exception($"Panel {GetType()} is missing an attribute.");
-            _label = attr.Label;
-            _icon = attr.Icon;
-            _template = attr.Template;
+            Label = attr.Label;
+            Icon = new BitmapImage(new Uri(attr.Icon, UriKind.Relative));
+            Template = (DataTemplate)Application.Current.Resources[attr.Template];
         }
 
-        public event EventHandler? CanExecuteChanged;
-
         public event EventHandler? AppConfigurationChanged;
+
+        public event EventHandler? CanExecuteChanged;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
@@ -46,11 +42,11 @@ namespace GoogGUI
             }
         }
 
-        public virtual ImageSource Icon => new BitmapImage(new Uri(_icon, UriKind.Relative));
+        public ImageSource Icon { get; }
 
-        public virtual string Label => _label;
+        public string Label { get; }
 
-        public virtual DataTemplate Template => (DataTemplate)Application.Current.Resources[_template];
+        public virtual DataTemplate Template { get; }
 
         public virtual bool CanExecute(object? parameter)
         {
@@ -59,27 +55,27 @@ namespace GoogGUI
 
         public virtual void Execute(object? parameter)
         {
-            if(CanExecute(parameter))
+            if (CanExecute(parameter))
                 ((MainWindow)Application.Current.MainWindow).App.ActivePanel = this;
-        }
-
-        protected virtual void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-
-        protected virtual void OnCanExecuteChanged()
-        {
-            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        protected virtual void OnAppConfigurationChanged()
-        {
-            AppConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
 
         public virtual void RefreshPanel()
         {
+        }
+
+        protected void OnAppConfigurationChanged()
+        {
+            AppConfigurationChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected void OnCanExecuteChanged()
+        {
+            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+        }
+
+        protected void OnPropertyChanged(string name)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

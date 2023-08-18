@@ -1,5 +1,4 @@
 ﻿using Goog;
-using GoogGUI.Attributes;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -10,11 +9,11 @@ namespace GoogGUI
 {
     public class GoogApp : INotifyPropertyChanged
     {
+        private Panel? _activePanel;
         private List<object> _bottomTabs = new List<object>();
         private Config _config;
-        private Panel? _activePanel;
-        private List<object> _topTabs = new List<object>();
         private List<Panel> _panels = new List<Panel>();
+        private List<object> _topTabs = new List<object>();
         private UIConfig _uiConfig;
 
         public GoogApp(Config config, UIConfig uiConfig)
@@ -26,8 +25,6 @@ namespace GoogGUI
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-
-        public List<object> BottomTabs { get => _bottomTabs; }
 
         public Panel? ActivePanel
         {
@@ -42,6 +39,8 @@ namespace GoogGUI
                 OnPropertyChanged("ActivePanel");
             }
         }
+
+        public List<object> BottomTabs { get => _bottomTabs; }
 
         public List<object> TopTabs { get => _topTabs; }
 
@@ -88,7 +87,7 @@ namespace GoogGUI
                 if (attr.Group != group)
                 {
                     group = attr.Group;
-                    if(!string.IsNullOrEmpty(group))
+                    if (!string.IsNullOrEmpty(group))
                     {
                         if (attr.Bottom)
                             _bottomTabs.Add(group);
@@ -105,14 +104,14 @@ namespace GoogGUI
             }
         }
 
-        private void OnAppConfigurationChanged(object? sender, EventArgs e)
-        {
-            _panels.ForEach(p => p.RefreshPanel());
-        }
-
         protected virtual void OnPropertyChanged(string property)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+        }
+
+        private void OnAppConfigurationChanged(object? sender, EventArgs e)
+        {
+            _panels.ForEach(p => p.RefreshPanel());
         }
     }
 }

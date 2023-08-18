@@ -8,7 +8,7 @@ using System.Windows.Media;
 
 namespace GoogGUI
 {
-    internal class ModFile : INotifyPropertyChanged
+    public class ModFile : INotifyPropertyChanged
     {
         private FileInfo _infos;
         private DateTime _lastUpdate;

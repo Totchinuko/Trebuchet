@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace GoogGUI.Attributes
+namespace GoogGUI
 {
     [AttributeUsage(AttributeTargets.Class, Inherited = true)]
     public class PanelAttribute : Attribute
