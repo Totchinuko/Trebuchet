@@ -22,8 +22,9 @@ namespace GoogGUI
         private ObservableCollection<ServerInstanceDashboard> _instances = new ObservableCollection<ServerInstanceDashboard>();
         private DispatcherTimer _timer;
         private Trebuchet _trebuchet;
+        private SteamHandler _steamHandler;
 
-        public Dashboard(Config config, UIConfig uiConfig) : base(config, uiConfig)
+        public Dashboard(Config config, UIConfig uiConfig, SteamHandler steamHandler, Trebuchet trebuchet) : base(config, uiConfig)
         {
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
@@ -31,8 +32,8 @@ namespace GoogGUI
             UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, TaskBlocker.MainTask, GameTask);
             UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, TaskBlocker.MainTask, GameTask);
 
-            _trebuchet = new Trebuchet(config);
-            _trebuchet.DispatcherRequest += OnTrebuchetRequestDispatcher;
+            _steamHandler = steamHandler;
+            _trebuchet = trebuchet;
             _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnDispatcherTick, Application.Current.Dispatcher);
 
             _client = new ClientInstanceDashboard(_config, _uiConfig, _trebuchet);
@@ -47,6 +48,7 @@ namespace GoogGUI
                 foreach (var i in Instances)
                     i.Launch();
             }
+            _steamHandler = steamHandler;
         }
 
         public bool CanDisplayServers => _config.IsInstallPathValid &&
@@ -229,11 +231,6 @@ namespace GoogGUI
         private void OnServerUpdate(object? obj)
         {
             UpdateServer();
-        }
-
-        private void OnTrebuchetRequestDispatcher(object? sender, Action e)
-        {
-            Application.Current.Dispatcher.Invoke(e);
         }
 
         private async Task StartupUpdate(int launchedInstances, CancellationToken ct)

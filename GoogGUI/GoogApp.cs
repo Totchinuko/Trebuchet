@@ -1,9 +1,11 @@
 ﻿using Goog;
+using GoogLib;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
+using System.Windows;
 
 namespace GoogGUI
 {
@@ -17,10 +19,12 @@ namespace GoogGUI
             Config = config;
             UiConfig = uiConfig;
             SteamHandler = new SteamHandler();
+            Trebuchet = new Trebuchet(config);
+            Trebuchet.DispatcherRequest += OnTrebuchetRequestDispatcher;
             _options = new JsonSerializerOptions
             {
                 WriteIndented = true,
-                TypeInfoResolver = new MenuElementFactory(config, uiConfig, SteamHandler)
+                TypeInfoResolver = new MenuElementFactory(Config, UiConfig, SteamHandler, Trebuchet)
             };
 
             var menuConfig = GuiExtensions.GetEmbededTextFile("GoogGUI.GoogApp.Menu.json");
@@ -51,6 +55,8 @@ namespace GoogGUI
         public List<Panel> Panels { get; set; } = new List<Panel>();
 
         public SteamHandler SteamHandler { get; }
+
+        public Trebuchet Trebuchet { get; }
 
         public UIConfig UiConfig { get; }
 
@@ -83,6 +89,11 @@ namespace GoogGUI
         private void OnAppConfigurationChanged(object? sender, EventArgs e)
         {
             Panels.ForEach(p => p.RefreshPanel());
+        }
+
+        private void OnTrebuchetRequestDispatcher(object? sender, Action e)
+        {
+            Application.Current.Dispatcher.Invoke(e);
         }
     }
 }

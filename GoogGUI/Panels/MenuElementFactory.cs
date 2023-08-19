@@ -1,4 +1,5 @@
 ﻿using Goog;
+using GoogLib;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,12 +16,14 @@ namespace GoogGUI
         private readonly Config _config;
         private readonly UIConfig _uiConfig;
         private readonly SteamHandler _steamHandler;
+        private readonly Trebuchet _trebuchet;
 
-        public MenuElementFactory(Config config, UIConfig uiConfig, SteamHandler steamHandler)
+        public MenuElementFactory(Config config, UIConfig uiConfig, SteamHandler steamHandler, Trebuchet trebuchet)
         {
             _config = config;
             _uiConfig = uiConfig;
             _steamHandler = steamHandler;
+            _trebuchet = trebuchet;
         }
 
         public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
@@ -37,6 +40,8 @@ namespace GoogGUI
         {
             switch (type.Name)
             {
+                case nameof(Dashboard):
+                    return new Dashboard(_config, _uiConfig, _steamHandler, _trebuchet);
                 default:
                     return (Panel)(Activator.CreateInstance(type, _config, _uiConfig) ?? throw new Exception($"Could not create a panel of type {type}"));
             }
