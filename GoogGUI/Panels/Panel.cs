@@ -1,7 +1,6 @@
 ﻿using Goog;
 using System;
 using System.ComponentModel;
-using System.Reflection;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
@@ -9,7 +8,7 @@ using System.Windows.Media.Imaging;
 
 namespace GoogGUI
 {
-    public abstract class Panel : ICommand, INotifyPropertyChanged, ITemplateHolder
+    public abstract class Panel : MenuElement, ICommand, INotifyPropertyChanged, ITemplateHolder
     {
         protected bool _active;
         protected Config _config;
@@ -19,11 +18,6 @@ namespace GoogGUI
         {
             _config = config;
             _uiConfig = uiConfig;
-
-            PanelAttribute attr = GetType().GetCustomAttribute<PanelAttribute>() ?? throw new Exception($"Panel {GetType()} is missing an attribute.");
-            Label = attr.Label;
-            Icon = new BitmapImage(new Uri(attr.Icon, UriKind.Relative));
-            Template = (DataTemplate)Application.Current.Resources[attr.Template];
         }
 
         public event EventHandler? AppConfigurationChanged;
@@ -42,11 +36,11 @@ namespace GoogGUI
             }
         }
 
-        public ImageSource Icon { get; }
+        public ImageSource? Icon => string.IsNullOrEmpty(IconPath) ? null : new BitmapImage(new Uri(IconPath, UriKind.Relative));
 
-        public string Label { get; }
+        public string IconPath { get; set; } = string.Empty;
 
-        public virtual DataTemplate Template { get; }
+        public abstract DataTemplate Template { get; }
 
         public virtual bool CanExecute(object? parameter)
         {

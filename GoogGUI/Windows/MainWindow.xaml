@@ -61,10 +61,10 @@
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
                     <StackPanel>
-                        <ItemsControl ItemsSource="{Binding App.TopTabs}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
+                        <ItemsControl ItemsSource="{Binding App.Menu.Top}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
                     </StackPanel>
                     <StackPanel Grid.Row="2">
-                        <ItemsControl ItemsSource="{Binding App.BottomTabs}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
+                        <ItemsControl ItemsSource="{Binding App.Menu.Bottom}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
                     </StackPanel>
                 </Grid>
                 <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12,12,2,12">

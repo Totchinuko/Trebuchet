@@ -14,7 +14,6 @@ using System.Windows.Threading;
 
 namespace GoogGUI
 {
-    [Panel("Dashboard", "/Icons/Dashboard.png", true, 0, "Dashboard")]
     public class Dashboard : Panel
     {
         public const string GameTask = "GameRunning";
@@ -63,6 +62,8 @@ namespace GoogGUI
         public SimpleCommand KillAllCommand { get; private set; }
 
         public TaskBlockedCommand LaunchAllCommand { get; private set; }
+
+        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["Dashboard"];
 
         public TaskBlockedCommand UpdateAllModsCommand { get; private set; }
 
@@ -165,6 +166,18 @@ namespace GoogGUI
             OnPropertyChanged("Instances");
         }
 
+        private void LaunchServer(int instance)
+        {
+            if (instance >= _instances.Count)
+                throw new ArgumentOutOfRangeException(nameof(instance));
+
+            if (instance < 0)
+                foreach (var i in _instances)
+                    i.Launch();
+            else
+                _instances[instance].Launch();
+        }
+
         private void OnCloseAll(object? obj)
         {
             foreach (var i in Instances)
@@ -203,31 +216,29 @@ namespace GoogGUI
             if (sender is not ServerInstanceDashboard dashboard)
                 throw new InvalidOperationException();
 
-            if(_instances.Any(i => i.ProcessRunning) || !_config.AutoUpdateOnStart)
+            if (_instances.Any(i => i.ProcessRunning) || !_config.AutoUpdateOnStart)
             {
                 LaunchServer(instance);
                 return;
             }
 
             var ct = App.TaskBlocker.SetMain("");
-            Task.Run(() => StartupUpdate(instance, ct));                
+            Task.Run(() => StartupUpdate(instance, ct));
         }
 
-        private void LaunchServer(int instance)
+        private void OnServerUpdate(object? obj)
         {
-            if (instance >= _instances.Count)
-                throw new ArgumentOutOfRangeException(nameof(instance));
+            UpdateServer();
+        }
 
-            if(instance < 0)
-                foreach(var i in _instances)
-                    i.Launch();
-            else
-                _instances[instance].Launch();
+        private void OnTrebuchetRequestDispatcher(object? sender, Action e)
+        {
+            Application.Current.Dispatcher.Invoke(e);
         }
 
         private async Task StartupUpdate(int launchedInstances, CancellationToken ct)
         {
-            Application.Current.Dispatcher.Invoke(()=> App.TaskBlocker.Description = "Checking for server update...");
+            Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Checking for server update...");
 
             var status = await Setup.GetServerUptoDate(_config, ct);
             if (ct.IsCancellationRequested) return;
@@ -243,13 +254,13 @@ namespace GoogGUI
             if (ct.IsCancellationRequested) return;
 
             bool needUpdate = false;
-            foreach(var mod in mods.PublishedFileDetails)
+            foreach (var mod in mods.PublishedFileDetails)
             {
                 string path = mod.PublishedFileID.ToString();
-                if(ModListProfile.ResolveMod(_config, ref path))
+                if (ModListProfile.ResolveMod(_config, ref path))
                 {
                     FileInfo file = new FileInfo(path);
-                    if(Tools.UnixTimeStampToDateTime(mod.TimeUpdated) > file.LastWriteTimeUtc || file.Length != mod.FileSize)
+                    if (Tools.UnixTimeStampToDateTime(mod.TimeUpdated) > file.LastWriteTimeUtc || file.Length != mod.FileSize)
                     {
                         needUpdate = true;
                         break;
@@ -261,7 +272,7 @@ namespace GoogGUI
             {
                 Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Updating mods...");
                 await Setup.UpdateMods(_config, CollectAllMods().Distinct(), ct);
-                if(ct.IsCancellationRequested) return;
+                if (ct.IsCancellationRequested) return;
             }
 
             Application.Current.Dispatcher.Invoke(() =>
@@ -269,16 +280,6 @@ namespace GoogGUI
                 App.TaskBlocker.ReleaseMain();
                 LaunchServer(launchedInstances);
             });
-        }
-
-        private void OnServerUpdate(object? obj)
-        {
-            UpdateServer();
-        }
-
-        private void OnTrebuchetRequestDispatcher(object? sender, Action e)
-        {
-            Application.Current.Dispatcher.Invoke(e);
         }
     }
 }

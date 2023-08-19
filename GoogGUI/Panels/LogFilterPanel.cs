@@ -1,15 +1,17 @@
 ﻿using Goog;
 using System.IO;
+using System.Windows;
 
 namespace GoogGUI
 {
-    [Panel("Log Filter", "/Icons/Filter.png", false, 400, "LogFilterPanel", "Server")]
     public class LogFilterPanel : Panel
     {
         public LogFilterPanel(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
             LoadPanel();
         }
+
+        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["LogFilterPanel"];
 
         public override bool CanExecute(object? parameter)
         {

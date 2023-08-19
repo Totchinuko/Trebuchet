@@ -12,6 +12,7 @@
   <ItemGroup>
     <None Remove="AppSettings.json" />
     <None Remove="ClientSettings.Fields.json" />
+    <None Remove="GoogApp.Menu.json" />
     <None Remove="Icons\Add.png" />
     <None Remove="Icons\BugWindow.png" />
     <None Remove="Icons\Close.png" />
@@ -87,10 +88,15 @@
     <Resource Include="Icons\Upload.png" />
     <Resource Include="Icons\Window.png" />
     <EmbeddedResource Include="AppSettings.json" />
-    <EmbeddedResource Include="ClientSettings.Fields.json" />
-    <EmbeddedResource Include="ServerSettings.Fields.json" />
-    <EmbeddedResource Include="Settings.UI.Fields.json" />
-    <EmbeddedResource Include="Settings.Fields.json" />
+    <EmbeddedResource Include="GoogApp.Menu.json" />
+    <EmbeddedResource Include="Panels\ClientSettings.Fields.json" />
+    <EmbeddedResource Include="Panels\ServerSettings.Fields.json" />
+    <EmbeddedResource Include="Panels\Settings.UI.Fields.json" />
+    <EmbeddedResource Include="Panels\Settings.Fields.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SteamKit2" Version="2.4.1" />
   </ItemGroup>
 
   <ItemGroup>

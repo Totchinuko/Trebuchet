@@ -9,7 +9,6 @@ using System.Windows.Input;
 
 namespace GoogGUI
 {
-    [Panel("Profiles", "/Icons/Server.png", false, 200, group: "Server")]
     public class ServerSettings : FieldEditorPanel
     {
         private ServerProfile _profile;
@@ -63,7 +62,7 @@ namespace GoogGUI
 
         protected override void BuildFields()
         {
-            BuildFields("GoogGUI.ServerSettings.Fields.json", this, "Profile");
+            BuildFields("GoogGUI.Panels.ServerSettings.Fields.json", this, "Profile");
         }
 
         protected override void OnValueChanged(string property)

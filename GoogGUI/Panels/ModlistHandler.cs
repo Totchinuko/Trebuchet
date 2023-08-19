@@ -18,7 +18,6 @@ using System.Windows.Input;
 
 namespace GoogGUI
 {
-    [Panel("Mod Lists", "/Icons/List.png", false, 0, "ModlistEditor")]
     public class ModlistHandler : Panel
     {
         private const string FetchManifests = "FetchManifests";
@@ -93,6 +92,8 @@ namespace GoogGUI
                 OnSelectionChanged();
             }
         }
+
+        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ModlistEditor"];
 
         public override bool CanExecute(object? parameter)
         {

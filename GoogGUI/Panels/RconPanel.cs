@@ -1,15 +1,17 @@
 ﻿using Goog;
 using System.IO;
+using System.Windows;
 
 namespace GoogGUI
 {
-    [Panel("Rcon", "/Icons/Steam.png", false, 300, "RconPanel", "Server")]
     public class RconPanel : Panel
     {
         public RconPanel(Config config, UIConfig uiConfig) : base(config, uiConfig)
         {
             LoadPanel();
         }
+
+        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["RconPanel"];
 
         public override bool CanExecute(object? parameter)
         {

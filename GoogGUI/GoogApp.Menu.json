@@ -1,0 +1,47 @@
+{
+  "Top": [
+    {
+      "$type": "Modlist",
+      "Label": "Mod Lists",
+      "IconPath": "/Icons/List.png"
+    },
+    {
+      "Label": "Game"
+    },
+    {
+      "$type": "ClientSettings",
+      "Label": "Profiles",
+      "IconPath": "/Icons/Game.png"
+    },
+    {
+      "Label": "Server"
+    },
+    {
+      "$type": "ServerSettings",
+      "Label": "Profiles",
+      "IconPath": "/Icons/Server.png"
+    },
+    {
+      "$type": "Rcon",
+      "Label": "Rcon",
+      "IconPath": "/Icons/Steam.png"
+    },
+    {
+      "$type": "LogFilter",
+      "Label": "Log Filter",
+      "IconPath": "/Icons/FIlter.png"
+    }
+  ],
+  "Bottom": [
+    {
+      "$type": "Dashboard",
+      "Label": "Dashboard",
+      "IconPath": "/Icons/Dashboard.png"
+    },
+    {
+      "$type": "Settings",
+      "Label": "Settings",
+      "IconPath": "/Icons/Settings.png"
+    }
+  ]
+}

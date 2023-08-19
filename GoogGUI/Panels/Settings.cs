@@ -5,7 +5,6 @@ using System.Windows;
 
 namespace GoogGUI
 {
-    [Panel("Settings", "/Icons/Settings.png", true, 10)]
     public class Settings : FieldEditorPanel
     {
         public Settings(Config config, UIConfig uiConfig) : base(config, uiConfig)
@@ -25,8 +24,8 @@ namespace GoogGUI
 
         protected override void BuildFields()
         {
-            BuildFields("GoogGUI.Settings.Fields.json", this, "Config");
-            BuildFields("GoogGUI.Settings.UI.Fields.json", this, "UIConfig");
+            BuildFields("GoogGUI.Panels.Settings.Fields.json", this, "Config");
+            BuildFields("GoogGUI.Panels.Settings.UI.Fields.json", this, "UIConfig");
         }
 
         protected override void OnValueChanged(string property)

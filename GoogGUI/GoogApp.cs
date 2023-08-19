@@ -3,25 +3,29 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using System.Reflection;
+using System.Text.Json;
 
 namespace GoogGUI
 {
     public class GoogApp : INotifyPropertyChanged
     {
         private Panel? _activePanel;
-        private List<object> _bottomTabs = new List<object>();
-        private Config _config;
-        private List<Panel> _panels = new List<Panel>();
-        private List<object> _topTabs = new List<object>();
-        private UIConfig _uiConfig;
+        private JsonSerializerOptions _options;
 
         public GoogApp(Config config, UIConfig uiConfig)
         {
-            _config = config;
-            _uiConfig = uiConfig;
+            Config = config;
+            UiConfig = uiConfig;
+            SteamHandler = new SteamHandler();
+            _options = new JsonSerializerOptions
+            {
+                WriteIndented = true,
+                TypeInfoResolver = new MenuElementFactory(config, uiConfig, SteamHandler)
+            };
 
-            BuildTabs();
+            var menuConfig = GuiExtensions.GetEmbededTextFile("GoogGUI.GoogApp.Menu.json");
+            Menu = JsonSerializer.Deserialize<Menu>(menuConfig, _options) ?? throw new Exception("Could not deserialize the menu.");
+            Panels = Menu.GetPanels().ToList();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -40,68 +44,35 @@ namespace GoogGUI
             }
         }
 
-        public List<object> BottomTabs { get => _bottomTabs; }
+        public Config Config { get; }
 
-        public List<object> TopTabs { get => _topTabs; }
+        public Menu Menu { get; set; } = new Menu();
+
+        public List<Panel> Panels { get; set; } = new List<Panel>();
+
+        public SteamHandler SteamHandler { get; }
+
+        public UIConfig UiConfig { get; }
 
         public void BaseChecks()
         {
-            if (!string.IsNullOrEmpty(_config.InstallPath) && !Tools.CanWriteHere(_config.InstallPath))
+            if (!string.IsNullOrEmpty(Config.InstallPath) && !Tools.CanWriteHere(Config.InstallPath))
                 new ErrorModal("Install Folder Error", "Cannot access the install folder", false).ShowDialog();
 
-            if (string.IsNullOrEmpty(_config.InstallPath))
+            if (string.IsNullOrEmpty(Config.InstallPath))
                 new MessageModal("Install Folder", "In order to use Goog, please configure a folder to install your mods and profiles").ShowDialog();
 
-            if (!_config.IsInstallPathValid)
-                ActivePanel = (Panel)_bottomTabs.Where(x => x.GetType() == typeof(Settings)).First();
+            if (!Config.IsInstallPathValid)
+                ActivePanel = (Panel)Menu.Bottom.Where(x => x.GetType() == typeof(Settings)).First();
             else
-                ActivePanel = (Panel)_bottomTabs.Where(x => x.GetType() == typeof(Dashboard)).First();
+                ActivePanel = (Panel)Menu.Bottom.Where(x => x.GetType() == typeof(Dashboard)).First();
         }
 
         public T GetPanel<T>() where T : Panel
         {
-            T panel = (T)_panels.Where(p => p.GetType() == typeof(T)).First();
+            T panel = (T)Panels.Where(p => p.GetType() == typeof(T)).First();
             if (panel == null) throw new Exception("Unknown Panel.");
             return panel;
-        }
-
-        protected virtual void BuildTabs()
-        {
-            IEnumerable<Type> types = Assembly.GetExecutingAssembly()
-                .GetTypes()
-                .Where(x => x.GetCustomAttributes<PanelAttribute>().Any())
-                .OrderBy(type => !type.GetCustomAttribute<PanelAttribute>()?.Bottom)
-                .ThenBy(type => type.GetCustomAttribute<PanelAttribute>()?.Group)
-                .ThenBy(type => type.GetCustomAttribute<PanelAttribute>()?.Sort ?? 0);
-
-            string group = string.Empty;
-            foreach (Type t in types)
-            {
-                Panel? panel = (Panel?)Activator.CreateInstance(t, _config, _uiConfig) ?? throw new Exception("Panel attribute must be placed on Panel classes.");
-                if (panel == null) continue;
-                PanelAttribute? attr = t.GetCustomAttribute<PanelAttribute>();
-                if (attr == null) continue;
-
-                panel.AppConfigurationChanged += OnAppConfigurationChanged;
-
-                if (attr.Group != group)
-                {
-                    group = attr.Group;
-                    if (!string.IsNullOrEmpty(group))
-                    {
-                        if (attr.Bottom)
-                            _bottomTabs.Add(group);
-                        else
-                            _topTabs.Add(group);
-                    }
-                }
-
-                if (attr.Bottom)
-                    _bottomTabs.Add(panel);
-                else
-                    _topTabs.Add(panel);
-                _panels.Add(panel);
-            }
         }
 
         protected virtual void OnPropertyChanged(string property)
@@ -111,7 +82,7 @@ namespace GoogGUI
 
         private void OnAppConfigurationChanged(object? sender, EventArgs e)
         {
-            _panels.ForEach(p => p.RefreshPanel());
+            Panels.ForEach(p => p.RefreshPanel());
         }
     }
 }
