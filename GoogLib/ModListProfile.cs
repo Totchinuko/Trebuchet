@@ -1,6 +1,5 @@
 ﻿using Goog;
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace GoogLib
@@ -49,6 +48,30 @@ namespace GoogLib
                     yield return mod;
         }
 
+        public static bool ResolveMod(Config config, ref string mod)
+        {
+            string file = mod;
+            if (long.TryParse(mod, out _))
+                file = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, config.ClientAppID.ToString(), mod, "none");
+
+            string? folder = Path.GetDirectoryName(file);
+            if (folder == null)
+                return false;
+
+            if (!long.TryParse(Path.GetFileName(folder), out _))
+                return File.Exists(file);
+
+            if (!Directory.Exists(folder))
+                return false;
+
+            string[] files = Directory.GetFiles(folder, "*.pak", SearchOption.TopDirectoryOnly);
+            if (files.Length == 0)
+                return false;
+
+            mod = files[0];
+            return true;
+        }
+
         public static void ResolveProfile(Config config, ref string profileName)
         {
             if (!string.IsNullOrEmpty(profileName))
@@ -63,6 +86,19 @@ namespace GoogLib
             profileName = "Default";
             if (!File.Exists(GetPath(config, profileName)))
                 CreateFile(GetPath(config, profileName)).SaveFile();
+        }
+
+        public static bool TryLoadProfile(Config config, string name, [NotNullWhen(true)] out ModListProfile? profile)
+        {
+            profile = null;
+            string profilePath = GetPath(config, name);
+            if (!File.Exists(profilePath)) return false;
+            try
+            {
+                profile = LoadProfile(config, profilePath);
+                return true;
+            }
+            catch { return false; }
         }
 
         public static bool TryParseDirectory2ModID(string path, out ulong id)
@@ -112,30 +148,6 @@ namespace GoogLib
             return string.Join("\r\n", Modlist);
         }
 
-        public bool ResolveMod(ref string mod)
-        {
-            string file = mod;
-            if (long.TryParse(mod, out _))
-                file = Path.Combine(Config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, Config.ClientAppID.ToString(), mod, "none");
-
-            string? folder = Path.GetDirectoryName(file);
-            if (folder == null)
-                return false;
-
-            if (!long.TryParse(Path.GetFileName(folder), out _))
-                return File.Exists(file);
-
-            if (!Directory.Exists(folder))
-                return false;
-
-            string[] files = Directory.GetFiles(folder, "*.pak", SearchOption.TopDirectoryOnly);
-            if (files.Length == 0)
-                return false;
-
-            mod = files[0];
-            return true;
-        }
-
         public IEnumerable<string> GetResolvedModlist()
         {
             foreach (string mod in Modlist)
@@ -147,23 +159,14 @@ namespace GoogLib
             }
         }
 
+        public bool ResolveMod(ref string mod)
+        {
+            return ResolveMod(Config, ref mod);
+        }
+
         public void SetModList(string modlist)
         {
             Modlist = modlist.Split(new[] { "\r\n", "\r", "\n" }, StringSplitOptions.RemoveEmptyEntries).ToList();
-        }
-
-        public static bool TryLoadProfile(Config config, string name, [NotNullWhen(true)] out ModListProfile? profile)
-        {
-            profile = null;
-            string profilePath = GetPath(config, name);
-            if (!File.Exists(profilePath)) return false;
-            try
-            {
-                profile = LoadProfile(config, profilePath);
-                return true;
-
-            }
-            catch { return false; }
         }
     }
 }

@@ -1,10 +1,13 @@
 ﻿using Goog;
 using GoogLib;
+using SteamWorksWebAPI;
+using SteamWorksWebAPI.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
@@ -39,7 +42,7 @@ namespace GoogGUI
             OnDispatcherTick(this, EventArgs.Empty);
             _timer.Start();
 
-            if(App.ImmediateServerCatapult)
+            if (App.ImmediateServerCatapult)
             {
                 Log.Write("Immediate server catapult requested.", LogSeverity.Info);
                 foreach (var i in Instances)
@@ -137,9 +140,10 @@ namespace GoogGUI
 
         private void CheckForCMDErrors(Task<int> task)
         {
+            App.TaskBlocker.ReleaseMain();
             if (task.IsFaulted || !task.IsCompleted || task.Exception != null || task.Result != 0)
             {
-                App.TaskBlocker.ReleaseMain();
+                if (task.Exception != null) Log.Write(task.Exception);
                 new ErrorModal("SteamCMD Error", "SteamCMD has encountered an error. Please check the logs for more information.").ShowDialog();
             }
         }
@@ -153,7 +157,11 @@ namespace GoogGUI
             }
 
             for (int i = _instances.Count; i < _config.ServerInstanceCount; i++)
-                _instances.Add(new ServerInstanceDashboard(_config, _uiConfig, _trebuchet, i));
+            {
+                var inst = new ServerInstanceDashboard(_config, _uiConfig, _trebuchet, i);
+                inst.LaunchRequested += OnServerLaunchRequested;
+                _instances.Add(inst);
+            }
             OnPropertyChanged("Instances");
         }
 
@@ -182,13 +190,85 @@ namespace GoogGUI
 
         private void OnLaunchAll(object? obj)
         {
-            foreach (var i in Instances)
-                i.Launch();
+            OnServerLaunchRequested(this, -1);
         }
 
         private void OnModUpdate(object? obj)
         {
             UpdateMods();
+        }
+
+        private void OnServerLaunchRequested(object? sender, int instance)
+        {
+            if (sender is not ServerInstanceDashboard dashboard)
+                throw new InvalidOperationException();
+
+            if(_instances.Any(i => i.ProcessRunning) || !_config.AutoUpdateOnStart)
+            {
+                LaunchServer(instance);
+                return;
+            }
+
+            var ct = App.TaskBlocker.SetMain("");
+            Task.Run(() => StartupUpdate(instance, ct));                
+        }
+
+        private void LaunchServer(int instance)
+        {
+            if (instance >= _instances.Count)
+                throw new ArgumentOutOfRangeException(nameof(instance));
+
+            if(instance < 0)
+                foreach(var i in _instances)
+                    i.Launch();
+            else
+                _instances[instance].Launch();
+        }
+
+        private async Task StartupUpdate(int launchedInstances, CancellationToken ct)
+        {
+            Application.Current.Dispatcher.Invoke(()=> App.TaskBlocker.Description = "Checking for server update...");
+
+            var status = await Setup.GetServerUptoDate(_config, ct);
+            if (ct.IsCancellationRequested) return;
+            if (!status.IsUpToDate)
+            {
+                Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Updating servers...");
+                await Setup.UpdateServerInstances(_config, ct);
+                if (ct.IsCancellationRequested) return;
+            }
+
+            Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Checking mod updates...");
+            var mods = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(CollectAllMods().Distinct()), ct);
+            if (ct.IsCancellationRequested) return;
+
+            bool needUpdate = false;
+            foreach(var mod in mods.PublishedFileDetails)
+            {
+                string path = mod.PublishedFileID.ToString();
+                if(ModListProfile.ResolveMod(_config, ref path))
+                {
+                    FileInfo file = new FileInfo(path);
+                    if(Tools.UnixTimeStampToDateTime(mod.TimeUpdated) > file.LastWriteTimeUtc || file.Length != mod.FileSize)
+                    {
+                        needUpdate = true;
+                        break;
+                    }
+                }
+            }
+
+            if (needUpdate)
+            {
+                Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Updating mods...");
+                await Setup.UpdateMods(_config, CollectAllMods().Distinct(), ct);
+                if(ct.IsCancellationRequested) return;
+            }
+
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                App.TaskBlocker.ReleaseMain();
+                LaunchServer(launchedInstances);
+            });
         }
 
         private void OnServerUpdate(object? obj)

@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace GoogGUI
 {
@@ -58,6 +59,8 @@ namespace GoogGUI
         public ProcessStats ProcessStats { get; } = new ProcessStats();
 
         public List<string> Profiles { get; private set; } = new List<string>();
+
+        public event EventHandler<int>? LaunchRequested;
 
         public string SelectedModlist
         {
@@ -140,6 +143,11 @@ namespace GoogGUI
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
+        protected void OnLaunchRequested()
+        {
+            LaunchRequested?.Invoke(this, Instance);
+        }
+
         private void ListProfiles()
         {
             Modlists = ModListProfile.ListProfiles(_config).ToList();
@@ -160,7 +168,7 @@ namespace GoogGUI
 
         private void OnLaunched(object? obj)
         {
-            Launch();
+            OnLaunchRequested();
         }
 
         private void OnProcessFailed(object? sender, TrebuchetFailEventArgs e)

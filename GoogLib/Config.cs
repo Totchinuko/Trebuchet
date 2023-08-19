@@ -51,6 +51,8 @@ namespace Goog
 
         #endregion constants
 
+        public bool AutoUpdateOnStart { get; set; } = false;
+
         public uint ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
         public string ClientPath { get; set; } = string.Empty;

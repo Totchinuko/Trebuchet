@@ -1,5 +1,6 @@
 ﻿using GoogLib;
 using System.Diagnostics;
+using System.Text;
 using System.Text.RegularExpressions;
 
 namespace Goog
@@ -130,12 +131,12 @@ namespace Goog
         {
             string appinfo = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamAppInfo);
 
-            if (File.Exists(appinfo))
-                File.Move(appinfo, appinfo + ".changed");
+            Tools.DeleteIfExists(appinfo);
 
             Process process = new Process();
             process.StartInfo.FileName = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin);
             process.StartInfo.Arguments = string.Join(" ",
+                    string.Format(Config.CmdArgForceInstallDir, Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, 0))),
                     Config.CmdArgLoginAnonymous,
                     "+app_info_update 1",
                     "+app_info_print " + config.ServerAppID,
@@ -411,7 +412,7 @@ namespace Goog
             process.Start();
             while (!process.HasExited && !token.IsCancellationRequested)
             {
-                string data = await process.StandardOutput.ReadToEndAsync();
+                string? data = await process.StandardOutput.ReadLineAsync();
                 if (!string.IsNullOrEmpty(data))
                     Log.Write("Steam output" + Environment.NewLine + data, LogSeverity.Info);
                 await Task.Delay(200);
@@ -442,24 +443,26 @@ namespace Goog
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.Start();
-            string content = string.Empty;
-            while (!process.HasExited && !ct.IsCancellationRequested)
+            StringBuilder message = new StringBuilder();
+            while (true && !ct.IsCancellationRequested)
             {
-                content += await process.StandardOutput.ReadToEndAsync();
-                await Task.Delay(200);
+                char? data = (char)process.StandardOutput.Read();
+                message.Append(data);
+                if (data == null)
+                    break;
             }
             if (process.HasExited)
             {
                 Log.Write($"SteamCMD exited with code {process.ExitCode}", (process.ExitCode != 7 && process.ExitCode != 0 ? LogSeverity.Warning : LogSeverity.Info));
                 process.Dispose();
-                return content;
+                return message.ToString();
             }
 
             Log.Write("SteamCMD process was killed by cancel.", LogSeverity.Warning);
             process.Kill(true);
             process.WaitForExit();
             process.Dispose();
-            return content;
+            return message.ToString();
         }
     }
 }
