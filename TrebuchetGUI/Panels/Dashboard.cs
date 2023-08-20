@@ -24,7 +24,7 @@ namespace Trebuchet
         {
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
-            LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll);
+            LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll, true, SteamWidget.SteamTask, GameTask);
             UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, SteamWidget.SteamTask, GameTask);
             UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, SteamWidget.SteamTask, GameTask);
             VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification, true, SteamWidget.SteamTask, GameTask);
