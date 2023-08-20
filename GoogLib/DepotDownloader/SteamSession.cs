@@ -37,6 +37,10 @@ namespace Goog
 
         public event EventHandler? TimedOut;
 
+        public event EventHandler<SteamClient.DisconnectedCallback>? Disconnected;
+
+        public event EventHandler<SteamUser.LoggedOnCallback>? LoggedOn;
+
         public SteamApps Apps { get; }
 
         public SteamClient Client { get; }
@@ -49,7 +53,6 @@ namespace Goog
 
         public void Disconnect()
         {
-            _isRunning = false;
             ContentDownloader.Shutdown();
             Client.Disconnect();
         }
@@ -73,6 +76,8 @@ namespace Goog
 
         private void OnDisconnected(SteamClient.DisconnectedCallback callback)
         {
+            _isRunning = false;
+            Disconnected?.Invoke(this, callback);
             Log.Write("Disconnected from steam.", LogSeverity.Info);
         }
 
@@ -85,6 +90,7 @@ namespace Goog
                 return;
             }
             Log.Write("Login successful.", LogSeverity.Info);
+            LoggedOn?.Invoke(this, callback);
             this.currentSessionIndex++;
         }
 
