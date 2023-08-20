@@ -102,6 +102,11 @@ namespace Trebuchet
                             yield return id;
         }
 
+        public override void RefreshPanel()
+        {
+            OnCanExecuteChanged();
+        }
+
         /// <summary>
         /// Show the panel.
         /// </summary>
