@@ -19,8 +19,8 @@ namespace GoogGUI
         public ClientInstanceDashboard(Config config, UIConfig uiConfig, Trebuchet trebuchet)
         {
             KillCommand = new SimpleCommand(OnKilled, false);
-            LaunchCommand = new TaskBlockedCommand(OnLaunched);
-            LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched);
+            LaunchCommand = new TaskBlockedCommand(OnLaunched, true, SteamWidget.SteamTask);
+            LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched, true, SteamWidget.SteamTask);
 
             _config = config;
             _trebuchet = trebuchet;
@@ -98,6 +98,7 @@ namespace GoogGUI
         public void Launch(bool isBattleEye)
         {
             if (_trebuchet.IsClientRunning()) return;
+            if (App.TaskBlocker.IsSet(SteamWidget.SteamTask)) return;
             if (_trebuchet.IsFolderLocked(ClientProfile.GetFolder(_config, _selectedProfile)))
             {
                 new ErrorModal("Locked", "This profile is currently used by another process. Only one process can use a profile at a time.").ShowDialog();

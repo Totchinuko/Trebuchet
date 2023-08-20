@@ -21,7 +21,7 @@ namespace GoogGUI
         {
             KillCommand = new SimpleCommand(OnKilled, false);
             CloseCommand = new SimpleCommand(OnClose, false);
-            LaunchCommand = new TaskBlockedCommand(OnLaunched);
+            LaunchCommand = new TaskBlockedCommand(OnLaunched, true, SteamWidget.SteamTask);
 
             _config = config;
             _trebuchet = trebuchet;
