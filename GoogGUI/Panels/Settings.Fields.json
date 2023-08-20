@@ -36,7 +36,7 @@
     "Property": "AutoUpdateStatus",
     "Name": "Update Server Instances",
     "Description": "Choose when to update your servers. This does not apply to client game.",
-    "Default": 0,
+    "Default": 1,
     "Options": [
       "Never",
       "Only on launch",
