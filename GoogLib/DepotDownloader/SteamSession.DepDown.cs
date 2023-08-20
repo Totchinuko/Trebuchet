@@ -87,9 +87,7 @@ namespace Goog
                 if (callback.Result == EResult.OK)
                 {
                     var response = callback.GetDeserializedResponse<CPublishedFile_GetDetails_Response>();
-                    var details = response.publishedfiledetails.FirstOrDefault();
-                    if (details != null)
-                        detailsList.Add(details);
+                    detailsList.AddRange(response.publishedfiledetails);
                 }
                 else
                 {

@@ -151,7 +151,7 @@ namespace Goog
 
             foreach (var depotManifest in depotManifestIds)
             {
-                if (TryGetDepotInfo(depotManifest.Item1, appId, depotManifest.Item2, branch, installDir, out var info))
+                if (TryGetDepotInfo(depotManifest.Item1, appId, depotManifest.Item2, 0, branch, installDir, out var info))
                     infos.Add(info);
             }
 
@@ -258,7 +258,7 @@ namespace Goog
             {
                 if (!CreateUGCDirectories(appId, depotManifest.publishedfileid, out var installDir))
                     throw new Exception("Unable to create install directories!");
-                if (TryGetDepotInfo(depotManifest.appId, appId, depotManifest.hcontent_file, branch, installDir, out var info))
+                if (TryGetDepotInfo(depotManifest.appId, appId, depotManifest.hcontent_file, depotManifest.publishedfileid, branch, installDir, out var info))
                     infos.Add(info);
             }
 
@@ -539,10 +539,7 @@ namespace Goog
                     if (Config.VerifyAll || !hashMatches)
                     {
                         // we have a version of this file, but it doesn't fully match what we want
-                        if (Config.VerifyAll)
-                        {
-                            Log.Write("Validating {0}", LogSeverity.Debug, fileFinalPath);
-                        }
+                        Log.Write("Validating {0}", LogSeverity.Debug, fileFinalPath);
 
                         var matchingChunks = new List<ChunkMatch>();
 
@@ -840,7 +837,10 @@ namespace Goog
                 }
             }
 
-            depotConfigStore.InstalledManifestIDs[depot.id] = depot.manifestId;
+            if (depot.publishedFileId != 0)
+                depotConfigStore.InstalledUGCManifestIDs[depot.publishedFileId] = depot.manifestId;
+            else
+                depotConfigStore.InstalledManifestIDs[depot.id] = depot.manifestId;
             depotConfigStore.Save();
 
             Log.Write("Depot {0} - Downloaded {1} bytes ({2} bytes uncompressed)", LogSeverity.Info, depot.id, depotCounter.DepotBytesCompressed, depotCounter.DepotBytesUncompressed);
@@ -918,10 +918,21 @@ namespace Goog
             var configDir = Path.Combine(depot.installDir, STEAMKIT_DIR);
 
             var lastManifestId = INVALID_MANIFEST_ID;
-            depotConfigStore.InstalledManifestIDs.TryGetValue(depot.id, out lastManifestId);
+            if(depot.publishedFileId != 0)
+            {
+                depotConfigStore.InstalledUGCManifestIDs.TryGetValue(depot.publishedFileId, out lastManifestId);
 
-            // In case we have an early exit, this will force equiv of verifyall next run.
-            depotConfigStore.InstalledManifestIDs[depot.id] = INVALID_MANIFEST_ID;
+                // In case we have an early exit, this will force equiv of verifyall next run.
+                depotConfigStore.InstalledUGCManifestIDs[depot.publishedFileId] = INVALID_MANIFEST_ID;
+            }
+            else
+            {
+                depotConfigStore.InstalledManifestIDs.TryGetValue(depot.id, out lastManifestId);
+                
+                // In case we have an early exit, this will force equiv of verifyall next run.
+                depotConfigStore.InstalledManifestIDs[depot.id] = INVALID_MANIFEST_ID;
+            }
+
             depotConfigStore.Save();
 
             if (lastManifestId != INVALID_MANIFEST_ID)
@@ -1136,7 +1147,7 @@ namespace Goog
             };
         }
 
-        private bool TryGetDepotInfo(uint depotId, uint appId, ulong manifestId, string branch, string installDir, [NotNullWhen(true)] out DepotDownloadInfo? info)
+        private bool TryGetDepotInfo(uint depotId, uint appId, ulong manifestId, ulong publishedFileId, string branch, string installDir, [NotNullWhen(true)] out DepotDownloadInfo? info)
         {
             if (appId != INVALID_APP_ID)
                 steam.RequestAppInfo(appId);
@@ -1174,7 +1185,7 @@ namespace Goog
 
             var depotKey = steam.DepotKeys[depotId];
 
-            info = new DepotDownloadInfo(depotId, appId, manifestId, branch, installDir, depotKey);
+            info = new DepotDownloadInfo(depotId, appId, manifestId, publishedFileId, branch, installDir, depotKey);
             return true;
         }
 

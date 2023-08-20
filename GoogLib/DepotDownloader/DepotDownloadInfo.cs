@@ -2,9 +2,7 @@
 {
     internal sealed class DepotDownloadInfo
     {
-        public DepotDownloadInfo(
-            uint depotid, uint appId, ulong manifestId, string branch,
-            string installDir, byte[] depotKey)
+        public DepotDownloadInfo( uint depotid, uint appId, ulong manifestId, ulong publishedFileId, string branch, string installDir, byte[] depotKey)
         {
             this.id = depotid;
             this.appId = appId;
@@ -12,6 +10,7 @@
             this.branch = branch;
             this.installDir = installDir;
             this.depotKey = depotKey;
+            this.publishedFileId = publishedFileId;
         }
 
         public uint appId { get; private set; }
@@ -25,5 +24,7 @@
         public string installDir { get; private set; }
 
         public ulong manifestId { get; private set; }
+
+        public ulong publishedFileId { get; private set; }
     }
 }

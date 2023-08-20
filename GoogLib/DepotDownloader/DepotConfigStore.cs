@@ -11,6 +11,9 @@ namespace Goog
         [ProtoMember(1)]
         public Dictionary<uint, ulong> InstalledManifestIDs { get; } = new Dictionary<uint, ulong>();
 
+        [ProtoMember(2)]
+        public Dictionary<ulong, ulong> InstalledUGCManifestIDs { get; } = new Dictionary<ulong, ulong>();
+
         private string FileName { get; set; } = string.Empty;
 
         public static DepotConfigStore LoadFromFile(string filename)
