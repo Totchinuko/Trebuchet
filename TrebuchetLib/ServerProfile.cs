@@ -72,7 +72,7 @@ namespace Trebuchet
         #region IniSettings
 
         [IniSetting(Config.FileIniServer, "Engine")]
-        protected void ApplyEngineSettings(IniDocument document)
+        public void ApplyEngineSettings(IniDocument document)
         {
             IniSection section = document.GetSection("OnlineSubsystem");
             section.SetParameter("ServerName", ServerName);
@@ -89,7 +89,7 @@ namespace Trebuchet
         }
 
         [IniSetting(Config.FileIniServer, "Game")]
-        protected void ApplyGameSettings(IniDocument document)
+        public void ApplyGameSettings(IniDocument document)
         {
             IniSection section = document.GetSection("/Script/Engine.GameSession");
             section.SetParameter("MaxPlayers", MaxPlayers.ToString());
@@ -102,7 +102,7 @@ namespace Trebuchet
         }
 
         [IniSetting(Config.FileIniServer, "ServerSettings")]
-        protected void ApplyServerSettings(IniDocument document)
+        public void ApplyServerSettings(IniDocument document)
         {
             IniSection section = document.GetSection("ServerSettings");
             section.SetParameter("ServerRegion", ServerRegion.ToString());
@@ -112,7 +112,7 @@ namespace Trebuchet
         }
 
         [IniSetting(Config.FileIniDefault, "Engine")]
-        protected void ApplySudoSettings(IniDocument document)
+        public void ApplySudoSettings(IniDocument document)
         {
             IniSection section = document.GetSection("/Game/Mods/ModAdmin/Auth/EA_MC_Auth.EA_MC_Auth_C");
             section.GetParameters("+SuperAdminSteamIDs").ForEach(section.Remove);
@@ -124,7 +124,7 @@ namespace Trebuchet
                 document.Remove(section);
         }
 
-        #endregion IniSettings
+        #endregion IniSettings  
 
         /// <summary>
         /// Get the folder of a server profile.
