@@ -14,7 +14,7 @@
                         <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding UpdateServerCommand}" Margin="0,0,6,0">
                             <StackPanel Orientation="Horizontal">
                                 <Image Source="pack://application:,,,/GoogGui;component/Icons/Server.png" Width="16" Height="16" Margin="0,0,6,0" />
-                                <TextBlock Text="Update Instances" />
+                                <TextBlock Text="Update Servers" />
                             </StackPanel>
                         </Button>
                         <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding UpdateAllModsCommand}" Margin="0,0,6,0">
