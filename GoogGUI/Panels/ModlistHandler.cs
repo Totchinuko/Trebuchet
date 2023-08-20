@@ -11,6 +11,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
@@ -112,7 +113,28 @@ namespace GoogGUI
         {
             if (App.TaskBlocker.IsSet(FetchModlist)) return;
             var cts = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
-            Task.Run(() => Tools.DownloadModList(builder.ToString(), cts.Token), cts.Token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModlistDownloaded(x)));
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var result = await Tools.DownloadModList(builder.ToString(), cts.Token);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _profile.Modlist = ModListProfile.ParseModList(result.Modlist).ToList();
+                        LoadModlist();
+                    });
+                }
+                catch(OperationCanceledException) { }
+                catch(Exception ex)
+                {
+                    Log.Write(ex);
+                    new ErrorModal("Failed", $" Could not download the file. ({ex.Message})").ShowDialog();
+                }
+                finally
+                {
+                    Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Release(FetchModlist));                    
+                }
+            }, cts.Token);
         }
 
         private void FetchSteamCollection(UriBuilder builder)
@@ -127,8 +149,34 @@ namespace GoogGUI
                 return;
             }
             var cts = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
-            Task.Run(() => SteamRemoteStorage.GetCollectionDetails(new GetCollectionDetailsQuery(collectionID), cts.Token), cts.Token)
-                .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCollectionDownloaded(x)));
+
+            Task.Run(async () =>
+            {
+
+                try
+                {
+                    var result = await SteamRemoteStorage.GetCollectionDetails(new GetCollectionDetailsQuery(collectionID), cts.Token);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        List<string> modlist = new List<string>();
+                        foreach (var child in result.CollectionDetails.First().Children)
+                            modlist.Add(child.PublishedFileId);
+                        _profile.Modlist = modlist;
+                        LoadModlist();
+                    });
+                }
+                catch(OperationCanceledException) { }
+                catch(Exception ex)
+                {
+                    Log.Write(ex);
+                    new ErrorModal("Failed", $"Could not download the collection. ({ex.Message})").ShowDialog();
+                }
+                finally
+                {
+                    Application.Current.Dispatcher.Invoke(()=> App.TaskBlocker.Release(FetchModlist));
+                }
+
+            }, cts.Token);
         }
 
         private void LoadManifests()
@@ -142,8 +190,37 @@ namespace GoogGUI
                 select mod.PublishedFileID;
 
             var cts = App.TaskBlocker.Set(FetchManifests, 15 * 1000);
-            Task.Run(() => SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token), cts.Token)
-                .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnManifestsLoaded(x)));
+            Task.Run(async () =>
+            {
+                try
+                {
+                    var result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
+
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        var update = from file in _modlist
+                                     where file.IsPublished
+                                     join details in result.PublishedFileDetails on file.PublishedFileID equals details.PublishedFileID
+                                     select new KeyValuePair<ModFile, PublishedFile>(file, details);
+
+                        foreach (var u in update)
+                            u.Key.SetManifest(u.Value);
+                    });
+                }
+                catch(OperationCanceledException) { }
+                catch(Exception ex)
+                {
+                    Log.Write(ex);
+                    new ErrorModal("Modlist", $"Could not download mod details of your modlist. ({ex.Message})", false).ShowDialog();
+                }
+                finally
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        App.TaskBlocker.Release(FetchManifests);
+                    });
+                }
+            }, cts.Token);
         }
 
         private void LoadModlist()
@@ -186,33 +263,6 @@ namespace GoogGUI
             _modlistURL = _profile.SyncURL;
             OnPropertyChanged("ModlistURL");
 
-            LoadModlist();
-        }
-
-        private void OnCollectionDownloaded(Task<CollectionDetailsResponse> task)
-        {
-            App.TaskBlocker.Release(FetchModlist);
-            OnPropertyChanged("IsLoading");
-            if (!task.IsCompleted || task.Exception != null)
-            {
-                new ErrorModal("Failed", $"Could not download the collection. ({(task.Exception?.Message ?? "Unknown Error")})").ShowDialog();
-                return;
-            }
-            if (task.Result.ResultCount == 0)
-            {
-                new ErrorModal("Not Found", "Collection could not be found.");
-                return;
-            }
-            if (task.Result.CollectionDetails.First().Children.Length == 0)
-            {
-                new ErrorModal("Empty", "Collection is empty.");
-                return;
-            }
-
-            List<string> modlist = new List<string>();
-            foreach (var child in task.Result.CollectionDetails.First().Children)
-                modlist.Add(child.PublishedFileId);
-            _profile.Modlist = modlist;
             LoadModlist();
         }
 
@@ -357,28 +407,6 @@ namespace GoogGUI
             LoadModlist();
         }
 
-        private void OnManifestsLoaded(Task<PublishedFilesResponse> task)
-        {
-            App.TaskBlocker.Release(FetchManifests);
-            OnPropertyChanged("IsLoading");
-            if (!task.IsCompletedSuccessfully)
-            {
-                if (task.Exception != null)
-                    new ExceptionModal(task.Exception).ShowDialog();
-                else
-                    new ErrorModal("Modlist", "Could not download mod details of your modlist.", false).ShowDialog();
-                return;
-            }
-
-            var update = from file in _modlist
-                         where file.IsPublished
-                         join details in task.Result.PublishedFileDetails on file.PublishedFileID equals details.PublishedFileID
-                         select new KeyValuePair<ModFile, PublishedFile>(file, details);
-
-            foreach (var u in update)
-                u.Key.SetManifest(u.Value);
-        }
-
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
         {
             if (_modlist.Where((x) => x.IsPublished && x.PublishedFileID == mod.PublishedFileID).Any()) return;
@@ -485,24 +513,6 @@ namespace GoogGUI
                 RefreshProfiles();
                 SelectedModlist = profile;
             }
-        }
-
-        private void OnModlistDownloaded(Task<ModlistExport> task)
-        {
-            App.TaskBlocker.Release(FetchModlist);
-            if (!task.IsCompleted || task.Exception != null)
-            {
-                new ErrorModal("Failed", $"Could not download the file. ({(task.Exception?.Message ?? "Unknown Error")})").ShowDialog();
-                return;
-            }
-            if (task.Result.Modlist.Count == 0)
-            {
-                new ErrorModal("Empty", "Downloaded list is empty.");
-                return;
-            }
-
-            _profile.Modlist = ModListProfile.ParseModList(task.Result.Modlist).ToList();
-            LoadModlist();
         }
 
         private void OnModlistDuplicate(object? obj)
