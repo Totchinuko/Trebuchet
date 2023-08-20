@@ -43,7 +43,7 @@
     "Property": "VerifyAll",
     "Name": "Always Verify",
     "Description": "Verify the files after downloading them, either for server instances or mods.",
-    "Default": true
+    "Default": false
   },
   {
     "$type": "IntSlider",
