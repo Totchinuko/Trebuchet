@@ -11,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using static SteamKit2.Internal.CMsgClientAMGetPersonaNameHistory;
 
 namespace GoogGUI
 {
@@ -32,6 +33,7 @@ namespace GoogGUI
             LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll);
             UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, SteamWidget.SteamTask, GameTask);
             UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, SteamWidget.SteamTask, GameTask);
+            VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification, true, SteamWidget.SteamTask, GameTask);
 
             _steam = steam;
             _steamWidget = steamWidget;
@@ -53,6 +55,8 @@ namespace GoogGUI
             _steam = steam;
         }
 
+
+
         public bool CanDisplayServers => _config.IsInstallPathValid &&
                 _config.ServerInstanceCount > 0;
 
@@ -71,6 +75,7 @@ namespace GoogGUI
         public TaskBlockedCommand UpdateAllModsCommand { get; private set; }
 
         public TaskBlockedCommand UpdateServerCommand { get; private set; }
+        public TaskBlockedCommand VerifyFilesCommand { get; private set; }
 
         public override bool CanExecute(object? parameter)
         {
@@ -251,18 +256,89 @@ namespace GoogGUI
             if (sender is not ServerInstanceDashboard dashboard)
                 throw new InvalidOperationException();
 
-            if (_instances.Any(i => i.ProcessRunning) || !_config.AutoUpdateOnStart)
+            if (_instances.Any(i => i.ProcessRunning) || _config.AutoUpdateStatus == AutoUpdateStatus.Never)
             {
                 LaunchServer(instance);
                 return;
             }
 
-            // TODO: Update then start
+            if (App.TaskBlocker.IsSet(GameTask)) return;
+            if (!_steamWidget.CanExecute()) return;
+
+            var cts = _steamWidget.SetTask("Updating server instances and mods...");
+            Task.Run(() => StartupUpdate(cts, instance), cts.Token);
         }
 
         private void OnServerUpdate(object? obj)
         {
-            UpdateServer(); 
+            UpdateServer();
+        }
+
+        private void OnFileVerification(object? obj)
+        {
+            if (App.TaskBlocker.IsSet(GameTask)) return;
+            if (!_steamWidget.CanExecute()) return;
+
+            var question = new QuestionModal("Verify files", "This will verify all server and mod files. This may take a while. Do you want to continue?");
+            question.ShowDialog();
+            if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+
+            var cts = _steamWidget.SetTask("Verifying server and mod files...");
+            Task.Run(() => VerifyFiles(cts), cts.Token);
+        }
+
+        private async Task StartupUpdate(CancellationTokenSource cts, int instance)
+        {
+
+            try
+            {
+                await Setup.UpdateServerInstances(_config, _steam, cts);
+                await Setup.UpdateMods(_config, _steam, CollectAllMods().Distinct(), cts);
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                Log.Write(ex);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    new ErrorModal("Launch Failed", $"Update failed. Please check the log for more information. ({ex.Message})").ShowDialog();
+                });
+            }
+            finally
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _steamWidget.ReleaseTask();
+                    LaunchServer(instance);
+                });
+            }
+        }
+
+        private async Task VerifyFiles(CancellationTokenSource cts)
+        {
+
+            try
+            {
+                Tools.DeleteIfExists(_steam.ContentDownloader.STEAMKIT_DIR);
+                await Setup.UpdateServerInstances(_config, _steam, cts);
+                await Setup.UpdateMods(_config, _steam, CollectAllMods().Distinct(), cts);
+            }
+            catch (OperationCanceledException) { }
+            catch (Exception ex)
+            {
+                Log.Write(ex);
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    new ErrorModal("File verification failed", $"Please check the log for more information. ({ex.Message})").ShowDialog();
+                });
+            }
+            finally
+            {
+                Application.Current.Dispatcher.Invoke(() =>
+                {
+                    _steamWidget.ReleaseTask();
+                });
+            }
         }
     }
 }

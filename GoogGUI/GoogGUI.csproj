@@ -27,6 +27,7 @@
     <None Remove="Icons\List.png" />
     <None Remove="Icons\LocalStorage.png" />
     <None Remove="Icons\Logo.png" />
+    <None Remove="Icons\Magnifying.png" />
     <None Remove="Icons\Map.png" />
     <None Remove="Icons\Maximize.png" />
     <None Remove="Icons\Minimize.png" />
@@ -73,6 +74,7 @@
     <Resource Include="Icons\List.png" />
     <Resource Include="Icons\LocalStorage.png" />
     <Resource Include="Icons\Logo.png" />
+    <Resource Include="Icons\Magnifying.png" />
     <Resource Include="Icons\Map.png" />
     <Resource Include="Icons\Maximize.png" />
     <Resource Include="Icons\Minimize.png" />

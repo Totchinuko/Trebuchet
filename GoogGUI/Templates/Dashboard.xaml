@@ -23,6 +23,12 @@
                                 <TextBlock Text="Update All Mods" />
                             </StackPanel>
                         </Button>
+                        <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding VerifyFilesCommand}" Margin="0,0,6,0">
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="pack://application:,,,/GoogGui;component/Icons/Magnifying.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                <TextBlock Text="Verify Files" />
+                            </StackPanel>
+                        </Button>
                     </WrapPanel>
                 </Border>
                 <ContentPresenter Grid.Row="1" ContentTemplate="{StaticResource ClientDashboard}" Content="{Binding Client}" />

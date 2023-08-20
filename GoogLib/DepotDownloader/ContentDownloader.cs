@@ -12,8 +12,8 @@ namespace Goog
         public const uint INVALID_APP_ID = uint.MaxValue;
         public const uint INVALID_DEPOT_ID = uint.MaxValue;
         public const ulong INVALID_MANIFEST_ID = ulong.MaxValue;
-        private readonly string STAGING_DIR;
-        private readonly string STEAMKIT_DIR;
+        public readonly string STAGING_DIR;
+        public readonly string STEAMKIT_DIR;
         private CDNClientPool cdnPool;
         private DepotConfigStore depotConfigStore;
         private IProgress<double>? progress;

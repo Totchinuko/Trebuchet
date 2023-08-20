@@ -48,7 +48,9 @@ namespace Goog
 
         #endregion constants
 
-        public bool AutoUpdateOnStart { get; set; } = false;
+        public int AutoUpdateStatus { get; set; } = 1;
+
+        public int UpdateCheckInterval { get; set; } = 300;
 
         public uint ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
@@ -78,5 +80,12 @@ namespace Goog
             ConfigPath = Path.Combine(ConfigPath, $"{(testlive ? FolderTestLive : FolderLive)}.{FileConfig}");
             return ConfigPath;
         }
+    }
+
+    public static class AutoUpdateStatus
+    {
+        public const int Never = 0;
+        public const int OnlyOnStart = 1;
+        public const int CheckForUpdates = 2;
     }
 }
