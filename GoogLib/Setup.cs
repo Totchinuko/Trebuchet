@@ -93,6 +93,7 @@ namespace Goog
         /// <returns></returns>
         public static async Task UpdateMods(Config config, SteamSession steam, IEnumerable<ulong> enumerable, CancellationTokenSource cts)
         {
+            if (!SetupFolders(config)) return;
             steam.ContentDownloader.SetInstallDirectory(Path.Combine(config.InstallPath, Config.FolderWorkshop));
             await steam.ContentDownloader.DownloadUGCAsync(config.ClientAppID, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
         }
@@ -110,6 +111,8 @@ namespace Goog
         {
             if (config.ServerInstanceCount <= 0)
                 throw new Exception("No server instance is configured.");
+
+            if (!SetupFolders(config)) return;
 
             Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info);
 
@@ -142,6 +145,8 @@ namespace Goog
             if (config.ServerInstanceCount <= 0) return;
             if (instanceNumber == 0)
                 throw new Exception("Can't update instance 0 with itself.");
+
+            if (!SetupFolders(config)) return;
 
             string instance = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
             string instance0 = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, 0));
@@ -178,6 +183,28 @@ namespace Goog
                     await UpdateServerFromInstance0(config, i, cts.Token);
                 }
             }
+        }
+
+        public static bool SetupFolders(Config config)
+        {
+            if (!Directory.Exists(config.InstallPath)) return false;
+
+            try
+            {
+                Tools.CreateDir(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances));
+                Tools.CreateDir(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles));
+                Tools.CreateDir(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles));
+                Tools.CreateDir(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles));
+
+                Tools.CreateDir(Path.Combine(config.InstallPath, Config.FolderWorkshop));
+            }
+            catch(Exception ex)
+            {
+                Log.Write(ex);
+                throw new Exception("Failed to create app folders folders.", ex);
+            }
+            
+            return true;
         }
     }
 }
