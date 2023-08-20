@@ -10,7 +10,7 @@
         #if DEBUG
         public const LogSeverity MinimumSeverity = LogSeverity.Debug;
         #else
-        public const ApplicationLogSeverity MinimumSeverity = ApplicationLogSeverity.Info;
+        public const LogSeverity MinimumSeverity = LogSeverity.Info;
         #endif
 
         private static Log? _instance;
