@@ -230,6 +230,7 @@ namespace Trebuchet
             }
 
             var list = steam.GetPublishedFileDetails(appId, publishedFiles);
+            if (list.Count == 0) return; 
             var depotManifestIds = list.Where(x => x.hcontent_file > 0).Select(i => (appId, i.publishedfileid, i.hcontent_file)).ToList();
 
             var hasSpecificDepots = depotManifestIds.Count > 0;

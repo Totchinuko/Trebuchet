@@ -82,6 +82,8 @@ namespace Trebuchet
         {
             var pubFileRequest = new CPublishedFile_GetDetails_Request { appid = appId };
             pubFileRequest.publishedfileids.AddRange(pubFiles);
+            if (pubFileRequest.publishedfileids.Count == 0)
+                return new List<PublishedFileDetails>();
 
             var completed = false;
             List<PublishedFileDetails> detailsList = new List<PublishedFileDetails>();
