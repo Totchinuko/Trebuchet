@@ -7,11 +7,7 @@
     <UseWPF>true</UseWPF>
 	<UseWindowsForms>true</UseWindowsForms>
 	<ApplicationIcon>Icons\AppIcon.ico</ApplicationIcon>
-	<PlatformTarget>AnyCPU</PlatformTarget>
 	<Authors>Totchinuko</Authors>
-	<Product>Trebuchet</Product>
-	<RootNamespace>Trebuchet</RootNamespace>
-	<AssemblyName>Trebuchet</AssemblyName>
 	<StartupObject>Trebuchet.App</StartupObject>
 	<FileVersion>0.2.2</FileVersion>
 	<AssemblyVersion>0.2.0</AssemblyVersion>
