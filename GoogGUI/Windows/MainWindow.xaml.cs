@@ -29,6 +29,7 @@ namespace GoogGUI
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
+            _app.OnAppClose();
             Application.Current.Shutdown();
         }
 

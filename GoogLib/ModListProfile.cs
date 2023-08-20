@@ -52,7 +52,7 @@ namespace GoogLib
         {
             string file = mod;
             if (long.TryParse(mod, out _))
-                file = Path.Combine(config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, config.ClientAppID.ToString(), mod, "none");
+                file = Path.Combine(config.InstallPath, Config.FolderWorkshop, config.ClientAppID.ToString(), mod, "none");
 
             string? folder = Path.GetDirectoryName(file);
             if (folder == null)

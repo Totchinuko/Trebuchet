@@ -33,12 +33,5 @@
     "Name": "Update Before Starting Servers",
     "Description": "Automatically update the server instances before starting them, including mods.",
     "Default": false
-  },
-  {
-    "$type": "Toggle",
-    "Property": "DisplayCMD",
-    "Name": "Display Steam Commande Line",
-    "Description": "Display the command line console when updating the server intances or your mods. Useful for troubleshooting.",
-    "Default": false
   }
 ]

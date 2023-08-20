@@ -41,7 +41,6 @@ namespace GoogGUI
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool CanUseDashboard => _config.IsInstallPathValid &&
-                File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
                 (_config.ServerInstanceCount > Instance || ProcessRunning);
 
         public SimpleCommand CloseCommand { get; private set; }

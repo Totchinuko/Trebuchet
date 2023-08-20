@@ -107,10 +107,10 @@ namespace GoogGUI
                 ReturnShortDescription = true
             };
 
-            var ct = App.TaskBlocker.Set(SearchTask, 15 * 1000);
-            Task.Run(() => PublishedFileService.QueryFiles(query, ct), ct)
+            var cts = App.TaskBlocker.Set(SearchTask, 15 * 1000);
+            Task.Run(() => PublishedFileService.QueryFiles(query, cts.Token), cts.Token)
                 .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnSearchCompleted(x)))
-                .ContinueWith((x) => OnSearchCreators(ct), ct)
+                .ContinueWith((x) => OnSearchCreators(cts.Token), cts.Token)
                 .Unwrap().ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCreatorSearchComplete(x)));
         }
 

@@ -49,7 +49,6 @@ namespace GoogGUI
         public override bool CanExecute(object? parameter)
         {
             return _config.IsInstallPathValid &&
-                File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
                 !string.IsNullOrEmpty(_config.ClientPath) &&
                 File.Exists(Path.Combine(_config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
         }

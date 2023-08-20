@@ -96,10 +96,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="SteamKit2" Version="2.4.1" />
-  </ItemGroup>
-
-  <ItemGroup>
     <None Update="Json\Maps.json">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

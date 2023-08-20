@@ -1,4 +1,5 @@
-﻿using GoogLib;
+﻿using Goog;
+using GoogLib;
 using System;
 using System.Linq;
 using System.Text.Json;
@@ -38,12 +39,13 @@ namespace GoogGUI
         protected override void OnExit(ExitEventArgs e)
         {
             IsShutingDown = true;
+            Log.Write("Trebuchet is shutting down.", LogSeverity.Info);
+            Log.Write("----------------------------------------", LogSeverity.Info);
             base.OnExit(e);
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
-            Exit += OnApplicationExit;
             Log.Write("Starting Trebuchet", LogSeverity.Info);
             ReadSettings();
 
@@ -70,13 +72,6 @@ namespace GoogGUI
             TestliveModal modal = new TestliveModal();
             Current.MainWindow = modal.Window;
             modal.ShowDialog();
-        }
-
-        private void OnApplicationExit(object sender, ExitEventArgs e)
-        {
-            IsShutingDown = true;
-            Log.Write("Trebuchet ending, shutting down.", LogSeverity.Info);
-            Log.Write("----------------------------------------", LogSeverity.Info);
         }
 
         private void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)

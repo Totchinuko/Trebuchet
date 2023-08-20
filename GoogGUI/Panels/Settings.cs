@@ -54,24 +54,6 @@ namespace GoogGUI
             System.Windows.Application.Current.Shutdown();
         }
 
-        private void OnInstallSteam(object? obj)
-        {
-            if (!App.TaskBlocker.IsAvailable) return;
-
-            var token = App.TaskBlocker.SetMain("Installing steam CMD...");
-            var task = Task.Run(() => Setup.SetupAppAndSteam(_config, token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnInstallSteamComplete(x)));
-        }
-
-        private void OnInstallSteamComplete(Task<int> task)
-        {
-            HandleTaskErrors(task);
-            if (task.IsCanceled)
-                Tools.DeleteIfExists(Path.Combine(_config.InstallPath, Config.FolderSteam));
-
-            App.TaskBlocker.ReleaseMain();
-            OnAppConfigurationChanged();
-        }
-
         private void OnServerInstanceInstall(object? obj)
         {
             if (_config.ServerInstanceCount <= 0) return;
@@ -89,9 +71,7 @@ namespace GoogGUI
             RequiredActions.Clear();
 
             int installed = Setup.GetInstalledInstances(_config);
-            if (Directory.Exists(_config.InstallPath) && !File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)))
-                RequiredActions.Add(new RequiredCommand("Steam CMD is not yet installed.", "Install", OnInstallSteam, TaskBlocker.MainTask));
-            else if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)
+            if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)
                 RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, TaskBlocker.MainTask));
             if (App.UseSoftwareRendering == _uiConfig.UseHardwareAcceleration)
                 RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, TaskBlocker.MainTask));

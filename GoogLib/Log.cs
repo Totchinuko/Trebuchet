@@ -1,4 +1,4 @@
-﻿namespace GoogLib
+﻿namespace Goog
 {
     public class Log
     {
@@ -14,6 +14,8 @@
         #endif
 
         private static Log? _instance;
+
+        private object _lock = new object();
 
         private Log()
         { }
@@ -62,9 +64,7 @@
         {
             if (level < MinimumSeverity)
                 return;
-            var logFile = Instance.GetLogFilePath();
-            File.AppendAllText(logFile, $"[{DateTime.Now}] {level}: {message}" + Environment.NewLine);
-            Instance.PurgeOldLogFiles();
+            Instance.WriteToFile($"[{DateTime.Now}] {level}: {message}" + Environment.NewLine);
         }
 
         /// <summary>
@@ -73,12 +73,15 @@
         /// <param name="ex"></param>
         public static void Write(Exception ex)
         {
-            var logFile = Instance.GetLogFilePath();
-            File.AppendAllText(logFile, $"[{DateTime.Now}] {LogSeverity.Critical}: {ex.Message}" + Environment.NewLine);
-            File.AppendAllText(logFile, ex.StackTrace + Environment.NewLine);
+            Instance.WriteToFile($"[{DateTime.Now}] {LogSeverity.Critical}: {ex.Message}" + Environment.NewLine);
+            Instance.WriteToFile(ex.StackTrace + Environment.NewLine);
             if (ex.InnerException != null)
                 Write(ex.InnerException);
-            Instance.PurgeOldLogFiles();
+        }
+
+        public static void Write(string format, LogSeverity severity, params object[] args)
+        {
+            Write(string.Format(format, args), severity);
         }
 
         private void PurgeOldLogFiles()
@@ -92,5 +95,16 @@
             foreach (var file in filesToDelete)
                 File.Delete(file);
         }
+
+        private void WriteToFile(string append)
+        {
+            lock (_lock)
+            {
+                var logFile = GetLogFilePath();
+                File.AppendAllText(logFile, append);
+                PurgeOldLogFiles();
+            }
+        }
+        
     }
 }

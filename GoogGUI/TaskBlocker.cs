@@ -66,25 +66,25 @@ namespace GoogGUI
             OnPropertyChanged("IsAvailable");
         }
 
-        public CancellationToken Set(string key, int cancelAfter = 0)
+        public CancellationTokenSource Set(string key, int cancelAfter = 0)
         {
-            CancellationTokenSource source = new CancellationTokenSource();
-            _taskSources.Add(key, source);
+            CancellationTokenSource cts = new CancellationTokenSource();
+            _taskSources.Add(key, cts);
             OnTaskSourceChanged(key);
             if (cancelAfter > 0)
-                source.CancelAfter(cancelAfter);
-            return source.Token;
+                cts.CancelAfter(cancelAfter);
+            return cts;
         }
 
-        public CancellationToken SetMain(string description, int cancelAfter = 0)
+        public CancellationTokenSource SetMain(string description, int cancelAfter = 0)
         {
             if (IsSet(MainTask))
                 throw new Exception("Cannot set a new blocking task while one is already running");
 
             Description = description;
-            var token = Set(MainTask, cancelAfter);
+            var cts = Set(MainTask, cancelAfter);
             OnPropertyChanged("IsAvailable");
-            return token;
+            return cts;
         }
 
         protected virtual void OnPropertyChanged(string name)

@@ -6,12 +6,9 @@ using System.Threading.Tasks;
 
 namespace Goog
 {
-    public enum LogSeverity
+    public class GlobalDownloadCounter
     {
-        Debug,
-        Info,
-        Warning,
-        Error,
-        Critical
+        public ulong TotalBytesCompressed;
+        public ulong TotalBytesUncompressed;
     }
 }

@@ -28,9 +28,6 @@ namespace Goog
         public const string FileProfileConfig = "profile.json";
         public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
         public const string FileServerProxyBin = "ConanSandboxServer.exe";
-        public const string FileSteamAppInfo = "appcache\\appinfo.vdf";
-        public const string FileSteamCMDBin = "steamcmd.exe";
-        public const string FileSteamInstanceManifeste = "steamapps\\appmanifest_{0}.acf";
         public const string FileTrebuchetLaunch = "trebuchet.json";
         public const string FolderClientProfiles = "ClientProfiles";
         public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
@@ -40,14 +37,14 @@ namespace Goog
         public const string FolderModlistProfiles = "Modlists";
         public const string FolderServerInstances = "ServerInstances";
         public const string FolderServerProfiles = "ServerProfiles";
-        public const string FolderSteam = "Steam";
-        public const string FolderSteamMods = "steamapps\\workshop\\content";
         public const string FolderTestLive = "TestLive";
+        public const string FolderWorkshop = "Workshop";
         public const string GameArgsLog = "-log";
         public const string GameArgsModList = "-modlist=\"{0}\"";
         public const string GameArgsUseAllCore = "-useallavailablecores";
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
         public const string ServerArgsMultiHome = "-MULTIHOME={0}";
+        public const string FileBuildID = "buildid";
 
         #endregion constants
 
@@ -57,17 +54,19 @@ namespace Goog
 
         public string ClientPath { get; set; } = string.Empty;
 
-        public bool DisplayCMD { get; set; } = false;
-
         public string InstallPath { get; set; } = string.Empty;
 
         public bool IsInstallPathValid => !string.IsNullOrEmpty(InstallPath) && Directory.Exists(InstallPath);
 
         public bool IsTestLive => Path.GetFileName(Path.GetDirectoryName(FilePath)) == FolderTestLive;
 
+        public int MaxDownloads { get; set; } = 8;
+
         public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
         public int ServerInstanceCount { get; set; } = 0;
+
+        public bool VerifyAll { get; set; } = false;
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 

@@ -29,9 +29,11 @@ namespace GoogGUI
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
+        private SteamSession _steam;
 
-        public ModlistHandler(Config config, UIConfig uiConfig) : base(config, uiConfig)
+        public ModlistHandler(Config config, UIConfig uiConfig, SteamSession steam) : base(config, uiConfig)
         {
+            _steam = steam;
             LoadPanel();
         }
 
@@ -97,7 +99,7 @@ namespace GoogGUI
 
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid && File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin));
+            return _config.IsInstallPathValid;
         }
 
         public override void RefreshPanel()
@@ -109,8 +111,8 @@ namespace GoogGUI
         private void FetchJsonList(UriBuilder builder)
         {
             if (App.TaskBlocker.IsSet(FetchModlist)) return;
-            var token = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
-            Task.Run(() => Tools.DownloadModList(builder.ToString(), token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModlistDownloaded(x)));
+            var cts = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
+            Task.Run(() => Tools.DownloadModList(builder.ToString(), cts.Token), cts.Token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModlistDownloaded(x)));
         }
 
         private void FetchSteamCollection(UriBuilder builder)
@@ -124,8 +126,8 @@ namespace GoogGUI
                 new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").ShowDialog();
                 return;
             }
-            var ct = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
-            Task.Run(() => SteamRemoteStorage.GetCollectionDetails(new GetCollectionDetailsQuery(collectionID), ct), ct)
+            var cts = App.TaskBlocker.Set(FetchModlist, 15 * 1000);
+            Task.Run(() => SteamRemoteStorage.GetCollectionDetails(new GetCollectionDetailsQuery(collectionID), cts.Token), cts.Token)
                 .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCollectionDownloaded(x)));
         }
 
@@ -139,8 +141,8 @@ namespace GoogGUI
                 where mod.IsPublished
                 select mod.PublishedFileID;
 
-            var ct = App.TaskBlocker.Set(FetchManifests, 15 * 1000);
-            Task.Run(() => SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), ct), ct)
+            var cts = App.TaskBlocker.Set(FetchManifests, 15 * 1000);
+            Task.Run(() => SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token), cts.Token)
                 .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnManifestsLoaded(x)));
         }
 
@@ -410,20 +412,29 @@ namespace GoogGUI
             question.ShowDialog();
             if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
 
-            var token = App.TaskBlocker.SetMain($"Updating your modlist mods {_selectedModlist}...");
-            var task = Task.Run(() => Setup.UpdateMods(_config, SelectedModlist, token), token).ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnModFilesDownloaded(x)));
-        }
+            var cts = App.TaskBlocker.SetMain($"Updating your modlist mods {_selectedModlist}...");
 
-        private void OnModFilesDownloaded(Task<int> task)
-        {
-            App.TaskBlocker.ReleaseMain();
-            if (task.Exception != null)
+            Task.Run(async () =>
             {
-                new ExceptionModal(task.Exception).ShowDialog();
-                return;
-            }
-
-            RefreshModFileStatus();
+                try
+                {
+                    await Setup.UpdateMods(_config, _steam, _profile.GetModIDList(), cts);
+                }
+                catch(OperationCanceledException) { }
+                catch(Exception ex)
+                {
+                    Log.Write(ex);
+                    new ErrorModal("Mod update failed", $"Mod update failed. Please check the log for more information. ({ex.Message})").ShowDialog();
+                }
+                finally
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        RefreshModFileStatus();
+                        App.TaskBlocker.ReleaseMain();
+                    });
+                }               
+            });
         }
 
         private void OnModlistChanged()
@@ -567,7 +578,7 @@ namespace GoogGUI
                 _modWatcher = null;
             }
 
-            string path = Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FolderSteamMods, _config.ClientAppID.ToString());
+            string path = Path.Combine(_config.InstallPath, Config.FolderWorkshop, _config.ClientAppID.ToString());
             if (!Directory.Exists(path)) return;
 
             _modWatcher = new FileSystemWatcher(path);

@@ -1,24 +1,19 @@
 ﻿using Goog;
 using GoogLib;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
-using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
-using System.Threading.Tasks;
 
 namespace GoogGUI
 {
     public class MenuElementFactory : DefaultJsonTypeInfoResolver
     {
         private readonly Config _config;
-        private readonly UIConfig _uiConfig;
-        private readonly SteamHandler _steamHandler;
+        private readonly SteamSession _steamHandler;
         private readonly Trebuchet _trebuchet;
+        private readonly UIConfig _uiConfig;
 
-        public MenuElementFactory(Config config, UIConfig uiConfig, SteamHandler steamHandler, Trebuchet trebuchet)
+        public MenuElementFactory(Config config, UIConfig uiConfig, SteamSession steamHandler, Trebuchet trebuchet)
         {
             _config = config;
             _uiConfig = uiConfig;
@@ -42,6 +37,10 @@ namespace GoogGUI
             {
                 case nameof(Dashboard):
                     return new Dashboard(_config, _uiConfig, _steamHandler, _trebuchet);
+
+                case nameof(ModlistHandler):
+                    return new ModlistHandler(_config, _uiConfig, _steamHandler);
+
                 default:
                     return (Panel)(Activator.CreateInstance(type, _config, _uiConfig) ?? throw new Exception($"Could not create a panel of type {type}"));
             }

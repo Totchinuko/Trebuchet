@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
+using System.Threading.Tasks;
 using System.Windows;
 
 namespace GoogGUI
@@ -18,18 +19,20 @@ namespace GoogGUI
         {
             Config = config;
             UiConfig = uiConfig;
-            SteamHandler = new SteamHandler();
+            Steam = new SteamSession(Config);
             Trebuchet = new Trebuchet(config);
             Trebuchet.DispatcherRequest += OnTrebuchetRequestDispatcher;
             _options = new JsonSerializerOptions
             {
                 WriteIndented = true,
-                TypeInfoResolver = new MenuElementFactory(Config, UiConfig, SteamHandler, Trebuchet)
+                TypeInfoResolver = new MenuElementFactory(Config, UiConfig, Steam, Trebuchet)
             };
 
             var menuConfig = GuiExtensions.GetEmbededTextFile("GoogGUI.GoogApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig, _options) ?? throw new Exception("Could not deserialize the menu.");
             Panels = Menu.GetPanels().ToList();
+
+            Steam.Connect();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -54,7 +57,7 @@ namespace GoogGUI
 
         public List<Panel> Panels { get; set; } = new List<Panel>();
 
-        public SteamHandler SteamHandler { get; }
+        public SteamSession Steam { get; }
 
         public Trebuchet Trebuchet { get; }
 
@@ -79,6 +82,16 @@ namespace GoogGUI
             T panel = (T)Panels.Where(p => p.GetType() == typeof(T)).First();
             if (panel == null) throw new Exception("Unknown Panel.");
             return panel;
+        }
+
+        public virtual void OnAppClose()
+        {
+            Steam.Disconnect();
+            Task.Run(() =>
+            {
+                while(Steam.Client.IsConnected)
+                    Task.Delay(100);
+            }).Wait();
         }
 
         protected virtual void OnPropertyChanged(string property)

@@ -120,22 +120,6 @@ namespace Goog
                     entry.ExtractToFile(Path.Join(destination, entry.FullName));
         }
 
-        public static void WriteColored(string text, ConsoleColor color, ConsoleColor background = ConsoleColor.Black)
-        {
-            Console.ForegroundColor = color;
-            Console.BackgroundColor = background;
-            Console.Write(text);
-            Console.ResetColor();
-        }
-
-        public static void WriteColoredLine(string text, ConsoleColor color, ConsoleColor background = ConsoleColor.Black)
-        {
-            Console.ForegroundColor = color;
-            Console.BackgroundColor = background;
-            Console.WriteLine(text);
-            Console.ResetColor();
-        }
-
         public static string GetFirstFileName(string folder, string pattern)
         {
             if (!Directory.Exists(folder))

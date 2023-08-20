@@ -22,9 +22,9 @@ namespace GoogGUI
         private ObservableCollection<ServerInstanceDashboard> _instances = new ObservableCollection<ServerInstanceDashboard>();
         private DispatcherTimer _timer;
         private Trebuchet _trebuchet;
-        private SteamHandler _steamHandler;
+        private SteamSession _steam;
 
-        public Dashboard(Config config, UIConfig uiConfig, SteamHandler steamHandler, Trebuchet trebuchet) : base(config, uiConfig)
+        public Dashboard(Config config, UIConfig uiConfig, SteamSession steam, Trebuchet trebuchet) : base(config, uiConfig)
         {
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
@@ -32,7 +32,7 @@ namespace GoogGUI
             UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, TaskBlocker.MainTask, GameTask);
             UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, TaskBlocker.MainTask, GameTask);
 
-            _steamHandler = steamHandler;
+            _steam = steam;
             _trebuchet = trebuchet;
             _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnDispatcherTick, Application.Current.Dispatcher);
 
@@ -48,11 +48,10 @@ namespace GoogGUI
                 foreach (var i in Instances)
                     i.Launch();
             }
-            _steamHandler = steamHandler;
+            _steam = steam;
         }
 
         public bool CanDisplayServers => _config.IsInstallPathValid &&
-                File.Exists(Path.Combine(_config.InstallPath, Config.FolderSteam, Config.FileSteamCMDBin)) &&
                 _config.ServerInstanceCount > 0;
 
         public ClientInstanceDashboard Client => _client;
@@ -125,9 +124,28 @@ namespace GoogGUI
         public void UpdateMods()
         {
             if (App.TaskBlocker.IsSet(TaskBlocker.MainTask, GameTask)) return;
-            var ct = App.TaskBlocker.SetMain("Update all selected modlists...");
-            Task.Run(() => Setup.UpdateMods(_config, CollectAllMods().Distinct(), ct), ct)
-                .ContinueWith((t) => Application.Current.Dispatcher.Invoke(() => CheckForCMDErrors(t)));
+            var cts = App.TaskBlocker.SetMain("Update all selected modlists...");
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Setup.UpdateMods(_config, _steam, CollectAllMods().Distinct(), cts);
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    Log.Write(ex);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        new ErrorModal("Mod update failed", $"Mod update failed. Please check the log for more information. ({ex.Message})").ShowDialog();
+                    });
+                }
+                finally
+                {
+                    Application.Current.Dispatcher.Invoke(App.TaskBlocker.ReleaseMain);
+                }
+            }, cts.Token);
         }
 
         /// <summary>
@@ -136,19 +154,28 @@ namespace GoogGUI
         public void UpdateServer()
         {
             if (App.TaskBlocker.IsSet(TaskBlocker.MainTask, GameTask)) return;
-            var ct = App.TaskBlocker.SetMain("Updating server instances...");
-            Task.Run(() => Setup.UpdateServerInstances(_config, ct), ct)
-                .ContinueWith((t) => Application.Current.Dispatcher.Invoke(() => CheckForCMDErrors(t)));
-        }
+            var cts = App.TaskBlocker.SetMain("Updating server instances...");
 
-        private void CheckForCMDErrors(Task<int> task)
-        {
-            App.TaskBlocker.ReleaseMain();
-            if (task.IsFaulted || !task.IsCompleted || task.Exception != null || task.Result != 0)
+            Task.Run(async () =>
             {
-                if (task.Exception != null) Log.Write(task.Exception);
-                new ErrorModal("SteamCMD Error", "SteamCMD has encountered an error. Please check the logs for more information.").ShowDialog();
-            }
+                try
+                {
+                    await Setup.UpdateServerInstances(_config, _steam, cts);
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    Log.Write(ex);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        new ErrorModal("Mod update failed", $"Mod update failed. Please check the log for more information. ({ex.Message})").ShowDialog();
+                    });
+                }
+                finally
+                {
+                    Application.Current.Dispatcher.Invoke(App.TaskBlocker.ReleaseMain);
+                }
+            }, cts.Token);
         }
 
         private void CreateInstancesIfNeeded()
@@ -224,59 +251,12 @@ namespace GoogGUI
                 return;
             }
 
-            var ct = App.TaskBlocker.SetMain("");
-            Task.Run(() => StartupUpdate(instance, ct));
+            // TODO: Update then start
         }
 
         private void OnServerUpdate(object? obj)
         {
-            UpdateServer();
-        }
-
-        private async Task StartupUpdate(int launchedInstances, CancellationToken ct)
-        {
-            Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Checking for server update...");
-
-            var status = await Setup.GetServerUptoDate(_config, ct);
-            if (ct.IsCancellationRequested) return;
-            if (!status.IsUpToDate)
-            {
-                Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Updating servers...");
-                await Setup.UpdateServerInstances(_config, ct);
-                if (ct.IsCancellationRequested) return;
-            }
-
-            Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Checking mod updates...");
-            var mods = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(CollectAllMods().Distinct()), ct);
-            if (ct.IsCancellationRequested) return;
-
-            bool needUpdate = false;
-            foreach (var mod in mods.PublishedFileDetails)
-            {
-                string path = mod.PublishedFileID.ToString();
-                if (ModListProfile.ResolveMod(_config, ref path))
-                {
-                    FileInfo file = new FileInfo(path);
-                    if (Tools.UnixTimeStampToDateTime(mod.TimeUpdated) > file.LastWriteTimeUtc || file.Length != mod.FileSize)
-                    {
-                        needUpdate = true;
-                        break;
-                    }
-                }
-            }
-
-            if (needUpdate)
-            {
-                Application.Current.Dispatcher.Invoke(() => App.TaskBlocker.Description = "Updating mods...");
-                await Setup.UpdateMods(_config, CollectAllMods().Distinct(), ct);
-                if (ct.IsCancellationRequested) return;
-            }
-
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                App.TaskBlocker.ReleaseMain();
-                LaunchServer(launchedInstances);
-            });
+            UpdateServer(); 
         }
     }
 }
