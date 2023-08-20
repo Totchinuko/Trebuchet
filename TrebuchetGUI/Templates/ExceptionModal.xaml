@@ -1,0 +1,36 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Trebuchet">
+    <DataTemplate x:Key="ExceptionModal">
+        <Grid Margin="12">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="12" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="auto" />
+                    <RowDefinition Height="12" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+                <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}" Foreground="{StaticResource GRed}">
+                    <Run Text="{Binding ErrorTitle}" />
+                </TextBlock>
+                <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <TextBlock TextWrapping="Wrap">
+                        <Run Text="{Binding ErrorMessage}" />
+                    </TextBlock>
+                </ScrollViewer>
+            </Grid>
+            <Button Style="{StaticResource ButtonTabRed}"
+                    Content="Close"
+                    Command="{Binding CloseCommand}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    local:GuiExtensions.IconSize="13"
+                    Grid.Row="2"
+                    local:GuiExtensions.Icon="pack://application:,,,/TrebuchetGUI;component/Icons/close.png" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

@@ -1,0 +1,45 @@
+﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:local="clr-namespace:Trebuchet"
+                    xmlns:Controls="clr-namespace:Trebuchet.Controls"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="ModlistItems">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="1.7*" />
+                <ColumnDefinition Width="1*" />
+            </Grid.ColumnDefinitions>
+            <Image Margin="0,0,12,0">
+                <Image.Style>
+                    <Style TargetType="Image">
+                        <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUI;component/Icons/Steam.png" />
+                        <Setter Property="ToolTip" Value="Steam Workshop" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsPublished}" Value="False">
+                                <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUI;component/Icons/File.png" />
+                                <Setter Property="ToolTip" Value="Local File" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Image.Style>
+            </Image>
+            <Grid Grid.Column="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock VerticalAlignment="Center">
+                    <Run Text="{Binding Title, Mode=OneWay}" />
+                </TextBlock>
+                <Border Grid.Column="1" Background="{Binding StatusColor}" Margin="0,0,12,0" CornerRadius="3" Padding="8">
+                    <TextBlock Text="{Binding StatusTooltip}" />
+                </Border>
+            </Grid>            
+            <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                <TextBlock>
+                    <Run Text="{Binding LastUpdate, Mode=OneWay}" />
+                </TextBlock>
+            </StackPanel>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>
