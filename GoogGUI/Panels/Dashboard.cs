@@ -262,7 +262,7 @@ namespace GoogGUI
                 return;
             }
 
-            if (App.TaskBlocker.IsSet(GameTask)) return;
+            if (App.TaskBlocker.IsSet(GameTask, SteamWidget.SteamTask)) return;
             if (!_steamWidget.CanExecute()) return;
 
             var cts = _steamWidget.SetTask("Updating server instances and mods...");
