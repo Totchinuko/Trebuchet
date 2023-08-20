@@ -28,10 +28,31 @@
     "RefreshApp": true
   },
   {
+    "$type": "Title",
+    "Name": "Download"
+  },
+  {
     "$type": "Toggle",
     "Property": "AutoUpdateOnStart",
     "Name": "Update Before Starting Servers",
     "Description": "Automatically update the server instances before starting them, including mods.",
     "Default": false
+  },
+  {
+    "$type": "Toggle",
+    "Property": "VerifyAll",
+    "Name": "Always Verify",
+    "Description": "Verify the files after downloading them, either for server instances or mods.",
+    "Default": true
+  },
+  {
+    "$type": "IntSlider",
+    "Property": "MaxDownloads",
+    "Name": "Max Simultaneous Downloads",
+    "Description": "Max amount of files downloaded at the same time on the steam network.",
+    "Minimum": 1,
+    "Maximum": 16,
+    "Frequency": 1,
+    "Default": 8
   }
 ]

@@ -1,5 +1,9 @@
 [
   {
+    "$type": "Title",
+    "Name": "Trebuchet UI"
+  },
+  {
     "$type": "Toggle",
     "Property": "UseHardwareAcceleration",
     "Name": "Use Hardware Acceleration",

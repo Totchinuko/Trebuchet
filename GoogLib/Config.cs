@@ -66,7 +66,7 @@ namespace Goog
 
         public int ServerInstanceCount { get; set; } = 0;
 
-        public bool VerifyAll { get; set; } = false;
+        public bool VerifyAll { get; set; } = true;
 
         public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
 
