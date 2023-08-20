@@ -89,7 +89,7 @@ namespace GoogGUI
 
         public FieldCondition? Condition { get; set; } = null;
 
-        public D? Default { get; set; } = default;
+        public virtual D? Default { get; set; } = default;
 
         public ICommand HyperlinkCommand { get; private set; }
 

@@ -11,6 +11,17 @@ namespace GoogGUI.SettingFields
     {
         public override bool IsDefault => Default == Value;
 
+        public override string? Default 
+        { 
+            get
+            {
+                if(base.Default == null)
+                    return string.Empty;
+                return base.Default;
+            }
+            set => base.Default = value; 
+        }
+
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["TextboxField"];
 
         protected override string? GetConvert(object? value)
