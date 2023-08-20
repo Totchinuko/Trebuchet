@@ -1,6 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Linq;
 using System.Windows.Input;
 
 namespace GoogGUI
@@ -20,7 +18,7 @@ namespace GoogGUI
             _message = message;
             _button = button;
             if (_tasks.Length > 0)
-                App.TaskBlocker.PropertyChanged += OnTaskBlockerPropertyChanged;
+                App.TaskBlocker.TaskSourceChanged += OnTaskSourceChanged;
         }
 
         public event EventHandler? CanExecuteChanged;
@@ -44,9 +42,9 @@ namespace GoogGUI
             _callback.Invoke(parameter);
         }
 
-        private void OnTaskBlockerPropertyChanged(object? sender, PropertyChangedEventArgs e)
+        private void OnTaskSourceChanged(object? sender, string e)
         {
-            if (e.PropertyName == "IsAvailable")
+            if (e == SteamWidget.SteamTask)
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }

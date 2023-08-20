@@ -12,13 +12,15 @@ namespace GoogGUI
         private readonly SteamSession _steamHandler;
         private readonly Trebuchet _trebuchet;
         private readonly UIConfig _uiConfig;
+        private readonly SteamWidget _widget;
 
-        public MenuElementFactory(Config config, UIConfig uiConfig, SteamSession steamHandler, Trebuchet trebuchet)
+        public MenuElementFactory(Config config, UIConfig uiConfig, SteamSession steamHandler, Trebuchet trebuchet, SteamWidget widget)
         {
             _config = config;
             _uiConfig = uiConfig;
             _steamHandler = steamHandler;
             _trebuchet = trebuchet;
+            _widget = widget;
         }
 
         public override JsonTypeInfo GetTypeInfo(Type type, JsonSerializerOptions options)
@@ -36,10 +38,13 @@ namespace GoogGUI
             switch (type.Name)
             {
                 case nameof(Dashboard):
-                    return new Dashboard(_config, _uiConfig, _steamHandler, _trebuchet);
+                    return new Dashboard(_config, _uiConfig, _steamHandler, _trebuchet, _widget);
+
+                case nameof(Settings):
+                    return new Settings(_config, _uiConfig, _steamHandler, _widget);
 
                 case nameof(ModlistHandler):
-                    return new ModlistHandler(_config, _uiConfig, _steamHandler);
+                    return new ModlistHandler(_config, _uiConfig, _steamHandler, _widget);
 
                 default:
                     return (Panel)(Activator.CreateInstance(type, _config, _uiConfig) ?? throw new Exception($"Could not create a panel of type {type}"));

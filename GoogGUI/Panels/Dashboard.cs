@@ -23,16 +23,18 @@ namespace GoogGUI
         private DispatcherTimer _timer;
         private Trebuchet _trebuchet;
         private SteamSession _steam;
+        private SteamWidget _steamWidget;
 
-        public Dashboard(Config config, UIConfig uiConfig, SteamSession steam, Trebuchet trebuchet) : base(config, uiConfig)
+        public Dashboard(Config config, UIConfig uiConfig, SteamSession steam, Trebuchet trebuchet, SteamWidget steamWidget) : base(config, uiConfig)
         {
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
             LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll);
-            UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, TaskBlocker.MainTask, GameTask);
-            UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, TaskBlocker.MainTask, GameTask);
+            UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, SteamWidget.SteamTask, GameTask);
+            UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, SteamWidget.SteamTask, GameTask);
 
             _steam = steam;
+            _steamWidget = steamWidget;
             _trebuchet = trebuchet;
             _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnDispatcherTick, Application.Current.Dispatcher);
 
@@ -123,8 +125,10 @@ namespace GoogGUI
         /// </summary>
         public void UpdateMods()
         {
-            if (App.TaskBlocker.IsSet(TaskBlocker.MainTask, GameTask)) return;
-            var cts = App.TaskBlocker.SetMain("Update all selected modlists...");
+            if (App.TaskBlocker.IsSet(GameTask)) return;
+            if(!_steamWidget.CanExecute()) return;
+
+            var cts = _steamWidget.SetTask("Update all selected modlists...");
 
             Task.Run(async () =>
             {
@@ -143,7 +147,7 @@ namespace GoogGUI
                 }
                 finally
                 {
-                    Application.Current.Dispatcher.Invoke(App.TaskBlocker.ReleaseMain);
+                    Application.Current.Dispatcher.Invoke(_steamWidget.ReleaseTask);
                 }
             }, cts.Token);
         }
@@ -153,8 +157,10 @@ namespace GoogGUI
         /// </summary>
         public void UpdateServer()
         {
-            if (App.TaskBlocker.IsSet(TaskBlocker.MainTask, GameTask)) return;
-            var cts = App.TaskBlocker.SetMain("Updating server instances...");
+            if (App.TaskBlocker.IsSet(GameTask)) return;
+            if (!_steamWidget.CanExecute()) return;
+
+            var cts = _steamWidget.SetTask("Updating server instances...");
 
             Task.Run(async () =>
             {
@@ -173,7 +179,7 @@ namespace GoogGUI
                 }
                 finally
                 {
-                    Application.Current.Dispatcher.Invoke(App.TaskBlocker.ReleaseMain);
+                    Application.Current.Dispatcher.Invoke(_steamWidget.ReleaseTask);
                 }
             }, cts.Token);
         }

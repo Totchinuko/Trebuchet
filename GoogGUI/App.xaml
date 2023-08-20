@@ -9,6 +9,7 @@
                 <ResourceDictionary Source="Styles\ScrollBar.xaml" />
                 <ResourceDictionary Source="Styles\ButtonStyles.xaml" />
                 <ResourceDictionary Source="Styles\Slider.xaml" />
+                <ResourceDictionary Source="Styles\ProgressBar.xaml" />
                 <ResourceDictionary Source="Styles\ComboBox.xaml" />
                 <ResourceDictionary Source="Templates\Converters.xaml" />
                 <ResourceDictionary Source="Templates\Selectors.xaml" />
@@ -44,6 +45,7 @@
                 <ResourceDictionary Source="Templates\Dashboard.xaml" />
                 <ResourceDictionary Source="Templates\RconPanel.xaml" />
                 <ResourceDictionary Source="Templates\LogFilterPanel.xaml" />
+                <ResourceDictionary Source="Templates\SteamWidget.xaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>

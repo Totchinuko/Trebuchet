@@ -20,12 +20,13 @@ namespace GoogGUI
             Config = config;
             UiConfig = uiConfig;
             Steam = new SteamSession(Config);
+            SteamWidget = new SteamWidget(Steam);
             Trebuchet = new Trebuchet(config);
             Trebuchet.DispatcherRequest += OnTrebuchetRequestDispatcher;
             _options = new JsonSerializerOptions
             {
                 WriteIndented = true,
-                TypeInfoResolver = new MenuElementFactory(Config, UiConfig, Steam, Trebuchet)
+                TypeInfoResolver = new MenuElementFactory(Config, UiConfig, Steam, Trebuchet, SteamWidget)
             };
 
             var menuConfig = GuiExtensions.GetEmbededTextFile("GoogGUI.GoogApp.Menu.json");
@@ -62,6 +63,8 @@ namespace GoogGUI
         public Trebuchet Trebuchet { get; }
 
         public UIConfig UiConfig { get; }
+
+        public SteamWidget SteamWidget { get; }
 
         public void BaseChecks()
         {

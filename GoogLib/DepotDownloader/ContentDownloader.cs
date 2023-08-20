@@ -12,11 +12,11 @@ namespace Goog
         public const uint INVALID_APP_ID = uint.MaxValue;
         public const uint INVALID_DEPOT_ID = uint.MaxValue;
         public const ulong INVALID_MANIFEST_ID = ulong.MaxValue;
-        private const string DEFAULT_DOWNLOAD_DIR = "depots";
         private readonly string STAGING_DIR;
         private readonly string STEAMKIT_DIR;
         private CDNClientPool cdnPool;
         private DepotConfigStore depotConfigStore;
+        private IProgress<double>? progress;
         private SteamSession steam;
 
         public ContentDownloader(SteamSession steam, Config config, uint appID)
@@ -29,11 +29,6 @@ namespace Goog
             STAGING_DIR = Path.Combine(STEAMKIT_DIR, "Staging");
             depotConfigStore = DepotConfigStore.LoadFromFile(Path.Combine(STEAMKIT_DIR, "depot.config"));
         }
-
-        /// <summary>
-        /// Download progress for the current app. Use a lock on its reference to access it in a thread-safe manner.
-        /// </summary>
-        public GlobalDownloadCounter? GlobalDownloadCounter { get; private set; }
 
         /// <summary>
         /// Current install directory for the app. Set this before downloading.
@@ -317,8 +312,13 @@ namespace Goog
             }
             else
             {
-                throw new DirectoryNotFoundException("Directory does not exist");
+                throw new DirectoryNotFoundException($"Directory {path} does not exist");
             }
+        }
+
+        public void SetProgress(IProgress<double> progress)
+        {
+            this.progress = progress;
         }
 
         /// <summary>
@@ -436,7 +436,7 @@ namespace Goog
 
             cdnPool.ExhaustedToken = cts;
 
-            GlobalDownloadCounter = new GlobalDownloadCounter();
+            var globalDownloadCounter = new GlobalDownloadCounter();
             var depotsToDownload = new List<DepotFilesData>(depots.Count);
             var allFileNamesAllDepots = new HashSet<String>();
 
@@ -469,20 +469,23 @@ namespace Goog
                 }
             }
 
+            ulong downloaded = 0;
+            ulong totalDownloaded = depotsToDownload.Select(d => d.depotCounter.CompleteDownloadSize).Aggregate((a, b) => a + b);
             foreach (var depotFileData in depotsToDownload)
             {
-                await DownloadSteam3AsyncDepotFiles(cts, appId, GlobalDownloadCounter, depotFileData, allFileNamesAllDepots);
+                await DownloadSteam3AsyncDepotFiles(cts, appId, globalDownloadCounter, depotFileData, allFileNamesAllDepots, totalDownloaded, downloaded);
+                downloaded += depotFileData.depotCounter.CompleteDownloadSize;
             }
 
             Log.Write("Total downloaded: {0} bytes ({1} bytes uncompressed) from {2} depots", LogSeverity.Info,
-                GlobalDownloadCounter.TotalBytesCompressed, GlobalDownloadCounter.TotalBytesUncompressed, depots.Count);
+                globalDownloadCounter.TotalBytesCompressed, globalDownloadCounter.TotalBytesUncompressed, depots.Count);
         }
 
         private void DownloadSteam3AsyncDepotFile(
             CancellationTokenSource cts,
             DepotFilesData depotFilesData,
             ProtoManifest.FileData file,
-            ConcurrentQueue<(FileStreamData, ProtoManifest.FileData, ProtoManifest.ChunkData)> networkChunkQueue)
+            ConcurrentQueue<(FileStreamData, ProtoManifest.FileData, ProtoManifest.ChunkData)> networkChunkQueue, ulong totalDepots, ulong downloadedDepots)
         {
             cts.Token.ThrowIfCancellationRequested();
 
@@ -641,7 +644,7 @@ namespace Goog
                         depotDownloadCounter.SizeDownloaded += file.TotalSize;
                         Log.Write("{0,6:#00.00}% {1}", LogSeverity.Debug, (depotDownloadCounter.SizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, fileFinalPath);
                     }
-
+                    progress?.Report(downloadedDepots / (double)totalDepots * 100f);
                     return;
                 }
 
@@ -670,7 +673,7 @@ namespace Goog
             }
         }
 
-        private async Task DownloadSteam3AsyncDepotFileChunk(CancellationTokenSource cts, uint appId, GlobalDownloadCounter downloadCounter, DepotFilesData depotFilesData, ProtoManifest.FileData file, FileStreamData fileStreamData, ProtoManifest.ChunkData chunk)
+        private async Task DownloadSteam3AsyncDepotFileChunk(CancellationTokenSource cts, uint appId, GlobalDownloadCounter downloadCounter, DepotFilesData depotFilesData, ProtoManifest.FileData file, FileStreamData fileStreamData, ProtoManifest.ChunkData chunk, ulong totalDepots, ulong downloadedDepots)
         {
             if (cdnPool == null)
                 throw new Exception("cdnPool is not available.");
@@ -788,9 +791,10 @@ namespace Goog
                 var fileFinalPath = Path.Combine(depot.installDir, file.FileName);
                 Log.Write("{0,6:#00.00}% {1}", LogSeverity.Debug, (sizeDownloaded / (float)depotDownloadCounter.CompleteDownloadSize) * 100.0f, fileFinalPath);
             }
+            progress?.Report((sizeDownloaded + downloadedDepots) / (double)totalDepots * 100.0d);
         }
 
-        private async Task DownloadSteam3AsyncDepotFiles(CancellationTokenSource cts, uint appId, GlobalDownloadCounter downloadCounter, DepotFilesData depotFilesData, HashSet<String> allFileNamesAllDepots)
+        private async Task DownloadSteam3AsyncDepotFiles(CancellationTokenSource cts, uint appId, GlobalDownloadCounter downloadCounter, DepotFilesData depotFilesData, HashSet<String> allFileNamesAllDepots, ulong totalDepots, ulong downloadedDepots)
         {
             if (string.IsNullOrWhiteSpace(InstallDirectory))
                 throw new Exception("InstallDirectory was not set");
@@ -805,14 +809,15 @@ namespace Goog
 
             await Util.InvokeAsync(
                 files.Select(file => new Func<Task>(async () =>
-                    await Task.Run(() => DownloadSteam3AsyncDepotFile(cts, depotFilesData, file, networkChunkQueue)))),
+                    await Task.Run(() => DownloadSteam3AsyncDepotFile(cts, depotFilesData, file, networkChunkQueue, totalDepots, downloadedDepots)))),
                 maxDegreeOfParallelism: Config.MaxDownloads
             );
 
             await Util.InvokeAsync(
                 networkChunkQueue.Select(q => new Func<Task>(async () =>
-                    await Task.Run(() => DownloadSteam3AsyncDepotFileChunk(cts, appId, downloadCounter, depotFilesData,
-                        q.fileData, q.fileStreamData, q.chunk)))),
+                    await Task.Run(() => 
+                        DownloadSteam3AsyncDepotFileChunk(cts, appId, downloadCounter, depotFilesData, q.fileData, q.fileStreamData, q.chunk, totalDepots, downloadedDepots)
+                    ))),
                 maxDegreeOfParallelism: Config.MaxDownloads
             );
 

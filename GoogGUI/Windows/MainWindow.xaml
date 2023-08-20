@@ -28,26 +28,7 @@
                 MaximizeIcon="pack://application:,,,/GoogGui;component/icons/Maximize.png"
                 MinimizeIcon="pack://application:,,,/GoogGui;component/icons/Minimize.png">
                 <Controls:WindowTitlebar.Header>
-                    <Border VerticalAlignment="Center" MinWidth="400" HorizontalAlignment="Center" CornerRadius="3" Padding="3,0,0,0">
-                        <Border.Style>
-                            <Style TargetType="Border" BasedOn="{StaticResource Panel}">
-                                <Setter Property="Height" Value="25" />
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding TaskBlocker.IsAvailable}" Value="True">
-                                        <Setter Property="Visibility" Value="Hidden" />
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Border.Style>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="{Binding TaskBlocker.Description}" Margin="0,0,12,0" VerticalAlignment="Center" />
-                            <Button Grid.Column="1" Style="{StaticResource ButtonIconBlue}" local:GuiExtensions.CornerRadius="0,3,3,0" Margin="0" Padding="8,0" Background="{StaticResource GDimBlue}" Content="Cancel" Command="{Binding TaskBlocker.CancelCommand}" />
-                        </Grid>
-                    </Border>
+                    <ContentPresenter ContentTemplate="{StaticResource SteamWidget}" Content="{Binding App.SteamWidget}" />
                 </Controls:WindowTitlebar.Header>
             </Controls:WindowTitlebar>
             <Grid x:Name="WindowContent" Grid.Row="2" Margin="0,12,0,0">

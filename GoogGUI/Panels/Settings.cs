@@ -1,4 +1,5 @@
 ﻿using Goog;
+using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
@@ -7,8 +8,13 @@ namespace GoogGUI
 {
     public class Settings : FieldEditorPanel
     {
-        public Settings(Config config, UIConfig uiConfig) : base(config, uiConfig)
+        private readonly SteamSession _steam;
+        private readonly SteamWidget _steamWidget;
+
+        public Settings(Config config, UIConfig uiConfig, SteamSession steam, SteamWidget steamWidget) : base(config, uiConfig)
         {
+            _steam = steam;
+            _steamWidget = steamWidget;
             LoadPanel();
         }
 
@@ -57,13 +63,39 @@ namespace GoogGUI
         private void OnServerInstanceInstall(object? obj)
         {
             if (_config.ServerInstanceCount <= 0) return;
-            if (!App.TaskBlocker.IsAvailable) return;
+            if (!_steamWidget.CanExecute()) return;
+            if (App.TaskBlocker.IsSet(Dashboard.GameTask)) return;
 
             int installed = Setup.GetInstalledInstances(_config);
             if (installed >= _config.ServerInstanceCount)
                 return;
 
-            App.GetApp().GetPanel<Dashboard>().UpdateServer();
+            var cts = _steamWidget.SetTask("Updating server instances...");
+
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await Setup.UpdateServerInstances(_config, _steam, cts);
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    Log.Write(ex);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        new ErrorModal("Mod update failed", $"Mod update failed. Please check the log for more information. ({ex.Message})").ShowDialog();
+                    });
+                }
+                finally
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _steamWidget.ReleaseTask();
+                        UpdateRequiredActions();
+                    });
+                }
+            }, cts.Token);
         }
 
         private void UpdateRequiredActions()
@@ -72,9 +104,9 @@ namespace GoogGUI
 
             int installed = Setup.GetInstalledInstances(_config);
             if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)
-                RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, TaskBlocker.MainTask));
+                RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, SteamWidget.SteamTask));
             if (App.UseSoftwareRendering == _uiConfig.UseHardwareAcceleration)
-                RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, TaskBlocker.MainTask));
+                RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, SteamWidget.SteamTask));
         }
     }
 }

@@ -10,26 +10,23 @@ namespace GoogGUI
     /// </summary>
     public partial class MainWindow : Window
     {
-        private GoogApp _app;
         private bool _shown;
 
         public MainWindow(Config config, UIConfig uiConfig)
         {
-            _app = new GoogApp(config, uiConfig);
+            App = new GoogApp(config, uiConfig);
             InitializeComponent();
             DataContext = this;
         }
 
-        public GoogApp App { get => _app; set => _app = value; }
+        public GoogApp App { get; }
 
         public bool WasShown => _shown;
-
-        public TaskBlocker TaskBlocker => GoogGUI.App.TaskBlocker;
 
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            _app.OnAppClose();
+            App.OnAppClose();
             Application.Current.Shutdown();
         }
 
@@ -53,7 +50,7 @@ namespace GoogGUI
 
         protected virtual void OnWindowShown()
         {
-            _app.BaseChecks();
+            App.BaseChecks();
         }
     }
 }

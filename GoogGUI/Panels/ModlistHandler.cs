@@ -31,9 +31,11 @@ namespace GoogGUI
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
         private SteamSession _steam;
+        private SteamWidget _steamWidget;
 
-        public ModlistHandler(Config config, UIConfig uiConfig, SteamSession steam) : base(config, uiConfig)
+        public ModlistHandler(Config config, UIConfig uiConfig, SteamSession steam, SteamWidget steamWidget) : base(config, uiConfig)
         {
+            _steamWidget = steamWidget;
             _steam = steam;
             LoadPanel();
         }
@@ -60,7 +62,7 @@ namespace GoogGUI
 
         public object ItemTemplate => Application.Current.Resources["ModlistItems"];
 
-        public ICommand ModFilesDownloadCommand => new TaskBlockedCommand(OnModFilesDownload, true, TaskBlocker.MainTask, Dashboard.GameTask);
+        public ICommand ModFilesDownloadCommand => new TaskBlockedCommand(OnModFilesDownload, true, SteamWidget.SteamTask, Dashboard.GameTask);
 
         public TrulyObservableCollection<ModFile> Modlist
         {
@@ -128,7 +130,7 @@ namespace GoogGUI
                 catch(Exception ex)
                 {
                     Log.Write(ex);
-                    new ErrorModal("Failed", $" Could not download the file. ({ex.Message})").ShowDialog();
+                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Failed", $"Could not download the file. ({ex.Message})").ShowDialog());
                 }
                 finally
                 {
@@ -169,7 +171,7 @@ namespace GoogGUI
                 catch(Exception ex)
                 {
                     Log.Write(ex);
-                    new ErrorModal("Failed", $"Could not download the collection. ({ex.Message})").ShowDialog();
+                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Failed", $"Could not download the collection. ({ex.Message})").ShowDialog());
                 }
                 finally
                 {
@@ -211,7 +213,7 @@ namespace GoogGUI
                 catch(Exception ex)
                 {
                     Log.Write(ex);
-                    new ErrorModal("Modlist", $"Could not download mod details of your modlist. ({ex.Message})", false).ShowDialog();
+                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Modlist", $"Could not download mod details of your modlist. ({ex.Message})").ShowDialog());
                 }
                 finally
                 {
@@ -434,13 +436,13 @@ namespace GoogGUI
 
         private void OnModFilesDownload(object? obj)
         {
-            if (!App.TaskBlocker.IsAvailable) return;
+            if (!_steamWidget.CanExecute()) return;
 
             QuestionModal question = new QuestionModal("Download", "Do you wish to update your modlist ? This might take a while.");
             question.ShowDialog();
             if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
 
-            var cts = App.TaskBlocker.SetMain($"Updating your modlist mods {_selectedModlist}...");
+            var cts = _steamWidget.SetTask($"Updating your modlist mods {_selectedModlist}...");
 
             Task.Run(async () =>
             {
@@ -452,14 +454,14 @@ namespace GoogGUI
                 catch(Exception ex)
                 {
                     Log.Write(ex);
-                    new ErrorModal("Mod update failed", $"Mod update failed. Please check the log for more information. ({ex.Message})").ShowDialog();
+                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Mod update failed", $"Mod update failed. Please check the log for more information. ({ex.Message})").ShowDialog());
                 }
                 finally
                 {
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         RefreshModFileStatus();
-                        App.TaskBlocker.ReleaseMain();
+                        _steamWidget.ReleaseTask();
                     });
                 }               
             });
@@ -589,7 +591,8 @@ namespace GoogGUI
             }
 
             string path = Path.Combine(_config.InstallPath, Config.FolderWorkshop, _config.ClientAppID.ToString());
-            if (!Directory.Exists(path)) return;
+            if (!Directory.Exists(path))
+                Tools.CreateDir(path);
 
             _modWatcher = new FileSystemWatcher(path);
             _modWatcher.NotifyFilter = NotifyFilters.Attributes
