@@ -109,8 +109,7 @@ namespace Goog
         /// <returns></returns>
         public static async Task UpdateServer(Config config, SteamSession steam, int instanceNumber, CancellationTokenSource cts, bool reinstall = false)
         {
-            if (config.ServerInstanceCount <= 0)
-                throw new Exception("No server instance is configured.");
+            if (config.ServerInstanceCount <= 0) return;
 
             if (!SetupFolders(config)) return;
 
@@ -141,11 +140,11 @@ namespace Goog
         /// <exception cref="DirectoryNotFoundException"></exception>
         public static async Task UpdateServerFromInstance0(Config config, int instanceNumber, CancellationToken token)
         {
-            Log.Write("Updating server instance {0} from instance 0.", LogSeverity.Info);
             if (config.ServerInstanceCount <= 0) return;
             if (instanceNumber == 0)
                 throw new Exception("Can't update instance 0 with itself.");
 
+            Log.Write("Updating server instance {0} from instance 0.", LogSeverity.Info);
             if (!SetupFolders(config)) return;
 
             string instance = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
@@ -170,6 +169,8 @@ namespace Goog
         /// <returns></returns>
         public static async Task UpdateServerInstances(Config config, SteamSession steam, CancellationTokenSource cts)
         {
+            if (config.ServerInstanceCount <= 0) return;
+
             Log.Write("Updating all server instances...", LogSeverity.Info);
             int count = config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
