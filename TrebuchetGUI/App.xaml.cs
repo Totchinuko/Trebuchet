@@ -105,7 +105,7 @@ namespace Trebuchet
 
         private void ReadSettings()
         {
-            var node = JsonSerializer.Deserialize<JsonNode>(GuiExtensions.GetEmbededTextFile("TrebuchetGUI.AppSettings.json"));
+            var node = JsonSerializer.Deserialize<JsonNode>(GuiExtensions.GetEmbededTextFile("Trebuchet.AppSettings.json"));
             if (node == null) return;
 
             APIKey = node["apikey"]?.GetValue<string>() ?? string.Empty;

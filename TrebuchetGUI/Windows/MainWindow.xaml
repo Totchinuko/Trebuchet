@@ -22,11 +22,11 @@
             </Grid.RowDefinitions>
             <Controls:WindowTitlebar
                 x:Name="TitleBar"
-                Title="Tot ! Trebuchet"
-                CloseIcon="pack://application:,,,/TrebuchetGUI;component/icons/Close.png"
-                RestoreIcon="pack://application:,,,/TrebuchetGUI;component/icons/Restore.png"
-                MaximizeIcon="pack://application:,,,/TrebuchetGUI;component/icons/Maximize.png"
-                MinimizeIcon="pack://application:,,,/TrebuchetGUI;component/icons/Minimize.png">
+                Title="{Binding App.AppTitle}"
+                CloseIcon="pack://application:,,,/Trebuchet;component/icons/Close.png"
+                RestoreIcon="pack://application:,,,/Trebuchet;component/icons/Restore.png"
+                MaximizeIcon="pack://application:,,,/Trebuchet;component/icons/Maximize.png"
+                MinimizeIcon="pack://application:,,,/Trebuchet;component/icons/Minimize.png">
                 <Controls:WindowTitlebar.Header>
                     <ContentPresenter ContentTemplate="{StaticResource SteamWidget}" Content="{Binding App.SteamWidget}" />
                 </Controls:WindowTitlebar.Header>

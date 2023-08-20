@@ -12,7 +12,7 @@
                 ToolTip="Map Selection"
                 ToolTipService.InitialShowDelay="0"
                 Style="{StaticResource IconButton}" Padding="8">
-            <Image Source="pack://application:,,,/TrebuchetGUI;component/Icons/Map.png" Width="16" />
+            <Image Source="pack://application:,,,/Trebuchet;component/Icons/Map.png" Width="16" />
         </Button>
         <Popup Name="MapListPopup" StaysOpen="False" AllowsTransparency="True">
             <Border BorderThickness="1" BorderBrush="{StaticResource GPanel}" CornerRadius="3" Background="{StaticResource GBackground}" MaxHeight="300" MinWidth="100" Width="200">

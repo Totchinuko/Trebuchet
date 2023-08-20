@@ -70,7 +70,7 @@
                         VerticalAlignment="Top"
                         Margin="12,0,3,0"
                         Command="{Binding ResetCommand}">
-                    <Image Source="pack://application:,,,/TrebuchetGUI;component/Icons/Reset.png" Width="16" Height="16" />
+                    <Image Source="pack://application:,,,/Trebuchet;component/Icons/Reset.png" Width="16" Height="16" />
                     <Button.Style>
                         <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
                             <Style.Triggers>

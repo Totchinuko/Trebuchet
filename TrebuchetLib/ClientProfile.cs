@@ -7,10 +7,6 @@ namespace Trebuchet
 {
     public sealed class ClientProfile : ProfileFile<ClientProfile>
     {
-        private ClientProfile()
-        {
-        }
-
         public int AddedTexturePool { get; set; } = 0;
 
         public bool BackgroundSound { get; set; } = false;

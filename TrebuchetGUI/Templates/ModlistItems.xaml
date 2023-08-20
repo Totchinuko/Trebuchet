@@ -12,11 +12,11 @@
             <Image Margin="0,0,12,0">
                 <Image.Style>
                     <Style TargetType="Image">
-                        <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUI;component/Icons/Steam.png" />
+                        <Setter Property="Source" Value="pack://application:,,,/Trebuchet;component/Icons/Steam.png" />
                         <Setter Property="ToolTip" Value="Steam Workshop" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsPublished}" Value="False">
-                                <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUI;component/Icons/File.png" />
+                                <Setter Property="Source" Value="pack://application:,,,/Trebuchet;component/Icons/File.png" />
                                 <Setter Property="ToolTip" Value="Local File" />
                             </DataTrigger>
                         </Style.Triggers>

@@ -17,7 +17,7 @@
                 </TextBlock>
             </StackPanel>
             <Button Style="{StaticResource ButtonTabRed}"
-                    local:GuiExtensions.Icon="pack://application:,,,/TrebuchetGUI;component/Icons/close.png"
+                    local:GuiExtensions.Icon="pack://application:,,,/Trebuchet;component/Icons/close.png"
                     local:GuiExtensions.IconSize="13"
                     Content="Close"
                     Command="{Binding CloseCommand}"

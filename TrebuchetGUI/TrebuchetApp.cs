@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
@@ -27,9 +28,10 @@ namespace Trebuchet
                 TypeInfoResolver = new MenuElementFactory(Config, UiConfig, Steam, Trebuchet, SteamWidget)
             };
 
-            var menuConfig = GuiExtensions.GetEmbededTextFile("TrebuchetGUI.TrebuchetApp.Menu.json");
+            var menuConfig = GuiExtensions.GetEmbededTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig, _options) ?? throw new Exception("Could not deserialize the menu.");
             Panels = Menu.GetPanels().ToList();
+            Panels.ForEach(p => p.AppConfigurationChanged += OnAppConfigurationChanged);
 
             Steam.Connect();
         }
@@ -63,6 +65,8 @@ namespace Trebuchet
         public TrebuchetLauncher Trebuchet { get; }
 
         public UIConfig UiConfig { get; }
+
+        public string AppTitle => $"Tot ! Trebuchet {GetFileVersion()}";
 
         public void BaseChecks()
         {
@@ -108,6 +112,13 @@ namespace Trebuchet
         private void OnTrebuchetRequestDispatcher(object? sender, Action e)
         {
             Application.Current.Dispatcher.Invoke(e);
+        }
+
+        private string GetFileVersion()
+        {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            return fvi.FileVersion ?? string.Empty;
         }
     }
 }

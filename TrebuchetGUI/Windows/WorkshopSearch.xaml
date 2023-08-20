@@ -23,10 +23,10 @@
             <Controls:WindowTitlebar
                 x:Name="TitleBar"
                 Title="Workshop Search"
-                CloseIcon="pack://application:,,,/TrebuchetGUI;component/icons/Close.png"
-                RestoreIcon="pack://application:,,,/TrebuchetGUI;component/icons/Restore.png"
-                MaximizeIcon="pack://application:,,,/TrebuchetGUI;component/icons/Maximize.png"
-                MinimizeIcon="pack://application:,,,/TrebuchetGUI;component/icons/Minimize.png" />
+                CloseIcon="pack://application:,,,/Trebuchet;component/icons/Close.png"
+                RestoreIcon="pack://application:,,,/Trebuchet;component/icons/Restore.png"
+                MaximizeIcon="pack://application:,,,/Trebuchet;component/icons/Maximize.png"
+                MinimizeIcon="pack://application:,,,/Trebuchet;component/icons/Minimize.png" />
             <Border Grid.Row="2" Padding="12">
                 <Grid x:Name="WindowContent" Margin="0,12,0,0">
                     <Grid.RowDefinitions>
@@ -68,7 +68,7 @@
                                                                 CommandParameter="{Binding .}"
                                                                 Padding="8">
                                                             <StackPanel Orientation="Horizontal">
-                                                                <Image Source="pack://application:,,,/TrebuchetGUI;component/Icons/Add.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                                                <Image Source="pack://application:,,,/Trebuchet;component/Icons/Add.png" Width="16" Height="16" Margin="0,0,6,0" />
                                                                 <TextBlock Text="Add to Mod List" />
                                                             </StackPanel>
                                                         </Button>

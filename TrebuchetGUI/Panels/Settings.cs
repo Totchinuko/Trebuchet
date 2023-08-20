@@ -29,13 +29,14 @@ namespace Trebuchet
 
         protected override void BuildFields()
         {
-            BuildFields("TrebuchetGUI.Panels.Settings.Fields.json", this, "Config");
-            BuildFields("TrebuchetGUI.Panels.Settings.UI.Fields.json", this, "UIConfig");
+            BuildFields("Trebuchet.Panels.Settings.Fields.json", this, "Config");
+            BuildFields("Trebuchet.Panels.Settings.UI.Fields.json", this, "UIConfig");
         }
 
         protected override void OnValueChanged(string property)
         {
             _config.SaveFile();
+            _uiConfig.SaveFile();
             UpdateRequiredActions();
         }
 

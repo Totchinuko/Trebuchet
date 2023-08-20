@@ -58,7 +58,7 @@
                                     </Grid.ColumnDefinitions>
                                     <ContentPresenter Content="{Binding .}" ContentTemplate="{Binding ItemTemplate, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" />
                                     <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding RemoveCommand, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" CommandParameter="{Binding .}">
-                                        <Image Source="pack://application:,,,/TrebuchetGUI;component/Icons/Trash.png" Width="16" Height="16" />
+                                        <Image Source="pack://application:,,,/Trebuchet;component/Icons/Trash.png" Width="16" Height="16" />
                                     </Button>
                                 </Grid>
                             </Border>

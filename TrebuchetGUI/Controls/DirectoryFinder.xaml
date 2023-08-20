@@ -9,6 +9,6 @@
     <Button x:Name="FindButton"
             Click="FindButton_MouseDown"
             Style="{StaticResource IconButton}" Padding="8">
-        <Image Source="pack://application:,,,/TrebuchetGUI;component/Icons/LocalStorage.png" Width="16" />
+        <Image Source="pack://application:,,,/Trebuchet;component/Icons/LocalStorage.png" Width="16" />
     </Button>
 </UserControl>

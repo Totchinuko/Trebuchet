@@ -586,6 +586,7 @@ namespace Trebuchet
             }
 
             string path = Path.Combine(_config.InstallPath, Config.FolderWorkshop, _config.ClientAppID.ToString());
+            if (string.IsNullOrWhiteSpace(_config.InstallPath) || !Directory.Exists(_config.InstallPath)) return;
             if (!Directory.Exists(path))
                 Tools.CreateDir(path);
 

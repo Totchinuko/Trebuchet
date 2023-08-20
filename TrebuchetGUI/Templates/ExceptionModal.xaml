@@ -30,7 +30,7 @@
                     VerticalAlignment="Center"
                     local:GuiExtensions.IconSize="13"
                     Grid.Row="2"
-                    local:GuiExtensions.Icon="pack://application:,,,/TrebuchetGUI;component/Icons/close.png" />
+                    local:GuiExtensions.Icon="pack://application:,,,/Trebuchet;component/Icons/close.png" />
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

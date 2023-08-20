@@ -5,9 +5,6 @@ namespace Trebuchet
 {
     public sealed class ModListProfile : ProfileFile<ModListProfile>
     {
-        private ModListProfile()
-        { }
-
         public List<string> Modlist { get; set; } = new List<string>();
 
         [JsonIgnore]

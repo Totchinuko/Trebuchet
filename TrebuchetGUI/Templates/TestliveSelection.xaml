@@ -14,7 +14,7 @@
                     Height="128"
                     Width="128"
                     Command="{Binding LiveCommand}"
-                    local:GuiExtensions.Icon="pack://application:,,,/TrebuchetGUI;component/Icons/Window.png"
+                    local:GuiExtensions.Icon="pack://application:,,,/Trebuchet;component/Icons/Window.png"
                     Style="{StaticResource ButtonTestlive}">
                 <TextBlock FontSize="16" Text="Live" />
             </Button>
@@ -22,7 +22,7 @@
             <Button Grid.Column="3"
                     Height="128"
                     Width="128"
-                    local:GuiExtensions.Icon="pack://application:,,,/TrebuchetGUI;component/Icons/BugWindow.png"
+                    local:GuiExtensions.Icon="pack://application:,,,/Trebuchet;component/Icons/BugWindow.png"
                     Command="{Binding TestLiveCommand}"
                     Style="{StaticResource ButtonTestlive}">
                 <TextBlock FontSize="16" Text="Test Live" />
