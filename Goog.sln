@@ -7,9 +7,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogGUI", "GoogGUI\GoogGUI.
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "GoogLib", "GoogLib\GoogLib.csproj", "{64D1F074-DE93-4D23-8207-29F0C9C63006}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Goog", "Goog\Goog.csproj", "{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SteamWorksWebAPI", "SteamWorksWebAPI\SteamWorksWebAPI.csproj", "{4AC38001-A77A-4C8C-8CBE-1CA9E1FE8E53}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SteamWorksWebAPI", "SteamWorksWebAPI\SteamWorksWebAPI.csproj", "{4AC38001-A77A-4C8C-8CBE-1CA9E1FE8E53}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -25,10 +23,6 @@ Global
 		{64D1F074-DE93-4D23-8207-29F0C9C63006}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{64D1F074-DE93-4D23-8207-29F0C9C63006}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{64D1F074-DE93-4D23-8207-29F0C9C63006}.Release|Any CPU.Build.0 = Release|Any CPU
-		{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{DA1A9BAA-3760-438A-9A2B-739A1AD8A0A9}.Release|Any CPU.Build.0 = Release|Any CPU
 		{4AC38001-A77A-4C8C-8CBE-1CA9E1FE8E53}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{4AC38001-A77A-4C8C-8CBE-1CA9E1FE8E53}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4AC38001-A77A-4C8C-8CBE-1CA9E1FE8E53}.Release|Any CPU.ActiveCfg = Release|Any CPU
