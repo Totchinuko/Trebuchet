@@ -259,9 +259,6 @@ namespace Trebuchet
 
         private void OnServerLaunchRequested(object? sender, int instance)
         {
-            if (sender is not ServerInstanceDashboard dashboard)
-                throw new InvalidOperationException();
-
             if (_instances.Any(i => i.ProcessRunning) || _config.AutoUpdateStatus == AutoUpdateStatus.Never)
             {
                 LaunchServer(instance);
