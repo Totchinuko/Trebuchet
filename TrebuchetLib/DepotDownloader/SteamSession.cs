@@ -1,6 +1,10 @@
 ﻿using SteamKit2;
 using SteamKit2.Internal;
 
+/// GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
+/// Copyright (C) 2023 Totchinuko https://github.com/Totchinuko
+/// Full license text: LICENSE.txt at the project root
+
 namespace Trebuchet
 {
     public partial class SteamSession

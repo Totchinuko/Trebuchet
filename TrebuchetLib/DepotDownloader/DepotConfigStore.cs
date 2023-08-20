@@ -1,12 +1,18 @@
 ﻿using ProtoBuf;
 using System.IO.Compression;
 
+/// GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
+/// Copyright (C) 2023 SteamRE https://opensteamworks.org
+/// Full license text: LICENSE.txt at the project root
+/// Modificatied by Totchinuko under the same license
+
 namespace Trebuchet
 {
     [ProtoContract]
     internal class DepotConfigStore
     {
-        private DepotConfigStore() { }
+        private DepotConfigStore()
+        { }
 
         [ProtoMember(1)]
         public Dictionary<uint, ulong> InstalledManifestIDs { get; } = new Dictionary<uint, ulong>();

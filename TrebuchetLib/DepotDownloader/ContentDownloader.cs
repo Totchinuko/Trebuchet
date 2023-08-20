@@ -4,6 +4,11 @@ using System.Collections.Concurrent;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 
+/// GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
+/// Copyright (C) 2023 SteamRE https://opensteamworks.org
+/// Full license text: LICENSE.txt at the project root
+/// Modificatied by Totchinuko under the same license
+
 namespace Trebuchet
 {
     public class ContentDownloader
@@ -812,7 +817,7 @@ namespace Trebuchet
 
             await Util.InvokeAsync(
                 networkChunkQueue.Select(q => new Func<Task>(async () =>
-                    await Task.Run(() => 
+                    await Task.Run(() =>
                         DownloadSteam3AsyncDepotFileChunk(cts, appId, downloadCounter, depotFilesData, q.fileData, q.fileStreamData, q.chunk, totalDepots, downloadedDepots)
                     ))),
                 maxDegreeOfParallelism: Config.MaxDownloads
@@ -918,7 +923,7 @@ namespace Trebuchet
             var configDir = Path.Combine(depot.installDir, STEAMKIT_DIR);
 
             var lastManifestId = INVALID_MANIFEST_ID;
-            if(depot.publishedFileId != 0)
+            if (depot.publishedFileId != 0)
             {
                 depotConfigStore.InstalledUGCManifestIDs.TryGetValue(depot.publishedFileId, out lastManifestId);
 
@@ -928,7 +933,7 @@ namespace Trebuchet
             else
             {
                 depotConfigStore.InstalledManifestIDs.TryGetValue(depot.id, out lastManifestId);
-                
+
                 // In case we have an early exit, this will force equiv of verifyall next run.
                 depotConfigStore.InstalledManifestIDs[depot.id] = INVALID_MANIFEST_ID;
             }
