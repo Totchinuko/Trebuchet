@@ -17,10 +17,10 @@ namespace Trebuchet
         public const uint INVALID_APP_ID = uint.MaxValue;
         public const uint INVALID_DEPOT_ID = uint.MaxValue;
         public const ulong INVALID_MANIFEST_ID = ulong.MaxValue;
-        public readonly string STAGING_DIR;
-        public readonly string STEAMKIT_DIR;
+        public string STAGING_DIR => Path.Combine(STEAMKIT_DIR, "Staging");
+        public string STEAMKIT_DIR => Path.Combine(Config.InstallPath, "SteamCache");
         private CDNClientPool cdnPool;
-        private DepotConfigStore depotConfigStore;
+        private DepotConfigStore? depotConfigStore;
         private IProgress<double>? progress;
         private SteamSession steam;
 
@@ -29,10 +29,6 @@ namespace Trebuchet
             this.steam = steam;
             cdnPool = new CDNClientPool(steam, appID);
             Config = config;
-
-            STEAMKIT_DIR = Path.Combine(Config.InstallPath, "SteamCache");
-            STAGING_DIR = Path.Combine(STEAMKIT_DIR, "Staging");
-            depotConfigStore = DepotConfigStore.LoadFromFile(Path.Combine(STEAMKIT_DIR, "depot.config"));
         }
 
         /// <summary>
@@ -440,6 +436,8 @@ namespace Trebuchet
             if (string.IsNullOrWhiteSpace(InstallDirectory))
                 throw new ArgumentNullException(nameof(InstallDirectory));
 
+            depotConfigStore = DepotConfigStore.LoadFromFile(Path.Combine(STEAMKIT_DIR, "depot.config"));
+
             cdnPool.ExhaustedToken = cts;
 
             var globalDownloadCounter = new GlobalDownloadCounter();
@@ -843,6 +841,9 @@ namespace Trebuchet
                 }
             }
 
+             if(depotConfigStore == null)
+                throw new Exception("DepotConfigStore was not loaded.");
+
             if (depot.publishedFileId != 0)
                 depotConfigStore.InstalledUGCManifestIDs[depot.publishedFileId] = depot.manifestId;
             else
@@ -915,6 +916,9 @@ namespace Trebuchet
 
         private async Task<DepotFilesData> ProcessDepotManifestAndFiles(CancellationTokenSource cts, uint appId, DepotDownloadInfo depot)
         {
+            if (depotConfigStore == null)
+                throw new Exception("DepotConfigStore was not loaded.");
+
             var depotCounter = new DepotDownloadCounter();
 
             Log.Write("Processing depot {0}", LogSeverity.Debug, depot.id);
