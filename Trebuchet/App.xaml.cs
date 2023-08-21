@@ -61,18 +61,30 @@ namespace Trebuchet
                     ImmediateServerCatapult = true;
                 if (e.Args.Contains("-testlive"))
                 {
-                    TestliveModal.OpenApp(true);
+                    OpenApp(true);
                     return;
                 }
                 else if (e.Args.Contains("-live"))
                 {
-                    TestliveModal.OpenApp(false);
+                    OpenApp(false);
                     return;
                 }
             }
             TestliveModal modal = new TestliveModal();
             Current.MainWindow = modal.Window;
             modal.ShowDialog();
+        }
+
+        public static void OpenApp(bool testlive)
+        {
+            Log.Write($"Selecting {(testlive ? "testlive" : "live")}", LogSeverity.Info);
+            Config config = Config.LoadConfig(Config.GetPath(testlive));
+            UIConfig uiConfig = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
+            App.UseSoftwareRendering = !uiConfig.UseHardwareAcceleration;
+
+            MainWindow mainWindow = new MainWindow(config, uiConfig);
+            Application.Current.MainWindow = mainWindow;
+            mainWindow.Show();
         }
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

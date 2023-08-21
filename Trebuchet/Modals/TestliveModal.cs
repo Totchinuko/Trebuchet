@@ -27,18 +27,6 @@ namespace Trebuchet
 
         public ICommand TestLiveCommand { get; private set; }
 
-        public static void OpenApp(bool testlive)
-        {
-            Log.Write($"Selecting {(testlive ? "testlive" : "live")}", LogSeverity.Info);
-            Config config = Config.LoadConfig(Config.GetPath(testlive));
-            UIConfig uiConfig = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
-            App.UseSoftwareRendering = !uiConfig.UseHardwareAcceleration;
-
-            MainWindow mainWindow = new MainWindow(config, uiConfig);
-            Application.Current.MainWindow = mainWindow;
-            mainWindow.Show();
-        }
-
         public override void OnWindowClose()
         {
             if (!_madeASelection)
@@ -48,14 +36,14 @@ namespace Trebuchet
         private void OnLiveClicked(object? obj)
         {
             _madeASelection = true;
-            OpenApp(false);
+            App.OpenApp(false);
             _window.Close();
         }
 
         private void OnTestLiveClicked(object? obj)
         {
             _madeASelection = true;
-            OpenApp(true);
+            App.OpenApp(true);
             _window.Close();
         }
     }

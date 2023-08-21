@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Text.Json;
 using System.Threading.Tasks;
 using System.Windows;
+using CommunityToolkit.Mvvm;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace Trebuchet
 {
