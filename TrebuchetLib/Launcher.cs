@@ -333,8 +333,8 @@ namespace TrebuchetLib
             {
                 lock (_lock)
                 {
-                    foreach (var q in queue)
-                        q.Invoke();
+                    while (queue.Count > 0)
+                        queue.Take().Invoke();
 
                     if (DateTime.UtcNow - lastSearch > TimeSpan.FromSeconds(1))
                     {
