@@ -28,7 +28,7 @@ namespace Trebuchet
         {
             base.OnClosed(e);
             App.OnAppClose();
-            Application.Current.Shutdown();
+            Application.Current.Shutdown(0);
         }
 
         protected override void OnContentRendered(EventArgs e)
