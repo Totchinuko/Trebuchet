@@ -105,7 +105,7 @@ namespace Trebuchet
             if (message.instance != Instance) return;
 
             if (message is ProcessStartedMessage started)
-                OnProcessStarted(started.data);
+                OnProcessStarted(started.data, started.reader);
             else if (message is ProcessFailledMessage failed)
                 OnProcessFailed(failed.Exception);
             else if (message is ProcessStoppedMessage stopped)
@@ -161,7 +161,7 @@ namespace Trebuchet
             new ErrorModal("Server failed to start", exception.Message).ShowDialog();
         }
 
-        private void OnProcessStarted(ProcessData data)
+        private void OnProcessStarted(ProcessData data, IServerStateReader? reader)
         {
             LaunchCommand.Toggle(false);
             KillCommand.Toggle(true);
@@ -172,6 +172,7 @@ namespace Trebuchet
 
             if (ProcessStats.Running) ProcessStats.StopStats();
             ProcessStats.StartStats(data, Path.GetFileNameWithoutExtension(Config.FileServerBin));
+            if (reader != null) ProcessStats.SetServerStateReader(reader);
             StrongReferenceMessenger.Default.Send<ProcessStateChangedMessage>();
         }
 

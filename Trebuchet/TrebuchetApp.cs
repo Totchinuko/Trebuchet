@@ -216,7 +216,7 @@ namespace Trebuchet
 
         private void RegisterEvents()
         {
-            _trebuchet.Launcher.ServerStarted += (_, e) => RegisterEvent(new ProcessStartedMessage(e.process, e.instance));
+            _trebuchet.Launcher.ServerStarted += (_, e) => RegisterEvent(new ProcessStartedMessage(e.process, e.instance, _trebuchet.Launcher.GetServerStateReader(e.instance)));
             _trebuchet.Launcher.ServerTerminated += (_, e) => RegisterEvent(new ProcessStoppedMessage(e));
             _trebuchet.Launcher.ServerFailed += (_, e) => RegisterEvent(new ProcessFailledMessage(e.Exception, e.Instance));
 

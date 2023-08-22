@@ -15,13 +15,14 @@ namespace Trebuchet
         protected ProcessData _process;
         private int _cpuUsage = 0;
 
+        private object _lock = new object();
         private long _memoryConsumption = 0;
         private long _peakMemoryConsumption = 0;
         private CancellationTokenSource? _source;
         private DateTime _start;
+        private IServerStateReader? _stateReader;
 
         private DispatcherTimer _timer;
-        private object theLock = new object();
 
         public ProcessStats()
         {
@@ -34,13 +35,24 @@ namespace Trebuchet
 
         public string CpuUsage { get; private set; }
 
+        public bool IsServer => _stateReader != null;
+
         public string MemoryConsumption { get; private set; }
 
+        public string OnlineStatus { get; private set; } = string.Empty;
+
         public int PID => _process.pid;
+
+        public string PlayerCount { get; private set; } = string.Empty;
 
         public bool Running => !_process.IsEmpty;
 
         public string Uptime => _process.IsEmpty ? string.Empty : (DateTime.UtcNow - _start).ToString("d'd.'h'h:'m'm:'s's'");
+
+        public virtual void SetServerStateReader(IServerStateReader reader)
+        {
+            _stateReader = reader;
+        }
 
         public virtual void StartStats(ProcessData process, string processName)
         {
@@ -77,11 +89,19 @@ namespace Trebuchet
         {
             if (_process.IsEmpty) return;
 
-            lock (theLock)
+            lock (_lock)
             {
                 _peakMemoryConsumption = Math.Max(_memoryConsumption, _peakMemoryConsumption);
                 CpuUsage = string.Format(CPUFormat, _cpuUsage.ToString());
                 MemoryConsumption = string.Format(MemoryFormat, (_memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
+            }
+
+            if (_stateReader != null)
+            {
+                OnlineStatus = _stateReader.ServerState.Online ? "Online" : "Offline";
+                PlayerCount = $"{_stateReader.ServerState.Players}/{_stateReader.ServerState.MaxPlayers}";
+                OnPropertyChanged(nameof(OnlineStatus));
+                OnPropertyChanged(nameof(PlayerCount));
             }
 
             OnPropertyChanged(nameof(MemoryConsumption));
@@ -108,7 +128,7 @@ namespace Trebuchet
                 }
                 catch { break; }
 
-                lock (theLock)
+                lock (_lock)
                 {
                     _memoryConsumption = memory;
                     _cpuUsage = cpu;

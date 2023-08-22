@@ -24,12 +24,14 @@ namespace Trebuchet
 
     public class ProcessStartedMessage : ProcessMessage
     {
-        public ProcessStartedMessage(ProcessData data, int instance = -1) : base(instance)
+        public readonly ProcessData data;
+        public readonly IServerStateReader? reader;
+
+        public ProcessStartedMessage(ProcessData data, int instance = -1, IServerStateReader? reader = null) : base(instance)
         {
             this.data = data;
+            this.reader = reader;
         }
-
-        public ProcessData data { get; } = ProcessData.Empty;
     }
 
     public class ProcessStateChangedMessage
