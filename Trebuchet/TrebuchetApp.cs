@@ -216,7 +216,10 @@ namespace Trebuchet
                 }
                 finally
                 {
-                    _taskBlocker.Release(Operations.SteamDownload);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _taskBlocker.Release(Operations.SteamDownload);
+                    });
                 }
             }, cts.Token);
         }
