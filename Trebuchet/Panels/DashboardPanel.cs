@@ -22,7 +22,7 @@ namespace Trebuchet
             _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
-            LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll, true, Operations.SteamDownload, Operations.GameRunning);
+            LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll, true, Operations.SteamDownload);
             UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, Operations.SteamDownload, Operations.GameRunning);
             UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning);
             VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification, true, Operations.SteamDownload, Operations.GameRunning);
