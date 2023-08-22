@@ -81,6 +81,12 @@ namespace Trebuchet
             }
         }
 
+        public void SetDescription(string description)
+        {
+            Description = description;
+            OnPropertyChanged(nameof(Description));
+        }
+
         public void Start(string description)
         {
             Description = description;

@@ -275,7 +275,7 @@ namespace Trebuchet
         {
             if (_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload)) return;
 
-            SteamWidget.Start("Verifying server files and mods...");
+            SteamWidget.Start("Verifying server files...");
             var cts = _taskBlocker.Set(Operations.SteamDownload);
 
             Task.Run(async () =>
@@ -284,6 +284,8 @@ namespace Trebuchet
                 {
                     _trebuchet.Steam.ClearCache();
                     await _trebuchet.Steam.UpdateServerInstances(cts);
+                    SteamWidget.Report(0);
+                    SteamWidget.SetDescription("Verifying mod files...");
                     await _trebuchet.Steam.UpdateMods(modlist, cts);
                 }
                 catch (OperationCanceledException) { }
