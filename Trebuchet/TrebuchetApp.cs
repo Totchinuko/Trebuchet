@@ -137,6 +137,7 @@ namespace Trebuchet
 
         internal virtual void OnAppClose()
         {
+            _trebuchet.Launcher.Dispose();
             _trebuchet.Steam.Disconnect();
             Task.Run(() =>
             {

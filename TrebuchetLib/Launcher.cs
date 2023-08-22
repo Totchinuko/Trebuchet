@@ -6,12 +6,13 @@ using Trebuchet;
 
 namespace TrebuchetLib
 {
-    public class Launcher
+    public class Launcher : IDisposable
     {
         private static Regex _instanceRegex = new Regex(@"-TotInstance=([0-9+])");
 
         private ClientProcess? _clientProcess;
 
+        private bool _isRunning = true;
         private object _lock = new object();
         private HashSet<string> _lockedFolders = new HashSet<string>();
 
@@ -127,6 +128,14 @@ namespace TrebuchetLib
                 if (_serverProcesses.TryGetValue(instance, out var watcher))
                     watcher.Close();
             });
+        }
+
+        public void Dispose()
+        {
+            _isRunning = false;
+            foreach (var item in _serverProcesses)
+                item.Value.Dispose();
+            _serverProcesses.Clear();
         }
 
         /// <summary>
@@ -329,7 +338,7 @@ namespace TrebuchetLib
         private void Tick()
         {
             DateTime lastSearch = DateTime.UtcNow;
-            while (true)
+            while (_isRunning)
             {
                 lock (_lock)
                 {

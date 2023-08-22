@@ -5,7 +5,7 @@ using Yuu.Ini;
 
 namespace Trebuchet
 {
-    public class ServerProcess : IServerStateReader
+    public class ServerProcess : IServerStateReader, IDisposable
     {
         private readonly object _processLock = new object();
         private Process? _process;
@@ -73,6 +73,15 @@ namespace Trebuchet
 
                 Closed = true;
                 _process.CloseMainWindow();
+            }
+        }
+
+        public void Dispose()
+        {
+            lock (_processLock)
+            {
+                _process?.Dispose();
+                _process = null;
             }
         }
 
