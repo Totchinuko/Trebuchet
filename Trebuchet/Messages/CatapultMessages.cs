@@ -9,32 +9,28 @@ namespace Trebuchet
     public class CatapultClientMessage : CatapultMessage
     {
         public readonly bool isBattleEye;
-
-        public CatapultClientMessage(string modlist, string profile, bool isBattleEye) : base(modlist, profile)
-        {
-            this.isBattleEye = isBattleEye;
-        }
-    }
-
-    public abstract class CatapultMessage
-    {
         public readonly string modlist;
         public readonly string profile;
 
-        public CatapultMessage(string modlist, string profile)
+        public CatapultClientMessage(string profile, string modlist, bool isBattleEye)
         {
+            this.isBattleEye = isBattleEye;
             this.modlist = modlist;
             this.profile = profile;
         }
     }
 
+    public abstract class CatapultMessage
+    {
+    }
+
     public class CatapultServerMessage : CatapultMessage
     {
-        public readonly int instance;
+        public readonly IEnumerable<(string modlist, string profile, int intance)> instances;
 
-        public CatapultServerMessage(string modlist, string profile, int instance) : base(modlist, profile)
+        public CatapultServerMessage(IEnumerable<(string modlist, string profile, int intance)> instances)
         {
-            this.instance = instance;
+            this.instances = instances;
         }
     }
 

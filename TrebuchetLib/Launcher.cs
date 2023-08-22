@@ -142,6 +142,22 @@ namespace TrebuchetLib
             }
         }
 
+        public bool IsAnyServerRunning()
+        {
+            lock (_lock)
+            {
+                return _serverProcesses.Count > 0;
+            }
+        }
+
+        public bool IsClientRunning()
+        {
+            lock (_lock)
+            {
+                return _clientProcess != null;
+            }
+        }
+
         /// <summary>
         /// Kill the client process.
         /// </summary>

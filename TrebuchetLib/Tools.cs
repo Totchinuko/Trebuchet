@@ -195,6 +195,11 @@ namespace Trebuchet
             return processList.EnumerateData();
         }
 
+        public static string GetRootPath()
+        {
+            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException("Assembly directory is not found.");
+        }
+
         public static bool IsSymbolicLink(string path)
         {
             return Directory.Exists(path) && File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint);
@@ -213,7 +218,7 @@ namespace Trebuchet
         public static void RemoveSymboliclink(string path)
         {
             if (Directory.Exists(path) && File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint))
-                Directory.Delete(path);
+                JunctionPoint.Delete(path);
             else if (Directory.Exists(path))
                 Directory.Delete(path, true);
         }
@@ -229,10 +234,10 @@ namespace Trebuchet
         public static void SetupSymboliclink(string path, string targetPath)
         {
             if (Directory.Exists(path) && File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint))
-                Directory.Delete(path);
+                JunctionPoint.Delete(path);
             else if (Directory.Exists(path))
                 Directory.Delete(path, true);
-            JunctionPoint.Create(path, targetPath, false);
+            JunctionPoint.Create(path, targetPath, true);
         }
 
         public static IEnumerable<string> Split(this string str, Func<char, bool> controller)
@@ -287,11 +292,6 @@ namespace Trebuchet
             using (ZipArchive archive = ZipFile.OpenRead(file))
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     entry.ExtractToFile(Path.Join(destination, entry.FullName));
-        }
-
-        public static string GetRootPath()
-        {
-            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException("Assembly directory is not found.");
         }
     }
 }

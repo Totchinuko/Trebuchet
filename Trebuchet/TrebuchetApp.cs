@@ -33,7 +33,18 @@ namespace Trebuchet
             _trebuchet = new TrebuchetLauncher(testlive);
             _catapult = catapult;
 
-            RegisterMessages();
+            RegisterEvents();
+
+            StrongReferenceMessenger.Default.Register<CatapultServerMessage>(this);
+            StrongReferenceMessenger.Default.Register<CatapultClientMessage>(this);
+            StrongReferenceMessenger.Default.Register<ConfigRequest>(this);
+            StrongReferenceMessenger.Default.Register<CloseProcessMessage>(this);
+            StrongReferenceMessenger.Default.Register<KillProcessMessage>(this);
+            StrongReferenceMessenger.Default.Register<ShutdownProcessMessage>(this);
+            StrongReferenceMessenger.Default.Register<ServerUpdateMessage>(this);
+            StrongReferenceMessenger.Default.Register<VerifyFilesMessage>(this);
+            StrongReferenceMessenger.Default.Register<InstanceInstalledCountRequest>(this);
+            StrongReferenceMessenger.Default.Register<PanelActivateMessage>(this);
 
             var menuConfig = GuiExtensions.GetEmbededTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
@@ -82,9 +93,9 @@ namespace Trebuchet
             if (_taskBlocker.IsSet(Operations.SteamDownload)) return;
 
             if (message is CatapultClientMessage client)
-                _trebuchet.Launcher.CatapultClient(client.profile, client.modlist, client.isBattleEye);
+                UpdateThenCatapultClient(client.profile, client.modlist, client.isBattleEye);
             else if (message is CatapultServerMessage server)
-                UpdateThenCatapultServer(server.profile, server.modlist, server.instance);
+                UpdateThenCatapultServer(server.instances);
         }
 
         void IRecipient<CloseProcessMessage>.Receive(CloseProcessMessage message)
@@ -153,12 +164,23 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new SteamConnectionChangedMessage(false));
         }
 
-        private void RegisterMessages()
+        private void RegisterEvent<T>(T message) where T : ProcessMessage
         {
-            _trebuchet.Launcher.ServerStarted += (_, e) => StrongReferenceMessenger.Default.Send(new ProcessStartedMessage(e.process, e.instance));
-            _trebuchet.Launcher.ServerTerminated += (_, e) => StrongReferenceMessenger.Default.Send(new ProcessStoppedMessage(e));
-            _trebuchet.Launcher.ServerFailed += (_, e) => StrongReferenceMessenger.Default.Send(new ProcessFailledMessage(e.Exception, e.Instance));
-            StrongReferenceMessenger.Default.RegisterAll(this);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                StrongReferenceMessenger.Default.Send(message);
+            });
+        }
+
+        private void RegisterEvents()
+        {
+            _trebuchet.Launcher.ServerStarted += (_, e) => RegisterEvent(new ProcessStartedMessage(e.process, e.instance));
+            _trebuchet.Launcher.ServerTerminated += (_, e) => RegisterEvent(new ProcessStoppedMessage(e));
+            _trebuchet.Launcher.ServerFailed += (_, e) => RegisterEvent(new ProcessFailledMessage(e.Exception, e.Instance));
+
+            _trebuchet.Launcher.ClientStarted += (_, e) => RegisterEvent(new ProcessStartedMessage(e.process));
+            _trebuchet.Launcher.ClientTerminated += (_, e) => RegisterEvent(new ProcessStoppedMessage());
+            _trebuchet.Launcher.ClientFailed += (_, e) => RegisterEvent(new ProcessFailledMessage(e.Exception));
         }
 
         private void UpdateServerMods(IEnumerable<ulong> modlist)
@@ -195,6 +217,7 @@ namespace Trebuchet
         private void UpdateServers()
         {
             if (_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload)) return;
+            if (!_trebuchet.Steam.IsConnected) return;
 
             SteamWidget.Start("Checking for mod updates...");
             var cts = _taskBlocker.Set(Operations.SteamDownload);
@@ -224,33 +247,27 @@ namespace Trebuchet
             }, cts.Token);
         }
 
-        private void UpdateThenCatapultServer(string profile, string modlist, int instance)
+        private void UpdateThenCatapultClient(string profile, string modlist, bool isBattlEye)
         {
             if (_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload)) return;
 
             if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never)
             {
-                _trebuchet.Launcher.CatapultServer(profile, modlist, instance);
+                _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye);
                 return;
             }
 
-            SteamWidget.Start("Checking for server updates...");
+            if (!_trebuchet.Steam.IsConnected) return;
+
+            SteamWidget.Start("Checking mod files...");
             var cts = _taskBlocker.Set(Operations.SteamDownload);
 
-            if (!ModListProfile.TryLoadProfile(_trebuchet.Config, modlist, out ModListProfile? modlistProfile))
-            {
-                new ErrorModal("Modlist not found", "The modlist you tried to load does not exist.").ShowDialog();
-                return;
-            }
-
+            var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, new string[] { modlist }).Distinct();
             Task.Run(async () =>
             {
                 try
                 {
-                    await _trebuchet.Steam.UpdateServerInstances(cts);
-                    SteamWidget.Report(0);
-                    SteamWidget.SetDescription("Checking mod files...");
-                    await _trebuchet.Steam.UpdateMods(modlistProfile.GetModIDList(), cts);
+                    await _trebuchet.Steam.UpdateMods(allmodlist, cts);
                 }
                 catch (OperationCanceledException) { }
                 catch (Exception ex)
@@ -266,11 +283,58 @@ namespace Trebuchet
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         _taskBlocker.Release(Operations.SteamDownload);
-                        if (instance >= 0)
+                        _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye);
+                    });
+                }
+            });
+        }
+
+        private void UpdateThenCatapultServer(IEnumerable<(string profile, string modlist, int instance)> instances)
+        {
+            if (_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload)) return;
+
+            if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never || _trebuchet.Launcher.IsAnyServerRunning())
+            {
+                foreach (var (profile, modlist, instance) in instances)
+                    _trebuchet.Launcher.CatapultServer(profile, modlist, instance);
+                return;
+            }
+
+            if (!_trebuchet.Steam.IsConnected) return;
+
+            SteamWidget.Start("Checking for server updates...");
+            var cts = _taskBlocker.Set(Operations.SteamDownload);
+
+            var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, instances.Select(i => i.modlist)).Distinct();
+            Task.Run(async () =>
+            {
+                try
+                {
+                    await _trebuchet.Steam.UpdateServerInstances(cts);
+
+                    if (!_trebuchet.Launcher.IsClientRunning())
+                    {
+                        SteamWidget.Report(0);
+                        SteamWidget.SetDescription("Checking mod files...");
+                        await _trebuchet.Steam.UpdateMods(allmodlist, cts);
+                    }
+                }
+                catch (OperationCanceledException) { }
+                catch (Exception ex)
+                {
+                    Log.Write(ex);
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        new ErrorModal("Launch Failed", $"Update failed. Please check the log for more information. ({ex.Message})").ShowDialog();
+                    });
+                }
+                finally
+                {
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        _taskBlocker.Release(Operations.SteamDownload);
+                        foreach (var (profile, modlist, instance) in instances)
                             _trebuchet.Launcher.CatapultServer(profile, modlist, instance);
-                        else
-                            for (int i = 0; i < _trebuchet.Config.ServerInstanceCount; i++)
-                                _trebuchet.Launcher.CatapultServer(profile, modlist, i);
                     });
                 }
             });

@@ -72,19 +72,6 @@ namespace Trebuchet
         }
 
         /// <summary>
-        /// Collect all used mods of all the client and server instances. Can have duplicates.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<ulong> CollectAllMods()
-        {
-            foreach (var i in CollectAllModlistNames().Distinct())
-                if (ModListProfile.TryLoadProfile(_config, i, out ModListProfile? profile))
-                    foreach (var m in profile.Modlist)
-                        if (ModListProfile.TryParseModID(m, out ulong id))
-                            yield return id;
-        }
-
-        /// <summary>
         /// Show the panel.
         /// </summary>
         /// <param name="parameter">Unused</param>
@@ -102,9 +89,9 @@ namespace Trebuchet
 
         public void Receive(CatapulServersMessage message)
         {
-            Log.Write("Immediate server catapult requested.", LogSeverity.Info);
-            foreach (var i in Instances)
-                i.Launch();
+            StrongReferenceMessenger.Default.Send(new CatapultServerMessage(
+                Instances.Where(i => !i.ProcessRunning).Select(i => (i.SelectedProfile, i.SelectedModlist, i.Instance))
+                ));
         }
 
         public override void RefreshPanel()
@@ -117,7 +104,7 @@ namespace Trebuchet
         /// </summary>
         public void UpdateMods()
         {
-            StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(CollectAllMods().Distinct()));
+            StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(ModListProfile.CollectAllMods(_config, CollectAllModlistNames()).Distinct()));
         }
 
         /// <summary>
@@ -137,24 +124,8 @@ namespace Trebuchet
             }
 
             for (int i = _instances.Count; i < _config.ServerInstanceCount; i++)
-            {
-                var inst = new ServerInstanceDashboard(i);
-                inst.LaunchRequested += OnServerLaunchRequested;
-                _instances.Add(inst);
-            }
+                _instances.Add(new ServerInstanceDashboard(i));
             OnPropertyChanged(nameof(Instances));
-        }
-
-        private void LaunchServer(int instance)
-        {
-            if (instance >= _instances.Count)
-                throw new ArgumentOutOfRangeException(nameof(instance));
-
-            if (instance < 0)
-                foreach (var i in _instances)
-                    i.Launch();
-            else
-                _instances[instance].Launch();
         }
 
         private void OnCloseAll(object? obj)
@@ -169,7 +140,7 @@ namespace Trebuchet
             question.ShowDialog();
             if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
 
-            StrongReferenceMessenger.Default.Send(new VerifyFilesMessage(CollectAllMods().Distinct()));
+            StrongReferenceMessenger.Default.Send(new VerifyFilesMessage(ModListProfile.CollectAllMods(_config, CollectAllModlistNames()).Distinct()));
         }
 
         private void OnKillAll(object? obj)
@@ -180,21 +151,14 @@ namespace Trebuchet
 
         private void OnLaunchAll(object? obj)
         {
-            OnServerLaunchRequested(this, -1);
+            StrongReferenceMessenger.Default.Send(new CatapultServerMessage(
+                Instances.Where(i => !i.ProcessRunning).Select(i => (i.SelectedProfile, i.SelectedModlist, i.Instance))
+            ));
         }
 
         private void OnModUpdate(object? obj)
         {
             UpdateMods();
-        }
-
-        private void OnServerLaunchRequested(object? sender, int instance)
-        {
-            if (_instances.Any(i => i.ProcessRunning) || _config.AutoUpdateStatus == AutoUpdateStatus.Never)
-            {
-                LaunchServer(instance);
-                return;
-            }
         }
 
         private void OnServerUpdate(object? obj)

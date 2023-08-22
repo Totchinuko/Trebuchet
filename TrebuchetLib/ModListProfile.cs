@@ -12,6 +12,19 @@ namespace Trebuchet
 
         public string SyncURL { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Collect all used mods of all the client and server instances. Can have duplicates.
+        /// </summary>
+        /// <returns></returns>
+        public static IEnumerable<ulong> CollectAllMods(Config config, IEnumerable<string> modlists)
+        {
+            foreach (var i in modlists.Distinct())
+                if (TryLoadProfile(config, i, out ModListProfile? profile))
+                    foreach (var m in profile.Modlist)
+                        if (TryParseModID(m, out ulong id))
+                            yield return id;
+        }
+
         public static IEnumerable<ulong> GetModIDList(IEnumerable<string> modlist)
         {
             foreach (string mod in modlist)

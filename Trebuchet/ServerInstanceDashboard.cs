@@ -32,8 +32,6 @@ namespace Trebuchet
             ListProfiles();
         }
 
-        public event EventHandler<int>? LaunchRequested;
-
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public bool CanUseDashboard => _config.IsInstallPathValid &&
@@ -102,15 +100,6 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new KillProcessMessage(Instance));
         }
 
-        public void Launch()
-        {
-            if (!CanUseDashboard) return;
-            if (ProcessRunning) return;
-
-            LaunchCommand.Toggle(false);
-            StrongReferenceMessenger.Default.Send(new CatapultServerMessage(SelectedModlist, SelectedProfile, Instance));
-        }
-
         void IRecipient<ProcessMessage>.Receive(ProcessMessage message)
         {
             if (message.instance != Instance) return;
@@ -127,11 +116,6 @@ namespace Trebuchet
         {
             Resolve();
             ListProfiles();
-        }
-
-        protected void OnLaunchRequested()
-        {
-            LaunchRequested?.Invoke(this, Instance);
         }
 
         protected virtual void OnPropertyChanged(string name)
@@ -159,7 +143,14 @@ namespace Trebuchet
 
         private void OnLaunched(object? obj)
         {
-            OnLaunchRequested();
+            if (!CanUseDashboard) return;
+            if (ProcessRunning) return;
+
+            LaunchCommand.Toggle(false);
+            StrongReferenceMessenger.Default.Send(new CatapultServerMessage(new[]
+            {
+                (SelectedProfile, SelectedModlist, Instance)
+            }));
         }
 
         private void OnProcessFailed(Exception exception)
