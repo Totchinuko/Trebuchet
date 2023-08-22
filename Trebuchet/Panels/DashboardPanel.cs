@@ -168,6 +168,8 @@ namespace Trebuchet
             var question = new QuestionModal("Verify files", "This will verify all server and mod files. This may take a while. Do you want to continue?");
             question.ShowDialog();
             if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+
+            StrongReferenceMessenger.Default.Send(new VerifyFilesMessage(CollectAllMods().Distinct()));
         }
 
         private void OnKillAll(object? obj)
