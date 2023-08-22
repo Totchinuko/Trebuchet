@@ -11,7 +11,8 @@ using System.Windows.Threading;
 namespace Trebuchet
 {
     public class DashboardPanel : Panel,
-        IRecipient<CatapulServersMessage>
+        IRecipient<CatapulServersMessage>,
+        IRecipient<ProcessStateChangedMessage>
     {
         private ClientInstanceDashboard _client;
         private Config _config;
@@ -29,6 +30,8 @@ namespace Trebuchet
 
             _client = new ClientInstanceDashboard();
             CreateInstancesIfNeeded();
+
+            StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
         public bool CanDisplayServers => _config.IsInstallPathValid &&
@@ -92,6 +95,20 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new CatapultServerMessage(
                 Instances.Where(i => !i.ProcessRunning).Select(i => (i.SelectedProfile, i.SelectedModlist, i.Instance))
                 ));
+        }
+
+        public void Receive(ProcessStateChangedMessage message)
+        {
+            if (_client.ProcessRunning || Instances.Any(i => i.ProcessRunning))
+            {
+                if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.GameRunning))) return;
+                StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.GameRunning));
+            }
+            else
+            {
+                if (!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.GameRunning))) return;
+                StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.GameRunning));
+            }
         }
 
         public override void RefreshPanel()

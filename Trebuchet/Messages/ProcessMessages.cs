@@ -32,6 +32,10 @@ namespace Trebuchet
         public ProcessData data { get; } = ProcessData.Empty;
     }
 
+    public class ProcessStateChangedMessage
+    {
+    }
+
     public class ProcessStoppedMessage : ProcessMessage
     {
         public ProcessStoppedMessage(int instance = -1) : base(instance)

@@ -163,6 +163,7 @@ namespace Trebuchet
 
             if (ProcessStats.Running) ProcessStats.StopStats();
             ProcessStats.StartStats(data, Path.GetFileNameWithoutExtension(Config.FileClientBin));
+            StrongReferenceMessenger.Default.Send<ProcessStateChangedMessage>();
         }
 
         private void OnProcessTerminated()
@@ -174,6 +175,7 @@ namespace Trebuchet
 
             ProcessRunning = false;
             OnPropertyChanged(nameof(ProcessRunning));
+            StrongReferenceMessenger.Default.Send<ProcessStateChangedMessage>();
         }
 
         private void Resolve()
