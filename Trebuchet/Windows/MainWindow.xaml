@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Trebuchet"
-        xmlns:Controls="clr-namespace:Trebuchet.Controls" 
+        xmlns:Controls="clr-namespace:Trebuchet.Controls"
         mc:Ignorable="d"
         Title="Tot ! Trebuchet"
         Height="650" Width="1010"
@@ -12,7 +12,7 @@
         WindowStartupLocation="CenterScreen"
         UseLayoutRounding="True" Background="{StaticResource GBackground}">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False" />
+        <WindowChrome CaptionHeight="40" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowBackPanel}" x:Name="MainBorder">
         <Grid>
@@ -42,10 +42,10 @@
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
                     <StackPanel>
-                        <ItemsControl ItemsSource="{Binding App.Menu.Top}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
+                        <ItemsControl ItemsSource="{Binding App.Menu.Top}" ItemTemplateSelector="{StaticResource TabTemplateSelector}" />
                     </StackPanel>
                     <StackPanel Grid.Row="2">
-                        <ItemsControl ItemsSource="{Binding App.Menu.Bottom}" ItemTemplateSelector="{StaticResource TabTemplateSelector}"/>
+                        <ItemsControl ItemsSource="{Binding App.Menu.Bottom}" ItemTemplateSelector="{StaticResource TabTemplateSelector}" />
                     </StackPanel>
                 </Grid>
                 <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12,12,2,12">

@@ -176,11 +176,15 @@ namespace Trebuchet.Controls
                 titleBar.TitleRun.Text = (string)e.NewValue;
         }
 
-        private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
-        {
-            if (e.LeftButton == MouseButtonState.Pressed)
-                Window.GetWindow(this).DragMove();
-        }
+        //private void Border_MouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        //{
+        //    if (e.LeftButton == MouseButtonState.Pressed)
+        //    {
+        //        if (Window.GetWindow(this).WindowState == WindowState.Maximized)
+        //            Window.GetWindow(this).WindowState = WindowState.Normal;
+        //        Window.GetWindow(this).DragMove();
+        //    }
+        //}
 
         private void Close_MouseLeftButtonUp(object sender, RoutedEventArgs e)
         {
@@ -193,14 +197,12 @@ namespace Trebuchet.Controls
             {
                 Window.GetWindow(this).WindowState = WindowState.Maximized;
                 _state = WindowState.Maximized;
-                Window.GetWindow(this).Padding = new Thickness(10);
                 MaximizeImage.Source = (ImageSource)GetValue(RestoreIconProperty);
             }
             else if (Window.GetWindow(this).WindowState == WindowState.Maximized)
             {
                 Window.GetWindow(this).WindowState = WindowState.Normal;
                 _state = WindowState.Normal;
-                Window.GetWindow(this).Padding = new Thickness(0);
                 MaximizeImage.Source = (ImageSource)GetValue(MaximizeIconProperty);
             }
         }

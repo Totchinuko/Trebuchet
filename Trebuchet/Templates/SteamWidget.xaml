@@ -3,7 +3,13 @@
                     xmlns:local="clr-namespace:Trebuchet">
     <DataTemplate x:Key="SteamWidget">
         <Grid>
-            <Button Style="{StaticResource IconButton}" VerticalAlignment="Center" Height="32" HorizontalAlignment="Center" Padding="8" Command="{Binding ConnectCommand}">
+            <Button Style="{StaticResource IconButton}"
+                    WindowChrome.IsHitTestVisibleInChrome="True"
+                    VerticalAlignment="Center"
+                    Height="32"
+                    HorizontalAlignment="Center"
+                    Padding="8"
+                    Command="{Binding ConnectCommand}">
                 <StackPanel Orientation="Horizontal">
                     <Image Source="pack://application:,,,/Trebuchet;component/Icons/Steam.png" Width="16" Height="16" Margin="0,0,12,0" VerticalAlignment="Center" />
                     <TextBlock VerticalAlignment="Center">
@@ -30,10 +36,16 @@
                     </Grid.ColumnDefinitions>
                     <ProgressBar Grid.ColumnSpan="2" Value="{Binding Progress, Mode=OneWay}" Background="Transparent" />
                     <TextBlock Text="{Binding Description}" Margin="6,0,12,0" VerticalAlignment="Center" />
-                    <Button Grid.Column="1" Style="{StaticResource IconButton}" local:GuiExtensions.CornerRadius="0,3,3,0" Margin="0" Padding="8,0" Content="Cancel" Command="{Binding CancelCommand}" />
+                    <Button Grid.Column="1"
+                            Style="{StaticResource IconButton}"
+                            local:GuiExtensions.CornerRadius="0,3,3,0"
+                            WindowChrome.IsHitTestVisibleInChrome="True"
+                            Margin="0"
+                            Padding="8,0"
+                            Content="Cancel"
+                            Command="{Binding CancelCommand}" />
                 </Grid>
             </Border>
-            
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

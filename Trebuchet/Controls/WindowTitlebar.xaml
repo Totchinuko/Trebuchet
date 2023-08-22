@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Trebuchet.Controls"
              mc:Ignorable="d"
              d:DesignHeight="30" d:DesignWidth="800">
-    <Border MouseDown="Border_MouseLeftButtonDown" Height="40" Background="{DynamicResource GBackground}">
+    <Border Height="40" Background="{DynamicResource GBackground}">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="auto" />
@@ -22,6 +22,7 @@
             <StackPanel Orientation="Horizontal" VerticalAlignment="Top" Grid.Column="3">
                 <Button x:Name="MinimizeBtn"
                         Style="{StaticResource WindowButton}"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
                         Width="40"
                         Height="30"
                         Click="Minimize_MouseLeftButtonUp">
@@ -29,6 +30,7 @@
                 </Button>
                 <Button x:Name="MaximizeBtn"
                         Style="{StaticResource WindowButton}"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
                         Width="40"
                         Height="30"
                         Click="MaximizeButton_MouseLeftButtonUp">
@@ -37,6 +39,7 @@
 
                 <Button x:Name="CloseBtn"
                         Style="{StaticResource WindowCloseButton}"
+                        WindowChrome.IsHitTestVisibleInChrome="True"
                         Width="40"
                         Height="30"
                         Click="Close_MouseLeftButtonUp">

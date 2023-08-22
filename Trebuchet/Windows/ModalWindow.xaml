@@ -11,7 +11,7 @@
         Height="200"
         Width="650">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False" />
+        <WindowChrome CaptionHeight="40" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowBackPanel}" x:Name="MainBorder">
         <Grid>

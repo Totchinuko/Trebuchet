@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Trebuchet"
-        xmlns:Controls="clr-namespace:Trebuchet.Controls" 
+        xmlns:Controls="clr-namespace:Trebuchet.Controls"
         mc:Ignorable="d"
         Title="Workshop Search"
         Height="650" Width="900"
@@ -12,7 +12,7 @@
         WindowStartupLocation="CenterScreen"
         UseLayoutRounding="True" Background="{StaticResource GBackground}">
     <WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="0" UseAeroCaptionButtons="False" />
+        <WindowChrome CaptionHeight="40" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
     <Border Style="{StaticResource WindowBackPanel}" x:Name="MainBorder">
         <Grid>
@@ -40,7 +40,7 @@
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox VerticalContentAlignment="Center" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" MinWidth="300" MaxWidth="400" Margin="0,0,12,0" VerticalAlignment="center" Height="25" KeyDown="TextBox_KeyDown" />
-                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90" Content="Search" Style="{StaticResource ButtonIconBlue}"/>
+                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90" Content="Search" Style="{StaticResource ButtonIconBlue}" />
                         </Grid>
                     </Border>
                     <Border Padding="0,12,0,0" Grid.Row="1">
@@ -75,18 +75,18 @@
                                                     </StackPanel>
                                                     <StackPanel Orientation="Vertical" Grid.Column="1">
                                                         <TextBlock TextWrapping="Wrap" Margin="0,0,3,0" FontSize="16" Grid.Row="1">
-                                                            <Run Text="{Binding Title, Mode=OneWay}" Style="{StaticResource TitleRun}" /><Run Text=" By "/><Run Text="{Binding Creator, Mode=OneWay}" />
+                                                            <Run Text="{Binding Title, Mode=OneWay}" Style="{StaticResource TitleRun}" /><Run Text=" By " /><Run Text="{Binding Creator, Mode=OneWay}" />
                                                         </TextBlock>
                                                         <TextBlock Foreground="{StaticResource GDescription}">
                                                             <Run Text="Last Update: " Foreground="{StaticResource GDescription}" />
                                                             <Run Text="{Binding LastUpdateReadable, Mode=OneWay}" Foreground="{StaticResource GDescription}" />
-                                                            <Run Foreground="{StaticResource GGreen}" Text=" +"/>
-                                                            <Run Foreground="{StaticResource GGreen}" Text="{Binding VoteUp, Mode=OneWay}"/>
-                                                            <Run Foreground="{StaticResource GRed}" Text=" -"/>
-                                                            <Run Foreground="{StaticResource GRed}" Text="{Binding VoteDown, Mode=OneWay}"/>
-                                                            <Run Foreground="{StaticResource GRed}" Text=" "/>
-                                                            <Run Foreground="{StaticResource GDescription}" Text="{Binding Subs, Mode=OneWay}"/>
-                                                            <Run Foreground="{StaticResource GDescription}" Text=" Subscriptions"/>
+                                                            <Run Foreground="{StaticResource GGreen}" Text=" +" />
+                                                            <Run Foreground="{StaticResource GGreen}" Text="{Binding VoteUp, Mode=OneWay}" />
+                                                            <Run Foreground="{StaticResource GRed}" Text=" -" />
+                                                            <Run Foreground="{StaticResource GRed}" Text="{Binding VoteDown, Mode=OneWay}" />
+                                                            <Run Foreground="{StaticResource GRed}" Text=" " />
+                                                            <Run Foreground="{StaticResource GDescription}" Text="{Binding Subs, Mode=OneWay}" />
+                                                            <Run Foreground="{StaticResource GDescription}" Text=" Subscriptions" />
                                                         </TextBlock>
                                                         <TextBlock Foreground="{StaticResource GDescription}" TextWrapping="Wrap" Text="{Binding ShortDescription, Mode=OneWay}" />
                                                     </StackPanel>
@@ -114,7 +114,6 @@
                     </Border>
                 </Grid>
             </Border>
-            
         </Grid>
     </Border>
 </Window>
