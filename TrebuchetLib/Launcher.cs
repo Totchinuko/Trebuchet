@@ -35,6 +35,8 @@ namespace TrebuchetLib
 
         public event EventHandler<TrebuchetFailEventArgs>? ServerFailed;
 
+        public event EventHandler<int>? ServerOnline;
+
         public event EventHandler<TrebuchetStartEventArgs>? ServerStarted;
 
         public event EventHandler<int>? ServerTerminated;
@@ -107,6 +109,7 @@ namespace TrebuchetLib
                 watcher.ProcessExited += OnServerProcessTerminate;
                 watcher.ProcessStarted += OnServerProcessStarted;
                 watcher.ProcessFailed += OnServerProcessFailed;
+                watcher.ServerOnline += OnServerOnline;
                 _serverProcesses.Add(instance, watcher);
 
                 _lockedFolders.Add(GetCurrentServerJunction(instance));
@@ -148,6 +151,16 @@ namespace TrebuchetLib
             {
                 foreach (ServerProcess p in _serverProcesses.Values)
                     yield return p.Information;
+            }
+        }
+
+        public IServerStateReader GetServerStateReader(int instance)
+        {
+            lock (_lock)
+            {
+                if (_serverProcesses.TryGetValue(instance, out var watcher))
+                    return watcher;
+                throw new ArgumentException($"Server instance {instance} is not running.");
             }
         }
 
@@ -290,6 +303,12 @@ namespace TrebuchetLib
                 _clientProcess = null;
                 _lockedFolders.Remove(GetCurrentClientJunction());
             });
+        }
+
+        private void OnServerOnline(object? sender, int e)
+        {
+            Log.Write($"Server instance {e} is online", LogSeverity.Info);
+            ServerOnline?.Invoke(this, e);
         }
 
         private void OnServerProcessFailed(object? sender, TrebuchetFailEventArgs e)

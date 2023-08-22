@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Trebuchet
 {
-    internal interface IServerStateReader
+    public interface IServerStateReader
     {
         public ServerState ServerState { get; }
     }

@@ -42,6 +42,8 @@ namespace Trebuchet
 
         public event EventHandler<TrebuchetStartEventArgs>? ProcessStarted;
 
+        public event EventHandler<int>? ServerOnline;
+
         public bool Closed { get; private set; }
 
         public ServerInstanceInformation Information { get; }
@@ -105,6 +107,7 @@ namespace Trebuchet
             bool killZombies = Profile.KillZombies;
             DateTime last = DateTime.UtcNow;
             int instance = ServerInstance;
+            bool online = false;
 
             while (true)
             {
@@ -115,6 +118,12 @@ namespace Trebuchet
                     _process.Refresh();
                     _sourceQueryReader.Refresh();
                     _serverState = new ServerState(_sourceQueryReader.Online, _sourceQueryReader.Name, _sourceQueryReader.Players, _sourceQueryReader.MaxPlayers);
+
+                    if (_serverState.Online && !online)
+                    {
+                        online = true;
+                        ServerOnline?.Invoke(this, instance);
+                    }
 
                     if (_process.Responding)
                         last = DateTime.UtcNow;
@@ -225,7 +234,7 @@ namespace Trebuchet
         {
             if (_sourceQueryReader != null) return;
 
-            _sourceQueryReader = new SourceQueryReader(new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), Information.QueryPort), 10 * 1000);
+            _sourceQueryReader = new SourceQueryReader(new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), Information.QueryPort), 4 * 1000, 5 * 1000);
         }
 
         private ServerInstanceInformation GetInformationFromIni(ServerProfile profile, int instance)
