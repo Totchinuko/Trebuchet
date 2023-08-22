@@ -250,7 +250,7 @@ namespace Trebuchet
 
         private void UpdateThenCatapultClient(string profile, string modlist, bool isBattlEye)
         {
-            if (!Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
 
             if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never)
             {
@@ -271,7 +271,7 @@ namespace Trebuchet
 
         private void UpdateThenCatapultServer(IEnumerable<(string profile, string modlist, int instance)> instances)
         {
-            if (!Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
 
             if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never || _trebuchet.Launcher.IsAnyServerRunning())
             {
