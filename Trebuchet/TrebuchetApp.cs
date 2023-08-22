@@ -234,7 +234,7 @@ namespace Trebuchet
                 return;
             }
 
-            SteamWidget.Start("Checking for updates...");
+            SteamWidget.Start("Checking for server updates...");
             var cts = _taskBlocker.Set(Operations.SteamDownload);
 
             if (!ModListProfile.TryLoadProfile(_trebuchet.Config, modlist, out ModListProfile? modlistProfile))
@@ -248,6 +248,8 @@ namespace Trebuchet
                 try
                 {
                     await _trebuchet.Steam.UpdateServerInstances(cts);
+                    SteamWidget.Report(0);
+                    SteamWidget.SetDescription("Checking mod files...");
                     await _trebuchet.Steam.UpdateMods(modlistProfile.GetModIDList(), cts);
                 }
                 catch (OperationCanceledException) { }
