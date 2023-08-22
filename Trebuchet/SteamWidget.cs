@@ -15,8 +15,10 @@ namespace Trebuchet
         IRecipient<SteamConnectionChangedMessage>,
         IRecipient<OperationStateChanged>
     {
+        private readonly object _descriptionLock = new object();
+        private readonly object _progressLock = new object();
+        private string _description = string.Empty;
         private double _progress;
-        private object _progressLock = new object();
         private DispatcherTimer _timer;
 
         public SteamWidget()
@@ -36,7 +38,14 @@ namespace Trebuchet
 
         public SimpleCommand ConnectCommand { get; }
 
-        public string Description { get; private set; } = string.Empty;
+        public string Description
+        {
+            get
+            {
+                lock (_descriptionLock)
+                    return _description;
+            }
+        }
 
         public bool IsConnected { get; private set; }
 
@@ -65,7 +74,7 @@ namespace Trebuchet
 
             if (!message.Value)
             {
-                Description = string.Empty;
+                SetDescription(string.Empty);
                 _timer.Stop();
                 _progress = 0;
                 OnPropertyChanged(nameof(Description));
@@ -83,13 +92,16 @@ namespace Trebuchet
 
         public void SetDescription(string description)
         {
-            Description = description;
-            OnPropertyChanged(nameof(Description));
+            lock (_descriptionLock)
+            {
+                _description = description;
+                OnPropertyChanged(nameof(Description));
+            }
         }
 
         public void Start(string description)
         {
-            Description = description;
+            SetDescription(description);
             OnPropertyChanged(nameof(Description));
             _timer.Start();
         }
@@ -102,7 +114,7 @@ namespace Trebuchet
         private void OnCancel(object? obj)
         {
             StrongReferenceMessenger.Default.Send(new OperationCancelMessage(Operations.SteamDownload));
-            Description = "Canceling...";
+            SetDescription("Canceling...");
             OnPropertyChanged(nameof(Description));
         }
 
