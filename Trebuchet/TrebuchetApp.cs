@@ -36,6 +36,7 @@ namespace Trebuchet
 
             RegisterEvents();
 
+            StrongReferenceMessenger.Default.Register<SteamConnectMessage>(this);
             StrongReferenceMessenger.Default.Register<CatapultServerMessage>(this);
             StrongReferenceMessenger.Default.Register<CatapultClientMessage>(this);
             StrongReferenceMessenger.Default.Register<ConfigRequest>(this);

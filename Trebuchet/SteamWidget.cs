@@ -64,8 +64,12 @@ namespace Trebuchet
 
         public void Receive(SteamConnectionChangedMessage message)
         {
-            IsConnected = message.Value;
-            OnPropertyChanged(nameof(IsConnected));
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                IsConnected = message.Value;
+                OnPropertyChanged(nameof(IsConnected));
+                ConnectCommand.Toggle(true);
+            });
         }
 
         public void Receive(OperationStateChanged message)

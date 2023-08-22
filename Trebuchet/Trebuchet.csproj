@@ -9,7 +9,7 @@
 	<ApplicationIcon>Icons\AppIcon.ico</ApplicationIcon>
 	<Authors>Totchinuko</Authors>
 	<StartupObject>Trebuchet.App</StartupObject>
-	<FileVersion>0.2.3</FileVersion>
+	<FileVersion>0.2.4</FileVersion>
 	<AssemblyVersion>0.2.0</AssemblyVersion>
   </PropertyGroup>
 
