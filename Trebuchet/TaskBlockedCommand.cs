@@ -19,6 +19,7 @@ namespace Trebuchet
             _command = command;
             _tasks = tasks;
             _enabled = enabled;
+            StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
         public event EventHandler? CanExecuteChanged;
