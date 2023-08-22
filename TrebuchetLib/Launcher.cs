@@ -135,10 +135,13 @@ namespace TrebuchetLib
 
         public void Dispose()
         {
-            _isRunning = false;
-            foreach (var item in _serverProcesses)
-                item.Value.Dispose();
-            _serverProcesses.Clear();
+            lock (_lock)
+            {
+                _isRunning = false;
+                foreach (var item in _serverProcesses)
+                    item.Value.Dispose();
+                _serverProcesses.Clear();
+            }
         }
 
         /// <summary>
