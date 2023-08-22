@@ -62,7 +62,15 @@ namespace Trebuchet
             _start = _process.start;
 
             _source = new CancellationTokenSource();
-            Task.Run(() => RunCounters(_process.pid, processName, _source.Token), _source.Token);
+            if (App.Config.DisplayProcessPerformance)
+                Task.Run(() => RunCounters(_process.pid, processName, _source.Token), _source.Token);
+            else
+            {
+                MemoryConsumption = string.Empty;
+                CpuUsage = string.Empty;
+                OnPropertyChanged(nameof(MemoryConsumption));
+                OnPropertyChanged(nameof(CpuUsage));
+            }
 
             _timer.Start();
             OnPropertyChanged(nameof(Running));
@@ -89,12 +97,13 @@ namespace Trebuchet
         {
             if (_process.IsEmpty) return;
 
-            lock (_lock)
-            {
-                _peakMemoryConsumption = Math.Max(_memoryConsumption, _peakMemoryConsumption);
-                CpuUsage = string.Format(CPUFormat, _cpuUsage.ToString());
-                MemoryConsumption = string.Format(MemoryFormat, (_memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
-            }
+            if (App.Config.DisplayProcessPerformance)
+                lock (_lock)
+                {
+                    _peakMemoryConsumption = Math.Max(_memoryConsumption, _peakMemoryConsumption);
+                    CpuUsage = string.Format(CPUFormat, _cpuUsage.ToString());
+                    MemoryConsumption = string.Format(MemoryFormat, (_memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
+                }
 
             if (_stateReader != null)
             {

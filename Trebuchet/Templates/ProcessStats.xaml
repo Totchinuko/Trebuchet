@@ -27,7 +27,7 @@
                 <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Uptime" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding Uptime, Mode=OneWay}" VerticalAlignment="Center" />
             </Grid>
-            <Grid Margin="0,0,0,6"  Height="25" Background="{StaticResource GDarkPanel}">
+            <Grid Margin="0,0,0,6"  Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding CpuUsage, Converter={StaticResource Null2Collapsed}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
@@ -35,7 +35,7 @@
                 <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="CPU" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding CpuUsage, Mode=OneWay}" VerticalAlignment="Center" />
             </Grid>
-            <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}">
+            <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding MemoryConsumption, Converter={StaticResource Null2Collapsed}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />

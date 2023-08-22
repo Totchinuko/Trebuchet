@@ -30,6 +30,8 @@ namespace Trebuchet
 
         public string[] DashboardServerProfiles { get => _dashboardServerProfiles; set => _dashboardServerProfiles = value; }
 
+        public bool DisplayProcessPerformance { get; set; } = true;
+
         public bool DisplayWarningOnKill { get => _displayWarningOnKill; set => _displayWarningOnKill = value; }
 
         public bool UseHardwareAcceleration { get => _useHardwareAcceleration; set => _useHardwareAcceleration = value; }
