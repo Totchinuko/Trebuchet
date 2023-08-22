@@ -374,6 +374,8 @@ namespace TrebuchetLib
                         FindExistingServers();
                     }
                 }
+
+                Thread.Sleep(100);
             }
         }
     }
