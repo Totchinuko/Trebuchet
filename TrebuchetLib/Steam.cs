@@ -109,6 +109,11 @@
                 Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
         }
 
+        public void SetProgress(IProgress<double> progress)
+        {
+            _steam.ContentDownloader.SetProgress(progress);
+        }
+
         public bool SetupFolders()
         {
             if (!Directory.Exists(_config.InstallPath)) return false;

@@ -42,6 +42,7 @@ namespace Trebuchet
             _trebuchet.Steam.Connected += OnSteamConnected;
             _trebuchet.Steam.Disconnected += OnSteamDisconnected;
             _trebuchet.Steam.Connect();
+            _trebuchet.Steam.SetProgress(SteamWidget);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
