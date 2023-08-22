@@ -1,6 +1,7 @@
 ﻿using System.IO.Compression;
 using System.Management;
 using System.Reflection;
+using System.Text;
 using System.Text.Json;
 using Yuu.Ini;
 
@@ -206,6 +207,21 @@ namespace Trebuchet
         }
 
         public static string PosixFullName(this string path) => path.Replace(Path.DirectorySeparatorChar, Path.AltDirectorySeparatorChar);
+
+        /// <summary>Reads a null-terminated string into a c# compatible string.</summary>
+        /// <param name="input">Binary reader to pull the null-terminated string from.  Make sure it is correctly positioned in the stream before calling.</param>
+        /// <returns>String of the same encoding as the input BinaryReader.</returns>
+        public static string ReadNullTerminatedString(this BinaryReader input)
+        {
+            StringBuilder sb = new StringBuilder();
+            char read = input.ReadChar();
+            while (read != '\x00')
+            {
+                sb.Append(read);
+                read = input.ReadChar();
+            }
+            return sb.ToString();
+        }
 
         public static string RemoveExtension(this string path) => path[..^Path.GetExtension(path).Length];
 

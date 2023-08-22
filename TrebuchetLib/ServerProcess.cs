@@ -1,13 +1,16 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Threading;
 using Yuu.Ini;
 
 namespace Trebuchet
 {
-    public class ServerProcess
+    public class ServerProcess : IServerStateReader
     {
         private readonly object _processLock = new object();
         private Process? _process;
+        private ServerState _serverState;
+        private SourceQueryReader? _sourceQueryReader;
 
         public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance)
         {
@@ -29,6 +32,8 @@ namespace Trebuchet
             _process.EnableRaisingEvents = true;
             _process.Exited -= OnProcessExited;
             _process.Exited += OnProcessExited;
+            CreateQueryPortListener();
+            new Thread(ProcessRefresh).Start();
         }
 
         public event EventHandler? ProcessExited;
@@ -51,26 +56,42 @@ namespace Trebuchet
 
         public int ServerInstance { get; }
 
+        public ServerState ServerState
+        {
+            get
+            {
+                lock (_processLock)
+                    return _serverState;
+            }
+        }
+
         public void Close()
         {
-            if (_process == null) return;
-
-            Closed = true;
             lock (_processLock)
+            {
+                if (_process == null) return;
+
+                Closed = true;
                 _process.CloseMainWindow();
+            }
         }
 
         public void Kill()
         {
-            if (_process == null) return;
-
-            Closed = true;
             lock (_processLock)
+            {
+                if (_process == null) return;
+
+                Closed = true;
                 _process.Kill();
+            }
         }
 
         public void ProcessRefresh()
         {
+            if (_sourceQueryReader == null)
+                throw new InvalidOperationException("Query listener is not initialized.");
+
             int timeSpan = Profile.ZombieCheckSeconds;
             bool killZombies = Profile.KillZombies;
             DateTime last = DateTime.UtcNow;
@@ -80,9 +101,11 @@ namespace Trebuchet
             {
                 lock (_processLock)
                 {
-                    if (_process == null || _process.HasExited) return;
+                    if (_process == null) break;
 
                     _process.Refresh();
+                    _sourceQueryReader.Refresh();
+                    _serverState = new ServerState(_sourceQueryReader.Online, _sourceQueryReader.Name, _sourceQueryReader.Players, _sourceQueryReader.MaxPlayers);
 
                     if (_process.Responding)
                         last = DateTime.UtcNow;
@@ -128,6 +151,7 @@ namespace Trebuchet
                 _process.Exited -= OnProcessExited;
                 _process.Dispose();
                 _process = null;
+                _sourceQueryReader = null;
             }
             ProcessExited?.Invoke(this, EventArgs.Empty);
         }
@@ -184,7 +208,15 @@ namespace Trebuchet
 
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
             OnProcessStarted(ProcessData);
+            CreateQueryPortListener();
             new Thread(ProcessRefresh).Start();
+        }
+
+        private void CreateQueryPortListener()
+        {
+            if (_sourceQueryReader != null) return;
+
+            _sourceQueryReader = new SourceQueryReader(new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), Information.QueryPort), 10 * 1000);
         }
 
         private ServerInstanceInformation GetInformationFromIni(ServerProfile profile, int instance)
