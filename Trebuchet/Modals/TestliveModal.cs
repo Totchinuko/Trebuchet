@@ -5,12 +5,14 @@ namespace Trebuchet
 {
     public class TestliveModal : BaseModal
     {
+        private bool _catapult;
         private bool _madeASelection;
 
-        public TestliveModal() : base()
+        public TestliveModal(bool catapult) : base()
         {
             LiveCommand = new SimpleCommand(OnLiveClicked);
             TestLiveCommand = new SimpleCommand(OnTestLiveClicked);
+            _catapult = catapult;
         }
 
         public override bool CloseDisabled => false;
@@ -36,14 +38,14 @@ namespace Trebuchet
         private void OnLiveClicked(object? obj)
         {
             _madeASelection = true;
-            App.OpenApp(false);
+            App.OpenApp(false, _catapult);
             _window.Close();
         }
 
         private void OnTestLiveClicked(object? obj)
         {
             _madeASelection = true;
-            App.OpenApp(true);
+            App.OpenApp(true, _catapult);
             _window.Close();
         }
     }

@@ -8,14 +8,8 @@ namespace Trebuchet
 {
     public class Menu
     {
-        public List<MenuElement> Top { get; set; } = new List<MenuElement>();
         public List<MenuElement> Bottom { get; set; } = new List<MenuElement>();
 
-        public IEnumerable<Panel> GetPanels()
-        {
-            return Top.Where(x => x is Panel).Cast<Panel>()
-                .Concat(Bottom.Where(x => x is Panel).Cast<Panel>());
-        }
-
+        public List<MenuElement> Top { get; set; } = new List<MenuElement>();
     }
 }

@@ -1,10 +1,13 @@
-﻿using System.Windows;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System.Windows;
 
 namespace Trebuchet
 {
     public class RconPanel : Panel
     {
-        public RconPanel(Config config, UIConfig uiConfig) : base(config, uiConfig)
+        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+
+        public RconPanel()
         {
             LoadPanel();
         }

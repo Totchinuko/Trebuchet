@@ -1,10 +1,13 @@
-﻿using System.Windows;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System.Windows;
 
 namespace Trebuchet
 {
     public class LogFilterPanel : Panel
     {
-        public LogFilterPanel(Config config, UIConfig uiConfig) : base(config, uiConfig)
+        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+
+        public LogFilterPanel()
         {
             LoadPanel();
         }

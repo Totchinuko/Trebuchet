@@ -1,24 +1,25 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System;
+using System.Linq;
 using System.Windows.Input;
 
 namespace Trebuchet
 {
-    public class RequiredCommand : ICommand
+    public class RequiredCommand : ICommand, IRecipient<OperationStateChanged>
     {
         private string _button;
         private Action<object?> _callback;
         private bool _launched;
         private string _message;
-        private string[] _tasks;
+        private Operations[] _tasks;
 
-        public RequiredCommand(string message, string button, Action<object?> callback, params string[] tasks)
+        public RequiredCommand(string message, string button, Action<object?> callback, params Operations[] tasks)
         {
             _tasks = tasks;
             _callback = callback;
             _message = message;
             _button = button;
-            if (_tasks.Length > 0)
-                App.TaskBlocker.TaskSourceChanged += OnTaskSourceChanged;
+            StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
         public event EventHandler? CanExecuteChanged;
@@ -31,7 +32,7 @@ namespace Trebuchet
 
         public bool CanExecute(object? parameter)
         {
-            return !App.TaskBlocker.IsSet(_tasks) && !_launched;
+            return !StrongReferenceMessenger.Default.Send(new OperationStateRequest(_tasks)) && !_launched;
         }
 
         public void Execute(object? parameter)
@@ -42,9 +43,9 @@ namespace Trebuchet
             _callback.Invoke(parameter);
         }
 
-        private void OnTaskSourceChanged(object? sender, string e)
+        void IRecipient<OperationStateChanged>.Receive(OperationStateChanged message)
         {
-            if (e == SteamWidget.SteamTask)
+            if (_tasks.Contains(message.key))
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
     }

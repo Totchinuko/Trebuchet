@@ -29,7 +29,7 @@ namespace Trebuchet
             set
             {
                 _message = value;
-                OnPropertyChanged("Message");
+                OnPropertyChanged(nameof(Message));
             } 
         }
 
@@ -39,7 +39,7 @@ namespace Trebuchet
             set
             {
                 _messageTitle = value;
-                OnPropertyChanged("MessageTitle");
+                OnPropertyChanged(nameof(MessageTitle));
             }
         }
 
@@ -64,7 +64,7 @@ namespace Trebuchet
         {
             _cancelCallback.Invoke();
             _message = "Canceling...";
-            OnPropertyChanged("Message");
+            OnPropertyChanged(nameof(Message));
         }
     }
 }

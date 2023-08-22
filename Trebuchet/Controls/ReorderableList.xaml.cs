@@ -100,7 +100,7 @@ namespace Trebuchet.Controls
                     ItemsSource.RemoveAt(remIdx);
                 }
             }
-            OnPropertyChanged("ItemsSource");
+            OnPropertyChanged(nameof(ItemsSource));
         }
 
         private void Item_MouseDown(object sender, MouseButtonEventArgs e)

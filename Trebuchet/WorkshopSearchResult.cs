@@ -66,8 +66,8 @@ namespace Trebuchet
         {
             _creator = summary.PersonaName;
             _creatorAvatar = summary.Avatar;
-            OnPropertyChanged("CreatorAvatar");
-            OnPropertyChanged("Creator");
+            OnPropertyChanged(nameof(CreatorAvatar));
+            OnPropertyChanged(nameof(Creator));
         }
 
         protected void OnPropertyChanged(string name)

@@ -8,23 +8,6 @@ namespace Trebuchet
 {
     public static class Tools
     {
-        public static bool CanWriteHere(string path)
-        {
-            if (string.IsNullOrEmpty(path))
-                return false;
-            if (!Directory.Exists(path))
-                return false;
-
-            try
-            {
-                string file = Path.Combine(path, "file.lock");
-                File.WriteAllText(file, string.Empty);
-                File.Delete(file);
-                return true;
-            }
-            catch { return false; }
-        }
-
         public static long Clamp2CPUThreads(long value)
         {
             int maxCPU = Environment.ProcessorCount;
@@ -304,6 +287,11 @@ namespace Trebuchet
             using (ZipArchive archive = ZipFile.OpenRead(file))
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     entry.ExtractToFile(Path.Join(destination, entry.FullName));
+        }
+
+        public static string GetRootPath()
+        {
+            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException("Assembly directory is not found.");
         }
     }
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -7,25 +8,35 @@ using System.Windows.Input;
 
 namespace Trebuchet
 {
-    public class TaskBlockedCommand : ICommand
+    public class TaskBlockedCommand : ICommand, IRecipient<OperationStateChanged>
     {
-        private string[] _tasks = new string[0];
         private Action<object?> _command;
         private bool _enabled;
+        private Operations[] _tasks;
 
-        public event EventHandler? CanExecuteChanged;
-
-        public TaskBlockedCommand(Action<object?> command, bool enabled = true, params string[] tasks)
+        public TaskBlockedCommand(Action<object?> command, bool enabled = true, params Operations[] tasks)
         {
             _command = command;
             _tasks = tasks;
             _enabled = enabled;
-            App.TaskBlocker.TaskSourceChanged += OnTaskSourceChanged;
         }
 
-        private void OnTaskSourceChanged(object? sender, string e)
+        public event EventHandler? CanExecuteChanged;
+
+        public bool CanExecute(object? parameter)
         {
-            if (_tasks.Contains(e))
+            return !StrongReferenceMessenger.Default.Send(new OperationStateRequest(_tasks)) && _enabled;
+        }
+
+        public void Execute(object? parameter)
+        {
+            if (CanExecute(parameter))
+                _command.Invoke(parameter);
+        }
+
+        void IRecipient<OperationStateChanged>.Receive(OperationStateChanged message)
+        {
+            if (_tasks.Contains(message.key))
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
@@ -33,17 +44,6 @@ namespace Trebuchet
         {
             _enabled = enabled;
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        public bool CanExecute(object? parameter)
-        {
-            return !App.TaskBlocker.IsSet(_tasks) && _enabled;
-        }
-
-        public void Execute(object? parameter)
-        {
-            if(CanExecute(parameter))
-                _command.Invoke(parameter);
         }
     }
 }

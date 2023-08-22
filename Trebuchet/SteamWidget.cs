@@ -1,33 +1,31 @@
-﻿using SteamKit2;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using CommunityToolkit.Mvvm.Messaging.Messages;
+using SteamKit2;
 using System;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows;
 using System.Windows.Threading;
 
 namespace Trebuchet
 {
-    public class SteamWidget : IProgress<double>, INotifyPropertyChanged
+    public class SteamWidget : IProgress<double>,
+        INotifyPropertyChanged,
+        IRecipient<SteamConnectionChangedMessage>,
+        IRecipient<OperationStateChanged>
     {
-        public const string SteamTask = "SteamDownloadTask";
-
-        private CancellationTokenSource? _cts;
         private double _progress;
         private object _progressLock = new object();
-        private SteamSession _steam;
         private DispatcherTimer _timer;
 
-        public SteamWidget(SteamSession steam)
+        public SteamWidget()
         {
-            _steam = steam;
-            _steam.Connected += OnConnected;
-            _steam.Disconnected += OnDisconnected;
-            _steam.LoggedOn += OnLoggedOn;
+            StrongReferenceMessenger.Default.RegisterAll(this);
 
             _progressLock = new object();
             CancelCommand = new SimpleCommand(OnCancel);
             ConnectCommand = new SimpleCommand(OnConnect);
-            App.TaskBlocker.TaskSourceChanged += OnTaskSourceChanged;
 
             _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(300), DispatcherPriority.Background, Tick, Application.Current.Dispatcher);
         }
@@ -40,7 +38,7 @@ namespace Trebuchet
 
         public string Description { get; private set; } = string.Empty;
 
-        public bool IsConnected => _steam.User.SteamID?.IsAnonAccount ?? false;
+        public bool IsConnected { get; private set; }
 
         public double Progress { get; private set; }
 
@@ -55,15 +53,24 @@ namespace Trebuchet
             return true;
         }
 
-        public bool IsTaskSet() => App.TaskBlocker.IsSet(SteamTask);
-
-        public void ReleaseTask()
+        public void Receive(SteamConnectionChangedMessage message)
         {
-            App.TaskBlocker.Release(SteamTask);
-            Description = string.Empty;
-            _cts = null;
-            _timer.Stop();
-            OnPropertyChanged(nameof(Description));
+            IsConnected = message.Value;
+            OnPropertyChanged(nameof(IsConnected));
+        }
+
+        public void Receive(OperationStateChanged message)
+        {
+            if (message.key != Operations.SteamDownload) return;
+
+            if (!message.Value)
+            {
+                Description = string.Empty;
+                _timer.Stop();
+                _progress = 0;
+                OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(Progress));
+            }
         }
 
         public void Report(double value)
@@ -74,15 +81,11 @@ namespace Trebuchet
             }
         }
 
-        public CancellationTokenSource SetTask(string description)
+        public void Start(string description)
         {
-            if (App.TaskBlocker.IsSet(SteamTask))
-                throw new InvalidOperationException("Steam task already set.");
-
             Description = description;
             OnPropertyChanged(nameof(Description));
             _timer.Start();
-            return _cts = App.TaskBlocker.Set(SteamTask);
         }
 
         protected void OnPropertyChanged(string name)
@@ -92,7 +95,7 @@ namespace Trebuchet
 
         private void OnCancel(object? obj)
         {
-            App.TaskBlocker.Cancel(SteamTask);
+            StrongReferenceMessenger.Default.Send(new OperationCancelMessage(Operations.SteamDownload));
             Description = "Canceling...";
             OnPropertyChanged(nameof(Description));
         }
@@ -100,52 +103,8 @@ namespace Trebuchet
         private void OnConnect(object? obj)
         {
             ConnectCommand.Toggle(false);
-            if (IsConnected)
-                _steam.Disconnect();
-            else
-                _steam.Connect();
-        }
-
-        private void OnConnected(object? sender, SteamClient.ConnectedCallback e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                OnPropertyChanged(nameof(IsConnected));
-                ConnectCommand.Toggle(true);
-            });
-        }
-
-        private void OnDisconnected(object? sender, SteamClient.DisconnectedCallback e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                OnPropertyChanged(nameof(IsConnected));
-                ConnectCommand.Toggle(true);
-            });
-        }
-
-        private void OnLoggedOn(object? sender, SteamUser.LoggedOnCallback e)
-        {
-            Application.Current.Dispatcher.Invoke(() =>
-            {
-                OnPropertyChanged(nameof(IsConnected));
-                ConnectCommand.Toggle(true);
-            });
-        }
-
-        private void OnTaskSourceChanged(object? sender, string e)
-        {
-            if (e != SteamTask) return;
-
-            if (!App.TaskBlocker.IsSet(SteamTask))
-            {
-                Description = string.Empty;
-                _progress = 0;
-            }
-            else
-            {
-                _steam.ContentDownloader.SetProgress(this);
-            }
+            if (!IsConnected)
+                StrongReferenceMessenger.Default.Send<SteamConnectMessage>();
         }
 
         private void Tick(object? sender, EventArgs e)

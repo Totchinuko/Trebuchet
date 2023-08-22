@@ -1,6 +1,8 @@
 ﻿using System;
+using System.IO;
 using System.Windows;
 using System.Windows.Interop;
+using System.Windows.Shapes;
 
 namespace Trebuchet
 {
@@ -11,9 +13,9 @@ namespace Trebuchet
     {
         private bool _shown;
 
-        public MainWindow(Config config, UIConfig uiConfig)
+        public MainWindow(TrebuchetApp app)
         {
-            App = new TrebuchetApp(config, uiConfig);
+            App = app;
             InitializeComponent();
             DataContext = this;
         }
@@ -49,7 +51,16 @@ namespace Trebuchet
 
         protected virtual void OnWindowShown()
         {
-            App.BaseChecks();
+            try
+            {
+                string file = System.IO.Path.Combine(Tools.GetRootPath(), "file.lock");
+                File.WriteAllText(file, string.Empty);
+                File.Delete(file);
+            }
+            catch (Exception ex)
+            {
+                new ErrorModal("I/O Error", $"The install directory for trebuchet cannot be accessed.{Environment.NewLine}{ex.Message}", true).ShowDialog();
+            }
         }
     }
 }

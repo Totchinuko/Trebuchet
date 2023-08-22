@@ -77,8 +77,8 @@ namespace Trebuchet
         public void RefreshFile(string path)
         {
             _infos = new FileInfo(path);
-            OnPropertyChanged("StatusColor");
-            OnPropertyChanged("StatusTooltip");
+            OnPropertyChanged(nameof(StatusColor));
+            OnPropertyChanged(nameof(StatusTooltip));
         }
 
         public void SetManifest(PublishedFile file)
@@ -88,10 +88,10 @@ namespace Trebuchet
             _lastUpdate = Tools.UnixTimeStampToDateTime(file.TimeUpdated);
             _title = file.Title;
             _size = file.FileSize;
-            OnPropertyChanged("Title");
-            OnPropertyChanged("LastUpdate");
-            OnPropertyChanged("StatusColor");
-            OnPropertyChanged("StatusTooltip");
+            OnPropertyChanged(nameof(Title));
+            OnPropertyChanged(nameof(LastUpdate));
+            OnPropertyChanged(nameof(StatusColor));
+            OnPropertyChanged(nameof(StatusTooltip));
         }
 
         public override string ToString()

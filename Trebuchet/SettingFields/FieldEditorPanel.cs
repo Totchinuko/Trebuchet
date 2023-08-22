@@ -1,6 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
+using Trebuchet.Messages;
 
 namespace Trebuchet
 {
@@ -8,10 +10,6 @@ namespace Trebuchet
     {
         private List<Field> _fields = new List<Field>();
         private ObservableCollection<RequiredCommand> _requiredActions = new ObservableCollection<RequiredCommand>();
-
-        protected FieldEditorPanel(Config config, UIConfig uiConfig) : base(config, uiConfig)
-        {
-        }
 
         public List<Field> Fields { get => _fields; set => _fields = value; }
 
@@ -47,7 +45,7 @@ namespace Trebuchet
             OnValueChanged(e.Property);
             _fields.ForEach(f => f.RefreshVisibility());
             if (e.RefreshApp)
-                OnAppConfigurationChanged();
+                StrongReferenceMessenger.Default.Send<PanelRefreshConfigMessage>();
         }
     }
 }

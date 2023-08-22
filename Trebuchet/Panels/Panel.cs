@@ -1,25 +1,26 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Trebuchet.Messages;
 
 namespace Trebuchet
 {
-    public abstract class Panel : MenuElement, ICommand, INotifyPropertyChanged, ITemplateHolder
+    public abstract class Panel : MenuElement,
+        ICommand,
+        INotifyPropertyChanged,
+        ITemplateHolder,
+        IRecipient<PanelRefreshConfigMessage>
     {
         protected bool _active;
-        protected Config _config;
-        protected UIConfig _uiConfig;
 
-        public Panel(Config config, UIConfig uiConfig)
+        public Panel()
         {
-            _config = config;
-            _uiConfig = uiConfig;
+            StrongReferenceMessenger.Default.RegisterAll(this);
         }
-
-        public event EventHandler? AppConfigurationChanged;
 
         public event EventHandler? CanExecuteChanged;
 
@@ -31,7 +32,7 @@ namespace Trebuchet
             set
             {
                 _active = value;
-                OnPropertyChanged("Active");
+                OnPropertyChanged(nameof(Active));
             }
         }
 
@@ -49,16 +50,16 @@ namespace Trebuchet
         public virtual void Execute(object? parameter)
         {
             if (CanExecute(parameter))
-                ((MainWindow)Application.Current.MainWindow).App.ActivePanel = this;
+                StrongReferenceMessenger.Default.Send(new PanelActivateMessage(this));
+        }
+
+        public void Receive(PanelRefreshConfigMessage message)
+        {
+            RefreshPanel();
         }
 
         public virtual void RefreshPanel()
         {
-        }
-
-        protected void OnAppConfigurationChanged()
-        {
-            AppConfigurationChanged?.Invoke(this, EventArgs.Empty);
         }
 
         protected void OnCanExecuteChanged()

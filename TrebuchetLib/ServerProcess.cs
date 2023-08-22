@@ -1,10 +1,12 @@
 ﻿using System.Diagnostics;
+using System.Threading;
 using Yuu.Ini;
 
 namespace Trebuchet
 {
     public class ServerProcess
     {
+        private readonly object _processLock = new object();
         private Process? _process;
 
         public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance)
@@ -21,7 +23,7 @@ namespace Trebuchet
             Profile = profile;
             Modlist = modlist;
             ProcessData = data;
-            Information = GetInformationFromInit(profile, instance);
+            Information = GetInformationFromIni(profile, instance);
 
             _process = process;
             _process.EnableRaisingEvents = true;
@@ -41,8 +43,6 @@ namespace Trebuchet
 
         public bool IsRunning => _process != null;
 
-        public DateTime LastResponsive { get; private set; }
-
         public ModListProfile Modlist { get; }
 
         public ProcessData ProcessData { get; private set; }
@@ -56,7 +56,8 @@ namespace Trebuchet
             if (_process == null) return;
 
             Closed = true;
-            _process.CloseMainWindow();
+            lock (_processLock)
+                _process.CloseMainWindow();
         }
 
         public void Kill()
@@ -64,21 +65,36 @@ namespace Trebuchet
             if (_process == null) return;
 
             Closed = true;
-            _process.Kill();
+            lock (_processLock)
+                _process.Kill();
         }
 
         public void ProcessRefresh()
         {
-            if (_process == null) return;
-            _process.Refresh();
+            int timeSpan = Profile.ZombieCheckSeconds;
+            bool killZombies = Profile.KillZombies;
+            DateTime last = DateTime.UtcNow;
+            int instance = ServerInstance;
 
-            if (_process.Responding)
-                LastResponsive = DateTime.UtcNow;
-
-            if ((LastResponsive + TimeSpan.FromSeconds(Profile.ZombieCheckSeconds)) < DateTime.UtcNow && Profile.KillZombies)
+            while (true)
             {
-                Log.Write($"Killing zombie instance {ServerInstance} ({_process.Id})", LogSeverity.Warning);
-                _process.Kill();
+                lock (_processLock)
+                {
+                    if (_process == null || _process.HasExited) return;
+
+                    _process.Refresh();
+
+                    if (_process.Responding)
+                        last = DateTime.UtcNow;
+
+                    if ((last + TimeSpan.FromSeconds(timeSpan)) < DateTime.UtcNow && killZombies)
+                    {
+                        Log.Write($"Killing zombie instance {instance} ({_process.Id})", LogSeverity.Warning);
+                        _process.Kill();
+                    }
+                }
+
+                Thread.Sleep(1000);
             }
         }
 
@@ -105,11 +121,14 @@ namespace Trebuchet
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)
         {
-            if (_process == null) return;
+            lock (_processLock)
+            {
+                if (_process == null) return;
 
-            _process.Exited -= OnProcessExited;
-            _process.Dispose();
-            _process = null;
+                _process.Exited -= OnProcessExited;
+                _process.Dispose();
+                _process = null;
+            }
             ProcessExited?.Invoke(this, EventArgs.Empty);
         }
 
@@ -129,7 +148,6 @@ namespace Trebuchet
             Profile.WriteIniFiles(ServerInstance);
             TrebuchetLaunch.WriteConfig(Profile, Modlist, ServerInstance);
 
-            LastResponsive = DateTime.UtcNow;
             process.Start();
 
             ProcessData child = ProcessData.Empty;
@@ -166,9 +184,10 @@ namespace Trebuchet
 
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
             OnProcessStarted(ProcessData);
+            new Thread(ProcessRefresh).Start();
         }
 
-        private ServerInstanceInformation GetInformationFromInit(ServerProfile profile, int instance)
+        private ServerInstanceInformation GetInformationFromIni(ServerProfile profile, int instance)
         {
             string instancePath = profile.GetInstancePath(instance);
             string initPath = Path.Combine(instancePath, string.Format(Config.FileIniServer, "Engine"));

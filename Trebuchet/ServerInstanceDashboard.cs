@@ -1,4 +1,5 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -6,30 +7,26 @@ using System.Linq;
 
 namespace Trebuchet
 {
-    public class ServerInstanceDashboard : INotifyPropertyChanged
+    public class ServerInstanceDashboard : INotifyPropertyChanged, IRecipient<ProcessMessage>
     {
         private Config _config;
         private string _selectedModlist = string.Empty;
         private string _selectedProfile = string.Empty;
-        private TrebuchetLauncher _trebuchet;
-        private UIConfig _uiConfig;
 
-        public ServerInstanceDashboard(Config config, UIConfig uiConfig, TrebuchetLauncher trebuchet, int instance)
+        public ServerInstanceDashboard(int instance)
         {
             KillCommand = new SimpleCommand(OnKilled, false);
             CloseCommand = new SimpleCommand(OnClose, false);
-            LaunchCommand = new TaskBlockedCommand(OnLaunched, true, SteamWidget.SteamTask);
+            LaunchCommand = new TaskBlockedCommand(OnLaunched, true, Operations.SteamDownload);
 
-            _config = config;
-            _trebuchet = trebuchet;
+            _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
             Instance = instance;
-            _uiConfig = uiConfig;
 
-            _trebuchet.ServerTerminated += OnProcessTerminated;
-            _trebuchet.ServerStarted += OnProcessStarted;
-            _trebuchet.ServerFailed += OnProcessFailed;
+            StrongReferenceMessenger.Default.Register<ProcessFailledMessage>(this);
+            StrongReferenceMessenger.Default.Register<ProcessStartedMessage>(this);
+            StrongReferenceMessenger.Default.Register<ProcessStoppedMessage>(this);
 
-            _uiConfig.GetInstanceParameters(Instance, out _selectedModlist, out _selectedProfile);
+            App.Config.GetInstanceParameters(Instance, out _selectedModlist, out _selectedProfile);
 
             Resolve();
             ListProfiles();
@@ -52,7 +49,7 @@ namespace Trebuchet
 
         public List<string> Modlists { get; private set; } = new List<string>();
 
-        public bool ProcessRunning => _trebuchet.IsServerRunning(Instance);
+        public bool ProcessRunning { get; private set; }
 
         public ProcessStats ProcessStats { get; } = new ProcessStats();
 
@@ -64,8 +61,8 @@ namespace Trebuchet
             set
             {
                 _selectedModlist = value;
-                _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
-                _uiConfig.SaveFile();
+                App.Config.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
+                App.Config.SaveFile();
             }
         }
 
@@ -75,24 +72,24 @@ namespace Trebuchet
             set
             {
                 _selectedProfile = value;
-                _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
-                _uiConfig.SaveFile();
+                App.Config.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
+                App.Config.SaveFile();
             }
         }
 
         public void Close()
         {
-            if (!_trebuchet.IsServerRunning(Instance)) return;
+            if (!ProcessRunning) return;
 
             CloseCommand.Toggle(false);
-            _trebuchet.CloseServer(Instance);
+            StrongReferenceMessenger.Default.Send(new CloseProcessMessage(Instance));
         }
 
         public void Kill()
         {
-            if (!_trebuchet.IsServerRunning(Instance)) return;
+            if (!ProcessRunning) return;
 
-            if (_uiConfig.DisplayWarningOnKill)
+            if (App.Config.DisplayWarningOnKill)
             {
                 QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
                     "Do you wish to continue ?");
@@ -102,30 +99,28 @@ namespace Trebuchet
 
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
-            _trebuchet.KillServer(Instance);
+            StrongReferenceMessenger.Default.Send(new KillProcessMessage(Instance));
         }
 
         public void Launch()
         {
             if (!CanUseDashboard) return;
-            if (_trebuchet.IsServerRunning(Instance)) return;
-            if (_trebuchet.IsFolderLocked(ServerProfile.GetFolder(_config, _selectedProfile)))
-            {
-                new ErrorModal("Locked", "This profile is currently used by another process. Only one process can use a profile at a time.").ShowDialog();
-                return;
-            }
+            if (ProcessRunning) return;
 
             LaunchCommand.Toggle(false);
-            try
-            {
-                _trebuchet.CatapultServer(_selectedProfile, _selectedModlist, Instance);
-                OnPropertyChanged("ProcessRunning");
-            }
-            catch (Exception ex)
-            {
-                LaunchCommand.Toggle(true);
-                new ErrorModal("Error", ex.Message).ShowDialog();
-            }
+            StrongReferenceMessenger.Default.Send(new CatapultServerMessage(SelectedModlist, SelectedProfile, Instance));
+        }
+
+        void IRecipient<ProcessMessage>.Receive(ProcessMessage message)
+        {
+            if (message.instance != Instance) return;
+
+            if (message is ProcessStartedMessage started)
+                OnProcessStarted(started.data);
+            else if (message is ProcessFailledMessage failed)
+                OnProcessFailed(failed.Exception);
+            else if (message is ProcessStoppedMessage stopped)
+                OnProcessTerminated();
         }
 
         public void RefreshSelection()
@@ -148,8 +143,8 @@ namespace Trebuchet
         {
             Modlists = ModListProfile.ListProfiles(_config).ToList();
             Profiles = ServerProfile.ListProfiles(_config).ToList();
-            OnPropertyChanged("Modlists");
-            OnPropertyChanged("Profiles");
+            OnPropertyChanged(nameof(Modlists));
+            OnPropertyChanged(nameof(Profiles));
         }
 
         private void OnClose(object? obj)
@@ -167,33 +162,35 @@ namespace Trebuchet
             OnLaunchRequested();
         }
 
-        private void OnProcessFailed(object? sender, TrebuchetFailEventArgs e)
+        private void OnProcessFailed(Exception exception)
         {
-            new ErrorModal("Server failed to start", e.Exception.Message).ShowDialog();
+            KillCommand.Toggle(false);
+            CloseCommand.Toggle(false);
+            LaunchCommand.Toggle(true);
+            new ErrorModal("Server failed to start", exception.Message).ShowDialog();
         }
 
-        private void OnProcessStarted(object? sender, TrebuchetStartEventArgs e)
+        private void OnProcessStarted(ProcessData data)
         {
-            if (Instance != e.instance) return;
-
             LaunchCommand.Toggle(false);
             KillCommand.Toggle(true);
             CloseCommand.Toggle(true);
-            OnPropertyChanged("ProcessRunning");
+
+            ProcessRunning = true;
+            OnPropertyChanged(nameof(ProcessRunning));
 
             if (ProcessStats.Running) ProcessStats.StopStats();
-            ProcessStats.StartStats(e.process, Path.GetFileNameWithoutExtension(Config.FileServerBin));
+            ProcessStats.StartStats(data, Path.GetFileNameWithoutExtension(Config.FileServerBin));
         }
 
-        private void OnProcessTerminated(object? sender, int instance)
+        private void OnProcessTerminated()
         {
-            if (Instance != instance) return;
-
             ProcessStats.StopStats();
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
             LaunchCommand.Toggle(true);
-            OnPropertyChanged("ProcessRunning");
+            ProcessRunning = false;
+            OnPropertyChanged(nameof(ProcessRunning));
         }
 
         private void Resolve()
@@ -201,10 +198,10 @@ namespace Trebuchet
             ServerProfile.ResolveProfile(_config, ref _selectedProfile);
             ModListProfile.ResolveProfile(_config, ref _selectedModlist);
 
-            _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
-            _uiConfig.SaveFile();
-            OnPropertyChanged("SelectedModlist");
-            OnPropertyChanged("SelectedProfile");
+            App.Config.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
+            App.Config.SaveFile();
+            OnPropertyChanged(nameof(SelectedModlist));
+            OnPropertyChanged(nameof(SelectedProfile));
         }
     }
 }

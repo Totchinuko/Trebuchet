@@ -17,24 +17,29 @@ namespace Trebuchet
     /// </summary>
     public partial class App : Application
     {
-        public static readonly TaskBlocker TaskBlocker = new TaskBlocker();
-
         public static bool UseSoftwareRendering = true;
 
         public static string APIKey { get; private set; } = string.Empty;
 
-        public static bool HasCrashed { get; private set; }
+        public static UIConfig Config { get; private set; } = default!;
 
-        public static bool ImmediateServerCatapult { get; private set; } = false;
+        public static bool HasCrashed { get; private set; }
 
         public bool IsShutingDown { get; private set; }
 
         public static void Crash() => HasCrashed = true;
 
-        public static TrebuchetApp GetApp()
+        public static void OpenApp(bool testlive, bool catapult)
         {
-            if (Current.MainWindow is not MainWindow window) throw new Exception("MainWindow is not valid.");
-            return window.App;
+            Log.Write($"Selecting {(testlive ? "testlive" : "live")}", LogSeverity.Info);
+
+            Config = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
+            App.UseSoftwareRendering = !Config.UseHardwareAcceleration;
+
+            TrebuchetApp app = new TrebuchetApp(testlive, catapult);
+            MainWindow mainWindow = new MainWindow(app);
+            Application.Current.MainWindow = mainWindow;
+            mainWindow.Show();
         }
 
         protected override void OnExit(ExitEventArgs e)
@@ -57,34 +62,20 @@ namespace Trebuchet
 
             if (e.Args.Length > 0)
             {
-                if (e.Args.Contains("-catapult"))
-                    ImmediateServerCatapult = true;
                 if (e.Args.Contains("-testlive"))
                 {
-                    OpenApp(true);
+                    OpenApp(true, e.Args.Contains("-catapult"));
                     return;
                 }
                 else if (e.Args.Contains("-live"))
                 {
-                    OpenApp(false);
+                    OpenApp(false, e.Args.Contains("-catapult"));
                     return;
                 }
             }
-            TestliveModal modal = new TestliveModal();
+            TestliveModal modal = new TestliveModal(e.Args.Contains("-catapult"));
             Current.MainWindow = modal.Window;
             modal.ShowDialog();
-        }
-
-        public static void OpenApp(bool testlive)
-        {
-            Log.Write($"Selecting {(testlive ? "testlive" : "live")}", LogSeverity.Info);
-            Config config = Config.LoadConfig(Config.GetPath(testlive));
-            UIConfig uiConfig = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
-            App.UseSoftwareRendering = !uiConfig.UseHardwareAcceleration;
-
-            MainWindow mainWindow = new MainWindow(config, uiConfig);
-            Application.Current.MainWindow = mainWindow;
-            mainWindow.Show();
         }
 
         private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

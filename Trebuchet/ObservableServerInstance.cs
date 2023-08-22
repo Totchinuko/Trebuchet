@@ -22,7 +22,7 @@ namespace Trebuchet
             {
                 if (_instance.Profile == value) return;
                 _instance.Profile = value;
-                OnPropertyChanged("Profile");
+                OnPropertyChanged(nameof(Profile));
             }
         }
 

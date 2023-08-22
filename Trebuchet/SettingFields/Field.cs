@@ -113,20 +113,20 @@ namespace Trebuchet
                 _propertyInfos.SetValue(GetTarget(), SetConvert(value));
                 AddCollectionEvent();
                 OnValueChanged();
-                OnPropertyChanged("Value");
-                OnPropertyChanged("IsDefault");
+                OnPropertyChanged(nameof(Value));
+                OnPropertyChanged(nameof(IsDefault));
             }
         }
 
         public override void RefreshValue()
         {
-            OnPropertyChanged("Value");
-            OnPropertyChanged("IsDefault");
+            OnPropertyChanged(nameof(Value));
+            OnPropertyChanged(nameof(IsDefault));
         }
 
         public override void RefreshVisibility()
         {
-            OnPropertyChanged("IsVisible");
+            OnPropertyChanged(nameof(IsVisible));
         }
 
         public override void SetTarget(object target, PropertyInfo? property = null)
@@ -159,8 +159,8 @@ namespace Trebuchet
 
         private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
         {
-            OnPropertyChanged("Value");
-            OnPropertyChanged("IsDefault");
+            OnPropertyChanged(nameof(Value));
+            OnPropertyChanged(nameof(IsDefault));
         }
 
         private void OnHyperlinkClicked(object? obj)

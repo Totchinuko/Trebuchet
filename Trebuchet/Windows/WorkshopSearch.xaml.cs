@@ -1,4 +1,5 @@
-﻿using SteamWorksWebAPI;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using SteamWorksWebAPI.Response;
 using System;
@@ -18,8 +19,6 @@ namespace Trebuchet
     /// </summary>
     public partial class WorkshopSearch : Window, INotifyPropertyChanged
     {
-        public const string SearchTask = "WorkshopSearchTask";
-
         private Config _config;
         private List<WorkshopSearchResult> _searchResults = new List<WorkshopSearchResult>();
         private string _searchTerm = string.Empty;
@@ -27,7 +26,7 @@ namespace Trebuchet
         public WorkshopSearch(Config config)
         {
             _config = config;
-            SearchCommand = new TaskBlockedCommand(OnSearch, true, SearchTask);
+            SearchCommand = new TaskBlockedCommand(OnSearch, true, Operations.SteamSearch);
             AddModCommand = new SimpleCommand(OnModAdded);
             InitializeComponent();
             DataContext = this;
@@ -47,7 +46,7 @@ namespace Trebuchet
             set
             {
                 _searchResults = value;
-                OnPropertyChanged("SearchResults");
+                OnPropertyChanged(nameof(SearchResults));
             }
         }
 
@@ -76,7 +75,7 @@ namespace Trebuchet
 
         private void OnCreatorSearchComplete(Task<GetPlayerSummariesResponse> task)
         {
-            App.TaskBlocker.Release(SearchTask);
+            StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.SteamSearch));
             if (task.Result.Players.Length == 0) return;
 
             var enumeration =
@@ -89,7 +88,7 @@ namespace Trebuchet
 
         private void OnSearch(object? obj)
         {
-            if (App.TaskBlocker.IsSet(SearchTask)) return;
+            if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamSearch))) return;
             if (string.IsNullOrEmpty(_searchTerm)) return;
 
             var query = new QueryFilesQuery(App.APIKey)
@@ -106,7 +105,7 @@ namespace Trebuchet
                 ReturnShortDescription = true
             };
 
-            var cts = App.TaskBlocker.Set(SearchTask, 15 * 1000);
+            CancellationTokenSource cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.SteamSearch, 15 * 1000));
             Task.Run(() => PublishedFileService.QueryFiles(query, cts.Token), cts.Token)
                 .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnSearchCompleted(x)))
                 .ContinueWith((x) => OnSearchCreators(cts.Token), cts.Token)

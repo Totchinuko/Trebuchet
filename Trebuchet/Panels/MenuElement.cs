@@ -8,12 +8,12 @@ using System.Threading.Tasks;
 namespace Trebuchet
 {
     [JsonDerivedType(typeof(LogFilterPanel), "LogFilter")]
-    [JsonDerivedType(typeof(Dashboard), "Dashboard")]
+    [JsonDerivedType(typeof(DashboardPanel), "Dashboard")]
     [JsonDerivedType(typeof(RconPanel), "Rcon")]
-    [JsonDerivedType(typeof(ClientSettings), "ClientSettings")]
-    [JsonDerivedType(typeof(ServerSettings), "ServerSettings")]
-    [JsonDerivedType(typeof(ModlistHandler), "Modlist")]
-    [JsonDerivedType(typeof(Settings), "Settings")]
+    [JsonDerivedType(typeof(ClientProfilePanel), "ClientSettings")]
+    [JsonDerivedType(typeof(ServerProfilePanel), "ServerSettings")]
+    [JsonDerivedType(typeof(ModlistPanel), "Modlist")]
+    [JsonDerivedType(typeof(SettingsPanel), "Settings")]
     public class MenuElement
     {
         public string Label { get; set; } = string.Empty;

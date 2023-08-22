@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace Trebuchet
 {
-    public static class GuiExtensions
+    internal static class GuiExtensions
     {
         public static readonly DependencyProperty AccentProperty = DependencyProperty.RegisterAttached(
             "Accent",
@@ -94,6 +94,23 @@ namespace Trebuchet
             return (CornerRadius)element.GetValue(CornerRadiusProperty);
         }
 
+        public static string GetEmbededTextFile(string path)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using (Stream stream = assembly.GetManifestResourceStream(path) ?? throw new Exception($"Could not find resource {path}."))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+
+        public static string GetFileVersion()
+        {
+            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            return fvi.FileVersion ?? string.Empty;
+        }
+
         public static ImageSource GetIcon(UIElement element)
         {
             return (ImageSource)element.GetValue(IconProperty);
@@ -152,6 +169,11 @@ namespace Trebuchet
             }
         }
 
+        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> enumerable)
+        {
+            return new ObservableCollection<T>(enumerable);
+        }
+
         public static bool TryGetParent<TParent>(this DependencyObject child, [NotNullWhen(true)] out TParent? parent) where TParent : DependencyObject
         {
             DependencyObject current = child;
@@ -167,21 +189,6 @@ namespace Trebuchet
 
             parent = default;
             return false;
-        }
-
-        public static string GetEmbededTextFile(string path)
-        {
-            var assembly = Assembly.GetExecutingAssembly();
-            using (Stream stream = assembly.GetManifestResourceStream(path) ?? throw new Exception($"Could not find resource {path}."))
-            using (StreamReader reader = new StreamReader(stream))
-            {
-                return reader.ReadToEnd();
-            }
-        }
-
-        public static ObservableCollection<T> ToObservableCollection<T>(this IEnumerable<T> enumerable)
-        {
-            return new ObservableCollection<T>(enumerable);
         }
     }
 }

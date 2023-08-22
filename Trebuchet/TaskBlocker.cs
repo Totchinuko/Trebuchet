@@ -1,52 +1,73 @@
-﻿using System;
+﻿using CommunityToolkit.Mvvm.Messaging;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
-using System.Windows.Input;
 
 namespace Trebuchet
 {
-    public class TaskBlocker
+    internal class TaskBlocker : IRecipient<OperationMessage>,
+        IRecipient<OperationStartMessage>,
+        IRecipient<OperationStateRequest>
     {
-        private Dictionary<string, CancellationTokenSource> _taskSources = new Dictionary<string, CancellationTokenSource>();
+        private Dictionary<Operations, CancellationTokenSource> _taskSources = new Dictionary<Operations, CancellationTokenSource>();
 
-        public event EventHandler<string>? TaskSourceChanged;
-
-        public void Cancel(string key)
+        public TaskBlocker()
         {
-            if (_taskSources.TryGetValue(key, out var source))
+            StrongReferenceMessenger.Default.RegisterAll(this);
+        }
+
+        public void Cancel(Operations operation)
+        {
+            if (_taskSources.TryGetValue(operation, out var source))
                 source.Cancel();
         }
 
-        public bool IsSet(params string[] key)
+        public bool IsSet(params Operations[] operation)
         {
-            return key.Any(_taskSources.ContainsKey);
+            return operation.Any(_taskSources.ContainsKey);
         }
 
-        public void Release(string key)
+        public void Receive(OperationMessage message)
         {
-            if (_taskSources.TryGetValue(key, out var source))
+            if (message is OperationCancelMessage cancelMessage)
+                Cancel(cancelMessage.key);
+            else if (message is OperationReleaseMessage releaseMessage)
+                Release(releaseMessage.key);
+        }
+
+        public void Receive(OperationStartMessage message)
+        {
+            message.Reply(Set(message.key, message.cancelAfter));
+        }
+
+        public void Receive(OperationStateRequest message)
+        {
+            message.Reply(IsSet(message.keys));
+        }
+
+        public void Release(Operations operation)
+        {
+            if (_taskSources.TryGetValue(operation, out var source))
             {
                 source.Dispose();
-                _taskSources.Remove(key);
-                OnTaskSourceChanged(key);
+                _taskSources.Remove(operation);
+                OnTaskSourceChanged(operation);
             }
         }
 
-        public CancellationTokenSource Set(string key, int cancelAfter = 0)
+        public CancellationTokenSource Set(Operations operation, int cancelAfter = 0)
         {
             CancellationTokenSource cts = new CancellationTokenSource();
-            _taskSources.Add(key, cts);
-            OnTaskSourceChanged(key);
+            _taskSources.Add(operation, cts);
+            OnTaskSourceChanged(operation);
             if (cancelAfter > 0)
                 cts.CancelAfter(cancelAfter);
             return cts;
         }
 
-        protected virtual void OnTaskSourceChanged(string name)
+        protected virtual void OnTaskSourceChanged(Operations operation)
         {
-            TaskSourceChanged?.Invoke(this, name);
+            StrongReferenceMessenger.Default.Send(new OperationStateChanged(operation, IsSet(operation)));
         }
     }
 }

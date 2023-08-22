@@ -1,17 +1,49 @@
 ﻿namespace Trebuchet
 {
-    public static class Setup
+    public class Steam
     {
+        private Config _config;
+        private SteamSession _steam;
+
+        public Steam(Config config)
+        {
+            _config = config;
+            _steam = new SteamSession(config);
+            _steam.Connected += (sender, args) => Connected?.Invoke(this, EventArgs.Empty);
+            _steam.Disconnected += (sender, args) => Disconnected?.Invoke(this, EventArgs.Empty);
+        }
+
+        public event EventHandler? Connected;
+
+        public event EventHandler? Disconnected;
+
+        public bool IsConnected => _steam.Client.IsConnected;
+
+        public void ClearCache()
+        {
+            Tools.DeleteIfExists(_steam.ContentDownloader.STEAMKIT_DIR);
+        }
+
+        public void Connect()
+        {
+            _steam.Connect();
+        }
+
+        public void Disconnect()
+        {
+            _steam.Disconnect();
+        }
+
         /// <summary>
         /// Count the amount of instances currently installed. This does not verify if the files are valid, just the main binary.
         /// </summary>
         /// <param name="config"></param>
         /// <returns></returns>
-        public static int GetInstalledInstances(Config config)
+        public int GetInstalledInstances()
         {
             int count = 0;
 
-            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances);
+            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances);
             if (!Directory.Exists(folder))
                 return 0;
 
@@ -33,11 +65,11 @@
         /// <param name="instance"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static ulong GetInstanceBuildID(Config config, int instance)
+        public ulong GetInstanceBuildID(int instance)
         {
             string manifest = Path.Combine(
-                config.InstallPath,
-                config.VersionFolder,
+                _config.InstallPath,
+                _config.VersionFolder,
                 Config.FolderServerInstances,
                 string.Format(Config.FolderInstancePattern, instance),
                 Config.FileBuildID);
@@ -57,19 +89,19 @@
         /// <param name="config"></param>
         /// <param name="steam"></param>
         /// <returns></returns>
-        public static ulong GetSteamBuildID(Config config, SteamSession steam)
+        public ulong GetSteamBuildID()
         {
-            steam.RequestAppInfo(config.ServerAppID, true);
-            return steam.ContentDownloader.GetSteam3AppBuildNumber(config.ServerAppID, ContentDownloader.DEFAULT_BRANCH);
+            _steam.RequestAppInfo(_config.ServerAppID, true);
+            return _steam.ContentDownloader.GetSteam3AppBuildNumber(_config.ServerAppID, ContentDownloader.DEFAULT_BRANCH);
         }
 
         /// <summary>
         /// Remove all junctions present in any server instance folder. Used before update to avoid crash du to copy error on junction folders.
         /// </summary>
         /// <param name="config"></param>
-        public static void RemoveAllSymbolicLinks(Config config)
+        public void RemoveAllSymbolicLinks()
         {
-            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances);
+            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances);
             if (!Directory.Exists(folder))
                 return;
             string[] instances = Directory.GetDirectories(folder);
@@ -77,18 +109,18 @@
                 Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
         }
 
-        public static bool SetupFolders(Config config)
+        public bool SetupFolders()
         {
-            if (!Directory.Exists(config.InstallPath)) return false;
+            if (!Directory.Exists(_config.InstallPath)) return false;
 
             try
             {
-                Tools.CreateDir(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances));
-                Tools.CreateDir(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles));
-                Tools.CreateDir(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles));
-                Tools.CreateDir(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles));
+                Tools.CreateDir(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances));
+                Tools.CreateDir(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderClientProfiles));
+                Tools.CreateDir(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerProfiles));
+                Tools.CreateDir(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles));
 
-                Tools.CreateDir(Path.Combine(config.InstallPath, Config.FolderWorkshop));
+                Tools.CreateDir(Path.Combine(_config.InstallPath, Config.FolderWorkshop));
             }
             catch (Exception ex)
             {
@@ -107,11 +139,11 @@
         /// <param name="enumerable"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
-        public static async Task UpdateMods(Config config, SteamSession steam, IEnumerable<ulong> enumerable, CancellationTokenSource cts)
+        public async Task UpdateMods(IEnumerable<ulong> enumerable, CancellationTokenSource cts)
         {
-            if (!SetupFolders(config)) return;
-            steam.ContentDownloader.SetInstallDirectory(Path.Combine(config.InstallPath, Config.FolderWorkshop));
-            await steam.ContentDownloader.DownloadUGCAsync(config.ClientAppID, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
+            if (!SetupFolders()) return;
+            _steam.ContentDownloader.SetInstallDirectory(Path.Combine(_config.InstallPath, Config.FolderWorkshop));
+            await _steam.ContentDownloader.DownloadUGCAsync(_config.ClientAppID, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
         }
 
         /// <summary>
@@ -122,15 +154,15 @@
         /// <param name="token"></param>
         /// <param name="reinstall"></param>
         /// <returns></returns>
-        public static async Task UpdateServer(Config config, SteamSession steam, int instanceNumber, CancellationTokenSource cts, bool reinstall = false)
+        public async Task UpdateServer(int instanceNumber, CancellationTokenSource cts, bool reinstall = false)
         {
-            if (config.ServerInstanceCount <= 0) return;
+            if (_config.ServerInstanceCount <= 0) return;
 
-            if (!SetupFolders(config)) return;
+            if (!SetupFolders()) return;
 
             Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info);
 
-            string instance = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
+            string instance = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
 
             if (reinstall)
             {
@@ -140,8 +172,8 @@
 
             Tools.CreateDir(instance);
 
-            steam.ContentDownloader.SetInstallDirectory(instance);
-            await steam.ContentDownloader.DownloadAppAsync(config.ServerAppID, new List<(uint depotId, ulong manifestId)>(), ContentDownloader.DEFAULT_BRANCH, null, null, null, false, cts);
+            _steam.ContentDownloader.SetInstallDirectory(instance);
+            await _steam.ContentDownloader.DownloadAppAsync(_config.ServerAppID, new List<(uint depotId, ulong manifestId)>(), ContentDownloader.DEFAULT_BRANCH, null, null, null, false, cts);
         }
 
         /// <summary>
@@ -153,17 +185,17 @@
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        public static async Task UpdateServerFromInstance0(Config config, int instanceNumber, CancellationToken token)
+        public async Task UpdateServerFromInstance0(int instanceNumber, CancellationToken token)
         {
-            if (config.ServerInstanceCount <= 0) return;
+            if (_config.ServerInstanceCount <= 0) return;
             if (instanceNumber == 0)
                 throw new Exception("Can't update instance 0 with itself.");
 
             Log.Write("Updating server instance {0} from instance 0.", LogSeverity.Info);
-            if (!SetupFolders(config)) return;
+            if (!SetupFolders()) return;
 
-            string instance = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
-            string instance0 = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, 0));
+            string instance = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
+            string instance0 = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, 0));
 
             if (!Directory.Exists(instance0))
                 throw new DirectoryNotFoundException($"{instance0} was not found.");
@@ -182,21 +214,21 @@
         /// <param name="config"></param>
         /// <param name="token"></param>
         /// <returns></returns>
-        public static async Task UpdateServerInstances(Config config, SteamSession steam, CancellationTokenSource cts)
+        public async Task UpdateServerInstances(CancellationTokenSource cts)
         {
-            if (config.ServerInstanceCount <= 0) return;
+            if (_config.ServerInstanceCount <= 0) return;
 
             Log.Write("Updating all server instances...", LogSeverity.Info);
-            int count = config.ServerInstanceCount;
+            int count = _config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
             {
                 if (i == 0)
                 {
-                    await UpdateServer(config, steam, i, cts, false);
+                    await UpdateServer(i, cts, false);
                 }
                 else
                 {
-                    await UpdateServerFromInstance0(config, i, cts.Token);
+                    await UpdateServerFromInstance0(i, cts.Token);
                 }
             }
         }

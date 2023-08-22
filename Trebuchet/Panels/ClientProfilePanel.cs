@@ -1,4 +1,5 @@
-﻿using System.Collections.ObjectModel;
+﻿using CommunityToolkit.Mvvm.Messaging;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -7,13 +8,14 @@ using System.Windows.Input;
 
 namespace Trebuchet
 {
-    public class ClientSettings : FieldEditorPanel
+    public class ClientProfilePanel : FieldEditorPanel
     {
+        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
         private ClientProfile _profile;
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private string _selectedProfile;
 
-        public ClientSettings(Config config, UIConfig uiConfig) : base(config, uiConfig)
+        public ClientProfilePanel()
         {
             LoadPanel();
         }
@@ -59,7 +61,7 @@ namespace Trebuchet
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.ClientSettings.Fields.json", this, "Profile");
+            BuildFields("Trebuchet.Panels.ClientProfilePanel.Fields.json", this, "Profile");
         }
 
         protected override void OnValueChanged(string property)
@@ -71,10 +73,10 @@ namespace Trebuchet
         private void LoadPanel()
         {
             MoveOriginalSavedFolder();
-            _selectedProfile = _uiConfig.CurrentClientProfile;
+            _selectedProfile = App.Config.CurrentClientProfile;
             ClientProfile.ResolveProfile(_config, ref _selectedProfile);
 
-            OnPropertyChanged("SelectedProfile");
+            OnPropertyChanged(nameof(SelectedProfile));
             LoadProfileList();
             LoadProfile();
         }
@@ -83,14 +85,14 @@ namespace Trebuchet
         private void LoadProfile()
         {
             _profile = ClientProfile.LoadProfile(_config, ClientProfile.GetPath(_config, _selectedProfile));
-            OnPropertyChanged("ProfileSize");
+            OnPropertyChanged(nameof(ProfileSize));
             RefreshFields();
         }
 
         private void LoadProfileList()
         {
             _profiles = new ObservableCollection<string>(ClientProfile.ListProfiles(_config));
-            OnPropertyChanged("Profiles");
+            OnPropertyChanged(nameof(Profiles));
         }
 
         private void MoveOriginalSavedFolder()
@@ -130,9 +132,9 @@ namespace Trebuchet
         private void OnProfileChanged()
         {
             ClientProfile.ResolveProfile(_config, ref _selectedProfile);
-            _uiConfig.CurrentClientProfile = _selectedProfile;
-            _uiConfig.SaveFile();
-            OnPropertyChanged("SelectedProfile");
+            App.Config.CurrentClientProfile = _selectedProfile;
+            App.Config.SaveFile();
+            OnPropertyChanged(nameof(SelectedProfile));
             LoadProfile();
         }
 

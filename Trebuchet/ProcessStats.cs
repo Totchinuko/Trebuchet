@@ -53,8 +53,8 @@ namespace Trebuchet
             Task.Run(() => RunCounters(_process.pid, processName, _source.Token), _source.Token);
 
             _timer.Start();
-            OnPropertyChanged("Running");
-            OnPropertyChanged("PID");
+            OnPropertyChanged(nameof(Running));
+            OnPropertyChanged(nameof(PID));
         }
 
         public virtual void StopStats()
@@ -65,7 +65,7 @@ namespace Trebuchet
             _source = null;
             _timer.Stop();
             _peakMemoryConsumption = 0;
-            OnPropertyChanged("Running");
+            OnPropertyChanged(nameof(Running));
         }
 
         protected virtual void OnPropertyChanged(string name)
@@ -84,10 +84,9 @@ namespace Trebuchet
                 MemoryConsumption = string.Format(MemoryFormat, (_memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
             }
 
-            OnPropertyChanged("MemoryConsumption");
-            OnPropertyChanged("PeakMemoryConsumption");
-            OnPropertyChanged("CpuUsage");
-            OnPropertyChanged("Uptime");
+            OnPropertyChanged(nameof(MemoryConsumption));
+            OnPropertyChanged(nameof(CpuUsage));
+            OnPropertyChanged(nameof(Uptime));
         }
 
         protected virtual async Task RunCounters(int processID, string processName, CancellationToken token)
