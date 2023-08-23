@@ -44,6 +44,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<CloseProcessMessage>(this);
             StrongReferenceMessenger.Default.Register<KillProcessMessage>(this);
             StrongReferenceMessenger.Default.Register<ShutdownProcessMessage>(this);
+            StrongReferenceMessenger.Default.Register<ServerUpdateModsMessage>(this);
             StrongReferenceMessenger.Default.Register<ServerUpdateMessage>(this);
             StrongReferenceMessenger.Default.Register<VerifyFilesMessage>(this);
             StrongReferenceMessenger.Default.Register<InstanceInstalledCountRequest>(this);
