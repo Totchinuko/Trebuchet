@@ -67,10 +67,10 @@ namespace Trebuchet.Utils
                 {
                     action();
                 }
-            }, cts.Token);
 
-            _then.Dispose();
-            _tasks.Dispose();
+                _then.Dispose();
+                _tasks.Dispose();
+            }, cts.Token);
         }
 
         public CatchedTasked Then(Action action)
