@@ -166,7 +166,7 @@ namespace Trebuchet
         private void LoadManifests()
         {
             if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
-            if (!GuiExtensions.Assert(_modlist.Count != 0, "Mod List is empty, nothing to refresh.")) return;
+            if (_modlist.Count == 0) return;
 
             IEnumerable<ulong> list =
                 from mod in _modlist
