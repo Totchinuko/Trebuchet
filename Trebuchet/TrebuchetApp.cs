@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using Trebuchet.Controls;
 using Trebuchet.Messages;
+using Trebuchet.Utils;
 using static SteamKit2.Internal.CMsgClientAMGetPersonaNameHistory;
 
 namespace Trebuchet
@@ -162,36 +163,6 @@ namespace Trebuchet
             return true;
         }
 
-        private void CatchTask(Operations operation, Func<CancellationTokenSource, Task> action, Action? then)
-        {
-            var cts = _taskBlocker.Set(operation);
-            Task.Run(async () =>
-            {
-                try
-                {
-                    await action.Invoke(cts);
-                }
-                catch (OperationCanceledException) { }
-                catch (Exception ex)
-                {
-                    Log.Write(ex);
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        new ErrorModal("Error", $"{ex.Message + Environment.NewLine}Please check the log for more information.").ShowDialog();
-                        return;
-                    });
-                }
-                finally
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        _taskBlocker.Release(operation);
-                    });
-                }
-                then?.Invoke();
-            }, cts.Token);
-        }
-
         private void OnSteamConnected(object? sender, EventArgs e)
         {
             StrongReferenceMessenger.Default.Send(new SteamConnectionChangedMessage(true));
@@ -232,10 +203,11 @@ namespace Trebuchet
             if (!Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Checking for mod updates...");
-            CatchTask(Operations.SteamDownload, async (cts) =>
-            {
-                await _trebuchet.Steam.UpdateMods(modlist, cts);
-            }, null);
+            new CatchedTasked(Operations.SteamDownload)
+                .Add(async (cts) =>
+                {
+                    await _trebuchet.Steam.UpdateMods(modlist, cts);
+                });
         }
 
         private void UpdateServers()
@@ -244,17 +216,18 @@ namespace Trebuchet
             if (!Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Checking for mod updates...");
-            CatchTask(Operations.SteamDownload, async (cts) =>
-            {
-                await _trebuchet.Steam.UpdateServerInstances(cts);
-            }, null);
+            new CatchedTasked(Operations.SteamDownload)
+                .Add(async (cts) =>
+                {
+                    await _trebuchet.Steam.UpdateServerInstances(cts);
+                });
         }
 
         private void UpdateThenCatapultClient(string profile, string modlist, bool isBattlEye)
         {
             if (!Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
 
-            if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never)
+            if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never || _trebuchet.Launcher.IsAnyServerRunning())
             {
                 _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye);
                 return;
@@ -264,11 +237,12 @@ namespace Trebuchet
 
             SteamWidget.Start("Checking mod files...");
             var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, new string[] { modlist }).Distinct();
-            CatchTask(Operations.SteamDownload, async (cts) =>
-            {
-                await _trebuchet.Steam.UpdateMods(allmodlist, cts);
-            },
-            () => _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye));
+            new CatchedTasked(Operations.SteamDownload)
+                .Add(async (cts) =>
+                {
+                    await _trebuchet.Steam.UpdateMods(allmodlist, cts);
+                })
+                .Then(() => _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye));
         }
 
         private void UpdateThenCatapultServer(IEnumerable<(string profile, string modlist, int instance)> instances)
@@ -286,22 +260,23 @@ namespace Trebuchet
 
             SteamWidget.Start("Checking for server updates...");
             var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, instances.Select(i => i.modlist)).Distinct();
-            CatchTask(Operations.SteamDownload, async (cts) =>
-            {
-                await _trebuchet.Steam.UpdateServerInstances(cts);
-
-                if (!_trebuchet.Launcher.IsClientRunning())
+            new CatchedTasked(Operations.SteamDownload)
+                .Add(async (cts) =>
                 {
-                    SteamWidget.Report(0);
-                    SteamWidget.SetDescription("Checking mod files...");
-                    await _trebuchet.Steam.UpdateMods(allmodlist, cts);
-                }
-            },
-            () =>
-            {
-                foreach (var (profile, modlist, instance) in instances)
-                    _trebuchet.Launcher.CatapultServer(profile, modlist, instance);
-            });
+                    await _trebuchet.Steam.UpdateServerInstances(cts);
+
+                    if (!_trebuchet.Launcher.IsClientRunning())
+                    {
+                        SteamWidget.Report(0);
+                        SteamWidget.SetDescription("Checking mod files...");
+                        await _trebuchet.Steam.UpdateMods(allmodlist, cts);
+                    }
+                })
+                .Then(() =>
+                {
+                    foreach (var (profile, modlist, instance) in instances)
+                        _trebuchet.Launcher.CatapultServer(profile, modlist, instance);
+                });
         }
 
         private void VerifyFiles(IEnumerable<ulong> modlist)
@@ -311,14 +286,15 @@ namespace Trebuchet
 
             SteamWidget.Start("Verifying server files...");
 
-            CatchTask(Operations.SteamDownload, async (cts) =>
-            {
-                _trebuchet.Steam.ClearCache();
-                await _trebuchet.Steam.UpdateServerInstances(cts);
-                SteamWidget.Report(0);
-                SteamWidget.SetDescription("Verifying mod files...");
-                await _trebuchet.Steam.UpdateMods(modlist, cts);
-            }, null);
+            new CatchedTasked(Operations.SteamDownload)
+                .Add(async (cts) =>
+                {
+                    _trebuchet.Steam.ClearCache();
+                    await _trebuchet.Steam.UpdateServerInstances(cts);
+                    SteamWidget.Report(0);
+                    SteamWidget.SetDescription("Verifying mod files...");
+                    await _trebuchet.Steam.UpdateMods(modlist, cts);
+                });
         }
     }
 }
