@@ -14,13 +14,15 @@ namespace Trebuchet.Utils
 {
     public class CatchedTasked
     {
+        private int _cancelAfter;
         private Operations _operations;
         private BlockingCollection<Func<CancellationTokenSource, Task>> _tasks = new BlockingCollection<Func<CancellationTokenSource, Task>>();
         private BlockingCollection<Action> _then = new BlockingCollection<Action>();
 
-        public CatchedTasked(Operations operations)
+        public CatchedTasked(Operations operations, int cancelAfter = 0)
         {
             _operations = operations;
+            _cancelAfter = cancelAfter;
         }
 
         public CatchedTasked Add(Func<CancellationTokenSource, Task> task)
@@ -33,7 +35,7 @@ namespace Trebuchet.Utils
         {
             _tasks.CompleteAdding();
             _then.CompleteAdding();
-            var cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(_operations)).Response;
+            var cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(_operations, _cancelAfter)).Response;
 
             Task.Run(async () =>
             {

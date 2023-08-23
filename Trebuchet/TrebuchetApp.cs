@@ -207,10 +207,7 @@ namespace Trebuchet
 
             SteamWidget.Start("Checking for mod updates...");
             new CatchedTasked(Operations.SteamDownload)
-                .Add(async (cts) =>
-                {
-                    await _trebuchet.Steam.UpdateServerInstances(cts);
-                });
+                .Add(_trebuchet.Steam.UpdateServerInstances);
         }
 
         private void UpdateThenCatapultClient(string profile, string modlist, bool isBattlEye)

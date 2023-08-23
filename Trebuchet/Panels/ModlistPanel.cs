@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.VisualBasic;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using System;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
 using System.Windows.Input;
+using Trebuchet.Utils;
 
 namespace Trebuchet
 {
@@ -107,12 +109,10 @@ namespace Trebuchet
 
         private void FetchJsonList(UriBuilder builder)
         {
-            if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.DownloadModlist))) return;
+            if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.DownloadModlist)), "Trebuchet is busy.")) return;
 
-            CancellationTokenSource cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.DownloadModlist, 15 * 1000));
-            Task.Run(async () =>
-            {
-                try
+            new CatchedTasked(Operations.DownloadModlist, 15 * 1000)
+                .Add(async (cts) =>
                 {
                     var result = await Tools.DownloadModList(builder.ToString(), cts.Token);
                     Application.Current.Dispatcher.Invoke(() =>
@@ -120,23 +120,12 @@ namespace Trebuchet
                         _profile.Modlist = ModListProfile.ParseModList(result.Modlist).ToList();
                         LoadModlist();
                     });
-                }
-                catch (OperationCanceledException) { }
-                catch (Exception ex)
-                {
-                    Log.Write(ex);
-                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Failed", $"Could not download the file. ({ex.Message})").ShowDialog());
-                }
-                finally
-                {
-                    Application.Current.Dispatcher.Invoke(() => StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.DownloadModlist)));
-                }
-            }, cts.Token);
+                });
         }
 
         private void FetchSteamCollection(UriBuilder builder)
         {
-            if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamCollectionFetch))) return;
+            if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamCollectionFetch)), "Trebuchet is busy.")) return;
 
             var query = HttpUtility.ParseQueryString(builder.Query);
             var id = query.Get("id");
@@ -145,11 +134,9 @@ namespace Trebuchet
                 new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").ShowDialog();
                 return;
             }
-            CancellationTokenSource cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.SteamCollectionFetch, 15 * 1000));
 
-            Task.Run(async () =>
-            {
-                try
+            new CatchedTasked(Operations.SteamCollectionFetch, 15 * 1000)
+                .Add(async (cts) =>
                 {
                     var result = await SteamRemoteStorage.GetCollectionDetails(new GetCollectionDetailsQuery(collectionID), cts.Token);
                     Application.Current.Dispatcher.Invoke(() =>
@@ -160,62 +147,34 @@ namespace Trebuchet
                         _profile.Modlist = modlist;
                         LoadModlist();
                     });
-                }
-                catch (OperationCanceledException) { }
-                catch (Exception ex)
-                {
-                    Log.Write(ex);
-                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Failed", $"Could not download the collection. ({ex.Message})").ShowDialog());
-                }
-                finally
-                {
-                    Application.Current.Dispatcher.Invoke(() => StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.SteamCollectionFetch)));
-                }
-            }, cts.Token);
+                });
         }
 
         private void LoadManifests()
         {
-            if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch))) return;
-            if (_modlist.Count == 0) return;
+            if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
+            if (!GuiExtensions.Assert(_modlist.Count != 0, "Mod List is empty, nothing to refresh.")) return;
 
             IEnumerable<ulong> list =
                 from mod in _modlist
                 where mod.IsPublished
                 select mod.PublishedFileID;
 
-            CancellationTokenSource cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.SteamPublishedFilesFetch, 15 * 1000));
-            Task.Run(async () =>
+            new CatchedTasked(Operations.SteamPublishedFilesFetch, 15 * 1000)
+            .Add(async (cts) =>
             {
-                try
+                var result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    var result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
+                    var update = from file in _modlist
+                                 where file.IsPublished
+                                 join details in result.PublishedFileDetails on file.PublishedFileID equals details.PublishedFileID
+                                 select new KeyValuePair<ModFile, PublishedFile>(file, details);
 
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        var update = from file in _modlist
-                                     where file.IsPublished
-                                     join details in result.PublishedFileDetails on file.PublishedFileID equals details.PublishedFileID
-                                     select new KeyValuePair<ModFile, PublishedFile>(file, details);
-
-                        foreach (var u in update)
-                            u.Key.SetManifest(u.Value);
-                    });
-                }
-                catch (OperationCanceledException) { }
-                catch (Exception ex)
-                {
-                    Log.Write(ex);
-                    Application.Current.Dispatcher.Invoke(() => new ErrorModal("Modlist", $"Could not download mod details of your modlist. ({ex.Message})").ShowDialog());
-                }
-                finally
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        Application.Current.Dispatcher.Invoke(() => StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.SteamPublishedFilesFetch)));
-                    });
-                }
-            }, cts.Token);
+                    foreach (var u in update)
+                        u.Key.SetManifest(u.Value);
+                });
+            });
         }
 
         private void LoadModlist()
