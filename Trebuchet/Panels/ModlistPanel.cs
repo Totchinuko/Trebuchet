@@ -274,7 +274,17 @@ namespace Trebuchet
             question.ShowDialog();
             if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
 
-            UriBuilder builder = new UriBuilder(_modlistURL);
+            UriBuilder builder;
+            try
+            {
+                builder = new UriBuilder(_modlistURL);
+            }
+            catch
+            {
+                new ErrorModal("Error", "Invalid URL.").ShowDialog();
+                return;
+            }
+
             if (SteamWorks.SteamCommunityHost == builder.Host)
                 FetchSteamCollection(builder);
             else
