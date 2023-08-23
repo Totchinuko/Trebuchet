@@ -153,16 +153,6 @@ namespace Trebuchet
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        private bool Assert(bool assertion, string message)
-        {
-            if (!assertion)
-            {
-                new ErrorModal("Error", message).ShowDialog();
-                return false;
-            }
-            return true;
-        }
-
         private void OnSteamConnected(object? sender, EventArgs e)
         {
             StrongReferenceMessenger.Default.Send(new SteamConnectionChangedMessage(true));
@@ -199,8 +189,8 @@ namespace Trebuchet
 
         private void UpdateServerMods(IEnumerable<ulong> modlist)
         {
-            if (!Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
-            if (!Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Checking for mod updates...");
             new CatchedTasked(Operations.SteamDownload)
@@ -212,8 +202,8 @@ namespace Trebuchet
 
         private void UpdateServers()
         {
-            if (!Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
-            if (!Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Checking for mod updates...");
             new CatchedTasked(Operations.SteamDownload)
@@ -225,7 +215,7 @@ namespace Trebuchet
 
         private void UpdateThenCatapultClient(string profile, string modlist, bool isBattlEye)
         {
-            if (!Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
 
             if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never || _trebuchet.Launcher.IsAnyServerRunning())
             {
@@ -233,7 +223,7 @@ namespace Trebuchet
                 return;
             }
 
-            if (!Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Checking mod files...");
             var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, new string[] { modlist }).Distinct();
@@ -247,7 +237,7 @@ namespace Trebuchet
 
         private void UpdateThenCatapultServer(IEnumerable<(string profile, string modlist, int instance)> instances)
         {
-            if (!Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
 
             if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never || _trebuchet.Launcher.IsAnyServerRunning())
             {
@@ -256,7 +246,7 @@ namespace Trebuchet
                 return;
             }
 
-            if (!Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Checking for server updates...");
             var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, instances.Select(i => i.modlist)).Distinct();
@@ -281,8 +271,8 @@ namespace Trebuchet
 
         private void VerifyFiles(IEnumerable<ulong> modlist)
         {
-            if (!Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
-            if (!Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Verifying server files...");
 

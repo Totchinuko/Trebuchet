@@ -56,6 +56,22 @@ namespace Trebuchet
                 )
             );
 
+        /// <summary>
+        /// Asserts that the given assertion is true, and if not, shows an error modal with the given message.
+        /// </summary>
+        /// <param name="assertion"></param>
+        /// <param name="message"></param>
+        /// <returns>Return false if the assertion failled</returns>
+        public static bool Assert(bool assertion, string message)
+        {
+            if (!assertion)
+            {
+                new ErrorModal("Error", message).ShowDialog();
+                return false;
+            }
+            return true;
+        }
+
         public static IEnumerable<T> FindVisualChildren<T>(DependencyObject depObj) where T : DependencyObject
         {
             if (depObj == null) yield return (T)Enumerable.Empty<T>();
