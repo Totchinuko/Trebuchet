@@ -34,31 +34,44 @@ namespace Trebuchet
         public ModlistPanel()
         {
             LoadPanel();
+
+            CreateModlistCommand = new SimpleCommand(OnModlistCreate);
+            DeleteModlistCommand = new SimpleCommand(OnModlistDelete);
+            DuplicateModlistCommand = new SimpleCommand(OnModlistDuplicate);
+            ExploreLocalCommand = new SimpleCommand(OnExploreLocal);
+            ExploreWorkshopCommand = new SimpleCommand(OnExploreWorkshop);
+            ExportToJsonCommand = new SimpleCommand(OnExportToJson);
+            ExportToTxtCommand = new SimpleCommand(OnExportToTxt);
+            FetchCommand = new TaskBlockedCommand(OnFetchClicked, true, Operations.DownloadModlist);
+            ImportFromFileCommand = new SimpleCommand(OnImportFromFile);
+            ImportFromTextCommand = new SimpleCommand(OnImportFromText);
+            ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload, Operations.GameRunning);
+            RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh, true, Operations.SteamPublishedFilesFetch);
         }
 
-        public ICommand CreateModlistCommand => new SimpleCommand(OnModlistCreate);
+        public SimpleCommand CreateModlistCommand { get; }
 
-        public ICommand DeleteModlistCommand => new SimpleCommand(OnModlistDelete);
+        public SimpleCommand DeleteModlistCommand { get; }
 
-        public ICommand DuplicateModlistCommand => new SimpleCommand(OnModlistDuplicate);
+        public SimpleCommand DuplicateModlistCommand { get; }
 
-        public ICommand ExploreLocalCommand => new SimpleCommand(OnExploreLocal);
+        public SimpleCommand ExploreLocalCommand { get; }
 
-        public ICommand ExploreWorkshopCommand => new SimpleCommand(OnExploreWorkshop);
+        public SimpleCommand ExploreWorkshopCommand { get; }
 
-        public ICommand ExportToJsonCommand => new SimpleCommand(OnExportToJson);
+        public SimpleCommand ExportToJsonCommand { get; }
 
-        public ICommand ExportToTxtCommand => new SimpleCommand(OnExportToTxt);
+        public SimpleCommand ExportToTxtCommand { get; }
 
-        public ICommand FetchCommand => new TaskBlockedCommand(OnFetchClicked, true, Operations.DownloadModlist);
+        public TaskBlockedCommand FetchCommand { get; }
 
-        public ICommand ImportFromFileCommand => new SimpleCommand(OnImportFromFile);
+        public SimpleCommand ImportFromFileCommand { get; }
 
-        public ICommand ImportFromTextCommand => new SimpleCommand(OnImportFromText);
+        public SimpleCommand ImportFromTextCommand { get; }
 
         public object ItemTemplate => Application.Current.Resources["ModlistItems"];
 
-        public ICommand ModFilesDownloadCommand => new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload, Operations.GameRunning);
+        public TaskBlockedCommand ModFilesDownloadCommand { get; }
 
         public TrulyObservableCollection<ModFile> Modlist
         {
@@ -82,7 +95,7 @@ namespace Trebuchet
 
         public ObservableCollection<string> Profiles { get => _profiles; set => _profiles = value; }
 
-        public ICommand RefreshModlistCommand => new TaskBlockedCommand(OnModlistRefresh, true, Operations.SteamPublishedFilesFetch);
+        public TaskBlockedCommand RefreshModlistCommand { get; }
 
         public string SelectedModlist
         {
@@ -120,7 +133,7 @@ namespace Trebuchet
                         _profile.Modlist = ModListProfile.ParseModList(result.Modlist).ToList();
                         LoadModlist();
                     });
-                });
+                }).Start();
         }
 
         private void FetchSteamCollection(UriBuilder builder)
@@ -147,7 +160,7 @@ namespace Trebuchet
                         _profile.Modlist = modlist;
                         LoadModlist();
                     });
-                });
+                }).Start();
         }
 
         private void LoadManifests()
@@ -174,7 +187,7 @@ namespace Trebuchet
                     foreach (var u in update)
                         u.Key.SetManifest(u.Value);
                 });
-            });
+            }).Start();
         }
 
         private void LoadModlist()

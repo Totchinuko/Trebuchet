@@ -13,7 +13,10 @@ namespace Trebuchet
 
         public TaskBlocker()
         {
-            StrongReferenceMessenger.Default.RegisterAll(this);
+            StrongReferenceMessenger.Default.Register<OperationReleaseMessage>(this);
+            StrongReferenceMessenger.Default.Register<OperationCancelMessage>(this);
+            StrongReferenceMessenger.Default.Register<OperationStartMessage>(this);
+            StrongReferenceMessenger.Default.Register<OperationStateRequest>(this);
         }
 
         public void Cancel(Operations operation)

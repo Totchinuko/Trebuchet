@@ -197,7 +197,8 @@ namespace Trebuchet
                 .Add(async (cts) =>
                 {
                     await _trebuchet.Steam.UpdateMods(modlist, cts);
-                });
+                })
+                .Start();
         }
 
         private void UpdateServers()
@@ -207,7 +208,8 @@ namespace Trebuchet
 
             SteamWidget.Start("Checking for mod updates...");
             new CatchedTasked(Operations.SteamDownload)
-                .Add(_trebuchet.Steam.UpdateServerInstances);
+                .Add(_trebuchet.Steam.UpdateServerInstances)
+                .Start();
         }
 
         private void UpdateThenCatapultClient(string profile, string modlist, bool isBattlEye)
@@ -229,7 +231,8 @@ namespace Trebuchet
                 {
                     await _trebuchet.Steam.UpdateMods(allmodlist, cts);
                 })
-                .Then(() => _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye));
+                .Then(() => _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye))
+                .Start();
         }
 
         private void UpdateThenCatapultServer(IEnumerable<(string profile, string modlist, int instance)> instances)
@@ -263,7 +266,8 @@ namespace Trebuchet
                 {
                     foreach (var (profile, modlist, instance) in instances)
                         _trebuchet.Launcher.CatapultServer(profile, modlist, instance);
-                });
+                })
+                .Start();
         }
 
         private void VerifyFiles(IEnumerable<ulong> modlist)
@@ -281,7 +285,8 @@ namespace Trebuchet
                     SteamWidget.Report(0);
                     SteamWidget.SetDescription("Verifying mod files...");
                     await _trebuchet.Steam.UpdateMods(modlist, cts);
-                });
+                })
+                .Start();
         }
     }
 }
