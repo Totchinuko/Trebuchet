@@ -7,9 +7,18 @@ using System.Windows;
 
 namespace Trebuchet.SettingFields
 {
-    internal class TextListField : Field<TrulyObservableCollection<ObservableString>, int>
+    internal class TextListField : Field<TrulyObservableCollection<ObservableString>, List<string>>
     {
-        public override bool IsDefault => Value == null ? false : Value.Count == Default;
+        public override bool IsDefault
+        {
+            get
+            {
+                if (Value == null) return Default == null;
+                if (Default == null) return Value == null;
+
+                return Default.SequenceEqual(Value.Select(x => (string)x));
+            }
+        }
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["StringListFields"];
 
@@ -21,7 +30,12 @@ namespace Trebuchet.SettingFields
 
         protected override void ResetToDefault()
         {
-            Value = new TrulyObservableCollection<ObservableString>();
+            if (Default == null)
+            {
+                Value = null;
+                return;
+            }
+            Value = new TrulyObservableCollection<ObservableString>(Default.Select(x => (ObservableString)x));
         }
 
         protected override object? SetConvert(TrulyObservableCollection<ObservableString>? value)

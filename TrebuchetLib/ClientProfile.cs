@@ -15,6 +15,49 @@ namespace Trebuchet
 
         public bool Log { get; set; } = false;
 
+        public List<string> LogFilters { get; set; } = new List<string>
+        {
+          "LogSkinnedMeshComp=NoLogging",
+          "NPC=Error",
+          "LogLevelActorContainer=NoLogging",
+          "LogSkeletalMesh=NoLogging",
+          "LogServerStats=NoLogging",
+          "LogDataTable=Error",
+          "Gamecode_Building=Error",
+          "Gamecode_Items=Error",
+          "Gamecode_AI=Error",
+          "Gamecode_Combat=Error",
+          "Gamecode_NPC=Error",
+          "Gamecode_Effects=Error",
+          "Network=Error",
+          "SmokeTest=NoLogging",
+          "LogCook=Error",
+          "LogSavePackage=Error",
+          "LogPackageDependencyInfo=Error",
+          "LogTexture=Error",
+          "LogStreaming=Error",
+          "LogGameMode=Error",
+          "HeatmapMetrics=Error",
+          "LogUObjectGlobals=Error",
+          "AI=Error",
+          "ItemInventory=Critical",
+          "LogScript=Error",
+          "LogNetPackageMap=Error",
+          "LogCharacterMovement=Error",
+          "LogAnimMontage=Error",
+          "Combat=Error",
+          "LogStreaming=Critical",
+          "LogModController=Error",
+          "LogPhysics=Error",
+          "Persistence=Error",
+          "LogAnimation=Error",
+          "SpawnTable=Critical",
+          "LogPrimitiveComponent=Error",
+          "building=Critical",
+          "ConanSandbox=NoLogging",
+          "LogScriptCore=Error"
+        };
+
         public int ProcessPriority { get; set; } = 0;
 
         [JsonIgnore]
@@ -53,6 +96,18 @@ namespace Trebuchet
         public void SoundSettings(IniDocument document)
         {
             document.GetSection("Audio").SetParameter("UnfocusedVolumeMultiplier", BackgroundSound ? "1.0" : "0,0");
+
+            IniSection section = document.GetSection("Core.Log");
+            section.GetParameters().ForEach(section.Remove);
+
+            if (LogFilters.Count > 0)
+                foreach (string filter in LogFilters)
+                {
+                    string[] content = filter.Split('=', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                    section.AddParameter(content[0], content[1]);
+                }
+            else
+                document.Remove(section);
         }
 
         [IniSetting(Config.FileIniDefault, "Scalability")]

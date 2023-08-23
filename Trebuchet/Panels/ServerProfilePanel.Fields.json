@@ -59,7 +59,7 @@
     "Property": "SudoSuperAdmins",
     "Name": "Sudo Super Admin List",
     "Description": "List of steam ID to be Sudo super admins on your servers. Leave it empty if you do not use Sudo.",
-    "Default": 0
+    "Default": []
   },
   {
     "$type": "Title",
@@ -247,5 +247,52 @@
     "Name": "Display Log Console",
     "Description": "Display server live logs instead of a blank window. WARNING: This might render the zombie process detection ineffective. I don't advise using this on a production server.",
     "Default": false
+  },
+  {
+    "$type": "TextList",
+    "Property": "LogFilters",
+    "Name": "Log Filters",
+    "Description": "Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).",
+    "Default": [
+      "LogSkinnedMeshComp=NoLogging",
+      "NPC=Error",
+      "LogLevelActorContainer=NoLogging",
+      "LogSkeletalMesh=NoLogging",
+      "LogServerStats=NoLogging",
+      "LogDataTable=Error",
+      "Gamecode_Building=Error",
+      "Gamecode_Items=Error",
+      "Gamecode_AI=Error",
+      "Gamecode_Combat=Error",
+      "Gamecode_NPC=Error",
+      "Gamecode_Effects=Error",
+      "Network=Error",
+      "SmokeTest=NoLogging",
+      "LogCook=Error",
+      "LogSavePackage=Error",
+      "LogPackageDependencyInfo=Error",
+      "LogTexture=Error",
+      "LogStreaming=Error",
+      "LogGameMode=Error",
+      "HeatmapMetrics=Error",
+      "LogUObjectGlobals=Error",
+      "AI=Error",
+      "ItemInventory=Critical",
+      "LogScript=Error",
+      "LogNetPackageMap=Error",
+      "LogCharacterMovement=Error",
+      "LogAnimMontage=Error",
+      "Combat=Error",
+      "LogStreaming=Critical",
+      "LogModController=Error",
+      "LogPhysics=Error",
+      "Persistence=Error",
+      "LogAnimation=Error",
+      "SpawnTable=Critical",
+      "LogPrimitiveComponent=Error",
+      "building=Critical",
+      "ConanSandbox=NoLogging",
+      "LogScriptCore=Error"
+    ]
   }
 ]
