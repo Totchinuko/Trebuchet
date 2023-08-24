@@ -31,6 +31,16 @@ namespace TrebuchetLib
 
         public event EventHandler<RconEventArgs>? RconResponded;
 
+        public event EventHandler<RconEventArgs>? RconSent;
+
+        public void Cancel()
+        {
+            lock (_lock)
+            {
+                _cts?.Cancel();
+            }
+        }
+
         public int Send(string data)
         {
             if (data.Length > 4086)
@@ -40,7 +50,7 @@ namespace TrebuchetLib
             {
                 id = _id++,
                 type = RconPacketType.SERVERDATA_EXECCOMMAND,
-                body = Encoding.ASCII.GetBytes(data)
+                body = data
             };
 
             _queue.Add(packet);
@@ -66,13 +76,18 @@ namespace TrebuchetLib
                 RconResponded?.Invoke(this, new RconEventArgs(-1, string.Empty, ex));
         }
 
+        protected void OnRconSent(RconEventArgs e)
+        {
+            RconSent?.Invoke(this, e);
+        }
+
         private RconPacket BuildAuthPacket()
         {
             var packet = new RconPacket
             {
                 id = _id++,
                 type = RconPacketType.SERVERDATA_AUTH,
-                body = Encoding.ASCII.GetBytes(_password)
+                body = _password
             };
 
             return packet;
@@ -90,10 +105,8 @@ namespace TrebuchetLib
             if (type == RconPacketType.SERVERDATA_AUTH_RESPONSE)
                 if (id == -1)
                     throw new Exception("Authentication failed.");
-                else
-                    OnRconResponded(new RconEventArgs(id, "Authentication successful"));
-            else if (type == RconPacketType.SERVERDATA_RESPONSE_VALUE)
-                OnRconResponded(new RconEventArgs(id, response));
+                else if (type == RconPacketType.SERVERDATA_RESPONSE_VALUE)
+                    OnRconResponded(new RconEventArgs(id, response));
         }
 
         private async Task RconThread(CancellationToken ct)
@@ -170,6 +183,7 @@ namespace TrebuchetLib
             foreach (var packet in _queue.GetConsumingEnumerable())
             {
                 await stream.WriteAsync(packet.GetRconRequest(), 0, packet.Length, ct);
+                OnRconSent(new RconEventArgs(packet.id, packet.body));
                 ct.ThrowIfCancellationRequested();
             }
             await stream.FlushAsync(ct);
@@ -202,7 +216,7 @@ namespace TrebuchetLib
         // https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
         private class RconPacket
         {
-            public byte[] body = new byte[0];
+            public string body = string.Empty;
             public int id;
             public RconPacketType type;
 
@@ -229,7 +243,7 @@ namespace TrebuchetLib
                 packet.AddRange(GetAutoBytes(Length));
                 packet.AddRange(GetAutoBytes(id));
                 packet.AddRange(GetAutoBytes((int)type));
-                packet.AddRange(body);
+                packet.AddRange(Encoding.ASCII.GetBytes(body));
                 packet.AddRange(new byte[] { 0, 0 });
 
                 return packet.ToArray();

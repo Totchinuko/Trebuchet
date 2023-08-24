@@ -157,12 +157,12 @@ namespace TrebuchetLib
             }
         }
 
-        public IConsoleLog GetServerConsoleLog(int instance)
+        public IConsole GetServerConsoleLog(int instance)
         {
             lock (_lock)
             {
                 if (_serverProcesses.TryGetValue(instance, out var watcher))
-                    return watcher;
+                    return watcher.Console;
                 throw new ArgumentException($"Server instance {instance} is not running.");
             }
         }

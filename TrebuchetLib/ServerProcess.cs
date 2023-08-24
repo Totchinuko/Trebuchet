@@ -7,11 +7,9 @@ using static SteamKit2.Internal.PublishedFileDetails;
 
 namespace Trebuchet
 {
-    public class ServerProcess : IServerStateReader, IDisposable, IConsoleLog
+    public class ServerProcess : IServerStateReader, IDisposable
     {
-        private readonly object _consoleLogLock = new object();
         private readonly object _processLock = new object();
-        private List<ConsoleLog> _consoleLog = new List<ConsoleLog>(201);
         private Process? _process;
         private ServerState _serverState;
         private SourceQueryReader? _sourceQueryReader;
@@ -23,7 +21,7 @@ namespace Trebuchet
             Modlist = modlist;
             Information = new ServerInstanceInformation(ServerInstance, profile.ServerName, profile.GameClientPort, profile.SourceQueryPort, profile.RConPort, profile.RConPassword);
             Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword);
-            Rcon.RconResponded += OnRconResponded;
+            Console = new MixedConsole(Rcon);
         }
 
         public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance, Process process, ProcessData data)
@@ -34,6 +32,7 @@ namespace Trebuchet
             ProcessData = data;
             Information = GetInformationFromIni(profile, instance);
             Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword);
+            Console = new MixedConsole(Rcon);
 
             _process = process;
             _process.EnableRaisingEvents = true;
@@ -53,14 +52,7 @@ namespace Trebuchet
 
         public bool Closed { get; private set; }
 
-        public IEnumerable<ConsoleLog> ConsoleLog
-        {
-            get
-            {
-                lock (_consoleLogLock)
-                    return _consoleLog.ToList();
-            }
-        }
+        public IConsole Console { get; }
 
         public ServerInstanceInformation Information { get; }
 
@@ -276,19 +268,6 @@ namespace Trebuchet
 
                 default:
                     return ProcessPriorityClass.Normal;
-            }
-        }
-
-        private void OnRconResponded(object? sender, RconEventArgs e)
-        {
-            lock (_consoleLogLock)
-            {
-                if (e.Id == -1 && e.Exception != null)
-                    _consoleLog.Add(new ConsoleLog(e.Exception.Message, e.Id));
-                else if (!string.IsNullOrWhiteSpace(e.Response))
-                    _consoleLog.Add(new ConsoleLog(e.Response, e.Id));
-                if (_consoleLog.Count > 200)
-                    _consoleLog.RemoveRange(0, _consoleLog.Count - 200);
             }
         }
 

@@ -10,6 +10,10 @@ namespace TrebuchetLib
     {
         event EventHandler<RconEventArgs>? RconResponded;
 
+        event EventHandler<RconEventArgs>? RconSent;
+
+        void Cancel();
+
         int Send(string data);
 
         IEnumerable<int> Send(IEnumerable<string> data);
