@@ -1,13 +1,16 @@
 ﻿using System.Diagnostics;
 using System.Net;
 using System.Threading;
+using TrebuchetLib;
 using Yuu.Ini;
 
 namespace Trebuchet
 {
-    public class ServerProcess : IServerStateReader, IDisposable
+    public class ServerProcess : IServerStateReader, IDisposable, IConsoleLog
     {
+        private readonly object _consoleLogLock = new object();
         private readonly object _processLock = new object();
+        private List<ConsoleLog> _consoleLog = new List<ConsoleLog>(201);
         private Process? _process;
         private ServerState _serverState;
         private SourceQueryReader? _sourceQueryReader;
@@ -17,7 +20,9 @@ namespace Trebuchet
             ServerInstance = instance;
             Profile = profile;
             Modlist = modlist;
-            Information = new ServerInstanceInformation(ServerInstance, profile.ServerName, profile.GameClientPort, profile.SourceQueryPort, profile.RConPort);
+            Information = new ServerInstanceInformation(ServerInstance, profile.ServerName, profile.GameClientPort, profile.SourceQueryPort, profile.RConPort, profile.RConPassword);
+            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword);
+            Rcon.RconResponded += OnRconResponded;
         }
 
         public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance, Process process, ProcessData data)
@@ -27,6 +32,7 @@ namespace Trebuchet
             Modlist = modlist;
             ProcessData = data;
             Information = GetInformationFromIni(profile, instance);
+            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword);
 
             _process = process;
             _process.EnableRaisingEvents = true;
@@ -46,6 +52,15 @@ namespace Trebuchet
 
         public bool Closed { get; private set; }
 
+        public IEnumerable<ConsoleLog> ConsoleLog
+        {
+            get
+            {
+                lock (_consoleLogLock)
+                    return _consoleLog.ToList();
+            }
+        }
+
         public ServerInstanceInformation Information { get; }
 
         public bool IsRunning => _process != null;
@@ -55,6 +70,8 @@ namespace Trebuchet
         public ProcessData ProcessData { get; private set; }
 
         public ServerProfile Profile { get; }
+
+        public IRcon Rcon { get; }
 
         public int ServerInstance { get; }
 
@@ -217,7 +234,7 @@ namespace Trebuchet
         {
             if (_sourceQueryReader != null) return;
 
-            _sourceQueryReader = new SourceQueryReader(new IPEndPoint(new IPAddress(new byte[] { 127, 0, 0, 1 }), Information.QueryPort), 4 * 1000, 5 * 1000);
+            _sourceQueryReader = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, Information.QueryPort), 4 * 1000, 5 * 1000);
         }
 
         private ServerInstanceInformation GetInformationFromIni(ServerProfile profile, int instance)
@@ -241,11 +258,14 @@ namespace Trebuchet
 
             document = IniParser.Parse(Tools.GetFileContent(Path.Combine(instancePath, string.Format(Config.FileIniServer, "Game"))));
             section = document.GetSection("RconPlugin");
+            string password = section.GetValue("RconPassword", string.Empty);
             int rconPort;
             if (!int.TryParse(section.GetValue("Port", "25575"), out rconPort))
                 rconPort = 25575;
 
-            return new ServerInstanceInformation(instance, title, port, queryPort, rconPort);
+            return new ServerInstanceInformation(instance, title, port, queryPort, rconPort, password);
+        }
+
         private ProcessPriorityClass GetPriority(int index)
         {
             switch (index)
@@ -263,6 +283,18 @@ namespace Trebuchet
                     return ProcessPriorityClass.Normal;
             }
         }
+
+        private void OnRconResponded(object? sender, RconEventArgs e)
+        {
+            lock (_consoleLogLock)
+            {
+                if (e.Id == -1 && e.Exception != null)
+                    _consoleLog.Add(new ConsoleLog(e.Exception.Message, e.Id));
+                else if (!string.IsNullOrWhiteSpace(e.Response))
+                    _consoleLog.Add(new ConsoleLog(e.Response, e.Id));
+                if (_consoleLog.Count > 200)
+                    _consoleLog.RemoveRange(0, _consoleLog.Count - 200);
+            }
         }
     }
 }

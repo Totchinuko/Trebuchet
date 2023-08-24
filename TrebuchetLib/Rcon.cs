@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace TrebuchetLib
 {
-    public class Rcon
+    public class Rcon : IRcon
     {
         private CancellationTokenSource? _cts;
         private IPEndPoint _endpoint;
@@ -47,6 +47,12 @@ namespace TrebuchetLib
             StartRconJob();
 
             return packet.id;
+        }
+
+        public IEnumerable<int> Send(IEnumerable<string> data)
+        {
+            foreach (string s in data)
+                yield return Send(s);
         }
 
         protected void OnRconResponded(RconEventArgs e)
