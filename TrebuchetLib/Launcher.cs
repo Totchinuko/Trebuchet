@@ -9,16 +9,11 @@ namespace TrebuchetLib
     public class Launcher : IDisposable
     {
         private static Regex _instanceRegex = new Regex(@"-TotInstance=([0-9+])");
-
         private ClientProcess? _clientProcess;
-
         private bool _isRunning = true;
         private object _lock = new object();
         private HashSet<string> _lockedFolders = new HashSet<string>();
-
         private Dictionary<int, ServerProcess> _serverProcesses = new Dictionary<int, ServerProcess>();
-
-        private BlockingCollection<Action> queue = new BlockingCollection<Action>(new ConcurrentQueue<Action>());
 
         public Launcher(Config config)
         {
@@ -126,11 +121,11 @@ namespace TrebuchetLib
         public void CloseServer(int instance)
         {
             Log.Write($"Requesting server instance {instance} stop", LogSeverity.Info);
-            Invoke(() =>
+            lock (_lock)
             {
                 if (_serverProcesses.TryGetValue(instance, out var watcher))
                     watcher.Close();
-            });
+            }
         }
 
         public void Dispose()
@@ -208,12 +203,12 @@ namespace TrebuchetLib
         /// </summary>
         public void KillClient()
         {
-            Invoke(() =>
+            lock (_lock)
             {
                 if (_clientProcess == null) return;
                 Log.Write("Requesting client process kill", LogSeverity.Info);
                 _clientProcess.Kill();
-            });
+            }
         }
 
         /// <summary>
@@ -222,14 +217,14 @@ namespace TrebuchetLib
         /// <param name="instance"></param>
         public void KillServer(int instance)
         {
-            Invoke(() =>
+            lock (_lock)
             {
                 if (_serverProcesses.TryGetValue(instance, out var watcher))
                 {
                     Log.Write($"Requesting server process kill on instance {instance}", LogSeverity.Info);
                     watcher.Kill();
                 }
-            });
+            }
         }
 
         private static bool GetInstance(string path, out int instance)
@@ -243,16 +238,19 @@ namespace TrebuchetLib
 
         private void FindExistingClient()
         {
-            if (_clientProcess != null) return;
-
             var data = Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
-            if (data.IsEmpty) return;
-            if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, out ClientProfile? profile, out ModListProfile? modlist)) return;
-            if (!data.TryGetProcess(out Process? process)) return;
+            lock (_lock)
+            {
+                if (_clientProcess != null) return;
+                if (data.IsEmpty) return;
+                if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, out ClientProfile? profile, out ModListProfile? modlist)) return;
+                if (!data.TryGetProcess(out Process? process)) return;
 
-            _clientProcess = new ClientProcess(profile, modlist, false, process, data);
-            _clientProcess.ProcessExited += OnClientProcessTerminate;
-            _lockedFolders.Add(GetCurrentClientJunction());
+                _clientProcess = new ClientProcess(profile, modlist, false, process, data);
+                _clientProcess.ProcessExited += OnClientProcessTerminate;
+                _lockedFolders.Add(GetCurrentClientJunction());
+            }
+
             OnClientProcessStarted(this, new TrebuchetStartEventArgs(data));
         }
 
@@ -261,15 +259,19 @@ namespace TrebuchetLib
             var processes = Tools.GetProcessesWithName(Config.FileServerBin);
             foreach (var p in processes)
             {
-                if (!GetInstance(p.args, out int instance)) continue;
-                if (_serverProcesses.ContainsKey(instance)) continue;
-                if (!p.TryGetProcess(out Process? process)) continue;
-                if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, instance, out ServerProfile? profile, out ModListProfile? modlist)) continue;
+                int instance;
+                lock (_lock)
+                {
+                    if (!GetInstance(p.args, out instance)) continue;
+                    if (_serverProcesses.ContainsKey(instance)) continue;
+                    if (!p.TryGetProcess(out Process? process)) continue;
+                    if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, instance, out ServerProfile? profile, out ModListProfile? modlist)) continue;
 
-                var watcher = new ServerProcess(profile, modlist, instance, process, p);
-                watcher.ProcessExited += OnServerProcessTerminate;
-                _serverProcesses.Add(instance, watcher);
-                _lockedFolders.Add(GetCurrentServerJunction(instance));
+                    var watcher = new ServerProcess(profile, modlist, instance, process, p);
+                    watcher.ProcessExited += OnServerProcessTerminate;
+                    _serverProcesses.Add(instance, watcher);
+                    _lockedFolders.Add(GetCurrentServerJunction(instance));
+                }
                 OnServerProcessStarted(this, new TrebuchetStartEventArgs(p, instance));
             }
         }
@@ -288,11 +290,6 @@ namespace TrebuchetLib
             if (JunctionPoint.Exists(path))
                 return JunctionPoint.GetTarget(path);
             else return string.Empty;
-        }
-
-        private void Invoke(Action callback)
-        {
-            queue.Add(callback);
         }
 
         private bool IsRestartWhenDown(string profileName)
@@ -321,11 +318,11 @@ namespace TrebuchetLib
 
             ClientTerminated?.Invoke(this, EventArgs.Empty);
 
-            Invoke(() =>
+            lock (_lock)
             {
                 _clientProcess = null;
                 _lockedFolders.Remove(GetCurrentClientJunction());
-            });
+            }
         }
 
         private void OnServerOnline(object? sender, int e)
@@ -353,7 +350,7 @@ namespace TrebuchetLib
 
             ServerTerminated?.Invoke(this, process.ServerInstance);
 
-            Invoke(() =>
+            lock (_lock)
             {
                 _serverProcesses.Remove(process.ServerInstance);
                 _lockedFolders.Remove(GetCurrentServerJunction(process.ServerInstance));
@@ -364,7 +361,7 @@ namespace TrebuchetLib
                     Log.Write($"Restarting server instance {process.ServerInstance}", LogSeverity.Info);
                     CatapultServer(process.Profile.ProfileName, process.Modlist.ProfileName, process.ServerInstance);
                 }
-            });
+            }
         }
 
         private void SetupJunction(string gamePath, string targetPath)
@@ -382,17 +379,11 @@ namespace TrebuchetLib
             DateTime lastSearch = DateTime.UtcNow;
             while (_isRunning)
             {
-                lock (_lock)
+                if (DateTime.UtcNow - lastSearch > TimeSpan.FromSeconds(1))
                 {
-                    while (queue.Count > 0)
-                        queue.Take().Invoke();
-
-                    if (DateTime.UtcNow - lastSearch > TimeSpan.FromSeconds(1))
-                    {
-                        lastSearch = DateTime.UtcNow;
-                        FindExistingClient();
-                        FindExistingServers();
-                    }
+                    lastSearch = DateTime.UtcNow;
+                    FindExistingClient();
+                    FindExistingServers();
                 }
 
                 Thread.Sleep(100);
