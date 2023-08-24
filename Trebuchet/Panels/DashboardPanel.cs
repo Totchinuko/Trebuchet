@@ -129,7 +129,7 @@ namespace Trebuchet
         /// </summary>
         public void UpdateServer()
         {
-            StrongReferenceMessenger.Default.Send<ServerMessages>();
+            StrongReferenceMessenger.Default.Send<ServerUpdateMessage>();
         }
 
         private void CreateInstancesIfNeeded()

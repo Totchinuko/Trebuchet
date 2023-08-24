@@ -52,7 +52,7 @@ namespace Trebuchet
 
         private void OnServerInstanceInstall(object? obj)
         {
-            StrongReferenceMessenger.Default.Send<ServerMessages>();
+            StrongReferenceMessenger.Default.Send<ServerUpdateMessage>();
         }
 
         private void UpdateRequiredActions()
