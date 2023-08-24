@@ -116,11 +116,11 @@ namespace TrebuchetLib
             client.ReceiveTimeout = _timeout;
             try
             {
-                await client.ConnectAsync(_endpoint, ct);
+                client.Connect(_endpoint);
                 if (!client.Connected)
                     throw new Exception("Failed to connect to server.");
 
-                await RconThreadLogin(client.GetStream(), ct);
+                RconThreadLogin(client.GetStream(), ct);
                 ct.ThrowIfCancellationRequested();
 
                 await RconThreadLoop(ct, client);
@@ -136,12 +136,14 @@ namespace TrebuchetLib
             }
         }
 
-        private async Task RconThreadLogin(NetworkStream stream, CancellationToken ct)
+        private void RconThreadLogin(NetworkStream stream, CancellationToken ct)
         {
             var auth = BuildAuthPacket();
-            await stream.WriteAsync(auth.GetRconRequest(), 0, auth.Length, ct);
+            stream.Write(auth.GetRconRequest(), 0, auth.Length);
+            stream.Flush();
+            //stream.Socket.Shutdown(SocketShutdown.Send);
             ct.ThrowIfCancellationRequested();
-            await RconThreadReceive(stream, ct);
+            RconThreadReceive(stream, ct);
         }
 
         private async Task RconThreadLoop(CancellationToken ct, TcpClient client)
@@ -152,7 +154,7 @@ namespace TrebuchetLib
                 if (_queue.Count != 0)
                 {
                     lastKeepAlive = DateTime.Now;
-                    await RconThreadSend(client, ct);
+                    RconThreadSend(client, ct);
                 }
 
                 if (_keepAlive == 0 || (DateTime.Now - lastKeepAlive).TotalMilliseconds > _keepAlive)
@@ -161,10 +163,10 @@ namespace TrebuchetLib
             }
         }
 
-        private async Task RconThreadReceive(NetworkStream stream, CancellationToken ct)
+        private void RconThreadReceive(NetworkStream stream, CancellationToken ct)
         {
             byte[] length = new byte[4];
-            await stream.ReadAsync(length, 0, 4, ct);
+            stream.Read(length, 0, 4);
             ct.ThrowIfCancellationRequested();
             if (!BitConverter.IsLittleEndian)
                 Array.Reverse(length);
@@ -173,23 +175,23 @@ namespace TrebuchetLib
                 throw new Exception("Invalid packet received.");
 
             byte[] rconpacket = new byte[size];
-            await stream.ReadAsync(rconpacket, 0, size, ct);
+            stream.Read(rconpacket, 0, size);
             ct.ThrowIfCancellationRequested();
             EvaluateRconResponse(rconpacket);
         }
 
-        private async Task RconThreadSend(TcpClient client, CancellationToken ct)
+        private void RconThreadSend(TcpClient client, CancellationToken ct)
         {
             using var stream = client.GetStream();
             foreach (var packet in _queue.GetConsumingEnumerable())
             {
-                await stream.WriteAsync(packet.GetRconRequest(), 0, packet.Length, ct);
+                stream.Write(packet.GetRconRequest(), 0, packet.Length);
                 if (!string.IsNullOrEmpty(packet.body))
                     OnRconSent(new RconEventArgs(packet.id, packet.body));
                 ct.ThrowIfCancellationRequested();
             }
-            await stream.FlushAsync(ct);
-            await RconThreadReceive(stream, ct);
+            stream.Flush();
+            RconThreadReceive(stream, ct);
         }
 
         private void StartRconJob()
