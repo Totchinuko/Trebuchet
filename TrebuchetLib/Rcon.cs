@@ -206,8 +206,7 @@ namespace TrebuchetLib
         {
             lock (_lock)
             {
-                if (_cts == null) return;
-                _cts.Cancel();
+                _cts?.Cancel();
                 _cts = null;
             }
         }
