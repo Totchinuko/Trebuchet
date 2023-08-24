@@ -3,6 +3,7 @@ using System.Net;
 using System.Threading;
 using TrebuchetLib;
 using Yuu.Ini;
+using static SteamKit2.Internal.PublishedFileDetails;
 
 namespace Trebuchet
 {
@@ -209,18 +210,12 @@ namespace Trebuchet
 
             process.Start();
 
-            ProcessData child = ProcessData.Empty;
-            while (child.IsEmpty && !process.HasExited)
+            ProcessData = await TryGetChildProcessData(process);
+            if (ProcessData.IsEmpty || !ProcessData.TryGetProcess(out _process))
             {
-                child = Tools.GetFirstChildProcesses(process.Id);
-                await Task.Delay(50);
+                OnProcessExited(this, EventArgs.Empty);
+                return;
             }
-
-            if (child.IsEmpty) return;
-            if (!child.TryGetProcess(out Process? childProcess)) return;
-
-            _process = childProcess;
-            ProcessData = child;
 
             _process.PriorityClass = GetPriority(Profile.ProcessPriority);
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
@@ -295,6 +290,18 @@ namespace Trebuchet
                 if (_consoleLog.Count > 200)
                     _consoleLog.RemoveRange(0, _consoleLog.Count - 200);
             }
+        }
+
+        private async Task<ProcessData> TryGetChildProcessData(Process process)
+        {
+            ProcessData child = ProcessData.Empty;
+            while (child.IsEmpty && !process.HasExited)
+            {
+                child = Tools.GetFirstChildProcesses(process.Id);
+                await Task.Delay(50);
+            }
+
+            return child;
         }
     }
 }
