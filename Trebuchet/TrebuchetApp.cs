@@ -23,7 +23,8 @@ namespace Trebuchet
         IRecipient<VerifyFilesMessage>,
         IRecipient<InstanceInstalledCountRequest>,
         IRecipient<PanelActivateMessage>,
-        IRecipient<ServerConsoleRequest>
+        IRecipient<ServerConsoleRequest>,
+        IRecipient<ServerInfoRequest>
     {
         private Panel? _activePanel;
 
@@ -51,6 +52,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<VerifyFilesMessage>(this);
             StrongReferenceMessenger.Default.Register<InstanceInstalledCountRequest>(this);
             StrongReferenceMessenger.Default.Register<PanelActivateMessage>(this);
+            StrongReferenceMessenger.Default.Register<ServerInfoRequest>(this);
 
             var menuConfig = GuiExtensions.GetEmbededTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
@@ -143,6 +145,11 @@ namespace Trebuchet
         public void Receive(ServerConsoleRequest message)
         {
             message.Reply(_trebuchet.Launcher.GetServerConsole(message.instance));
+        }
+
+        public void Receive(ServerInfoRequest message)
+        {
+            message.Reply(_trebuchet.Launcher.GetInstancesInformations().ToList());
         }
 
         internal virtual void OnAppClose()

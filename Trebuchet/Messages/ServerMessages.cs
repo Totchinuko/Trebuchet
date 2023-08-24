@@ -23,6 +23,9 @@ namespace Trebuchet
         }
     }
 
+    public class ServerInfoRequest : RequestMessage<List<ServerInstanceInformation>>
+    { }
+
     public abstract class ServerMessages
     {
     }
