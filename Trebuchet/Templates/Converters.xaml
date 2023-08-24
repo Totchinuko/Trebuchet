@@ -8,4 +8,5 @@
     <local:DataTypeConverter x:Key="DataType" />
     <local:IntDoubleConverter x:Key="IntDouble" />
     <local:InvBooleanConveter x:Key="InvBoolean" />
+    <local:UtcToStringConverter x:Key="UtcToString" />
 </ResourceDictionary>
