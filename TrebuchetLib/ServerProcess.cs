@@ -20,7 +20,7 @@ namespace Trebuchet
             Profile = profile;
             Modlist = modlist;
             Information = new ServerInstanceInformation(ServerInstance, profile.ServerName, profile.GameClientPort, profile.SourceQueryPort, profile.RConPort, profile.RConPassword);
-            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword);
+            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword, 5 * 1000, 30 * 3000);
             Console = new MixedConsole(Rcon);
         }
 
@@ -31,7 +31,7 @@ namespace Trebuchet
             Modlist = modlist;
             ProcessData = data;
             Information = GetInformationFromIni(profile, instance);
-            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword);
+            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword, 5 * 1000, 30 * 3000);
             Console = new MixedConsole(Rcon);
 
             _process = process;
