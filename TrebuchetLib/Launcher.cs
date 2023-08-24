@@ -157,7 +157,7 @@ namespace TrebuchetLib
             }
         }
 
-        public IConsole GetServerConsoleLog(int instance)
+        public IConsole GetServerConsole(int instance)
         {
             lock (_lock)
             {
