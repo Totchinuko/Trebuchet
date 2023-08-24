@@ -19,7 +19,7 @@ namespace Trebuchet
             ServerInstance = instance;
             Profile = profile;
             Modlist = modlist;
-            Information = new ServerInstanceInformation(ServerInstance, profile.ServerName, profile.GameClientPort, profile.SourceQueryPort, profile.RConPort, profile.RConPassword);
+            Information = new ServerInstanceInformation(ServerInstance, profile.ServerName, profile.GameClientPort, profile.SourceQueryPort, profile.EnableRCon ? profile.RConPort : 0, profile.RConPassword);
             Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword, 5 * 1000, 30 * 3000);
             Console = new MixedConsole(Rcon);
         }
@@ -249,8 +249,11 @@ namespace Trebuchet
             int rconPort;
             if (!int.TryParse(section.GetValue("Port", "25575"), out rconPort))
                 rconPort = 25575;
+            bool enabled;
+            if (!bool.TryParse(section.GetValue("RconEnabled", "False"), out enabled))
+                enabled = false;
 
-            return new ServerInstanceInformation(instance, title, port, queryPort, rconPort, password);
+            return new ServerInstanceInformation(instance, title, port, queryPort, enabled ? rconPort : 0, password);
         }
 
         private ProcessPriorityClass GetPriority(int index)
