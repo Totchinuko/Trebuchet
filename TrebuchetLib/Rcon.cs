@@ -184,7 +184,8 @@ namespace TrebuchetLib
             foreach (var packet in _queue.GetConsumingEnumerable())
             {
                 await stream.WriteAsync(packet.GetRconRequest(), 0, packet.Length, ct);
-                OnRconSent(new RconEventArgs(packet.id, packet.body));
+                if (!string.IsNullOrEmpty(packet.body))
+                    OnRconSent(new RconEventArgs(packet.id, packet.body));
                 ct.ThrowIfCancellationRequested();
             }
             await stream.FlushAsync(ct);
