@@ -8,13 +8,13 @@
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <ScrollViewer x:Name="ScrollArea" DragOver="ScrollArea_DragOver" Padding="0,0,6,0">
-        <ItemsControl ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}" VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling">
+        <ItemsControl ItemsSource="{Binding ItemsSource, RelativeSource={RelativeSource AncestorType=local:ReorderableList}}">
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <Border Name="MainRowBorder" 
+                    <Border Name="MainRowBorder"
                             DragEnter="Item_DragEnter"
                             DragLeave="Item_DragLeave"
-                            Drop="Item_Drop" 
+                            Drop="Item_Drop"
                             AllowDrop="True">
                         <StackPanel Orientation="Vertical">
                             <Border x:Name="GhostRow" CornerRadius="3" Background="Black" Opacity="0" Height="40">
@@ -24,8 +24,8 @@
                                         <Style.Triggers>
                                             <MultiDataTrigger>
                                                 <MultiDataTrigger.Conditions>
-                                                    <Condition Binding="{Binding (trebuchet:GuiExtensions.IsDraggedOver), ElementName=MainRowBorder}" Value="True"/>
-                                                    <Condition Binding="{Binding (trebuchet:GuiExtensions.IsDragging), ElementName=RowItem}" Value="False"/>
+                                                    <Condition Binding="{Binding (trebuchet:GuiExtensions.IsDraggedOver), ElementName=MainRowBorder}" Value="True" />
+                                                    <Condition Binding="{Binding (trebuchet:GuiExtensions.IsDragging), ElementName=RowItem}" Value="False" />
                                                 </MultiDataTrigger.Conditions>
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </MultiDataTrigger>
@@ -33,12 +33,12 @@
                                     </Style>
                                 </Border.Style>
                             </Border>
-                            <Border AllowDrop="True" Background="#FF000000" Opacity="0" Height="12"/>
-                            <Border Padding="8" 
+                            <Border AllowDrop="True" Background="#FF000000" Opacity="0" Height="12" />
+                            <Border Padding="8"
                                     x:Name="RowItem"
                                     ToolTip="Drag to reorder"
-                                    CornerRadius="3" 
-                                    MouseDown="Item_MouseDown" 
+                                    CornerRadius="3"
+                                    MouseDown="Item_MouseDown"
                                     AllowDrop="True">
                                 <Border.Style>
                                     <Style TargetType="Border">
