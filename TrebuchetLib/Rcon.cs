@@ -124,6 +124,7 @@ namespace TrebuchetLib
                 ct.ThrowIfCancellationRequested();
 
                 await RconThreadLoop(ct, client);
+                client.Close();
             }
             catch (Exception ex)
             {
