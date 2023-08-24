@@ -205,26 +205,9 @@ namespace Trebuchet
             _process = childProcess;
             ProcessData = child;
 
-            switch (Profile.ProcessPriority)
-            {
-                case 1:
-                    _process.PriorityClass = ProcessPriorityClass.AboveNormal;
-                    break;
-
-                case 2:
-                    _process.PriorityClass = ProcessPriorityClass.High;
-                    break;
-
-                case 3:
-                    _process.PriorityClass = ProcessPriorityClass.RealTime;
-                    break;
-
-                default:
-                    _process.PriorityClass = ProcessPriorityClass.Normal;
-                    break;
-            }
-
+            _process.PriorityClass = GetPriority(Profile.ProcessPriority);
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
+
             OnProcessStarted(ProcessData);
             CreateQueryPortListener();
             new Thread(ProcessRefresh).Start();
@@ -263,6 +246,23 @@ namespace Trebuchet
                 rconPort = 25575;
 
             return new ServerInstanceInformation(instance, title, port, queryPort, rconPort);
+        private ProcessPriorityClass GetPriority(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    return ProcessPriorityClass.AboveNormal;
+
+                case 2:
+                    return ProcessPriorityClass.High;
+
+                case 3:
+                    return ProcessPriorityClass.RealTime;
+
+                default:
+                    return ProcessPriorityClass.Normal;
+            }
+        }
         }
     }
 }
