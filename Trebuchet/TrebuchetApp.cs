@@ -19,7 +19,7 @@ namespace Trebuchet
         IRecipient<CatapultMessage>,
         IRecipient<ConfigRequest>,
         IRecipient<CloseProcessMessage>,
-        IRecipient<ServerUpdateMessage>,
+        IRecipient<ServerMessages>,
         IRecipient<VerifyFilesMessage>,
         IRecipient<InstanceInstalledCountRequest>,
         IRecipient<PanelActivateMessage>
@@ -115,11 +115,11 @@ namespace Trebuchet
                 _trebuchet.Launcher.KillClient();
         }
 
-        void IRecipient<ServerUpdateMessage>.Receive(ServerUpdateMessage message)
+        void IRecipient<ServerMessages>.Receive(ServerMessages message)
         {
             if (message is ServerUpdateModsMessage mods)
                 UpdateServerMods(mods.modlist);
-            else
+            else if (message is ServerUpdateMessage)
                 UpdateServers();
         }
 
