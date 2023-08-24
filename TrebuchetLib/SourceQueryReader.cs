@@ -8,6 +8,9 @@ using System.Threading.Tasks;
 using System.ComponentModel;
 using System.Threading;
 using Trebuchet;
+using static SteamKit2.GC.Dota.Internal.CMsgDOTABotDebugInfo;
+using static SteamKit2.Internal.CMsgNetworkDevicesData.Device.Wireless;
+using static Trebuchet.SourceQueryReader;
 
 namespace Trebuchet
 {
@@ -122,79 +125,57 @@ namespace Trebuchet
                 return;
             _lastUpdate = DateTime.Now;
 
-            using (UdpClient udp = new UdpClient())
+            try
             {
-                udp.Client.ReceiveTimeout = _timeout;
-
-                try
-                {
-                    udp.Send(REQUEST, REQUEST.Length, _endpoint);
-                }
-                catch (Exception ex)
-                {
-                    Log.Write(ex);
-                    udp.Close();
-                    Online = false;
-                    return;
-                }
-
-                try
-                {
-                    using (MemoryStream ms = new MemoryStream(udp.Receive(ref _endpoint)))
-                    {
-                        using (BinaryReader br = new BinaryReader(ms, Encoding.UTF8))
-                        {
-                            try
-                            {
-                                ms.Seek(4, SeekOrigin.Begin);   // skip the 4 0xFFs
-                                Header = br.ReadByte();
-                                Protocol = br.ReadByte();
-                                Name = br.ReadNullTerminatedString();
-                                Map = br.ReadNullTerminatedString();
-                                Folder = br.ReadNullTerminatedString();
-                                Game = br.ReadNullTerminatedString();
-                                ID = br.ReadInt16();
-                                Players = br.ReadByte();
-                                MaxPlayers = br.ReadByte();
-                                Bots = br.ReadByte();
-                                ServerType = (ServerTypeFlags)br.ReadByte();
-                                Environment = (EnvironmentFlags)br.ReadByte();
-                                Visibility = (VisibilityFlags)br.ReadByte();
-                                VAC = (VACFlags)br.ReadByte();
-                                Version = br.ReadNullTerminatedString();
-                                Online = true;
-                                Log.Write($"Endpoint={_endpoint.Address}:{_endpoint.Port} Name={Name}, Online={Online}, Players={Players}/{MaxPlayers}", LogSeverity.Debug);
-                            }
-                            catch (Exception ex)
-                            {
-                                Log.Write(ex);
-                                Online = false;
-                                return;
-                            }
-                            finally
-                            {
-                                br.Close();
-                                ms.Close();
-                                udp.Close();
-                            }
-                        }
-                    }
-                }
-                catch (SocketException ex)
-                {
-                    Log.Write($"Endpoint={_endpoint.Address.ToString()}:{_endpoint.Port} {ex.SocketErrorCode}.", LogSeverity.Debug);
-                    Online = false;
-                    udp.Close();
-                    return;
-                }
-                catch (Exception ex)
-                {
-                    Log.Write(ex);
-                    Online = false;
-                    udp.Close();
-                    return;
-                }
+                ProcessQuery();
             }
+            catch (SocketException ex)
+            {
+                Log.Write($"Endpoint={_endpoint.Address.ToString()}:{_endpoint.Port} {ex.SocketErrorCode}.", LogSeverity.Debug);
+                Online = false;
+            }
+            catch (Exception ex)
+            {
+                Log.Write(ex);
+                Online = false;
+            }
+        }
+
+        private void ProcessQuery()
+        {
+            using UdpClient udp = new UdpClient();
+            udp.Client.ReceiveTimeout = _timeout;
+            udp.Send(REQUEST, REQUEST.Length, _endpoint);
+            var result = udp.Receive(ref _endpoint);
+
+            using MemoryStream ms = new MemoryStream(result);
+            using BinaryReader br = new BinaryReader(ms, Encoding.UTF8);
+            ReadResponse(ms, br);
+            br.Close();
+            ms.Close();
+            udp.Close();
+        }
+
+        private void ReadResponse(MemoryStream ms, BinaryReader br)
+        {
+            ms.Seek(4, SeekOrigin.Begin);   // skip the 4 0xFFs
+            Header = br.ReadByte();
+            Protocol = br.ReadByte();
+            Name = br.ReadNullTerminatedString();
+            Map = br.ReadNullTerminatedString();
+            Folder = br.ReadNullTerminatedString();
+            Game = br.ReadNullTerminatedString();
+            ID = br.ReadInt16();
+            Players = br.ReadByte();
+            MaxPlayers = br.ReadByte();
+            Bots = br.ReadByte();
+            ServerType = (ServerTypeFlags)br.ReadByte();
+            Environment = (EnvironmentFlags)br.ReadByte();
+            Visibility = (VisibilityFlags)br.ReadByte();
+            VAC = (VACFlags)br.ReadByte();
+            Version = br.ReadNullTerminatedString();
+            Online = true;
+            Log.Write($"Endpoint={_endpoint.Address}:{_endpoint.Port} Name={Name}, Online={Online}, Players={Players}/{MaxPlayers}", LogSeverity.Debug);
         }
 
         //ExtraDataFlag = (ExtraDataFlags)br.ReadByte();
