@@ -22,7 +22,8 @@ namespace Trebuchet
         IRecipient<ServerMessages>,
         IRecipient<VerifyFilesMessage>,
         IRecipient<InstanceInstalledCountRequest>,
-        IRecipient<PanelActivateMessage>
+        IRecipient<PanelActivateMessage>,
+        IRecipient<ServerConsoleRequest>
     {
         private Panel? _activePanel;
 
@@ -45,6 +46,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<KillProcessMessage>(this);
             StrongReferenceMessenger.Default.Register<ShutdownProcessMessage>(this);
             StrongReferenceMessenger.Default.Register<ServerUpdateModsMessage>(this);
+            StrongReferenceMessenger.Default.Register<ServerConsoleRequest>(this);
             StrongReferenceMessenger.Default.Register<ServerUpdateMessage>(this);
             StrongReferenceMessenger.Default.Register<VerifyFilesMessage>(this);
             StrongReferenceMessenger.Default.Register<InstanceInstalledCountRequest>(this);
@@ -136,6 +138,11 @@ namespace Trebuchet
         public void Receive(PanelActivateMessage message)
         {
             ActivePanel = message.panel;
+        }
+
+        public void Receive(ServerConsoleRequest message)
+        {
+            message.Reply(_trebuchet.Launcher.GetServerConsole(message.instance));
         }
 
         internal virtual void OnAppClose()
