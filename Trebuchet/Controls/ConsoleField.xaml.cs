@@ -27,17 +27,7 @@ namespace Trebuchet.Controls
         public ICommand Command
         {
             get => (ICommand)GetValue(CommandProperty);
-            set
-            {
-                if (Command != null)
-                    Command.CanExecuteChanged -= Command_CanExecuteChanged;
-                SetValue(CommandProperty, value);
-                if (Command != null)
-                {
-                    IsEnabled = Command.CanExecute(null);
-                    Command.CanExecuteChanged += Command_CanExecuteChanged;
-                }
-            }
+            set => SetValue(CommandProperty, value);
         }
 
         public int MaxLength
@@ -61,7 +51,13 @@ namespace Trebuchet.Controls
         private static void OnCommandChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
         {
             if (d is ConsoleField consoleField)
+            {
+                if (e.OldValue != null && e.OldValue is ICommand oldCommand)
+                    oldCommand.CanExecuteChanged -= consoleField.Command_CanExecuteChanged;
                 consoleField.Command_CanExecuteChanged(consoleField.Command, EventArgs.Empty);
+                if (e.NewValue != null && e.NewValue is ICommand newCommand)
+                    newCommand.CanExecuteChanged += consoleField.Command_CanExecuteChanged;
+            }
         }
 
         private static void OnPlaceHolderChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
