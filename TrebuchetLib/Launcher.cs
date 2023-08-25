@@ -287,7 +287,7 @@ namespace TrebuchetLib
         {
             ClientProcessStateChanged?.Invoke(this, e);
 
-            if (e.NewDetails.State != ProcessState.CRASHED || e.NewDetails.State != ProcessState.STOPPED) return;
+            if (e.NewDetails.State.IsRunning()) return;
 
             lock (_lock)
             {
@@ -299,7 +299,7 @@ namespace TrebuchetLib
         private void OnServerProcessStateChanged(object? sender, ProcessServerDetailsEventArgs e)
         {
             ServerProcessStateChanged?.Invoke(this, e);
-            if (e.NewDetails.State != ProcessState.STOPPED || e.NewDetails.State != ProcessState.CRASHED) return;
+            if (e.NewDetails.State.IsRunning()) return;
             lock (_lock)
             {
                 _serverProcesses.Remove(e.NewDetails.Instance);
