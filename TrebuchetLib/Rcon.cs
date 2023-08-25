@@ -19,7 +19,7 @@ namespace TrebuchetLib
         private int _keepAlive;
         private object _lock = new object();
         private string _password;
-        private Queue<RconPacket> _queue = new Queue<RconPacket>();
+        private ConcurrentQueue<RconPacket> _queue = new ConcurrentQueue<RconPacket>();
         private int _timeout;
 
         public Rcon(IPEndPoint endpoint, string password, int timeout = 5000, int keepAlive = 0)
@@ -54,8 +54,7 @@ namespace TrebuchetLib
                 body = data
             };
 
-            lock (_queue)
-                _queue.Enqueue(packet);
+            _queue.Enqueue(packet);
             StartRconJob();
 
             return packet.id;
@@ -111,12 +110,6 @@ namespace TrebuchetLib
                 throw new Exception("Authentication failed.");
 
             return response;
-        }
-
-        private RconPacket? GetNextPacket()
-        {
-            lock (_queue)
-                return _queue.Count == 0 ? null : _queue.Dequeue();
         }
 
         private async Task RconThread(CancellationToken ct)
@@ -183,8 +176,7 @@ namespace TrebuchetLib
         private void RconThreadSend(TcpClient client, CancellationToken ct)
         {
             using var bw = new BinaryWriter(client.GetStream(), Encoding.ASCII, true);
-            RconPacket? packet;
-            while ((packet = GetNextPacket()) != null)
+            while (_queue.TryDequeue(out var packet))
             {
                 packet.WriteBinary(bw);
                 if (!string.IsNullOrEmpty(packet.body))
