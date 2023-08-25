@@ -17,7 +17,7 @@ namespace TrebuchetLib
         {
             _rcon = rcon;
             _rcon.RconResponded += OnRconMessaged;
-            _rcon.RconSent += OnRconMessaged;
+            _rcon.RconSent += OnRconSent;
         }
 
         public event EventHandler<ConsoleLogEventArgs>? LogReceived;
@@ -43,22 +43,31 @@ namespace TrebuchetLib
             _rcon.Send(data);
         }
 
-        private void OnRconMessaged(object? sender, RconEventArgs e)
+        private void AddLog(ConsoleLog log)
         {
             lock (_consoleLogLock)
             {
-                ConsoleLog log;
-                if (e.Id == -1 && e.Exception != null)
-                    log = new ConsoleLog(e.Exception.Message, e.Id);
-                else if (!string.IsNullOrWhiteSpace(e.Response))
-                    log = new ConsoleLog(e.Response, e.Id);
-                else return;
-
                 _consoleLog.Add(log);
-                LogReceived?.Invoke(this, new ConsoleLogEventArgs(log));
                 if (_consoleLog.Count > 200)
                     _consoleLog.RemoveRange(0, _consoleLog.Count - 200);
             }
+            LogReceived?.Invoke(this, new ConsoleLogEventArgs(log));
+        }
+
+        private void OnRconMessaged(object? sender, RconEventArgs e)
+        {
+            if (e.Exception != null)
+                AddLog(new ConsoleLog(e.Exception.Message, true, true));
+            else if (!string.IsNullOrWhiteSpace(e.Response))
+                AddLog(new ConsoleLog(e.Response, false, true));
+        }
+
+        private void OnRconSent(object? sender, RconEventArgs e)
+        {
+            if (e.Exception != null)
+                AddLog(new ConsoleLog(e.Exception.Message, true, false));
+            else if (!string.IsNullOrWhiteSpace(e.Response))
+                AddLog(new ConsoleLog(e.Response, false, false));
         }
     }
 }

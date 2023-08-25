@@ -161,10 +161,10 @@ namespace Trebuchet
             ms.Seek(4, SeekOrigin.Begin);   // skip the 4 0xFFs
             Header = br.ReadByte();
             Protocol = br.ReadByte();
-            Name = br.ReadNullTerminatedString();
-            Map = br.ReadNullTerminatedString();
-            Folder = br.ReadNullTerminatedString();
-            Game = br.ReadNullTerminatedString();
+            Name = br.ReadNullTerminatedString() ?? string.Empty;
+            Map = br.ReadNullTerminatedString() ?? string.Empty;
+            Folder = br.ReadNullTerminatedString() ?? string.Empty;
+            Game = br.ReadNullTerminatedString() ?? string.Empty;
             ID = br.ReadInt16();
             Players = br.ReadByte();
             MaxPlayers = br.ReadByte();
@@ -173,7 +173,7 @@ namespace Trebuchet
             Environment = (EnvironmentFlags)br.ReadByte();
             Visibility = (VisibilityFlags)br.ReadByte();
             VAC = (VACFlags)br.ReadByte();
-            Version = br.ReadNullTerminatedString();
+            Version = br.ReadNullTerminatedString() ?? string.Empty;
             Online = true;
             Log.Write($"Endpoint={_endpoint.Address}:{_endpoint.Port} Name={Name}, Online={Online}, Players={Players}/{MaxPlayers}", LogSeverity.Debug);
         }

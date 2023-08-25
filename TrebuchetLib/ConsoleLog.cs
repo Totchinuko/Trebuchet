@@ -8,16 +8,19 @@ namespace TrebuchetLib
 {
     public class ConsoleLog
     {
-        public ConsoleLog(string body, int id)
+        public ConsoleLog(string body, bool isError, bool isReceived)
         {
             UtcTime = DateTime.UtcNow;
             Body = body;
-            Id = id;
+            IsError = isError;
+            IsReceived = isReceived;
         }
 
         public string Body { get; }
 
-        public int Id { get; }
+        public bool IsError { get; }
+
+        public bool IsReceived { get; }
 
         public DateTime UtcTime { get; }
     }

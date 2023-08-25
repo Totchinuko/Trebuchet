@@ -211,7 +211,7 @@ namespace Trebuchet
         /// <summary>Reads a null-terminated string into a c# compatible string.</summary>
         /// <param name="input">Binary reader to pull the null-terminated string from.  Make sure it is correctly positioned in the stream before calling.</param>
         /// <returns>String of the same encoding as the input BinaryReader.</returns>
-        public static string ReadNullTerminatedString(this BinaryReader input)
+        public static string? ReadNullTerminatedString(this BinaryReader input)
         {
             StringBuilder sb = new StringBuilder();
             char read = input.ReadChar();
@@ -220,7 +220,8 @@ namespace Trebuchet
                 sb.Append(read);
                 read = input.ReadChar();
             }
-            return sb.ToString();
+            string result = sb.ToString();
+            return string.IsNullOrEmpty(result) ? null : result;
         }
 
         public static string RemoveExtension(this string path) => path[..^Path.GetExtension(path).Length];
@@ -308,6 +309,13 @@ namespace Trebuchet
             using (ZipArchive archive = ZipFile.OpenRead(file))
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     entry.ExtractToFile(Path.Join(destination, entry.FullName));
+        }
+
+        public static void WriteNullTerminatedString(this BinaryWriter writer, string content)
+        {
+            byte[] bytes = Encoding.ASCII.GetBytes(content);
+            writer.Write(bytes);
+            writer.Write((byte)0);
         }
     }
 }

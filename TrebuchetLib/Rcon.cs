@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Text;
 using System.Threading.Tasks;
+using Trebuchet;
 
 namespace TrebuchetLib
 {
@@ -18,7 +19,7 @@ namespace TrebuchetLib
         private int _keepAlive;
         private object _lock = new object();
         private string _password;
-        private BlockingCollection<RconPacket> _queue = new BlockingCollection<RconPacket>(new ConcurrentQueue<RconPacket>());
+        private Queue<RconPacket> _queue = new Queue<RconPacket>();
         private int _timeout;
 
         public Rcon(IPEndPoint endpoint, string password, int timeout = 5000, int keepAlive = 0)
@@ -53,7 +54,8 @@ namespace TrebuchetLib
                 body = data
             };
 
-            _queue.Add(packet);
+            lock (_queue)
+                _queue.Enqueue(packet);
             StartRconJob();
 
             return packet.id;
@@ -73,7 +75,7 @@ namespace TrebuchetLib
         protected void OnRconResponded(Exception ex)
         {
             if (ex is not OperationCanceledException)
-                RconResponded?.Invoke(this, new RconEventArgs(-1, string.Empty, ex));
+                RconResponded?.Invoke(this, new RconEventArgs(string.Empty, ex));
         }
 
         protected void OnRconSent(RconEventArgs e)
@@ -85,7 +87,7 @@ namespace TrebuchetLib
         {
             var packet = new RconPacket
             {
-                id = _id++,
+                id = ++_id,
                 type = RconPacketType.SERVERDATA_AUTH,
                 body = _password
             };
@@ -93,25 +95,33 @@ namespace TrebuchetLib
             return packet;
         }
 
-        private void EvaluateRconResponse(byte[] data)
+        private string? EvaluateRconResponse(BinaryReader br)
         {
-            if (data.Length < 10 || !data[^2..].SequenceEqual(new byte[] { 0, 0 }))
+            int size = br.ReadInt32();
+            if (size < 10 || size > 4096) // rcon message (called packet) can never be larger than 4096 bytes and never smaller than 10, this is by design in the protocol definition
                 throw new Exception("Invalid packet received.");
 
-            int id = RconPacket.GetAutoInt32(data[..4]);
-            RconPacketType type = (RconPacketType)RconPacket.GetAutoInt32(data[4..8]);
-            string response = Encoding.ASCII.GetString(data[8..^2]);
+            int id = br.ReadInt32();
+            RconPacketType type = (RconPacketType)br.ReadInt32();
+            string? response = br.ReadNullTerminatedString();
+            if (br.ReadByte() != 0)
+                throw new Exception("Invalid packet received.");
 
-            if (type == RconPacketType.SERVERDATA_AUTH_RESPONSE)
-                if (id == -1)
-                    throw new Exception("Authentication failed.");
-                else if (type == RconPacketType.SERVERDATA_RESPONSE_VALUE)
-                    OnRconResponded(new RconEventArgs(id, response));
+            if (id == -1)
+                throw new Exception("Authentication failed.");
+
+            return response;
+        }
+
+        private RconPacket? GetNextPacket()
+        {
+            lock (_queue)
+                return _queue.Count == 0 ? null : _queue.Dequeue();
         }
 
         private async Task RconThread(CancellationToken ct)
         {
-            using var client = new TcpClient();
+            var client = new TcpClient();
             client.SendTimeout = _timeout;
             client.ReceiveTimeout = _timeout;
             try
@@ -124,7 +134,6 @@ namespace TrebuchetLib
                 ct.ThrowIfCancellationRequested();
 
                 await RconThreadLoop(ct, client);
-                client.Close();
             }
             catch (Exception ex)
             {
@@ -132,6 +141,7 @@ namespace TrebuchetLib
             }
             finally
             {
+                client.Dispose();
                 StopRconJob();
             }
         }
@@ -139,9 +149,8 @@ namespace TrebuchetLib
         private void RconThreadLogin(NetworkStream stream, CancellationToken ct)
         {
             var auth = BuildAuthPacket();
-            stream.Write(auth.GetRconRequest(), 0, auth.Length);
-            stream.Flush();
-            //stream.Socket.Shutdown(SocketShutdown.Send);
+            using var bw = new BinaryWriter(stream, Encoding.ASCII, true);
+            auth.WriteBinary(bw);
             ct.ThrowIfCancellationRequested();
             RconThreadReceive(stream, ct);
         }
@@ -149,7 +158,7 @@ namespace TrebuchetLib
         private async Task RconThreadLoop(CancellationToken ct, TcpClient client)
         {
             DateTime lastKeepAlive = DateTime.Now;
-            while (!ct.IsCancellationRequested)
+            while (!ct.IsCancellationRequested && client.Connected)
             {
                 if (_queue.Count != 0)
                 {
@@ -165,33 +174,24 @@ namespace TrebuchetLib
 
         private void RconThreadReceive(NetworkStream stream, CancellationToken ct)
         {
-            byte[] length = new byte[4];
-            stream.Read(length, 0, 4);
+            using var br = new BinaryReader(stream, Encoding.ASCII, true);
             ct.ThrowIfCancellationRequested();
-            if (!BitConverter.IsLittleEndian)
-                Array.Reverse(length);
-            int size = BitConverter.ToInt32(length, 0);
-            if (size < 10 || size > 4096) // rcon message (called packet) can never be larger than 4096 bytes and never smaller than 10, this is by design in the protocol definition
-                throw new Exception("Invalid packet received.");
-
-            byte[] rconpacket = new byte[size];
-            stream.Read(rconpacket, 0, size);
-            ct.ThrowIfCancellationRequested();
-            EvaluateRconResponse(rconpacket);
+            string body = EvaluateRconResponse(br) ?? string.Empty;
+            OnRconResponded(new RconEventArgs(body));
         }
 
         private void RconThreadSend(TcpClient client, CancellationToken ct)
         {
-            using var stream = client.GetStream();
-            foreach (var packet in _queue.GetConsumingEnumerable())
+            using var bw = new BinaryWriter(client.GetStream(), Encoding.ASCII, true);
+            RconPacket? packet;
+            while ((packet = GetNextPacket()) != null)
             {
-                stream.Write(packet.GetRconRequest(), 0, packet.Length);
+                packet.WriteBinary(bw);
                 if (!string.IsNullOrEmpty(packet.body))
-                    OnRconSent(new RconEventArgs(packet.id, packet.body));
+                    OnRconSent(new RconEventArgs(packet.body));
                 ct.ThrowIfCancellationRequested();
             }
-            stream.Flush();
-            RconThreadReceive(stream, ct);
+            RconThreadReceive(client.GetStream(), ct);
         }
 
         private void StartRconJob()
@@ -211,6 +211,15 @@ namespace TrebuchetLib
                 _cts?.Cancel();
                 _cts = null;
             }
+        }
+
+        private void WriteEmpty(BinaryWriter bw, int id)
+        {
+            bw.Write(10);
+            bw.Write(id);
+            bw.Write((int)RconPacketType.SERVERDATA_RESPONSE_VALUE);
+            bw.Write((byte)0);
+            bw.Write((byte)0);
         }
 
         // Message contains int32 length, int32 request id, int32 type, string body null terminated, string null terminator
@@ -240,32 +249,26 @@ namespace TrebuchetLib
                 return BitConverter.ToInt32(data);
             }
 
-            public byte[] GetRconRequest()
+            public void WriteBinary(BinaryWriter bw)
             {
-                var packet = new List<byte>();
-                packet.AddRange(GetAutoBytes(Length));
-                packet.AddRange(GetAutoBytes(id));
-                packet.AddRange(GetAutoBytes((int)type));
-                packet.AddRange(Encoding.ASCII.GetBytes(body));
-                packet.AddRange(new byte[] { 0, 0 });
-
-                return packet.ToArray();
+                bw.Write(Length);
+                bw.Write(id);
+                bw.Write((int)type);
+                bw.WriteNullTerminatedString(body);
+                bw.Write((byte)0);
             }
         }
     }
 
     public class RconEventArgs
     {
-        public RconEventArgs(int id, string response, Exception? exception = null)
+        public RconEventArgs(string response, Exception? exception = null)
         {
-            Id = id;
             Response = response;
             Exception = exception;
         }
 
         public Exception? Exception { get; }
-
-        public int Id { get; }
 
         public string Response { get; }
     }
