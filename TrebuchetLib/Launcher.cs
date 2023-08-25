@@ -13,13 +13,14 @@ namespace TrebuchetLib
         private bool _isRunning = true;
         private object _lock = new object();
         private HashSet<string> _lockedFolders = new HashSet<string>();
-        private Dictionary<int, ServerProcess> _serverProcesses = new Dictionary<int, ServerProcess>();
+        private ConcurrentDictionary<int, ServerProcess> _serverProcesses = new ConcurrentDictionary<int, ServerProcess>();
+        private ConcurrentQueue<Action> _threadQueue = new ConcurrentQueue<Action>();
 
         public Launcher(Config config)
         {
             Config = config;
 
-            Task.Run(Tick);
+            Task.Run(ThreadLoop);
         }
 
         public event EventHandler<ProcessDetailsEventArgs>? ClientProcessStateChanged;
@@ -27,6 +28,20 @@ namespace TrebuchetLib
         public event EventHandler<ProcessServerDetailsEventArgs>? ServerProcessStateChanged;
 
         public Config Config { get; }
+
+        private ClientProcess? ClientProcess
+        {
+            get
+            {
+                lock (_lock)
+                    return _clientProcess;
+            }
+            set
+            {
+                lock (_lock)
+                    _clientProcess = value;
+            }
+        }
 
         /// <summary>
         /// Launch a client process while taking care of everything. Generate the modlist, generate the ini settings, etc.
@@ -39,9 +54,9 @@ namespace TrebuchetLib
         /// <exception cref="ArgumentException">Profiles can only be used by one process at a times, since they contain the db of the game.</exception>
         public void CatapultClient(string profileName, string modlistName, bool isBattleEye)
         {
-            lock (_lock)
+            Invoke(() =>
             {
-                if (_clientProcess != null) return;
+                if (ClientProcess != null) return;
 
                 if (!ClientProfile.TryLoadProfile(Config, profileName, out ClientProfile? profile))
                     throw new FileNotFoundException($"{profileName} profile not found.");
@@ -53,14 +68,14 @@ namespace TrebuchetLib
 
                 SetupJunction(Config.ClientPath, profile.ProfileFolder);
 
-                _clientProcess = new ClientProcess(profile, modlist, isBattleEye);
-                _clientProcess.ProcessStateChanged += OnClientProcessStateChanged;
+                ClientProcess = new ClientProcess(profile, modlist, isBattleEye);
+                ClientProcess.ProcessStateChanged += OnClientProcessStateChanged;
 
                 _lockedFolders.Add(GetCurrentClientJunction());
                 Log.Write($"Locking folder {profile.ProfileName}", LogSeverity.Debug);
                 Log.Write($"Launching client process with profile {profileName} and modlist {modlistName}", LogSeverity.Info);
-                Task.Run(_clientProcess.StartProcessAsync);
-            }
+                Task.Run(ClientProcess.StartProcessAsync);
+            });
         }
 
         /// <summary>
@@ -74,7 +89,7 @@ namespace TrebuchetLib
         /// <exception cref="ArgumentException">Profiles can only be used by one process at a times, since they contain the db of the game.</exception>
         public void CatapultServer(string profileName, string modlistName, int instance)
         {
-            lock (_lock)
+            Invoke(() =>
             {
                 if (_serverProcesses.ContainsKey(instance)) return;
 
@@ -90,13 +105,13 @@ namespace TrebuchetLib
 
                 ServerProcess watcher = new ServerProcess(profile, modlist, instance);
                 watcher.ProcessStateChanged += OnServerProcessStateChanged;
-                _serverProcesses.Add(instance, watcher);
+                _serverProcesses.TryAdd(instance, watcher);
 
                 _lockedFolders.Add(GetCurrentServerJunction(instance));
                 Log.Write($"Locking folder {profile.ProfileName}", LogSeverity.Debug);
                 Log.Write($"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}", LogSeverity.Info);
                 Task.Run(watcher.StartProcessAsync);
-            }
+            });
         }
 
         /// <summary>
@@ -106,47 +121,41 @@ namespace TrebuchetLib
         public void CloseServer(int instance)
         {
             Log.Write($"Requesting server instance {instance} stop", LogSeverity.Info);
-            lock (_lock)
+            Invoke(() =>
             {
                 if (_serverProcesses.TryGetValue(instance, out var watcher))
                     watcher.Close();
-            }
+            });
         }
 
         public void Dispose()
         {
-            lock (_lock)
+            Invoke(() =>
             {
                 _isRunning = false;
                 foreach (var item in _serverProcesses)
                     item.Value.Dispose();
                 _serverProcesses.Clear();
-            }
+            });
         }
 
         public ProcessDetails? GetClientDetails()
         {
-            return _clientProcess?.ProcessDetails;
+            return ClientProcess?.ProcessDetails;
         }
 
         public IConsole GetServerConsole(int instance)
         {
-            lock (_lock)
-            {
-                if (_serverProcesses.TryGetValue(instance, out var watcher))
-                    return watcher.Console;
-                throw new ArgumentException($"Server instance {instance} is not running.");
-            }
+            if (_serverProcesses.TryGetValue(instance, out var watcher))
+                return watcher.Console;
+            throw new ArgumentException($"Server instance {instance} is not running.");
         }
 
         public IRcon GetServerRcon(int instance)
         {
-            lock (_lock)
-            {
-                if (_serverProcesses.TryGetValue(instance, out var watcher))
-                    return watcher.Rcon;
-                throw new ArgumentException($"Server instance {instance} is not running.");
-            }
+            if (_serverProcesses.TryGetValue(instance, out var watcher))
+                return watcher.Rcon;
+            throw new ArgumentException($"Server instance {instance} is not running.");
         }
 
         /// <summary>
@@ -155,27 +164,23 @@ namespace TrebuchetLib
         /// <returns></returns>
         public IEnumerable<ProcessServerDetails> GetServersDetails()
         {
-            lock (_lock)
-            {
-                foreach (ServerProcess p in _serverProcesses.Values)
-                    yield return p.ProcessDetails;
-            }
+            foreach (ServerProcess p in _serverProcesses.Values)
+                yield return p.ProcessDetails;
+        }
+
+        public void Invoke(Action action)
+        {
+            _threadQueue.Enqueue(action);
         }
 
         public bool IsAnyServerRunning()
         {
-            lock (_lock)
-            {
-                return _serverProcesses.Count > 0;
-            }
+            return _serverProcesses.Count > 0;
         }
 
         public bool IsClientRunning()
         {
-            lock (_lock)
-            {
-                return _clientProcess != null;
-            }
+            return ClientProcess != null;
         }
 
         /// <summary>
@@ -183,12 +188,12 @@ namespace TrebuchetLib
         /// </summary>
         public void KillClient()
         {
-            lock (_lock)
+            Invoke(() =>
             {
-                if (_clientProcess == null) return;
+                if (ClientProcess == null) return;
                 Log.Write("Requesting client process kill", LogSeverity.Info);
-                _clientProcess.Kill();
-            }
+                ClientProcess.Kill();
+            });
         }
 
         /// <summary>
@@ -197,14 +202,14 @@ namespace TrebuchetLib
         /// <param name="instance"></param>
         public void KillServer(int instance)
         {
-            lock (_lock)
+            Invoke(() =>
             {
                 if (_serverProcesses.TryGetValue(instance, out var watcher))
                 {
                     Log.Write($"Requesting server process kill on instance {instance}", LogSeverity.Info);
                     watcher.Kill();
                 }
-            }
+            });
         }
 
         private static bool GetInstance(string path, out int instance)
@@ -220,20 +225,15 @@ namespace TrebuchetLib
         {
             var data = Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
 
-            ClientProcess client;
-            Process? process;
-            lock (_lock)
-            {
-                if (_clientProcess != null) return;
-                if (data.IsEmpty) return;
-                if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, out ClientProfile? profile, out ModListProfile? modlist)) return;
-                if (!data.TryGetProcess(out process)) return;
+            if (ClientProcess != null) return;
+            if (data.IsEmpty) return;
+            if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, out ClientProfile? profile, out ModListProfile? modlist)) return;
+            if (!data.TryGetProcess(out Process? process)) return;
 
-                client = new ClientProcess(profile, modlist, false);
-                client.ProcessStateChanged += OnClientProcessStateChanged;
-                _clientProcess = client;
-                _lockedFolders.Add(GetCurrentClientJunction());
-            }
+            ClientProcess client = new ClientProcess(profile, modlist, false);
+            client.ProcessStateChanged += OnClientProcessStateChanged;
+            ClientProcess = client;
+            _lockedFolders.Add(GetCurrentClientJunction());
             client.SetExistingProcess(process, data);
         }
 
@@ -242,21 +242,15 @@ namespace TrebuchetLib
             var processes = Tools.GetProcessesWithName(Config.FileServerBin);
             foreach (var p in processes)
             {
-                int instance;
-                ServerProcess server;
-                Process? process;
-                lock (_lock)
-                {
-                    if (!GetInstance(p.args, out instance)) continue;
-                    if (_serverProcesses.ContainsKey(instance)) continue;
-                    if (!p.TryGetProcess(out process)) continue;
-                    if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, instance, out ServerProfile? profile, out ModListProfile? modlist)) continue;
+                if (!GetInstance(p.args, out int instance)) continue;
+                if (_serverProcesses.ContainsKey(instance)) continue;
+                if (!p.TryGetProcess(out Process? process)) continue;
+                if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, instance, out ServerProfile? profile, out ModListProfile? modlist)) continue;
 
-                    server = new ServerProcess(profile, modlist, instance);
-                    server.ProcessStateChanged += OnServerProcessStateChanged;
-                    _serverProcesses.Add(instance, server);
-                    _lockedFolders.Add(GetCurrentServerJunction(instance));
-                }
+                ServerProcess server = new ServerProcess(profile, modlist, instance);
+                server.ProcessStateChanged += OnServerProcessStateChanged;
+                _serverProcesses.TryAdd(instance, server);
+                _lockedFolders.Add(GetCurrentServerJunction(instance));
                 server.SetExistingProcess(process, p);
             }
         }
@@ -286,23 +280,22 @@ namespace TrebuchetLib
         private void OnClientProcessStateChanged(object? sender, ProcessDetailsEventArgs e)
         {
             ClientProcessStateChanged?.Invoke(this, e);
-
             if (e.NewDetails.State.IsRunning()) return;
 
-            lock (_lock)
+            Invoke(() =>
             {
-                _clientProcess = null;
+                ClientProcess = null;
                 _lockedFolders.Remove(GetCurrentClientJunction());
-            }
+            });
         }
 
         private void OnServerProcessStateChanged(object? sender, ProcessServerDetailsEventArgs e)
         {
             ServerProcessStateChanged?.Invoke(this, e);
             if (e.NewDetails.State.IsRunning()) return;
-            lock (_lock)
+            Invoke(() =>
             {
-                _serverProcesses.Remove(e.NewDetails.Instance);
+                _serverProcesses.TryRemove(e.NewDetails.Instance, out _);
                 _lockedFolders.Remove(GetCurrentServerJunction(e.NewDetails.Instance));
                 Log.Write($"Server intance {e.NewDetails.Instance} terminated", LogSeverity.Info);
 
@@ -311,7 +304,7 @@ namespace TrebuchetLib
                     Log.Write($"Restarting server instance {e.NewDetails.Instance}", LogSeverity.Info);
                     CatapultServer(e.NewDetails.Profile, e.NewDetails.Modlist, e.NewDetails.Instance);
                 }
-            }
+            });
         }
 
         private void SetupJunction(string gamePath, string targetPath)
@@ -324,11 +317,14 @@ namespace TrebuchetLib
         /// <summary>
         /// Tick the trebuchet. This will check if client or any server is already running and catch them if they where started by trebuchet.
         /// </summary>
-        private void Tick()
+        private void ThreadLoop()
         {
             DateTime lastSearch = DateTime.UtcNow;
             while (_isRunning)
             {
+                while (_threadQueue.TryDequeue(out Action? action))
+                    action();
+
                 if (DateTime.UtcNow - lastSearch > TimeSpan.FromSeconds(1))
                 {
                     lastSearch = DateTime.UtcNow;
