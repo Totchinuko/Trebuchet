@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.Collections.Concurrent;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading;
@@ -12,9 +13,13 @@ namespace Trebuchet
     {
         private readonly object _processLock = new object();
         private ProcessServerDetails _details;
+        private bool _isRunning = false;
+        private DateTime _lastResponse;
         private Process? _process;
+        private ProcessData _processData;
         private ServerState _serverState;
         private SourceQueryReader? _sourceQueryReader;
+        private ConcurrentQueue<Action> _threadQueue = new ConcurrentQueue<Action>();
 
         public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance)
         {
@@ -32,7 +37,19 @@ namespace Trebuchet
 
         public ModListProfile Modlist { get; }
 
-        public ProcessData ProcessData { get; private set; }
+        public ProcessData ProcessData
+        {
+            get
+            {
+                lock (_processLock)
+                    return _processData;
+            }
+            private set
+            {
+                lock (_processLock)
+                    _processData = value;
+            }
+        }
 
         public ProcessServerDetails ProcessDetails
         {
@@ -51,39 +68,46 @@ namespace Trebuchet
 
         public ServerProfile Profile { get; }
 
-        public IRcon Rcon { get; }
+        public Rcon Rcon { get; }
 
         public int ServerInstance { get; }
 
         public void Close()
         {
-            lock (_processLock)
+            Invoke(() =>
             {
                 if (_process == null) return;
 
                 OnProcessStateChanged(ProcessState.STOPPING);
                 _process.CloseMainWindow();
-            }
+            });
         }
 
         public void Dispose()
         {
-            lock (_processLock)
+            Invoke(() =>
             {
                 _process?.Dispose();
+                Rcon.Dispose();
                 _process = null;
-            }
+                _isRunning = false;
+            });
+        }
+
+        public void Invoke(Action action)
+        {
+            _threadQueue.Enqueue(action);
         }
 
         public void Kill()
         {
-            lock (_processLock)
+            Invoke(() =>
             {
                 if (_process == null) return;
 
                 OnProcessStateChanged(ProcessState.STOPPING);
                 _process.Kill();
-            }
+            });
         }
 
         public void SetExistingProcess(Process process, ProcessData data)
@@ -129,7 +153,7 @@ namespace Trebuchet
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)
         {
-            lock (_processLock)
+            Invoke(() =>
             {
                 if (_process == null) return;
 
@@ -137,19 +161,23 @@ namespace Trebuchet
                 _process.Dispose();
                 _process = null;
                 _sourceQueryReader = null;
-            }
-            OnProcessStateChanged(ProcessDetails.State == ProcessState.STOPPING ? ProcessState.STOPPED : ProcessState.CRASHED);
+                Rcon.Dispose();
+                _isRunning = false;
+
+                OnProcessStateChanged(ProcessDetails.State == ProcessState.STOPPING ? ProcessState.STOPPED : ProcessState.CRASHED);
+            });
         }
 
         protected void OnProcessStateChanged(ProcessServerDetails details)
         {
-            ProcessStateChanged?.Invoke(this, new ProcessServerDetailsEventArgs(ProcessDetails, details));
+            ProcessServerDetails old = ProcessDetails;
             ProcessDetails = details;
+            ProcessStateChanged?.Invoke(this, new ProcessServerDetailsEventArgs(old, details));
         }
 
         protected void OnProcessStateChanged(ProcessState state)
         {
-            OnProcessStateChanged(new ProcessServerDetails(_details, state));
+            OnProcessStateChanged(new ProcessServerDetails(ProcessDetails, state));
         }
 
         protected virtual async Task StartProcessInternal(Process process)
@@ -205,56 +233,51 @@ namespace Trebuchet
             if (_sourceQueryReader == null)
                 throw new InvalidOperationException("Query listener is not initialized.");
 
-            int timeSpan = Profile.ZombieCheckSeconds;
-            bool killZombies = Profile.KillZombies;
-            DateTime last = DateTime.UtcNow;
-            int instance = ServerInstance;
+            _lastResponse = DateTime.UtcNow;
+            var lastRefresh = DateTime.UtcNow;
+            _isRunning = true;
 
-            while (true)
+            while (_isRunning == true)
             {
-                lock (_processLock)
-                    if (_process == null) return;
+                while (_threadQueue.TryDequeue(out Action? action))
+                    action();
 
-                ProcessThreadRefresh();
+                if ((DateTime.UtcNow - lastRefresh).TotalMilliseconds > 1000)
+                {
+                    lastRefresh = DateTime.UtcNow;
+                    ProcessThreadRefresh();
+                    UpdateOnlineStatus();
+                    ProcessThreadZombieCheck();
+                }
 
-                UpdateOnlineStatus();
-
-                ProcessThreadZombieCheck(timeSpan, killZombies, last, instance);
-
-                Thread.Sleep(1000);
+                Thread.Sleep(100);
             }
         }
 
         private void ProcessThreadRefresh()
         {
-            lock (_processLock)
-            {
-                if (_process == null)
-                    throw new InvalidOperationException("Process is not initialized.");
-                if (_sourceQueryReader == null)
-                    throw new InvalidOperationException("Query listener is not initialized.");
+            if (_process == null)
+                return;
+            if (_sourceQueryReader == null)
+                return;
 
-                _process.Refresh();
-                _sourceQueryReader.Refresh();
-                _serverState = new ServerState(_sourceQueryReader.Online, _sourceQueryReader.Name, _sourceQueryReader.Players, _sourceQueryReader.MaxPlayers);
-            }
+            _process.Refresh();
+            _sourceQueryReader.Refresh();
+            _serverState = new ServerState(_sourceQueryReader.Online, _sourceQueryReader.Name, _sourceQueryReader.Players, _sourceQueryReader.MaxPlayers);
         }
 
-        private void ProcessThreadZombieCheck(int timeSpan, bool killZombies, DateTime last, int instance)
+        private void ProcessThreadZombieCheck()
         {
-            lock (_processLock)
+            if (_process == null)
+                return;
+
+            if (_process.Responding)
+                _lastResponse = DateTime.UtcNow;
+
+            if ((_lastResponse + TimeSpan.FromSeconds(Profile.ZombieCheckSeconds)) < DateTime.UtcNow && Profile.KillZombies)
             {
-                if (_process == null)
-                    throw new InvalidOperationException("Process is not initialized.");
-
-                if (_process.Responding)
-                    last = DateTime.UtcNow;
-
-                if ((last + TimeSpan.FromSeconds(timeSpan)) < DateTime.UtcNow && killZombies)
-                {
-                    Log.Write($"Killing zombie instance {instance} ({_process.Id})", LogSeverity.Warning);
-                    _process.Kill();
-                }
+                Log.Write($"Killing zombie instance {ServerInstance} ({_process.Id})", LogSeverity.Warning);
+                _process.Kill();
             }
         }
 
@@ -272,12 +295,10 @@ namespace Trebuchet
 
         private void UpdateOnlineStatus()
         {
-            ServerState state;
-            lock (_processLock)
-                state = _serverState;
+            if (ProcessDetails.State == ProcessState.STOPPING || _process == null) return;
 
-            if ((ProcessDetails.State != ProcessState.ONLINE && state.Online) || ProcessDetails.Players != state.Players)
-                OnProcessStateChanged(new ProcessServerDetails(ProcessDetails, state.Players, state.MaxPlayers, ProcessState.ONLINE));
+            if ((ProcessDetails.State != ProcessState.ONLINE && _serverState.Online) || ProcessDetails.Players != _serverState.Players)
+                OnProcessStateChanged(new ProcessServerDetails(ProcessDetails, _serverState.Players, _serverState.MaxPlayers, ProcessState.ONLINE));
         }
     }
 }
