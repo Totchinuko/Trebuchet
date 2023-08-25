@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading;
 using TrebuchetLib;
@@ -7,9 +8,10 @@ using static SteamKit2.Internal.PublishedFileDetails;
 
 namespace Trebuchet
 {
-    public class ServerProcess : IServerStateReader, IDisposable
+    public class ServerProcess : IDisposable
     {
         private readonly object _processLock = new object();
+        private ProcessServerDetails _details;
         private Process? _process;
         private ServerState _serverState;
         private SourceQueryReader? _sourceQueryReader;
@@ -19,48 +21,33 @@ namespace Trebuchet
             ServerInstance = instance;
             Profile = profile;
             Modlist = modlist;
-            Information = new ServerInstanceInformation(ServerInstance, profile.ServerName, profile.GameClientPort, profile.SourceQueryPort, profile.EnableRCon ? profile.RConPort : 0, profile.RConPassword);
-            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword, 5 * 1000, 30 * 3000);
+            ProcessDetails = new ProcessServerDetails(instance, profile, modlist);
+            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, ProcessDetails.RconPort), ProcessDetails.RconPassword, 5 * 1000, 30 * 3000);
             Console = new MixedConsole(Rcon);
         }
 
-        public ServerProcess(ServerProfile profile, ModListProfile modlist, int instance, Process process, ProcessData data)
-        {
-            ServerInstance = instance;
-            Profile = profile;
-            Modlist = modlist;
-            ProcessData = data;
-            Information = GetInformationFromIni(profile, instance);
-            Rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, Information.RconPort), Information.RconPassword, 5 * 1000, 30 * 3000);
-            Console = new MixedConsole(Rcon);
-
-            _process = process;
-            _process.EnableRaisingEvents = true;
-            _process.Exited -= OnProcessExited;
-            _process.Exited += OnProcessExited;
-            CreateQueryPortListener();
-            new Thread(ProcessRefresh).Start();
-        }
-
-        public event EventHandler? ProcessExited;
-
-        public event EventHandler<TrebuchetFailEventArgs>? ProcessFailed;
-
-        public event EventHandler<TrebuchetStartEventArgs>? ProcessStarted;
-
-        public event EventHandler<int>? ServerOnline;
-
-        public bool Closed { get; private set; }
+        public event EventHandler<ProcessServerDetails>? ProcessStateChanged;
 
         public IConsole Console { get; }
-
-        public ServerInstanceInformation Information { get; }
-
-        public bool IsRunning => _process != null;
 
         public ModListProfile Modlist { get; }
 
         public ProcessData ProcessData { get; private set; }
+
+        public ProcessServerDetails ProcessDetails
+        {
+            get
+            {
+                lock (_processLock)
+                    return _details;
+            }
+            [MemberNotNull(nameof(_details))]
+            private set
+            {
+                lock (_processLock)
+                    _details = value;
+            }
+        }
 
         public ServerProfile Profile { get; }
 
@@ -68,22 +55,13 @@ namespace Trebuchet
 
         public int ServerInstance { get; }
 
-        public ServerState ServerState
-        {
-            get
-            {
-                lock (_processLock)
-                    return _serverState;
-            }
-        }
-
         public void Close()
         {
             lock (_processLock)
             {
                 if (_process == null) return;
 
-                Closed = true;
+                OnProcessStateChanged(ProcessState.STOPPING);
                 _process.CloseMainWindow();
             }
         }
@@ -103,50 +81,20 @@ namespace Trebuchet
             {
                 if (_process == null) return;
 
-                Closed = true;
+                OnProcessStateChanged(ProcessState.STOPPING);
                 _process.Kill();
             }
         }
 
-        public void ProcessRefresh()
+        public void SetExistingProcess(Process process, ProcessData data)
         {
-            if (_sourceQueryReader == null)
-                throw new InvalidOperationException("Query listener is not initialized.");
-
-            int timeSpan = Profile.ZombieCheckSeconds;
-            bool killZombies = Profile.KillZombies;
-            DateTime last = DateTime.UtcNow;
-            int instance = ServerInstance;
-            bool online = false;
-
-            while (true)
-            {
-                lock (_processLock)
-                {
-                    if (_process == null) break;
-
-                    _process.Refresh();
-                    _sourceQueryReader.Refresh();
-                    _serverState = new ServerState(_sourceQueryReader.Online, _sourceQueryReader.Name, _sourceQueryReader.Players, _sourceQueryReader.MaxPlayers);
-
-                    if (_serverState.Online && !online)
-                    {
-                        online = true;
-                        ServerOnline?.Invoke(this, instance);
-                    }
-
-                    if (_process.Responding)
-                        last = DateTime.UtcNow;
-
-                    if ((last + TimeSpan.FromSeconds(timeSpan)) < DateTime.UtcNow && killZombies)
-                    {
-                        Log.Write($"Killing zombie instance {instance} ({_process.Id})", LogSeverity.Warning);
-                        _process.Kill();
-                    }
-                }
-
-                Thread.Sleep(1000);
-            }
+            _process = process;
+            _process.EnableRaisingEvents = true;
+            _process.Exited -= OnProcessExited;
+            _process.Exited += OnProcessExited;
+            CreateQueryPortListener();
+            OnProcessStateChanged(new ProcessServerDetails(ProcessDetails, Profile.GetInstancePath(ServerInstance), data, ProcessState.RUNNING));
+            new Thread(ProcessThread).Start();
         }
 
         public async Task StartProcessAsync()
@@ -167,7 +115,16 @@ namespace Trebuchet
             process.EnableRaisingEvents = true;
             process.Exited += OnProcessExited;
 
-            await StartProcessInternal(process);
+            try
+            {
+                await StartProcessInternal(process);
+            }
+            catch (Exception e)
+            {
+                Log.Write(e);
+                process.Dispose();
+                OnProcessStateChanged(ProcessState.FAILED);
+            }
         }
 
         protected virtual void OnProcessExited(object? sender, EventArgs e)
@@ -181,17 +138,19 @@ namespace Trebuchet
                 _process = null;
                 _sourceQueryReader = null;
             }
-            ProcessExited?.Invoke(this, EventArgs.Empty);
+            OnProcessStateChanged(ProcessDetails.State == ProcessState.STOPPING ? ProcessState.STOPPED : ProcessState.CRASHED);
         }
 
-        protected virtual void OnProcessFailed(Exception exception)
+        protected void OnProcessStateChanged(ProcessServerDetails details)
         {
-            ProcessFailed?.Invoke(this, new TrebuchetFailEventArgs(exception));
+            ProcessDetails = details;
+            ProcessStateChanged?.Invoke(this, details);
         }
 
-        protected virtual void OnProcessStarted(ProcessData data)
+        protected void OnProcessStateChanged(ProcessState state)
         {
-            ProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(data, ServerInstance));
+            ProcessDetails = new ProcessServerDetails(_details, state);
+            OnProcessStateChanged(ProcessDetails);
         }
 
         protected virtual async Task StartProcessInternal(Process process)
@@ -203,57 +162,25 @@ namespace Trebuchet
             process.Start();
 
             ProcessData = await TryGetChildProcessData(process);
-            if (ProcessData.IsEmpty || !ProcessData.TryGetProcess(out _process))
+            if (ProcessData.IsEmpty || !ProcessData.TryGetProcess(out Process? childProcess))
             {
                 OnProcessExited(this, EventArgs.Empty);
                 return;
             }
 
+            _process = childProcess;
             _process.PriorityClass = GetPriority(Profile.ProcessPriority);
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
 
-            OnProcessStarted(ProcessData);
+            OnProcessStateChanged(new ProcessServerDetails(ProcessDetails, ProcessData, ProcessState.RUNNING));
             CreateQueryPortListener();
-            new Thread(ProcessRefresh).Start();
+            new Thread(ProcessThread).Start();
         }
 
         private void CreateQueryPortListener()
         {
             if (_sourceQueryReader != null) return;
-
-            _sourceQueryReader = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, Information.QueryPort), 4 * 1000, 5 * 1000);
-        }
-
-        private ServerInstanceInformation GetInformationFromIni(ServerProfile profile, int instance)
-        {
-            string instancePath = profile.GetInstancePath(instance);
-            string initPath = Path.Combine(instancePath, string.Format(Config.FileIniServer, "Engine"));
-            IniDocument document = IniParser.Parse(Tools.GetFileContent(initPath));
-
-            IniSection section = document.GetSection("OnlineSubsystem");
-            string title = section.GetValue("ServerName", "Conan Exile Dedicated Server");
-
-            section = document.GetSection("URL");
-            int port;
-            if (!int.TryParse(section.GetValue("Port", "7777"), out port))
-                port = 7777;
-
-            section = document.GetSection("OnlineSubsystemSteam");
-            int queryPort;
-            if (!int.TryParse(section.GetValue("GameServerQueryPort", "27015"), out queryPort))
-                queryPort = 27015;
-
-            document = IniParser.Parse(Tools.GetFileContent(Path.Combine(instancePath, string.Format(Config.FileIniServer, "Game"))));
-            section = document.GetSection("RconPlugin");
-            string password = section.GetValue("RconPassword", string.Empty);
-            int rconPort;
-            if (!int.TryParse(section.GetValue("Port", "25575"), out rconPort))
-                rconPort = 25575;
-            bool enabled;
-            if (!bool.TryParse(section.GetValue("RconEnabled", "False"), out enabled))
-                enabled = false;
-
-            return new ServerInstanceInformation(instance, title, port, queryPort, enabled ? rconPort : 0, password);
+            _sourceQueryReader = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, ProcessDetails.QueryPort), 4 * 1000, 5 * 1000);
         }
 
         private ProcessPriorityClass GetPriority(int index)
@@ -274,6 +201,64 @@ namespace Trebuchet
             }
         }
 
+        private void ProcessThread()
+        {
+            if (_sourceQueryReader == null)
+                throw new InvalidOperationException("Query listener is not initialized.");
+
+            int timeSpan = Profile.ZombieCheckSeconds;
+            bool killZombies = Profile.KillZombies;
+            DateTime last = DateTime.UtcNow;
+            int instance = ServerInstance;
+
+            while (true)
+            {
+                lock (_processLock)
+                    if (_process == null) return;
+
+                ProcessThreadRefresh();
+
+                UpdateOnlineStatus();
+
+                ProcessThreadZombieCheck(timeSpan, killZombies, last, instance);
+
+                Thread.Sleep(1000);
+            }
+        }
+
+        private void ProcessThreadRefresh()
+        {
+            lock (_processLock)
+            {
+                if (_process == null)
+                    throw new InvalidOperationException("Process is not initialized.");
+                if (_sourceQueryReader == null)
+                    throw new InvalidOperationException("Query listener is not initialized.");
+
+                _process.Refresh();
+                _sourceQueryReader.Refresh();
+                _serverState = new ServerState(_sourceQueryReader.Online, _sourceQueryReader.Name, _sourceQueryReader.Players, _sourceQueryReader.MaxPlayers);
+            }
+        }
+
+        private void ProcessThreadZombieCheck(int timeSpan, bool killZombies, DateTime last, int instance)
+        {
+            lock (_processLock)
+            {
+                if (_process == null)
+                    throw new InvalidOperationException("Process is not initialized.");
+
+                if (_process.Responding)
+                    last = DateTime.UtcNow;
+
+                if ((last + TimeSpan.FromSeconds(timeSpan)) < DateTime.UtcNow && killZombies)
+                {
+                    Log.Write($"Killing zombie instance {instance} ({_process.Id})", LogSeverity.Warning);
+                    _process.Kill();
+                }
+            }
+        }
+
         private async Task<ProcessData> TryGetChildProcessData(Process process)
         {
             ProcessData child = ProcessData.Empty;
@@ -284,6 +269,16 @@ namespace Trebuchet
             }
 
             return child;
+        }
+
+        private void UpdateOnlineStatus()
+        {
+            ServerState state;
+            lock (_processLock)
+                state = _serverState;
+
+            if ((ProcessDetails.State != ProcessState.ONLINE && state.Online) || ProcessDetails.Players != state.Players)
+                OnProcessStateChanged(new ProcessServerDetails(ProcessDetails, state.Players, state.MaxPlayers, ProcessState.ONLINE));
         }
     }
 }

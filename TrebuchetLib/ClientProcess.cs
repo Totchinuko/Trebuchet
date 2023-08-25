@@ -1,50 +1,61 @@
 ﻿using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using TrebuchetLib;
 
 namespace Trebuchet
 {
     public class ClientProcess
     {
+        private readonly object _processLock = new object();
         private Process? _process;
+        private ProcessDetails _processDetails;
 
         public ClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye)
         {
             Profile = profile;
             Modlist = modlist;
             IsBattleEye = isBattleEye;
+            ProcessDetails = new ProcessDetails(profile.ProfileName, modlist.ProfileName);
         }
 
-        public ClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye, Process process, ProcessData data)
-        {
-            Profile = profile;
-            Modlist = modlist;
-            IsBattleEye = isBattleEye;
-            ProcessData = data;
-
-            _process = process;
-            _process.EnableRaisingEvents = true;
-            _process.Exited -= OnProcessExited;
-            _process.Exited += OnProcessExited;
-        }
-
-        public event EventHandler? ProcessExited;
-
-        public event EventHandler<TrebuchetFailEventArgs>? ProcessFailed;
-
-        public event EventHandler<TrebuchetStartEventArgs>? ProcessStarted;
+        public event EventHandler<ProcessDetails>? ProcessStateChanged;
 
         public bool IsBattleEye { get; }
-
-        public bool IsRunning => _process != null;
 
         public ModListProfile Modlist { get; }
 
         public ProcessData ProcessData { get; private set; }
 
+        public ProcessDetails ProcessDetails
+        {
+            get
+            {
+                lock (_processLock)
+                    return _processDetails;
+            }
+            [MemberNotNull(nameof(_processDetails))]
+            set
+            {
+                lock (_processLock)
+                    _processDetails = value;
+            }
+        }
+
         public ClientProfile Profile { get; }
 
         public void Kill()
         {
+            OnProcessStateChanged(ProcessState.STOPPING);
             _process?.Kill();
+        }
+
+        public void SetExistingProcess(Process process, ProcessData data)
+        {
+            _process = process;
+            _process.EnableRaisingEvents = true;
+            _process.Exited -= OnProcessExited;
+            _process.Exited += OnProcessExited;
+            OnProcessStateChanged(new ProcessDetails(ProcessDetails, data, ProcessState.RUNNING));
         }
 
         public async Task StartProcessAsync()
@@ -75,8 +86,9 @@ namespace Trebuchet
             }
             catch (Exception ex)
             {
+                Log.Write(ex);
                 process.Dispose();
-                OnProcessFailed(ex);
+                OnProcessStateChanged(ProcessState.FAILED);
             }
         }
 
@@ -86,17 +98,19 @@ namespace Trebuchet
             _process.Exited -= OnProcessExited;
             _process.Dispose();
             _process = null;
-            ProcessExited?.Invoke(this, EventArgs.Empty);
+            OnProcessStateChanged(ProcessDetails.State == ProcessState.STOPPING ? ProcessState.STOPPED : ProcessState.CRASHED);
         }
 
-        protected virtual void OnProcessFailed(Exception exception)
+        protected void OnProcessStateChanged(ProcessDetails details)
         {
-            ProcessFailed?.Invoke(this, new TrebuchetFailEventArgs(exception));
+            ProcessDetails = details;
+            ProcessStateChanged?.Invoke(this, details);
         }
 
-        protected virtual void OnProcessStarted(ProcessData data)
+        protected void OnProcessStateChanged(ProcessState state)
         {
-            ProcessStarted?.Invoke(this, new TrebuchetStartEventArgs(data));
+            ProcessDetails = new ProcessDetails(ProcessDetails, state);
+            OnProcessStateChanged(ProcessDetails);
         }
 
         //If we start with battle eye, launched process is not going to be the actual game.
@@ -121,28 +135,28 @@ namespace Trebuchet
             _process = targetProcess;
             ProcessData = target;
 
-            switch (Profile.ProcessPriority)
-            {
-                case 1:
-                    _process.PriorityClass = ProcessPriorityClass.AboveNormal;
-                    break;
-
-                case 2:
-                    _process.PriorityClass = ProcessPriorityClass.High;
-                    break;
-
-                case 3:
-                    _process.PriorityClass = ProcessPriorityClass.RealTime;
-                    break;
-
-                default:
-                    _process.PriorityClass = ProcessPriorityClass.Normal;
-                    break;
-            }
-
+            _process.PriorityClass = GetPriority(Profile.ProcessPriority);
             _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
 
-            OnProcessStarted(ProcessData);
+            OnProcessStateChanged(new ProcessDetails(ProcessDetails, ProcessData, ProcessState.RUNNING));
+        }
+
+        private ProcessPriorityClass GetPriority(int index)
+        {
+            switch (index)
+            {
+                case 1:
+                    return ProcessPriorityClass.AboveNormal;
+
+                case 2:
+                    return ProcessPriorityClass.High;
+
+                case 3:
+                    return ProcessPriorityClass.RealTime;
+
+                default:
+                    return ProcessPriorityClass.Normal;
+            }
         }
     }
 }

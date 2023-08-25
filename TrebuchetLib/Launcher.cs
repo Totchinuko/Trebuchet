@@ -22,19 +22,9 @@ namespace TrebuchetLib
             Task.Run(Tick);
         }
 
-        public event EventHandler<TrebuchetFailEventArgs>? ClientFailed;
+        public event EventHandler<ProcessDetails>? ClientProcessStateChanged;
 
-        public event EventHandler<TrebuchetStartEventArgs>? ClientStarted;
-
-        public event EventHandler? ClientTerminated;
-
-        public event EventHandler<TrebuchetFailEventArgs>? ServerFailed;
-
-        public event EventHandler<int>? ServerOnline;
-
-        public event EventHandler<TrebuchetStartEventArgs>? ServerStarted;
-
-        public event EventHandler<int>? ServerTerminated;
+        public event EventHandler<ProcessServerDetails>? ServerProcessStateChanged;
 
         public Config Config { get; }
 
@@ -64,9 +54,7 @@ namespace TrebuchetLib
                 SetupJunction(Config.ClientPath, profile.ProfileFolder);
 
                 _clientProcess = new ClientProcess(profile, modlist, isBattleEye);
-                _clientProcess.ProcessExited += OnClientProcessTerminate;
-                _clientProcess.ProcessStarted += OnClientProcessStarted;
-                _clientProcess.ProcessFailed += OnClientProcessFailed;
+                _clientProcess.ProcessStateChanged += OnClientProcessStateChanged;
 
                 _lockedFolders.Add(GetCurrentClientJunction());
                 Log.Write($"Locking folder {profile.ProfileName}", LogSeverity.Debug);
@@ -101,10 +89,7 @@ namespace TrebuchetLib
                 SetupJunction(ServerProfile.GetInstancePath(Config, instance), profile.ProfileFolder);
 
                 ServerProcess watcher = new ServerProcess(profile, modlist, instance);
-                watcher.ProcessExited += OnServerProcessTerminate;
-                watcher.ProcessStarted += OnServerProcessStarted;
-                watcher.ProcessFailed += OnServerProcessFailed;
-                watcher.ServerOnline += OnServerOnline;
+                watcher.ProcessStateChanged += OnServerProcessStateChanged;
                 _serverProcesses.Add(instance, watcher);
 
                 _lockedFolders.Add(GetCurrentServerJunction(instance));
@@ -139,17 +124,9 @@ namespace TrebuchetLib
             }
         }
 
-        /// <summary>
-        /// Get the server port informations for all the running server processes.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<ServerInstanceInformation> GetInstancesInformations()
+        public ProcessDetails? GetClientDetails()
         {
-            lock (_lock)
-            {
-                foreach (ServerProcess p in _serverProcesses.Values)
-                    yield return p.Information;
-            }
+            return _clientProcess?.ProcessDetails;
         }
 
         public IConsole GetServerConsole(int instance)
@@ -172,13 +149,16 @@ namespace TrebuchetLib
             }
         }
 
-        public IServerStateReader GetServerStateReader(int instance)
+        /// <summary>
+        /// Get the server port informations for all the running server processes.
+        /// </summary>
+        /// <returns></returns>
+        public IEnumerable<ProcessServerDetails> GetServersDetails()
         {
             lock (_lock)
             {
-                if (_serverProcesses.TryGetValue(instance, out var watcher))
-                    return watcher;
-                throw new ArgumentException($"Server instance {instance} is not running.");
+                foreach (ServerProcess p in _serverProcesses.Values)
+                    yield return p.ProcessDetails;
             }
         }
 
@@ -239,19 +219,22 @@ namespace TrebuchetLib
         private void FindExistingClient()
         {
             var data = Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
+
+            ClientProcess client;
+            Process? process;
             lock (_lock)
             {
                 if (_clientProcess != null) return;
                 if (data.IsEmpty) return;
                 if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, out ClientProfile? profile, out ModListProfile? modlist)) return;
-                if (!data.TryGetProcess(out Process? process)) return;
+                if (!data.TryGetProcess(out process)) return;
 
-                _clientProcess = new ClientProcess(profile, modlist, false, process, data);
-                _clientProcess.ProcessExited += OnClientProcessTerminate;
+                client = new ClientProcess(profile, modlist, false);
+                client.ProcessStateChanged += OnClientProcessStateChanged;
+                _clientProcess = client;
                 _lockedFolders.Add(GetCurrentClientJunction());
             }
-
-            OnClientProcessStarted(this, new TrebuchetStartEventArgs(data));
+            client.SetExistingProcess(process, data);
         }
 
         private void FindExistingServers()
@@ -260,19 +243,21 @@ namespace TrebuchetLib
             foreach (var p in processes)
             {
                 int instance;
+                ServerProcess server;
+                Process? process;
                 lock (_lock)
                 {
                     if (!GetInstance(p.args, out instance)) continue;
                     if (_serverProcesses.ContainsKey(instance)) continue;
-                    if (!p.TryGetProcess(out Process? process)) continue;
+                    if (!p.TryGetProcess(out process)) continue;
                     if (!TrebuchetLaunch.TryLoadPreviousLaunch(Config, instance, out ServerProfile? profile, out ModListProfile? modlist)) continue;
 
-                    var watcher = new ServerProcess(profile, modlist, instance, process, p);
-                    watcher.ProcessExited += OnServerProcessTerminate;
-                    _serverProcesses.Add(instance, watcher);
+                    server = new ServerProcess(profile, modlist, instance);
+                    server.ProcessStateChanged += OnServerProcessStateChanged;
+                    _serverProcesses.Add(instance, server);
                     _lockedFolders.Add(GetCurrentServerJunction(instance));
                 }
-                OnServerProcessStarted(this, new TrebuchetStartEventArgs(p, instance));
+                server.SetExistingProcess(process, p);
             }
         }
 
@@ -298,25 +283,11 @@ namespace TrebuchetLib
             return profile.RestartWhenDown;
         }
 
-        private void OnClientProcessFailed(object? sender, TrebuchetFailEventArgs e)
+        private void OnClientProcessStateChanged(object? sender, ProcessDetails e)
         {
-            Log.Write($"Client process failed to start", LogSeverity.Error);
-            Log.Write(e.Exception);
-            ClientFailed?.Invoke(this, e);
-        }
+            ClientProcessStateChanged?.Invoke(this, e);
 
-        private void OnClientProcessStarted(object? sender, TrebuchetStartEventArgs e)
-        {
-            Log.Write($"Client process started ({e.process.pid})", LogSeverity.Info);
-            ClientStarted?.Invoke(this, e);
-        }
-
-        private void OnClientProcessTerminate(object? sender, EventArgs e)
-        {
-            if (sender is not ClientProcess) return;
-            Log.Write($"Client process terminated", LogSeverity.Info);
-
-            ClientTerminated?.Invoke(this, EventArgs.Empty);
+            if (e.State != ProcessState.CRASHED || e.State != ProcessState.STOPPED) return;
 
             lock (_lock)
             {
@@ -325,41 +296,20 @@ namespace TrebuchetLib
             }
         }
 
-        private void OnServerOnline(object? sender, int e)
+        private void OnServerProcessStateChanged(object? sender, ProcessServerDetails e)
         {
-            Log.Write($"Server instance {e} is online", LogSeverity.Info);
-            ServerOnline?.Invoke(this, e);
-        }
-
-        private void OnServerProcessFailed(object? sender, TrebuchetFailEventArgs e)
-        {
-            Log.Write($"Server process failed to start", LogSeverity.Error);
-            Log.Write(e.Exception);
-            ServerFailed?.Invoke(this, e);
-        }
-
-        private void OnServerProcessStarted(object? sender, TrebuchetStartEventArgs e)
-        {
-            Log.Write($"Server instance {e.instance} started ({e.process.pid})", LogSeverity.Info);
-            ServerStarted?.Invoke(this, e);
-        }
-
-        private void OnServerProcessTerminate(object? sender, EventArgs e)
-        {
-            if (sender is not ServerProcess process) return;
-
-            ServerTerminated?.Invoke(this, process.ServerInstance);
-
+            ServerProcessStateChanged?.Invoke(this, e);
+            if (e.State != ProcessState.STOPPED || e.State != ProcessState.CRASHED) return;
             lock (_lock)
             {
-                _serverProcesses.Remove(process.ServerInstance);
-                _lockedFolders.Remove(GetCurrentServerJunction(process.ServerInstance));
-                Log.Write($"Server intance {process.ServerInstance} terminated", LogSeverity.Info);
+                _serverProcesses.Remove(e.Instance);
+                _lockedFolders.Remove(GetCurrentServerJunction(e.Instance));
+                Log.Write($"Server intance {e.Instance} terminated", LogSeverity.Info);
 
-                if (!process.Closed && IsRestartWhenDown(process.Profile.ProfileName))
+                if (e.State == ProcessState.CRASHED && IsRestartWhenDown(e.Profile))
                 {
-                    Log.Write($"Restarting server instance {process.ServerInstance}", LogSeverity.Info);
-                    CatapultServer(process.Profile.ProfileName, process.Modlist.ProfileName, process.ServerInstance);
+                    Log.Write($"Restarting server instance {e.Instance}", LogSeverity.Info);
+                    CatapultServer(e.Profile, e.Modlist, e.Instance);
                 }
             }
         }
