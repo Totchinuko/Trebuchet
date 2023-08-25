@@ -20,6 +20,7 @@
     <None Remove="Icons\Add.png" />
     <None Remove="Icons\BugWindow.png" />
     <None Remove="Icons\Close.png" />
+    <None Remove="Icons\Console.png" />
     <None Remove="Icons\Dashboard.png" />
     <None Remove="Icons\Discord.png" />
     <None Remove="Icons\Download.png" />
@@ -57,6 +58,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Icons\Console.png" />
     <Resource Include="Icons\Dashboard.png" />
     <Resource Include="Icons\Discord.png" />
     <Resource Include="Icons\Download.png" />

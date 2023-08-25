@@ -23,8 +23,8 @@
     },
     {
       "$type": "Rcon",
-      "Label": "Rcon",
-      "IconPath": "/Icons/Steam.png"
+      "Label": "Console",
+      "IconPath": "/Icons/Console.png"
     },
     {
       "$type": "LogFilter",
