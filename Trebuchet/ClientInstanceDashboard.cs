@@ -4,10 +4,12 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using static SteamKit2.Internal.CMsgClientAMGetPersonaNameHistory;
+using TrebuchetLib;
 
 namespace Trebuchet
 {
-    public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<ProcessMessage>
+    public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<ClientProcessStateChanged>
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
         private string _selectedModlist = string.Empty;
@@ -19,9 +21,7 @@ namespace Trebuchet
             LaunchCommand = new TaskBlockedCommand(OnLaunched, true, Operations.SteamDownload);
             LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched, true, Operations.SteamDownload);
 
-            StrongReferenceMessenger.Default.Register<ProcessFailledMessage>(this);
-            StrongReferenceMessenger.Default.Register<ProcessStartedMessage>(this);
-            StrongReferenceMessenger.Default.Register<ProcessStoppedMessage>(this);
+            StrongReferenceMessenger.Default.Register<ClientProcessStateChanged>(this);
 
             _selectedProfile = App.Config.DashboardClientProfile;
             _selectedModlist = App.Config.DashboardClientModlist;
@@ -98,16 +98,17 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new CatapultClientMessage(SelectedProfile, SelectedModlist, isBattleEye));
         }
 
-        void IRecipient<ProcessMessage>.Receive(ProcessMessage message)
+        void IRecipient<ClientProcessStateChanged>.Receive(ClientProcessStateChanged message)
         {
-            if (message.instance >= 0) return;
+            if (message.ProcessDetails.OldDetails.State.IsRunning() && !message.ProcessDetails.NewDetails.State.IsRunning())
+                OnProcessTerminated(message.ProcessDetails.NewDetails);
+            else if (!message.ProcessDetails.OldDetails.State.IsRunning() && message.ProcessDetails.NewDetails.State.IsRunning())
+                OnProcessStarted(message.ProcessDetails.NewDetails);
 
-            if (message is ProcessStartedMessage started)
-                OnProcessStarted(started.data);
-            else if (message is ProcessFailledMessage failed)
-                OnProcessFailed(failed.Exception);
-            else if (message is ProcessStoppedMessage stopped)
-                OnProcessTerminated();
+            if (message.ProcessDetails.NewDetails.State == ProcessState.FAILED)
+                OnProcessFailed();
+            else if (ProcessRunning)
+                ProcessStats.SetDetails(message.ProcessDetails.NewDetails);
         }
 
         public void RefreshSelection()
@@ -144,15 +145,15 @@ namespace Trebuchet
             Launch(false);
         }
 
-        private void OnProcessFailed(Exception exception)
+        private void OnProcessFailed()
         {
             KillCommand.Toggle(false);
             LaunchCommand.Toggle(true);
             LaunchBattleEyeCommand.Toggle(true);
-            new ErrorModal("Client failed to start", exception.Message).ShowDialog();
+            new ErrorModal("Client failed to start", "See the logs for more informations.").ShowDialog();
         }
 
-        private void OnProcessStarted(ProcessData data)
+        private void OnProcessStarted(ProcessDetails details)
         {
             LaunchCommand.Toggle(false);
             LaunchBattleEyeCommand.Toggle(false);
@@ -161,21 +162,20 @@ namespace Trebuchet
             ProcessRunning = true;
             OnPropertyChanged(nameof(ProcessRunning));
 
-            if (ProcessStats.Running) ProcessStats.StopStats();
-            ProcessStats.StartStats(data, Path.GetFileNameWithoutExtension(Config.FileClientBin));
-            StrongReferenceMessenger.Default.Send<ProcessStateChangedMessage>();
+            ProcessStats.StartStats(details);
+            StrongReferenceMessenger.Default.Send<DashboardStateChanged>();
         }
 
-        private void OnProcessTerminated()
+        private void OnProcessTerminated(ProcessDetails details)
         {
-            ProcessStats.StopStats();
+            ProcessStats.StopStats(details);
             KillCommand.Toggle(false);
             LaunchCommand.Toggle(true);
             LaunchBattleEyeCommand.Toggle(true);
 
             ProcessRunning = false;
             OnPropertyChanged(nameof(ProcessRunning));
-            StrongReferenceMessenger.Default.Send<ProcessStateChangedMessage>();
+            StrongReferenceMessenger.Default.Send<DashboardStateChanged>();
         }
 
         private void Resolve()

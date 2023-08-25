@@ -13,6 +13,10 @@ namespace Trebuchet
     {
     }
 
+    public class ProcessServerDetailsRequest : RequestMessage<List<ProcessServerDetails>>
+    {
+    }
+
     public class ServerConsoleRequest : RequestMessage<IConsole>
     {
         public int instance;
@@ -22,9 +26,6 @@ namespace Trebuchet
             this.instance = instance;
         }
     }
-
-    public class ServerInfoRequest : RequestMessage<List<ServerInstanceInformation>>
-    { }
 
     public abstract class ServerMessages
     {

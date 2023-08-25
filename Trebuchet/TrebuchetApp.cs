@@ -24,7 +24,7 @@ namespace Trebuchet
         IRecipient<InstanceInstalledCountRequest>,
         IRecipient<PanelActivateMessage>,
         IRecipient<ServerConsoleRequest>,
-        IRecipient<ServerInfoRequest>
+        IRecipient<ProcessServerDetailsRequest>
     {
         private Panel? _activePanel;
 
@@ -52,7 +52,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<VerifyFilesMessage>(this);
             StrongReferenceMessenger.Default.Register<InstanceInstalledCountRequest>(this);
             StrongReferenceMessenger.Default.Register<PanelActivateMessage>(this);
-            StrongReferenceMessenger.Default.Register<ServerInfoRequest>(this);
+            StrongReferenceMessenger.Default.Register<ProcessServerDetailsRequest>(this);
 
             var menuConfig = GuiExtensions.GetEmbededTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
@@ -147,9 +147,9 @@ namespace Trebuchet
             message.Reply(_trebuchet.Launcher.GetServerConsole(message.instance));
         }
 
-        public void Receive(ServerInfoRequest message)
+        public void Receive(ProcessServerDetailsRequest message)
         {
-            message.Reply(_trebuchet.Launcher.GetInstancesInformations().ToList());
+            message.Reply(_trebuchet.Launcher.GetServersDetails().ToList());
         }
 
         internal virtual void OnAppClose()
@@ -183,7 +183,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new SteamConnectionChangedMessage(false));
         }
 
-        private void RegisterEvent<T>(T message) where T : ProcessMessage
+        private void RegisterEvent<T>(T message) where T : ProcessStateChanged
         {
             Application.Current.Dispatcher.Invoke(() =>
             {
@@ -193,13 +193,8 @@ namespace Trebuchet
 
         private void RegisterEvents()
         {
-            _trebuchet.Launcher.ServerStarted += (_, e) => RegisterEvent(new ProcessStartedMessage(e.process, e.instance, _trebuchet.Launcher.GetServerStateReader(e.instance)));
-            _trebuchet.Launcher.ServerTerminated += (_, e) => RegisterEvent(new ProcessStoppedMessage(e));
-            _trebuchet.Launcher.ServerFailed += (_, e) => RegisterEvent(new ProcessFailledMessage(e.Exception, e.Instance));
-
-            _trebuchet.Launcher.ClientStarted += (_, e) => RegisterEvent(new ProcessStartedMessage(e.process));
-            _trebuchet.Launcher.ClientTerminated += (_, e) => RegisterEvent(new ProcessStoppedMessage());
-            _trebuchet.Launcher.ClientFailed += (_, e) => RegisterEvent(new ProcessFailledMessage(e.Exception));
+            _trebuchet.Launcher.ServerProcessStateChanged += (_, e) => RegisterEvent(new ServerProcessStateChanged(e));
+            _trebuchet.Launcher.ClientProcessStateChanged += (_, e) => RegisterEvent(new ClientProcessStateChanged(e));
         }
 
         private void UpdateServerMods(IEnumerable<ulong> modlist)

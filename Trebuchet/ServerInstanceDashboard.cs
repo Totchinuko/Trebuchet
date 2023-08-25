@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using TrebuchetLib;
 
 namespace Trebuchet
 {
-    public class ServerInstanceDashboard : INotifyPropertyChanged, IRecipient<ProcessMessage>
+    public class ServerInstanceDashboard : INotifyPropertyChanged, IRecipient<ServerProcessStateChanged>
     {
         private Config _config;
         private string _selectedModlist = string.Empty;
@@ -22,9 +23,7 @@ namespace Trebuchet
             _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
             Instance = instance;
 
-            StrongReferenceMessenger.Default.Register<ProcessFailledMessage>(this);
-            StrongReferenceMessenger.Default.Register<ProcessStartedMessage>(this);
-            StrongReferenceMessenger.Default.Register<ProcessStoppedMessage>(this);
+            StrongReferenceMessenger.Default.Register<ServerProcessStateChanged>(this);
 
             App.Config.GetInstanceParameters(Instance, out _selectedModlist, out _selectedProfile);
 
@@ -100,16 +99,19 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new KillProcessMessage(Instance));
         }
 
-        void IRecipient<ProcessMessage>.Receive(ProcessMessage message)
+        void IRecipient<ServerProcessStateChanged>.Receive(ServerProcessStateChanged message)
         {
-            if (message.instance != Instance) return;
+            if (message.ProcessDetails.NewDetails.Instance != Instance) return;
 
-            if (message is ProcessStartedMessage started)
-                OnProcessStarted(started.data, started.reader);
-            else if (message is ProcessFailledMessage failed)
-                OnProcessFailed(failed.Exception);
-            else if (message is ProcessStoppedMessage stopped)
-                OnProcessTerminated();
+            if (message.ProcessDetails.OldDetails.State.IsRunning() && !message.ProcessDetails.NewDetails.State.IsRunning())
+                OnProcessTerminated(message.ProcessDetails.NewDetails);
+            else if (!message.ProcessDetails.OldDetails.State.IsRunning() && message.ProcessDetails.NewDetails.State.IsRunning())
+                OnProcessStarted(message.ProcessDetails.NewDetails);
+
+            if (message.ProcessDetails.NewDetails.State == ProcessState.FAILED)
+                OnProcessFailed();
+            else if (ProcessRunning)
+                ProcessStats.SetDetails(message.ProcessDetails.NewDetails);
         }
 
         public void RefreshSelection()
@@ -153,15 +155,15 @@ namespace Trebuchet
             }));
         }
 
-        private void OnProcessFailed(Exception exception)
+        private void OnProcessFailed()
         {
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
             LaunchCommand.Toggle(true);
-            new ErrorModal("Server failed to start", exception.Message).ShowDialog();
+            new ErrorModal("Server failed to start", "Server failed to start properly. See the logs for more informations.").ShowDialog();
         }
 
-        private void OnProcessStarted(ProcessData data, IServerStateReader? reader)
+        private void OnProcessStarted(ProcessServerDetails details)
         {
             LaunchCommand.Toggle(false);
             KillCommand.Toggle(true);
@@ -170,21 +172,19 @@ namespace Trebuchet
             ProcessRunning = true;
             OnPropertyChanged(nameof(ProcessRunning));
 
-            if (ProcessStats.Running) ProcessStats.StopStats();
-            ProcessStats.StartStats(data, Path.GetFileNameWithoutExtension(Config.FileServerBin));
-            if (reader != null) ProcessStats.SetServerStateReader(reader);
-            StrongReferenceMessenger.Default.Send<ProcessStateChangedMessage>();
+            ProcessStats.StartStats(details);
+            StrongReferenceMessenger.Default.Send<DashboardStateChanged>();
         }
 
-        private void OnProcessTerminated()
+        private void OnProcessTerminated(ProcessServerDetails details)
         {
-            ProcessStats.StopStats();
+            ProcessStats.StopStats(details);
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
             LaunchCommand.Toggle(true);
             ProcessRunning = false;
             OnPropertyChanged(nameof(ProcessRunning));
-            StrongReferenceMessenger.Default.Send<ProcessStateChangedMessage>();
+            StrongReferenceMessenger.Default.Send<DashboardStateChanged>();
         }
 
         private void Resolve()

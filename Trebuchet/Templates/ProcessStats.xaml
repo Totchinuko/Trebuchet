@@ -43,13 +43,13 @@
                 <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Memory" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding MemoryConsumption, Mode=OneWay}" VerticalAlignment="Center" />
             </Grid>
-            <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding OnlineStatus, Converter={StaticResource Null2Collapsed}}">
+            <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding ProcessStatus, Converter={StaticResource Null2Collapsed}}">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Server" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding OnlineStatus, Mode=OneWay}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Status" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding ProcessStatus, Mode=OneWay}" VerticalAlignment="Center" />
             </Grid>
             <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding PlayerCount, Converter={StaticResource Null2Collapsed}}">
                 <Grid.ColumnDefinitions>

@@ -28,19 +28,18 @@ namespace Trebuchet
     }
 
     public class RconPanel : Panel,
-            IRecipient<ProcessMessage>
+            IRecipient<ProcessStateChanged>
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
         private IConsole? _console;
         private int _selectedConsole = 0;
-        private List<ServerInstanceInformation> _servers = new List<ServerInstanceInformation>();
+        private List<ProcessServerDetails> _servers = new List<ProcessServerDetails>();
 
         public RconPanel()
         {
             SendCommand = new SimpleCommand(OnSendCommand, false);
 
-            StrongReferenceMessenger.Default.Register<ProcessStartedMessage>(this);
-            StrongReferenceMessenger.Default.Register<ProcessStoppedMessage>(this);
+            StrongReferenceMessenger.Default.Register<ServerProcessStateChanged>(this);
 
             LoadPanel();
         }
@@ -70,7 +69,7 @@ namespace Trebuchet
                    _config.ServerInstanceCount > 0;
         }
 
-        public void Receive(ProcessMessage message)
+        public void Receive(ProcessStateChanged message)
         {
             RefreshConsoleList();
         }
@@ -124,7 +123,7 @@ namespace Trebuchet
         private void RefreshConsoleList()
         {
             AvailableConsoles.Clear();
-            _servers = StrongReferenceMessenger.Default.Send<ServerInfoRequest>().Response;
+            _servers = StrongReferenceMessenger.Default.Send<ProcessServerDetailsRequest>().Response;
             for (int i = 0; i < _config.ServerInstanceCount; i++)
             {
                 var server = _servers.Where(x => x.Instance == i).FirstOrDefault();

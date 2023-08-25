@@ -1,10 +1,12 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using TrebuchetLib;
 
 namespace Trebuchet
 {
@@ -12,16 +14,13 @@ namespace Trebuchet
     {
         protected const string CPUFormat = "{0}%";
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
-        protected ProcessData _process;
         private int _cpuUsage = 0;
 
+        private ProcessDetails? _details;
         private object _lock = new object();
         private long _memoryConsumption = 0;
         private long _peakMemoryConsumption = 0;
         private CancellationTokenSource? _source;
-        private DateTime _start;
-        private IServerStateReader? _stateReader;
-
         private DispatcherTimer _timer;
 
         public ProcessStats()
@@ -35,35 +34,33 @@ namespace Trebuchet
 
         public string CpuUsage { get; private set; }
 
-        public bool IsServer => _stateReader != null;
-
         public string MemoryConsumption { get; private set; }
 
-        public string OnlineStatus { get; private set; } = string.Empty;
-
-        public int PID => _process.pid;
+        public int PID => (int)(_details?.PID ?? 0);
 
         public string PlayerCount { get; private set; } = string.Empty;
 
-        public bool Running => !_process.IsEmpty;
+        public string ProcessStatus => _details?.State.ToString() ?? string.Empty;
 
-        public string Uptime => _process.IsEmpty ? string.Empty : (DateTime.UtcNow - _start).ToString("d'd.'h'h:'m'm:'s's'");
+        public bool Running => _details?.State.IsRunning() ?? false;
 
-        public virtual void SetServerStateReader(IServerStateReader reader)
+        public string Uptime => _details == null ? string.Empty : (DateTime.UtcNow - _details.StartUtc).ToString("d'd.'h'h:'m'm:'s's'");
+
+        public void SetDetails(ProcessDetails details)
         {
-            _stateReader = reader;
+            _details = details;
+            OnPropertyChanged(nameof(ProcessStatus));
         }
 
-        public virtual void StartStats(ProcessData process, string processName)
+        public virtual void StartStats(ProcessDetails details)
         {
-            if (!_process.IsEmpty) throw new Exception("Stats already have a process.");
+            if (_source != null) throw new Exception("Stats already have a process.");
 
-            _process = process;
-            _start = _process.start;
+            SetDetails(details);
 
             _source = new CancellationTokenSource();
             if (App.Config.DisplayProcessPerformance)
-                Task.Run(() => RunCounters(_process.pid, processName, _source.Token), _source.Token);
+                Task.Run(() => RunCounters(PID, details.ProcessName, _source.Token), _source.Token);
             else
             {
                 MemoryConsumption = string.Empty;
@@ -75,17 +72,19 @@ namespace Trebuchet
             _timer.Start();
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(PID));
+            OnPropertyChanged(nameof(ProcessStatus));
         }
 
-        public virtual void StopStats()
+        public virtual void StopStats(ProcessDetails details)
         {
-            _process = ProcessData.Empty;
+            SetDetails(details);
             _source?.Cancel();
             _source?.Dispose();
             _source = null;
             _timer.Stop();
             _peakMemoryConsumption = 0;
             OnPropertyChanged(nameof(Running));
+            OnPropertyChanged(nameof(ProcessStatus));
         }
 
         protected virtual void OnPropertyChanged(string name)
@@ -95,7 +94,7 @@ namespace Trebuchet
 
         protected virtual void OnTick(object? sender, EventArgs e)
         {
-            if (_process.IsEmpty) return;
+            if (!Running) return;
 
             if (App.Config.DisplayProcessPerformance)
                 lock (_lock)
@@ -105,11 +104,9 @@ namespace Trebuchet
                     MemoryConsumption = string.Format(MemoryFormat, (_memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
                 }
 
-            if (_stateReader != null)
+            if (_details is ProcessServerDetails serverDetails)
             {
-                OnlineStatus = _stateReader.ServerState.Online ? "Online" : "Offline";
-                PlayerCount = $"{_stateReader.ServerState.Players}/{_stateReader.ServerState.MaxPlayers}";
-                OnPropertyChanged(nameof(OnlineStatus));
+                PlayerCount = $"{serverDetails.Players}/{serverDetails.MaxPlayers}";
                 OnPropertyChanged(nameof(PlayerCount));
             }
 

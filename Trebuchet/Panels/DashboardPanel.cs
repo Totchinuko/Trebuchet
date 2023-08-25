@@ -12,7 +12,7 @@ namespace Trebuchet
 {
     public class DashboardPanel : Panel,
         IRecipient<CatapulServersMessage>,
-        IRecipient<ProcessStateChangedMessage>
+        IRecipient<DashboardStateChanged>
     {
         private ClientInstanceDashboard _client;
         private Config _config;
@@ -97,7 +97,7 @@ namespace Trebuchet
                 ));
         }
 
-        public void Receive(ProcessStateChangedMessage message)
+        public void Receive(DashboardStateChanged message)
         {
             if (_client.ProcessRunning || Instances.Any(i => i.ProcessRunning))
             {
