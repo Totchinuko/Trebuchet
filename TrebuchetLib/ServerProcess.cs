@@ -26,7 +26,7 @@ namespace Trebuchet
             Console = new MixedConsole(Rcon);
         }
 
-        public event EventHandler<ProcessServerDetails>? ProcessStateChanged;
+        public event EventHandler<ProcessServerDetailsEventArgs>? ProcessStateChanged;
 
         public IConsole Console { get; }
 
@@ -143,14 +143,13 @@ namespace Trebuchet
 
         protected void OnProcessStateChanged(ProcessServerDetails details)
         {
+            ProcessStateChanged?.Invoke(this, new ProcessServerDetailsEventArgs(ProcessDetails, details));
             ProcessDetails = details;
-            ProcessStateChanged?.Invoke(this, details);
         }
 
         protected void OnProcessStateChanged(ProcessState state)
         {
-            ProcessDetails = new ProcessServerDetails(_details, state);
-            OnProcessStateChanged(ProcessDetails);
+            OnProcessStateChanged(new ProcessServerDetails(_details, state));
         }
 
         protected virtual async Task StartProcessInternal(Process process)

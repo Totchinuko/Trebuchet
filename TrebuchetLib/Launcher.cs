@@ -22,9 +22,9 @@ namespace TrebuchetLib
             Task.Run(Tick);
         }
 
-        public event EventHandler<ProcessDetails>? ClientProcessStateChanged;
+        public event EventHandler<ProcessDetailsEventArgs>? ClientProcessStateChanged;
 
-        public event EventHandler<ProcessServerDetails>? ServerProcessStateChanged;
+        public event EventHandler<ProcessServerDetailsEventArgs>? ServerProcessStateChanged;
 
         public Config Config { get; }
 
@@ -283,11 +283,11 @@ namespace TrebuchetLib
             return profile.RestartWhenDown;
         }
 
-        private void OnClientProcessStateChanged(object? sender, ProcessDetails e)
+        private void OnClientProcessStateChanged(object? sender, ProcessDetailsEventArgs e)
         {
             ClientProcessStateChanged?.Invoke(this, e);
 
-            if (e.State != ProcessState.CRASHED || e.State != ProcessState.STOPPED) return;
+            if (e.NewDetails.State != ProcessState.CRASHED || e.NewDetails.State != ProcessState.STOPPED) return;
 
             lock (_lock)
             {
@@ -296,20 +296,20 @@ namespace TrebuchetLib
             }
         }
 
-        private void OnServerProcessStateChanged(object? sender, ProcessServerDetails e)
+        private void OnServerProcessStateChanged(object? sender, ProcessServerDetailsEventArgs e)
         {
             ServerProcessStateChanged?.Invoke(this, e);
-            if (e.State != ProcessState.STOPPED || e.State != ProcessState.CRASHED) return;
+            if (e.NewDetails.State != ProcessState.STOPPED || e.NewDetails.State != ProcessState.CRASHED) return;
             lock (_lock)
             {
-                _serverProcesses.Remove(e.Instance);
-                _lockedFolders.Remove(GetCurrentServerJunction(e.Instance));
-                Log.Write($"Server intance {e.Instance} terminated", LogSeverity.Info);
+                _serverProcesses.Remove(e.NewDetails.Instance);
+                _lockedFolders.Remove(GetCurrentServerJunction(e.NewDetails.Instance));
+                Log.Write($"Server intance {e.NewDetails.Instance} terminated", LogSeverity.Info);
 
-                if (e.State == ProcessState.CRASHED && IsRestartWhenDown(e.Profile))
+                if (e.NewDetails.State == ProcessState.CRASHED && IsRestartWhenDown(e.NewDetails.Profile))
                 {
-                    Log.Write($"Restarting server instance {e.Instance}", LogSeverity.Info);
-                    CatapultServer(e.Profile, e.Modlist, e.Instance);
+                    Log.Write($"Restarting server instance {e.NewDetails.Instance}", LogSeverity.Info);
+                    CatapultServer(e.NewDetails.Profile, e.NewDetails.Modlist, e.NewDetails.Instance);
                 }
             }
         }

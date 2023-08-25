@@ -17,6 +17,7 @@ namespace TrebuchetLib
             ProcessName = data.processName;
             State = state;
             WorkingDirectory = Path.GetDirectoryName(Filename) ?? string.Empty;
+            StartUtc = data.start;
             Modlist = details.Modlist;
             Profile = details.Profile;
         }
@@ -28,6 +29,7 @@ namespace TrebuchetLib
             Arguments = string.Empty;
             Filename = string.Empty;
             PID = 0;
+            StartUtc = DateTime.MinValue;
             ProcessName = string.Empty;
             State = ProcessState.NEW;
             WorkingDirectory = string.Empty;
@@ -42,6 +44,7 @@ namespace TrebuchetLib
             Filename = data.filename;
             PID = (uint)data.pid;
             ProcessName = data.processName;
+            StartUtc = data.start;
             WorkingDirectory = Path.GetDirectoryName(Filename) ?? string.Empty;
         }
 
@@ -55,6 +58,7 @@ namespace TrebuchetLib
             WorkingDirectory = details.WorkingDirectory;
             Profile = details.Profile;
             Modlist = details.Modlist;
+            StartUtc = details.StartUtc;
         }
 
         public ProcessDetails()
@@ -67,6 +71,7 @@ namespace TrebuchetLib
             WorkingDirectory = string.Empty;
             Profile = string.Empty;
             Modlist = string.Empty;
+            StartUtc = DateTime.MinValue;
         }
 
         public string Arguments { get; }
@@ -81,8 +86,23 @@ namespace TrebuchetLib
 
         public string Profile { get; }
 
+        public DateTime StartUtc { get; }
+
         public ProcessState State { get; }
 
         public string WorkingDirectory { get; }
+    }
+
+    public class ProcessDetailsEventArgs
+    {
+        public ProcessDetailsEventArgs(ProcessDetails oldDetails, ProcessDetails newDetails)
+        {
+            OldDetails = oldDetails;
+            NewDetails = newDetails;
+        }
+
+        public ProcessDetails NewDetails { get; }
+
+        public ProcessDetails OldDetails { get; }
     }
 }

@@ -18,7 +18,7 @@ namespace Trebuchet
             ProcessDetails = new ProcessDetails(profile.ProfileName, modlist.ProfileName);
         }
 
-        public event EventHandler<ProcessDetails>? ProcessStateChanged;
+        public event EventHandler<ProcessDetailsEventArgs>? ProcessStateChanged;
 
         public bool IsBattleEye { get; }
 
@@ -103,14 +103,13 @@ namespace Trebuchet
 
         protected void OnProcessStateChanged(ProcessDetails details)
         {
+            ProcessStateChanged?.Invoke(this, new ProcessDetailsEventArgs(ProcessDetails, details));
             ProcessDetails = details;
-            ProcessStateChanged?.Invoke(this, details);
         }
 
         protected void OnProcessStateChanged(ProcessState state)
         {
-            ProcessDetails = new ProcessDetails(ProcessDetails, state);
-            OnProcessStateChanged(ProcessDetails);
+            OnProcessStateChanged(new ProcessDetails(ProcessDetails, state));
         }
 
         //If we start with battle eye, launched process is not going to be the actual game.

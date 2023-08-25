@@ -91,4 +91,17 @@ namespace TrebuchetLib
 
         public string Title { get; }
     }
+
+    public class ProcessServerDetailsEventArgs
+    {
+        public ProcessServerDetailsEventArgs(ProcessServerDetails oldDetails, ProcessServerDetails newDetails)
+        {
+            OldDetails = oldDetails;
+            NewDetails = newDetails;
+        }
+
+        public ProcessServerDetails NewDetails { get; }
+
+        public ProcessServerDetails OldDetails { get; }
+    }
 }
