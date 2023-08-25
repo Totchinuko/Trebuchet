@@ -11,7 +11,7 @@ using Trebuchet;
 
 namespace TrebuchetLib
 {
-    public class Rcon : IRcon
+    public class Rcon : IRcon, IDisposable
     {
         private CancellationTokenSource? _cts;
         private IPEndPoint _endpoint;
@@ -39,6 +39,16 @@ namespace TrebuchetLib
             lock (_lock)
             {
                 _cts?.Cancel();
+            }
+        }
+
+        public void Dispose()
+        {
+            if (_cts != null)
+            {
+                _cts.Cancel();
+                _cts.Dispose();
+                _cts = null;
             }
         }
 
