@@ -103,8 +103,9 @@ namespace Trebuchet
 
         protected void OnProcessStateChanged(ProcessDetails details)
         {
-            ProcessStateChanged?.Invoke(this, new ProcessDetailsEventArgs(ProcessDetails, details));
+            var old = ProcessDetails;
             ProcessDetails = details;
+            ProcessStateChanged?.Invoke(this, new ProcessDetailsEventArgs(old, details));
         }
 
         protected void OnProcessStateChanged(ProcessState state)
