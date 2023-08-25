@@ -14,29 +14,7 @@
 
             <Border Grid.Row="1" Padding="8" Style="{StaticResource Panel}" CornerRadius="3" Margin="0,0,0,12">
                 <Border Style="{StaticResource DarkPanel}">
-                    <ScrollViewer VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-                        <ItemsControl ItemsSource="{Binding ConsoleLogs, Mode=OneWay}">
-                            <ItemsControl.ItemTemplate>
-                                <DataTemplate>
-                                    <TextBlock TextWrapping="Wrap" Margin="0,0,0,12">
-                                        <Run Text="{Binding Header, Mode=OneWay}" Foreground="{StaticResource GDescription}" />
-                                        <Run Text="{Binding Body, Mode=OneWay}">
-                                            <Run.Style>
-                                                <Style TargetType="Run">
-                                                    <Setter Property="Foreground" Value="White" />
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsError}" Value="True">
-                                                            <Setter Property="Foreground" Value="{StaticResource GRed}" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Run.Style>
-                                        </Run>
-                                    </TextBlock>
-                                </DataTemplate>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </ScrollViewer>
+                    <Controls:ConsoleLog ConsoleLogs="{Binding ConsoleLogs, Mode=OneWay}" />
                 </Border>
             </Border>
             <Border Grid.Row="2" Padding="8" Style="{StaticResource Panel}" CornerRadius="3" Margin="0,0,0,0">
