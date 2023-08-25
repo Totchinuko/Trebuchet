@@ -28,7 +28,7 @@ namespace Trebuchet
     }
 
     public class RconPanel : Panel,
-            IRecipient<ProcessStateChanged>
+            IRecipient<ServerProcessStateChanged>
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
         private IConsole? _console;
@@ -69,7 +69,7 @@ namespace Trebuchet
                    _config.ServerInstanceCount > 0;
         }
 
-        public void Receive(ProcessStateChanged message)
+        public void Receive(ServerProcessStateChanged message)
         {
             RefreshConsoleList();
         }
@@ -127,7 +127,7 @@ namespace Trebuchet
             for (int i = 0; i < _config.ServerInstanceCount; i++)
             {
                 var server = _servers.Where(x => x.Instance == i).FirstOrDefault();
-                if (server != null && server.RconPort > 0)
+                if (server != null && server.RconPort > 0 && server.State == ProcessState.ONLINE)
                     AvailableConsoles.Add($"RCON - {server.Title} ({server.Instance}) - {IPAddress.Loopback}:{server.RconPort}");
                 else
                     AvailableConsoles.Add($"Unavailable - Instance {i}");
@@ -138,7 +138,7 @@ namespace Trebuchet
 
         private void RefreshValidity()
         {
-            var valid = _servers.Any(server => server.Instance == _selectedConsole);
+            var valid = _servers.Any(server => server.Instance == _selectedConsole && server.RconPort > 0 && server.State == ProcessState.ONLINE);
             SendCommand.Toggle(valid);
             if (valid)
                 LoadConsole(StrongReferenceMessenger.Default.Send(new ServerConsoleRequest(_selectedConsole)).Response);
