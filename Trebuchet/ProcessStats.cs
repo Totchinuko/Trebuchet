@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
@@ -60,7 +61,7 @@ namespace Trebuchet
 
             _source = new CancellationTokenSource();
             if (App.Config.DisplayProcessPerformance)
-                Task.Run(() => RunCounters(PID, details.ProcessName, _source.Token), _source.Token);
+                Task.Run(() => RunCounters(PID, Path.GetFileNameWithoutExtension(details.ProcessName), _source.Token), _source.Token);
             else
             {
                 MemoryConsumption = string.Empty;
