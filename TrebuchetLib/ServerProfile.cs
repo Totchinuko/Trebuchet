@@ -328,7 +328,7 @@ namespace Trebuchet
             List<string> args = new List<string>() { Map };
             if (Log) args.Add(Config.GameArgsLog);
             if (UseAllCores) args.Add(Config.GameArgsUseAllCore);
-            args.Add(string.Format(Config.ServerArgsMaxPlayers, 10));
+            args.Add(string.Format(Config.ServerArgsMaxPlayers, MaxPlayers));
             args.Add(string.Format(Config.GameArgsModList, Path.Combine(profileFolder, Config.FileGeneratedModlist)));
             if (EnableMultiHome) args.Add(string.Format(Config.ServerArgsMultiHome, MultiHomeAddress));
             args.Add($"-TotInstance={instance}");
