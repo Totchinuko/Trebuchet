@@ -2,6 +2,13 @@
 
 namespace Trebuchet
 {
+    public static class AutoUpdateStatus
+    {
+        public const int CheckForUpdates = 2;
+        public const int Never = 0;
+        public const int OnlyOnStart = 1;
+    }
+
     public sealed class Config : ConfigFile<Config>
     {
         #region constants
@@ -16,6 +23,7 @@ namespace Trebuchet
         public const string CmdArgLoginAnonymous = "+login anonymous";
         public const string CmdArgQuit = "+quit";
         public const string CmdArgWorkshopUpdate = "+workshop_download_item {0} {1}";
+        public const string FileBuildID = "buildid";
         public const string FileClientBEBin = "ConanSandbox_BE.exe";
         public const string FileClientBin = "ConanSandbox.exe";
         public const string FileConfig = "Config.json";
@@ -44,13 +52,10 @@ namespace Trebuchet
         public const string GameArgsUseAllCore = "-useallavailablecores";
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
         public const string ServerArgsMultiHome = "-MULTIHOME={0}";
-        public const string FileBuildID = "buildid";
 
         #endregion constants
 
         public int AutoUpdateStatus { get; set; } = 1;
-
-        public int UpdateCheckInterval { get; set; } = 300;
 
         public uint ClientAppID => IsTestLive ? AppIDTestLiveClient : AppIDLiveClient;
 
@@ -60,13 +65,15 @@ namespace Trebuchet
 
         public bool IsInstallPathValid => !string.IsNullOrEmpty(InstallPath) && Directory.Exists(InstallPath);
 
-        public bool IsTestLive => Path.GetFileName(Path.GetDirectoryName(FilePath)) == FolderTestLive;
+        public bool IsTestLive => Path.GetFileName(FilePath) == $"{FolderTestLive}.{FileConfig}";
 
         public int MaxDownloads { get; set; } = 8;
 
         public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
         public int ServerInstanceCount { get; set; } = 0;
+
+        public int UpdateCheckInterval { get; set; } = 300;
 
         public bool VerifyAll { get; set; } = false;
 
@@ -80,12 +87,5 @@ namespace Trebuchet
             ConfigPath = Path.Combine(ConfigPath, $"{(testlive ? FolderTestLive : FolderLive)}.{FileConfig}");
             return ConfigPath;
         }
-    }
-
-    public static class AutoUpdateStatus
-    {
-        public const int Never = 0;
-        public const int OnlyOnStart = 1;
-        public const int CheckForUpdates = 2;
     }
 }
