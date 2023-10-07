@@ -249,6 +249,13 @@
     "Default": false
   },
   {
+    "$type": "Toggle",
+    "Property": "NoAISpawn",
+    "Name": "No AI Spawn",
+    "Description": "Prevent the spawn of common map NPC. Some categories of NPC are not affected by this, like the Siptha vaults.",
+    "Default": false
+  },
+  {
     "$type": "TextList",
     "Property": "LogFilters",
     "Name": "Log Filters",

@@ -77,6 +77,8 @@ namespace Trebuchet
 
         public string MultiHomeAddress { get; set; } = string.Empty;
 
+        public bool NoAISpawn { get; set; } = false;
+
         public int ProcessPriority { get; set; } = 0;
 
         [JsonIgnore]
@@ -113,6 +115,13 @@ namespace Trebuchet
         public int ZombieCheckSeconds { get; set; } = 300;
 
         #region IniSettings
+
+        [IniSetting(Config.FileIniServer, "Engine")]
+        public void ApplyAISpawn(IniDocument document)
+        {
+            document.GetSection("/Script/ConanSandbox.SystemSettings").SetParameter("dw.EnableAISpawning", NoAISpawn ? "0" : "1");
+            document.GetSection("/Script/ConanSandbox.SystemSettings").SetParameter("dw.EnableInitialAISpawningPass", NoAISpawn ? "0" : "1");
+        }
 
         [IniSetting(Config.FileIniServer, "Engine")]
         public void ApplyEngineSettings(IniDocument document)
