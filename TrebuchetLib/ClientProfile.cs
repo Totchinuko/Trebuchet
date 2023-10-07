@@ -68,11 +68,19 @@ namespace Trebuchet
 
         public bool RemoveIntroVideo { get; set; } = false;
 
+        public bool TotAdminDoNotLoadServerList { get; set; } = false;
+
         public bool UltraAnisotropy { get; set; }
 
         public bool UseAllCores { get; set; } = false;
 
         #region IniConfig
+
+        [IniSetting(Config.FileIniDefault, "Engine")]
+        public void DefaultEngine(IniDocument document)
+        {
+            document.GetSection("/Game/Mods/TotAdmin/PreLoad/Tot_W_NoServer.Tot_W_NoServer_C").SetParameter("NoServerListAutoRefresh", TotAdminDoNotLoadServerList ? "true" : "false");
+        }
 
         [IniSetting(Config.FileIniDefault, "Game")]
         public void SkipMovies(IniDocument document)

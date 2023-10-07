@@ -81,6 +81,13 @@
     "Default": false
   },
   {
+    "$type": "Toggle",
+    "Property": "TotAdminDoNotLoadServerList",
+    "Name": "[Tot ! Admin] Do not load server list",
+    "Description": "Prevent the sever list from auto refreshing from the main menu",
+    "Default": false
+  },
+  {
     "$type": "TextList",
     "Property": "LogFilters",
     "Name": "Log Filters",
