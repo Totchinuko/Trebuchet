@@ -28,6 +28,13 @@
     "RefreshApp": true
   },
   {
+    "$type": "Toggle",
+    "Property": "UseLiveAppIDForMods",
+    "Name": "Use Live Mods on Testlive",
+    "Description": "Use live mods on the test live version of the game.",
+    "Default": false
+  },
+  {
     "$type": "Title",
     "Name": "Updates"
   },
