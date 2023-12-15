@@ -252,7 +252,7 @@ namespace Trebuchet
         private void OnExploreWorkshop(object? obj)
         {
             if (_searchWindow != null) return;
-            _searchWindow = new WorkshopSearch(_config);
+            _searchWindow = new WorkshopSearch();
             _searchWindow.Closing += OnSearchClosing;
             _searchWindow.ModAdded += OnModAdded;
             _searchWindow.Show();
@@ -537,7 +537,7 @@ namespace Trebuchet
                 _modWatcher = null;
             }
 
-            string path = Path.Combine(_config.InstallPath, Config.FolderWorkshop, _config.ClientAppID.ToString());
+            string path = Path.Combine(_config.InstallPath, Config.FolderWorkshop);
             if (string.IsNullOrWhiteSpace(_config.InstallPath) || !Directory.Exists(_config.InstallPath)) return;
             if (!Directory.Exists(path))
                 Tools.CreateDir(path);

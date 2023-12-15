@@ -17,11 +17,12 @@ namespace Trebuchet
         public const uint INVALID_APP_ID = uint.MaxValue;
         public const uint INVALID_DEPOT_ID = uint.MaxValue;
         public const ulong INVALID_MANIFEST_ID = ulong.MaxValue;
-        public string STAGING_DIR => Path.Combine(STEAMKIT_DIR, "Staging");
-        public string STEAMKIT_DIR => Path.Combine(Config.InstallPath, "SteamCache");
         private CDNClientPool cdnPool;
+
         private DepotConfigStore? depotConfigStore;
+
         private IProgress<double>? progress;
+
         private SteamSession steam;
 
         public ContentDownloader(SteamSession steam, Config config, uint appID)
@@ -35,6 +36,10 @@ namespace Trebuchet
         /// Current install directory for the app. Set this before downloading.
         /// </summary>
         public string? InstallDirectory { get; private set; }
+
+        public string STAGING_DIR => Path.Combine(STEAMKIT_DIR, "Staging");
+
+        public string STEAMKIT_DIR => Path.Combine(Config.InstallPath, "SteamCache");
 
         private Config Config { get; set; }
 
@@ -158,7 +163,7 @@ namespace Trebuchet
 
             try
             {
-                await DownloadSteam3Async(appId, infos, cts).ConfigureAwait(false);
+                await DownloadSteam3Async(infos, cts).ConfigureAwait(false);
                 WriteBuildIDFile(appId, branch);
             }
             catch (OperationCanceledException)
@@ -174,23 +179,23 @@ namespace Trebuchet
         /// <param name="appId"></param>
         /// <param name="publishedFileId"></param>
         /// <returns></returns>
-        public async Task DownloadPubfileAsync(uint appId, ulong publishedFileId, CancellationTokenSource cts)
-        {
-            var details = steam.GetPublishedFileDetails(appId, publishedFileId);
+        //public async Task DownloadPubfileAsync(IEnumerable<uint> apps, ulong publishedFileId, CancellationTokenSource cts)
+        //{
+        //    var details = steam.GetPublishedFileDetails(appId, publishedFileId);
 
-            if (!string.IsNullOrEmpty(details?.file_url))
-            {
-                await DownloadWebFile(appId, details.filename, details.file_url);
-            }
-            else if (details?.hcontent_file > 0)
-            {
-                await DownloadUGCAsync(appId, new List<ulong> { publishedFileId }, DEFAULT_BRANCH, cts);
-            }
-            else
-            {
-                Log.Write("Unable to locate manifest ID for published file {0}", LogSeverity.Error, publishedFileId);
-            }
-        }
+        //    if (!string.IsNullOrEmpty(details?.file_url))
+        //    {
+        //        await DownloadWebFile(appId, details.filename, details.file_url);
+        //    }
+        //    else if (details?.hcontent_file > 0)
+        //    {
+        //        await DownloadUGCAsync(apps, new List<ulong> { publishedFileId }, DEFAULT_BRANCH, cts);
+        //    }
+        //    else
+        //    {
+        //        Log.Write("Unable to locate manifest ID for published file {0}", LogSeverity.Error, publishedFileId);
+        //    }
+        //}
 
         /// <summary>
         /// Download a list of manifests handled UGC files.
@@ -202,75 +207,63 @@ namespace Trebuchet
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         /// <exception cref="ContentDownloaderException"></exception>
-        public async Task DownloadUGCAsync(uint appId, IEnumerable<ulong> publishedFiles, string branch, CancellationTokenSource cts)
+        public async Task DownloadUGCAsync(IEnumerable<uint> apps, IEnumerable<ulong> publishedFiles, string branch, CancellationTokenSource cts)
         {
             if (string.IsNullOrWhiteSpace(InstallDirectory))
                 throw new Exception("Install directory not set.");
 
-            steam.RequestAppInfo(appId);
+            List<SteamKit2.Internal.PublishedFileDetails> list = new List<SteamKit2.Internal.PublishedFileDetails>();
 
-            if (!AccountHasAccess(appId))
+            foreach (var appId in apps)
             {
-                if (steam.RequestFreeAppLicense(appId))
+                steam.RequestAppInfo(appId);
+                if (!AccountHasAccess(appId))
                 {
-                    Log.Write("Obtained FreeOnDemand license for app {0}", LogSeverity.Info, appId);
+                    if (steam.RequestFreeAppLicense(appId))
+                    {
+                        Log.Write("Obtained FreeOnDemand license for app {0}", LogSeverity.Info, appId);
 
-                    // Fetch app info again in case we didn't get it fully without a license.
-                    steam.RequestAppInfo(appId, true);
+                        // Fetch app info again in case we didn't get it fully without a license.
+                        steam.RequestAppInfo(appId, true);
+                    }
+                    else
+                    {
+                        var contentName = GetAppName(appId);
+                        throw new ContentDownloaderException(String.Format("App {0} ({1}) is not available from this account.", appId, contentName));
+                    }
                 }
-                else
-                {
-                    var contentName = GetAppName(appId);
-                    throw new ContentDownloaderException(String.Format("App {0} ({1}) is not available from this account.", appId, contentName));
-                }
+
+                list.AddRange(steam.GetPublishedFileDetails(appId, publishedFiles));
             }
 
-            var list = steam.GetPublishedFileDetails(appId, publishedFiles);
-            if (list.Count == 0) return; 
-            var depotManifestIds = list.Where(x => x.hcontent_file > 0).Select(i => (appId, i.publishedfileid, i.hcontent_file)).ToList();
+            if (list.Count == 0) return;
+            var depotManifestIds = list.Where(x => x.hcontent_file > 0).GroupBy(x => x.publishedfileid).Select(y => y.First()).Select(i => (i.consumer_appid, i.publishedfileid, i.hcontent_file)).ToList();
 
             var hasSpecificDepots = depotManifestIds.Count > 0;
-            var depotIdsFound = new List<uint>();
-            var depotIdsExpected = depotManifestIds.Select(x => x.appId).ToList();
-            var depots = GetSteam3AppSection(appId, EAppInfoSection.Depots);
-
-            var workshopDepot = depots["workshopdepot"].AsUnsignedInteger();
-            if (workshopDepot != 0 && !depotIdsExpected.Contains(workshopDepot))
-            {
-                depotIdsExpected.Add(workshopDepot);
-                depotManifestIds = depotManifestIds.Select(i => (workshopDepot, i.publishedfileid, i.hcontent_file)).ToList();
-            }
-
-            depotIdsFound.AddRange(depotIdsExpected);
+            var depotIdsExpected = depotManifestIds.Select(x => x.consumer_appid).ToList();
 
             if (depotManifestIds.Count == 0 && !hasSpecificDepots)
             {
-                throw new ContentDownloaderException(String.Format("Couldn't find any depots to download for app {0}", appId));
-            }
-
-            if (depotIdsFound.Count < depotIdsExpected.Count)
-            {
-                var remainingDepotIds = depotIdsExpected.Except(depotIdsFound);
-                throw new ContentDownloaderException(String.Format("Depot {0} not listed for app {1}", string.Join(", ", remainingDepotIds), appId));
+                throw new ContentDownloaderException(String.Format("Couldn't find any depots to download for app {0}", string.Join(", ", apps)));
             }
 
             var infos = new List<DepotDownloadInfo>();
 
-            foreach (var depotManifest in depotManifestIds)
+            foreach (var depot in depotManifestIds)
             {
-                if (!CreateUGCDirectories(appId, depotManifest.publishedfileid, out var installDir))
+                if (!CreateUGCDirectories(depot.consumer_appid, depot.publishedfileid, out var installDir))
                     throw new Exception("Unable to create install directories!");
-                if (TryGetDepotInfo(depotManifest.appId, appId, depotManifest.hcontent_file, depotManifest.publishedfileid, branch, installDir, out var info))
+                if (TryGetDepotInfo(depot.consumer_appid, depot.consumer_appid, depot.hcontent_file, depot.publishedfileid, branch, installDir, out var info))
                     infos.Add(info);
             }
 
             try
             {
-                await DownloadSteam3Async(appId, infos, cts).ConfigureAwait(false);
+                await DownloadSteam3Async(infos, cts).ConfigureAwait(false);
             }
             catch (OperationCanceledException)
             {
-                Log.Write("App {0} was not completely downloaded.", LogSeverity.Warning, appId);
+                Log.Write("App {0} was not completely downloaded.", LogSeverity.Warning, string.Join(", ", apps));
                 throw;
             }
         }
@@ -431,7 +424,7 @@ namespace Trebuchet
             return true;
         }
 
-        private async Task DownloadSteam3Async(uint appId, List<DepotDownloadInfo> depots, CancellationTokenSource cts)
+        private async Task DownloadSteam3Async(List<DepotDownloadInfo> depots, CancellationTokenSource cts)
         {
             if (string.IsNullOrWhiteSpace(InstallDirectory))
                 throw new ArgumentNullException(nameof(InstallDirectory));
@@ -447,7 +440,7 @@ namespace Trebuchet
             // First, fetch all the manifests for each depot (including previous manifests) and perform the initial setup
             foreach (var depot in depots)
             {
-                var depotFileData = await ProcessDepotManifestAndFiles(cts, appId, depot);
+                var depotFileData = await ProcessDepotManifestAndFiles(cts, depot);
 
                 if (depotFileData != null)
                 {
@@ -477,7 +470,7 @@ namespace Trebuchet
             ulong totalDownloaded = depotsToDownload.Select(d => d.depotCounter.CompleteDownloadSize).Aggregate((a, b) => a + b);
             foreach (var depotFileData in depotsToDownload)
             {
-                await DownloadSteam3AsyncDepotFiles(cts, appId, globalDownloadCounter, depotFileData, allFileNamesAllDepots, totalDownloaded, downloaded);
+                await DownloadSteam3AsyncDepotFiles(cts, globalDownloadCounter, depotFileData, allFileNamesAllDepots, totalDownloaded, downloaded);
                 downloaded += depotFileData.depotCounter.CompleteDownloadSize;
             }
 
@@ -674,7 +667,7 @@ namespace Trebuchet
             }
         }
 
-        private async Task DownloadSteam3AsyncDepotFileChunk(CancellationTokenSource cts, uint appId, GlobalDownloadCounter downloadCounter, DepotFilesData depotFilesData, ProtoManifest.FileData file, FileStreamData fileStreamData, ProtoManifest.ChunkData chunk, ulong totalDepots, ulong downloadedDepots)
+        private async Task DownloadSteam3AsyncDepotFileChunk(CancellationTokenSource cts, GlobalDownloadCounter downloadCounter, DepotFilesData depotFilesData, ProtoManifest.FileData file, FileStreamData fileStreamData, ProtoManifest.ChunkData chunk, ulong totalDepots, ulong downloadedDepots)
         {
             if (cdnPool == null)
                 throw new Exception("cdnPool is not available.");
@@ -795,7 +788,7 @@ namespace Trebuchet
             progress?.Report((sizeDownloaded + downloadedDepots) / (double)totalDepots * 100.0d);
         }
 
-        private async Task DownloadSteam3AsyncDepotFiles(CancellationTokenSource cts, uint appId, GlobalDownloadCounter downloadCounter, DepotFilesData depotFilesData, HashSet<String> allFileNamesAllDepots, ulong totalDepots, ulong downloadedDepots)
+        private async Task DownloadSteam3AsyncDepotFiles(CancellationTokenSource cts, GlobalDownloadCounter downloadCounter, DepotFilesData depotFilesData, HashSet<String> allFileNamesAllDepots, ulong totalDepots, ulong downloadedDepots)
         {
             if (string.IsNullOrWhiteSpace(InstallDirectory))
                 throw new Exception("InstallDirectory was not set");
@@ -817,7 +810,7 @@ namespace Trebuchet
             await Util.InvokeAsync(
                 networkChunkQueue.Select(q => new Func<Task>(async () =>
                     await Task.Run(() =>
-                        DownloadSteam3AsyncDepotFileChunk(cts, appId, downloadCounter, depotFilesData, q.fileData, q.fileStreamData, q.chunk, totalDepots, downloadedDepots)
+                        DownloadSteam3AsyncDepotFileChunk(cts, downloadCounter, depotFilesData, q.fileData, q.fileStreamData, q.chunk, totalDepots, downloadedDepots)
                     ))),
                 maxDegreeOfParallelism: Config.MaxDownloads
             );
@@ -841,7 +834,7 @@ namespace Trebuchet
                 }
             }
 
-             if(depotConfigStore == null)
+            if (depotConfigStore == null)
                 throw new Exception("DepotConfigStore was not loaded.");
 
             if (depot.publishedFileId != 0)
@@ -914,7 +907,7 @@ namespace Trebuchet
             return UInt64.Parse(node.Value);
         }
 
-        private async Task<DepotFilesData> ProcessDepotManifestAndFiles(CancellationTokenSource cts, uint appId, DepotDownloadInfo depot)
+        private async Task<DepotFilesData> ProcessDepotManifestAndFiles(CancellationTokenSource cts, DepotDownloadInfo depot)
         {
             if (depotConfigStore == null)
                 throw new Exception("DepotConfigStore was not loaded.");

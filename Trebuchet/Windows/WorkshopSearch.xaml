@@ -38,9 +38,11 @@
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="auto" />
+                                <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox VerticalContentAlignment="Center" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" MinWidth="300" MaxWidth="400" Margin="0,0,12,0" VerticalAlignment="center" Height="25" KeyDown="TextBox_KeyDown" />
-                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90" Content="Search" Style="{StaticResource ButtonIconBlue}" />
+                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90" Content="Search" Margin="0,0,12,0" Style="{StaticResource ButtonIconBlue}" />
+                            <CheckBox Grid.Column="2" IsChecked="{Binding TestLiveWorkshop, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Content="Test Live Workshop" VerticalAlignment="Center" />
                         </Grid>
                     </Border>
                     <Border Padding="0,12,0,0" Grid.Row="1">

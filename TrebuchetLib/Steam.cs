@@ -148,7 +148,7 @@
         {
             if (!SetupFolders()) return;
             _steam.ContentDownloader.SetInstallDirectory(Path.Combine(_config.InstallPath, Config.FolderWorkshop));
-            await _steam.ContentDownloader.DownloadUGCAsync(_config.ClientAppID, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
+            await _steam.ContentDownloader.DownloadUGCAsync(new uint[] { Config.AppIDLiveClient, Config.AppIDTestLiveClient }, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
         }
 
         /// <summary>

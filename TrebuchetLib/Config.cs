@@ -57,8 +57,6 @@ namespace Trebuchet
 
         public int AutoUpdateStatus { get; set; } = 1;
 
-        public uint ClientAppID => IsTestLive && !UseLiveAppIDForMods ? AppIDTestLiveClient : AppIDLiveClient;
-
         public string ClientPath { get; set; } = string.Empty;
 
         public string InstallPath { get; set; } = string.Empty;
@@ -74,8 +72,6 @@ namespace Trebuchet
         public int ServerInstanceCount { get; set; } = 0;
 
         public int UpdateCheckInterval { get; set; } = 300;
-
-        public bool UseLiveAppIDForMods { get; set; } = false;
 
         public bool VerifyAll { get; set; } = false;
 

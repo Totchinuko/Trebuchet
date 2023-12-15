@@ -57,11 +57,11 @@ namespace Trebuchet
                     yield return mod;
         }
 
-        public static bool ResolveMod(Config config, ref string mod)
+        public static bool ResolveMod(Config config, uint appID, ref string mod)
         {
             string file = mod;
             if (long.TryParse(mod, out _))
-                file = Path.Combine(config.InstallPath, Config.FolderWorkshop, config.ClientAppID.ToString(), mod, "none");
+                file = Path.Combine(config.InstallPath, Config.FolderWorkshop, appID.ToString(), mod, "none");
 
             string? folder = Path.GetDirectoryName(file);
             if (folder == null)
@@ -170,7 +170,11 @@ namespace Trebuchet
 
         public bool ResolveMod(ref string mod)
         {
-            return ResolveMod(Config, ref mod);
+            if (ResolveMod(Config, Config.AppIDLiveClient, ref mod))
+                return true;
+            else if (ResolveMod(Config, Config.AppIDTestLiveClient, ref mod))
+                return true;
+            return false;
         }
 
         public void SetModList(string modlist)

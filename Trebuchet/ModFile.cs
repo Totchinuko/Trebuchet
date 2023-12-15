@@ -102,18 +102,18 @@ namespace Trebuchet
         protected virtual Brush GetStatusBrush()
         {
             if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
-            if (_size == 0) return (Brush)Application.Current.Resources["GDimBlue"];
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _size == _infos.Length) return (Brush)Application.Current.Resources["GDimGreen"];
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
+            if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GDimBlue"];
+            if (_lastUpdate < _infos.LastWriteTimeUtc) return (Brush)Application.Current.Resources["GDimGreen"];
+            //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
             return (Brush)Application.Current.Resources["GDimYellow"];
         }
 
         protected virtual string GetStatusText()
         {
             if (!_infos.Exists) return "Missing";
-            if (_size == 0) return "Found";
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _size == _infos.Length) return "Up to Date";
-            if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return "Corrupted";
+            if (_publishedFileID == 0) return "Found";
+            if (_lastUpdate < _infos.LastWriteTimeUtc) return "Up to Date";
+            //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return "Corrupted";
             return "Update available";
         }
 

@@ -19,13 +19,12 @@ namespace Trebuchet
     /// </summary>
     public partial class WorkshopSearch : Window, INotifyPropertyChanged
     {
-        private Config _config;
         private List<WorkshopSearchResult> _searchResults = new List<WorkshopSearchResult>();
         private string _searchTerm = string.Empty;
+        private bool _testLiveWorkshop = false;
 
-        public WorkshopSearch(Config config)
+        public WorkshopSearch()
         {
-            _config = config;
             SearchCommand = new TaskBlockedCommand(OnSearch, true, Operations.SteamSearch);
             AddModCommand = new SimpleCommand(OnModAdded);
             InitializeComponent();
@@ -51,6 +50,17 @@ namespace Trebuchet
         }
 
         public string SearchTerm { get => _searchTerm; set => _searchTerm = value; }
+
+        public bool TestLiveWorkshop
+        {
+            get => _testLiveWorkshop;
+            set
+            {
+                if (_testLiveWorkshop == value) return;
+                _testLiveWorkshop = value;
+                OnSearch(this);
+            }
+        }
 
         protected virtual void OnModAdded(object? obj)
         {
@@ -95,7 +105,7 @@ namespace Trebuchet
             {
                 Page = 0,
                 SearchText = _searchTerm,
-                AppId = _config.IsTestLive ? Config.AppIDTestLiveClient : Config.AppIDLiveClient,
+                AppId = TestLiveWorkshop ? Config.AppIDTestLiveClient : Config.AppIDLiveClient,
                 FileType = PublishedFileType.Items_ReadyToUse,
                 NumPerPage = 20,
                 StripDescriptionBBcode = true,
