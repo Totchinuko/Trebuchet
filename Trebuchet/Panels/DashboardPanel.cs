@@ -12,7 +12,8 @@ namespace Trebuchet
 {
     public class DashboardPanel : Panel,
         IRecipient<CatapulServersMessage>,
-        IRecipient<DashboardStateChanged>
+        IRecipient<DashboardStateChanged>,
+        IRecipient<SteamModlistReceived>
     {
         private ClientInstanceDashboard _client;
         private Config _config;
@@ -109,6 +110,10 @@ namespace Trebuchet
                 if (!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.GameRunning))) return;
                 StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.GameRunning));
             }
+        }
+
+        public void Receive(SteamModlistReceived message)
+        {
         }
 
         public override void RefreshPanel()

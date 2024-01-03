@@ -13,6 +13,7 @@ namespace Trebuchet
         private uint _appID = 0;
         private FileInfo _infos;
         private DateTime _lastUpdate;
+        private bool _needUpdate = false;
         private ulong _publishedFileID = 0;
         private long _size = 0;
         private string _title = string.Empty;
@@ -52,12 +53,12 @@ namespace Trebuchet
                 if (!IsPublished)
                 {
                     DateTime lastModified = _infos.LastWriteTime;
-                    return $"Modified {_infos.LastWriteTime.Humanize()}";
+                    return $"Last Modified: {_infos.LastWriteTime.Humanize()}";
                 }
 
                 if (_lastUpdate == default) return "Loading...";
                 DateTime local = _lastUpdate.ToLocalTime();
-                return $"Updated {local.Humanize()}";
+                return $"Last Update: {local.Humanize()}";
             }
         }
 
@@ -88,7 +89,7 @@ namespace Trebuchet
             OnPropertyChanged(nameof(StatusTooltip));
         }
 
-        public void SetManifest(PublishedFile file)
+        public void SetManifest(PublishedFile file, bool needUpdate = false)
         {
             if (!IsPublished)
                 throw new Exception("Cannot set a manifest on a local mod.");
@@ -96,6 +97,7 @@ namespace Trebuchet
             _title = file.Title;
             _size = file.FileSize;
             _appID = file.ConsumerAppId;
+            _needUpdate = needUpdate;
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(LastUpdate));
             OnPropertyChanged(nameof(StatusColor));
@@ -111,7 +113,8 @@ namespace Trebuchet
         {
             if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
             if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GDimBlue"];
-            if (_lastUpdate < _infos.LastWriteTimeUtc) return (Brush)Application.Current.Resources["GDimGreen"];
+            if (!_needUpdate) return (Brush)Application.Current.Resources["GDimGreen"];
+            //if (_lastUpdate < _infos.LastWriteTimeUtc) return (Brush)Application.Current.Resources["GDimGreen"];
             //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
             return (Brush)Application.Current.Resources["GDimYellow"];
         }
@@ -120,7 +123,8 @@ namespace Trebuchet
         {
             if (!_infos.Exists) return "Missing";
             if (_publishedFileID == 0) return "Found";
-            if (_lastUpdate < _infos.LastWriteTimeUtc) return "Up to Date";
+            if (!_needUpdate) return "Up to Date";
+            //if (_lastUpdate < _infos.LastWriteTimeUtc) return "Up to Date";
             //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return "Corrupted";
             return "Update available";
         }

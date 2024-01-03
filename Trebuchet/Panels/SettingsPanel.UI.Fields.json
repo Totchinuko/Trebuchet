@@ -1,6 +1,22 @@
 [
   {
     "$type": "Title",
+    "Name": "Mod List"
+  },
+  {
+    "$type": "Toggle",
+    "Property": "AutoRefreshModlist",
+    "Name": "Auto Refresh Mod List",
+    "Default": true
+  },
+  {
+    "$type": "Toggle",
+    "Property": "AutoReconnectToSteam",
+    "Name": "Auto Reconnect to Steam",
+    "Default": true
+  },
+  {
+    "$type": "Title",
     "Name": "Trebuchet UI"
   },
   {

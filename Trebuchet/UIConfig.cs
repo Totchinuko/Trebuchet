@@ -7,25 +7,22 @@ namespace Trebuchet
 {
     public sealed class UIConfig : ConfigFile<UIConfig>
     {
-        private string _currentClientProfile = string.Empty;
-        private string _currentModlistProfile = string.Empty;
-        private string _currentServerProfile = string.Empty;
-        private string _dashboardClientModlist = string.Empty;
-        private string _dashboardClientProfile = string.Empty;
         private string[] _dashboardServerModlist = new string[0];
         private string[] _dashboardServerProfiles = new string[0];
-        private bool _displayWarningOnKill = true;
-        private bool _useHardwareAcceleration = true;
 
-        public string CurrentClientProfile { get => _currentClientProfile; set => _currentClientProfile = value; }
+        public bool AutoReconnectToSteam { get; set; } = true;
 
-        public string CurrentModlistProfile { get => _currentModlistProfile; set => _currentModlistProfile = value; }
+        public bool AutoRefreshModlist { get; set; } = true;
 
-        public string CurrentServerProfile { get => _currentServerProfile; set => _currentServerProfile = value; }
+        public string CurrentClientProfile { get; set; } = string.Empty;
 
-        public string DashboardClientModlist { get => _dashboardClientModlist; set => _dashboardClientModlist = value; }
+        public string CurrentModlistProfile { get; set; } = string.Empty;
 
-        public string DashboardClientProfile { get => _dashboardClientProfile; set => _dashboardClientProfile = value; }
+        public string CurrentServerProfile { get; set; } = string.Empty;
+
+        public string DashboardClientModlist { get; set; } = string.Empty;
+
+        public string DashboardClientProfile { get; set; } = string.Empty;
 
         public string[] DashboardServerModlist { get => _dashboardServerModlist; set => _dashboardServerModlist = value; }
 
@@ -33,9 +30,9 @@ namespace Trebuchet
 
         public bool DisplayProcessPerformance { get; set; } = true;
 
-        public bool DisplayWarningOnKill { get => _displayWarningOnKill; set => _displayWarningOnKill = value; }
+        public bool DisplayWarningOnKill { get; set; } = true;
 
-        public bool UseHardwareAcceleration { get => _useHardwareAcceleration; set => _useHardwareAcceleration = value; }
+        public bool UseHardwareAcceleration { get; set; } = true;
 
         public static string GetPath(bool testlive)
         {
@@ -50,21 +47,21 @@ namespace Trebuchet
         {
             modlist = string.Empty;
             profile = string.Empty;
-            if (_dashboardServerModlist.Length <= instance) return;
+            if (DashboardServerModlist.Length <= instance) return;
 
-            modlist = _dashboardServerModlist[instance];
-            profile = _dashboardServerProfiles[instance];
+            modlist = DashboardServerModlist[instance];
+            profile = DashboardServerProfiles[instance];
         }
 
         public void SetInstanceParameters(int instance, string modlist, string profile)
         {
-            if (_dashboardServerModlist.Length <= instance)
+            if (DashboardServerModlist.Length <= instance)
                 Array.Resize(ref _dashboardServerModlist, instance + 1);
-            _dashboardServerModlist[instance] = modlist;
+            DashboardServerModlist[instance] = modlist;
 
-            if (_dashboardServerProfiles.Length <= instance)
+            if (DashboardServerProfiles.Length <= instance)
                 Array.Resize(ref _dashboardServerProfiles, instance + 1);
-            _dashboardServerProfiles[instance] = profile;
+            DashboardServerProfiles[instance] = profile;
         }
     }
 }

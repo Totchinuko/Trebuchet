@@ -1,4 +1,6 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using SteamWorksWebAPI.Interfaces;
+using SteamWorksWebAPI;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -24,7 +26,9 @@ namespace Trebuchet
         IRecipient<InstanceInstalledCountRequest>,
         IRecipient<PanelActivateMessage>,
         IRecipient<ServerConsoleRequest>,
-        IRecipient<ProcessServerDetailsRequest>
+        IRecipient<ProcessServerDetailsRequest>,
+        IRecipient<SteamModlistRequest>,
+        IRecipient<SteamModlistUpdateRequest>
     {
         private Panel? _activePanel;
 
@@ -53,6 +57,8 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<InstanceInstalledCountRequest>(this);
             StrongReferenceMessenger.Default.Register<PanelActivateMessage>(this);
             StrongReferenceMessenger.Default.Register<ProcessServerDetailsRequest>(this);
+            StrongReferenceMessenger.Default.Register<SteamModlistRequest>(this);
+            StrongReferenceMessenger.Default.Register<SteamModlistUpdateRequest>(this);
 
             var menuConfig = GuiExtensions.GetEmbededTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
@@ -152,6 +158,16 @@ namespace Trebuchet
             message.Reply(_trebuchet.Launcher.GetServersDetails().ToList());
         }
 
+        public void Receive(SteamModlistRequest message)
+        {
+            RequestModlistManifests(message.modlist);
+        }
+
+        public void Receive(SteamModlistUpdateRequest message)
+        {
+            message.Reply(_trebuchet.Steam.GetUpdatedUGCFileIDs(message.keyValuePairs).ToList());
+        }
+
         internal virtual void OnAppClose()
         {
             _trebuchet.Launcher.Dispose();
@@ -197,6 +213,31 @@ namespace Trebuchet
             _trebuchet.Launcher.ClientProcessStateChanged += (_, e) => RegisterEvent(new ClientProcessStateChanged(e));
         }
 
+        private void RequestModlistManifests(string modlistName)
+        {
+            if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
+            if (!ModListProfile.TryLoadProfile(_trebuchet.Config, modlistName, out ModListProfile? profile)) return;
+
+            RequestModlistManifests(profile.GetModIDList().ToList());
+        }
+
+        private void RequestModlistManifests(List<ulong> list)
+        {
+            if (list.Count == 0) return;
+
+            new CatchedTasked(Operations.SteamPublishedFilesFetch, 15 * 1000)
+                .Add(async (cts) =>
+                {
+                    var result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
+                    if (result == null) return;
+                    Application.Current.Dispatcher.Invoke(() =>
+                    {
+                        StrongReferenceMessenger.Default.Send(new SteamModlistReceived(result));
+                    });
+                }
+                ).Start();
+        }
+
         private void UpdateServerMods(IEnumerable<ulong> modlist)
         {
             if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
@@ -207,6 +248,10 @@ namespace Trebuchet
                 .Add(async (cts) =>
                 {
                     await _trebuchet.Steam.UpdateMods(modlist, cts);
+                })
+                .Then(() =>
+                {
+                    RequestModlistManifests(modlist.ToList());
                 })
                 .Start();
         }

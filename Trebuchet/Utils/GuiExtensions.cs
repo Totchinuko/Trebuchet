@@ -1,10 +1,12 @@
-﻿using System;
+﻿using SteamWorksWebAPI;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Security.Policy;
 using System.Windows;
 using System.Windows.Media;
 
@@ -146,6 +148,15 @@ namespace Trebuchet
         public static bool GetIsDragging(DependencyObject source)
         {
             return (bool)source.GetValue(IsDraggingProperty);
+        }
+
+        public static IEnumerable<(ulong, ulong)> GetManifestKeyValuePairs(this List<PublishedFile> list)
+        {
+            foreach (var file in list)
+            {
+                if (ulong.TryParse(file.HcontentFile, out var manifest))
+                    yield return (file.PublishedFileID, manifest);
+            }
         }
 
         public static void SetAccent(UIElement element, bool value)

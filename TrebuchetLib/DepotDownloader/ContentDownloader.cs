@@ -174,30 +174,6 @@ namespace Trebuchet
         }
 
         /// <summary>
-        /// Download a single workshop item.
-        /// </summary>
-        /// <param name="appId"></param>
-        /// <param name="publishedFileId"></param>
-        /// <returns></returns>
-        //public async Task DownloadPubfileAsync(IEnumerable<uint> apps, ulong publishedFileId, CancellationTokenSource cts)
-        //{
-        //    var details = steam.GetPublishedFileDetails(appId, publishedFileId);
-
-        //    if (!string.IsNullOrEmpty(details?.file_url))
-        //    {
-        //        await DownloadWebFile(appId, details.filename, details.file_url);
-        //    }
-        //    else if (details?.hcontent_file > 0)
-        //    {
-        //        await DownloadUGCAsync(apps, new List<ulong> { publishedFileId }, DEFAULT_BRANCH, cts);
-        //    }
-        //    else
-        //    {
-        //        Log.Write("Unable to locate manifest ID for published file {0}", LogSeverity.Error, publishedFileId);
-        //    }
-        //}
-
-        /// <summary>
         /// Download a list of manifests handled UGC files.
         /// </summary>
         /// <param name="appId"></param>
@@ -268,6 +244,19 @@ namespace Trebuchet
             }
         }
 
+        //    if (!string.IsNullOrEmpty(details?.file_url))
+        //    {
+        //        await DownloadWebFile(appId, details.filename, details.file_url);
+        //    }
+        //    else if (details?.hcontent_file > 0)
+        //    {
+        //        await DownloadUGCAsync(apps, new List<ulong> { publishedFileId }, DEFAULT_BRANCH, cts);
+        //    }
+        //    else
+        //    {
+        //        Log.Write("Unable to locate manifest ID for published file {0}", LogSeverity.Error, publishedFileId);
+        //    }
+        //}
         /// <summary>
         /// Get current build number for a specific branch of an app.
         /// </summary>
@@ -294,6 +283,32 @@ namespace Trebuchet
             return uint.Parse(buildid.Value);
         }
 
+        /// <summary>
+        /// Compare a list of manifest ID from Published Files with the local steam cache
+        /// </summary>
+        /// <param name="keyValuePairs"></param>
+        /// <returns></returns>
+        public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubID, ulong manisfestID)> keyValuePairs)
+        {
+            depotConfigStore = DepotConfigStore.LoadFromFile(Path.Combine(STEAMKIT_DIR, "depot.config"));
+            foreach (var pair in keyValuePairs)
+            {
+                if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pair.pubID, out ulong manisfest))
+                    yield return pair.pubID;
+                if (manisfest != pair.manisfestID)
+                    yield return pair.pubID;
+            }
+        }
+
+        /// <summary>
+        /// Download a single workshop item.
+        /// </summary>
+        /// <param name="appId"></param>
+        /// <param name="publishedFileId"></param>
+        /// <returns></returns>
+        //public async Task DownloadPubfileAsync(IEnumerable<uint> apps, ulong publishedFileId, CancellationTokenSource cts)
+        //{
+        //    var details = steam.GetPublishedFileDetails(appId, publishedFileId);
         /// <summary>
         /// The target install directory for downloaded content.
         /// </summary>

@@ -96,6 +96,16 @@
         }
 
         /// <summary>
+        /// Compare a list of manifest ID from Published Files with the local steam cache
+        /// </summary>
+        /// <param name="keyValuePairs"></param>
+        /// <returns></returns>
+        public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong, ulong)> keyValuePairs)
+        {
+            return _steam.ContentDownloader.GetUpdatedUGCFileIDs(keyValuePairs);
+        }
+
+        /// <summary>
         /// Remove all junctions present in any server instance folder. Used before update to avoid crash du to copy error on junction folders.
         /// </summary>
         /// <param name="config"></param>

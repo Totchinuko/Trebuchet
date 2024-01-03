@@ -1,5 +1,8 @@
 ﻿using CommunityToolkit.Mvvm.Messaging.Messages;
+using SteamWorksWebAPI;
+using System.Collections.Generic;
 using System.Threading;
+using System.Windows.Documents;
 
 namespace Trebuchet
 {
@@ -12,5 +15,35 @@ namespace Trebuchet
 
     public class SteamConnectMessage
     {
+    }
+
+    public class SteamModlistReceived
+    {
+        public List<PublishedFile> Modlist;
+
+        public SteamModlistReceived(PublishedFilesResponse response)
+        {
+            Modlist = new List<PublishedFile>(response.PublishedFileDetails);
+        }
+    }
+
+    public class SteamModlistRequest
+    {
+        public string modlist = string.Empty;
+
+        public SteamModlistRequest(string modlist)
+        {
+            this.modlist = modlist;
+        }
+    }
+
+    public class SteamModlistUpdateRequest : RequestMessage<List<ulong>>
+    {
+        public IEnumerable<(ulong PubID, ulong manifestID)> keyValuePairs;
+
+        public SteamModlistUpdateRequest(IEnumerable<(ulong PubID, ulong manifestID)> keyValuePairs)
+        {
+            this.keyValuePairs = keyValuePairs;
+        }
     }
 }

@@ -20,7 +20,8 @@ using Trebuchet.Utils;
 
 namespace Trebuchet
 {
-    public class ModlistPanel : Panel
+    public class ModlistPanel : Panel,
+        IRecipient<SteamModlistReceived>
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
@@ -49,6 +50,8 @@ namespace Trebuchet
             UpdateModCommand = new TaskBlockedCommand(OnModUpdated, true, Operations.DownloadModlist);
             ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload, Operations.GameRunning);
             RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh, true, Operations.SteamPublishedFilesFetch);
+
+            StrongReferenceMessenger.Default.Register<SteamModlistReceived>(this);
         }
 
         public SimpleCommand CreateModlistCommand { get; }
@@ -120,6 +123,19 @@ namespace Trebuchet
             return _config.IsInstallPathValid;
         }
 
+        public void Receive(SteamModlistReceived message)
+        {
+            var update = from file in _modlist
+                         where file.IsPublished
+                         join details in message.Modlist on file.PublishedFileID equals details.PublishedFileID
+                         select new KeyValuePair<ModFile, PublishedFile>(file, details);
+
+            List<ulong> updates = StrongReferenceMessenger.Default.Send(new SteamModlistUpdateRequest(message.Modlist.GetManifestKeyValuePairs()));
+
+            foreach (var u in update)
+                u.Key.SetManifest(u.Value, updates.Contains(u.Value.PublishedFileID));
+        }
+
         public override void RefreshPanel()
         {
             OnCanExecuteChanged();
@@ -174,26 +190,7 @@ namespace Trebuchet
             if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
             if (_modlist.Count == 0) return;
 
-            IEnumerable<ulong> list =
-                from mod in _modlist
-                where mod.IsPublished
-                select mod.PublishedFileID;
-
-            new CatchedTasked(Operations.SteamPublishedFilesFetch, 15 * 1000)
-            .Add(async (cts) =>
-            {
-                var result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    var update = from file in _modlist
-                                 where file.IsPublished
-                                 join details in result.PublishedFileDetails on file.PublishedFileID equals details.PublishedFileID
-                                 select new KeyValuePair<ModFile, PublishedFile>(file, details);
-
-                    foreach (var u in update)
-                        u.Key.SetManifest(u.Value);
-                });
-            }).Start();
+            StrongReferenceMessenger.Default.Send(new SteamModlistRequest(_selectedModlist));
         }
 
         private void LoadModlist()
