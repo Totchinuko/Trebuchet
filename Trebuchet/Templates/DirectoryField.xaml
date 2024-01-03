@@ -13,7 +13,7 @@
             VerticalContentAlignment="Center"
             Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" />
 
-            <Controls:DirectoryFinder Path="{Binding Value, Mode=TwoWay}" Margin="3,0" VerticalAlignment="Center" Grid.Column="1" />
+            <Controls:DirectoryFinder Path="{Binding Value, Mode=TwoWay}" CreateDefaultFolder="{Binding CreateDefaultFolder, Mode=OneWay}" DefaultFolder="{Binding DefaultFolder, Mode=OneWay}" Margin="3,0" VerticalAlignment="Center" Grid.Column="1" />
         </Grid>
     </DataTemplate>
 </ResourceDictionary>
