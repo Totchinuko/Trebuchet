@@ -49,7 +49,7 @@ namespace Trebuchet
 
         public DateTime LastUpdate => _lastUpdate;
 
-        public string LastUpdateReadable => $"Updated {_lastUpdate.Humanize()}";
+        public string LastUpdateReadable => $"{_lastUpdate.Humanize()}";
 
         public string PreviewURL => _previewURL;
 
