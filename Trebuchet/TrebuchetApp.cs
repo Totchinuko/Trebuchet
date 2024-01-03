@@ -202,7 +202,7 @@ namespace Trebuchet
             if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
             if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
-            SteamWidget.Start("Checking for mod updates...");
+            SteamWidget.Start("Updating mods...");
             new CatchedTasked(Operations.SteamDownload)
                 .Add(async (cts) =>
                 {
