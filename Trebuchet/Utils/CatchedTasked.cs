@@ -63,10 +63,13 @@ namespace Trebuchet.Utils
                         StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(_operations));
                     });
                 }
-                foreach (var action in _then.GetConsumingEnumerable())
+                Application.Current.Dispatcher.Invoke(() =>
                 {
-                    action();
-                }
+                    foreach (var action in _then.GetConsumingEnumerable())
+                    {
+                        action();
+                    }
+                });
 
                 _then.Dispose();
                 _tasks.Dispose();

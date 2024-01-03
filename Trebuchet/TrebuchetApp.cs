@@ -219,6 +219,7 @@ namespace Trebuchet
             SteamWidget.Start("Updating servers...");
             new CatchedTasked(Operations.SteamDownload)
                 .Add(_trebuchet.Steam.UpdateServerInstances)
+                .Then(() => StrongReferenceMessenger.Default.Send<PanelRefreshConfigMessage>())
                 .Start();
         }
 
