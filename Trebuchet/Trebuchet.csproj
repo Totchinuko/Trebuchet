@@ -11,6 +11,8 @@
 	<StartupObject>Trebuchet.App</StartupObject>
 	<FileVersion>0.3.1</FileVersion>
 	<AssemblyVersion>0.2.0</AssemblyVersion>
+	<PublishSingleFile>true</PublishSingleFile>
+	<SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>

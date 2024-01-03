@@ -199,7 +199,7 @@ namespace Trebuchet
 
         public static string GetRootPath()
         {
-            return Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new DirectoryNotFoundException("Assembly directory is not found.");
+            return Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new DirectoryNotFoundException("Assembly directory is not found.");
         }
 
         public static bool IsRunning(this ProcessState state)

@@ -51,7 +51,7 @@ namespace Trebuchet.Controls
 
         private void FindButton_MouseDown(object sender, RoutedEventArgs e)
         {
-            string appDir = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location) ?? throw new Exception("App is installed in an invalid directory");
+            string appDir = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
             string defaultFolder = string.Empty;
             if (!string.IsNullOrEmpty(DefaultFolder))
             {

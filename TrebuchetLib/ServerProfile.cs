@@ -227,7 +227,7 @@ namespace Trebuchet
         /// <exception cref="Exception"></exception>
         public static Dictionary<string, string> GetMapList()
         {
-            string? appFolder = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
             if (string.IsNullOrEmpty(appFolder)) throw new Exception("Path to assembly is invalid.");
 
             string file = Path.Combine(appFolder, Config.FileMapJson);

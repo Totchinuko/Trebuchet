@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Reflection;
+using System.Windows;
 
 namespace Trebuchet
 {
@@ -38,7 +39,7 @@ namespace Trebuchet
 
         public static string GetPath(bool testlive)
         {
-            string? ConfigPath = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string? ConfigPath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
             if (string.IsNullOrEmpty(ConfigPath))
                 throw new Exception("Path to assembly is invalid.");
             ConfigPath = Path.Combine(ConfigPath, $"{(testlive ? Config.FolderTestLive : Config.FolderLive)}.UIConfig.json");

@@ -122,8 +122,9 @@ namespace Trebuchet
 
         public static string GetFileVersion()
         {
-            System.Reflection.Assembly assembly = System.Reflection.Assembly.GetExecutingAssembly();
-            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(assembly.Location);
+            if (string.IsNullOrEmpty(System.Environment.ProcessPath))
+                return string.Empty;
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Environment.ProcessPath);
             return fvi.FileVersion ?? string.Empty;
         }
 
