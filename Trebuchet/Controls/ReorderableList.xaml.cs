@@ -31,6 +31,15 @@ namespace Trebuchet.Controls
                 )
             );
 
+        public static readonly DependencyProperty ParentElementProperty = DependencyProperty.Register(
+                "ParentElement",
+                typeof(object),
+                typeof(ReorderableList),
+                new PropertyMetadata(
+                    default(object)
+                    )
+            );
+
         private DependencyObject? _draggedObject;
 
         public ReorderableList()
@@ -51,6 +60,12 @@ namespace Trebuchet.Controls
         {
             get => (DataTemplate)GetValue(ItemTemplateProperty);
             set => SetValue(ItemTemplateProperty, value);
+        }
+
+        public object ParentElement
+        {
+            get => GetValue(ParentElementProperty);
+            set => SetValue(ParentElementProperty, value);
         }
 
         public ICommand RemoveCommand { get; private set; }
@@ -130,12 +145,12 @@ namespace Trebuchet.Controls
             double verticalPos = e.GetPosition(container).Y;
             double offset = 20;
 
-            if (verticalPos < tolerance) // Top of visible list? 
+            if (verticalPos < tolerance) // Top of visible list?
             {
                 //Scroll up
                 container.ScrollToVerticalOffset(container.VerticalOffset - offset);
             }
-            else if (verticalPos > container.ActualHeight - tolerance) //Bottom of visible list? 
+            else if (verticalPos > container.ActualHeight - tolerance) //Bottom of visible list?
             {
                 //Scroll down
                 container.ScrollToVerticalOffset(container.VerticalOffset + offset);

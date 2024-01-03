@@ -8,6 +8,7 @@ namespace Trebuchet
 {
     public class WorkshopSearchResult : INotifyPropertyChanged
     {
+        private uint _appID;
         private string _creator = string.Empty;
         private string _creatorAvatar = string.Empty;
         private string _creatorID;
@@ -33,9 +34,12 @@ namespace Trebuchet
             _creatorID = result.Creator;
             _shortDescription = result.ShortDescription;
             _subs = result.Subscriptions;
+            _appID = result.ConsumerAppID;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public uint AppID => _appID;
 
         public string Creator => _creator;
 

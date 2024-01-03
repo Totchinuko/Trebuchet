@@ -45,6 +45,8 @@ namespace Trebuchet
             FetchCommand = new TaskBlockedCommand(OnFetchClicked, true, Operations.DownloadModlist);
             ImportFromFileCommand = new SimpleCommand(OnImportFromFile);
             ImportFromTextCommand = new SimpleCommand(OnImportFromText);
+            RemoveModCommand = new SimpleCommand(OnModRemoved);
+            UpdateModCommand = new TaskBlockedCommand(OnModUpdated, true, Operations.DownloadModlist);
             ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload, Operations.GameRunning);
             RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh, true, Operations.SteamPublishedFilesFetch);
         }
@@ -97,6 +99,8 @@ namespace Trebuchet
 
         public TaskBlockedCommand RefreshModlistCommand { get; }
 
+        public SimpleCommand RemoveModCommand { get; }
+
         public string SelectedModlist
         {
             get => _selectedModlist;
@@ -108,6 +112,8 @@ namespace Trebuchet
         }
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ModlistEditor"];
+
+        public TaskBlockedCommand UpdateModCommand { get; }
 
         public override bool CanExecute(object? parameter)
         {
@@ -494,6 +500,20 @@ namespace Trebuchet
             _profile.SyncURL = _modlistURL;
             _profile.SaveFile();
             OnPropertyChanged(nameof(ModlistURL));
+        }
+
+        private void OnModRemoved(object? obj)
+        {
+            if (obj is not ModFile modFile) return;
+
+            _modlist.Remove(modFile);
+        }
+
+        private void OnModUpdated(object? obj)
+        {
+            if (obj is not ModFile modFile) return;
+
+            StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(new ulong[] { modFile.PublishedFileID }));
         }
 
         private void OnSearchClosing(object? sender, CancelEventArgs e)

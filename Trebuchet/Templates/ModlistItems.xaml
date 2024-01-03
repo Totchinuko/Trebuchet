@@ -8,16 +8,21 @@
                 <ColumnDefinition Width="auto" />
                 <ColumnDefinition Width="1.7*" />
                 <ColumnDefinition Width="1*" />
+                <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <Image Margin="0,0,12,0">
                 <Image.Style>
                     <Style TargetType="Image">
                         <Setter Property="Source" Value="pack://application:,,,/Trebuchet;component/Icons/Steam.png" />
-                        <Setter Property="ToolTip" Value="Steam Workshop" />
+                        <Setter Property="ToolTip" Value="Steam Workshop (Live)" />
                         <Style.Triggers>
                             <DataTrigger Binding="{Binding IsPublished}" Value="False">
                                 <Setter Property="Source" Value="pack://application:,,,/Trebuchet;component/Icons/File.png" />
                                 <Setter Property="ToolTip" Value="Local File" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding IsTestLive}" Value="True">
+                                <Setter Property="Source" Value="pack://application:,,,/Trebuchet;component/Icons/Bug.png" />
+                                <Setter Property="ToolTip" Value="Steam Workshop (TestLive)" />
                             </DataTrigger>
                         </Style.Triggers>
                     </Style>
@@ -34,11 +39,19 @@
                 <Border Grid.Column="1" Background="{Binding StatusColor}" Margin="0,0,12,0" CornerRadius="3" Padding="8">
                     <TextBlock Text="{Binding StatusTooltip}" />
                 </Border>
-            </Grid>            
+            </Grid>
             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
                 <TextBlock>
                     <Run Text="{Binding LastUpdate, Mode=OneWay}" />
                 </TextBlock>
+            </StackPanel>
+            <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Grid.Column="1" Style="{StaticResource ButtonIconBlue}" Margin="0,0,3,0" ToolTip="Update Mod" Command="{Binding ParentElement.UpdateModCommand, RelativeSource={RelativeSource AncestorType=Controls:ReorderableList}}" CommandParameter="{Binding .}">
+                    <Image Source="pack://application:,,,/Trebuchet;component/Icons/Reset.png" Width="16" Height="16" />
+                </Button>
+                <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding ParentElement.RemoveModCommand, RelativeSource={RelativeSource AncestorType=Controls:ReorderableList}}" CommandParameter="{Binding .}">
+                    <Image Source="pack://application:,,,/Trebuchet;component/Icons/Trash.png" Width="16" Height="16" />
+                </Button>
             </StackPanel>
         </Grid>
     </DataTemplate>

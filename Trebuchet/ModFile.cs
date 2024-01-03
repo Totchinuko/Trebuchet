@@ -61,6 +61,8 @@ namespace Trebuchet
             }
         }
 
+        public string ModType => IsTestLive ? "TestLive" : "Live";
+
         public ulong PublishedFileID => _publishedFileID;
 
         public Brush StatusColor => GetStatusBrush();

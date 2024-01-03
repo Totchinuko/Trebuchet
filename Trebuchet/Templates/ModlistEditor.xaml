@@ -33,44 +33,43 @@
                     <Grid>
                         <TextBlock Margin="0,-10,0,0" Text="Add Mod" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <WrapPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource IconButton}" 
+                            <Button Style="{StaticResource IconButton}"
                                     VerticalAlignment="Top"
                                     Content="Workshop"
-                                    Command="{Binding ExploreWorkshopCommand}"/>
-                            <Button Style="{StaticResource IconButton}" 
+                                    Command="{Binding ExploreWorkshopCommand}" />
+                            <Button Style="{StaticResource IconButton}"
                                     VerticalAlignment="Top"
                                     Content="Local"
-                                    Command="{Binding ExploreLocalCommand}"/>
+                                    Command="{Binding ExploreLocalCommand}" />
                         </WrapPanel>
                     </Grid>
                     <Border Style="{StaticResource VerticalSep}" VerticalAlignment="Top" Margin="12,0,12,0" Height="35" />
                     <Grid>
                         <TextBlock Margin="0,-10,0,0" Text="Import" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <WrapPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource IconButton}" 
+                            <Button Style="{StaticResource IconButton}"
                                     VerticalAlignment="Top"
                                     Content="Paste"
-                                    Command="{Binding ImportFromTextCommand}"/>
-                            <Button Style="{StaticResource IconButton}" 
+                                    Command="{Binding ImportFromTextCommand}" />
+                            <Button Style="{StaticResource IconButton}"
                                     VerticalAlignment="Top"
                                     Content="File"
-                                    Command="{Binding ImportFromFileCommand}"/>
+                                    Command="{Binding ImportFromFileCommand}" />
                         </WrapPanel>
                     </Grid>
                     <Border Style="{StaticResource VerticalSep}" VerticalAlignment="Top" Margin="12,0,12,0" Height="35" />
                     <Grid>
                         <TextBlock Margin="0,-10,0,0" Text="Export" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                         <WrapPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource IconButton}" 
+                            <Button Style="{StaticResource IconButton}"
                                     VerticalAlignment="Top"
                                     Content="Json"
-                                    Command="{Binding ExportToJsonCommand}"/>
-                            <Button Style="{StaticResource IconButton}" 
+                                    Command="{Binding ExportToJsonCommand}" />
+                            <Button Style="{StaticResource IconButton}"
                                     VerticalAlignment="Top"
                                     Content="Txt"
-                                    Command="{Binding ExportToTxtCommand}"/>
+                                    Command="{Binding ExportToTxtCommand}" />
                         </WrapPanel>
-
                     </Grid>
                 </WrapPanel>
             </Border>
@@ -79,16 +78,16 @@
                     <TextBlock Margin="0,-10,0,0" Text="Mod List URL" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                     <WrapPanel>
                         <TextBox Text="{Binding ModlistURL, Mode=TwoWay, Delay=500, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0" Width="400" VerticalAlignment="Center" Height="25" VerticalContentAlignment="Center" ToolTip="Valid URL are either pointing to a steam collection or a json response/file" />
-                        <Button Style="{StaticResource ButtonIconGreen}" 
+                        <Button Style="{StaticResource ButtonIconGreen}"
                                     VerticalAlignment="Center"
                                     Content="Fetch"
-                                    Command="{Binding FetchCommand}"/>                       
+                                    Command="{Binding FetchCommand}" />
                     </WrapPanel>
                 </Grid>
             </Border>
             <Border Grid.Row="2" Padding="0,12,0,0">
-                <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
+                <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ParentElement="{Binding .}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
             </Border>
-        </Grid>            
+        </Grid>
     </DataTemplate>
 </ResourceDictionary>

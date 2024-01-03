@@ -12,7 +12,6 @@
 	<FileVersion>0.3.1</FileVersion>
 	<AssemblyVersion>0.2.0</AssemblyVersion>
 	<PublishSingleFile>true</PublishSingleFile>
-	<SelfContained>true</SelfContained>
   </PropertyGroup>
 
   <ItemGroup>
@@ -20,6 +19,7 @@
     <None Remove="AppSettings.json.sample" />
     <None Remove="ClientSettings.Fields.json" />
     <None Remove="Icons\Add.png" />
+    <None Remove="Icons\Bug.png" />
     <None Remove="Icons\BugWindow.png" />
     <None Remove="Icons\Close.png" />
     <None Remove="Icons\Console.png" />
@@ -60,6 +60,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Resource Include="Icons\Bug.png" />
     <Resource Include="Icons\Console.png" />
     <Resource Include="Icons\Dashboard.png" />
     <Resource Include="Icons\Discord.png" />
