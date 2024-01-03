@@ -1,4 +1,5 @@
-﻿using SteamWorksWebAPI;
+﻿using Humanizer;
+using SteamWorksWebAPI;
 using System;
 using System.ComponentModel;
 using System.IO;
@@ -9,6 +10,7 @@ namespace Trebuchet
 {
     public class ModFile : INotifyPropertyChanged
     {
+        private uint _appID = 0;
         private FileInfo _infos;
         private DateTime _lastUpdate;
         private ulong _publishedFileID = 0;
@@ -30,6 +32,7 @@ namespace Trebuchet
         {
             _title = search.Title;
             _publishedFileID = search.PublishedFileID;
+            _appID = search.AppID;
             _size = search.Size;
             _lastUpdate = search.LastUpdate;
             _infos = new FileInfo(path);
@@ -39,6 +42,8 @@ namespace Trebuchet
 
         public bool IsPublished => _publishedFileID > 0;
 
+        public bool IsTestLive => _appID == Config.AppIDTestLiveClient;
+
         public string LastUpdate
         {
             get
@@ -47,12 +52,12 @@ namespace Trebuchet
                 if (!IsPublished)
                 {
                     DateTime lastModified = _infos.LastWriteTime;
-                    return "Last Modified : " + lastModified.ToShortDateString() + " " + lastModified.ToShortTimeString();
+                    return $"Modified {_infos.LastWriteTime.Humanize()}";
                 }
 
                 if (_lastUpdate == default) return "Loading...";
                 DateTime local = _lastUpdate.ToLocalTime();
-                return "Last Update : " + local.ToShortDateString() + " " + local.ToShortTimeString();
+                return $"Updated {local.Humanize()}";
             }
         }
 
@@ -88,6 +93,7 @@ namespace Trebuchet
             _lastUpdate = Tools.UnixTimeStampToDateTime(file.TimeUpdated);
             _title = file.Title;
             _size = file.FileSize;
+            _appID = file.ConsumerAppId;
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(LastUpdate));
             OnPropertyChanged(nameof(StatusColor));

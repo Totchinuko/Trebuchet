@@ -1,4 +1,5 @@
-﻿using SteamWorksWebAPI;
+﻿using Humanizer;
+using SteamWorksWebAPI;
 using SteamWorksWebAPI.Response;
 using System;
 using System.ComponentModel;
@@ -44,7 +45,7 @@ namespace Trebuchet
 
         public DateTime LastUpdate => _lastUpdate;
 
-        public string LastUpdateReadable => LastUpdate.ToLocalTime().ToShortDateString();
+        public string LastUpdateReadable => $"Updated {_lastUpdate.Humanize()}";
 
         public string PreviewURL => _previewURL;
 
