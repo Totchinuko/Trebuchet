@@ -555,7 +555,7 @@ namespace Trebuchet
             _modWatcher.Created += OnModFileChanged;
             _modWatcher.Deleted += OnModFileChanged;
             _modWatcher.Renamed += OnModFileChanged;
-            _modWatcher.IncludeSubdirectories = false;
+            _modWatcher.IncludeSubdirectories = true;
             _modWatcher.EnableRaisingEvents = true;
         }
     }
