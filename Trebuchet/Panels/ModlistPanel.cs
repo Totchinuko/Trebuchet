@@ -153,6 +153,7 @@ namespace Trebuchet
                     Application.Current.Dispatcher.Invoke(() =>
                     {
                         _profile.Modlist = ModListProfile.ParseModList(result.Modlist).ToList();
+                        _profile.SaveFile();
                         LoadModlist();
                     });
                 }).Start();
@@ -180,6 +181,7 @@ namespace Trebuchet
                         foreach (var child in result.CollectionDetails.First().Children)
                             modlist.Add(child.PublishedFileId);
                         _profile.Modlist = modlist;
+                        _profile.SaveFile();
                         LoadModlist();
                     });
                 }).Start();
