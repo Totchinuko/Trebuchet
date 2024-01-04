@@ -10,8 +10,6 @@ namespace Trebuchet
         private string[] _dashboardServerModlist = new string[0];
         private string[] _dashboardServerProfiles = new string[0];
 
-        public bool AutoReconnectToSteam { get; set; } = true;
-
         public bool AutoRefreshModlist { get; set; } = true;
 
         public string CurrentClientProfile { get; set; } = string.Empty;

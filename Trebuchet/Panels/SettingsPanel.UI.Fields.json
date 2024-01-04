@@ -10,12 +10,6 @@
     "Default": true
   },
   {
-    "$type": "Toggle",
-    "Property": "AutoReconnectToSteam",
-    "Name": "Auto Reconnect to Steam",
-    "Default": true
-  },
-  {
     "$type": "Title",
     "Name": "Trebuchet UI"
   },
