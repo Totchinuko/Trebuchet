@@ -465,7 +465,8 @@ namespace Trebuchet
                 string profile = string.Empty;
                 ModListProfile.ResolveProfile(_config, ref profile);
                 RefreshProfiles();
-                SelectedModlist = profile;
+                _selectedModlist = profile;
+                OnPropertyChanged(nameof(SelectedModlist));
             }
         }
 
