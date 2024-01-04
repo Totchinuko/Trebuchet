@@ -160,12 +160,12 @@ namespace Trebuchet
             }
         }
 
-        public static void RestartProcess(bool asAdmin = false)
+        public static void RestartProcess(bool testlive, bool asAdmin = false)
         {
             var data = Tools.GetProcess(Environment.ProcessId);
             Process process = new Process();
             process.StartInfo.FileName = data.filename;
-            process.StartInfo.Arguments = data.args;
+            process.StartInfo.Arguments = data.args + (testlive ? " -testlive" : " -live");
             process.StartInfo.UseShellExecute = true;
             if (asAdmin)
                 process.StartInfo.Verb = "runas";

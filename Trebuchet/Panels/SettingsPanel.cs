@@ -46,7 +46,7 @@ namespace Trebuchet
 
         private void OnAppRestart(object? obj)
         {
-            GuiExtensions.RestartProcess(false);
+            GuiExtensions.RestartProcess(_config.IsTestLive, false);
         }
 
         private void OnServerInstanceInstall(object? obj)

@@ -177,7 +177,7 @@ namespace Trebuchet
 
             if (modal.Result == System.Windows.Forms.DialogResult.Yes)
             {
-                GuiExtensions.RestartProcess(true);
+                GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 message.Reply(true);
             }
             else
