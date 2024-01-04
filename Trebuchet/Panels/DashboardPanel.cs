@@ -18,6 +18,7 @@ namespace Trebuchet
         private ClientInstanceDashboard _client;
         private Config _config;
         private ObservableCollection<ServerInstanceDashboard> _instances = new ObservableCollection<ServerInstanceDashboard>();
+        private DispatcherTimer _timer;
 
         public DashboardPanel()
         {
@@ -33,6 +34,9 @@ namespace Trebuchet
             CreateInstancesIfNeeded();
 
             StrongReferenceMessenger.Default.RegisterAll(this);
+
+            _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, OnCheckModUpdate, Application.Current.Dispatcher);
+            Task.Run(WaitForInitialModUpdateCheck);
         }
 
         public bool CanDisplayServers => _config.IsInstallPathValid &&
@@ -114,6 +118,11 @@ namespace Trebuchet
 
         public void Receive(SteamModlistReceived message)
         {
+            List<ulong> updates = StrongReferenceMessenger.Default.Send(new SteamModlistUpdateRequest(message.Modlist.GetManifestKeyValuePairs()));
+
+            _client.RefreshUpdateStatus(updates);
+            foreach (var item in _instances)
+                item.RefreshUpdateStatus(updates);
         }
 
         public override void RefreshPanel()
@@ -137,6 +146,11 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send<ServerUpdateMessage>();
         }
 
+        private void CheckModUpdates()
+        {
+            StrongReferenceMessenger.Default.Send(new SteamModlistIDRequest(ModListProfile.CollectAllMods(_config, CollectAllModlistNames()).Distinct()));
+        }
+
         private void CreateInstancesIfNeeded()
         {
             if (_instances.Count >= _config.ServerInstanceCount)
@@ -148,6 +162,12 @@ namespace Trebuchet
             for (int i = _instances.Count; i < _config.ServerInstanceCount; i++)
                 _instances.Add(new ServerInstanceDashboard(i));
             OnPropertyChanged(nameof(Instances));
+        }
+
+        private void OnCheckModUpdate(object? sender, EventArgs e)
+        {
+            if (!App.Config.AutoRefreshModlist) return;
+            CheckModUpdates();
         }
 
         private void OnCloseAll(object? obj)
@@ -186,6 +206,16 @@ namespace Trebuchet
         private void OnServerUpdate(object? obj)
         {
             UpdateServer();
+        }
+
+        private async Task WaitForInitialModUpdateCheck()
+        {
+            while (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)))
+                await Task.Delay(200);
+            Application.Current.Dispatcher.Invoke(() =>
+            {
+                CheckModUpdates();
+            });
         }
     }
 }

@@ -25,6 +25,14 @@ namespace Trebuchet
                             yield return id;
         }
 
+        public static IEnumerable<ulong> CollectAllMods(Config config, string modlist)
+        {
+            if (TryLoadProfile(config, modlist, out ModListProfile? profile))
+                foreach (var m in profile.Modlist)
+                    if (TryParseModID(m, out ulong id))
+                        yield return id;
+        }
+
         public static IEnumerable<ulong> GetModIDList(IEnumerable<string> modlist)
         {
             foreach (string mod in modlist)

@@ -29,7 +29,8 @@ namespace Trebuchet
         IRecipient<ProcessServerDetailsRequest>,
         IRecipient<SteamModlistRequest>,
         IRecipient<SteamModlistUpdateRequest>,
-        IRecipient<UACPromptRequest>
+        IRecipient<UACPromptRequest>,
+        IRecipient<SteamModlistIDRequest>
     {
         private Panel? _activePanel;
 
@@ -61,6 +62,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<SteamModlistRequest>(this);
             StrongReferenceMessenger.Default.Register<SteamModlistUpdateRequest>(this);
             StrongReferenceMessenger.Default.Register<UACPromptRequest>(this);
+            StrongReferenceMessenger.Default.Register<SteamModlistIDRequest>(this);
 
             if (!WriteAccessCheck()) return;
 
@@ -184,6 +186,11 @@ namespace Trebuchet
             }
             else
                 message.Reply(false);
+        }
+
+        public void Receive(SteamModlistIDRequest message)
+        {
+            RequestModlistManifests(message.Modlist.ToList());
         }
 
         internal virtual void OnAppClose()

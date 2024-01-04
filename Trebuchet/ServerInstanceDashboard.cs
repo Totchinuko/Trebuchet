@@ -19,6 +19,7 @@ namespace Trebuchet
             KillCommand = new SimpleCommand(OnKilled, false);
             CloseCommand = new SimpleCommand(OnClose, false);
             LaunchCommand = new TaskBlockedCommand(OnLaunched, true, Operations.SteamDownload);
+            UpdateModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload);
 
             _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
             Instance = instance;
@@ -40,6 +41,8 @@ namespace Trebuchet
 
         public int Instance { get; }
 
+        public bool IsUpdateNeeded => UpdateNeeded.Count > 0;
+
         public SimpleCommand KillCommand { get; private set; }
 
         public TaskBlockedCommand LaunchCommand { get; private set; }
@@ -58,6 +61,7 @@ namespace Trebuchet
             set
             {
                 _selectedModlist = value;
+                CheckModUpdate();
                 App.Config.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
                 App.Config.SaveFile();
             }
@@ -73,6 +77,10 @@ namespace Trebuchet
                 App.Config.SaveFile();
             }
         }
+
+        public TaskBlockedCommand UpdateModsCommand { get; private set; }
+
+        public List<ulong> UpdateNeeded { get; private set; } = new List<ulong>();
 
         public void Close()
         {
@@ -120,9 +128,34 @@ namespace Trebuchet
             ListProfiles();
         }
 
+        public void RefreshUpdateStatus(List<ulong> list)
+        {
+            if (CanUseDashboard && !string.IsNullOrEmpty(SelectedModlist))
+            {
+                var mods = ModListProfile.CollectAllMods(_config, SelectedModlist);
+                UpdateNeeded = mods.Intersect(list).Union(UpdateNeeded).ToList();
+                OnPropertyChanged(nameof(UpdateNeeded));
+                OnPropertyChanged(nameof(IsUpdateNeeded));
+            }
+        }
+
         protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private void CheckModUpdate()
+        {
+            ClearUpdates();
+            if (string.IsNullOrEmpty(SelectedModlist)) return;
+            StrongReferenceMessenger.Default.Send(new SteamModlistIDRequest(ModListProfile.CollectAllMods(_config, SelectedModlist)));
+        }
+
+        private void ClearUpdates()
+        {
+            UpdateNeeded.Clear();
+            OnPropertyChanged(nameof(UpdateNeeded));
+            OnPropertyChanged(nameof(IsUpdateNeeded));
         }
 
         private void ListProfiles()
@@ -153,6 +186,12 @@ namespace Trebuchet
             {
                 (SelectedProfile, SelectedModlist, Instance)
             }));
+        }
+
+        private void OnModUpdate(object? obj)
+        {
+            if (string.IsNullOrEmpty(SelectedModlist)) return;
+            StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(ModListProfile.CollectAllMods(_config, SelectedModlist).Distinct()));
         }
 
         private void OnProcessFailed()

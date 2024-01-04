@@ -66,6 +66,21 @@
                                 <TextBlock Text="Kill" />
                             </StackPanel>
                         </Button>
+                        <Button Command="{Binding UpdateModsCommand}" ToolTip="Mod update available !" Margin="0,0,6,0" ToolTipService.InitialShowDelay="0" VerticalAlignment="Center">
+                            <Button.Style>
+                                <Style TargetType="Button" BasedOn="{StaticResource UpdateModButton}">
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding IsUpdateNeeded}" Value="False">
+                                            <Setter Property="Visibility" Value="Collapsed" />
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </Button.Style>
+                            <StackPanel Orientation="Horizontal">
+                                <Image Source="pack://application:,,,/Trebuchet;component/Icons/Reset.png" Width="16" Height="16" Margin="0,0,12,0" />
+                                <TextBlock Text="Update Mods" />
+                            </StackPanel>
+                        </Button>
                     </WrapPanel>
                 </Grid>
                 <Border Grid.Column="1" Background="{StaticResource GDarkPanel}">

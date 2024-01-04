@@ -215,6 +215,10 @@
         <Setter Property="Background" Value="{StaticResource GPanel}" />
     </Style>
 
+    <Style TargetType="Button" x:Key="UpdateModButton" BasedOn="{StaticResource ButtonIconBlue}">
+        <Setter Property="Background" Value="{StaticResource GPanel}" />
+    </Style>
+
     <Style TargetType="Button" x:Key="CloseButton" BasedOn="{StaticResource ButtonIconYellow}">
         <Setter Property="Background" Value="{StaticResource GPanel}" />
     </Style>

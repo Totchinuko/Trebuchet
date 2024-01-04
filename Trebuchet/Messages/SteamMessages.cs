@@ -17,6 +17,16 @@ namespace Trebuchet
     {
     }
 
+    public class SteamModlistIDRequest
+    {
+        public IEnumerable<ulong> Modlist;
+
+        public SteamModlistIDRequest(IEnumerable<ulong> modlist)
+        {
+            Modlist = modlist;
+        }
+    }
+
     public class SteamModlistReceived
     {
         public List<PublishedFile> Modlist;
