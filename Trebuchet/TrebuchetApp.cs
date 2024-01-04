@@ -62,6 +62,8 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<SteamModlistUpdateRequest>(this);
             StrongReferenceMessenger.Default.Register<UACPromptRequest>(this);
 
+            if (!WriteAccessCheck()) return;
+
             var menuConfig = GuiExtensions.GetEmbededTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
             ActivePanel = Menu.Bottom.Where(x => x is Panel).Cast<Panel>().Where(x => x.CanExecute(null)).FirstOrDefault();
@@ -359,6 +361,21 @@ namespace Trebuchet
                     await _trebuchet.Steam.UpdateMods(modlist, cts);
                 })
                 .Start();
+        }
+
+        private bool WriteAccessCheck()
+        {
+            if (Tools.ValidateInstallDirectory(_trebuchet.Config.InstallPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.InstallPath))
+            {
+                GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                return false;
+            }
+            if (Tools.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ClientPath))
+            {
+                GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                return false;
+            }
+            return true;
         }
     }
 }
