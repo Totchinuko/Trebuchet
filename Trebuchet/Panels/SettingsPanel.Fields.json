@@ -10,14 +10,20 @@
     "Description": "Folder for all the data needed by trebuchet. This will contains your mods, logs, saves, and most of your configurations.",
     "RefreshApp": true,
     "DefaultFolder": "%APP_DIRECTORY%\\TrebuchetData",
-    "CreateDefaultFolder": true
+    "CreateDefaultFolder": true,
+    "Validation": {
+      "$type": "InstallDirectory"
+    }
   },
   {
     "$type": "Directory",
     "Property": "ClientPath",
     "Name": "Conan Exile Installation Directory",
     "Description": "This is the path to your game. Leave it empty if you do not wish trebuchet to handle game launch.",
-    "RefreshApp": true
+    "RefreshApp": true,
+    "Validation": {
+      "$type": "GameDirectory"
+    }
   },
   {
     "$type": "IntSlider",

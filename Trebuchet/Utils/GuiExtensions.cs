@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -157,6 +158,19 @@ namespace Trebuchet
                 if (ulong.TryParse(file.HcontentFile, out var manifest))
                     yield return (file.PublishedFileID, manifest);
             }
+        }
+
+        public static void RestartProcess(bool asAdmin = false)
+        {
+            var data = Tools.GetProcess(Environment.ProcessId);
+            Process process = new Process();
+            process.StartInfo.FileName = data.filename;
+            process.StartInfo.Arguments = data.args;
+            process.StartInfo.UseShellExecute = true;
+            if (asAdmin)
+                process.StartInfo.Verb = "runas";
+            process.Start();
+            Application.Current.Shutdown();
         }
 
         public static void SetAccent(UIElement element, bool value)

@@ -140,7 +140,7 @@
             catch (Exception ex)
             {
                 Log.Write(ex);
-                throw new Exception("Failed to create app folders folders.", ex);
+                throw new Exception("Failed to create app folders.", ex);
             }
 
             return true;

@@ -46,8 +46,7 @@ namespace Trebuchet
 
         private void OnAppRestart(object? obj)
         {
-            System.Windows.Forms.Application.Restart();
-            System.Windows.Application.Current.Shutdown();
+            GuiExtensions.RestartProcess(false);
         }
 
         private void OnServerInstanceInstall(object? obj)

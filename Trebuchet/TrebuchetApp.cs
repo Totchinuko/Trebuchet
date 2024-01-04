@@ -28,7 +28,8 @@ namespace Trebuchet
         IRecipient<ServerConsoleRequest>,
         IRecipient<ProcessServerDetailsRequest>,
         IRecipient<SteamModlistRequest>,
-        IRecipient<SteamModlistUpdateRequest>
+        IRecipient<SteamModlistUpdateRequest>,
+        IRecipient<UACPromptRequest>
     {
         private Panel? _activePanel;
 
@@ -59,6 +60,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<ProcessServerDetailsRequest>(this);
             StrongReferenceMessenger.Default.Register<SteamModlistRequest>(this);
             StrongReferenceMessenger.Default.Register<SteamModlistUpdateRequest>(this);
+            StrongReferenceMessenger.Default.Register<UACPromptRequest>(this);
 
             var menuConfig = GuiExtensions.GetEmbededTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
@@ -166,6 +168,20 @@ namespace Trebuchet
         public void Receive(SteamModlistUpdateRequest message)
         {
             message.Reply(_trebuchet.Steam.GetUpdatedUGCFileIDs(message.keyValuePairs).ToList());
+        }
+
+        public void Receive(UACPromptRequest message)
+        {
+            QuestionModal modal = new QuestionModal("Administrator", $"The following folder is protected by administrator rights, Trebuchet need access to manage your game and data. Restart Trebuchet in Admin mode ?\n{message.Directory}");
+            modal.ShowDialog();
+
+            if (modal.Result == System.Windows.Forms.DialogResult.Yes)
+            {
+                GuiExtensions.RestartProcess(true);
+                message.Reply(true);
+            }
+            else
+                message.Reply(false);
         }
 
         internal virtual void OnAppClose()

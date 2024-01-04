@@ -62,6 +62,8 @@ namespace Trebuchet
 
         public abstract void RefreshVisibility();
 
+        public abstract void ResetToDefault();
+
         public abstract void SetTarget(object target, PropertyInfo? property = null);
 
         protected virtual void OnPropertyChanged(string name)
@@ -99,6 +101,8 @@ namespace Trebuchet
 
         public ICommand ResetCommand { get; private set; }
 
+        public BaseValidation<T>? Validation { get; set; } = null;
+
         public T? Value
         {
             get
@@ -108,6 +112,7 @@ namespace Trebuchet
             }
             set
             {
+                if (!Validate(value)) return;
                 if (_propertyInfos == null) throw new System.Exception($"Missing property information for {Property}.");
                 RemoveCollectionEvent();
                 _propertyInfos.SetValue(GetTarget(), SetConvert(value));
@@ -138,8 +143,6 @@ namespace Trebuchet
         }
 
         protected abstract T? GetConvert(object? value);
-
-        protected abstract void ResetToDefault();
 
         protected abstract object? SetConvert(T? value);
 
@@ -182,6 +185,17 @@ namespace Trebuchet
         {
             if (Value is INotifyCollectionChanged collection)
                 collection.CollectionChanged -= OnCollectionChanged;
+        }
+
+        private bool Validate(T? value)
+        {
+            if (Validation == null) return true;
+            if (Validation.IsValid(value, out string errorMessage)) return true;
+            if (string.IsNullOrEmpty(errorMessage)) return false;
+
+            ErrorModal modal = new ErrorModal("Invalid Value", errorMessage, false);
+            modal.ShowDialog();
+            return false;
         }
     }
 }

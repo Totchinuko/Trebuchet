@@ -1,8 +1,11 @@
-﻿using System.IO.Compression;
+﻿using SteamKit2.GC.Underlords.Internal;
+using System.Diagnostics;
+using System.IO.Compression;
 using System.Management;
 using System.Reflection;
 using System.Text;
 using System.Text.Json;
+using System.Text.RegularExpressions;
 using TrebuchetLib;
 using Yuu.Ini;
 
@@ -202,6 +205,30 @@ namespace Trebuchet
             return Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new DirectoryNotFoundException("Assembly directory is not found.");
         }
 
+        public static bool IsDirectoryWritable(string dirPath, bool throwIfFails = false)
+        {
+            try
+            {
+                using (FileStream fs = File.Create(
+                    Path.Combine(
+                        dirPath,
+                        Path.GetRandomFileName()
+                    ),
+                    1,
+                    FileOptions.DeleteOnClose)
+                )
+                { }
+                return true;
+            }
+            catch
+            {
+                if (throwIfFails)
+                    throw;
+                else
+                    return false;
+            }
+        }
+
         public static bool IsRunning(this ProcessState state)
         {
             return state == ProcessState.RUNNING || state == ProcessState.STOPPING || state == ProcessState.ONLINE;
@@ -315,6 +342,54 @@ namespace Trebuchet
             using (ZipArchive archive = ZipFile.OpenRead(file))
                 foreach (ZipArchiveEntry entry in archive.Entries)
                     entry.ExtractToFile(Path.Join(destination, entry.FullName));
+        }
+
+        public static bool ValidateDirectoryUAC(string directory)
+        {
+            if (!Directory.Exists(directory)) return false;
+            return IsDirectoryWritable(directory, false);
+        }
+
+        public static bool ValidateGameDirectory(string gameDirectory, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            if (string.IsNullOrEmpty(gameDirectory))
+            {
+                errorMessage = "Directory is invalid";
+                return false;
+            }
+            if (!Directory.Exists(gameDirectory))
+            {
+                errorMessage = "Directory not found";
+                return false;
+            }
+            if (!File.Exists(Path.Join(gameDirectory, Config.FolderGameBinaries, Config.FileClientBin)))
+            {
+                errorMessage = "Game could not be found in this Directory";
+                return false;
+            }
+            return true;
+        }
+
+        public static bool ValidateInstallDirectory(string installPath, out string errorMessage)
+        {
+            errorMessage = string.Empty;
+            if (string.IsNullOrEmpty(installPath))
+            {
+                errorMessage = "Directory is invalid";
+                return false;
+            }
+            if (!Directory.Exists(installPath))
+            {
+                errorMessage = "Install Directory does not exists";
+                return false;
+            }
+            if (Regex.IsMatch(installPath, Config.RegexSavedFolder))
+            {
+                errorMessage = "Install path cannot be in the game Saved folder";
+                return false;
+            }
+            return true;
         }
 
         public static void WriteNullTerminatedString(this BinaryWriter writer, string content)

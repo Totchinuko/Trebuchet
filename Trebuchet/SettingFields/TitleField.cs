@@ -17,6 +17,10 @@ namespace Trebuchet.SettingFields
         {
         }
 
+        public override void ResetToDefault()
+        {
+        }
+
         public override void SetTarget(object target, PropertyInfo? property = null)
         {
         }

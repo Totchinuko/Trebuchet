@@ -13,16 +13,16 @@ namespace Trebuchet
 
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["CPUAffinityField"];
 
-        protected override long GetConvert(object? value)
-        {
-            if(value is not long longValue)
-                throw new ArgumentException("value is not long", nameof(value));
-            return longValue;
-        }
-
-        protected override void ResetToDefault()
+        public override void ResetToDefault()
         {
             Value = GetDefaultValue();
+        }
+
+        protected override long GetConvert(object? value)
+        {
+            if (value is not long longValue)
+                throw new ArgumentException("value is not long", nameof(value));
+            return longValue;
         }
 
         protected override object? SetConvert(long value)
