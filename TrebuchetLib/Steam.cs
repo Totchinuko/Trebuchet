@@ -126,7 +126,7 @@
 
         public bool SetupFolders()
         {
-            if (!Directory.Exists(_config.InstallPath)) return false;
+            if (!Tools.ValidateInstallDirectory(_config.InstallPath, out string _)) return false;
 
             try
             {
@@ -157,6 +157,8 @@
         public async Task UpdateMods(IEnumerable<ulong> enumerable, CancellationTokenSource cts)
         {
             if (!SetupFolders()) return;
+            if (!await WaitSteamConnectionAsync()) return;
+
             _steam.ContentDownloader.SetInstallDirectory(Path.Combine(_config.InstallPath, Config.FolderWorkshop));
             await _steam.ContentDownloader.DownloadUGCAsync(new uint[] { Config.AppIDLiveClient, Config.AppIDTestLiveClient }, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
         }
@@ -174,6 +176,8 @@
             if (_config.ServerInstanceCount <= 0) return;
 
             if (!SetupFolders()) return;
+
+            if (!await WaitSteamConnectionAsync()) return;
 
             Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info);
 
@@ -233,6 +237,8 @@
         {
             if (_config.ServerInstanceCount <= 0) return;
 
+            if (!await WaitSteamConnectionAsync()) return;
+
             Log.Write("Updating all server instances...", LogSeverity.Info);
             int count = _config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
@@ -246,6 +252,28 @@
                     await UpdateServerFromInstance0(i, cts.Token);
                 }
             }
+        }
+
+        public bool WaitSteamConnection()
+        {
+            var task = Task.Run(WaitSteamConnectionAsync);
+            task.Wait();
+            return task.Result;
+        }
+
+        public async Task<bool> WaitSteamConnectionAsync()
+        {
+            if (IsConnected) return true;
+            _steam.Connect();
+            DateTime start = DateTime.UtcNow;
+            while (!IsConnected)
+            {
+                if ((DateTime.UtcNow - start).TotalSeconds > 60)
+                    return false;
+                await Task.Delay(1000);
+            }
+
+            return true;
         }
     }
 }

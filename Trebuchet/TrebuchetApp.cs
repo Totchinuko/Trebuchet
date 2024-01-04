@@ -259,7 +259,7 @@ namespace Trebuchet
         private void UpdateServerMods(IEnumerable<ulong> modlist)
         {
             if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
-            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Updating mods...");
             new CatchedTasked(Operations.SteamDownload)
@@ -277,7 +277,7 @@ namespace Trebuchet
         private void UpdateServers()
         {
             if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
-            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Updating servers...");
             new CatchedTasked(Operations.SteamDownload)
@@ -296,7 +296,7 @@ namespace Trebuchet
                 return;
             }
 
-            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Checking mod files...");
             var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, new string[] { modlist }).Distinct();
@@ -320,7 +320,7 @@ namespace Trebuchet
                 return;
             }
 
-            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Checking for server updates...");
             var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, instances.Select(i => i.modlist)).Distinct();
@@ -347,7 +347,7 @@ namespace Trebuchet
         private void VerifyFiles(IEnumerable<ulong> modlist)
         {
             if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
-            if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
+            //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Verifying server files...");
 

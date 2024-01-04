@@ -29,7 +29,7 @@ namespace Trebuchet
             CancelCommand = new SimpleCommand(OnCancel);
             ConnectCommand = new SimpleCommand(OnConnect);
 
-            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(300), DispatcherPriority.Background, Tick, Application.Current.Dispatcher);
+            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick, Application.Current.Dispatcher);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
