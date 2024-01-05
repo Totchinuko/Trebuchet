@@ -229,6 +229,17 @@ namespace Trebuchet
             }
         }
 
+        public static bool IsProcessRunning(string filename)
+        {
+            if (!File.Exists(filename)) return false;
+            foreach (var processData in GetProcessesWithName(Path.GetFileName(filename)))
+            {
+                if (processData.filename.Replace("/", "\\").ToLower() == filename.Replace("/", "\\").ToLower())
+                    return true;
+            }
+            return false;
+        }
+
         public static bool IsRunning(this ProcessState state)
         {
             return state == ProcessState.RUNNING || state == ProcessState.STOPPING || state == ProcessState.ONLINE;

@@ -102,24 +102,12 @@ namespace Trebuchet
             if (!Directory.Exists(savedFolder)) return;
             if (Tools.IsSymbolicLink(savedFolder)) return;
 
-            QuestionModal question = new QuestionModal("Saved Data", "Your game directory contain saved data from your previous use of the game. " +
-                "In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original. " +
-                "Do you wish to continue ?");
+            ErrorModal question = new ErrorModal("Game Folder Reset", "Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.");
             question.ShowDialog();
 
-            if (question.Result != System.Windows.Forms.DialogResult.Yes)
-            {
-                _config.ClientPath = string.Empty;
-                _config.SaveFile();
-                return;
-            }
-
-            string newPath = savedFolder + "_Original";
-            Directory.Move(savedFolder, newPath);
-            ClientProfile Original = ClientProfile.CreateProfile(_config, ClientProfile.GetPath(_config, "_Original"));
-            Original.SaveFile();
-            string profileFolder = Path.GetDirectoryName(Original.FilePath) ?? throw new DirectoryNotFoundException($"{Original.FilePath} path is invalid");
-            Tools.DeepCopy(newPath, profileFolder);
+            _config.ClientPath = string.Empty;
+            _config.SaveFile();
+            return;
         }
 
         private void OnOpenFolderProfile(object? obj)

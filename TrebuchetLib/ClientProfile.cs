@@ -131,6 +131,13 @@ namespace Trebuchet
 
         public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles, name, Config.FileProfileConfig);
 
+        public static string GetUniqueOriginalProfile(Config config)
+        {
+            int i = 1;
+            while (ProfileExists(config, "_Original_" + i)) i++;
+            return GetPath(config, "_Original_" + i);
+        }
+
         public static IEnumerable<string> ListProfiles(Config config)
         {
             string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles);
@@ -140,6 +147,11 @@ namespace Trebuchet
             string[] profiles = Directory.GetDirectories(folder, "*");
             foreach (string p in profiles)
                 yield return Path.GetFileName(p);
+        }
+
+        public static bool ProfileExists(Config config, string name)
+        {
+            return File.Exists(GetPath(config, name));
         }
 
         public static void ResolveProfile(Config config, ref string profileName)
