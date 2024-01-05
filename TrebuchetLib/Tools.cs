@@ -205,6 +205,12 @@ namespace Trebuchet
             return Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new DirectoryNotFoundException("Assembly directory is not found.");
         }
 
+        public static bool IsClientInstallValid(Config config)
+        {
+            return !string.IsNullOrEmpty(config.ClientPath) &&
+                File.Exists(Path.Combine(config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
+        }
+
         public static bool IsDirectoryWritable(string dirPath, bool throwIfFails = false)
         {
             try
@@ -243,6 +249,11 @@ namespace Trebuchet
         public static bool IsRunning(this ProcessState state)
         {
             return state == ProcessState.RUNNING || state == ProcessState.STOPPING || state == ProcessState.ONLINE;
+        }
+
+        public static bool IsServerInstallValid(Config config)
+        {
+            return config.ServerInstanceCount > 0;
         }
 
         public static bool IsSymbolicLink(string path)

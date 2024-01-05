@@ -557,8 +557,8 @@ namespace Trebuchet
                 _modWatcher = null;
             }
 
-            string path = Path.Combine(_config.InstallPath, Config.FolderWorkshop);
-            if (string.IsNullOrWhiteSpace(_config.InstallPath) || !Directory.Exists(_config.InstallPath)) return;
+            string path = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop);
+            if (string.IsNullOrWhiteSpace(_config.ResolvedInstallPath) || !Directory.Exists(_config.ResolvedInstallPath)) return;
             if (!Directory.Exists(path))
                 Tools.CreateDir(path);
 

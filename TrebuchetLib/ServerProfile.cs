@@ -196,7 +196,7 @@ namespace Trebuchet
         /// <param name="config"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static string GetFolder(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name);
+        public static string GetFolder(Config config, string name) => Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderServerProfiles, name);
 
         /// <summary>
         /// Get the path of a server instance.
@@ -206,7 +206,7 @@ namespace Trebuchet
         /// <returns></returns>
         public static string GetInstancePath(Config config, int instance)
         {
-            return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance));
+            return Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance));
         }
 
         /// <summary>
@@ -217,7 +217,7 @@ namespace Trebuchet
         /// <returns></returns>
         public static string GetIntanceBinary(Config config, int instance)
         {
-            return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance), Config.FileServerProxyBin);
+            return Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instance), Config.FileServerProxyBin);
         }
 
         /// <summary>
@@ -245,7 +245,7 @@ namespace Trebuchet
         /// <param name="config"></param>
         /// <param name="name"></param>
         /// <returns></returns>
-        public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
+        public static string GetPath(Config config, string name) => Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderServerProfiles, name, Config.FileProfileConfig);
 
         /// <summary>
         /// List all the server profiles in the installation folder.
@@ -254,7 +254,7 @@ namespace Trebuchet
         /// <returns></returns>
         public static IEnumerable<string> ListProfiles(Config config)
         {
-            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles);
+            string folder = Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderServerProfiles);
             if (!Directory.Exists(folder))
                 yield break;
 
@@ -276,7 +276,7 @@ namespace Trebuchet
                 if (File.Exists(path)) return;
             }
 
-            profileName = Tools.GetFirstDirectoryName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderServerProfiles), "*");
+            profileName = Tools.GetFirstDirectoryName(Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderServerProfiles), "*");
             if (!string.IsNullOrEmpty(profileName)) return;
 
             profileName = "Default";

@@ -127,9 +127,9 @@ namespace Trebuchet
 
         #endregion IniConfig
 
-        public static string GetFolder(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles, name);
+        public static string GetFolder(Config config, string name) => Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderClientProfiles, name);
 
-        public static string GetPath(Config config, string name) => Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles, name, Config.FileProfileConfig);
+        public static string GetPath(Config config, string name) => Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderClientProfiles, name, Config.FileProfileConfig);
 
         public static string GetUniqueOriginalProfile(Config config)
         {
@@ -140,7 +140,7 @@ namespace Trebuchet
 
         public static IEnumerable<string> ListProfiles(Config config)
         {
-            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles);
+            string folder = Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderClientProfiles);
             if (!Directory.Exists(folder))
                 yield break;
 
@@ -162,7 +162,7 @@ namespace Trebuchet
                 if (File.Exists(path)) return;
             }
 
-            profileName = Tools.GetFirstDirectoryName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderClientProfiles), "*");
+            profileName = Tools.GetFirstDirectoryName(Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderClientProfiles), "*");
             if (!string.IsNullOrEmpty(profileName)) return;
 
             profileName = "Default";

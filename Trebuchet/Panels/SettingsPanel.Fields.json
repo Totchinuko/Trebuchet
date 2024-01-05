@@ -6,9 +6,10 @@
   {
     "$type": "Directory",
     "Property": "InstallPath",
-    "Name": "Trebuchet Installation Directory",
+    "Name": "Trebuchet Data Directory",
     "Description": "Folder for all the data needed by trebuchet. This will contains your mods, logs, saves, and most of your configurations.",
     "RefreshApp": true,
+    "Default": "%APP_DIRECTORY%\\TrebuchetData",
     "DefaultFolder": "%APP_DIRECTORY%\\TrebuchetData",
     "CreateDefaultFolder": true,
     "Validation": {

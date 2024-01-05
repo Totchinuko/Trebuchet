@@ -62,7 +62,7 @@ namespace Trebuchet
 
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid;
+            return _config.IsInstallPathValid && (Tools.IsClientInstallValid(_config) || Tools.IsServerInstallValid(_config));
         }
 
         /// <summary>

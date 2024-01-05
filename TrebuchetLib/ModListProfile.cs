@@ -42,12 +42,12 @@ namespace Trebuchet
 
         public static string GetPath(Config config, string modlistName)
         {
-            return Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles, modlistName + ".json");
+            return Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderModlistProfiles, modlistName + ".json");
         }
 
         public static IEnumerable<string> ListProfiles(Config config)
         {
-            string folder = Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles);
+            string folder = Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderModlistProfiles);
             if (!Directory.Exists(folder))
                 yield break;
 
@@ -69,7 +69,7 @@ namespace Trebuchet
         {
             string file = mod;
             if (long.TryParse(mod, out _))
-                file = Path.Combine(config.InstallPath, Config.FolderWorkshop, appID.ToString(), mod, "none");
+                file = Path.Combine(config.ResolvedInstallPath, Config.FolderWorkshop, appID.ToString(), mod, "none");
 
             string? folder = Path.GetDirectoryName(file);
             if (folder == null)
@@ -97,7 +97,7 @@ namespace Trebuchet
                 if (File.Exists(path)) return;
             }
 
-            profileName = Tools.GetFirstFileName(Path.Combine(config.InstallPath, config.VersionFolder, Config.FolderModlistProfiles), "*.json");
+            profileName = Tools.GetFirstFileName(Path.Combine(config.ResolvedInstallPath, config.VersionFolder, Config.FolderModlistProfiles), "*.json");
             if (!string.IsNullOrEmpty(profileName)) return;
 
             profileName = "Default";

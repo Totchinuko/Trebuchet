@@ -48,9 +48,7 @@ namespace Trebuchet
 
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid &&
-                !string.IsNullOrEmpty(_config.ClientPath) &&
-                File.Exists(Path.Combine(_config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
+            return _config.IsInstallPathValid && Tools.IsClientInstallValid(_config);
         }
 
         public override void RefreshPanel()

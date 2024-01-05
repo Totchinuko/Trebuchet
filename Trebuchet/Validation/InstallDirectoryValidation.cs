@@ -16,6 +16,7 @@ namespace Trebuchet.Validation
                 errorMessage = string.Empty;
                 return true;
             }
+            value = Config.ResolveInstallPath(value);
             if (!Tools.ValidateInstallDirectory(value, out errorMessage))
             {
                 return false;

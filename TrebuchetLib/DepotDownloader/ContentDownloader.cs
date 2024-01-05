@@ -39,7 +39,7 @@ namespace Trebuchet
 
         public string STAGING_DIR => Path.Combine(STEAMKIT_DIR, "Staging");
 
-        public string STEAMKIT_DIR => Path.Combine(Config.InstallPath, "SteamCache");
+        public string STEAMKIT_DIR => Path.Combine(Config.ResolvedInstallPath, "SteamCache");
 
         private Config Config { get; set; }
 

@@ -43,7 +43,7 @@
         {
             int count = 0;
 
-            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances);
+            string folder = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances);
             if (!Directory.Exists(folder))
                 return 0;
 
@@ -68,7 +68,7 @@
         public ulong GetInstanceBuildID(int instance)
         {
             string manifest = Path.Combine(
-                _config.InstallPath,
+                _config.ResolvedInstallPath,
                 _config.VersionFolder,
                 Config.FolderServerInstances,
                 string.Format(Config.FolderInstancePattern, instance),
@@ -111,7 +111,7 @@
         /// <param name="config"></param>
         public void RemoveAllSymbolicLinks()
         {
-            string folder = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances);
+            string folder = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances);
             if (!Directory.Exists(folder))
                 return;
             string[] instances = Directory.GetDirectories(folder);
@@ -126,16 +126,16 @@
 
         public bool SetupFolders()
         {
-            if (!Tools.ValidateInstallDirectory(_config.InstallPath, out string _)) return false;
+            if (!Tools.ValidateInstallDirectory(_config.ResolvedInstallPath, out string _)) return false;
 
             try
             {
-                Tools.CreateDir(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances));
-                Tools.CreateDir(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderClientProfiles));
-                Tools.CreateDir(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerProfiles));
-                Tools.CreateDir(Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderModlistProfiles));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderClientProfiles));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerProfiles));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderModlistProfiles));
 
-                Tools.CreateDir(Path.Combine(_config.InstallPath, Config.FolderWorkshop));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop));
             }
             catch (Exception ex)
             {
@@ -159,7 +159,7 @@
             if (!SetupFolders()) return;
             if (!await WaitSteamConnectionAsync()) return;
 
-            _steam.ContentDownloader.SetInstallDirectory(Path.Combine(_config.InstallPath, Config.FolderWorkshop));
+            _steam.ContentDownloader.SetInstallDirectory(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop));
             await _steam.ContentDownloader.DownloadUGCAsync(new uint[] { Config.AppIDLiveClient, Config.AppIDTestLiveClient }, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
         }
 
@@ -181,7 +181,7 @@
 
             Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info);
 
-            string instance = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
+            string instance = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
 
             if (reinstall)
             {
@@ -213,8 +213,8 @@
             Log.Write("Updating server instance {0} from instance 0.", LogSeverity.Info);
             if (!SetupFolders()) return;
 
-            string instance = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
-            string instance0 = Path.Combine(_config.InstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, 0));
+            string instance = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
+            string instance0 = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, 0));
 
             if (!Directory.Exists(instance0))
                 throw new DirectoryNotFoundException($"{instance0} was not found.");

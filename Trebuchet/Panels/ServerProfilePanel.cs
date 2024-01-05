@@ -49,8 +49,7 @@ namespace Trebuchet
 
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid &&
-                   _config.ServerInstanceCount > 0;
+            return _config.IsInstallPathValid && Tools.IsServerInstallValid(_config);
         }
 
         public override void RefreshPanel()

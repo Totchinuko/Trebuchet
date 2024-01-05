@@ -56,17 +56,21 @@ namespace Trebuchet
 
         #endregion constants
 
+        private string _installPath = "%APP_DIRECTORY%\\TrebuchetData";
+
         public int AutoUpdateStatus { get; set; } = 1;
 
         public string ClientPath { get; set; } = string.Empty;
 
-        public string InstallPath { get; set; } = string.Empty;
+        public string InstallPath { get; set; } = "%APP_DIRECTORY%\\TrebuchetData";
 
-        public bool IsInstallPathValid => !string.IsNullOrEmpty(InstallPath) && Directory.Exists(InstallPath);
+        public bool IsInstallPathValid => !string.IsNullOrEmpty(InstallPath) && Directory.Exists(ResolvedInstallPath);
 
         public bool IsTestLive => Path.GetFileName(FilePath) == $"{FolderTestLive}.{FileConfig}";
 
         public int MaxDownloads { get; set; } = 8;
+
+        public string ResolvedInstallPath => ResolveInstallPath(InstallPath);
 
         public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
 
@@ -85,6 +89,12 @@ namespace Trebuchet
                 throw new Exception("Path to assembly is invalid.");
             ConfigPath = Path.Combine(ConfigPath, $"{(testlive ? FolderTestLive : FolderLive)}.{FileConfig}");
             return ConfigPath;
+        }
+
+        public static string ResolveInstallPath(string path)
+        {
+            string appDir = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
+            return path.Replace("%APP_DIRECTORY%", appDir);
         }
     }
 }

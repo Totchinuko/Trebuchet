@@ -372,7 +372,7 @@ namespace Trebuchet
 
         private bool WriteAccessCheck()
         {
-            if (Tools.ValidateInstallDirectory(_trebuchet.Config.InstallPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.InstallPath))
+            if (Tools.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ResolvedInstallPath))
             {
                 GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;

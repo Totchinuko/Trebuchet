@@ -59,7 +59,7 @@ namespace Trebuchet
             RequiredActions.Clear();
 
             int installed = StrongReferenceMessenger.Default.Send<InstanceInstalledCountRequest>();
-            if (Directory.Exists(_config.InstallPath) && _config.ServerInstanceCount > installed)
+            if (Directory.Exists(_config.ResolvedInstallPath) && _config.ServerInstanceCount > installed)
                 RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, Operations.SteamDownload));
             if (App.UseSoftwareRendering == App.Config.UseHardwareAcceleration)
                 RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, Operations.SteamDownload));
