@@ -22,6 +22,7 @@ namespace Trebuchet
     [JsonDerivedType(typeof(CPUAffinityField), "CPUAffinity")]
     [JsonDerivedType(typeof(ComboBoxField), "ComboBox")]
     [JsonDerivedType(typeof(TitleField), "Title")]
+    [JsonDerivedType(typeof(RawUDPField), "RawUDPPort")]
     public abstract class Field : INotifyPropertyChanged
     {
         private static JsonSerializerOptions _options = new JsonSerializerOptions();
@@ -103,7 +104,7 @@ namespace Trebuchet
 
         public BaseValidation<T>? Validation { get; set; } = null;
 
-        public T? Value
+        public virtual T? Value
         {
             get
             {

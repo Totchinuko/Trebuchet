@@ -137,10 +137,10 @@
     "Default": 7777
   },
   {
-    "$type": "Int",
-    "Property": "RawUPDPort",
+    "$type": "RawUDPPort",
+    "Property": "GameClientPort",
     "Name": "Raw UDP Port",
-    "Default": 7779,
+    "Default": 7777,
     "IsEnabled": false
   },
   {
