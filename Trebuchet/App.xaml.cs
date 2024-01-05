@@ -1,4 +1,6 @@
-﻿using System;
+﻿using SteamKit2.Internal;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
@@ -21,6 +23,8 @@ namespace Trebuchet
 
         public static string APIKey { get; private set; } = string.Empty;
 
+        public static Dictionary<string, string> AppText { get; set; } = new Dictionary<string, string>();
+
         public static UIConfig Config { get; private set; } = default!;
 
         public static bool HasCrashed { get; private set; }
@@ -28,6 +32,12 @@ namespace Trebuchet
         public bool IsShutingDown { get; private set; }
 
         public static void Crash() => HasCrashed = true;
+
+        public static string GetAppText(string key, params object[] args)
+        {
+            if (AppText.TryGetValue(key, out var text)) return string.Format(text, args);
+            return $"<INVALID_{key}>";
+        }
 
         public static void OpenApp(bool testlive, bool catapult)
         {
@@ -53,6 +63,7 @@ namespace Trebuchet
         protected override void OnStartup(StartupEventArgs e)
         {
             Log.Write("Starting Trebuchet", LogSeverity.Info);
+            ReadAppText();
             ReadSettings();
 
             AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(OnUnhandledException);
@@ -104,6 +115,16 @@ namespace Trebuchet
                 new ExceptionModal(e.Exception).ShowDialog();
                 IsShutingDown = true;
             });
+        }
+
+        private void ReadAppText()
+        {
+            var node = JsonSerializer.Deserialize<JsonNode>(GuiExtensions.GetEmbededTextFile("Trebuchet.Data.AppText.json"));
+            if (node == null) return;
+
+            AppText.Clear();
+            foreach (var n in node.AsObject())
+                AppText.Add(n.Key, n.Value?.GetValue<string>() ?? $"<INVALID_{n.Key}>");
         }
 
         private void ReadSettings()

@@ -17,7 +17,7 @@ namespace Trebuchet
                 errorMessage = string.Empty;
                 return true;
             }
-            if (!Tools.ValidateGameDirectory(value, out errorMessage))
+            if (!GuiExtensions.ValidateGameDirectory(value, out errorMessage))
                 return false;
 
             if (!Tools.ValidateDirectoryUAC(value))
@@ -29,7 +29,7 @@ namespace Trebuchet
 
             if (!HandlePotatoes(value))
             {
-                errorMessage = "Cannot setup the game directory while the game run. Close the game and retry. Bad Potato.";
+                errorMessage = App.GetAppText("Validation_PotatoError");
                 return false;
             }
 
@@ -47,9 +47,9 @@ namespace Trebuchet
             string savedFolder = Path.Combine(value, Config.FolderGameSave);
             if (Tools.IsSymbolicLink(savedFolder)) return true;
 
-            QuestionModal question = new QuestionModal("Saved Data", "Your game directory contain saved data from your previous use of the game. " +
-                "In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original. " +
-                "Do you wish to continue ?");
+            QuestionModal question = new QuestionModal(
+                App.GetAppText("Validation_HandleOriginalSavedDirectory_Title"),
+                App.GetAppText("Validation_HandleOriginalSavedDirectory"));
             question.ShowDialog();
 
             if (question.Result != System.Windows.Forms.DialogResult.Yes)

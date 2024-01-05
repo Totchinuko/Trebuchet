@@ -1,0 +1,15 @@
+{
+  "Validation_HandleOriginalSavedDirectory": "Your game directory contain saved data from your previous use of the game. In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original.\nDo you wish to continue ?",
+  "Validation_HandleOriginalSavedDirectory_Title": "Saved Data",
+  "Validation_PotatoError": "Cannot setup the game directory while the game run. Close the game and retry. Bad Potato.",
+  "InvalidDirectory": "Directory is invalid",
+  "DirectoryNotFound": "Directory does not exists",
+  "InstallPathInGameError": "Install path cannot be in the game Saved folder",
+  "GameDirectoryInvalidError": "Game could not be found in this Directory",
+  "Welcome_InstallPathInvalid": "Your trebuchet data path is not found. Please choose a new one.",
+  "Welcome_InstallPathInvalid_Title": "Invalid Install Path",
+  "Welcome_SettingTutorial": "Welcome to Trebuchet.\n\nIn order to use the software for launching your game or servers you need to point the location of your game, or select how many server you wish the launcher to handle, or both.\n\nOther section of the launcher will unlock as you set those settings up.",
+  "Welcome_SettingTutorial_Title": "Welcome",
+  "UACDialog": "The following folder is protected by administrator rights, Trebuchet need access to manage your game and data. Restart Trebuchet in Admin mode ?\n{0}",
+  "UACDialog_Title": "Administrator"
+}

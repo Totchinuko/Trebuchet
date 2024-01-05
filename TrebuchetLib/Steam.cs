@@ -126,7 +126,7 @@
 
         public bool SetupFolders()
         {
-            if (!Tools.ValidateInstallDirectory(_config.ResolvedInstallPath, out string _)) return false;
+            if (!Tools.ValidateInstallDirectory(_config.ResolvedInstallPath)) return false;
 
             try
             {

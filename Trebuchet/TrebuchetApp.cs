@@ -98,6 +98,12 @@ namespace Trebuchet
 
         public SteamWidget SteamWidget { get; } = new SteamWidget();
 
+        public void OnWindowShow()
+        {
+            Menu.Top.ForEach(x => x.OnWindowShow());
+            Menu.Bottom.ForEach(x => x.OnWindowShow());
+        }
+
         void IRecipient<SteamConnectMessage>.Receive(SteamConnectMessage message)
         {
             _trebuchet.Steam.Connect();
@@ -176,7 +182,10 @@ namespace Trebuchet
 
         public void Receive(UACPromptRequest message)
         {
-            QuestionModal modal = new QuestionModal("Administrator", $"The following folder is protected by administrator rights, Trebuchet need access to manage your game and data. Restart Trebuchet in Admin mode ?\n{message.Directory}");
+            QuestionModal modal = new QuestionModal(
+                App.GetAppText("UACDialog_Title"),
+                App.GetAppText("UACDialog", message.Directory)
+                );
             modal.ShowDialog();
 
             if (modal.Result == System.Windows.Forms.DialogResult.Yes)
@@ -372,12 +381,12 @@ namespace Trebuchet
 
         private bool WriteAccessCheck()
         {
-            if (Tools.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ResolvedInstallPath))
+            if (GuiExtensions.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ResolvedInstallPath))
             {
                 GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;
             }
-            if (Tools.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ClientPath))
+            if (GuiExtensions.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ClientPath))
             {
                 GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;

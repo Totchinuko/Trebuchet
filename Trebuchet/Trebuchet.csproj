@@ -18,6 +18,7 @@
     <None Remove="AppSettings.json" />
     <None Remove="AppSettings.json.sample" />
     <None Remove="ClientSettings.Fields.json" />
+    <None Remove="Data\AppText.json" />
     <None Remove="Icons\Add.png" />
     <None Remove="Icons\Bug.png" />
     <None Remove="Icons\BugWindow.png" />
@@ -101,6 +102,7 @@
     <Resource Include="Icons\Window.png" />
     <EmbeddedResource Include="AppSettings.json.sample" />
     <EmbeddedResource Include="AppSettings.json" />
+    <EmbeddedResource Include="Data\AppText.json" />
     <EmbeddedResource Include="TrebuchetApp.Menu.json" />
     <EmbeddedResource Include="Panels\ClientProfilePanel.Fields.json" />
     <EmbeddedResource Include="Panels\ServerProfilePanel.Fields.json" />

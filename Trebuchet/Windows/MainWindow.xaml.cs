@@ -51,16 +51,7 @@ namespace Trebuchet
 
         protected virtual void OnWindowShown()
         {
-            try
-            {
-                string file = System.IO.Path.Combine(Tools.GetRootPath(), "file.lock");
-                File.WriteAllText(file, string.Empty);
-                File.Delete(file);
-            }
-            catch (Exception ex)
-            {
-                new ErrorModal("I/O Error", $"The install directory for trebuchet cannot be accessed.{Environment.NewLine}{ex.Message}", true).ShowDialog();
-            }
+            App.OnWindowShow();
         }
     }
 }

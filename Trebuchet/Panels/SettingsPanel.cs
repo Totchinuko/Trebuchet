@@ -9,6 +9,7 @@ namespace Trebuchet
     public class SettingsPanel : FieldEditorPanel
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+        private bool _displayedHelp = false;
 
         public SettingsPanel()
         {
@@ -18,6 +19,11 @@ namespace Trebuchet
         public Config Config => _config;
 
         public UIConfig UIConfig => App.Config;
+
+        public override void OnWindowShow()
+        {
+            DisplaySetupHelp();
+        }
 
         public override void RefreshPanel()
         {
@@ -36,6 +42,32 @@ namespace Trebuchet
             _config.SaveFile();
             App.Config.SaveFile();
             UpdateRequiredActions();
+        }
+
+        private void DisplaySetupHelp()
+        {
+            if (_displayedHelp) return;
+            _displayedHelp = true;
+
+            if (_config.IsInstallPathValid && (Tools.IsClientInstallValid(_config) || Tools.IsServerInstallValid(_config)))
+                return;
+
+            if (!_config.IsInstallPathValid)
+            {
+                ErrorModal modal = new ErrorModal(
+                    App.GetAppText("Welcome_InstallPathInvalid_Title"),
+                    App.GetAppText("Welcome_InstallPathInvalid"));
+                modal.ShowDialog();
+            }
+
+            if ((!Tools.IsClientInstallValid(_config) && !Tools.IsServerInstallValid(_config)))
+            {
+                MessageModal modal = new MessageModal(
+                  App.GetAppText("Welcome_SettingTutorial_Title"),
+                  App.GetAppText("Welcome_SettingTutorial"),
+                  250);
+                modal.ShowDialog();
+            }
         }
 
         private void LoadPanel()

@@ -372,45 +372,14 @@ namespace Trebuchet
             return IsDirectoryWritable(directory, false);
         }
 
-        public static bool ValidateGameDirectory(string gameDirectory, out string errorMessage)
+        public static bool ValidateInstallDirectory(string installPath)
         {
-            errorMessage = string.Empty;
-            if (string.IsNullOrEmpty(gameDirectory))
-            {
-                errorMessage = "Directory is invalid";
-                return false;
-            }
-            if (!Directory.Exists(gameDirectory))
-            {
-                errorMessage = "Directory not found";
-                return false;
-            }
-            if (!File.Exists(Path.Join(gameDirectory, Config.FolderGameBinaries, Config.FileClientBin)))
-            {
-                errorMessage = "Game could not be found in this Directory";
-                return false;
-            }
-            return true;
-        }
-
-        public static bool ValidateInstallDirectory(string installPath, out string errorMessage)
-        {
-            errorMessage = string.Empty;
             if (string.IsNullOrEmpty(installPath))
-            {
-                errorMessage = "Directory is invalid";
                 return false;
-            }
             if (!Directory.Exists(installPath))
-            {
-                errorMessage = "Install Directory does not exists";
                 return false;
-            }
             if (Regex.IsMatch(installPath, Config.RegexSavedFolder))
-            {
-                errorMessage = "Install path cannot be in the game Saved folder";
                 return false;
-            }
             return true;
         }
 

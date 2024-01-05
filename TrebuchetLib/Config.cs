@@ -56,8 +56,6 @@ namespace Trebuchet
 
         #endregion constants
 
-        private string _installPath = "%APP_DIRECTORY%\\TrebuchetData";
-
         public int AutoUpdateStatus { get; set; } = 1;
 
         public string ClientPath { get; set; } = string.Empty;
