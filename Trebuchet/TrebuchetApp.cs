@@ -177,7 +177,14 @@ namespace Trebuchet
 
         public void Receive(SteamModlistUpdateRequest message)
         {
-            message.Reply(_trebuchet.Steam.GetUpdatedUGCFileIDs(message.keyValuePairs).ToList());
+            var updated = _trebuchet.Steam.GetUpdatedUGCFileIDs(message.keyValuePairs).ToList();
+            foreach (var kvp in message.keyValuePairs)
+            {
+                string mod = kvp.PubID.ToString();
+                if (!ModListProfile.ResolveMod(_trebuchet.Config, ref mod) && !updated.Contains(kvp.PubID))
+                    updated.Add(kvp.PubID);
+            }
+            message.Reply(updated);
         }
 
         public void Receive(UACPromptRequest message)
@@ -249,7 +256,6 @@ namespace Trebuchet
 
         private void RequestModlistManifests(string modlistName)
         {
-            if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
             if (!ModListProfile.TryLoadProfile(_trebuchet.Config, modlistName, out ModListProfile? profile)) return;
 
             RequestModlistManifests(profile.GetModIDList().ToList());
@@ -257,6 +263,7 @@ namespace Trebuchet
 
         private void RequestModlistManifests(List<ulong> list)
         {
+            if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
             if (list.Count == 0) return;
 
             new CatchedTasked(Operations.SteamPublishedFilesFetch, 15 * 1000)

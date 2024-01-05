@@ -27,6 +27,7 @@ namespace Trebuchet
         private TrulyObservableCollection<ModFile> _modlist = new TrulyObservableCollection<ModFile>();
         private string _modlistURL = string.Empty;
         private FileSystemWatcher? _modWatcher;
+        private bool _needRefresh;
         private ModListProfile _profile;
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private WorkshopSearch? _searchWindow;
@@ -123,6 +124,16 @@ namespace Trebuchet
             return _config.IsInstallPathValid;
         }
 
+        public override void Execute(object? parameter)
+        {
+            base.Execute(parameter);
+            if (_needRefresh)
+            {
+                _needRefresh = false;
+                LoadPanel();
+            }
+        }
+
         public void Receive(SteamModlistReceived message)
         {
             var update = from file in _modlist
@@ -139,7 +150,7 @@ namespace Trebuchet
         public override void RefreshPanel()
         {
             OnCanExecuteChanged();
-            LoadPanel();
+            _needRefresh = true;
         }
 
         private void FetchJsonList(UriBuilder builder)

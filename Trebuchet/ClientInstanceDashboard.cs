@@ -20,7 +20,7 @@ namespace Trebuchet
             KillCommand = new SimpleCommand(OnKilled, false);
             LaunchCommand = new TaskBlockedCommand(OnLaunched, true, Operations.SteamDownload);
             LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched, true, Operations.SteamDownload);
-            UpdateModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload);
+            UpdateModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning);
 
             StrongReferenceMessenger.Default.Register<ClientProcessStateChanged>(this);
 
@@ -125,12 +125,12 @@ namespace Trebuchet
             ListProfiles();
         }
 
-        public void RefreshUpdateStatus(List<ulong> list)
+        public void RefreshUpdateStatus(List<ulong> queried, List<ulong> updated)
         {
             if (CanUseDashboard && !string.IsNullOrEmpty(SelectedModlist))
             {
                 var mods = ModListProfile.CollectAllMods(_config, SelectedModlist);
-                UpdateNeeded = mods.Intersect(list).Union(UpdateNeeded).ToList();
+                UpdateNeeded = mods.Intersect(updated).Union(UpdateNeeded.Except(queried)).ToList();
                 OnPropertyChanged(nameof(UpdateNeeded));
                 OnPropertyChanged(nameof(IsUpdateNeeded));
             }

@@ -17,7 +17,9 @@ namespace Trebuchet
     {
         private ClientInstanceDashboard _client;
         private Config _config;
+        private bool _hasModRefreshScheduled = false;
         private ObservableCollection<ServerInstanceDashboard> _instances = new ObservableCollection<ServerInstanceDashboard>();
+        private object _lock = new object();
         private DispatcherTimer _timer;
 
         public DashboardPanel()
@@ -36,7 +38,6 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.RegisterAll(this);
 
             _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, OnCheckModUpdate, Application.Current.Dispatcher);
-            Task.Run(WaitForInitialModUpdateCheck);
         }
 
         public bool CanDisplayServers => _config.IsInstallPathValid &&
@@ -91,6 +92,7 @@ namespace Trebuchet
                 foreach (var i in _instances)
                     i.RefreshSelection();
                 CreateInstancesIfNeeded();
+                Task.Run(WaitModUpdateCheck);
             }
             base.Execute(parameter);
         }
@@ -119,10 +121,11 @@ namespace Trebuchet
         public void Receive(SteamModlistReceived message)
         {
             List<ulong> updates = StrongReferenceMessenger.Default.Send(new SteamModlistUpdateRequest(message.Modlist.GetManifestKeyValuePairs()));
+            List<ulong> queried = message.Modlist.Select(x => x.PublishedFileID).ToList();
 
-            _client.RefreshUpdateStatus(updates);
+            _client.RefreshUpdateStatus(queried, updates);
             foreach (var item in _instances)
-                item.RefreshUpdateStatus(updates);
+                item.RefreshUpdateStatus(queried, updates);
         }
 
         public override void RefreshPanel()
@@ -148,6 +151,8 @@ namespace Trebuchet
 
         private void CheckModUpdates()
         {
+            if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)))
+                return;
             StrongReferenceMessenger.Default.Send(new SteamModlistIDRequest(ModListProfile.CollectAllMods(_config, CollectAllModlistNames()).Distinct()));
         }
 
@@ -208,14 +213,24 @@ namespace Trebuchet
             UpdateServer();
         }
 
-        private async Task WaitForInitialModUpdateCheck()
+        private async Task WaitModUpdateCheck()
         {
+            lock (_lock)
+            {
+                if (_hasModRefreshScheduled) return;
+                _hasModRefreshScheduled = true;
+            }
+
             while (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)))
                 await Task.Delay(200);
+
             Application.Current.Dispatcher.Invoke(() =>
             {
                 CheckModUpdates();
             });
+
+            lock (_lock)
+                _hasModRefreshScheduled = false;
         }
     }
 }

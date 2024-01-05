@@ -89,6 +89,15 @@ namespace Trebuchet
             return true;
         }
 
+        public static bool ResolveMod(Config config, ref string mod)
+        {
+            if (ResolveMod(config, Config.AppIDLiveClient, ref mod))
+                return true;
+            else if (ResolveMod(config, Config.AppIDTestLiveClient, ref mod))
+                return true;
+            return false;
+        }
+
         public static void ResolveProfile(Config config, ref string profileName)
         {
             if (!string.IsNullOrEmpty(profileName))
@@ -178,11 +187,7 @@ namespace Trebuchet
 
         public bool ResolveMod(ref string mod)
         {
-            if (ResolveMod(Config, Config.AppIDLiveClient, ref mod))
-                return true;
-            else if (ResolveMod(Config, Config.AppIDTestLiveClient, ref mod))
-                return true;
-            return false;
+            return ResolveMod(Config, ref mod);
         }
 
         public void SetModList(string modlist)
