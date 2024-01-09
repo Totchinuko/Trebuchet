@@ -33,17 +33,15 @@ namespace Trebuchet
                 return false;
             }
 
-            if (!HandleOriginalSavedDirectory(value))
-            {
-                errorMessage = string.Empty;
+            if (!HandleOriginalSavedDirectory(value, out errorMessage))
                 return false;
-            }
 
             return true;
         }
 
-        private bool HandleOriginalSavedDirectory(string value)
+        private bool HandleOriginalSavedDirectory(string value, out string errorMessage)
         {
+            errorMessage = string.Empty;
             string savedFolder = Path.Combine(value, Config.FolderGameSave);
             if (Tools.IsSymbolicLink(savedFolder)) return true;
 
@@ -57,7 +55,16 @@ namespace Trebuchet
 
             Config config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
             string newPath = savedFolder + "_Original";
-            Directory.Move(savedFolder, newPath);
+
+            try
+            {
+                Directory.Move(savedFolder, newPath);
+            }
+            catch
+            {
+                errorMessage = App.GetAppText("Validation_PotatoError");
+                return false;
+            }
             ClientProfile Original = ClientProfile.CreateProfile(config, ClientProfile.GetUniqueOriginalProfile(config));
             Original.SaveFile();
             string profileFolder = Path.GetDirectoryName(Original.FilePath) ?? throw new DirectoryNotFoundException($"{Original.FilePath} path is invalid");
