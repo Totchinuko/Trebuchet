@@ -169,7 +169,7 @@ namespace Trebuchet
         public void ApplyServerSettings(IniDocument document)
         {
             IniSection section = document.GetSection("ServerSettings");
-            section.SetParameter("ServerRegion", ServerRegion.ToString());
+            section.SetParameter("serverRegion", ServerRegion.ToString());
             section.SetParameter("AdminPassword", AdminPassword);
             section.SetParameter("IsBattlEyeEnabled", EnableBattleEye.ToString());
             section.SetParameter("IsVACEnabled", EnableVAC.ToString());
