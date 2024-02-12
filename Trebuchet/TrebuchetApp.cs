@@ -269,7 +269,8 @@ namespace Trebuchet
             new CatchedTasked(Operations.SteamPublishedFilesFetch, 15 * 1000)
                 .Add(async (cts) =>
                 {
-                    var result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
+                    PublishedFilesResponse? result = null;
+                    result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
                     if (result == null) return;
                     Application.Current.Dispatcher.Invoke(() =>
                     {

@@ -39,7 +39,20 @@ namespace SteamWorksWebAPI
                     {
                         if (response.StatusCode != System.Net.HttpStatusCode.OK) return null;
 
+#if DEBUG
+                        string json = new StreamReader(download).ReadToEnd();
+
+                        try
+                        {
+                            return (JsonSerializer.Deserialize<APIResponse<T>>(json, jsonOptions))?.Response;
+                        }
+                        catch (Exception ex)
+                        {
+                            throw new Exception("Couldn't Parse Steam Response\nContent\n" + json, ex);
+                        }
+#else
                         return (await JsonSerializer.DeserializeAsync<APIResponse<T>>(download, jsonOptions))?.Response;
+#endif
                     }
                 }
             }
