@@ -118,8 +118,17 @@ namespace Trebuchet
 
         protected virtual async Task RunCounters(int processID, string processName, CancellationToken token)
         {
-            PerformanceCounter memoryConsumptionCounter = await Task.Run(() => new PerformanceCounter("Process V2", "Working Set", processName + ":" + processID));
-            PerformanceCounter cpuUsageCounter = await Task.Run(() => new PerformanceCounter("Process V2", "% Processor Time", processName + ":" + processID));
+            PerformanceCounter memoryConsumptionCounter;
+            PerformanceCounter cpuUsageCounter;
+            try
+            {
+                memoryConsumptionCounter = await Task.Run(() => new PerformanceCounter("Process V2", "Working Set", processName + ":" + processID));
+                cpuUsageCounter = await Task.Run(() => new PerformanceCounter("Process V2", "% Processor Time", processName + ":" + processID));
+            } catch(Exception ex)
+            {
+                Log.Write(ex);
+                return;
+            }
 
             while (!token.IsCancellationRequested)
             {
