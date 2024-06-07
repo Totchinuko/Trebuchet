@@ -75,6 +75,30 @@
   },
   {
     "$type": "Toggle",
+    "Property": "EnableAsyncScene",
+    "Name": "Enable Async Scene",
+    "Description": "Can improve performance, specially around heavy building areas",
+    "Default": false
+  },
+  {
+    "$type": "FloatField",
+    "Property": "MaxMoveDeltaTime",
+    "Name": "Max Move Delta Time",
+    "Description": "TBD",
+    "Default": 0.033
+  },
+  {
+    "$type": "IntSlider",
+    "Property": "ConfiguredInternetSpeed",
+    "Name": "Configured Internet Speed",
+    "Description": "TBD",
+    "Minimum": 50000,
+    "Maximum": 100000,
+    "Default": 50000,
+    "Frequency": 10000
+  },
+  {
+    "$type": "Toggle",
     "Property": "Log",
     "Name": "Display Log Console",
     "Description": "Display live game logs as the game is running.",

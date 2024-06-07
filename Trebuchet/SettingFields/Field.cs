@@ -23,6 +23,7 @@ namespace Trebuchet
     [JsonDerivedType(typeof(ComboBoxField), "ComboBox")]
     [JsonDerivedType(typeof(TitleField), "Title")]
     [JsonDerivedType(typeof(RawUDPField), "RawUDPPort")]
+    [JsonDerivedType(typeof(FloatField), "FloatField")]
     public abstract class Field : INotifyPropertyChanged
     {
         private static JsonSerializerOptions _options = new JsonSerializerOptions();

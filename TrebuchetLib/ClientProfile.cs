@@ -72,6 +72,12 @@ namespace Trebuchet
 
         public bool UltraAnisotropy { get; set; }
 
+        public bool EnableAsyncScene { get; set; } = false;
+
+        public float MaxMoveDeltaTime { get; set; } = 0.033f;
+
+        public int ConfiguredInternetSpeed { get; set; } = 50000;
+
         public bool UseAllCores { get; set; } = false;
 
         #region IniConfig
@@ -108,6 +114,9 @@ namespace Trebuchet
             IniSection section = document.GetSection("Core.Log");
             section.GetParameters().ForEach(section.Remove);
 
+            document.GetSection("/script/engine.physicssettings")
+                .SetParameter("bEnableAsyncScene", EnableAsyncScene ? "True" : "False");
+
             if (LogFilters.Count > 0)
                 foreach (string filter in LogFilters)
                 {
@@ -116,6 +125,22 @@ namespace Trebuchet
                 }
             else
                 document.Remove(section);
+        }
+
+        [IniSetting(Config.FileIniUser, "Game")]
+        public void UserGameSetting(IniDocument document)
+        {
+            document.GetSection("/script/engine.gamenetworkmanager")
+                .SetParameter("MaxMoveDeltaTime", MaxMoveDeltaTime.ToString());
+            document.GetSection("/script/engine.player")
+                .SetParameter("ConfiguredInternetSpeed", ConfiguredInternetSpeed.ToString());
+        }
+
+        [IniSetting(Config.FileIniUser, "GraniteBaking")]
+        public void Granite(IniDocument document)
+        {
+            document.GetSection("/script/granitematerialbaker.granitebakingsettings")
+                .SetParameter("Quality", UltraAnisotropy ? "High":"Medium");
         }
 
         [IniSetting(Config.FileIniDefault, "Scalability")]
@@ -214,7 +239,7 @@ namespace Trebuchet
                 IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
                 if (!documents.TryGetValue(attr.Path, out IniDocument? document))
                 {
-                    document = IniParser.Parse(Tools.GetFileContent(Path.Combine(GetClientPath(), attr.Path)));
+                        document = IniParser.Parse(Tools.GetFileContent(Path.Combine(GetClientPath(), attr.Path)));
                     documents.Add(attr.Path, document);
                 }
                 method.Invoke(this, new object?[] { document });
