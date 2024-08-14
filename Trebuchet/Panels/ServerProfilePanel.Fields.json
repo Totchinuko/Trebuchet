@@ -97,7 +97,7 @@
     "Name": "Maximum Tick Rate",
     "Description": "Maximum tick rate of your server instance.",
     "Default": 30,
-    "Minimum": 10
+    "Minimum": 1
   },
   {
     "$type": "Toggle",
