@@ -1,4 +1,5 @@
 ﻿using SteamKit2;
+using SteamKit2.GC.Dota.Internal;
 using SteamKit2.Internal;
 
 /// GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
@@ -7,7 +8,7 @@ using SteamKit2.Internal;
 
 namespace Trebuchet
 {
-    public partial class SteamSession
+    public partial class SteamSession : IDebugListener
     {
         private CallbackManager _callbackManager;
 
@@ -15,10 +16,14 @@ namespace Trebuchet
 
         private bool _isRunning;
 
+        private bool _shouldBeConnected;
+
         public SteamSession(Config config)
         {
+            SteamKit2.DebugLog.AddListener(this);
             _config = config;
-            Client = new SteamClient();
+            var clientConfig = SteamConfiguration.Create(config => config.WithProtocolTypes(ProtocolTypes.All).WithCellID(5));
+            Client = new SteamClient(clientConfig);
             _callbackManager = new CallbackManager(Client);
             User = Client.GetHandler<SteamUser>() ?? throw new Exception("Could not get SteamUser Handler.");
             Apps = Client.GetHandler<SteamApps>() ?? throw new Exception("Could not get SteamApps Handler.");
@@ -56,11 +61,20 @@ namespace Trebuchet
             _isRunning = true;
             Task.Run(CallbackLoop);
             Log.Write("Connecting to steam...", LogSeverity.Info);
+            _shouldBeConnected = true;
+            Client.Connect();
+        }
+
+        public void Retry()
+        {
+            _isRunning = true;
+            Task.Run(CallbackLoop);
             Client.Connect();
         }
 
         public void Disconnect()
         {
+            _shouldBeConnected = false;
             ContentDownloader.Shutdown();
             Client.Disconnect();
         }
@@ -69,7 +83,7 @@ namespace Trebuchet
         {
             while (_isRunning)
             {
-                _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(1));
+                _callbackManager.RunWaitCallbacks(TimeSpan.FromSeconds(0.25));
             }
         }
 
@@ -86,7 +100,9 @@ namespace Trebuchet
         {
             _isRunning = false;
             Disconnected?.Invoke(this, callback);
-            Log.Write("Disconnected from steam.", LogSeverity.Info);
+            //Log.Write($"Disconnected from steam.", LogSeverity.Info);
+            if(_shouldBeConnected)
+                Retry();
         }
 
         private void OnLoggedOn(SteamUser.LoggedOnCallback callback)
@@ -100,6 +116,11 @@ namespace Trebuchet
             Log.Write("Login successful.", LogSeverity.Info);
             LoggedOn?.Invoke(this, callback);
             this.currentSessionIndex++;
+        }
+
+        public void WriteLine(string category, string msg)
+        {
+            Log.Write($"[{category}] {msg}", LogSeverity.Info);
         }
     }
 }

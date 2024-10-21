@@ -64,7 +64,7 @@ namespace Trebuchet
 
         public void Receive(SteamConnectionChangedMessage message)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Application.Current?.Dispatcher.Invoke(() =>
             {
                 IsConnected = message.Value;
                 OnPropertyChanged(nameof(IsConnected));
@@ -124,9 +124,11 @@ namespace Trebuchet
 
         private void OnConnect(object? obj)
         {
-            ConnectCommand.Toggle(false);
             if (!IsConnected)
+            {
+                ConnectCommand.Toggle(false);
                 StrongReferenceMessenger.Default.Send<SteamConnectMessage>();
+            }
         }
 
         private void Tick(object? sender, EventArgs e)

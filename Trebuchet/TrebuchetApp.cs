@@ -13,6 +13,7 @@ using Trebuchet.Controls;
 using Trebuchet.Messages;
 using Trebuchet.Utils;
 using static SteamKit2.Internal.CMsgClientAMGetPersonaNameHistory;
+using System.Diagnostics;
 
 namespace Trebuchet
 {
