@@ -1,4 +1,5 @@
 ﻿using CommunityToolkit.Mvvm.Messaging;
+using GongSolutions.Wpf.DragDrop;
 using Microsoft.VisualBasic;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
@@ -21,6 +22,7 @@ using Trebuchet.Utils;
 namespace Trebuchet
 {
     public class ModlistPanel : Panel,
+        IDropTarget,
         IRecipient<SteamModlistReceived>
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
@@ -122,6 +124,33 @@ namespace Trebuchet
         public override bool CanExecute(object? parameter)
         {
             return _config.IsInstallPathValid;
+        }
+
+        public void DragOver(IDropInfo dropInfo)
+        {
+            ModFile? SourceMod = dropInfo.Data as ModFile;
+            ModFile? TargetMod = dropInfo.TargetItem as ModFile;
+
+            if (SourceMod != null && TargetMod != null)
+            {
+                dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
+                dropInfo.Effects = DragDropEffects.Move;
+            }
+        }
+
+        public void Drop(IDropInfo dropInfo)
+        {
+            ModFile? SourceMod = dropInfo.Data as ModFile;
+            ModFile? TargetMod = dropInfo.TargetItem as ModFile;
+            if (SourceMod != null && TargetMod != null)
+            {
+                int index = Modlist.IndexOf(SourceMod);
+                int target = dropInfo.InsertIndex;
+                if (index < target)
+                    target--;
+                Modlist.RemoveAt(index);
+                Modlist.Insert(target, SourceMod);
+            }
         }
 
         public override void Execute(object? parameter)

@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
                     xmlns:Controls="clr-namespace:Trebuchet.Controls"
                     xmlns:local="clr-namespace:Trebuchet"
+                    xmlns:dd="urn:gong-wpf-dragdrop"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ModlistEditor">
         <Grid>
@@ -86,7 +87,9 @@
                 </Grid>
             </Border>
             <Border Grid.Row="2" Padding="0,12,0,0">
-                <Controls:ReorderableList ItemTemplate="{Binding ItemTemplate}" ParentElement="{Binding .}" ItemsSource="{Binding Modlist, Mode=TwoWay}" />
+                <ScrollViewer x:Name="ModlistScroll">
+                    <ItemsControl ItemsSource="{Binding Modlist}" ItemTemplate="{Binding ItemTemplate}" dd:DragDrop.IsDragSource="True" dd:DragDrop.DropTargetScrollViewer="{Binding ElementName=ModlistScroll}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding .}" />
+                </ScrollViewer>
             </Border>
         </Grid>
     </DataTemplate>
