@@ -10,7 +10,13 @@ namespace Trebuchet
 {
     [JsonDerivedType(typeof(InstallDirectoryValidation), "InstallDirectory")]
     [JsonDerivedType(typeof(ConanGameDirectoryValidation), "GameDirectory")]
-    public abstract class BaseValidation<T>
+    public abstract class BaseValidation
+    {
+        protected BaseValidation()
+        { }
+    }
+
+    public abstract class BaseValidation<T> : BaseValidation
     {
         public abstract bool IsValid(T? value, out string errorMessage);
     }

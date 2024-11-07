@@ -103,7 +103,7 @@ namespace Trebuchet
 
         public ICommand ResetCommand { get; private set; }
 
-        public BaseValidation<T>? Validation { get; set; } = null;
+        public BaseValidation? Validation { get; set; } = null;
 
         public virtual T? Value
         {
@@ -192,7 +192,8 @@ namespace Trebuchet
         private bool Validate(T? value)
         {
             if (Validation == null) return true;
-            if (Validation.IsValid(value, out string errorMessage)) return true;
+            if (Validation is not BaseValidation<T> validation) return false;
+            if (validation.IsValid(value, out string errorMessage)) return true;
             if (string.IsNullOrEmpty(errorMessage)) return false;
 
             ErrorModal modal = new ErrorModal("Invalid Value", errorMessage, false);
