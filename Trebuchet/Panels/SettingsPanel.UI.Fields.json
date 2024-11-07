@@ -15,13 +15,6 @@
   },
   {
     "$type": "Toggle",
-    "Property": "UseHardwareAcceleration",
-    "Name": "Use Hardware Acceleration",
-    "Description": "Improve app performance by using your GPU to render the UI. This has no effect on machines without a gpu (servers for example)",
-    "Default": true
-  },
-  {
-    "$type": "Toggle",
     "Property": "DisplayWarningOnKill",
     "Name": "Display Warning On Kill",
     "Description": "Click on a Kill button will display first a warning about data loss and corruption.",

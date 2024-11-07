@@ -14,6 +14,7 @@ using Trebuchet.Messages;
 using Trebuchet.Utils;
 using static SteamKit2.Internal.CMsgClientAMGetPersonaNameHistory;
 using System.Diagnostics;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -196,7 +197,7 @@ namespace Trebuchet
                 );
             modal.ShowDialog();
 
-            if (modal.Result == System.Windows.Forms.DialogResult.Yes)
+            if (modal.Result)
             {
                 GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 message.Reply(true);

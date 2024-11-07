@@ -11,7 +11,7 @@
                     Padding="8"
                     Command="{Binding ConnectCommand}">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="pack://application:,,,/Trebuchet;component/Icons/Steam.png" Width="16" Height="16" Margin="0,0,12,0" VerticalAlignment="Center" />
+                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Steam.png" Width="16" Height="16" Margin="0,0,12,0" VerticalAlignment="Center" />
                     <TextBlock VerticalAlignment="Center">
                         <TextBlock.Style>
                             <Style TargetType="TextBlock">
@@ -38,7 +38,6 @@
                     <TextBlock Text="{Binding Description}" Margin="6,0,12,0" VerticalAlignment="Center" />
                     <Button Grid.Column="1"
                             Style="{StaticResource IconButton}"
-                            local:GuiExtensions.CornerRadius="0,3,3,0"
                             WindowChrome.IsHitTestVisibleInChrome="True"
                             Margin="0"
                             Padding="8,0"

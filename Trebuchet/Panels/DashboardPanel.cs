@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -185,7 +186,7 @@ namespace Trebuchet
         {
             var question = new QuestionModal("Verify files", "This will verify all server and mod files. This may take a while. Do you want to continue?");
             question.ShowDialog();
-            if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+            if (!question.Result) return;
 
             StrongReferenceMessenger.Default.Send(new VerifyFilesMessage(ModListProfile.CollectAllMods(_config, CollectAllModlistNames()).Distinct()));
         }

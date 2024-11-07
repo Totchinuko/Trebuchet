@@ -39,16 +39,6 @@ namespace Trebuchet
             OnWindowShown();
         }
 
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            var hwndSource = PresentationSource.FromVisual(this) as HwndSource;
-
-            if (hwndSource != null && Trebuchet.App.UseSoftwareRendering)
-                hwndSource.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
-
-            base.OnSourceInitialized(e);
-        }
-
         protected virtual void OnWindowShown()
         {
             App.OnWindowShow();

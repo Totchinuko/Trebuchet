@@ -6,6 +6,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Trebuchet.Messages;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -33,13 +34,13 @@ namespace Trebuchet
             {
                 _active = value;
                 OnPropertyChanged(nameof(Active));
+                OnPropertyChanged(nameof(TabStyle));
             }
         }
 
         public ImageSource? Icon => string.IsNullOrEmpty(IconPath) ? null : new BitmapImage(new Uri(IconPath, UriKind.Relative));
-
         public string IconPath { get; set; } = string.Empty;
-
+        public Style TabStyle => (Style)(Active ? Application.Current.Resources["ButtonTabBlue"] : Application.Current.Resources["ButtonTab"]);
         public abstract DataTemplate Template { get; }
 
         public virtual bool CanExecute(object? parameter)

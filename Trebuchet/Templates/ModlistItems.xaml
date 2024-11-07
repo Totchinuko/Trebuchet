@@ -14,15 +14,15 @@
                 <Image Margin="0,0,12,0">
                     <Image.Style>
                         <Style TargetType="Image">
-                            <Setter Property="Source" Value="pack://application:,,,/Trebuchet;component/Icons/Steam.png" />
+                            <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUILib;component/Icons/Steam.png" />
                             <Setter Property="ToolTip" Value="Steam Workshop (Live)" />
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsPublished}" Value="False">
-                                    <Setter Property="Source" Value="pack://application:,,,/Trebuchet;component/Icons/File.png" />
+                                    <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUILib;component/Icons/File.png" />
                                     <Setter Property="ToolTip" Value="Local File" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding IsTestLive}" Value="True">
-                                    <Setter Property="Source" Value="pack://application:,,,/Trebuchet;component/Icons/Bug.png" />
+                                    <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUILib;component/Icons/Bug.png" />
                                     <Setter Property="ToolTip" Value="Steam Workshop (TestLive)" />
                                 </DataTrigger>
                             </Style.Triggers>
@@ -47,11 +47,11 @@
                     </TextBlock>
                 </StackPanel>
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button Grid.Column="1" Style="{StaticResource ButtonIconBlue}" Margin="0,0,3,0" ToolTip="Update Mod" Command="{Binding ParentElement.UpdateModCommand, RelativeSource={RelativeSource AncestorType=Controls:ReorderableList}}" CommandParameter="{Binding .}">
-                        <Image Source="pack://application:,,,/Trebuchet;component/Icons/Reset.png" Width="16" Height="16" />
+                    <Button Grid.Column="1" Style="{StaticResource ButtonIconBlue}" Margin="0,0,3,0" ToolTip="Update Mod" Command="{Binding Content.UpdateModCommand, RelativeSource={RelativeSource AncestorType=ContentPresenter, AncestorLevel=3}}" CommandParameter="{Binding .}">
+                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
                     </Button>
-                    <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding ParentElement.RemoveModCommand, RelativeSource={RelativeSource AncestorType=Controls:ReorderableList}}" CommandParameter="{Binding .}">
-                        <Image Source="pack://application:,,,/Trebuchet;component/Icons/Trash.png" Width="16" Height="16" />
+                    <Button Grid.Column="1" Style="{StaticResource ButtonIconRed}" ToolTip="Remove from list" Command="{Binding Content.RemoveModCommand, RelativeSource={RelativeSource AncestorType=ContentPresenter, AncestorLevel=3}}" CommandParameter="{Binding .}">
+                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Trash.png" Width="16" Height="16" />
                     </Button>
                 </StackPanel>
             </Grid>

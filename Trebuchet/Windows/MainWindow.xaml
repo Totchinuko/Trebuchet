@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Trebuchet"
-        xmlns:Controls="clr-namespace:Trebuchet.Controls"
+        xmlns:TrebGUI="clr-namespace:TrebuchetGUILib;assembly=TrebuchetGUILib"
         mc:Ignorable="d"
         Title="Tot ! Trebuchet"
         Height="650" Width="1010"
@@ -20,23 +20,23 @@
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Controls:WindowTitlebar
+            <TrebGUI:WindowTitlebar
                 x:Name="TitleBar"
                 Title="{Binding App.AppTitle}"
-                CloseIcon="pack://application:,,,/Trebuchet;component/icons/Close.png"
-                RestoreIcon="pack://application:,,,/Trebuchet;component/icons/Restore.png"
-                MaximizeIcon="pack://application:,,,/Trebuchet;component/icons/Maximize.png"
-                MinimizeIcon="pack://application:,,,/Trebuchet;component/icons/Minimize.png">
-                <Controls:WindowTitlebar.Header>
+                CloseIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Close.png"
+                RestoreIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Restore.png"
+                MaximizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Maximize.png"
+                MinimizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Minimize.png">
+                <TrebGUI:WindowTitlebar.Header>
                     <ContentPresenter ContentTemplate="{StaticResource SteamWidget}" Content="{Binding App.SteamWidget}" />
-                </Controls:WindowTitlebar.Header>
-            </Controls:WindowTitlebar>
+                </TrebGUI:WindowTitlebar.Header>
+            </TrebGUI:WindowTitlebar>
             <Grid x:Name="WindowContent" Grid.Row="2" Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="240" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
-                <Grid x:Name="Navigation" Margin="4,0,5,6">
+                <Grid x:Name="Navigation" Margin="0,0,5,6">
                     <Grid.RowDefinitions>
                         <RowDefinition Height="*" />
                         <RowDefinition Height="auto" />

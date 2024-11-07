@@ -2,13 +2,15 @@
                     xmlns:local="clr-namespace:Trebuchet"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="TabButtonTemplate">
-        <Button local:GuiExtensions.Icon="{Binding Icon}"
-                local:GuiExtensions.Accent="{Binding Active}"
-                FontSize="16"
-                FontWeight="Bold"
-                Style="{StaticResource ButtonTab}"
-                Content="{Binding Label}"
-                Margin="0,6,0,6"
-                Command="{Binding .}"/>
+        <Button Style="{Binding TabStyle}"
+                Margin="0,3,0,3"
+                Command="{Binding .}"
+                HorizontalContentAlignment="Left"
+                >
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Icon}" Height="16" Width="16" Margin="0 0 6 0" />
+                <TextBlock Text="{Binding Label}" FontSize="14" />
+            </StackPanel>
+        </Button>
     </DataTemplate>
 </ResourceDictionary>

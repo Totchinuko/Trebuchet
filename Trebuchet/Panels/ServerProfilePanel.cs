@@ -5,6 +5,7 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -134,7 +135,7 @@ namespace Trebuchet
 
             QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
             question.ShowDialog();
-            if (question.Result == System.Windows.Forms.DialogResult.Yes)
+            if (question.Result)
             {
                 _profile.DeleteFolder();
 

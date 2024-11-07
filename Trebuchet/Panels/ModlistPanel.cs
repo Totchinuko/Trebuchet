@@ -18,6 +18,7 @@ using System.Web;
 using System.Windows;
 using System.Windows.Input;
 using Trebuchet.Utils;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -330,7 +331,7 @@ namespace Trebuchet
 
             QuestionModal question = new QuestionModal("Replacement", "This action will replace your modlist, do you wish to continue ?");
             question.ShowDialog();
-            if (question.Result != System.Windows.Forms.DialogResult.Yes) return;
+            if (!question.Result) return;
 
             UriBuilder builder;
             try
@@ -498,7 +499,7 @@ namespace Trebuchet
 
             QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected modlist {_selectedModlist} ?");
             question.ShowDialog();
-            if (question.Result == System.Windows.Forms.DialogResult.Yes)
+            if (question.Result)
             {
                 _profile.DeleteFile();
 

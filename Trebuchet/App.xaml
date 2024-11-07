@@ -1,17 +1,12 @@
-﻿<Application x:Class="Trebuchet.App"
+﻿<TrebGUI:TrebuchetBaseApp x:Class="Trebuchet.App"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             DispatcherUnhandledException ="OnDispatcherUnhandledException">
+             xmlns:TrebGUI="clr-namespace:TrebuchetGUILib;assembly=TrebuchetGUILib">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <ResourceDictionary Source="Styles\AppSkin.xaml" />
-                <ResourceDictionary Source="Styles\ScrollBar.xaml" />
-                <ResourceDictionary Source="Styles\ButtonStyles.xaml" />
-                <ResourceDictionary Source="Styles\Slider.xaml" />
-                <ResourceDictionary Source="Styles\ProgressBar.xaml" />
-                <ResourceDictionary Source="Styles\ComboBox.xaml" />
-                <ResourceDictionary Source="Templates\Converters.xaml" />
+                <ResourceDictionary Source="pack://application:,,,/TrebuchetGUILib;component/TrebuchetGUILib.xaml" />
+                <ResourceDictionary Source="Templates\ButtonStyles.xaml" />
                 <ResourceDictionary Source="Templates\Selectors.xaml" />
                 <ResourceDictionary Source="Templates\FieldRow.xaml" />
                 <ResourceDictionary Source="Templates\TitleField.xaml" />
@@ -22,17 +17,11 @@
                 <ResourceDictionary Source="Templates\FieldEditor.xaml" />
                 <ResourceDictionary Source="Templates\ToggleField.xaml" />
                 <ResourceDictionary Source="Templates\IntSliderField.xaml" />
-                <ResourceDictionary Source="Templates\ErrorModal.xaml" />
-                <ResourceDictionary Source="Templates\MessageModal.xaml" />
-                <ResourceDictionary Source="Templates\WaitModal.xaml" />
-                <ResourceDictionary Source="Templates\QuestionModal.xaml" />
-                <ResourceDictionary Source="Templates\ExceptionModal.xaml" />
                 <ResourceDictionary Source="Templates\TestliveSelection.xaml" />
                 <ResourceDictionary Source="Templates\StringListFields.xaml" />
                 <ResourceDictionary Source="Templates\TextboxField.xaml" />
                 <ResourceDictionary Source="Templates\ModlistEditor.xaml" />
                 <ResourceDictionary Source="Templates\ModlistItems.xaml" />
-                <ResourceDictionary Source="Templates\ChooseNameModal.xaml" />
                 <ResourceDictionary Source="Templates\ModlistTextImport.xaml" />
                 <ResourceDictionary Source="Templates\ClientSettings.xaml" />
                 <ResourceDictionary Source="Templates\TabButton.xaml" />
@@ -50,4 +39,4 @@
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
-</Application>
+</TrebGUI:TrebuchetBaseApp>

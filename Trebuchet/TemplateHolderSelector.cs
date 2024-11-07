@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -15,7 +16,7 @@ namespace Trebuchet
             // Null value can be passed by IDE designer
             if (item == null) return null;
             if (item is not ITemplateHolder holder) return null;
-            return holder.Template;            
+            return holder.Template;
         }
     }
 }

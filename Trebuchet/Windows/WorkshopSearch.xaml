@@ -4,7 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Trebuchet"
-        xmlns:Controls="clr-namespace:Trebuchet.Controls"
+        xmlns:TrebGUI="clr-namespace:TrebuchetGUILib;assembly=TrebuchetGUILib"
         mc:Ignorable="d"
         Title="Workshop Search"
         Height="650" Width="900"
@@ -14,19 +14,19 @@
     <WindowChrome.WindowChrome>
         <WindowChrome CaptionHeight="40" UseAeroCaptionButtons="False" />
     </WindowChrome.WindowChrome>
-    <Border Style="{StaticResource WindowBackPanel}" x:Name="MainBorder">
+    <Border Style="{StaticResource WindowBackPanel}" FocusManager.FocusedElement="{Binding ElementName=SearchField}" x:Name="MainBorder">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Controls:WindowTitlebar
+            <TrebGUI:WindowTitlebar
                 x:Name="TitleBar"
                 Title="Workshop Search"
-                CloseIcon="pack://application:,,,/Trebuchet;component/icons/Close.png"
-                RestoreIcon="pack://application:,,,/Trebuchet;component/icons/Restore.png"
-                MaximizeIcon="pack://application:,,,/Trebuchet;component/icons/Maximize.png"
-                MinimizeIcon="pack://application:,,,/Trebuchet;component/icons/Minimize.png" />
+                CloseIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Close.png"
+                RestoreIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Restore.png"
+                MaximizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Maximize.png"
+                MinimizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Minimize.png" />
             <Border Grid.Row="2" Padding="12">
                 <Grid x:Name="WindowContent" Margin="0,12,0,0">
                     <Grid.RowDefinitions>
@@ -40,7 +40,7 @@
                                 <ColumnDefinition Width="auto" />
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBox VerticalContentAlignment="Center" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" MinWidth="300" MaxWidth="400" Margin="0,0,12,0" VerticalAlignment="center" Height="25" KeyDown="TextBox_KeyDown" />
+                            <TextBox VerticalContentAlignment="Center" Name="SearchField" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" MinWidth="300" MaxWidth="400" Margin="0,0,12,0" VerticalAlignment="center" Height="25" KeyDown="TextBox_KeyDown" />
                             <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90" Content="Search" Margin="0,0,12,0" Style="{StaticResource ButtonIconBlue}" />
                             <CheckBox Grid.Column="2" IsChecked="{Binding TestLiveWorkshop, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Content="Test Live Workshop" VerticalAlignment="Center" />
                         </Grid>
@@ -70,7 +70,7 @@
                                                                 CommandParameter="{Binding .}"
                                                                 Padding="8">
                                                             <StackPanel Orientation="Horizontal">
-                                                                <Image Source="pack://application:,,,/Trebuchet;component/Icons/Add.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                                                <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Add.png" Width="16" Height="16" Margin="0,0,6,0" />
                                                                 <TextBlock Text="Add to Mod List" />
                                                             </StackPanel>
                                                         </Button>

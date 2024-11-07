@@ -73,16 +73,6 @@ namespace Trebuchet
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
-        protected override void OnSourceInitialized(EventArgs e)
-        {
-            var hwndSource = PresentationSource.FromVisual(this) as HwndSource;
-
-            if (hwndSource != null && Trebuchet.App.UseSoftwareRendering)
-                hwndSource.CompositionTarget.RenderMode = RenderMode.SoftwareOnly;
-
-            base.OnSourceInitialized(e);
-        }
-
         private void OnCreatorSearchComplete(Task<GetPlayerSummariesResponse> task)
         {
             StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.SteamSearch));

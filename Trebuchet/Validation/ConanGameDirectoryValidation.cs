@@ -4,7 +4,9 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -50,7 +52,7 @@ namespace Trebuchet
                 App.GetAppText("Validation_HandleOriginalSavedDirectory"));
             question.ShowDialog();
 
-            if (question.Result != System.Windows.Forms.DialogResult.Yes)
+            if (!question.Result)
                 return false;
 
             Config config = StrongReferenceMessenger.Default.Send<ConfigRequest>();

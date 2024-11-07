@@ -3,6 +3,7 @@ using System;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -93,8 +94,6 @@ namespace Trebuchet
             int installed = StrongReferenceMessenger.Default.Send<InstanceInstalledCountRequest>();
             if (Directory.Exists(_config.ResolvedInstallPath) && _config.ServerInstanceCount > installed)
                 RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, Operations.SteamDownload));
-            if (App.UseSoftwareRendering == App.Config.UseHardwareAcceleration)
-                RequiredActions.Add(new RequiredCommand("Changing hardware acceleration require to restart the application", "Restart", OnAppRestart, Operations.SteamDownload));
         }
     }
 }

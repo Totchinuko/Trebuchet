@@ -14,7 +14,6 @@
                     Height="128"
                     Width="128"
                     Command="{Binding LiveCommand}"
-                    local:GuiExtensions.Icon="pack://application:,,,/Trebuchet;component/Icons/Window.png"
                     Style="{StaticResource ButtonTestlive}">
                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
                     <Grid.RowDefinitions>
@@ -22,7 +21,7 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
-                    <Image Source="pack://application:,,,/Trebuchet;component/Icons/Window.png" Width="32" Height="32" />
+                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Window.png" Width="32" Height="32" />
                     <TextBlock FontSize="16" Grid.Row="2" Text="Live" />
                 </Grid>
             </Button>
@@ -30,7 +29,6 @@
             <Button Grid.Column="3"
                     Height="128"
                     Width="128"
-                    local:GuiExtensions.Icon="pack://application:,,,/Trebuchet;component/Icons/BugWindow.png"
                     Command="{Binding TestLiveCommand}"
                     Style="{StaticResource ButtonTestlive}">
                 <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
@@ -39,7 +37,7 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
-                    <Image Source="pack://application:,,,/Trebuchet;component/Icons/BugWindow.png" Width="32" Height="32" />
+                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/BugWindow.png" Width="32" Height="32" />
                     <TextBlock FontSize="16" Grid.Row="2" Text="Test Live" />
                 </Grid>
             </Button>
