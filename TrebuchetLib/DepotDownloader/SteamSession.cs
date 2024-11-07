@@ -65,6 +65,13 @@ namespace Trebuchet
             Client.Connect();
         }
 
+        public void Disconnect()
+        {
+            _shouldBeConnected = false;
+            ContentDownloader.Shutdown();
+            Client.Disconnect();
+        }
+
         public void Retry()
         {
             _isRunning = true;
@@ -72,11 +79,9 @@ namespace Trebuchet
             Client.Connect();
         }
 
-        public void Disconnect()
+        public void WriteLine(string category, string msg)
         {
-            _shouldBeConnected = false;
-            ContentDownloader.Shutdown();
-            Client.Disconnect();
+            Log.Write($"[{category}] {msg}", LogSeverity.Info);
         }
 
         private void CallbackLoop()
@@ -101,7 +106,7 @@ namespace Trebuchet
             _isRunning = false;
             Disconnected?.Invoke(this, callback);
             //Log.Write($"Disconnected from steam.", LogSeverity.Info);
-            if(_shouldBeConnected)
+            if (_shouldBeConnected)
                 Retry();
         }
 
@@ -116,11 +121,6 @@ namespace Trebuchet
             Log.Write("Login successful.", LogSeverity.Info);
             LoggedOn?.Invoke(this, callback);
             this.currentSessionIndex++;
-        }
-
-        public void WriteLine(string category, string msg)
-        {
-            Log.Write($"[{category}] {msg}", LogSeverity.Info);
         }
     }
 }
