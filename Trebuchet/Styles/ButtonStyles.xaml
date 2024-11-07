@@ -9,7 +9,7 @@
                             Padding="{TemplateBinding Padding}"
                             Margin="{TemplateBinding Margin}"
                             Opacity="{TemplateBinding Opacity}"
-                            CornerRadius="{Binding (local:GuiExtensions.CornerRadius), RelativeSource={RelativeSource AncestorType=Button}}"
+                            CornerRadius="3"
                             BorderBrush="{TemplateBinding BorderBrush}"
                             BorderThickness="{TemplateBinding BorderThickness}">
                         <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" />
@@ -19,7 +19,7 @@
         </Setter>
     </Style>
 
-    <Style TargetType="Button" x:Key="ButtonTestlive">
+    <Style TargetType="Button" x:Key="ButtonTestlive" BasedOn="{StaticResource BaseButton}">
         <Setter Property="BorderThickness" Value="0" />
         <Setter Property="BorderBrush" Value="{StaticResource GDimBlue}" />
         <Setter Property="Background" Value="{StaticResource GPanel}" />
@@ -27,23 +27,6 @@
         <Setter Property="FontSize" Value="16" />
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="local:GuiExtensions.CornerRadius" Value="6" />
-        <Setter Property="Template">
-            <Setter.Value>
-                <ControlTemplate TargetType="Button">
-                    <Border Background="{TemplateBinding Background}" Opacity="{TemplateBinding Opacity}" CornerRadius="{Binding (local:GuiExtensions.CornerRadius), RelativeSource={RelativeSource AncestorType=Button}}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
-                        <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <Grid.RowDefinitions>
-                                <RowDefinition Height="auto" />
-                                <RowDefinition Height="12" />
-                                <RowDefinition Height="auto" />
-                            </Grid.RowDefinitions>
-                            <Image Source="{Binding (local:GuiExtensions.Icon), RelativeSource={RelativeSource AncestorType=Button}}" Width="32" Height="32" />
-                            <ContentPresenter Grid.Row="2" />
-                        </Grid>
-                    </Border>
-                </ControlTemplate>
-            </Setter.Value>
-        </Setter>
         <Style.Triggers>
             <Trigger Property="IsMouseOver" Value="True">
                 <Setter Property="Background" Value="{StaticResource GDimBlue}" />
