@@ -52,7 +52,7 @@ namespace Trebuchet
 
         public bool ProcessRunning { get; private set; }
 
-        public ProcessStats ProcessStats { get; } = new ProcessStats();
+        public IProcessStats ProcessStats { get; } = new ProcessStatsLight();
 
         public List<string> Profiles { get; private set; } = new List<string>();
 

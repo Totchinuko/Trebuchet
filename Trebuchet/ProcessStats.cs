@@ -11,7 +11,7 @@ using TrebuchetLib;
 
 namespace Trebuchet
 {
-    public class ProcessStats : INotifyPropertyChanged
+    public class ProcessStats : IProcessStats, INotifyPropertyChanged
     {
         protected const string CPUFormat = "{0}%";
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
@@ -124,7 +124,8 @@ namespace Trebuchet
             {
                 memoryConsumptionCounter = await Task.Run(() => new PerformanceCounter("Process V2", "Working Set", processName + ":" + processID));
                 cpuUsageCounter = await Task.Run(() => new PerformanceCounter("Process V2", "% Processor Time", processName + ":" + processID));
-            } catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 Log.Write(ex);
                 return;
