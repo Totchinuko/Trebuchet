@@ -476,10 +476,10 @@ namespace Trebuchet
 
         private void OnModlistCreate(object? obj)
         {
-            ChooseNameModal modal = new ChooseNameModal("Create", string.Empty);
+            InputTextModal modal = new InputTextModal("Create", "Modlist Name");
             modal.ShowDialog();
-            string name = modal.Name;
-            if (string.IsNullOrEmpty(name)) return;
+            if (string.IsNullOrEmpty(modal.Text)) return;
+            string name = modal.Text;
             if (_profiles.Contains(name))
             {
                 new ErrorModal("Already Exitsts", "This mod list name is already used").ShowDialog();
@@ -513,10 +513,11 @@ namespace Trebuchet
 
         private void OnModlistDuplicate(object? obj)
         {
-            ChooseNameModal modal = new ChooseNameModal("Duplicate", _selectedModlist);
+            InputTextModal modal = new InputTextModal("Duplicate", "Modlist Name");
+            modal.SetValue(_selectedModlist);
             modal.ShowDialog();
-            string name = modal.Name;
-            if (string.IsNullOrEmpty(name)) return;
+            if (string.IsNullOrEmpty(modal.Text)) return;
+            string name = modal.Text;
             if (_profiles.Contains(name))
             {
                 new ErrorModal("Already Exitsts", "This mod list name is already used").ShowDialog();

@@ -26,6 +26,8 @@ namespace Trebuchet
 
         public static UIConfig Config { get; private set; } = default!;
 
+        public override string AppIconPath => "pack://application:,,,/Trebuchet;component/Icons/AppIcon.ico";
+
         public static string GetAppText(string key, params object[] args)
         {
             if (AppText.TryGetValue(key, out var text)) return string.Format(text, args);

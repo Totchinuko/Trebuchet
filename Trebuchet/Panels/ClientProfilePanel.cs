@@ -127,10 +127,10 @@ namespace Trebuchet
 
         private void OnProfileCreate(object? obj)
         {
-            ChooseNameModal modal = new ChooseNameModal("Create", string.Empty);
+            InputTextModal modal = new InputTextModal("Create","Profile Name");
             modal.ShowDialog();
-            string name = modal.Name;
-            if (string.IsNullOrEmpty(name)) return;
+            if (string.IsNullOrEmpty(modal.Text)) return;
+            string name = modal.Text;
             if (_profiles.Contains(name))
             {
                 new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
@@ -163,10 +163,11 @@ namespace Trebuchet
 
         private void OnProfileDuplicate(object? obj)
         {
-            ChooseNameModal modal = new ChooseNameModal("Duplicate", _selectedProfile);
+            InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
+            modal.SetValue(_selectedProfile);
             modal.ShowDialog();
-            string name = modal.Name;
-            if (string.IsNullOrEmpty(name)) return;
+            if (string.IsNullOrEmpty(modal.Text)) return;
+            string name = modal.Text;
             if (_profiles.Contains(name))
             {
                 new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
