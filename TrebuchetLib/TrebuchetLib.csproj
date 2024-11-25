@@ -7,9 +7,19 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="SteamKit2" Version="2.5.0" />
+	  <PackageReference Include="protobuf-net" Version="3.2.30" />
+	  <PackageReference Include="SteamKit2" Version="3.0.0-Beta.4" />
     <PackageReference Include="System.Management" Version="8.0.0" />
     <PackageReference Include="Yuu.Ini" Version="0.2.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="DepotDownloader">
+      <HintPath>..\..\DepotDownloader\DepotDownloader\bin\Release\net8.0\DepotDownloader.dll</HintPath>
+    </Reference>
+    <Reference Include="TrebuchetGUILib">
+      <HintPath>..\..\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetGUILib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>
