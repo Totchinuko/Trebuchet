@@ -1,5 +1,4 @@
-﻿using SteamKit2.GC.Underlords.Internal;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.IO.Compression;
 using System.Management;
 using System.Reflection;
