@@ -1,12 +1,17 @@
-﻿namespace Trebuchet
+﻿using SteamKit2;
+using TrebuchetGUILib;
+
+namespace Trebuchet
 {
-    public class Steam
+    public class Steam : IDebugListener
     {
         private Config _config;
         private SteamSession _steam;
 
         public Steam(Config config)
         {
+            SteamKit2.DebugLog.AddListener(this);
+
             _config = config;
             _steam = new SteamSession(config);
             _steam.Connected += (sender, args) => Connected?.Invoke(this, EventArgs.Empty);
@@ -179,7 +184,7 @@
 
             if (!await WaitSteamConnectionAsync()) return;
 
-            Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info);
+            await Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info);
 
             string instance = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
 
@@ -210,7 +215,7 @@
             if (instanceNumber == 0)
                 throw new Exception("Can't update instance 0 with itself.");
 
-            Log.Write("Updating server instance {0} from instance 0.", LogSeverity.Info);
+            await Log.Write("Updating server instance {0} from instance 0.", LogSeverity.Info);
             if (!SetupFolders()) return;
 
             string instance = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
@@ -239,7 +244,7 @@
 
             if (!await WaitSteamConnectionAsync()) return;
 
-            Log.Write("Updating all server instances...", LogSeverity.Info);
+            await Log.Write("Updating all server instances...", LogSeverity.Info);
             int count = _config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
             {
@@ -274,6 +279,11 @@
             }
 
             return true;
+        }
+
+        public async void WriteLine(string category, string msg)
+        {
+            await Log.Write($"[{category}] {msg}", LogSeverity.Info);
         }
     }
 }
