@@ -49,7 +49,7 @@ namespace Trebuchet
             ImportFromTextCommand = new SimpleCommand(OnImportFromText);
             RemoveModCommand = new SimpleCommand(OnModRemoved);
             UpdateModCommand = new TaskBlockedCommand(OnModUpdated, true, Operations.DownloadModlist);
-            ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload, Operations.GameRunning);
+            ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload, Operations.GameRunning, Operations.ServerRunning);
             RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh, true, Operations.SteamPublishedFilesFetch);
 
             StrongReferenceMessenger.Default.Register<SteamModlistReceived>(this);

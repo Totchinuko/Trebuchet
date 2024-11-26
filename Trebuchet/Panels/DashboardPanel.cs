@@ -28,7 +28,7 @@ namespace Trebuchet
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
             LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll, true, Operations.SteamDownload);
-            UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, Operations.SteamDownload, Operations.GameRunning);
+            UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, Operations.SteamDownload, Operations.ServerRunning);
             UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning, Operations.ServerRunning);
             VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification, true, Operations.SteamDownload, Operations.GameRunning, Operations.ServerRunning);
 
@@ -106,7 +106,7 @@ namespace Trebuchet
 
         public void Receive(DashboardStateChanged message)
         {
-            if (_client.ProcessRunning || Instances.Any(i => i.ProcessRunning))
+            if (_client.ProcessRunning)
             {
                 if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.GameRunning))) return;
                 StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.GameRunning));
@@ -115,6 +115,17 @@ namespace Trebuchet
             {
                 if (!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.GameRunning))) return;
                 StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.GameRunning));
+            }
+
+            if (Instances.Any(i => i.ProcessRunning))
+            {
+                if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.ServerRunning))) return;
+                StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.ServerRunning));
+            }
+            else
+            {
+                if (!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.ServerRunning))) return;
+                StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.ServerRunning));
             }
         }
 
