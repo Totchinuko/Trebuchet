@@ -12,6 +12,9 @@
 	<FileVersion>0.3.7</FileVersion>
 	<AssemblyVersion>0.2.0</AssemblyVersion>
 	<PublishSingleFile>true</PublishSingleFile>
+	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+	<Deterministic>true</Deterministic>
+	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
   </PropertyGroup>
 
   <ItemGroup>
