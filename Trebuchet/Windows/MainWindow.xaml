@@ -1,7 +1,7 @@
 ﻿<Window x:Class="Trebuchet.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Trebuchet"
         xmlns:TrebGUI="clr-namespace:TrebuchetGUILib;assembly=TrebuchetGUILib"
@@ -22,7 +22,7 @@
             </Grid.RowDefinitions>
             <TrebGUI:WindowTitlebar
                 x:Name="TitleBar"
-                Title="{Binding App.AppTitle}"
+                Title="{x:Static local:TrebuchetApp.AppTitle}"
                 CloseIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Close.png"
                 RestoreIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Restore.png"
                 MaximizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Maximize.png"
