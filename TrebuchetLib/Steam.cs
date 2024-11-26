@@ -16,14 +16,10 @@ namespace TrebuchetLib
 
             DebugLog.AddListener(this);
             Util.ConsoleWriteRedirect += OnConsoleWriteRedirect;
-            AccountSettingsStore.LoadFromFile(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, "account.config"));
             ContentDownloader.Config.RememberPassword = false;
             ContentDownloader.Config.DownloadManifestOnly = false;
-            ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
-            ContentDownloader.Config.MaxDownloads = _config.MaxDownloads;
-            ContentDownloader.Config.MaxServers = Math.Max(_config.MaxServers, ContentDownloader.Config.MaxDownloads);
             ContentDownloader.Config.LoginID = null;
-            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.CONFIG_DIR);
+            UpdateDownloaderConfig();
             _session = ContentDownloader.InitializeSteam3(null, null);
             _session.Connected += (sender, args) => Connected?.Invoke(this, EventArgs.Empty);
             _session.Disconnected += (sender, args) => Disconnected?.Invoke(this, EventArgs.Empty);
@@ -33,34 +29,15 @@ namespace TrebuchetLib
         public event EventHandler? Disconnected;
         public bool IsConnected => _session?.steamClient?.IsConnected ?? false;
 
-        public static void ClearCache()
-        {
-            Tools.DeleteIfExists(ContentDownloader.Config.DepotConfigDirectory);
-        }
-
-        public static uint GetSteam3AppBuildNumber(uint appId, string branch)
-        {
-            if (appId == ContentDownloader.INVALID_APP_ID)
-                return 0;
-
-            var depots = ContentDownloader.GetSteam3AppSection(appId, EAppInfoSection.Depots);
-            var branches = depots["branches"];
-            var node = branches[branch];
-
-            if (node == KeyValue.Invalid)
-                return 0;
-
-            var buildid = node["buildid"];
-
-            if (buildid == KeyValue.Invalid || buildid.Value == null)
-                return 0;
-
-            return uint.Parse(buildid.Value);
-        }
-
         public static void SetProgress(IProgress<double> progress)
         {
             ContentDownloader.Config.Progress = progress;
+        }
+
+        public void ClearCache()
+        {
+            UpdateDownloaderConfig();
+            Tools.DeleteIfExists(ContentDownloader.Config.DepotConfigDirectory);
         }
 
         public async void Connect()
@@ -127,6 +104,28 @@ namespace TrebuchetLib
             return Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
         }
 
+        public uint GetSteam3AppBuildNumber(uint appId, string branch)
+        {
+            UpdateDownloaderConfig();
+
+            if (appId == ContentDownloader.INVALID_APP_ID)
+                return 0;
+
+            var depots = ContentDownloader.GetSteam3AppSection(appId, EAppInfoSection.Depots);
+            var branches = depots["branches"];
+            var node = branches[branch];
+
+            if (node == KeyValue.Invalid)
+                return 0;
+
+            var buildid = node["buildid"];
+
+            if (buildid == KeyValue.Invalid || buildid.Value == null)
+                return 0;
+
+            return uint.Parse(buildid.Value);
+        }
+
         /// <summary>
         /// Force refresh of the steam app info cache and get the current build id of the server app.
         /// </summary>
@@ -135,6 +134,8 @@ namespace TrebuchetLib
         /// <returns></returns>
         public async Task<ulong> GetSteamBuildID()
         {
+            UpdateDownloaderConfig();
+
             if (_session == null)
                 throw new InvalidOperationException("Steam session is not functioning");
             return await Task.Run(() =>
@@ -151,6 +152,8 @@ namespace TrebuchetLib
         /// <returns></returns>
         public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubID, ulong manisfestID)> keyValuePairs)
         {
+            UpdateDownloaderConfig();
+
             var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.CONFIG_DIR, ContentDownloader.DEPOT_CONFIG));
             foreach (var (pubID, manisfestID) in keyValuePairs)
             {
@@ -197,6 +200,15 @@ namespace TrebuchetLib
             return true;
         }
 
+        public void UpdateDownloaderConfig()
+        {
+            ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
+            ContentDownloader.Config.MaxDownloads = _config.MaxDownloads;
+            ContentDownloader.Config.MaxServers = Math.Max(_config.MaxServers, ContentDownloader.Config.MaxDownloads);
+            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.CONFIG_DIR);
+            AccountSettingsStore.LoadFromFile(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, "account.config"));
+        }
+
         /// <summary>
         /// Update a list of mods from the steam workshop.
         /// </summary>
@@ -210,8 +222,8 @@ namespace TrebuchetLib
             if (!SetupFolders()) return;
             if (!await WaitSteamConnectionAsync()) return;
 
+            UpdateDownloaderConfig();
             ContentDownloader.Config.InstallDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop);
-
             await Task.Run(() => ContentDownloader.DownloadUGCAsync([Config.AppIDLiveClient, Config.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts));
         }
 
@@ -241,6 +253,7 @@ namespace TrebuchetLib
             }
 
             Tools.CreateDir(instance);
+            UpdateDownloaderConfig();
             ContentDownloader.Config.InstallDirectory = instance;
             await Task.Run(() => ContentDownloader.DownloadAppAsync(_config.ServerAppID, [], ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts), cts.Token).ConfigureAwait(false);
         }

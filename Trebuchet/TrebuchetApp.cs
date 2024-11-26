@@ -375,7 +375,7 @@ namespace Trebuchet
             new CatchedTasked(Operations.SteamDownload)
                 .Add(async (cts) =>
                 {
-                    Steam.ClearCache();
+                    _trebuchet.Steam.ClearCache();
                     await _trebuchet.Steam.UpdateServerInstances(cts);
                     SteamWidget.Report(0);
                     SteamWidget.SetDescription("Verifying mod files...");
