@@ -1,9 +1,4 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using GongSolutions.Wpf.DragDrop;
-using Microsoft.VisualBasic;
-using SteamWorksWebAPI;
-using SteamWorksWebAPI.Interfaces;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -12,13 +7,15 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
-using System.Threading.Tasks;
 using System.Web;
 using System.Windows;
-using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using GongSolutions.Wpf.DragDrop;
+using SteamWorksWebAPI;
+using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Utils;
 using TrebuchetGUILib;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {

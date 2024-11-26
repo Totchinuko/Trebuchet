@@ -2,11 +2,8 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
-using System.Threading;
-using TrebuchetGUILib;
 using TrebuchetLib;
-using Yuu.Ini;
-using static SteamKit2.Internal.PublishedFileDetails;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {

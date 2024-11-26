@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using TrebuchetGUILib;
 using TrebuchetLib;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {

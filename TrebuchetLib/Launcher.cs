@@ -1,9 +1,8 @@
-﻿using SteamKit2.GC.Dota.Internal;
-using System.Collections.Concurrent;
+﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Trebuchet;
-using TrebuchetGUILib;
+using TrebuchetUtils;
 
 namespace TrebuchetLib
 {

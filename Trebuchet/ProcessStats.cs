@@ -1,14 +1,13 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
-using TrebuchetGUILib;
 using TrebuchetLib;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {

@@ -87,7 +87,10 @@
 
   <ItemGroup>
     <Reference Include="TrebuchetGUILib">
-      <HintPath>..\..\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetGUILib.dll</HintPath>
+      <HintPath>..\..\TrebuchetGUILib\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetGUILib.dll</HintPath>
+    </Reference>
+    <Reference Include="TrebuchetUtils">
+      <HintPath>..\..\TrebuchetGUILib\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetUtils.dll</HintPath>
     </Reference>
   </ItemGroup>
 

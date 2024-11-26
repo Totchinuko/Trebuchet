@@ -1,15 +1,10 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using SteamKit2.Internal;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Windows;
-using System.Windows.Ink;
+using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetGUILib;
+using TrebuchetUtils;
 
 namespace Trebuchet.Utils
 {
@@ -45,7 +40,7 @@ namespace Trebuchet.Utils
                     await task(cts);
                 }
             }
-            catch (OperationCanceledException) 
+            catch (OperationCanceledException)
             {
                 await Log.Write("Operation cancelled", LogSeverity.Info);
             }

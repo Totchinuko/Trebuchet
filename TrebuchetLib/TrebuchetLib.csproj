@@ -20,8 +20,8 @@
     <Reference Include="DepotDownloader">
       <HintPath>..\..\DepotDownloader\DepotDownloader\bin\Release\net8.0\DepotDownloader.dll</HintPath>
     </Reference>
-    <Reference Include="TrebuchetGUILib">
-      <HintPath>..\..\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetGUILib.dll</HintPath>
+    <Reference Include="TrebuchetUtils">
+      <HintPath>..\..\TrebuchetGUILib\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetUtils.dll</HintPath>
     </Reference>
   </ItemGroup>
 

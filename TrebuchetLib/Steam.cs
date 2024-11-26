@@ -1,7 +1,6 @@
 ﻿using DepotDownloader;
 using SteamKit2;
-using SteamKit2.GC.CSGO.Internal;
-using TrebuchetGUILib;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {
@@ -28,13 +27,10 @@ namespace Trebuchet
             _session.Disconnected += (sender, args) => Disconnected?.Invoke(this, EventArgs.Empty);
         }
 
-        public string STEAMKIT_DIR => Path.Combine(_config.ResolvedInstallPath, ContentDownloader.CONFIG_DIR);
-
         public event EventHandler? Connected;
-
         public event EventHandler? Disconnected;
-
         public bool IsConnected => _session?.steamClient?.IsConnected ?? false;
+        public string STEAMKIT_DIR => Path.Combine(_config.ResolvedInstallPath, ContentDownloader.CONFIG_DIR);
 
         public void ClearCache()
         {
@@ -100,23 +96,6 @@ namespace Trebuchet
             return 0;
         }
 
-        /// <summary>
-        /// Force refresh of the steam app info cache and get the current build id of the server app.
-        /// </summary>
-        /// <param name="config"></param>
-        /// <param name="steam"></param>
-        /// <returns></returns>
-        public async Task<ulong> GetSteamBuildID()
-        {
-            if (_session == null)
-                throw new InvalidOperationException("Steam session is not functioning");
-            return await Task.Run(() =>
-            {
-                _session.RequestAppInfo(_config.ServerAppID, true);
-                return ContentDownloader.GetSteam3AppBuildNumber(_config.ServerAppID, ContentDownloader.DEFAULT_BRANCH);
-            }).ConfigureAwait(false);
-        }
-
         public uint GetSteam3AppBuildNumber(uint appId, string branch)
         {
             if (appId == ContentDownloader.INVALID_APP_ID)
@@ -135,6 +114,23 @@ namespace Trebuchet
                 return 0;
 
             return uint.Parse(buildid.Value);
+        }
+
+        /// <summary>
+        /// Force refresh of the steam app info cache and get the current build id of the server app.
+        /// </summary>
+        /// <param name="config"></param>
+        /// <param name="steam"></param>
+        /// <returns></returns>
+        public async Task<ulong> GetSteamBuildID()
+        {
+            if (_session == null)
+                throw new InvalidOperationException("Steam session is not functioning");
+            return await Task.Run(() =>
+            {
+                _session.RequestAppInfo(_config.ServerAppID, true);
+                return ContentDownloader.GetSteam3AppBuildNumber(_config.ServerAppID, ContentDownloader.DEFAULT_BRANCH);
+            }).ConfigureAwait(false);
         }
 
         /// <summary>
