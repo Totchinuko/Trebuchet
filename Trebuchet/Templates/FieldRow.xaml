@@ -3,7 +3,7 @@
     <DataTemplate x:Key="FieldRow">
         <Border CornerRadius="3" Padding="0,12" Margin="0,0,0,12" Visibility="{Binding IsVisible}">
             <Border.Style>
-                <Style TargetType="Border" BasedOn="{StaticResource Panel}">
+                <Style TargetType="Border" BasedOn="{StaticResource TPnlMid}">
                     <Setter Property="Background" Value="{StaticResource GPanel}" />
                     <Style.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
@@ -70,7 +70,7 @@
                         Command="{Binding ResetCommand}">
                     <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
                     <Button.Style>
-                        <Style TargetType="Button" BasedOn="{StaticResource IconButton}">
+                        <Style TargetType="Button" BasedOn="{StaticResource TBtnStrokeBlueOver}">
                             <Style.Triggers>
                                 <DataTrigger Binding="{Binding IsDefault}" Value="True">
                                     <Setter Property="Visibility" Value="Hidden" />

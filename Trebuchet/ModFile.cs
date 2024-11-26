@@ -40,11 +40,9 @@ namespace Trebuchet
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-
+        public Brush BorderColor => GetBorderBrush();
         public bool IsPublished => _publishedFileID > 0;
-
         public bool IsTestLive => _appID == Config.AppIDTestLiveClient;
-
         public string LastUpdate
         {
             get
@@ -61,13 +59,9 @@ namespace Trebuchet
                 return $"Last Update: {local.Humanize()}";
             }
         }
-
         public string ModType => IsTestLive ? "TestLive" : "Live";
-
         public ulong PublishedFileID => _publishedFileID;
-
         public Brush StatusColor => GetStatusBrush();
-
         public string StatusTooltip => GetStatusText();
 
         public string Title
@@ -109,14 +103,20 @@ namespace Trebuchet
             return IsPublished ? PublishedFileID.ToString() : _infos.FullName;
         }
 
-        protected virtual Brush GetStatusBrush()
+        protected virtual Brush GetBorderBrush()
         {
             if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
             if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GDimBlue"];
             if (!_needUpdate) return (Brush)Application.Current.Resources["GDimGreen"];
-            //if (_lastUpdate < _infos.LastWriteTimeUtc) return (Brush)Application.Current.Resources["GDimGreen"];
-            //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return (Brush)Application.Current.Resources["GDimYellow"];
             return (Brush)Application.Current.Resources["GDimYellow"];
+        }
+
+        protected virtual Brush GetStatusBrush()
+        {
+            if (!_infos.Exists) return (Brush)Application.Current.Resources["GPRed"];
+            if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GPBlue"];
+            if (!_needUpdate) return (Brush)Application.Current.Resources["GPGreen"];
+            return (Brush)Application.Current.Resources["GPYellow"];
         }
 
         protected virtual string GetStatusText()

@@ -5,85 +5,94 @@
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
-                <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Border Style="{StaticResource Panel}" CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,0" Margin="0,0,0,12">
-                <WrapPanel Orientation="Horizontal">
-                    <Button Style="{StaticResource ButtonIconGreen}" Command="{Binding CreateModlistCommand}" ToolTip="Create" Margin="0,0,6,0" VerticalAlignment="Top">
-                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Add.png" Width="16" Height="16" />
-                    </Button>
-                    <Border VerticalAlignment="Top" Height="32">
-                        <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center" />
-                    </Border>
-                    <Button Style="{StaticResource ButtonIconRed}" Command="{Binding DeleteModlistCommand}" ToolTip="Delete" Margin="0,0,0,6" VerticalAlignment="Top">
-                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Trash.png" Width="16" Height="16" />
-                    </Button>
-                    <Button Style="{StaticResource IconButton}" Command="{Binding DuplicateModlistCommand}" ToolTip="Duplicate" Margin="0" VerticalAlignment="Top">
-                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Duplicate.png" Width="16" Height="16" />
-                    </Button>
-                    <Button Style="{StaticResource IconButton}" Command="{Binding RefreshModlistCommand}" ToolTip="Refresh mod infos" Margin="0" VerticalAlignment="Top">
-                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
-                    </Button>
-                    <Button Style="{StaticResource ButtonIconBlue}" Command="{Binding ModFilesDownloadCommand}" ToolTip="Update Mods" Margin="0" VerticalAlignment="Top">
-                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Download.png" Width="16" Height="16" />
-                    </Button>
-                    <Border Style="{StaticResource VerticalSep}" VerticalAlignment="Top" Margin="12,0,12,0" Height="35" />
-                    <Grid>
-                        <TextBlock Margin="0,-10,0,0" Text="Add Mod" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                        <WrapPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource IconButton}"
-                                    VerticalAlignment="Top"
-                                    Content="Workshop"
-                                    Command="{Binding ExploreWorkshopCommand}" />
-                            <Button Style="{StaticResource IconButton}"
-                                    VerticalAlignment="Top"
-                                    Content="Local"
-                                    Command="{Binding ExploreLocalCommand}" />
-                        </WrapPanel>
-                    </Grid>
-                    <Border Style="{StaticResource VerticalSep}" VerticalAlignment="Top" Margin="12,0,12,0" Height="35" />
-                    <Grid>
-                        <TextBlock Margin="0,-10,0,0" Text="Import" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                        <WrapPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource IconButton}"
-                                    VerticalAlignment="Top"
-                                    Content="Paste"
-                                    Command="{Binding ImportFromTextCommand}" />
-                            <Button Style="{StaticResource IconButton}"
-                                    VerticalAlignment="Top"
-                                    Content="File"
-                                    Command="{Binding ImportFromFileCommand}" />
-                        </WrapPanel>
-                    </Grid>
-                    <Border Style="{StaticResource VerticalSep}" VerticalAlignment="Top" Margin="12,0,12,0" Height="35" />
-                    <Grid>
-                        <TextBlock Margin="0,-10,0,0" Text="Export" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                        <WrapPanel Orientation="Horizontal">
-                            <Button Style="{StaticResource IconButton}"
-                                    VerticalAlignment="Top"
-                                    Content="Json"
-                                    Command="{Binding ExportToJsonCommand}" />
-                            <Button Style="{StaticResource IconButton}"
-                                    VerticalAlignment="Top"
-                                    Content="Txt"
-                                    Command="{Binding ExportToTxtCommand}" />
-                        </WrapPanel>
-                    </Grid>
-                </WrapPanel>
-            </Border>
-            <Border Style="{StaticResource Panel}" Grid.Row="1" CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,8" Margin="0,0,0,12">
-                <Grid>
-                    <TextBlock Margin="0,-10,0,0" Text="Mod List URL" Foreground="#80FFFFFF" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+            <WrapPanel Margin="0 0 0 0">
+                <Border Style="{StaticResource TPnlMid}" CornerRadius="3" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource TBtnStrokeGreenOver}" Command="{Binding CreateModlistCommand}" ToolTip="Create" Margin="0,0,3,0" VerticalAlignment="Top">
+                            <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Add.png" Width="16" Height="16" />
+                        </Button>
+                        <Border VerticalAlignment="Center" Height="32">
+                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center" />
+                        </Border>
+                        <Button Style="{StaticResource TBtnStrokeRedOver}" Command="{Binding DeleteModlistCommand}" ToolTip="Delete" Margin="0,0,3,0" VerticalAlignment="Center">
+                            <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Trash.png" Width="16" Height="16" />
+                        </Button>
+                        <Button Style="{StaticResource TBtnStrokeNormalOver}" Command="{Binding DuplicateModlistCommand}" ToolTip="Duplicate" Margin="0 0 3 0" VerticalAlignment="Center">
+                            <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Duplicate.png" Width="16" Height="16" />
+                        </Button>
+                        <Button Style="{StaticResource TBtnStrokeNormalOver}" Command="{Binding RefreshModlistCommand}" ToolTip="Refresh mod infos" Margin="0 0 3 0" VerticalAlignment="Center">
+                            <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
+                        </Button>
+                        <Button Style="{StaticResource TBtnStrokeBlueOver}" Command="{Binding ModFilesDownloadCommand}" ToolTip="Update Mods" Margin="0 0 3 0" VerticalAlignment="Center">
+                            <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Download.png" Width="16" Height="16" />
+                        </Button>
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource TPnlMid}" CornerRadius="3" Padding="8" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource TBtnStrokeNormalOver}"
+                                VerticalAlignment="Center"
+                                Content="Workshop"
+                                Margin="0 0 3 0"
+                                Command="{Binding ExploreWorkshopCommand}" />
+                        <Button Style="{StaticResource TBtnStrokeNormalOver}"
+                                VerticalAlignment="Center"
+                                Content="Local Mod"
+                                Command="{Binding ExploreLocalCommand}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource TPnlMid}" CornerRadius="3" Padding="8" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource TBtnStrokeNormalOver}"
+                                VerticalAlignment="Center"
+                                Content="Paste .txt"
+                                Margin="0 0 3 0"
+                                Command="{Binding ImportFromTextCommand}" />
+                        <Button Style="{StaticResource TBtnStrokeNormalOver}"
+                                VerticalAlignment="Center"
+                                Content="Import .txt"
+                                Command="{Binding ImportFromFileCommand}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource TPnlMid}" CornerRadius="3" Padding="8" Margin="0,0,6,6">
+                    <StackPanel Orientation="Horizontal">
+                        <Button Style="{StaticResource TBtnStrokeNormalOver}"
+                                VerticalAlignment="Center"
+                                Content="Export .json"
+                                Margin="0 0 3 0"
+                                Command="{Binding ExportToJsonCommand}" />
+                        <Button Style="{StaticResource TBtnStrokeNormalOver}"
+                                VerticalAlignment="Center"
+                                Content="Export .txt"
+                                Command="{Binding ExportToTxtCommand}" />
+                    </StackPanel>
+                </Border>
+                <Border Style="{StaticResource TPnlMid}" CornerRadius="3" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
                     <WrapPanel>
-                        <TextBox Text="{Binding ModlistURL, Mode=TwoWay, Delay=500, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0" Width="400" VerticalAlignment="Center" Height="25" VerticalContentAlignment="Center" ToolTip="Valid URL are either pointing to a steam collection or a json response/file" />
-                        <Button Style="{StaticResource ButtonIconGreen}"
-                                    VerticalAlignment="Center"
-                                    Content="Fetch"
-                                    Command="{Binding FetchCommand}" />
+                        <Grid Margin="0,0,12,0" VerticalAlignment="Center">
+                            <TextBox Name="ModlistURL" Text="{Binding ModlistURL, Mode=TwoWay, Delay=500, UpdateSourceTrigger=PropertyChanged}" Width="400" FontSize="16" VerticalContentAlignment="Center" ToolTip="Valid URL are either pointing to a steam collection or a json response/file" />
+                            <TextBlock Text="Steam Collection/.json URL" Opacity="0.5" Foreground="{StaticResource GForeground}" IsHitTestVisible="False" VerticalAlignment="Center" Margin="9 0 0 0">
+                                <TextBlock.Style>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="Visibility" Value="Hidden" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Text, ElementName=ModlistURL}" Value="">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </TextBlock.Style>
+                            </TextBlock>
+                        </Grid>
+                        <Button Style="{StaticResource TBtnStrokeGreenOver}"
+                                        VerticalAlignment="Center"
+                                        Content="Fetch"
+                                        Command="{Binding FetchCommand}" />
                     </WrapPanel>
-                </Grid>
-            </Border>
+                </Border>
+            </WrapPanel>
             <Border Grid.Row="2" Padding="0,12,0,0">
                 <ScrollViewer x:Name="ModlistScroll">
                     <ItemsControl ItemsSource="{Binding Modlist}" ItemTemplate="{Binding ItemTemplate}" dd:DragDrop.IsDragSource="True" dd:DragDrop.DropTargetScrollViewer="{Binding ElementName=ModlistScroll}" dd:DragDrop.IsDropTarget="True" dd:DragDrop.DropHandler="{Binding .}" />

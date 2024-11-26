@@ -9,19 +9,19 @@
                 </Grid.RowDefinitions>
                 <TextBox x:Name="ToFocus" HorizontalScrollBarVisibility="Auto"  VerticalScrollBarVisibility="Auto" Text="{Binding Text}" AcceptsReturn="True" Margin="0,0,0,12" />
                 <WrapPanel Grid.Row="1" Orientation="Horizontal">
-                    <Button Style="{StaticResource ButtonIconGreen}"
+                    <Button Style="{StaticResource TBtnStrokeGreenOver}"
                         Content="Save As"
                         Visibility="{Binding SaveAsVisible}"
                         Command="{Binding SaveCommand}"
                         Width="70"
                         Margin="0" />
-                    <Button Style="{StaticResource ButtonIconGreen}"
+                    <Button Style="{StaticResource TBtnStrokeGreenOver}"
                         Content="Append"
                         Visibility="{Binding ImportVisible}"
                         Command="{Binding AppendCommand}"
                         Width="70"
                         Margin="0,0,12,0" />
-                    <Button Style="{StaticResource ButtonIconGreen}"
+                    <Button Style="{StaticResource TBtnStrokeGreenOver}"
                         Content="Replace"
                         Visibility="{Binding ImportVisible}"
                         Command="{Binding ApplyCommand}"

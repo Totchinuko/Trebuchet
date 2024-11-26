@@ -1,8 +1,8 @@
 ﻿<UserControl x:Class="Trebuchet.Controls.MapList"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:local="clr-namespace:Trebuchet.Controls"
              mc:Ignorable="d"
              d:DesignHeight="32" d:DesignWidth="32">
@@ -11,7 +11,7 @@
                 Click="MapList_Click"
                 ToolTip="Map Selection"
                 ToolTipService.InitialShowDelay="0"
-                Style="{StaticResource IconButton}" Padding="8">
+                Style="{StaticResource TBtnStrokeNormalOver}" Padding="8">
             <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Map.png" Width="16" />
         </Button>
         <Popup Name="MapListPopup" StaysOpen="False" AllowsTransparency="True">
