@@ -1,19 +1,20 @@
 ﻿using DepotDownloader;
 using SteamKit2;
+using Trebuchet;
 using TrebuchetUtils;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public class Steam : IDebugListener
     {
-        private Config _config;
-        private Steam3Session _session;
+        private readonly Config _config;
+        private readonly Steam3Session _session;
 
         public Steam(Config config)
         {
             _config = config;
 
-            SteamKit2.DebugLog.AddListener(this);
+            DebugLog.AddListener(this);
             Util.ConsoleWriteRedirect += OnConsoleWriteRedirect;
             AccountSettingsStore.LoadFromFile(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, "account.config"));
             ContentDownloader.Config.RememberPassword = false;
@@ -32,9 +33,34 @@ namespace Trebuchet
         public event EventHandler? Disconnected;
         public bool IsConnected => _session?.steamClient?.IsConnected ?? false;
 
-        public void ClearCache()
+        public static void ClearCache()
         {
             Tools.DeleteIfExists(ContentDownloader.Config.DepotConfigDirectory);
+        }
+
+        public static uint GetSteam3AppBuildNumber(uint appId, string branch)
+        {
+            if (appId == ContentDownloader.INVALID_APP_ID)
+                return 0;
+
+            var depots = ContentDownloader.GetSteam3AppSection(appId, EAppInfoSection.Depots);
+            var branches = depots["branches"];
+            var node = branches[branch];
+
+            if (node == KeyValue.Invalid)
+                return 0;
+
+            var buildid = node["buildid"];
+
+            if (buildid == KeyValue.Invalid || buildid.Value == null)
+                return 0;
+
+            return uint.Parse(buildid.Value);
+        }
+
+        public static void SetProgress(IProgress<double> progress)
+        {
+            ContentDownloader.Config.Progress = progress;
         }
 
         public async void Connect()
@@ -101,26 +127,6 @@ namespace Trebuchet
             return Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
         }
 
-        public uint GetSteam3AppBuildNumber(uint appId, string branch)
-        {
-            if (appId == ContentDownloader.INVALID_APP_ID)
-                return 0;
-
-            var depots = ContentDownloader.GetSteam3AppSection(appId, EAppInfoSection.Depots);
-            var branches = depots["branches"];
-            var node = branches[branch];
-
-            if (node == KeyValue.Invalid)
-                return 0;
-
-            var buildid = node["buildid"];
-
-            if (buildid == KeyValue.Invalid || buildid.Value == null)
-                return 0;
-
-            return uint.Parse(buildid.Value);
-        }
-
         /// <summary>
         /// Force refresh of the steam app info cache and get the current build id of the server app.
         /// </summary>
@@ -169,11 +175,6 @@ namespace Trebuchet
                 Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
         }
 
-        public void SetProgress(IProgress<double> progress)
-        {
-            ContentDownloader.Config.Progress = progress;
-        }
-
         public bool SetupFolders()
         {
             if (!Tools.ValidateInstallDirectory(_config.ResolvedInstallPath)) return false;
@@ -211,7 +212,7 @@ namespace Trebuchet
 
             ContentDownloader.Config.InstallDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop);
 
-            await ContentDownloader.DownloadUGCAsync(new uint[] { Config.AppIDLiveClient, Config.AppIDTestLiveClient }, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
+            await ContentDownloader.DownloadUGCAsync([Config.AppIDLiveClient, Config.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
         }
 
         /// <summary>
@@ -241,7 +242,7 @@ namespace Trebuchet
 
             Tools.CreateDir(instance);
             ContentDownloader.Config.InstallDirectory = instance;
-            await Task.Run(() => ContentDownloader.DownloadAppAsync(_config.ServerAppID, new List<(uint depotId, ulong manifestId)>(), ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts), cts.Token).ConfigureAwait(false);
+            await Task.Run(() => ContentDownloader.DownloadAppAsync(_config.ServerAppID, [], ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts), cts.Token).ConfigureAwait(false);
         }
 
         /// <summary>
