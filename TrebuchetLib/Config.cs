@@ -68,6 +68,8 @@ namespace Trebuchet
 
         public int MaxDownloads { get; set; } = 8;
 
+        public int MaxServers { get; set; } = 20;
+
         public string ResolvedInstallPath => ResolveInstallPath(InstallPath);
 
         public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;

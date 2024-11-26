@@ -32,49 +32,40 @@ namespace Trebuchet.Utils
             return this;
         }
 
-        public void Start()
+        public async void Start()
         {
             _tasks.CompleteAdding();
             _then.CompleteAdding();
             var cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(_operations, _cancelAfter)).Response;
 
-            Task.Run(async () =>
+            try
             {
-                try
+                foreach (var task in _tasks.GetConsumingEnumerable())
                 {
-                    foreach (var task in _tasks.GetConsumingEnumerable())
-                    {
-                        await task(cts);
-                    }
+                    await task(cts);
                 }
-                catch (OperationCanceledException) { }
-                catch (Exception ex)
-                {
-                    Log.Write(ex);
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        new ErrorModal("Error", $"{ex.Message + Environment.NewLine}Please check the log for more information.").ShowDialog();
-                        return;
-                    });
-                }
-                finally
-                {
-                    Application.Current.Dispatcher.Invoke(() =>
-                    {
-                        StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(_operations));
-                    });
-                }
-                Application.Current.Dispatcher.Invoke(() =>
-                {
-                    foreach (var action in _then.GetConsumingEnumerable())
-                    {
-                        action();
-                    }
-                });
+            }
+            catch (OperationCanceledException) 
+            {
+                await Log.Write("Operation cancelled", LogSeverity.Info);
+            }
+            catch (Exception ex)
+            {
+                await Log.Write(ex);
+                new ErrorModal("Error", $"{ex.Message + Environment.NewLine}Please check the log for more information.").ShowDialog();
+                return;
+            }
+            finally
+            {
+                StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(_operations));
+            }
+            foreach (var action in _then.GetConsumingEnumerable())
+            {
+                action();
+            }
 
-                _then.Dispose();
-                _tasks.Dispose();
-            }, cts.Token);
+            _then.Dispose();
+            _tasks.Dispose();
         }
 
         public CatchedTasked Then(Action action)

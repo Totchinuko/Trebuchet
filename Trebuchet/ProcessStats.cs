@@ -7,6 +7,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using TrebuchetGUILib;
 using TrebuchetLib;
 
 namespace Trebuchet
@@ -127,7 +128,7 @@ namespace Trebuchet
             }
             catch (Exception ex)
             {
-                Log.Write(ex);
+                await Log.Write(ex);
                 return;
             }
 

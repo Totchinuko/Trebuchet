@@ -11,6 +11,7 @@ using Trebuchet;
 using static SteamKit2.GC.Dota.Internal.CMsgDOTABotDebugInfo;
 using static SteamKit2.Internal.CMsgNetworkDevicesData.Device.Wireless;
 using static Trebuchet.SourceQueryReader;
+using TrebuchetGUILib;
 
 namespace Trebuchet
 {

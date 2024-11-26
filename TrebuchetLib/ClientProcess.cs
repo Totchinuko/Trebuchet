@@ -1,5 +1,6 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using TrebuchetGUILib;
 using TrebuchetLib;
 
 namespace Trebuchet
@@ -86,7 +87,7 @@ namespace Trebuchet
             }
             catch (Exception ex)
             {
-                Log.Write(ex);
+                await Log.Write(ex);
                 process.Dispose();
                 OnProcessStateChanged(ProcessState.FAILED);
             }

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using Trebuchet;
+using TrebuchetGUILib;
 
 namespace TrebuchetLib
 {
@@ -223,7 +224,7 @@ namespace TrebuchetLib
 
         private void FindExistingClient()
         {
-            var data = Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
+            var data = Trebuchet.Tools.GetProcessesWithName(Config.FileClientBin).FirstOrDefault();
 
             if (ClientProcess != null) return;
             if (data.IsEmpty) return;
@@ -239,7 +240,7 @@ namespace TrebuchetLib
 
         private void FindExistingServers()
         {
-            var processes = Tools.GetProcessesWithName(Config.FileServerBin);
+            var processes = Trebuchet.Tools.GetProcessesWithName(Config.FileServerBin);
             foreach (var p in processes)
             {
                 if (!GetInstance(p.args, out int instance)) continue;
@@ -310,8 +311,8 @@ namespace TrebuchetLib
         private void SetupJunction(string gamePath, string targetPath)
         {
             string junction = Path.Combine(gamePath, Config.FolderGameSave);
-            Tools.RemoveSymboliclink(junction);
-            Tools.SetupSymboliclink(junction, targetPath);
+            Trebuchet.Tools.RemoveSymboliclink(junction);
+            Trebuchet.Tools.SetupSymboliclink(junction, targetPath);
         }
 
         /// <summary>

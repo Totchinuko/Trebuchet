@@ -1,4 +1,6 @@
-﻿using SteamKit2;
+﻿using DepotDownloader;
+using SteamKit2;
+using SteamKit2.GC.CSGO.Internal;
 using TrebuchetGUILib;
 
 namespace Trebuchet
@@ -6,37 +8,47 @@ namespace Trebuchet
     public class Steam : IDebugListener
     {
         private Config _config;
-        private SteamSession _steam;
+        private Steam3Session _session;
 
         public Steam(Config config)
         {
-            SteamKit2.DebugLog.AddListener(this);
-
             _config = config;
-            _steam = new SteamSession(config);
-            _steam.Connected += (sender, args) => Connected?.Invoke(this, EventArgs.Empty);
-            _steam.Disconnected += (sender, args) => Disconnected?.Invoke(this, EventArgs.Empty);
+
+            SteamKit2.DebugLog.AddListener(this);
+            Util.ConsoleWriteRedirect += OnConsoleWriteRedirect;
+            AccountSettingsStore.LoadFromFile(Path.Combine(STEAMKIT_DIR, "account.config"));
+            ContentDownloader.Config.RememberPassword = false;
+            ContentDownloader.Config.DownloadManifestOnly = false;
+            ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
+            ContentDownloader.Config.MaxDownloads = _config.MaxDownloads;
+            ContentDownloader.Config.MaxServers = Math.Max(_config.MaxServers, ContentDownloader.Config.MaxDownloads);
+            ContentDownloader.Config.LoginID = null;
+            _session = ContentDownloader.InitializeSteam3(null, null);
+            _session.Connected += (sender, args) => Connected?.Invoke(this, EventArgs.Empty);
+            _session.Disconnected += (sender, args) => Disconnected?.Invoke(this, EventArgs.Empty);
         }
+
+        public string STEAMKIT_DIR => Path.Combine(_config.ResolvedInstallPath, ContentDownloader.CONFIG_DIR);
 
         public event EventHandler? Connected;
 
         public event EventHandler? Disconnected;
 
-        public bool IsConnected => _steam.Client.IsConnected;
+        public bool IsConnected => _session?.steamClient?.IsConnected ?? false;
 
         public void ClearCache()
         {
-            Tools.DeleteIfExists(_steam.ContentDownloader.STEAMKIT_DIR);
+            Tools.DeleteIfExists(STEAMKIT_DIR);
         }
 
-        public void Connect()
+        public async void Connect()
         {
-            _steam.Connect();
+            await _session.Connect();
         }
 
-        public void Disconnect()
+        public void Disconnect(bool sendLogOff = true)
         {
-            _steam.Disconnect();
+            _session.Disconnect(sendLogOff);
         }
 
         /// <summary>
@@ -94,10 +106,35 @@ namespace Trebuchet
         /// <param name="config"></param>
         /// <param name="steam"></param>
         /// <returns></returns>
-        public ulong GetSteamBuildID()
+        public async Task<ulong> GetSteamBuildID()
         {
-            _steam.RequestAppInfo(_config.ServerAppID, true);
-            return _steam.ContentDownloader.GetSteam3AppBuildNumber(_config.ServerAppID, ContentDownloader.DEFAULT_BRANCH);
+            if (_session == null)
+                throw new InvalidOperationException("Steam session is not functioning");
+            return await Task.Run(() =>
+            {
+                _session.RequestAppInfo(_config.ServerAppID, true);
+                return ContentDownloader.GetSteam3AppBuildNumber(_config.ServerAppID, ContentDownloader.DEFAULT_BRANCH);
+            }).ConfigureAwait(false);
+        }
+
+        public uint GetSteam3AppBuildNumber(uint appId, string branch)
+        {
+            if (appId == ContentDownloader.INVALID_APP_ID)
+                return 0;
+
+            var depots = ContentDownloader.GetSteam3AppSection(appId, EAppInfoSection.Depots);
+            var branches = depots["branches"];
+            var node = branches[branch];
+
+            if (node == KeyValue.Invalid)
+                return 0;
+
+            var buildid = node["buildid"];
+
+            if (buildid == KeyValue.Invalid || buildid.Value == null)
+                return 0;
+
+            return uint.Parse(buildid.Value);
         }
 
         /// <summary>
@@ -105,9 +142,16 @@ namespace Trebuchet
         /// </summary>
         /// <param name="keyValuePairs"></param>
         /// <returns></returns>
-        public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong, ulong)> keyValuePairs)
+        public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubID, ulong manisfestID)> keyValuePairs)
         {
-            return _steam.ContentDownloader.GetUpdatedUGCFileIDs(keyValuePairs);
+            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(STEAMKIT_DIR, ContentDownloader.DEPOT_CONFIG));
+            foreach (var pair in keyValuePairs)
+            {
+                if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pair.pubID, out ulong manisfest))
+                    yield return pair.pubID;
+                if (manisfest != pair.manisfestID)
+                    yield return pair.pubID;
+            }
         }
 
         /// <summary>
@@ -126,7 +170,7 @@ namespace Trebuchet
 
         public void SetProgress(IProgress<double> progress)
         {
-            _steam.ContentDownloader.SetProgress(progress);
+            ContentDownloader.Config.Progress = progress;
         }
 
         public bool SetupFolders()
@@ -164,8 +208,9 @@ namespace Trebuchet
             if (!SetupFolders()) return;
             if (!await WaitSteamConnectionAsync()) return;
 
-            _steam.ContentDownloader.SetInstallDirectory(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop));
-            await _steam.ContentDownloader.DownloadUGCAsync(new uint[] { Config.AppIDLiveClient, Config.AppIDTestLiveClient }, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
+            ContentDownloader.Config.InstallDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop);
+
+            await ContentDownloader.DownloadUGCAsync(new uint[] { Config.AppIDLiveClient, Config.AppIDTestLiveClient }, enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
         }
 
         /// <summary>
@@ -182,9 +227,9 @@ namespace Trebuchet
 
             if (!SetupFolders()) return;
 
-            if (!await WaitSteamConnectionAsync()) return;
+            if (!await WaitSteamConnectionAsync().ConfigureAwait(false)) return;
 
-            await Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info);
+            await Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info).ConfigureAwait(false);
 
             string instance = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
 
@@ -195,9 +240,8 @@ namespace Trebuchet
             }
 
             Tools.CreateDir(instance);
-
-            _steam.ContentDownloader.SetInstallDirectory(instance);
-            await _steam.ContentDownloader.DownloadAppAsync(_config.ServerAppID, new List<(uint depotId, ulong manifestId)>(), ContentDownloader.DEFAULT_BRANCH, null, null, null, false, cts);
+            ContentDownloader.Config.InstallDirectory = instance;
+            await Task.Run(() => ContentDownloader.DownloadAppAsync(_config.ServerAppID, new List<(uint depotId, ulong manifestId)>(), ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts), cts.Token).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -269,21 +313,20 @@ namespace Trebuchet
         public async Task<bool> WaitSteamConnectionAsync()
         {
             if (IsConnected) return true;
-            _steam.Connect();
-            DateTime start = DateTime.UtcNow;
-            while (!IsConnected)
-            {
-                if ((DateTime.UtcNow - start).TotalSeconds > 60)
-                    return false;
-                await Task.Delay(1000);
-            }
-
-            return true;
+            if (_session == null) return false;
+            await _session.Connect();
+            return IsConnected;
         }
 
         public async void WriteLine(string category, string msg)
         {
             await Log.Write($"[{category}] {msg}", LogSeverity.Info);
+        }
+
+        private void OnConsoleWriteRedirect(string obj)
+        {
+            obj = obj.Replace(Environment.NewLine, string.Empty);
+            Log.Write($"[ContentDownloader] {obj}", LogSeverity.Info);
         }
     }
 }
