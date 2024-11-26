@@ -15,7 +15,7 @@ namespace Trebuchet
 
             SteamKit2.DebugLog.AddListener(this);
             Util.ConsoleWriteRedirect += OnConsoleWriteRedirect;
-            AccountSettingsStore.LoadFromFile(Path.Combine(STEAMKIT_DIR, "account.config"));
+            AccountSettingsStore.LoadFromFile(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, "account.config"));
             ContentDownloader.Config.RememberPassword = false;
             ContentDownloader.Config.DownloadManifestOnly = false;
             ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
@@ -30,11 +30,19 @@ namespace Trebuchet
         public event EventHandler? Connected;
         public event EventHandler? Disconnected;
         public bool IsConnected => _session?.steamClient?.IsConnected ?? false;
-        public string STEAMKIT_DIR => Path.Combine(_config.ResolvedInstallPath, ContentDownloader.CONFIG_DIR);
 
         public void ClearCache()
         {
-            Tools.DeleteIfExists(STEAMKIT_DIR);
+            // Server instance cleanup
+            string folder = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances);
+            if (!Directory.Exists(folder))
+                return;
+            string[] instances = Directory.GetDirectories(folder);
+            foreach (string instance in instances)
+                Tools.DeleteIfExists(Path.Combine(instance, ContentDownloader.CONFIG_DIR));
+
+            //Mods cleanup
+            Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.DEPOT_CONFIG);
         }
 
         public async void Connect()
@@ -96,6 +104,11 @@ namespace Trebuchet
             return 0;
         }
 
+        public string GetServerInstancePath(int instanceNumber)
+        {
+            return Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
+        }
+
         public uint GetSteam3AppBuildNumber(uint appId, string branch)
         {
             if (appId == ContentDownloader.INVALID_APP_ID)
@@ -140,13 +153,13 @@ namespace Trebuchet
         /// <returns></returns>
         public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubID, ulong manisfestID)> keyValuePairs)
         {
-            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(STEAMKIT_DIR, ContentDownloader.DEPOT_CONFIG));
-            foreach (var pair in keyValuePairs)
+            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.DEPOT_CONFIG));
+            foreach (var (pubID, manisfestID) in keyValuePairs)
             {
-                if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pair.pubID, out ulong manisfest))
-                    yield return pair.pubID;
-                if (manisfest != pair.manisfestID)
-                    yield return pair.pubID;
+                if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pubID, out ulong manisfest))
+                    yield return pubID;
+                if (manisfest != manisfestID)
+                    yield return pubID;
             }
         }
 
@@ -227,8 +240,7 @@ namespace Trebuchet
 
             await Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info).ConfigureAwait(false);
 
-            string instance = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
-
+            string instance = GetServerInstancePath(instanceNumber);
             if (reinstall)
             {
                 Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
