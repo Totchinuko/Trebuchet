@@ -6,7 +6,6 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceDictionary Source="pack://application:,,,/TrebuchetGUILib;component/TrebuchetGUILib.xaml" />
-                <ResourceDictionary Source="Templates\ButtonStyles.xaml" />
                 <ResourceDictionary Source="Templates\Selectors.xaml" />
                 <ResourceDictionary Source="Templates\FieldRow.xaml" />
                 <ResourceDictionary Source="Templates\TitleField.xaml" />
