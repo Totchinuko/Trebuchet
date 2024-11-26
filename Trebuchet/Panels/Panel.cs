@@ -1,10 +1,11 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+
+using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
 using TrebuchetGUILib;
 

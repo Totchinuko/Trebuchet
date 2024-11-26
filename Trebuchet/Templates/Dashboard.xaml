@@ -43,7 +43,7 @@
                         </Style>
                     </Border.Style>
                     <Grid Margin="12">
-                        <TextBlock Text="Servers" Margin="-10,-20,0,20" FontSize="30" Opacity="0.3" FontWeight="Bold"/>
+                        <TextBlock Text="Servers" Margin="-10,-20,0,20" FontSize="30" Opacity="0.3" FontWeight="Bold" />
                         <WrapPanel Orientation="Horizontal" Margin="0,20,0,0">
                             <Button Style="{StaticResource LaunchButton}" Command="{Binding LaunchAllCommand}" ToolTip="Launch All Server Intances" ToolTipService.InitialShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
@@ -67,7 +67,7 @@
                     </Grid>
                 </Border>
                 <Border Grid.Row="3" Padding="24,0,0,0">
-                    <ItemsControl ItemsSource="{Binding Instances}" ItemTemplate="{StaticResource ServerDashboard}"/>
+                    <ItemsControl ItemsSource="{Binding Instances}" ItemTemplate="{StaticResource ServerDashboard}" />
                 </Border>
             </Grid>
         </ScrollViewer>

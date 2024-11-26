@@ -12,6 +12,6 @@
                 </TextBlock>
                 <Slider Style="{StaticResource HSlider}" Grid.Column="1" IsSnapToTickEnabled="{Binding TickEnabled}" TickFrequency="{Binding Frequency}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" Value="{Binding Value, Converter={StaticResource IntDouble}, Mode=TwoWay}" />
             </Grid>
-        </Border>       
+        </Border>
     </DataTemplate>
 </ResourceDictionary>

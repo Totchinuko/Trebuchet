@@ -1,7 +1,8 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Windows;
+
+using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
 
 namespace Trebuchet

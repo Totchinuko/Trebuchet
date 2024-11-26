@@ -1,19 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 
 namespace Trebuchet
 {
     public class FloatField : Field<float, float>
     {
-        public float Minimum {  get; set; } = float.MinValue;
-        public float Maximum { get; set; } = float.MaxValue;
-
         public override bool IsDefault => Value == Default;
-
+        public float Maximum { get; set; } = float.MaxValue;
+        public float Minimum { get; set; } = float.MinValue;
         public override DataTemplate Template => (DataTemplate)Application.Current.Resources["FloatField"];
 
         public override void ResetToDefault()

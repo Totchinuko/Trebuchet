@@ -1,12 +1,10 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
-using static SteamKit2.Internal.CMsgClientAMGetPersonaNameHistory;
-using TrebuchetLib;
+using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetGUILib;
+using TrebuchetLib;
 
 namespace Trebuchet
 {
@@ -107,19 +105,6 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new CatapultClientMessage(SelectedProfile, SelectedModlist, isBattleEye));
         }
 
-        void IRecipient<ClientProcessStateChanged>.Receive(ClientProcessStateChanged message)
-        {
-            if (message.ProcessDetails.OldDetails.State.IsRunning() && !message.ProcessDetails.NewDetails.State.IsRunning())
-                OnProcessTerminated(message.ProcessDetails.NewDetails);
-            else if (!message.ProcessDetails.OldDetails.State.IsRunning() && message.ProcessDetails.NewDetails.State.IsRunning())
-                OnProcessStarted(message.ProcessDetails.NewDetails);
-
-            if (message.ProcessDetails.NewDetails.State == ProcessState.FAILED)
-                OnProcessFailed();
-            else if (ProcessRunning)
-                ProcessStats.SetDetails(message.ProcessDetails.NewDetails);
-        }
-
         public void RefreshSelection()
         {
             Resolve();
@@ -135,6 +120,19 @@ namespace Trebuchet
                 OnPropertyChanged(nameof(UpdateNeeded));
                 OnPropertyChanged(nameof(IsUpdateNeeded));
             }
+        }
+
+        void IRecipient<ClientProcessStateChanged>.Receive(ClientProcessStateChanged message)
+        {
+            if (message.ProcessDetails.OldDetails.State.IsRunning() && !message.ProcessDetails.NewDetails.State.IsRunning())
+                OnProcessTerminated(message.ProcessDetails.NewDetails);
+            else if (!message.ProcessDetails.OldDetails.State.IsRunning() && message.ProcessDetails.NewDetails.State.IsRunning())
+                OnProcessStarted(message.ProcessDetails.NewDetails);
+
+            if (message.ProcessDetails.NewDetails.State == ProcessState.FAILED)
+                OnProcessFailed();
+            else if (ProcessRunning)
+                ProcessStats.SetDetails(message.ProcessDetails.NewDetails);
         }
 
         protected virtual void OnPropertyChanged(string name)

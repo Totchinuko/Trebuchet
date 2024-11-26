@@ -1,12 +1,10 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Windows;
-using System.Windows.Documents;
+
+using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
 
 namespace Trebuchet

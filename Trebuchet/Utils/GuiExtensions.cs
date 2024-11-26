@@ -1,5 +1,4 @@
-﻿using SteamWorksWebAPI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -7,10 +6,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.Security.Policy;
 using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Media;
+
+using SteamWorksWebAPI;
 using TrebuchetGUILib;
 
 namespace Trebuchet

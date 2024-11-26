@@ -10,7 +10,7 @@
             <TextBox VerticalAlignment="Center"
                      Height="25"
                      VerticalContentAlignment="Center"
-                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" />  
+                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=500}" />
 
             <Controls:MapList SelectedMap="{Binding Value, Mode=TwoWay}" Margin="3,0" VerticalAlignment="Center" Grid.Column="1" />
         </Grid>

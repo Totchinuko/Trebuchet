@@ -1,6 +1,4 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:local="clr-namespace:Trebuchet"
-                    xmlns:Controls="clr-namespace:Trebuchet.Controls"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ModlistItems">
         <Border Style="{StaticResource Panel}" Margin="0 0 0 12" CornerRadius="3" Padding="8" ToolTip="Drag to reorder">

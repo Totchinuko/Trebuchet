@@ -1,9 +1,7 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
 using System.Linq;
+using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetGUILib;
 using TrebuchetLib;
 
@@ -108,21 +106,6 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new KillProcessMessage(Instance));
         }
 
-        void IRecipient<ServerProcessStateChanged>.Receive(ServerProcessStateChanged message)
-        {
-            if (message.ProcessDetails.NewDetails.Instance != Instance) return;
-
-            if (message.ProcessDetails.OldDetails.State.IsRunning() && !message.ProcessDetails.NewDetails.State.IsRunning())
-                OnProcessTerminated(message.ProcessDetails.NewDetails);
-            else if (!message.ProcessDetails.OldDetails.State.IsRunning() && message.ProcessDetails.NewDetails.State.IsRunning())
-                OnProcessStarted(message.ProcessDetails.NewDetails);
-
-            if (message.ProcessDetails.NewDetails.State == ProcessState.FAILED)
-                OnProcessFailed();
-            else if (ProcessRunning)
-                ProcessStats.SetDetails(message.ProcessDetails.NewDetails);
-        }
-
         public void RefreshSelection()
         {
             Resolve();
@@ -138,6 +121,21 @@ namespace Trebuchet
                 OnPropertyChanged(nameof(UpdateNeeded));
                 OnPropertyChanged(nameof(IsUpdateNeeded));
             }
+        }
+
+        void IRecipient<ServerProcessStateChanged>.Receive(ServerProcessStateChanged message)
+        {
+            if (message.ProcessDetails.NewDetails.Instance != Instance) return;
+
+            if (message.ProcessDetails.OldDetails.State.IsRunning() && !message.ProcessDetails.NewDetails.State.IsRunning())
+                OnProcessTerminated(message.ProcessDetails.NewDetails);
+            else if (!message.ProcessDetails.OldDetails.State.IsRunning() && message.ProcessDetails.NewDetails.State.IsRunning())
+                OnProcessStarted(message.ProcessDetails.NewDetails);
+
+            if (message.ProcessDetails.NewDetails.State == ProcessState.FAILED)
+                OnProcessFailed();
+            else if (ProcessRunning)
+                ProcessStats.SetDetails(message.ProcessDetails.NewDetails);
         }
 
         protected virtual void OnPropertyChanged(string name)

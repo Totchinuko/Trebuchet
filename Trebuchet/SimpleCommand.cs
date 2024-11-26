@@ -1,26 +1,20 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace Trebuchet
 {
     public class SimpleCommand : ICommand
     {
-        private bool _enabled = true;
-
-        public event EventHandler? CanExecuteChanged;
-
         private readonly Action<object?> _execute;
+        private bool _enabled = true;
 
         public SimpleCommand(Action<object?> execute, bool enabled = true)
         {
             _execute = execute;
             _enabled = enabled;
         }
+
+        public event EventHandler? CanExecuteChanged;
 
         public bool CanExecute(object? parameter)
         {
@@ -29,7 +23,7 @@ namespace Trebuchet
 
         public void Execute(object? parameter)
         {
-            if(_enabled)
+            if (_enabled)
                 _execute(parameter);
         }
 

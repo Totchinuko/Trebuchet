@@ -1,8 +1,8 @@
-﻿using Humanizer;
+﻿using System;
+using System.ComponentModel;
+using Humanizer;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Response;
-using System;
-using System.ComponentModel;
 
 namespace Trebuchet
 {

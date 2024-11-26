@@ -1,6 +1,6 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:Controls="clr-namespace:Trebuchet.Controls"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:Trebuchet.Controls">
     <DataTemplate x:Key="RconPanel">
         <Grid Margin="0,0,6,0">
             <Grid.RowDefinitions>

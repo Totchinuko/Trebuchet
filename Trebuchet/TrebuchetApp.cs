@@ -1,19 +1,15 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using SteamWorksWebAPI.Interfaces;
-using SteamWorksWebAPI;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
-using Trebuchet.Controls;
+using CommunityToolkit.Mvvm.Messaging;
+using SteamWorksWebAPI;
+using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Messages;
 using Trebuchet.Utils;
-using static SteamKit2.Internal.CMsgClientAMGetPersonaNameHistory;
-using System.Diagnostics;
 using TrebuchetGUILib;
 
 namespace Trebuchet
@@ -106,57 +102,6 @@ namespace Trebuchet
             Menu.Bottom.ForEach(x => x.OnWindowShow());
         }
 
-        void IRecipient<SteamConnectMessage>.Receive(SteamConnectMessage message)
-        {
-            _trebuchet.Steam.Connect();
-        }
-
-        void IRecipient<ConfigRequest>.Receive(ConfigRequest message)
-        {
-            message.Reply(_trebuchet.Config);
-        }
-
-        void IRecipient<CatapultMessage>.Receive(CatapultMessage message)
-        {
-            if (_taskBlocker.IsSet(Operations.SteamDownload)) return;
-
-            if (message is CatapultClientMessage client)
-                UpdateThenCatapultClient(client.profile, client.modlist, client.isBattleEye);
-            else if (message is CatapultServerMessage server)
-                UpdateThenCatapultServer(server.instances);
-        }
-
-        void IRecipient<CloseProcessMessage>.Receive(CloseProcessMessage message)
-        {
-            if (message.instance >= 0)
-                if (message is ShutdownProcessMessage)
-                    throw new NotImplementedException();
-                else if (message is KillProcessMessage)
-                    _trebuchet.Launcher.KillServer(message.instance);
-                else
-                    _trebuchet.Launcher.CloseServer(message.instance);
-            else
-                _trebuchet.Launcher.KillClient();
-        }
-
-        void IRecipient<ServerMessages>.Receive(ServerMessages message)
-        {
-            if (message is ServerUpdateModsMessage mods)
-                UpdateServerMods(mods.modlist);
-            else if (message is ServerUpdateMessage)
-                UpdateServers();
-        }
-
-        void IRecipient<VerifyFilesMessage>.Receive(VerifyFilesMessage message)
-        {
-            VerifyFiles(message.modlist);
-        }
-
-        void IRecipient<InstanceInstalledCountRequest>.Receive(InstanceInstalledCountRequest message)
-        {
-            message.Reply(_trebuchet.Steam.GetInstalledInstances());
-        }
-
         public void Receive(PanelActivateMessage message)
         {
             ActivePanel = message.panel;
@@ -209,6 +154,57 @@ namespace Trebuchet
         public void Receive(SteamModlistIDRequest message)
         {
             RequestModlistManifests(message.Modlist.ToList());
+        }
+
+        void IRecipient<SteamConnectMessage>.Receive(SteamConnectMessage message)
+        {
+            _trebuchet.Steam.Connect();
+        }
+
+        void IRecipient<ConfigRequest>.Receive(ConfigRequest message)
+        {
+            message.Reply(_trebuchet.Config);
+        }
+
+        void IRecipient<CatapultMessage>.Receive(CatapultMessage message)
+        {
+            if (_taskBlocker.IsSet(Operations.SteamDownload)) return;
+
+            if (message is CatapultClientMessage client)
+                UpdateThenCatapultClient(client.profile, client.modlist, client.isBattleEye);
+            else if (message is CatapultServerMessage server)
+                UpdateThenCatapultServer(server.instances);
+        }
+
+        void IRecipient<CloseProcessMessage>.Receive(CloseProcessMessage message)
+        {
+            if (message.instance >= 0)
+                if (message is ShutdownProcessMessage)
+                    throw new NotImplementedException();
+                else if (message is KillProcessMessage)
+                    _trebuchet.Launcher.KillServer(message.instance);
+                else
+                    _trebuchet.Launcher.CloseServer(message.instance);
+            else
+                _trebuchet.Launcher.KillClient();
+        }
+
+        void IRecipient<ServerMessages>.Receive(ServerMessages message)
+        {
+            if (message is ServerUpdateModsMessage mods)
+                UpdateServerMods(mods.modlist);
+            else if (message is ServerUpdateMessage)
+                UpdateServers();
+        }
+
+        void IRecipient<VerifyFilesMessage>.Receive(VerifyFilesMessage message)
+        {
+            VerifyFiles(message.modlist);
+        }
+
+        void IRecipient<InstanceInstalledCountRequest>.Receive(InstanceInstalledCountRequest message)
+        {
+            message.Reply(_trebuchet.Steam.GetInstalledInstances());
         }
 
         internal virtual void OnAppClose()

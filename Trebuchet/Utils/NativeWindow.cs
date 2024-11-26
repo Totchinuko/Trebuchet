@@ -11,9 +11,10 @@ using IWin32Window = System.Windows.Forms.IWin32Window;
 
 namespace Trebuchet
 {
-    class NativeWindow : IWin32Window
+    internal class NativeWindow : IWin32Window
     {
         private readonly IntPtr _handle;
+
         public NativeWindow(IntPtr handle)
         {
             _handle = handle;
@@ -32,6 +33,5 @@ namespace Trebuchet
             IWin32Window win = new NativeWindow(source.Handle);
             return win;
         }
-
     }
 }

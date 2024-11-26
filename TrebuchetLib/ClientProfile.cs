@@ -11,8 +11,10 @@ namespace Trebuchet
 
         public bool BackgroundSound { get; set; } = false;
 
+        public int ConfiguredInternetSpeed { get; set; } = 50000;
         public long CPUThreadAffinity { get; set; } = 0xffffffffffff;
 
+        public bool EnableAsyncScene { get; set; } = false;
         public bool Log { get; set; } = false;
 
         public List<string> LogFilters { get; set; } = new List<string>
@@ -58,6 +60,7 @@ namespace Trebuchet
           "LogScriptCore=Error"
         };
 
+        public float MaxMoveDeltaTime { get; set; } = 0.033f;
         public int ProcessPriority { get; set; } = 0;
 
         [JsonIgnore]
@@ -71,13 +74,6 @@ namespace Trebuchet
         public bool TotAdminDoNotLoadServerList { get; set; } = false;
 
         public bool UltraAnisotropy { get; set; }
-
-        public bool EnableAsyncScene { get; set; } = false;
-
-        public float MaxMoveDeltaTime { get; set; } = 0.033f;
-
-        public int ConfiguredInternetSpeed { get; set; } = 50000;
-
         public bool UseAllCores { get; set; } = false;
 
         #region IniConfig
@@ -86,6 +82,13 @@ namespace Trebuchet
         public void DefaultEngine(IniDocument document)
         {
             document.GetSection("/Game/Mods/TotAdmin/PreLoad/Tot_W_NoServer.Tot_W_NoServer_C").SetParameter("NoServerListAutoRefresh", TotAdminDoNotLoadServerList ? "true" : "false");
+        }
+
+        [IniSetting(Config.FileIniUser, "GraniteBaking")]
+        public void Granite(IniDocument document)
+        {
+            document.GetSection("/script/granitematerialbaker.granitebakingsettings")
+                .SetParameter("Quality", UltraAnisotropy ? "High" : "Medium");
         }
 
         [IniSetting(Config.FileIniDefault, "Game")]
@@ -127,6 +130,13 @@ namespace Trebuchet
                 document.Remove(section);
         }
 
+        [IniSetting(Config.FileIniDefault, "Scalability")]
+        public void UltraSetting(IniDocument document)
+        {
+            document.GetSection("TextureQuality@3").SetParameter("r.Streaming.PoolSize", (1500 + AddedTexturePool).ToString());
+            document.GetSection("TextureQuality@3").SetParameter("r.MaxAnisotropy", UltraAnisotropy ? "16" : "8");
+        }
+
         [IniSetting(Config.FileIniUser, "Game")]
         public void UserGameSetting(IniDocument document)
         {
@@ -134,20 +144,6 @@ namespace Trebuchet
                 .SetParameter("MaxMoveDeltaTime", MaxMoveDeltaTime.ToString());
             document.GetSection("/script/engine.player")
                 .SetParameter("ConfiguredInternetSpeed", ConfiguredInternetSpeed.ToString());
-        }
-
-        [IniSetting(Config.FileIniUser, "GraniteBaking")]
-        public void Granite(IniDocument document)
-        {
-            document.GetSection("/script/granitematerialbaker.granitebakingsettings")
-                .SetParameter("Quality", UltraAnisotropy ? "High":"Medium");
-        }
-
-        [IniSetting(Config.FileIniDefault, "Scalability")]
-        public void UltraSetting(IniDocument document)
-        {
-            document.GetSection("TextureQuality@3").SetParameter("r.Streaming.PoolSize", (1500 + AddedTexturePool).ToString());
-            document.GetSection("TextureQuality@3").SetParameter("r.MaxAnisotropy", UltraAnisotropy ? "16" : "8");
         }
 
         #endregion IniConfig
@@ -239,7 +235,7 @@ namespace Trebuchet
                 IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
                 if (!documents.TryGetValue(attr.Path, out IniDocument? document))
                 {
-                        document = IniParser.Parse(Tools.GetFileContent(Path.Combine(GetClientPath(), attr.Path)));
+                    document = IniParser.Parse(Tools.GetFileContent(Path.Combine(GetClientPath(), attr.Path)));
                     documents.Add(attr.Path, document);
                 }
                 method.Invoke(this, new object?[] { document });

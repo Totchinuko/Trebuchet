@@ -1,5 +1,4 @@
-﻿using Trebuchet.SettingFields;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -9,6 +8,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Windows;
 using System.Windows.Input;
+
+using Trebuchet.SettingFields;
 using TrebuchetGUILib;
 
 namespace Trebuchet

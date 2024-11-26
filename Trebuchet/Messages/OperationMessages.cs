@@ -1,5 +1,6 @@
-﻿using CommunityToolkit.Mvvm.Messaging.Messages;
-using System.Threading;
+﻿using System.Threading;
+
+using CommunityToolkit.Mvvm.Messaging.Messages;
 
 namespace Trebuchet
 {

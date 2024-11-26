@@ -7,7 +7,7 @@
                              Height="25"
                              MinValue="{Binding Minimum}"
                              MaxValue="{Binding Maximum}"
-                             Value="{Binding Value, Mode=TwoWay}" /> 
+                             Value="{Binding Value, Mode=TwoWay}" />
         </Border>
     </DataTemplate>
 </ResourceDictionary>

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SteamWorksWebAPI
+﻿namespace SteamWorksWebAPI
 {
     public enum PublishedFileType
     {
@@ -27,7 +21,7 @@ namespace SteamWorksWebAPI
         SteamworksAccessInvites = 16, // Used internally.
         Items_Mtx = 17, // Workshop items that can be sold in-game.
         Items_ReadyToUse = 18, // Workshop items that can be used right away by the user.
-        WorkshopShowcase = 19, 
+        WorkshopShowcase = 19,
         GameManagedItems = 20, // Managed completely by the game, not the user, and not shown on the web.
     }
 }

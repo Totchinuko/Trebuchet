@@ -14,19 +14,19 @@
                         Visibility="{Binding SaveAsVisible}"
                         Command="{Binding SaveCommand}"
                         Width="70"
-                        Margin="0"/>
+                        Margin="0" />
                     <Button Style="{StaticResource ButtonIconGreen}"
                         Content="Append"
                         Visibility="{Binding ImportVisible}"
                         Command="{Binding AppendCommand}"
                         Width="70"
-                        Margin="0,0,12,0"/>
+                        Margin="0,0,12,0" />
                     <Button Style="{StaticResource ButtonIconGreen}"
                         Content="Replace"
                         Visibility="{Binding ImportVisible}"
                         Command="{Binding ApplyCommand}"
                         Width="70"
-                        Margin="0"/>
+                        Margin="0" />
                 </WrapPanel>
             </Grid>
         </Border>

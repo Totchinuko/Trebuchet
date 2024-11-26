@@ -1,7 +1,7 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace Trebuchet
 {

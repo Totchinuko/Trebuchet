@@ -22,7 +22,7 @@
             yield return new KeyValuePair<string, string>("collectioncount", PublishedFileIds.Count.ToString());
 
             int i = 0;
-            foreach(var id in PublishedFileIds)
+            foreach (var id in PublishedFileIds)
             {
                 yield return new KeyValuePair<string, string>($"publishedfileids[{i}]", id.ToString());
                 i++;

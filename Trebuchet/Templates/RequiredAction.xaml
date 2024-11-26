@@ -13,7 +13,7 @@
                 <Button Style="{StaticResource ButtonIconBlue}"
                         Grid.Column="1"
                         Command="{Binding .}"
-                        Content="{Binding Button}"/>
+                        Content="{Binding Button}" />
             </Grid>
         </Border>
     </DataTemplate>

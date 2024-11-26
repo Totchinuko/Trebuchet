@@ -1,10 +1,10 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using System.Collections.ObjectModel;
+﻿using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows;
 using System.Windows.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetGUILib;
 
 namespace Trebuchet
@@ -127,7 +127,7 @@ namespace Trebuchet
 
         private void OnProfileCreate(object? obj)
         {
-            InputTextModal modal = new InputTextModal("Create","Profile Name");
+            InputTextModal modal = new InputTextModal("Create", "Profile Name");
             modal.ShowDialog();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;

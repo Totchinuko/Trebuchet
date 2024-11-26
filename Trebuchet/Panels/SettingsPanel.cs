@@ -1,8 +1,6 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using System;
-using System.IO;
-using System.Threading.Tasks;
-using System.Windows;
+﻿using System.IO;
+
+using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetGUILib;
 
 namespace Trebuchet

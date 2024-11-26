@@ -1,12 +1,10 @@
 ﻿<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-                    xmlns:local="clr-namespace:Trebuchet"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="TabButtonTemplate">
         <Button Style="{Binding TabStyle}"
                 Margin="0,3,0,3"
                 Command="{Binding .}"
-                HorizontalContentAlignment="Left"
-                >
+                HorizontalContentAlignment="Left">
             <StackPanel Orientation="Horizontal">
                 <Image Source="{Binding Icon}" Height="16" Width="16" Margin="0 0 6 0" />
                 <TextBlock Text="{Binding Label}" FontSize="14" />

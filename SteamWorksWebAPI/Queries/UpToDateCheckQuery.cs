@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SteamWorksWebAPI
+﻿namespace SteamWorksWebAPI
 {
     public class UpToDateCheckQuery : Query
     {
@@ -13,4 +7,3 @@ namespace SteamWorksWebAPI
         public uint Version { get; set; } = 0;
     }
 }
-    

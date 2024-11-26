@@ -70,7 +70,7 @@ namespace Trebuchet.Controls
 
         private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
-            if(!IsTextAllowed(e.Text))
+            if (!IsTextAllowed(e.Text))
             {
                 e.Handled = true;
                 return;

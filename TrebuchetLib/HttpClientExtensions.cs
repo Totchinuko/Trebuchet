@@ -20,8 +20,7 @@ namespace Trebuchet
 
                 using (var download = await response.Content.ReadAsStreamAsync())
                 {
-
-                    // Ignore progress reporting when no progress reporter was 
+                    // Ignore progress reporting when no progress reporter was
                     // passed or when the content length is unknown
                     if (progress == null || !contentLength.HasValue)
                     {
