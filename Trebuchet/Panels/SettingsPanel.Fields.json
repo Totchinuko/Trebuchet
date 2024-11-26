@@ -77,10 +77,20 @@
     "$type": "IntSlider",
     "Property": "MaxDownloads",
     "Name": "Max Simultaneous Downloads",
-    "Description": "Max amount of files downloaded at the same time on the steam network.",
+    "Description": "Max amount of files downloaded at the same time on the steam network. This can increase the load on your CPU/Drive/Network but make the download potentially faster if your network allow it",
     "Minimum": 1,
     "Maximum": 16,
     "Frequency": 1,
     "Default": 8
+  },
+  {
+    "$type": "IntSlider",
+    "Property": "MaxServers",
+    "Name": "Max Download Servers",
+    "Description": "Max amount of content server used at the same time on the steam network.",
+    "Minimum": 1,
+    "Maximum": 20,
+    "Frequency": 1,
+    "Default": 20
   }
 ]
