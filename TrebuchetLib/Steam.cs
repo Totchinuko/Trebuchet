@@ -212,7 +212,7 @@ namespace TrebuchetLib
 
             ContentDownloader.Config.InstallDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop);
 
-            await ContentDownloader.DownloadUGCAsync([Config.AppIDLiveClient, Config.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
+            await Task.Run(() => ContentDownloader.DownloadUGCAsync([Config.AppIDLiveClient, Config.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts));
         }
 
         /// <summary>
