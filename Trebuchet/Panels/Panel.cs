@@ -41,7 +41,7 @@ namespace Trebuchet
 
         public ImageSource? Icon => string.IsNullOrEmpty(IconPath) ? null : new BitmapImage(new Uri(IconPath, UriKind.Relative));
         public string IconPath { get; set; } = string.Empty;
-        public Style TabStyle => (Style)(Active ? Application.Current.Resources["ButtonTabBlue"] : Application.Current.Resources["ButtonTab"]);
+        public Style TabStyle => (Style)(Active ? Application.Current.Resources["TTabLMidBlueBright"] : Application.Current.Resources["TTabLMidNormalStealth"]);
         public abstract DataTemplate Template { get; }
 
         public virtual bool CanExecute(object? parameter)
