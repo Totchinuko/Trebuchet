@@ -105,18 +105,18 @@ namespace Trebuchet
 
         protected virtual Brush GetBorderBrush()
         {
-            if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
-            if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GDimBlue"];
-            if (!_needUpdate) return (Brush)Application.Current.Resources["GDimGreen"];
-            return (Brush)Application.Current.Resources["GDimYellow"];
+            if (!_infos.Exists) return (Brush)Application.Current.Resources["GRed"];
+            if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GBlue"];
+            if (!_needUpdate) return (Brush)Application.Current.Resources["GGreen"];
+            return (Brush)Application.Current.Resources["GYellow"];
         }
 
         protected virtual Brush GetStatusBrush()
         {
-            if (!_infos.Exists) return (Brush)Application.Current.Resources["GPRed"];
-            if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GPBlue"];
-            if (!_needUpdate) return (Brush)Application.Current.Resources["GPGreen"];
-            return (Brush)Application.Current.Resources["GPYellow"];
+            if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
+            if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GDimBlue"];
+            if (!_needUpdate) return (Brush)Application.Current.Resources["GDimGreen"];
+            return (Brush)Application.Current.Resources["GDimYellow"];
         }
 
         protected virtual string GetStatusText()
