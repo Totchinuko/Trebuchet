@@ -22,6 +22,7 @@ namespace Trebuchet
             ContentDownloader.Config.MaxDownloads = _config.MaxDownloads;
             ContentDownloader.Config.MaxServers = Math.Max(_config.MaxServers, ContentDownloader.Config.MaxDownloads);
             ContentDownloader.Config.LoginID = null;
+            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.CONFIG_DIR);
             _session = ContentDownloader.InitializeSteam3(null, null);
             _session.Connected += (sender, args) => Connected?.Invoke(this, EventArgs.Empty);
             _session.Disconnected += (sender, args) => Disconnected?.Invoke(this, EventArgs.Empty);
@@ -33,16 +34,7 @@ namespace Trebuchet
 
         public void ClearCache()
         {
-            // Server instance cleanup
-            string folder = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances);
-            if (!Directory.Exists(folder))
-                return;
-            string[] instances = Directory.GetDirectories(folder);
-            foreach (string instance in instances)
-                Tools.DeleteIfExists(Path.Combine(instance, ContentDownloader.CONFIG_DIR));
-
-            //Mods cleanup
-            Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.DEPOT_CONFIG);
+            Tools.DeleteIfExists(ContentDownloader.Config.DepotConfigDirectory);
         }
 
         public async void Connect()
@@ -153,7 +145,7 @@ namespace Trebuchet
         /// <returns></returns>
         public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubID, ulong manisfestID)> keyValuePairs)
         {
-            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.DEPOT_CONFIG));
+            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.CONFIG_DIR, ContentDownloader.DEPOT_CONFIG));
             foreach (var (pubID, manisfestID) in keyValuePairs)
             {
                 if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pubID, out ulong manisfest))
