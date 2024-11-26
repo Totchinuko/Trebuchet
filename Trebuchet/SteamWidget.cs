@@ -12,8 +12,8 @@ namespace Trebuchet
         IRecipient<SteamConnectionChangedMessage>,
         IRecipient<OperationStateChanged>
     {
-        private readonly object _descriptionLock = new object();
-        private readonly object _progressLock = new object();
+        private readonly object _descriptionLock = new();
+        private readonly object _progressLock = new();
         private string _description = string.Empty;
         private double _progress;
         private DispatcherTimer _timer;
