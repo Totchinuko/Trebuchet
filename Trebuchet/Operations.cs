@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Trebuchet
+﻿namespace Trebuchet
 {
     public enum Operations
     {
@@ -13,6 +7,7 @@ namespace Trebuchet
         SteamCollectionFetch,
         SteamSearch,
         DownloadModlist,
-        GameRunning
+        GameRunning,
+        ServerRunning
     }
 }

@@ -30,8 +30,8 @@ namespace Trebuchet
             KillAllCommand = new SimpleCommand(OnKillAll);
             LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll, true, Operations.SteamDownload);
             UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate, true, Operations.SteamDownload, Operations.GameRunning);
-            UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning);
-            VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification, true, Operations.SteamDownload, Operations.GameRunning);
+            UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning, Operations.ServerRunning);
+            VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification, true, Operations.SteamDownload, Operations.GameRunning, Operations.ServerRunning);
 
             _client = new ClientInstanceDashboard();
             CreateInstancesIfNeeded();

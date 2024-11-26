@@ -21,7 +21,7 @@ namespace Trebuchet
             KillCommand = new SimpleCommand(OnKilled, false);
             LaunchCommand = new TaskBlockedCommand(OnLaunched, true, Operations.SteamDownload);
             LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched, true, Operations.SteamDownload);
-            UpdateModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning);
+            UpdateModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning, Operations.ServerRunning);
 
             StrongReferenceMessenger.Default.Register<ClientProcessStateChanged>(this);
 
