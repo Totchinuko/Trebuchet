@@ -1,16 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
-using System.Security.Cryptography;
-using System.Text;
-using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
 using TrebuchetLib;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
 
 namespace Trebuchet
 {
@@ -19,9 +13,10 @@ namespace Trebuchet
         protected const string CPUFormat = "{0}%";
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
         private static DateTime? _previousCpuStartTime = null;
-        private static TimeSpan? _previousTotalProcessorTime = null;
+        private static long? _previousTotalProcessorTime = null;
         private ProcessDetails? _details;
         private long _peakMemoryConsumption;
+        private Process? _process;
         private DispatcherTimer _timer;
 
         public ProcessStatsLight()
@@ -54,8 +49,12 @@ namespace Trebuchet
 
         public void StartStats(ProcessDetails details)
         {
-            SetDetails(details);
+            if (!TryGetProcess((int)details.PID, out Process? process)) return;
+            _process = process;
 
+            SetDetails(details);
+            _previousCpuStartTime = DateTime.UtcNow;
+            _previousTotalProcessorTime = process.TotalProcessorTime.Ticks;
             _timer.Start();
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(PID));
@@ -65,6 +64,7 @@ namespace Trebuchet
         public void StopStats(ProcessDetails details)
         {
             SetDetails(details);
+            _process = null;
             _timer.Stop();
             _peakMemoryConsumption = 0;
             OnPropertyChanged(nameof(Running));
@@ -101,27 +101,24 @@ namespace Trebuchet
 
         private double GetCpuUsageForProcess()
         {
-            if (_details == null) return 0;
-            if (!TryGetProcess((int)_details.PID, out Process? process)) return 0;
-            var currentCpuStartTime = DateTime.UtcNow;
-            var currentCpuUsage = process.TotalProcessorTime;
+            if (_process == null) return 0;
 
             // If no start time set then set to now
             if (_previousCpuStartTime == null || _previousTotalProcessorTime == null)
-            {
-                _previousCpuStartTime = currentCpuStartTime;
-                _previousTotalProcessorTime = currentCpuUsage;
-            }
+                throw new Exception("Time values have not been initiliazed properly");
 
-            var cpuUsedMs = (currentCpuUsage - _previousTotalProcessorTime.Value).TotalMilliseconds;
-            var totalMsPassed = (currentCpuStartTime - _previousCpuStartTime.Value).TotalMilliseconds;
+            var currentCpuStartTime = DateTime.UtcNow;
+            var currentCpuUsage = _process.TotalProcessorTime.Ticks;
+
+            var cpuUsedMs = (currentCpuUsage - (long)_previousTotalProcessorTime);
+            var totalMsPassed = (currentCpuStartTime - (DateTime)_previousCpuStartTime).Ticks;
             var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
 
             // Set previous times.
             _previousCpuStartTime = currentCpuStartTime;
             _previousTotalProcessorTime = currentCpuUsage;
 
-            return cpuUsageTotal * 1000.0;
+            return cpuUsageTotal * 100.0;
         }
 
         private long GetMemeoryUsageForProcess()
