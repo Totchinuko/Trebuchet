@@ -1,7 +1,7 @@
 ﻿<Window x:Class="Trebuchet.WorkshopSearch"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Trebuchet"
         xmlns:TrebGUI="clr-namespace:TrebuchetGUILib;assembly=TrebuchetGUILib"
@@ -41,7 +41,7 @@
                                 <ColumnDefinition Width="auto" />
                             </Grid.ColumnDefinitions>
                             <TextBox VerticalContentAlignment="Center" Name="SearchField" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" MinWidth="300" MaxWidth="400" Margin="0,0,12,0" VerticalAlignment="center" Height="25" KeyDown="TextBox_KeyDown" />
-                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90" Content="Search" Margin="0,0,12,0" Style="{StaticResource ButtonIconBlue}" />
+                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Width="90" Content="Search" Margin="0,0,12,0" Style="{StaticResource TBtnStrokeBlueOver}" />
                             <CheckBox Grid.Column="2" IsChecked="{Binding TestLiveWorkshop, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Content="Test Live Workshop" VerticalAlignment="Center" />
                         </Grid>
                     </Border>
@@ -64,7 +64,7 @@
                                                     </Grid.ColumnDefinitions>
                                                     <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,12,0">
                                                         <Image Source="{Binding PreviewURL, Mode=OneWay}" Margin="0,0,0,12" />
-                                                        <Button Style="{StaticResource LaunchButton}"
+                                                        <Button Style="{StaticResource TBtnStrokeGreenOver}"
                                                                 HorizontalAlignment="Right"
                                                                 Command="{Binding AddModCommand, RelativeSource={RelativeSource AncestorType=local:WorkshopSearch}}"
                                                                 CommandParameter="{Binding .}"

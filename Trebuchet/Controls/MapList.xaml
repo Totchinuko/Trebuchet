@@ -21,7 +21,7 @@
                         <ItemsControl ItemsSource="{Binding MapListData, RelativeSource={RelativeSource AncestorType=local:MapList}}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Style="{StaticResource IconButton}" Content="{Binding Key}" Command="{Binding MapSelectCommand, RelativeSource={RelativeSource AncestorType=local:MapList}}" CommandParameter="{Binding Value}" Padding="4" HorizontalContentAlignment="Left" />
+                                    <Button Style="{StaticResource TBtnStrokeBlueStealth}" Content="{Binding Key}" Command="{Binding MapSelectCommand, RelativeSource={RelativeSource AncestorType=local:MapList}}" CommandParameter="{Binding Value}" Padding="4" HorizontalContentAlignment="Left" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
