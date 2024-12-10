@@ -80,6 +80,7 @@ namespace Trebuchet
         {
             _infos = new FileInfo(path);
             OnPropertyChanged(nameof(StatusColor));
+            OnPropertyChanged(nameof(BorderColor));
             OnPropertyChanged(nameof(StatusTooltip));
         }
 
@@ -95,6 +96,7 @@ namespace Trebuchet
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(LastUpdate));
             OnPropertyChanged(nameof(StatusColor));
+            OnPropertyChanged(nameof(BorderColor));
             OnPropertyChanged(nameof(StatusTooltip));
         }
 
