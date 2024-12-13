@@ -2,8 +2,8 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Net;
+using Serilog;
 using TrebuchetLib;
-using TrebuchetUtils;
 
 namespace Trebuchet
 {
@@ -143,7 +143,7 @@ namespace Trebuchet
             }
             catch (Exception e)
             {
-                await Log.Write(e);
+                Log.Error(e, "Could not start process");
                 process.Dispose();
                 OnProcessStateChanged(ProcessState.FAILED);
             }
@@ -274,7 +274,7 @@ namespace Trebuchet
 
             if ((_lastResponse + TimeSpan.FromSeconds(Profile.ZombieCheckSeconds)) < DateTime.UtcNow && Profile.KillZombies)
             {
-                Log.Write($"Killing zombie instance {ServerInstance} ({_process.Id})", LogSeverity.Warning);
+                Log.Warning($"Killing zombie instance {ServerInstance} ({_process.Id})");
                 _process.Kill();
             }
         }

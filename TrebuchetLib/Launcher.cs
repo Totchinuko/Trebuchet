@@ -1,6 +1,7 @@
 ﻿using System.Collections.Concurrent;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
+using Serilog;
 using Trebuchet;
 using TrebuchetUtils;
 
@@ -72,8 +73,8 @@ namespace TrebuchetLib
                 ClientProcess.ProcessStateChanged += OnClientProcessStateChanged;
 
                 _lockedFolders.Add(GetCurrentClientJunction());
-                Log.Write($"Locking folder {profile.ProfileName}", LogSeverity.Debug);
-                Log.Write($"Launching client process with profile {profileName} and modlist {modlistName}", LogSeverity.Info);
+                Log.Debug($"Locking folder {profile.ProfileName}");
+                Log.Information($"Launching client process with profile {profileName} and modlist {modlistName}");
                 Task.Run(ClientProcess.StartProcessAsync);
             });
         }
@@ -108,8 +109,8 @@ namespace TrebuchetLib
                 _serverProcesses.TryAdd(instance, watcher);
 
                 _lockedFolders.Add(GetCurrentServerJunction(instance));
-                Log.Write($"Locking folder {profile.ProfileName}", LogSeverity.Debug);
-                Log.Write($"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}", LogSeverity.Info);
+                Log.Debug($"Locking folder {profile.ProfileName}");
+                Log.Information($"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}");
                 Task.Run(watcher.StartProcessAsync);
             });
         }
@@ -120,7 +121,7 @@ namespace TrebuchetLib
         /// <param name="instance"></param>
         public void CloseServer(int instance)
         {
-            Log.Write($"Requesting server instance {instance} stop", LogSeverity.Info);
+            Log.Information($"Requesting server instance {instance} stop");
             Invoke(() =>
             {
                 if (_serverProcesses.TryGetValue(instance, out var watcher))
@@ -191,7 +192,7 @@ namespace TrebuchetLib
             Invoke(() =>
             {
                 if (ClientProcess == null) return;
-                Log.Write("Requesting client process kill", LogSeverity.Info);
+                Log.Information("Requesting client process kill");
                 ClientProcess.Kill();
             });
         }
@@ -206,7 +207,7 @@ namespace TrebuchetLib
             {
                 if (_serverProcesses.TryGetValue(instance, out var watcher))
                 {
-                    Log.Write($"Requesting server process kill on instance {instance}", LogSeverity.Info);
+                    Log.Information($"Requesting server process kill on instance {instance}");
                     watcher.Kill();
                 }
             });
@@ -297,11 +298,11 @@ namespace TrebuchetLib
             {
                 _serverProcesses.TryRemove(e.NewDetails.Instance, out _);
                 _lockedFolders.Remove(GetCurrentServerJunction(e.NewDetails.Instance));
-                Log.Write($"Server intance {e.NewDetails.Instance} terminated", LogSeverity.Info);
+                Log.Information($"Server intance {e.NewDetails.Instance} terminated");
 
                 if (e.NewDetails.State == ProcessState.CRASHED && IsRestartWhenDown(e.NewDetails.Profile))
                 {
-                    Log.Write($"Restarting server instance {e.NewDetails.Instance}", LogSeverity.Info);
+                    Log.Information($"Restarting server instance {e.NewDetails.Instance}");
                     CatapultServer(e.NewDetails.Profile, e.NewDetails.Modlist, e.NewDetails.Instance);
                 }
             });

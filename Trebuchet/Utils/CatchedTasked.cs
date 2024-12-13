@@ -3,8 +3,8 @@ using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
+using Serilog;
 using TrebuchetGUILib;
-using TrebuchetUtils;
 
 namespace Trebuchet.Utils
 {
@@ -42,11 +42,11 @@ namespace Trebuchet.Utils
             }
             catch (OperationCanceledException)
             {
-                await Log.Write("Operation cancelled", LogSeverity.Info);
+                Log.Information("Operation cancelled");
             }
             catch (Exception ex)
             {
-                await Log.Write(ex);
+                Log.Error(ex, "CatchedTasked failed to complete");
                 new ErrorModal("Error", $"{ex.Message + Environment.NewLine}Please check the log for more information.").ShowDialog();
                 return;
             }

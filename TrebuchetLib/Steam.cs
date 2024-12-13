@@ -1,7 +1,7 @@
 ﻿using DepotDownloader;
+using Serilog;
 using SteamKit2;
 using Trebuchet;
-using TrebuchetUtils;
 
 namespace TrebuchetLib
 {
@@ -193,7 +193,7 @@ namespace TrebuchetLib
             }
             catch (Exception ex)
             {
-                Log.Write(ex);
+                Log.Error(ex, "Failed to create app folders.");
                 throw new Exception("Failed to create app folders.", ex);
             }
 
@@ -243,7 +243,7 @@ namespace TrebuchetLib
 
             if (!await WaitSteamConnectionAsync().ConfigureAwait(false)) return;
 
-            await Log.Write($"Updating server instance {instanceNumber}.", LogSeverity.Info).ConfigureAwait(false);
+            Log.Information($"Updating server instance {instanceNumber}.");
 
             string instance = GetServerInstancePath(instanceNumber);
             if (reinstall)
@@ -273,7 +273,7 @@ namespace TrebuchetLib
             if (instanceNumber == 0)
                 throw new Exception("Can't update instance 0 with itself.");
 
-            await Log.Write("Updating server instance {0} from instance 0.", LogSeverity.Info);
+            Log.Information("Updating server instance {0} from instance 0.");
             if (!SetupFolders()) return;
 
             string instance = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
@@ -302,7 +302,7 @@ namespace TrebuchetLib
 
             if (!await WaitSteamConnectionAsync()) return;
 
-            await Log.Write("Updating all server instances...", LogSeverity.Info);
+            Log.Information("Updating all server instances...");
             int count = _config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
             {
@@ -332,15 +332,15 @@ namespace TrebuchetLib
             return IsConnected;
         }
 
-        public async void WriteLine(string category, string msg)
+        public void WriteLine(string category, string msg)
         {
-            await Log.Write($"[{category}] {msg}", LogSeverity.Info);
+            Log.Information($"[{category}] {msg}");
         }
 
         private void OnConsoleWriteRedirect(string obj)
         {
             obj = obj.Replace(Environment.NewLine, string.Empty);
-            Log.Write($"[ContentDownloader] {obj}", LogSeverity.Info);
+            Log.Information($"[ContentDownloader] {obj}");
         }
     }
 }

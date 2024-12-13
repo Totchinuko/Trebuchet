@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using TrebuchetUtils;
+using Serilog;
 
 namespace Trebuchet
 {
@@ -122,12 +122,12 @@ namespace Trebuchet
             }
             catch (SocketException ex)
             {
-                Log.Write($"Endpoint={_endpoint.Address.ToString()}:{_endpoint.Port} {ex.SocketErrorCode}.", LogSeverity.Debug);
+                Log.Debug($"Endpoint={_endpoint.Address.ToString()}:{_endpoint.Port} {ex.SocketErrorCode}.");
                 Online = false;
             }
             catch (Exception ex)
             {
-                Log.Write(ex);
+                Log.Error(ex, "Could not process Source Query");
                 Online = false;
             }
         }
@@ -166,7 +166,7 @@ namespace Trebuchet
             VAC = (VACFlags)br.ReadByte();
             Version = br.ReadNullTerminatedString() ?? string.Empty;
             Online = true;
-            Log.Write($"Endpoint={_endpoint.Address}:{_endpoint.Port} Name={Name}, Online={Online}, Players={Players}/{MaxPlayers}", LogSeverity.Debug);
+            Log.Debug($"Endpoint={_endpoint.Address}:{_endpoint.Port} Name={Name}, Online={Online}, Players={Players}/{MaxPlayers}");
         }
 
         //ExtraDataFlag = (ExtraDataFlags)br.ReadByte();

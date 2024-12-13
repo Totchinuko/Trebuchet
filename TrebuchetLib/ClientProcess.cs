@@ -1,7 +1,7 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using Serilog;
 using TrebuchetLib;
-using TrebuchetUtils;
 
 namespace Trebuchet
 {
@@ -87,7 +87,7 @@ namespace Trebuchet
             }
             catch (Exception ex)
             {
-                await Log.Write(ex);
+                Log.Error(ex, "Could not start process");
                 process.Dispose();
                 OnProcessStateChanged(ProcessState.FAILED);
             }

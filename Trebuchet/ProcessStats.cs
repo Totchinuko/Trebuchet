@@ -6,8 +6,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Threading;
+using Serilog;
 using TrebuchetLib;
-using TrebuchetUtils;
 
 namespace Trebuchet
 {
@@ -127,7 +127,7 @@ namespace Trebuchet
             }
             catch (Exception ex)
             {
-                await Log.Write(ex);
+                Log.Error(ex, "Failed to run performance counters");
                 return;
             }
 

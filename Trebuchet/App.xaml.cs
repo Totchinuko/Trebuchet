@@ -1,11 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Threading;
+using Serilog;
 using TrebuchetGUILib;
-using TrebuchetUtils;
 
 /// GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
 /// Copyright (C) 2023 Totchinuko https://github.com/Totchinuko
@@ -34,8 +37,7 @@ namespace Trebuchet
 
         public static void OpenApp(bool testlive, bool catapult)
         {
-            Log.Write($"Selecting {(testlive ? "testlive" : "live")}", LogSeverity.Info);
-
+            Log.Information($"Selecting {(testlive ? "testlive" : "live")}");
             Config = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
 
             TrebuchetApp app = new TrebuchetApp(testlive, catapult);
@@ -44,13 +46,32 @@ namespace Trebuchet
             mainWindow.Show();
         }
 
+        protected override void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            Log.Error(e.Exception, "DispatcherUnhandledException");
+            base.OnDispatcherUnhandledException(sender, e);
+        }
+
         protected override void OnExit(ExitEventArgs e)
         {
+            Log.Information("Trebuchet off");
+            Log.Information("----------------------------------------");
             base.OnExit(e);
         }
 
         protected override void OnStartup(StartupEventArgs e)
         {
+            Log.Logger = new LoggerConfiguration()
+#if !DEBUG
+                .MinimumLevel.Information()
+#endif
+                .WriteTo.File(
+                    Path.Combine(Tools.GetRootPath(), "Logs/app.log"),
+                    retainedFileTimeLimit: TimeSpan.FromDays(7),
+                    rollingInterval: RollingInterval.Day)
+                .CreateLogger();
+            Log.Information("Starting Taskmaster");
+
             base.OnStartup(e);
 
             ReadAppText();
@@ -72,6 +93,18 @@ namespace Trebuchet
             TestliveModal modal = new TestliveModal(e.Args.Contains("-catapult"));
             Current.MainWindow = modal.Window;
             modal.ShowDialog();
+        }
+
+        protected override async void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
+        {
+            await Current.Dispatcher.InvokeAsync(() => Log.Error((Exception)e.ExceptionObject, "UnhandledException"));
+            base.OnUnhandledException(sender, e);
+        }
+
+        protected override async void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
+        {
+            await Current.Dispatcher.InvokeAsync(() => Log.Error(e.Exception, "UnobservedTaskException"));
+            base.OnUnobservedTaskException(sender, e);
         }
 
         private void ReadAppText()
