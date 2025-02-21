@@ -62,6 +62,13 @@
     "Default": []
   },
   {
+    "$type": "Toggle",
+    "Property": "DisableHighPrecisionMoveTool",
+    "Name": "Disable Tot!Admin High Precision Move Tool",
+    "Description": "For better compatibility with other move tools, disable two decimal scaling of Tot!Admin Move Tool",
+    "Default": false
+  },
+  {
     "$type": "Title",
     "Name": "Restart Settings"
   },

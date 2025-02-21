@@ -12,6 +12,7 @@ namespace Trebuchet
 
         public long CPUThreadAffinity { get; set; } = 0xffffffffffff;
 
+        public bool DisableHighPrecisionMoveTool { get; set; } = false;
         public bool EnableBattleEye { get; set; } = false;
 
         public bool EnableMultiHome { get; set; } = false;
@@ -113,7 +114,6 @@ namespace Trebuchet
         public bool UseAllCores { get; set; } = true;
 
         public int ZombieCheckSeconds { get; set; } = 300;
-
         #region IniSettings
 
         [IniSetting(Config.FileIniServer, "Engine")]
@@ -186,6 +186,9 @@ namespace Trebuchet
                     section.InsertParameter(0, "+SuperAdminSteamIDs", id);
             else
                 document.Remove(section);
+
+            section = document.GetSection("/Game/Mods/TotAdmin/Tot_AC_Buildable_RPC.Tot_AC_Buildable_RPC_C");
+            section.SetParameter("DisableHighPrecisionMoveTool", DisableHighPrecisionMoveTool ? "True" : "False");
         }
 
         #endregion IniSettings
