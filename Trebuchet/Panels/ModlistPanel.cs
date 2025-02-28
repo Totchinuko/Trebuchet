@@ -48,6 +48,7 @@ namespace Trebuchet
             ImportFromFileCommand = new SimpleCommand(OnImportFromFile);
             ImportFromTextCommand = new SimpleCommand(OnImportFromText);
             RemoveModCommand = new SimpleCommand(OnModRemoved);
+            OpenWorkshopCommand = new SimpleCommand(OnOpenWorkshop);
             UpdateModCommand = new TaskBlockedCommand(OnModUpdated, true, Operations.DownloadModlist);
             ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload, Operations.GameRunning, Operations.ServerRunning);
             RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh, true, Operations.SteamPublishedFilesFetch);
@@ -98,6 +99,8 @@ namespace Trebuchet
                 OnModlistURLChanged();
             }
         }
+
+        public SimpleCommand OpenWorkshopCommand { get; }
 
         public ObservableCollection<string> Profiles { get => _profiles; set => _profiles = value; }
 
@@ -553,6 +556,13 @@ namespace Trebuchet
             if (obj is not ModFile modFile) return;
 
             StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(new ulong[] { modFile.PublishedFileID }));
+        }
+
+        private void OnOpenWorkshop(object? obj)
+        {
+            if (obj is not ModFile modFile) return;
+
+            TrebuchetUtils.Utils.OpenWeb(string.Format(Config.SteamWorkshopURL, modFile.PublishedFileID));
         }
 
         private void OnSearchClosing(object? sender, CancelEventArgs e)

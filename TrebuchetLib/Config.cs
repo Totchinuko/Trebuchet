@@ -1,6 +1,4 @@
-﻿using System.Reflection;
-
-namespace Trebuchet
+﻿namespace Trebuchet
 {
     public static class AutoUpdateStatus
     {
@@ -53,6 +51,7 @@ namespace Trebuchet
         public const string RegexSavedFolder = @"ConanSandbox([\\/]+)Saved";
         public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
         public const string ServerArgsMultiHome = "-MULTIHOME={0}";
+        public const string SteamWorkshopURL = "https://steamcommunity.com/sharedfiles/filedetails/?id={0}";
 
         #endregion constants
 

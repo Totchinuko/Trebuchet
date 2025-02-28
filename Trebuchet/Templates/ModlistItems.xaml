@@ -54,6 +54,9 @@
                     </TextBlock>
                 </StackPanel>
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button Grid.Column="1" Style="{StaticResource TBtnStrokeBlueOver}" Visibility="{Binding IsPublished, Converter={StaticResource False2Collapsed}}" Cursor="Hand" Margin="0,0,3,0" ToolTip="Open Workshop Page" Command="{Binding Content.OpenWorkshopCommand, RelativeSource={RelativeSource AncestorType=ContentPresenter, AncestorLevel=3}}" CommandParameter="{Binding .}">
+                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Steam.png" Width="16" Height="16" />
+                    </Button>
                     <Button Grid.Column="1" Style="{StaticResource TBtnStrokeBlueOver}" Cursor="Hand" Margin="0,0,3,0" ToolTip="Update Mod" Command="{Binding Content.UpdateModCommand, RelativeSource={RelativeSource AncestorType=ContentPresenter, AncestorLevel=3}}" CommandParameter="{Binding .}">
                         <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
                     </Button>
