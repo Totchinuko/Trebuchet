@@ -1,139 +1,76 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
+    <PropertyGroup>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net8.0</TargetFramework>
+        <Nullable>enable</Nullable>
+        <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
+        <ApplicationIcon>Icons\AppIcon.ico</ApplicationIcon>
+        <Authors>Totchinuko</Authors>
+        <StartupObject>Trebuchet.App</StartupObject>
+        <FileVersion>0.3.7</FileVersion>
+        <AssemblyVersion>0.2.0</AssemblyVersion>
+        <PublishSingleFile>true</PublishSingleFile>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <Deterministic>true</Deterministic>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+    </PropertyGroup>
 
-  <PropertyGroup>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net8.0-windows7.0</TargetFramework>
-    <Nullable>enable</Nullable>
-    <UseWPF>true</UseWPF>
-	<UseWindowsForms>true</UseWindowsForms>
-	<ApplicationIcon>Icons\AppIcon.ico</ApplicationIcon>
-	<Authors>Totchinuko</Authors>
-	<StartupObject>Trebuchet.App</StartupObject>
-	<FileVersion>0.3.7</FileVersion>
-	<AssemblyVersion>0.2.0</AssemblyVersion>
-	<PublishSingleFile>true</PublishSingleFile>
-	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-	<Deterministic>true</Deterministic>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
+    <ItemGroup>
+        <Folder Include="Models\"/>
+        <AvaloniaResource Include="Assets\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="AppSettings.json" />
-    <None Remove="AppSettings.json.sample" />
-    <None Remove="ClientSettings.Fields.json" />
-    <None Remove="Data\AppText.json" />
-    <None Remove="Icons\Add.png" />
-    <None Remove="Icons\Bug.png" />
-    <None Remove="Icons\BugWindow.png" />
-    <None Remove="Icons\Close.png" />
-    <None Remove="Icons\Console.png" />
-    <None Remove="Icons\Dashboard.png" />
-    <None Remove="Icons\Discord.png" />
-    <None Remove="Icons\Download.png" />
-    <None Remove="Icons\Duplicate.png" />
-    <None Remove="Icons\FIle.png" />
-    <None Remove="Icons\Filter.png" />
-    <None Remove="Icons\Folder.png" />
-    <None Remove="Icons\Game.png" />
-    <None Remove="Icons\List.png" />
-    <None Remove="Icons\LocalStorage.png" />
-    <None Remove="Icons\Logo.png" />
-    <None Remove="Icons\Magnifying.png" />
-    <None Remove="Icons\Map.png" />
-    <None Remove="Icons\Maximize.png" />
-    <None Remove="Icons\Minimize.png" />
-    <None Remove="Icons\Pacman.png" />
-    <None Remove="Icons\Reset.png" />
-    <None Remove="Icons\Restore.png" />
-    <None Remove="Icons\Save.png" />
-    <None Remove="Icons\Server.png" />
-    <None Remove="Icons\Settings.png" />
-    <None Remove="Icons\Skull.png" />
-    <None Remove="Icons\Steam.png" />
-    <None Remove="Icons\Trash.png" />
-    <None Remove="Icons\Upload.png" />
-    <None Remove="Icons\Window.png" />
-    <None Remove="ServerSettings.Fields.json" />
-    <None Remove="Settings.Fields.json" />
-    <None Remove="Settings.UI.Fields.json" />
-    <None Remove="TrebuchetApp.Menu.json" />
-  </ItemGroup>
+    <ItemGroup>
+        <EmbeddedResource Include="AppSettings.json.sample" />
+        <EmbeddedResource Include="AppSettings.json" />
+        <EmbeddedResource Include="Data\AppText.json" />
+        <EmbeddedResource Include="TrebuchetApp.Menu.json" />
+        <EmbeddedResource Include="Panels\ClientProfilePanel.Fields.json" />
+        <EmbeddedResource Include="Panels\ServerProfilePanel.Fields.json" />
+        <EmbeddedResource Include="Panels\SettingsPanel.UI.Fields.json" />
+        <EmbeddedResource Include="Panels\SettingsPanel.Fields.json" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="Icons\AppIcon.ico" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Avalonia" Version="11.2.1"/>
+        <PackageReference Include="Avalonia.Desktop" Version="11.2.1"/>
+        <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.1"/>
+        <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.1"/>
+        <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->
+        <PackageReference Include="Avalonia.Diagnostics" Version="11.2.1">
+            <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
+            <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
+        </PackageReference>
+        <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
+        <PackageReference Include="gong-wpf-dragdrop" Version="3.2.1" />
+        <PackageReference Include="Humanizer" Version="2.14.1" />
+        <PackageReference Include="Serilog" Version="4.2.0" />
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <EmbeddedResource Include="AppSettings.json.sample" />
-    <EmbeddedResource Include="AppSettings.json" />
-    <EmbeddedResource Include="Data\AppText.json" />
-    <EmbeddedResource Include="TrebuchetApp.Menu.json" />
-    <EmbeddedResource Include="Panels\ClientProfilePanel.Fields.json" />
-    <EmbeddedResource Include="Panels\ServerProfilePanel.Fields.json" />
-    <EmbeddedResource Include="Panels\SettingsPanel.UI.Fields.json" />
-    <EmbeddedResource Include="Panels\SettingsPanel.Fields.json" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
+        <ProjectReference Include="..\TrebuchetLib\TrebuchetLib.csproj" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.1" />
-    <PackageReference Include="gong-wpf-dragdrop" Version="3.2.1" />
-    <PackageReference Include="Humanizer" Version="2.14.1" />
-	<PackageReference Include="Serilog" Version="4.2.0" />
-	<PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-  </ItemGroup>
+    <ItemGroup>
+        <Reference Include="TrebuchetGUILib">
+            <HintPath>..\..\TrebuchetGUILib\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetGUILib.dll</HintPath>
+        </Reference>
+        <Reference Include="TrebuchetUtils">
+            <HintPath>..\..\TrebuchetGUILib\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetUtils.dll</HintPath>
+        </Reference>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
-    <ProjectReference Include="..\TrebuchetLib\TrebuchetLib.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="Json\Maps.json">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Reference Include="TrebuchetGUILib">
-      <HintPath>..\..\TrebuchetGUILib\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetGUILib.dll</HintPath>
-    </Reference>
-    <Reference Include="TrebuchetUtils">
-      <HintPath>..\..\TrebuchetGUILib\TrebuchetGUILib\bin\Release\net8.0-windows\TrebuchetUtils.dll</HintPath>
-    </Reference>
-  </ItemGroup>
-
-  <ItemGroup>
-    <Resource Include="Icons\Add.png" />
-    <Resource Include="Icons\Bug.png" />
-    <Resource Include="Icons\BugWindow.png" />
-    <Resource Include="Icons\Close.png" />
-    <Resource Include="Icons\Console.png" />
-    <Resource Include="Icons\Dashboard.png" />
-    <Resource Include="Icons\Discord.png" />
-    <Resource Include="Icons\Download.png" />
-    <Resource Include="Icons\Duplicate.png" />
-    <Resource Include="Icons\FIle.png" />
-    <Resource Include="Icons\Filter.png" />
-    <Resource Include="Icons\Folder.png" />
-    <Resource Include="Icons\Game.png" />
-    <Resource Include="Icons\List.png" />
-    <Resource Include="Icons\LocalStorage.png" />
-    <Resource Include="Icons\Logo.png" />
-    <Resource Include="Icons\Magnifying.png" />
-    <Resource Include="Icons\Map.png" />
-    <Resource Include="Icons\Maximize.png" />
-    <Resource Include="Icons\Minimize.png" />
-    <Resource Include="Icons\Pacman.png" />
-    <Resource Include="Icons\Reset.png" />
-    <Resource Include="Icons\Restore.png" />
-    <Resource Include="Icons\Save.png" />
-    <Resource Include="Icons\Server.png" />
-    <Resource Include="Icons\Settings.png" />
-    <Resource Include="Icons\Skull.png" />
-    <Resource Include="Icons\Steam.png" />
-    <Resource Include="Icons\Trash.png" />
-    <Resource Include="Icons\Upload.png" />
-    <Resource Include="Icons\Window.png" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="Json\Maps.json">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="Assets\" />
+    </ItemGroup>
 
 </Project>
