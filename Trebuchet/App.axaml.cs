@@ -12,6 +12,7 @@ using Avalonia.Threading;
 using Serilog;
 using TrebuchetLib;
 using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
 // GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
 // Copyright (C) 2023 Totchinuko https://github.com/Totchinuko
@@ -162,5 +163,11 @@ public sealed partial class App : Application
         if(Application.Current?.ApplicationLifetime is IControlledApplicationLifetime app)
             app.Shutdown();
         else  throw new Exception("Application not initialized");
+    }
+
+    private static void ShutdownOnError()
+    {
+        if(Current?.ApplicationLifetime is  IControlledApplicationLifetime app)
+            app.Shutdown();
     }
 }
