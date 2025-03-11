@@ -1,4 +1,4 @@
-﻿namespace Trebuchet
+﻿namespace TrebuchetLib
 {
     [AttributeUsage(AttributeTargets.Method, AllowMultiple = true, Inherited = true)]
     public class IniSettingAttribute : Attribute

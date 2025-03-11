@@ -2,7 +2,6 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-using System.Windows;
 
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;

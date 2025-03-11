@@ -3,7 +3,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using TrebuchetLib;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public sealed class TrebuchetLauncher
     {

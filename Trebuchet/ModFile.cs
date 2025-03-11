@@ -1,8 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
-using System.Windows.Media;
 using Humanizer;
 using SteamWorksWebAPI;
 

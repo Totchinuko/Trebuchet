@@ -1,7 +1,7 @@
 ﻿using System.IO;
 
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
+using TrebuchetLib;
 
 namespace Trebuchet
 {

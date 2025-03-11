@@ -1,12 +1,11 @@
 ﻿using System;
-using System.Windows.Input;
 
 namespace Trebuchet
 {
     public class SimpleCommand : ICommand
     {
         private readonly Action<object?> _execute;
-        private bool _enabled = true;
+        private bool _enabled;
 
         public SimpleCommand(Action<object?> execute, bool enabled = true)
         {

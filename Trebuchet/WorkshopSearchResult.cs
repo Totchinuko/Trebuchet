@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Humanizer;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Response;
+using TrebuchetLib;
 
 namespace Trebuchet
 {

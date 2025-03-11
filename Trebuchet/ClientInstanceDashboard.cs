@@ -3,7 +3,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
 using TrebuchetLib;
 
 namespace Trebuchet
@@ -48,7 +47,7 @@ namespace Trebuchet
 
         public bool ProcessRunning { get; private set; }
 
-        public IProcessStats ProcessStats { get; } = new ProcessStats();
+        public IProcessStats ProcessStats { get; } = new ProcessStatsLight();
 
         public List<string> Profiles { get; private set; } = new List<string>();
 

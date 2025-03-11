@@ -1,0 +1,25 @@
+﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:Controls="clr-namespace:Trebuchet.Controls">
+    <DataTemplate x:Key="RconPanel">
+        <Grid Margin="0,0,6,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" HorizontalAlignment="Left" Padding="8" Style="{StaticResource TPnlMid}" CornerRadius="3" Margin="0,0,0,12">
+                <ComboBox MinWidth="250" ItemsSource="{Binding AvailableConsoles, Mode=OneWay}" SelectedIndex="{Binding SelectedConsole, Mode=TwoWay}" />
+            </Border>
+
+            <Border Grid.Row="1" Padding="8" Style="{StaticResource TPnlMid}" CornerRadius="3" Margin="0,0,0,12">
+                <Border Style="{StaticResource DarkPanel}">
+                    <Controls:ConsoleLog ConsoleLogs="{Binding ConsoleLogs, Mode=OneWay}" />
+                </Border>
+            </Border>
+            <Border Grid.Row="2" Padding="8" Style="{StaticResource TPnlMid}" CornerRadius="3" Margin="0,0,0,0">
+                <Controls:ConsoleField Foreground="White" PlaceholderBrush="{StaticResource GDescription}" Height="25" Command="{Binding SendCommand}" MaxLength="4000" Placeholder="Console Command" />
+            </Border>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

@@ -1,0 +1,48 @@
+﻿<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Trebuchet.App"
+             xmlns:local="using:Trebuchet"
+             RequestedThemeVariant="Default">
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+    <Application.Styles>
+        <FluentTheme />
+    </Application.Styles>
+    <!-- <Application.Resources> -->
+    <!--     <ResourceDictionary> -->
+    <!--         <ResourceDictionary.MergedDictionaries> -->
+    <!--             <ResourceDictionary Source="pack://application:,,,/TrebuchetGUILib;component/TrebuchetGUILib.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\Selectors.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\FieldRow.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\TitleField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\CPUAffinityField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\DirectoryField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ComboBoxField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\RequiredAction.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\FieldEditor.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ToggleField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\IntSliderField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\TestliveSelection.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\StringListFields.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\TextboxField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ModlistEditor.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ModlistItems.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ModlistTextImport.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ClientSettings.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\TabButton.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\TabLabel.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\MapField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\IntField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\FloatField.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ProcessStats.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ClientDashboard.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\ServerDashboard.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\Dashboard.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\RconPanel.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\LogFilterPanel.xaml" /> -->
+    <!--             <ResourceDictionary Source="Templates\SteamWidget.xaml" /> -->
+    <!--         </ResourceDictionary.MergedDictionaries> -->
+    <!--     </ResourceDictionary> -->
+    <!-- </Application.Resources> -->
+</Application>

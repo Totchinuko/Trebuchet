@@ -6,11 +6,7 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Windows;
-using System.Windows.Input;
-
 using Trebuchet.SettingFields;
-using TrebuchetGUILib;
 
 namespace Trebuchet
 {

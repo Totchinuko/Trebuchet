@@ -4,13 +4,13 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Windows;
+using Avalonia;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Messages;
 using Trebuchet.Utils;
-using TrebuchetGUILib;
 using TrebuchetLib;
 
 namespace Trebuchet
@@ -224,7 +224,7 @@ namespace Trebuchet
 
         private static void RegisterEvent<T>(T message) where T : ProcessStateChanged
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.UIThread.Invoke(() =>
             {
                 StrongReferenceMessenger.Default.Send(message);
             });
@@ -241,7 +241,7 @@ namespace Trebuchet
                     PublishedFilesResponse? result = null;
                     result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
                     if (result == null) return;
-                    Application.Current.Dispatcher.Invoke(() =>
+                    Dispatcher.UIThread.Invoke(() =>
                     {
                         StrongReferenceMessenger.Default.Send(new SteamModlistReceived(result));
                     });

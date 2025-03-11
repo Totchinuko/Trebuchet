@@ -7,7 +7,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization.Metadata;
 using System.Threading.Tasks;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     internal class PrivateConstructorContractResolver : DefaultJsonTypeInfoResolver
     {

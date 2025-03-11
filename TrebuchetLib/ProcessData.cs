@@ -5,10 +5,12 @@ using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Management;
 using System.Numerics;
+using System.Runtime.InteropServices;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public struct ProcessData
     {
@@ -18,6 +20,7 @@ namespace Trebuchet
         public string processName;
         public DateTime start;
 
+        [SupportedOSPlatform("windows")]
         public ProcessData(ManagementBaseObject processData)
         {
             pid = Convert.ToInt32(processData.GetPropertyValue("ProcessId"));
@@ -36,6 +39,12 @@ namespace Trebuchet
                 args = string.Join(" ", arguments[1..]);
             else
                 args = string.Empty;
+        }
+
+        [SupportedOSPlatform("linux")]
+        public ProcessData(int pid, string commandLine, DateTime start)
+        {
+            throw new NotImplementedException();
         }
 
         public static ProcessData Empty => new ProcessData { pid = 0, filename = string.Empty, args = string.Empty };

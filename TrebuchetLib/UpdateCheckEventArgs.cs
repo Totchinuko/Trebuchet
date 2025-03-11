@@ -1,4 +1,5 @@
-﻿namespace Trebuchet
+﻿
+namespace TrebuchetLib 
 {
     public class UpdateCheckEventArgs
     {

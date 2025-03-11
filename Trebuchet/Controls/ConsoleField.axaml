@@ -1,0 +1,10 @@
+﻿<!-- <UserControl x:Class="Trebuchet.Controls.ConsoleField" -->
+<!--              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" -->
+<!--              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" -->
+<!--              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" -->
+<!--              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" -->
+<!--              xmlns:local="clr-namespace:Trebuchet.Controls" -->
+<!--              mc:Ignorable="d" -->
+<!--              d:DesignHeight="450" d:DesignWidth="800"> -->
+<!--     <TextBox x:Name="Console" VerticalContentAlignment="Center" GotFocus="Console_GotFocus" LostFocus="Console_LostFocus" PreviewKeyDown="Console_PreviewKeyDown" MaxLength="{Binding MaxLength, RelativeSource={RelativeSource AncestorType=local:ConsoleField}}" /> -->
+<!-- </UserControl> -->

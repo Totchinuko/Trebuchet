@@ -4,8 +4,10 @@ using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using Serilog;
 using TrebuchetLib;
+using System.Runtime.InteropServices;
+using Serilog.Core;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public class ServerProcess : IDisposable
     {
@@ -195,8 +197,9 @@ namespace Trebuchet
 
             _process = childProcess;
             _process.PriorityClass = GetPriority(Profile.ProcessPriority);
-            _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
-
+            if (OperatingSystem.IsLinux() || OperatingSystem.IsWindows())
+                _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
+            
             OnProcessStateChanged(new ProcessServerDetails(ProcessDetails, ProcessData, ProcessState.RUNNING));
             CreateQueryPortListener();
             new Thread(ProcessThread).Start();
@@ -235,7 +238,7 @@ namespace Trebuchet
             var lastRefresh = DateTime.UtcNow;
             _isRunning = true;
 
-            while (_isRunning == true)
+            while (_isRunning)
             {
                 while (_threadQueue.TryDequeue(out Action? action))
                     action();

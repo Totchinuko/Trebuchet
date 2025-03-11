@@ -1,14 +1,18 @@
-﻿using System.IO.Compression;
+﻿using System.Collections;
+using System.Diagnostics;
+using System.IO.Compression;
 using System.Management;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using SteamKit2.GC.Dota.Internal;
 using TrebuchetLib;
 using TrebuchetUtils;
 using Yuu.Ini;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public static class Tools
     {
@@ -91,27 +95,22 @@ namespace Trebuchet
             if (string.IsNullOrEmpty(url))
                 throw new ArgumentException("Sync URL is invalid");
 
-            using (var client = new HttpClient())
-            {
-                client.Timeout = TimeSpan.FromSeconds(15);
+            using var client = new HttpClient();
+            client.Timeout = TimeSpan.FromSeconds(15);
 
-                using (var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct))
-                {
-                    var contentLength = response.Content.Headers.ContentLength;
-                    if (response.Content.Headers.ContentLength > 1024 * 1024 * 10)
-                        throw new Exception("Content was too big.");
-                    if (response.Content.Headers.ContentType?.MediaType != "application/json")
-                        throw new Exception("Content was not json.");
+            using var response = await client.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
+            var contentLength = response.Content.Headers.ContentLength;
+            if (response.Content.Headers.ContentLength > 1024 * 1024 * 10)
+                throw new Exception("Content was too big.");
+            if (response.Content.Headers.ContentType?.MediaType != "application/json")
+                throw new Exception("Content was not json.");
 
-                    using (var download = await response.Content.ReadAsStreamAsync(ct))
-                    {
-                        return await JsonSerializer.DeserializeAsync<ModlistExport>(download, new JsonSerializerOptions(), ct) ?? new ModlistExport();
-                    }
-                }
-            }
+            await using var download = await response.Content.ReadAsStreamAsync(ct);
+            return await JsonSerializer.DeserializeAsync<ModlistExport>(download, new JsonSerializerOptions(), ct) ?? new ModlistExport();
         }
 
-        public static IEnumerable<ProcessData> EnumerateData(this ManagementObjectCollection collection)
+        [SupportedOSPlatform("windows")]
+        private static IEnumerable<ProcessData> EnumerateData(this ManagementObjectCollection collection)
         {
             foreach (var process in collection)
                 yield return new ProcessData(process);
@@ -119,11 +118,34 @@ namespace Trebuchet
 
         public static IEnumerable<ProcessData> GetChildProcesses(int parentId)
         {
+            if(OperatingSystem.IsWindows())
+                return GetChildProcessesWindows(parentId);
+            else if (OperatingSystem.IsLinux())
+                return GetChildProcessesLinux(parentId);
+            throw new NotSupportedException("Operating system is not supported.");
+        }
+        
+        [SupportedOSPlatform("windows")]
+        private static IEnumerable<ProcessData> GetChildProcessesWindows(int parentId)
+        {
             var query = $"Select * From Win32_Process Where ParentProcessId = {parentId}";
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
             ManagementObjectCollection processList = searcher.Get();
 
             return processList.EnumerateData();
+        }
+        
+        //TODO: Find a way to recover the command line of the process post launch
+        [SupportedOSPlatform("linux")]
+        private static IEnumerable<ProcessData> GetChildProcessesLinux(int parentId)
+        {
+            Process[] processes = Process.GetProcesses();
+            foreach (var process in processes)
+            {
+                var pid = GetParentProcessIdLinux(process.Id);
+                if (pid == parentId) 
+                    yield return new ProcessData(process.Id, string.Empty, process.StartTime);
+            }
         }
 
         public static string GetFileContent(string path)
@@ -131,8 +153,18 @@ namespace Trebuchet
             if (!File.Exists(path)) return string.Empty;
             return File.ReadAllText(path);
         }
-
+        
         public static ProcessData GetFirstChildProcesses(int parentId)
+        {
+            if(OperatingSystem.IsWindows())
+                return GetFirstChildProcessesWindows(parentId);
+            else if (OperatingSystem.IsLinux())
+                return GetFirstChildProcessesLinux(parentId);
+            throw new NotSupportedException("Operating system is not supported.");
+        }
+
+        [SupportedOSPlatform("windows")]
+        private static ProcessData GetFirstChildProcessesWindows(int parentId)
         {
             var query = $"Select * From Win32_Process Where ParentProcessId = {parentId}";
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
@@ -141,6 +173,13 @@ namespace Trebuchet
             if (processList.Count == 0) return ProcessData.Empty;
 
             return new ProcessData(processList.Cast<ManagementObject>().First());
+        }
+
+        [SupportedOSPlatform("linux")]
+        private static ProcessData GetFirstChildProcessesLinux(int parentId)
+        {
+            var proc = GetChildProcessesLinux(parentId).FirstOrDefault(ProcessData.Empty);
+            return proc;
         }
 
         public static string GetFirstDirectoryName(string folder, string pattern)
@@ -181,6 +220,16 @@ namespace Trebuchet
 
         public static ProcessData GetProcess(int processId)
         {
+            if(OperatingSystem.IsWindows())
+                return GetProcessWindows(processId);
+            else if (OperatingSystem.IsLinux())
+                return GetProcessLinux(processId);
+            throw new NotSupportedException("Operating system is not supported.");
+        }
+        
+        [SupportedOSPlatform("windows")]
+        private static ProcessData GetProcessWindows(int processId)
+        {
             var query = $"Select * From Win32_Process Where ProcessId = {processId}";
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
             ManagementObjectCollection processList = searcher.Get();
@@ -190,13 +239,55 @@ namespace Trebuchet
             return new ProcessData(processList.Cast<ManagementObject>().First());
         }
 
+        [SupportedOSPlatform("linux")]
+        private static ProcessData GetProcessLinux(int processId)
+        {
+            throw new NotImplementedException();
+        }
+
         public static IEnumerable<ProcessData> GetProcessesWithName(string processName)
+        {
+            if(OperatingSystem.IsWindows())
+                return GetProcessesWithNameWindows(processName);
+            else  if (OperatingSystem.IsLinux())
+                return GetProcessesWithNameLinux(processName);
+            throw new NotSupportedException("Operating system is not supported.");
+        }
+
+        [SupportedOSPlatform("windows")]
+        private static IEnumerable<ProcessData> GetProcessesWithNameWindows(string processName)
         {
             var query = $"Select * From Win32_Process Where Name='{processName}'";
             ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
             ManagementObjectCollection processList = searcher.Get();
 
             return processList.EnumerateData();
+        }
+
+        [SupportedOSPlatform("linux")]
+        private static IEnumerable<ProcessData> GetProcessesWithNameLinux(string processName)
+        {
+            throw new NotImplementedException();
+        }
+        
+        [SupportedOSPlatform("linux")]
+        private static int GetParentProcessIdLinux(int processId)
+        {
+            string? line;
+            using (StreamReader reader = new StreamReader ("/proc/" + processId + "/stat"))
+                line = reader.ReadLine();
+            if (line == null) return -1;
+            
+            int endOfName = line.LastIndexOf(')');
+            string [] parts = line.Substring(endOfName).Split (new char [] {' '}, 4);
+
+            if (parts.Length >= 3) 
+            {
+                int ppid = Int32.Parse (parts [2]);
+                return ppid;
+            }
+
+            return -1;
         }
 
         public static string GetRootPath()

@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public class TrebuchetLaunch : ConfigFile<TrebuchetLaunch>
     {

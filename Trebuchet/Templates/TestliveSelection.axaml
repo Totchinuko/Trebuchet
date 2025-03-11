@@ -1,0 +1,45 @@
+﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="TestliveSelection">
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="20" />
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="1"
+                    Height="128"
+                    Width="128"
+                    Command="{Binding LiveCommand}"
+                    Style="{StaticResource TBtnStrokeBlueOver}">
+                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Window.png" Width="32" Height="32" />
+                    <TextBlock FontWeight="Bold" FontSize="16" Grid.Row="2" Text="Live" />
+                </Grid>
+            </Button>
+
+            <Button Grid.Column="3"
+                    Height="128"
+                    Width="128"
+                    Command="{Binding TestLiveCommand}"
+                    Style="{StaticResource TBtnStrokeBlueOver}">
+                <Grid VerticalAlignment="Center" HorizontalAlignment="Center">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto" />
+                        <RowDefinition Height="12" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/BugWindow.png" Width="32" Height="32" />
+                    <TextBlock FontWeight="Bold" FontSize="16" Grid.Row="2" Text="Test Live" />
+                </Grid>
+            </Button>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

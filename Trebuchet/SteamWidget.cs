@@ -1,9 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Windows;
-using System.Windows.Threading;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
 
 namespace Trebuchet
 {
@@ -26,7 +24,7 @@ namespace Trebuchet
             CancelCommand = new SimpleCommand(OnCancel);
             ConnectCommand = new SimpleCommand(OnConnect);
 
-            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick, Application.Current.Dispatcher);
+            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -61,7 +59,7 @@ namespace Trebuchet
 
         public void Receive(SteamConnectionChangedMessage message)
         {
-            Application.Current?.Dispatcher.Invoke(() =>
+            Dispatcher.UIThread.Invoke(() =>
             {
                 IsConnected = message.Value;
                 OnPropertyChanged(nameof(IsConnected));

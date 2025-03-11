@@ -1,6 +1,4 @@
-﻿using System.Windows;
-
-using CommunityToolkit.Mvvm.Messaging;
+﻿using CommunityToolkit.Mvvm.Messaging;
 
 namespace Trebuchet
 {
