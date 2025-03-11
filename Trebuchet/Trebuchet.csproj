@@ -49,6 +49,7 @@
     <ItemGroup>
         <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
         <ProjectReference Include="..\TrebuchetLib\TrebuchetLib.csproj" />
+        <ProjectReference Include="..\TrebuchetUtils\TrebuchetUtils.csproj" />
     </ItemGroup>
 
     <ItemGroup>
@@ -59,12 +60,6 @@
 
     <ItemGroup>
         <Folder Include="Assets\" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="TrebuchetUtils">
-        <HintPath>..\..\TrebuchetGUILib\TrebuchetLib\bin\Release\net8.0\TrebuchetUtils.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>
