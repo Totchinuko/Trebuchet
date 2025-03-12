@@ -1,41 +1,24 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
 
 namespace TrebuchetUtils
 {
-    public class ToggleCommand : ICommand, INotifyPropertyChanged
+    public class ToggleCommand(
+        Action<object?, bool> execute,
+        bool defaultState,
+        string offClass,
+        string onClass,
+        bool enabled = true)
+        : ICommand, INotifyPropertyChanged
     {
-        private bool _enabled = true;
-        private bool _toggled = false;
-        private Style _offStyle;
-        private Style _onStyle;
+        private bool _enabled = enabled;
+        private bool _toggled = defaultState;
 
         public event EventHandler? CanExecuteChanged;
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        private readonly Action<object?, bool> _execute;
-
-        public Style Style => _toggled ? _onStyle : _offStyle;
-
-        public static Style GetStyle(string key)
-        {
-            return (Style)Application.Current.Resources[key];
-        }
-
-        public ToggleCommand(Action<object?, bool> execute, bool defaultState, Style offStyle, Style onStyle, bool enabled = true)
-        {
-            _toggled = defaultState;
-            _offStyle = offStyle;
-            _onStyle = onStyle;
-            _execute = execute;
-            _enabled = enabled;
-        }
+        public string Classes => _toggled ? onClass : offClass;
 
         public bool CanExecute(object? parameter)
         {
@@ -44,19 +27,17 @@ namespace TrebuchetUtils
 
         public void Execute(object? parameter)
         {
-            if (_enabled)
-            {
-                _toggled = !_toggled;
-                _execute(parameter, _toggled);
-                PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Style)));
-            }
+            if (!_enabled) return;
+            _toggled = !_toggled;
+            execute(parameter, _toggled);
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Classes)));
         }
 
         public void SetToggle(bool value)
         {
             if(_toggled == value) return;
             _toggled = value;
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Style)));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(nameof(Classes)));
         }
 
         public void IsEnabled(bool enabled)
