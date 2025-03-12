@@ -1,17 +1,16 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Windows;
 using System.Windows.Input;
 
 namespace TrebuchetUtils.Modals
 {
     public class WaitModal : BaseModal, INotifyPropertyChanged
     {
-        private Action _cancelCallback;
-        private string _message = string.Empty;
-        private string _messageTitle = string.Empty;
+        private readonly Action _cancelCallback;
+        private string _message;
+        private string _messageTitle;
 
-        public WaitModal(string title, string message, Action cancelCallback) : base()
+        public WaitModal(string title, string message, Action cancelCallback) : base(650,200, "Please wait...", "WaitModal")
         {
             CloseCommand = new SimpleCommand(OnCloseModal);
             _message = message;
@@ -42,19 +41,6 @@ namespace TrebuchetUtils.Modals
                 OnPropertyChanged(nameof(MessageTitle));
             }
         }
-
-        protected override int ModalHeight => 200;
-
-        public override string ModalTitle => "Working";
-
-        protected override int ModalWidth => 650;
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["WaitModal"];
-
-        public override void OnWindowClose()
-        {
-        }
-
         protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
@@ -65,6 +51,10 @@ namespace TrebuchetUtils.Modals
             _cancelCallback.Invoke();
             _message = "Canceling...";
             OnPropertyChanged(nameof(Message));
+        }
+
+        protected override void OnWindowClose(object? sender, EventArgs e)
+        {
         }
     }
 }

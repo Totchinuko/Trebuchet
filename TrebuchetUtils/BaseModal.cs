@@ -2,41 +2,25 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Markup.Xaml.Templates;
+using Avalonia.Controls.Templates;
 
 namespace TrebuchetUtils
 {
     public abstract class BaseModal
     {
         private readonly ModalWindow _window;
-        protected BaseModal(int width, int height, string title, DataTemplate template)
+        private readonly string _template;
+        protected BaseModal(int width, int height, string title, string template)
         {
-            Window? owner;
-            WindowStartupLocation location;
-            // User should not be able to go back on the main window as long as the modal was not removed..
-            // But in some cases we want to be to show it without a main window open
-            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-                throw new ApplicationException("This is a desktop application");
-                
-            if (desktop.MainWindow is IShownWindow mainWin && mainWin.WasShown())
-            {
-                owner = desktop.MainWindow;
-                location = WindowStartupLocation.CenterOwner;
-            }
-            else
-            {
-                location = WindowStartupLocation.CenterScreen;
-                owner = null;
-            }
-            
             ModalTitle = title;
-            Template = template;
-            _window = new ModalWindow(this, owner)
+            _template = template;
+            _window = new ModalWindow(this)
             {
                 Height = height,
                 Width = width,
-                WindowStartupLocation = location
             };
+
+            _window.WindowClosed += OnWindowClose;
         }
 
         public bool CloseDisabled { get; protected set; } = true;
@@ -48,7 +32,20 @@ namespace TrebuchetUtils
         public string ModalTitle { get; }
 
         public bool CanResize { get; protected set; } = false;
-        public DataTemplate Template { get; }
+        public IDataTemplate Template {
+            get
+            {
+                if(Application.Current == null) throw new Exception("Application.Current is null");
+
+                if (Application.Current.Resources.TryGetResource(_template, Application.Current.ActualThemeVariant,
+                        out var resource) && resource is IDataTemplate template)
+                {
+                    return template;
+                }
+
+                throw new Exception($"Template {_template} not found");
+            }
+        }
         public Window Window => _window;
 
         public virtual void Cancel()
@@ -57,40 +54,43 @@ namespace TrebuchetUtils
 
         public void Close() => _window.Close();
 
-        public abstract void OnWindowClose();
+        protected abstract void OnWindowClose(object? sender, EventArgs e);
 
-        public void SetNoOwner()
-        {
-            _window.SetOwner(null);
-            _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-        }
+        public void Open() => _window.OpenDialogue();
+        
+        public void OpenDialogue(Window window) => _window.OpenDialogue(window);
 
-        public void SetOwner(Window owner)
+        public void OpenDialogue()
         {
-            if (owner is IShownWindow shown && shown.WasShown())
+            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                throw new ApplicationException("This is a desktop application");
+            
+            if (desktop.MainWindow is IShownWindow { WasShown: true })
             {
-                _window.SetOwner(owner);
                 _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                _window.OpenDialogue(desktop.MainWindow);
             }
-            else throw new ArgumentException(null, nameof(owner));
+            else
+            {
+                _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                _window.OpenDialogue();
+            }
         }
 
-        public bool SetOwner<T>() where T : class
+        public void OpenDialogue<T>() where T : Window
         {
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
                 throw new ApplicationException("This is a desktop application");
             foreach (var win in desktop.Windows)
             {
                 if (win is not T) continue;
-                SetOwner(win);
-                return true;
+                _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                _window.OpenDialogue(win);
+                return;
             }
-            return false;
+            _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            _window.OpenDialogue();
         }
-
-        public void Show() => _window.PopDialog(false);
-
-        public void ShowDialog() => _window.PopDialog();
 
         public virtual void Submit()
         {

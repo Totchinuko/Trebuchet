@@ -1,21 +1,21 @@
 ﻿using System;
-using System.Windows;
 using System.Windows.Input;
+using Avalonia.Layout;
 
 namespace TrebuchetUtils.Modals
 {
     public class InputTextModal : BaseModal
     {
-        private string _buttonLabel = string.Empty;
         private string? _text = string.Empty;
         private bool _validated;
 
-        public InputTextModal(string buttonLabel, string watermark = "", bool acceptReturn = false)
+        public InputTextModal(string buttonLabel, string watermark = "", bool acceptReturn = false) : base(650, 200, "Text", "InputTextModal")
         {
             Watermark = watermark;
             ValidateCommand = new SimpleCommand(OnValidate);
-            _buttonLabel = buttonLabel;
+            ButtonLabel = buttonLabel;
             AcceptReturn = acceptReturn;
+            CloseDisabled = false;
         }
 
         public void SetMaxLength(int maxLength)
@@ -34,23 +34,18 @@ namespace TrebuchetUtils.Modals
         }
 
         public bool AcceptReturn { get; private set; }
-        public string ButtonLabel { get => _buttonLabel; set => _buttonLabel = value; }
+        public string ButtonLabel { get; set; }
 
-        public override bool CloseDisabled => false;
         public double FieldHeight => AcceptReturn ? 120.0 : 32.0;
-        public VerticalAlignment fieldVerticalAlignement => AcceptReturn ? VerticalAlignment.Top : VerticalAlignment.Center;
-        protected override int ModalHeight => 200;
-        public override string ModalTitle => "Name";
-        protected override int ModalWidth => 650;
+        public VerticalAlignment FieldVerticalAlignment => AcceptReturn ? VerticalAlignment.Top : VerticalAlignment.Center;
         public string Watermark { get; private set; }
         public int MaxLength { get; private set; } = -1;
         public string? Text { get => _text; set => _text = value; }
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["InputTextModal"];
-
         public ICommand ValidateCommand { get; private set; }
 
-        public override void OnWindowClose()
+
+        protected override void OnWindowClose(object? sender, EventArgs e)
         {
             if (!_validated)
                 _text = null;
@@ -66,7 +61,7 @@ namespace TrebuchetUtils.Modals
             if (string.IsNullOrEmpty(_text))
                 return;
             _validated = true;
-            _window.Close();
+            Window.Close();
         }
     }
 }

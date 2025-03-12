@@ -8,6 +8,6 @@ namespace TrebuchetUtils
 {
     public interface IShownWindow
     {
-        bool WasShown();
+        bool WasShown { get; }
     }
 }

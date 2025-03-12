@@ -1,15 +1,13 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
-using Avalonia;
+using System.Windows.Input;
+using Avalonia.Threading;
 
 namespace TrebuchetUtils.Modals
 {
     public class ErrorModal : BaseModal
     {
-        public ErrorModal(string title, string message) : base(650, 200, "Error", null)
+        public ErrorModal(string title, string message) : base(650, 200, "Error", "ErrorModal")
         {
             CloseCommand = new SimpleCommand(OnCloseModal);
 
@@ -21,33 +19,33 @@ namespace TrebuchetUtils.Modals
         public string ErrorMessage { get; }
         public string ErrorTitle { get; }
 
-        public static async void ShowError(string error, string title = "Error")
+        public static async Task ShowError(string error, string title = "Error")
         {
-            if(Application.Current.Dispatcher.CheckAccess())
+            if(Dispatcher.UIThread.CheckAccess())
             {
-                new ErrorModal(title, error, exit).ShowDialog();
+                new ErrorModal(title, error).OpenDialogue();
             }
             else
-                await Application.Current.Dispatcher.InvokeAsync(() => ShowError(error, title, exit));
-        }
-
-        public override void OnWindowClose()
-        {
+                await Dispatcher.UIThread.InvokeAsync(() => ShowError(error, title));
         }
 
         private void OnCloseModal(object? obj)
         {
-            Window?.Close();
+            Window.Close();
         }
 
         public override void Submit()
         {
-            CloseCommand?.Execute(this);
+            CloseCommand.Execute(this);
         }
 
         public override void Cancel()
         {
-            CloseCommand?.Execute(this);
+            CloseCommand.Execute(this);
+        }
+
+        protected override void OnWindowClose(object? sender, EventArgs e)
+        {
         }
     }
 }

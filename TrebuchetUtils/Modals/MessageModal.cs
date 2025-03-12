@@ -1,55 +1,42 @@
-﻿using System.Windows;
+﻿using System;
+using System.Windows;
 using System.Windows.Input;
 
 namespace TrebuchetUtils.Modals
 {
     public class MessageModal : BaseModal
     {
-        private int _height = 200;
-        private string _message = string.Empty;
-        private string _messageTitle = string.Empty;
-
-        public MessageModal(string title, string message, int height = 200) : base()
+        public MessageModal(string title, string message, int height = 200) : base(650, height, "Information", "MessageModal")
         {
             CloseCommand = new SimpleCommand(OnCloseModal);
 
-            _message = message;
-            _messageTitle = title;
-            _height = height;
-            _window.Height = height;
+            Message = message;
+            MessageTitle = title;
         }
 
         public ICommand CloseCommand { get; private set; }
 
-        public string Message { get => _message; set => _message = value; }
+        public string Message {get;}
 
-        public string MessageTitle { get => _messageTitle; set => _messageTitle = value; }
-
-        protected override int ModalHeight => _height;
-
-        public override string ModalTitle => "Information";
-
-        protected override int ModalWidth => 650;
-
-        public override DataTemplate Template => (DataTemplate)System.Windows.Application.Current.Resources["MessageModal"];
-
-        public override void OnWindowClose()
-        {
-        }
+        public string MessageTitle {get;}
 
         private void OnCloseModal(object? obj)
         {
-            _window?.Close();
+            Window?.Close();
         }
 
         public override void Submit()
         {
-            CloseCommand?.Execute(this);
+            CloseCommand.Execute(this);
         }
 
         public override void Cancel()
         {
-            CloseCommand?.Execute(this);
+            CloseCommand.Execute(this);
+        }
+
+        protected override void OnWindowClose(object? sender, EventArgs e)
+        {
         }
     }
 }
