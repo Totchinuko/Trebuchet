@@ -4,7 +4,7 @@ using System.Windows.Input;
 
 namespace TrebuchetUtils.Modals
 {
-    public class WaitModal : BaseModal, INotifyPropertyChanged
+    public class WaitModal : BaseModal
     {
         private readonly Action _cancelCallback;
         private string _message;
@@ -18,32 +18,19 @@ namespace TrebuchetUtils.Modals
             _cancelCallback = cancelCallback;
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public ICommand CloseCommand { get; private set; }
 
         public string Message 
         { 
             get => _message; 
-            set
-            {
-                _message = value;
-                OnPropertyChanged(nameof(Message));
-            } 
+            set => SetField(ref _message, value);
         }
 
         public string MessageTitle 
         { 
             get => _messageTitle; 
-            set
-            {
-                _messageTitle = value;
-                OnPropertyChanged(nameof(MessageTitle));
-            }
-        }
-        protected virtual void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+            set => SetField(ref _messageTitle, value);
         }
 
         private void OnCloseModal(object? obj)

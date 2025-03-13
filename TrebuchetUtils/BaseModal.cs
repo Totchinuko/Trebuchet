@@ -1,4 +1,7 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -6,10 +9,14 @@ using Avalonia.Controls.Templates;
 
 namespace TrebuchetUtils
 {
-    public abstract class BaseModal
+    public abstract class BaseModal : INotifyPropertyChanged
     {
         private readonly ModalWindow _window;
         private readonly string _template;
+        private bool _closeDisabled = true;
+        private bool _maximizeDisabled = true;
+        private bool _minimizeDisabled = true;
+
         protected BaseModal(int width, int height, string title, string template)
         {
             ModalTitle = title;
@@ -24,11 +31,23 @@ namespace TrebuchetUtils
             _window.WindowClosed += OnWindowClose;
         }
 
-        public bool CloseDisabled { get; protected set; } = true;
+        public bool CloseDisabled
+        {
+            get => _closeDisabled;
+            protected set => SetField(ref _closeDisabled, value);
+        }
 
-        public bool MaximizeDisabled { get; protected set; } = true;
+        public bool MaximizeDisabled
+        {
+            get => _maximizeDisabled;
+            protected set => SetField(ref _maximizeDisabled, value);
+        }
 
-        public bool MinimizeDisabled { get; protected set; } = true;
+        public bool MinimizeDisabled
+        {
+            get => _minimizeDisabled;
+            protected set => SetField(ref _minimizeDisabled, value);
+        }
 
         public string ModalTitle { get; }
 
@@ -95,6 +114,21 @@ namespace TrebuchetUtils
 
         public virtual void Submit()
         {
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }
