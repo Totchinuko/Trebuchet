@@ -1,64 +1,64 @@
-﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ProcessStats">
-        <StackPanel Grid.Row="2" Orientation="Vertical">
-            <StackPanel.Style>
-                <Style TargetType="StackPanel">
-                    <Style.Triggers>
-                        <DataTrigger Binding="{Binding Running}" Value="False">
-                            <Setter Property="Visibility" Value="Hidden" />
-                        </DataTrigger>
-                    </Style.Triggers>
-                </Style>
-            </StackPanel.Style>
-            <Grid Margin="0,0,0,6"  Height="25" Background="{StaticResource GDarkPanel}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="PID" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding PID, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6"  Height="25" Background="{StaticResource GDarkPanel}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Uptime" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding Uptime, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6"  Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding CpuUsage, Converter={StaticResource Null2Collapsed}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="CPU" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding CpuUsage, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding MemoryConsumption, Converter={StaticResource Null2Collapsed}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Memory" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding MemoryConsumption, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding ProcessStatus, Converter={StaticResource Null2Collapsed}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Status" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding ProcessStatus, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding PlayerCount, Converter={StaticResource Null2Collapsed}}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Players" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding PlayerCount, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-        </StackPanel>
-    </DataTemplate>
+    <!-- <DataTemplate x:Key="ProcessStats"> -->
+    <!--     <StackPanel Grid.Row="2" Orientation="Vertical"> -->
+    <!--         <StackPanel.Style> -->
+    <!--             <Style TargetType="StackPanel"> -->
+    <!--                 <Style.Triggers> -->
+    <!--                     <DataTrigger Binding="{Binding Running}" Value="False"> -->
+    <!--                         <Setter Property="Visibility" Value="Hidden" /> -->
+    <!--                     </DataTrigger> -->
+    <!--                 </Style.Triggers> -->
+    <!--             </Style> -->
+    <!--         </StackPanel.Style> -->
+    <!--         <Grid Margin="0,0,0,6"  Height="25" Background="{StaticResource GDarkPanel}"> -->
+    <!--             <Grid.ColumnDefinitions> -->
+    <!--                 <ColumnDefinition Width="*" /> -->
+    <!--                 <ColumnDefinition Width="auto" /> -->
+    <!--             </Grid.ColumnDefinitions> -->
+    <!--             <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="PID" VerticalAlignment="Center" /> -->
+    <!--             <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding PID, Mode=OneWay}" VerticalAlignment="Center" /> -->
+    <!--         </Grid> -->
+    <!--         <Grid Margin="0,0,0,6"  Height="25" Background="{StaticResource GDarkPanel}"> -->
+    <!--             <Grid.ColumnDefinitions> -->
+    <!--                 <ColumnDefinition Width="*" /> -->
+    <!--                 <ColumnDefinition Width="auto" /> -->
+    <!--             </Grid.ColumnDefinitions> -->
+    <!--             <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Uptime" VerticalAlignment="Center" /> -->
+    <!--             <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding Uptime, Mode=OneWay}" VerticalAlignment="Center" /> -->
+    <!--         </Grid> -->
+    <!--         <Grid Margin="0,0,0,6"  Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding CpuUsage, Converter={StaticResource Null2Collapsed}}"> -->
+    <!--             <Grid.ColumnDefinitions> -->
+    <!--                 <ColumnDefinition Width="*" /> -->
+    <!--                 <ColumnDefinition Width="auto" /> -->
+    <!--             </Grid.ColumnDefinitions> -->
+    <!--             <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="CPU" VerticalAlignment="Center" /> -->
+    <!--             <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding CpuUsage, Mode=OneWay}" VerticalAlignment="Center" /> -->
+    <!--         </Grid> -->
+    <!--         <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding MemoryConsumption, Converter={StaticResource Null2Collapsed}}"> -->
+    <!--             <Grid.ColumnDefinitions> -->
+    <!--                 <ColumnDefinition Width="*" /> -->
+    <!--                 <ColumnDefinition Width="auto" /> -->
+    <!--             </Grid.ColumnDefinitions> -->
+    <!--             <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Memory" VerticalAlignment="Center" /> -->
+    <!--             <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding MemoryConsumption, Mode=OneWay}" VerticalAlignment="Center" /> -->
+    <!--         </Grid> -->
+    <!--         <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding ProcessStatus, Converter={StaticResource Null2Collapsed}}"> -->
+    <!--             <Grid.ColumnDefinitions> -->
+    <!--                 <ColumnDefinition Width="*" /> -->
+    <!--                 <ColumnDefinition Width="auto" /> -->
+    <!--             </Grid.ColumnDefinitions> -->
+    <!--             <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Status" VerticalAlignment="Center" /> -->
+    <!--             <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding ProcessStatus, Mode=OneWay}" VerticalAlignment="Center" /> -->
+    <!--         </Grid> -->
+    <!--         <Grid Margin="0,0,0,6" Height="25" Background="{StaticResource GDarkPanel}" Visibility="{Binding PlayerCount, Converter={StaticResource Null2Collapsed}}"> -->
+    <!--             <Grid.ColumnDefinitions> -->
+    <!--                 <ColumnDefinition Width="*" /> -->
+    <!--                 <ColumnDefinition Width="auto" /> -->
+    <!--             </Grid.ColumnDefinitions> -->
+    <!--             <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Players" VerticalAlignment="Center" /> -->
+    <!--             <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding PlayerCount, Mode=OneWay}" VerticalAlignment="Center" /> -->
+    <!--         </Grid> -->
+    <!--     </StackPanel> -->
+    <!-- </DataTemplate> -->
 </ResourceDictionary>

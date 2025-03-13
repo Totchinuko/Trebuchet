@@ -1,8 +1,8 @@
-﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ToggleField">
-        <CheckBox IsChecked="{Binding Value, Mode=TwoWay}" VerticalAlignment="Center" Cursor="Hand">
-            <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding Description}" Foreground="{StaticResource GDescription}" />
-        </CheckBox>
-    </DataTemplate>
+    <!-- <DataTemplate x:Key="ToggleField"> -->
+    <!--     <CheckBox IsChecked="{Binding Value, Mode=TwoWay}" VerticalAlignment="Center" Cursor="Hand"> -->
+    <!--         <TextBlock VerticalAlignment="Center" TextWrapping="Wrap" Text="{Binding Description}" Foreground="{StaticResource GDescription}" /> -->
+    <!--     </CheckBox> -->
+    <!-- </DataTemplate> -->
 </ResourceDictionary>

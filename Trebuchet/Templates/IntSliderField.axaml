@@ -1,17 +1,17 @@
-﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="IntSliderField">
-        <Border Height="38" Margin="0,3">
-            <Grid VerticalAlignment="Center">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" MaxWidth="300" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Margin="0,0,12,0">
-                    <Run Text="{Binding Value}" />
-                </TextBlock>
-                <Slider Style="{StaticResource HSlider}" Grid.Column="1" IsSnapToTickEnabled="{Binding TickEnabled}" TickFrequency="{Binding Frequency}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" Value="{Binding Value, Converter={StaticResource IntDouble}, Mode=TwoWay}" />
-            </Grid>
-        </Border>
-    </DataTemplate>
+    <!-- <DataTemplate x:Key="IntSliderField"> -->
+    <!--     <Border Height="38" Margin="0,3"> -->
+    <!--         <Grid VerticalAlignment="Center"> -->
+    <!--             <Grid.ColumnDefinitions> -->
+    <!--                 <ColumnDefinition Width="auto" /> -->
+    <!--                 <ColumnDefinition Width="*" MaxWidth="300" /> -->
+    <!--             </Grid.ColumnDefinitions> -->
+    <!--             <TextBlock Margin="0,0,12,0"> -->
+    <!--                 <Run Text="{Binding Value}" /> -->
+    <!--             </TextBlock> -->
+    <!--             <Slider Style="{StaticResource HSlider}" Grid.Column="1" IsSnapToTickEnabled="{Binding TickEnabled}" TickFrequency="{Binding Frequency}" Minimum="{Binding Minimum}" Maximum="{Binding Maximum}" Value="{Binding Value, Converter={StaticResource IntDouble}, Mode=TwoWay}" /> -->
+    <!--         </Grid> -->
+    <!--     </Border> -->
+    <!-- </DataTemplate> -->
 </ResourceDictionary>

@@ -1,7 +1,7 @@
-﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:Controls="clr-namespace:Trebuchet.Controls">
-    <DataTemplate x:Key="StringListFields">
-        <Controls:StringListEditor Values="{Binding Value, Mode=TwoWay}" />
-    </DataTemplate>
+    <!-- <DataTemplate x:Key="StringListFields"> -->
+    <!--     <Controls:StringListEditor Values="{Binding Value, Mode=TwoWay}" /> -->
+    <!-- </DataTemplate> -->
 </ResourceDictionary>

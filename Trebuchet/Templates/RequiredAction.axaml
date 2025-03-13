@@ -1,20 +1,20 @@
-﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="RequiredAction">
-        <Border Margin="0,0,0,12" Padding="8" CornerRadius="3" BorderThickness="1" BorderBrush="{StaticResource GDimBlue}" Background="{StaticResource GPanel}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0">
-                    <Run Text="{Binding Message}" />
-                </TextBlock>
-                <Button Style="{StaticResource TBtnStrokeBlueOver}"
-                        Grid.Column="1"
-                        Command="{Binding .}"
-                        Content="{Binding Button}" />
-            </Grid>
-        </Border>
-    </DataTemplate>
+    <!-- <DataTemplate x:Key="RequiredAction"> -->
+    <!--     <Border Margin="0,0,0,12" Padding="8" CornerRadius="3" BorderThickness="1" BorderBrush="{StaticResource GDimBlue}" Background="{StaticResource GPanel}"> -->
+    <!--         <Grid> -->
+    <!--             <Grid.ColumnDefinitions> -->
+    <!--                 <ColumnDefinition Width="*" /> -->
+    <!--                 <ColumnDefinition Width="auto" /> -->
+    <!--             </Grid.ColumnDefinitions> -->
+    <!--             <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0"> -->
+    <!--                 <Run Text="{Binding Message}" /> -->
+    <!--             </TextBlock> -->
+    <!--             <Button Style="{StaticResource TBtnStrokeBlueOver}" -->
+    <!--                     Grid.Column="1" -->
+    <!--                     Command="{Binding .}" -->
+    <!--                     Content="{Binding Button}" /> -->
+    <!--         </Grid> -->
+    <!--     </Border> -->
+    <!-- </DataTemplate> -->
 </ResourceDictionary>

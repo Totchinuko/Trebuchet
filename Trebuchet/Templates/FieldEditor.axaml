@@ -1,15 +1,15 @@
-﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="FieldEditor">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <ItemsControl ItemsSource="{Binding RequiredActions}" ItemTemplate="{StaticResource RequiredAction}" />
-            <ScrollViewer Grid.Row="1">
-                <ItemsControl ItemsSource="{Binding Fields}" ItemTemplateSelector="{StaticResource FieldRowSelector}" Margin="0,0,6,0" />
-            </ScrollViewer>
-        </Grid>
-    </DataTemplate>
+    <!-- <DataTemplate x:Key="FieldEditor"> -->
+    <!--     <Grid> -->
+    <!--         <Grid.RowDefinitions> -->
+    <!--             <RowDefinition Height="auto" /> -->
+    <!--             <RowDefinition Height="*" /> -->
+    <!--         </Grid.RowDefinitions> -->
+    <!--         <ItemsControl ItemsSource="{Binding RequiredActions}" ItemTemplate="{StaticResource RequiredAction}" /> -->
+    <!--         <ScrollViewer Grid.Row="1"> -->
+    <!--             <ItemsControl ItemsSource="{Binding Fields}" ItemTemplateSelector="{StaticResource FieldRowSelector}" Margin="0,0,6,0" /> -->
+    <!--         </ScrollViewer> -->
+    <!--     </Grid> -->
+    <!-- </DataTemplate> -->
 </ResourceDictionary>

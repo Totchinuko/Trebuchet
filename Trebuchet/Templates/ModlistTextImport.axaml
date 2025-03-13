@@ -1,34 +1,34 @@
-﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ModlistTextImport">
-        <Border Padding="12">
-            <Grid>
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="*" />
-                    <RowDefinition Height="auto" />
-                </Grid.RowDefinitions>
-                <TextBox x:Name="ToFocus" HorizontalScrollBarVisibility="Auto"  VerticalScrollBarVisibility="Auto" Text="{Binding Text}" AcceptsReturn="True" Margin="0,0,0,12" />
-                <WrapPanel Grid.Row="1" Orientation="Horizontal">
-                    <Button Style="{StaticResource TBtnStrokeGreenOver}"
-                        Content="Save As"
-                        Visibility="{Binding SaveAsVisible}"
-                        Command="{Binding SaveCommand}"
-                        Width="70"
-                        Margin="0" />
-                    <Button Style="{StaticResource TBtnStrokeGreenOver}"
-                        Content="Append"
-                        Visibility="{Binding ImportVisible}"
-                        Command="{Binding AppendCommand}"
-                        Width="70"
-                        Margin="0,0,12,0" />
-                    <Button Style="{StaticResource TBtnStrokeGreenOver}"
-                        Content="Replace"
-                        Visibility="{Binding ImportVisible}"
-                        Command="{Binding ApplyCommand}"
-                        Width="70"
-                        Margin="0" />
-                </WrapPanel>
-            </Grid>
-        </Border>
-    </DataTemplate>
+    <!-- <DataTemplate x:Key="ModlistTextImport"> -->
+    <!--     <Border Padding="12"> -->
+    <!--         <Grid> -->
+    <!--             <Grid.RowDefinitions> -->
+    <!--                 <RowDefinition Height="*" /> -->
+    <!--                 <RowDefinition Height="auto" /> -->
+    <!--             </Grid.RowDefinitions> -->
+    <!--             <TextBox x:Name="ToFocus" HorizontalScrollBarVisibility="Auto"  VerticalScrollBarVisibility="Auto" Text="{Binding Text}" AcceptsReturn="True" Margin="0,0,0,12" /> -->
+    <!--             <WrapPanel Grid.Row="1" Orientation="Horizontal"> -->
+    <!--                 <Button Style="{StaticResource TBtnStrokeGreenOver}" -->
+    <!--                     Content="Save As" -->
+    <!--                     Visibility="{Binding SaveAsVisible}" -->
+    <!--                     Command="{Binding SaveCommand}" -->
+    <!--                     Width="70" -->
+    <!--                     Margin="0" /> -->
+    <!--                 <Button Style="{StaticResource TBtnStrokeGreenOver}" -->
+    <!--                     Content="Append" -->
+    <!--                     Visibility="{Binding ImportVisible}" -->
+    <!--                     Command="{Binding AppendCommand}" -->
+    <!--                     Width="70" -->
+    <!--                     Margin="0,0,12,0" /> -->
+    <!--                 <Button Style="{StaticResource TBtnStrokeGreenOver}" -->
+    <!--                     Content="Replace" -->
+    <!--                     Visibility="{Binding ImportVisible}" -->
+    <!--                     Command="{Binding ApplyCommand}" -->
+    <!--                     Width="70" -->
+    <!--                     Margin="0" /> -->
+    <!--             </WrapPanel> -->
+    <!--         </Grid> -->
+    <!--     </Border> -->
+    <!-- </DataTemplate> -->
 </ResourceDictionary>

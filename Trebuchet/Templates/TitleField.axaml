@@ -1,9 +1,9 @@
-﻿<!--<ResourceDictionary xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="TitleField">
-        <StackPanel Orientation="Vertical" Margin="0,24,0,0">
-            <TextBlock Text="{Binding Name}" Style="{StaticResource TitleText}" />
-            <Border Style="{StaticResource HorizontalSep}" />
-        </StackPanel>
-    </DataTemplate>
+    <!-- <DataTemplate x:Key="TitleField"> -->
+    <!--     <StackPanel Orientation="Vertical" Margin="0,24,0,0"> -->
+    <!--         <TextBlock Text="{Binding Name}" Style="{StaticResource TitleText}" /> -->
+    <!--         <Border Style="{StaticResource HorizontalSep}" /> -->
+    <!--     </StackPanel> -->
+    <!-- </DataTemplate> -->
 </ResourceDictionary>
