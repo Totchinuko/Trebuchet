@@ -1,23 +1,22 @@
 ﻿using System.IO;
-
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
+using TrebuchetUtils.Modals;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public class SettingsPanel : FieldEditorPanel
     {
-        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
-        private bool _displayedHelp = false;
+        private bool _displayedHelp;
 
-        public SettingsPanel()
+        public SettingsPanel() : base(string.Empty)
         {
             LoadPanel();
         }
 
-        public Config Config => _config;
+        public Config Config { get; } = StrongReferenceMessenger.Default.Send<ConfigRequest>();
 
-        public UIConfig UIConfig => App.Config;
+        public UIConfig UiConfig => App.Config;
 
         public override void OnWindowShow()
         {
@@ -38,7 +37,7 @@ namespace Trebuchet
 
         protected override void OnValueChanged(string property)
         {
-            _config.SaveFile();
+            Config.SaveFile();
             App.Config.SaveFile();
             UpdateRequiredActions();
         }
@@ -48,24 +47,24 @@ namespace Trebuchet
             if (_displayedHelp) return;
             _displayedHelp = true;
 
-            if (_config.IsInstallPathValid && (Tools.IsClientInstallValid(_config) || Tools.IsServerInstallValid(_config)))
+            if (Config.IsInstallPathValid && (Tools.IsClientInstallValid(Config) || Tools.IsServerInstallValid(Config)))
                 return;
 
-            if (!_config.IsInstallPathValid)
+            if (!Config.IsInstallPathValid)
             {
                 ErrorModal modal = new ErrorModal(
                     App.GetAppText("Welcome_InstallPathInvalid_Title"),
                     App.GetAppText("Welcome_InstallPathInvalid"));
-                modal.ShowDialog();
+                modal.OpenDialogue();
             }
 
-            if ((!Tools.IsClientInstallValid(_config) && !Tools.IsServerInstallValid(_config)))
+            if ((!Tools.IsClientInstallValid(Config) && !Tools.IsServerInstallValid(Config)))
             {
                 MessageModal modal = new MessageModal(
                   App.GetAppText("Welcome_SettingTutorial_Title"),
                   App.GetAppText("Welcome_SettingTutorial"),
                   250);
-                modal.ShowDialog();
+                modal.OpenDialogue();
             }
         }
 
@@ -77,7 +76,7 @@ namespace Trebuchet
 
         private void OnAppRestart(object? obj)
         {
-            GuiExtensions.RestartProcess(_config.IsTestLive, false);
+            GuiExtensions.RestartProcess(Config.IsTestLive);
         }
 
         private void OnServerInstanceInstall(object? obj)
@@ -89,8 +88,9 @@ namespace Trebuchet
         {
             RequiredActions.Clear();
 
+            //TODO: Add to AppText
             int installed = StrongReferenceMessenger.Default.Send<InstanceInstalledCountRequest>();
-            if (Directory.Exists(_config.ResolvedInstallPath) && _config.ServerInstanceCount > installed)
+            if (Directory.Exists(Config.ResolvedInstallPath) && Config.ServerInstanceCount > installed)
                 RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, Operations.SteamDownload));
         }
     }

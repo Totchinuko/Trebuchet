@@ -1,21 +1,15 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
-    public abstract class FieldEditorPanel : Panel
+    public abstract class FieldEditorPanel(string template) : Panel(string.IsNullOrEmpty(template) ? "FieldEditor" : template)
     {
-        private List<Field> _fields = new List<Field>();
-        private ObservableCollection<RequiredCommand> _requiredActions = new ObservableCollection<RequiredCommand>();
+        public List<Field> Fields { get; set; } = [];
 
-        public List<Field> Fields { get => _fields; set => _fields = value; }
-
-        public ObservableCollection<RequiredCommand> RequiredActions { get => _requiredActions; set => _requiredActions = value; }
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["FieldEditor"];
+        public ObservableCollection<RequiredCommand> RequiredActions { get; set; } = [];
 
         protected virtual void BuildFields(string path, object target, string property = "")
         {
@@ -23,7 +17,7 @@ namespace Trebuchet
             foreach (var field in fields)
             {
                 field.ValueChanged += OnFieldValueChanged;
-                _fields.Add(field);
+                Fields.Add(field);
             }
         }
 
@@ -34,16 +28,16 @@ namespace Trebuchet
 
         protected void RefreshFields()
         {
-            if (_fields.Count == 0)
+            if (Fields.Count == 0)
                 BuildFields();
             else
-                _fields.ForEach(f => f.RefreshValue());
+                Fields.ForEach(f => f.RefreshValue());
         }
 
         private void OnFieldValueChanged(object? sender, Field e)
         {
             OnValueChanged(e.Property);
-            _fields.ForEach(f => f.RefreshVisibility());
+            Fields.ForEach(f => f.RefreshVisibility());
             if (e.RefreshApp)
                 StrongReferenceMessenger.Default.Send<PanelRefreshConfigMessage>();
         }

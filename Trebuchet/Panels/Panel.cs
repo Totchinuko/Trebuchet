@@ -1,22 +1,25 @@
 ﻿using System;
 using System.ComponentModel;
-
+using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls.Templates;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
-using TrebuchetGUILib;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public abstract class Panel : MenuElement,
         ICommand,
         INotifyPropertyChanged,
-        ITemplateHolder,
         IRecipient<PanelRefreshConfigMessage>
     {
-        protected bool _active;
+        private readonly string _template;
+        private bool _active;
 
-        public Panel()
+        public Panel(string template)
         {
+            _template = template;
             StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
@@ -31,14 +34,28 @@ namespace Trebuchet
             {
                 _active = value;
                 OnPropertyChanged(nameof(Active));
-                OnPropertyChanged(nameof(TabStyle));
+                OnPropertyChanged(nameof(TabClass));
             }
         }
 
-        public ImageSource? Icon => string.IsNullOrEmpty(IconPath) ? null : new BitmapImage(new Uri(IconPath, UriKind.Relative));
+        public Bitmap? Icon => string.IsNullOrEmpty(IconPath) ? null : TrebuchetUtils.Utils.LoadFromResource(new Uri(IconPath, UriKind.Relative));
         public string IconPath { get; set; } = string.Empty;
-        public Style TabStyle => (Style)(Active ? Application.Current.Resources["TTabLMidBlueBright"] : Application.Current.Resources["TTabLMidNormalStealth"]);
-        public abstract DataTemplate Template { get; }
+        public string TabClass => Active ? "AppTabBlue" : "AppTabNeutral";
+        
+        public IDataTemplate Template {
+            get
+            {
+                if(Application.Current == null) throw new Exception("Application.Current is null");
+
+                if (Application.Current.Resources.TryGetResource(_template, Application.Current.ActualThemeVariant,
+                        out var resource) && resource is IDataTemplate template)
+                {
+                    return template;
+                }
+
+                throw new Exception($"Template {_template} not found");
+            }
+        }
 
         public virtual bool CanExecute(object? parameter)
         {

@@ -2,22 +2,18 @@
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
-
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
+using TrebuchetUtils;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
-    public class ObservableConsoleLog
+    public class ObservableConsoleLog(ConsoleLog consoleLog)
     {
-        public ObservableConsoleLog(ConsoleLog consoleLog)
-        {
-            ConsoleLog = consoleLog;
-        }
-
         public string Body => ConsoleLog.Body;
 
-        public ConsoleLog ConsoleLog { get; }
+        public ConsoleLog ConsoleLog { get; } = consoleLog;
 
         public string Header => ConsoleLog.IsReceived ? $"[{ConsoleLog.UtcTime.ToLocalTime():HH:mm:ss}]" : "> ";
 
@@ -29,10 +25,10 @@ namespace Trebuchet
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
         private IConsole? _console;
-        private int _selectedConsole = 0;
+        private int _selectedConsole;
         private List<ProcessServerDetails> _servers = new List<ProcessServerDetails>();
 
-        public RconPanel()
+        public RconPanel() : base("RconPanel")
         {
             SendCommand = new SimpleCommand(OnSendCommand, false);
 
@@ -58,12 +54,9 @@ namespace Trebuchet
 
         public SimpleCommand SendCommand { get; }
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["RconPanel"];
-
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid &&
-                   _config.ServerInstanceCount > 0;
+            return _config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
         }
 
         public void Receive(ServerProcessStateChanged message)
@@ -97,7 +90,7 @@ namespace Trebuchet
 
         private void OnConsoleLogReceived(object? sender, ConsoleLogEventArgs e)
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.UIThread.Invoke(() =>
             {
                 ConsoleLogs.Add(new ObservableConsoleLog(e.ConsoleLog));
                 if (ConsoleLogs.Count > 200)
@@ -123,11 +116,10 @@ namespace Trebuchet
             _servers = StrongReferenceMessenger.Default.Send<ProcessServerDetailsRequest>().Response;
             for (int i = 0; i < _config.ServerInstanceCount; i++)
             {
-                var server = _servers.Where(x => x.Instance == i).FirstOrDefault();
-                if (server != null && server.RconPort > 0 && server.State == ProcessState.ONLINE)
-                    AvailableConsoles.Add($"RCON - {server.Title} ({server.Instance}) - {IPAddress.Loopback}:{server.RconPort}");
-                else
-                    AvailableConsoles.Add($"Unavailable - Instance {i}");
+                var server = _servers.FirstOrDefault(x => x.Instance == i);
+                AvailableConsoles.Add(server is { RconPort: > 0, State: ProcessState.ONLINE }
+                    ? $"RCON - {server.Title} ({server.Instance}) - {IPAddress.Loopback}:{server.RconPort}"
+                    : $"Unavailable - Instance {i}");
             }
             OnPropertyChanged(nameof(AvailableConsoles));
             RefreshValidity();
@@ -135,7 +127,7 @@ namespace Trebuchet
 
         private void RefreshValidity()
         {
-            var valid = _servers.Any(server => server.Instance == _selectedConsole && server.RconPort > 0 && server.State == ProcessState.ONLINE);
+            var valid = _servers.Any(server => server.Instance == _selectedConsole && server is { RconPort: > 0, State: ProcessState.ONLINE });
             SendCommand.Toggle(valid);
             if (valid)
                 LoadConsole(StrongReferenceMessenger.Default.Send(new ServerConsoleRequest(_selectedConsole)).Response);

@@ -1,22 +1,22 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
+﻿using Avalonia.Markup.Xaml.Templates;
+using CommunityToolkit.Mvvm.Messaging;
+using Trebuchet.Panels;
+using TrebuchetLib;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public class LogFilterPanel : Panel
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
 
-        public LogFilterPanel()
+        public LogFilterPanel() : base("LogFilterPanel")
         {
             LoadPanel();
         }
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["LogFilterPanel"];
-
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid &&
-                   _config.ServerInstanceCount > 0;
+            return _config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
         }
 
         public override void RefreshPanel()

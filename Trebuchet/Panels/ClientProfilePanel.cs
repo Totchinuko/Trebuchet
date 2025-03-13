@@ -2,10 +2,13 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public class ClientProfilePanel : FieldEditorPanel
     {
@@ -14,7 +17,7 @@ namespace Trebuchet
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private string _selectedProfile;
 
-        public ClientProfilePanel()
+        public ClientProfilePanel() : base("ClientSettings")
         {
             LoadPanel();
         }
@@ -42,8 +45,6 @@ namespace Trebuchet
                 OnProfileChanged();
             }
         }
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ClientSettings"];
 
         public override bool CanExecute(object? parameter)
         {
@@ -99,12 +100,12 @@ namespace Trebuchet
             if (!Directory.Exists(savedFolder)) return;
             if (Tools.IsSymbolicLink(savedFolder)) return;
 
-            ErrorModal question = new ErrorModal("Game Folder Reset", "Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.");
-            question.ShowDialog();
+            //TODO: Move that text into AppText.json
+            ErrorModal question = new("Game Folder Reset", "Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.");
+            question.OpenDialogue();
 
             _config.ClientPath = string.Empty;
             _config.SaveFile();
-            return;
         }
 
         private void OnOpenFolderProfile(object? obj)
@@ -125,13 +126,14 @@ namespace Trebuchet
 
         private void OnProfileCreate(object? obj)
         {
-            InputTextModal modal = new InputTextModal("Create", "Profile Name");
-            modal.ShowDialog();
+            //TODO: Move that text into AppText
+            InputTextModal modal = new("Create", "Profile Name");
+            modal.OpenDialogue();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
                 return;
             }
 
@@ -144,31 +146,31 @@ namespace Trebuchet
         private void OnProfileDelete(object? obj)
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
-            if (_profile == null) return;
 
-            QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
-            question.ShowDialog();
-            if (question.Result)
-            {
-                _profile.DeleteFolder();
+            //TODO: Move that text into AppText
+            QuestionModal question = new("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
+            question.OpenDialogue();
+            if (!question.Result) return;
+            
+            _profile.DeleteFolder();
 
-                string profile = string.Empty;
-                ClientProfile.ResolveProfile(_config, ref profile);
-                LoadProfileList();
-                SelectedProfile = profile;
-            }
+            string profile = string.Empty;
+            ClientProfile.ResolveProfile(_config, ref profile);
+            LoadProfileList();
+            SelectedProfile = profile;
         }
 
         private void OnProfileDuplicate(object? obj)
         {
+            //TODO: Move that text into AppText
             InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
             modal.SetValue(_selectedProfile);
-            modal.ShowDialog();
+            modal.OpenDialogue();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                new ErrorModal("Already Exitsts", "This profile name is already used").OpenDialogue();
                 return;
             }
 

@@ -2,11 +2,13 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
 using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public class ServerProfilePanel : FieldEditorPanel
     {
@@ -16,7 +18,7 @@ namespace Trebuchet
         private string _selectedProfile;
         private TrulyObservableCollection<ObservableString> _sudoList = new TrulyObservableCollection<ObservableString>();
 
-        public ServerProfilePanel()
+        public ServerProfilePanel() : base("ClientSettings")
         {
             LoadPanel();
         }
@@ -44,8 +46,6 @@ namespace Trebuchet
                 OnProfileChanged();
             }
         }
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ClientSettings"];
 
         public override bool CanExecute(object? parameter)
         {
@@ -112,12 +112,13 @@ namespace Trebuchet
         private void OnProfileCreate(object? obj)
         {
             InputTextModal modal = new InputTextModal("Create", "Profile Name");
-            modal.ShowDialog();
+            modal.OpenDialogue();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                //TODO: Add to AppText
+                new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
                 return;
             }
 
@@ -130,10 +131,10 @@ namespace Trebuchet
         private void OnProfileDelete(object? obj)
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
-            if (_profile == null) return;
 
-            QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
-            question.ShowDialog();
+            //TODO: Add to AppText
+            QuestionModal question = new("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
+            question.OpenDialogue();
             if (question.Result)
             {
                 _profile.DeleteFolder();
@@ -149,12 +150,13 @@ namespace Trebuchet
         {
             InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
             modal.SetValue(_selectedProfile);
-            modal.ShowDialog();
+            modal.OpenDialogue();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                //TODO: Add to AppText
+                new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
                 return;
             }
 
