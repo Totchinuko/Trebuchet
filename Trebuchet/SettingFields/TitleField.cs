@@ -2,10 +2,8 @@
 
 namespace Trebuchet.SettingFields
 {
-    public class TitleField : Field
+    public class TitleField() : Field("TitleField")
     {
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["TitleField"];
-
         public override bool UseFieldRow => false;
 
         public override void RefreshValue()

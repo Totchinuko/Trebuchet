@@ -1,12 +1,10 @@
 ﻿using System;
 
-namespace Trebuchet
+namespace Trebuchet.SettingFields
 {
-    public class CPUAffinityField : Field<long, long>
+    public class CpuAffinityField() : Field<long, long>("CPUAffinityField")
     {
         public override bool IsDefault => Value == GetDefaultValue();
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["CPUAffinityField"];
 
         public override void ResetToDefault()
         {
@@ -28,9 +26,9 @@ namespace Trebuchet
         // flip the first x bit of the long value
         private long GetDefaultValue()
         {
-            int maxCPU = Environment.ProcessorCount;
+            int maxCpu = Environment.ProcessorCount;
             long mask = 0L;
-            for (int i = 0; i < maxCPU; i++)
+            for (int i = 0; i < maxCpu; i++)
                 mask |= 1L << i;
             return mask;
         }

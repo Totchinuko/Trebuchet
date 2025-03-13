@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace Trebuchet.SettingFields
 {
-    public class MapField : TextField
+    public class MapField() : TextField("MapField")
     {
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["MapField"];
     }
 }

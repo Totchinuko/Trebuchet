@@ -2,6 +2,7 @@
 using System.Collections.ObjectModel;
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
+using Trebuchet.SettingFields;
 
 namespace Trebuchet.Panels
 {

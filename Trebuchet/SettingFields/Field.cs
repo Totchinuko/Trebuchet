@@ -1,4 +1,6 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
 using System.Collections.Specialized;
 using System.ComponentModel;
@@ -6,9 +8,15 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Trebuchet.SettingFields;
+using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls.Templates;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
-namespace Trebuchet
+#endregion
+
+namespace Trebuchet.SettingFields
 {
     [JsonDerivedType(typeof(IntField), "Int")]
     [JsonDerivedType(typeof(ToggleField), "Toggle")]
@@ -17,18 +25,30 @@ namespace Trebuchet
     [JsonDerivedType(typeof(TextListField), "TextList")]
     [JsonDerivedType(typeof(DirectoryField), "Directory")]
     [JsonDerivedType(typeof(MapField), "Map")]
-    [JsonDerivedType(typeof(CPUAffinityField), "CPUAffinity")]
+    [JsonDerivedType(typeof(CpuAffinityField), "CPUAffinity")]
     [JsonDerivedType(typeof(ComboBoxField), "ComboBox")]
     [JsonDerivedType(typeof(TitleField), "Title")]
-    [JsonDerivedType(typeof(RawUDPField), "RawUDPPort")]
+    [JsonDerivedType(typeof(RawUdpField), "RawUDPPort")]
     [JsonDerivedType(typeof(FloatField), "FloatField")]
-    public abstract class Field : INotifyPropertyChanged
+    public abstract class Field(string template) : INotifyPropertyChanged
     {
-        private static JsonSerializerOptions _options = new JsonSerializerOptions();
+        private static readonly JsonSerializerOptions Options = new();
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public IDataTemplate Template
+        {
+            get
+            {
+                if (Application.Current == null) throw new Exception("Application.Current is null");
 
-        public event EventHandler<Field>? ValueChanged;
+                if (Application.Current.Resources.TryGetResource(template, Application.Current.ActualThemeVariant,
+                        out var resource) && resource is IDataTemplate template1)
+                {
+                    return template1;
+                }
+
+                throw new Exception($"Template {template} not found");
+            }
+        }
 
         public string Description { get; set; } = string.Empty;
 
@@ -44,13 +64,15 @@ namespace Trebuchet
 
         public bool RefreshApp { get; set; } = false;
 
-        public abstract DataTemplate Template { get; }
-
         public virtual bool UseFieldRow => true;
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        public event EventHandler<Field>? ValueChanged;
 
         public static List<Field> BuildFieldList(string json, object target, PropertyInfo? property = null)
         {
-            List<Field>? fields = JsonSerializer.Deserialize<List<Field>>(json, _options);
+            List<Field>? fields = JsonSerializer.Deserialize<List<Field>>(json, Options);
             if (fields == null) throw new Exception("Could not deserialize json fields definition.");
 
             foreach (var field in fields)
@@ -77,27 +99,28 @@ namespace Trebuchet
         }
     }
 
-    public abstract class Field<T, D> : Field, ITemplateHolder
+    public abstract class Field<T, TD> : Field
     {
         private PropertyInfo? _propertyInfos;
         private object? _target;
         private PropertyInfo? _targetProperty;
 
-        public Field()
+        protected Field(string template) : base(template)
         {
             ResetCommand = new SimpleCommand(OnReset);
             HyperlinkCommand = new SimpleCommand(OnHyperlinkClicked);
         }
 
+
         public FieldCondition? Condition { get; set; } = null;
 
-        public virtual D? Default { get; set; } = default;
+        public virtual TD? Default { get; set; }
 
         public ICommand HyperlinkCommand { get; private set; }
 
         public abstract bool IsDefault { get; }
 
-        public Visibility IsVisible => Condition == null ? Visibility.Visible : Condition.IsVisible(GetTarget()) ? Visibility.Visible : Visibility.Collapsed;
+        public bool IsVisible => Condition == null || Condition.IsVisible(GetTarget());
 
         public ICommand ResetCommand { get; private set; }
 
@@ -107,13 +130,13 @@ namespace Trebuchet
         {
             get
             {
-                if (_propertyInfos == null) throw new System.Exception($"Missing property information for {Property}.");
+                if (_propertyInfos == null) throw new Exception($"Missing property information for {Property}.");
                 return GetConvert(_propertyInfos.GetValue(GetTarget()));
             }
             set
             {
                 if (!Validate(value)) return;
-                if (_propertyInfos == null) throw new System.Exception($"Missing property information for {Property}.");
+                if (_propertyInfos == null) throw new Exception($"Missing property information for {Property}.");
                 RemoveCollectionEvent();
                 _propertyInfos.SetValue(GetTarget(), SetConvert(value));
                 AddCollectionEvent();
@@ -156,8 +179,8 @@ namespace Trebuchet
         {
             if (_targetProperty == null)
                 return _target ?? throw new NullReferenceException("Target is not set to a value.");
-            else
-                return _targetProperty.GetValue(_target) ?? throw new NullReferenceException("Target is not set to a value.");
+            return _targetProperty.GetValue(_target) ??
+                   throw new NullReferenceException("Target is not set to a value.");
         }
 
         private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
@@ -168,12 +191,10 @@ namespace Trebuchet
 
         private void OnHyperlinkClicked(object? obj)
         {
-            using (Process process = new Process())
-            {
-                process.StartInfo.UseShellExecute = true;
-                process.StartInfo.FileName = Hyperlink;
-                process.Start();
-            }
+            using var process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = Hyperlink;
+            process.Start();
         }
 
         private void OnReset(object? obj)
@@ -191,11 +212,11 @@ namespace Trebuchet
         {
             if (Validation == null) return true;
             if (Validation is not BaseValidation<T> validation) return false;
-            if (validation.IsValid(value, out string errorMessage)) return true;
+            if (validation.IsValid(value, out var errorMessage)) return true;
             if (string.IsNullOrEmpty(errorMessage)) return false;
 
-            ErrorModal modal = new ErrorModal("Invalid Value", errorMessage, false);
-            modal.ShowDialog();
+            var modal = new ErrorModal("Invalid Value", errorMessage);
+            modal.OpenDialogue();
             return false;
         }
     }

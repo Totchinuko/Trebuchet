@@ -2,7 +2,7 @@
 
 namespace Trebuchet.SettingFields
 {
-    public class TextField : Field<string, string>
+    public class TextField(string template) : Field<string, string>(string.IsNullOrEmpty(template) ? "TextboxField" : template)
     {
         public override string? Default
         {
@@ -17,14 +17,12 @@ namespace Trebuchet.SettingFields
 
         public override bool IsDefault => Default == Value;
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["TextboxField"];
-
         public override void ResetToDefault()
         {
             Value = Default;
         }
 
-        protected override string? GetConvert(object? value)
+        protected override string GetConvert(object? value)
         {
             if (value is not string n) throw new Exception("Value was expected to be a string.");
             return n;
