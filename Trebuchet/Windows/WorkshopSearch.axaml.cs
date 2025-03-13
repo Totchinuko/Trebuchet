@@ -4,21 +4,31 @@ using SteamWorksWebAPI.Interfaces;
 using SteamWorksWebAPI.Response;
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Threading;
+using TrebuchetLib;
+using TrebuchetUtils;
 
-namespace Trebuchet
+namespace Trebuchet.Windows
 {
     /// <summary>
     /// Interaction logic for WorkshopSearch.xaml
     /// </summary>
-    public partial class WorkshopSearch : Window, INotifyPropertyChanged
+    public partial class WorkshopSearch : Window
     {
+        public static readonly DirectProperty<WorkshopSearch, List<WorkshopSearchResult>> SearchResultsProperty =
+            AvaloniaProperty.RegisterDirect<WorkshopSearch, List<WorkshopSearchResult>>(nameof(SearchResults),
+                o => o.SearchResults, (o, v) => o.SearchResults = v);
+        
         private List<WorkshopSearchResult> _searchResults = new List<WorkshopSearchResult>();
         private string _searchTerm = string.Empty;
-        private bool _testLiveWorkshop = false;
+        private bool _testLiveWorkshop;
 
         public WorkshopSearch()
         {
@@ -30,8 +40,6 @@ namespace Trebuchet
 
         public event EventHandler<WorkshopSearchResult>? ModAdded;
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         public ICommand AddModCommand { get; private set; }
 
         public ICommand SearchCommand { get; private set; }
@@ -39,11 +47,7 @@ namespace Trebuchet
         public List<WorkshopSearchResult> SearchResults
         {
             get => _searchResults;
-            set
-            {
-                _searchResults = value;
-                OnPropertyChanged(nameof(SearchResults));
-            }
+            set => SetAndRaise(SearchResultsProperty, ref _searchResults, value);
         }
 
         public string SearchTerm { get => _searchTerm; set => _searchTerm = value; }
@@ -63,11 +67,6 @@ namespace Trebuchet
         {
             if (obj is WorkshopSearchResult value)
                 ModAdded?.Invoke(this, value);
-        }
-
-        protected virtual void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         private void OnCreatorSearchComplete(Task<GetPlayerSummariesResponse> task)
@@ -104,17 +103,14 @@ namespace Trebuchet
 
             CancellationTokenSource cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.SteamSearch, 15 * 1000));
             Task.Run(() => PublishedFileService.QueryFiles(query, cts.Token), cts.Token)
-                .ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnSearchCompleted(x)))
-                .ContinueWith((x) => OnSearchCreators(cts.Token), cts.Token)
-                .Unwrap().ContinueWith((x) => Application.Current.Dispatcher.Invoke(() => OnCreatorSearchComplete(x)));
+                .ContinueWith((x) => Dispatcher.UIThread.Invoke(() => OnSearchCompleted(x)), cts.Token)
+                .ContinueWith((_) => OnSearchCreators(cts.Token), cts.Token)
+                .Unwrap().ContinueWith((x) => Dispatcher.UIThread.Invoke(() => OnCreatorSearchComplete(x)), cts.Token);
         }
 
         private void OnSearchCompleted(Task<QueryFilesResponse> task)
         {
-            if (task.Result.Total == 0)
-                SearchResults = new List<WorkshopSearchResult>();
-            else
-                SearchResults = task.Result.PublishedFileDetails.Select(file => new WorkshopSearchResult(file)).ToList();
+            SearchResults = task.Result.Total == 0 ? [] : task.Result.PublishedFileDetails.Select(file => new WorkshopSearchResult(file)).ToList();
         }
 
         private async Task<GetPlayerSummariesResponse> OnSearchCreators(CancellationToken ct)

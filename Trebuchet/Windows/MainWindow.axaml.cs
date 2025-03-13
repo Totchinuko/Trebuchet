@@ -2,6 +2,7 @@
 using System.IO;
 using Avalonia.Controls;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 
 namespace Trebuchet
 {
@@ -24,7 +25,8 @@ namespace Trebuchet
         {
             base.OnClosed(e);
             App.OnAppClose();
-            Application.Current.Shutdown(0);
+            if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                desktop.Shutdown();
         }
 
         //TODO: Test that this event actually work for this purpose

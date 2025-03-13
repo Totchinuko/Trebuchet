@@ -149,7 +149,7 @@ namespace Trebuchet.Panels
         {
             var update = from file in _modlist
                 where file.IsPublished
-                join details in message.Modlist on file.PublishedFileID equals details.PublishedFileID
+                join details in message.Modlist on file.PublishedFileId equals details.PublishedFileID
                 select new KeyValuePair<ModFile, PublishedFile>(file, details);
 
             List<ulong> updates =
@@ -471,7 +471,7 @@ namespace Trebuchet.Panels
 
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
         {
-            if (_modlist.Any(x => x.IsPublished && x.PublishedFileID == mod.PublishedFileID)) return;
+            if (_modlist.Any(x => x.IsPublished && x.PublishedFileId == mod.PublishedFileID)) return;
             var path = mod.PublishedFileID.ToString();
             _profile.ResolveMod(ref path);
             var file = new ModFile(mod, path);
@@ -485,9 +485,9 @@ namespace Trebuchet.Panels
 
             Dispatcher.UIThread.Invoke(() =>
             {
-                foreach (var file in _modlist.Where(file => file.PublishedFileID == id))
+                foreach (var file in _modlist.Where(file => file.PublishedFileId == id))
                 {
-                    var path = file.PublishedFileID.ToString();
+                    var path = file.PublishedFileId.ToString();
                     _profile.ResolveMod(ref path);
                     file.RefreshFile(path);
                 }
@@ -595,14 +595,14 @@ namespace Trebuchet.Panels
         {
             if (obj is not ModFile modFile) return;
 
-            StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage([modFile.PublishedFileID]));
+            StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage([modFile.PublishedFileId]));
         }
 
         private void OnOpenWorkshop(object? obj)
         {
             if (obj is not ModFile modFile) return;
 
-            global::TrebuchetUtils.Utils.OpenWeb(string.Format(Config.SteamWorkshopURL, modFile.PublishedFileID));
+            global::TrebuchetUtils.Utils.OpenWeb(string.Format(Config.SteamWorkshopURL, modFile.PublishedFileId));
         }
 
         private void OnSearchClosing(object? sender, CancelEventArgs e)
@@ -626,7 +626,7 @@ namespace Trebuchet.Panels
         {
             foreach (var file in _modlist)
             {
-                var path = file.PublishedFileID.ToString();
+                var path = file.PublishedFileId.ToString();
                 _profile.ResolveMod(ref path);
                 file.RefreshFile(path);
             }

@@ -3,14 +3,16 @@ using System.ComponentModel;
 using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
-    public class ServerInstanceDashboard : INotifyPropertyChanged, IRecipient<ServerProcessStateChanged>
+    public sealed class ServerInstanceDashboard : INotifyPropertyChanged, IRecipient<ServerProcessStateChanged>
     {
-        private Config _config;
-        private string _selectedModlist = string.Empty;
-        private string _selectedProfile = string.Empty;
+        private readonly Config _config;
+        private string _selectedModlist;
+        private string _selectedProfile;
 
         public ServerInstanceDashboard(int instance)
         {
@@ -22,7 +24,7 @@ namespace Trebuchet
             _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
             Instance = instance;
 
-            StrongReferenceMessenger.Default.Register<ServerProcessStateChanged>(this);
+            StrongReferenceMessenger.Default.Register(this);
 
             App.Config.GetInstanceParameters(Instance, out _selectedModlist, out _selectedProfile);
 
@@ -49,7 +51,7 @@ namespace Trebuchet
 
         public bool ProcessRunning { get; private set; }
 
-        public IProcessStats ProcessStats { get; } = new ProcessStats();
+        public IProcessStats ProcessStats { get; } = new ProcessStatsLight();
 
         public List<string> Profiles { get; private set; } = new List<string>();
 
@@ -94,9 +96,10 @@ namespace Trebuchet
 
             if (App.Config.DisplayWarningOnKill)
             {
+                //TODO: Add to AppText
                 QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
                     "Do you wish to continue ?");
-                question.ShowDialog();
+                question.OpenDialogue();
                 if (!question.Result) return;
             }
 
@@ -137,7 +140,7 @@ namespace Trebuchet
                 ProcessStats.SetDetails(message.ProcessDetails.NewDetails);
         }
 
-        protected virtual void OnPropertyChanged(string name)
+        private void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
@@ -180,10 +183,9 @@ namespace Trebuchet
             if (ProcessRunning) return;
 
             LaunchCommand.Toggle(false);
-            StrongReferenceMessenger.Default.Send(new CatapultServerMessage(new[]
-            {
+            StrongReferenceMessenger.Default.Send(new CatapultServerMessage([
                 (SelectedProfile, SelectedModlist, Instance)
-            }));
+            ]));
         }
 
         private void OnModUpdate(object? obj)
@@ -197,7 +199,7 @@ namespace Trebuchet
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
             LaunchCommand.Toggle(true);
-            new ErrorModal("Server failed to start", "Server failed to start properly. See the logs for more informations.").ShowDialog();
+            new ErrorModal("Server failed to start", "Server failed to start properly. See the logs for more information.").OpenDialogue();
         }
 
         private void OnProcessStarted(ProcessServerDetails details)

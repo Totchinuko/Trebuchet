@@ -10,6 +10,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Serilog;
+using Trebuchet.Modals;
 using TrebuchetLib;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
@@ -20,9 +21,9 @@ using TrebuchetUtils.Modals;
 
 namespace Trebuchet;
 
-public sealed partial class App : Application
+public partial class App : Application, IApplication
 {
-    public static bool HasCrashed { get; private set; }
+    public bool HasCrashed { get; private set; }
     public bool IsShuttingDown { get; private set; }
     public static string ApiKey { get; private set; } = string.Empty;
 
@@ -31,6 +32,7 @@ public sealed partial class App : Application
     public static UIConfig Config { get; private set; } = null!;
 
     public string AppIconPath => "pack://application:,,,/Trebuchet;component/Icons/AppIcon.ico";
+    public bool IsShutingDown { get; } = false;
 
     public static string GetAppText(string key, params object[] args)
     {
@@ -56,15 +58,15 @@ public sealed partial class App : Application
         mainWindow.Show();
     }
         
-    public static void Crash() => HasCrashed = true;
+    public void Crash() => HasCrashed = true;
         
         
     private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         Log.Error(e.Exception, "DispatcherUnhandledException");
         e.Handled = true;
-        new ExceptionModal(e.Exception).ShowDialog();
-        IsShuttingDown = true;
+        new ExceptionModal(e.Exception).OpenDialogue();
+        ShutdownOnError();
     }
     
     public override void OnFrameworkInitializationCompleted()
@@ -106,7 +108,7 @@ public sealed partial class App : Application
             }
             TestliveModal modal = new (desktop.Args?.Contains("-catapult") ?? false);
             desktop.MainWindow = modal.Window;
-            modal.ShowDialog();
+            modal.OpenDialogue();
         }
         base.OnFrameworkInitializationCompleted();
     }
@@ -123,8 +125,8 @@ public sealed partial class App : Application
         await Dispatcher.UIThread.InvokeAsync(() => Log.Error((Exception)e.ExceptionObject, "UnhandledException"));
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            new ExceptionModal(((Exception)e.ExceptionObject)).ShowDialog();
-            IsShuttingDown = true;
+            new ExceptionModal(((Exception)e.ExceptionObject)).OpenDialogue();
+            ShutdownOnError();
         });
     }
 
@@ -133,14 +135,14 @@ public sealed partial class App : Application
         await Dispatcher.UIThread.InvokeAsync(() => Log.Error(e.Exception, "UnobservedTaskException"));
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            new ExceptionModal(e.Exception).ShowDialog();
-            IsShuttingDown = true;
+            new ExceptionModal(e.Exception).OpenDialogue();
+            ShutdownOnError();
         });
     }
 
     private void ReadAppText()
     {
-        var node = JsonSerializer.Deserialize<JsonNode>(GuiExtensions.GetEmbededTextFile("Trebuchet.Data.AppText.json"));
+        var node = JsonSerializer.Deserialize<JsonNode>(TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.Data.AppText.json"));
         if (node == null) return;
 
         AppText.Clear();
@@ -150,7 +152,7 @@ public sealed partial class App : Application
 
     private static void ReadSettings()
     {
-        var node = JsonSerializer.Deserialize<JsonNode>(GuiExtensions.GetEmbededTextFile("Trebuchet.AppSettings.json"));
+        var node = JsonSerializer.Deserialize<JsonNode>(TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.AppSettings.json"));
         if (node == null) return;
 
         ApiKey = node["apikey"]?.GetValue<string>() ?? string.Empty;
@@ -158,15 +160,16 @@ public sealed partial class App : Application
         
     public void Handle(ITinyMessage message, Exception exception)
     {
-        new ExceptionModal(exception).ShowDialog();
+        new ExceptionModal(exception).OpenDialogue();
         IsShuttingDown = true;
         if(Application.Current?.ApplicationLifetime is IControlledApplicationLifetime app)
             app.Shutdown();
         else  throw new Exception("Application not initialized");
     }
 
-    private static void ShutdownOnError()
+    private void ShutdownOnError()
     {
+        IsShuttingDown = true;
         if(Current?.ApplicationLifetime is  IControlledApplicationLifetime app)
             app.Shutdown();
     }

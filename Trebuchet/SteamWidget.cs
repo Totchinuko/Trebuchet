@@ -2,6 +2,8 @@
 using System.ComponentModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
@@ -11,10 +13,10 @@ namespace Trebuchet
         IRecipient<OperationStateChanged>
     {
         private readonly object _descriptionLock = new();
-        private readonly object _progressLock = new();
+        private readonly object _progressLock;
         private string _description = string.Empty;
         private double _progress;
-        private DispatcherTimer _timer;
+        private readonly DispatcherTimer _timer;
 
         public SteamWidget()
         {
@@ -51,7 +53,7 @@ namespace Trebuchet
             if (!IsConnected)
             {
                 if (displayError)
-                    new ErrorModal("Steam Error", "You must be connected to Steam for this opperation.").ShowDialog();
+                    new ErrorModal("Steam Error", "You must be connected to Steam for this operation.").OpenDialogue();
                 return false;
             }
             return true;

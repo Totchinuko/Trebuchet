@@ -4,6 +4,8 @@ using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
@@ -84,9 +86,10 @@ namespace Trebuchet
 
             if (App.Config.DisplayWarningOnKill)
             {
+                //TODO: Add to AppText
                 QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
                     "Do you wish to continue ?");
-                question.ShowDialog();
+                question.OpenDialogue();
                 if (!question.Result) return;
             }
 
@@ -187,7 +190,7 @@ namespace Trebuchet
             KillCommand.Toggle(false);
             LaunchCommand.Toggle(true);
             LaunchBattleEyeCommand.Toggle(true);
-            new ErrorModal("Client failed to start", "See the logs for more informations.").ShowDialog();
+            new ErrorModal("Client failed to start", "See the logs for more informations.").OpenDialogue();
         }
 
         private void OnProcessStarted(ProcessDetails details)
