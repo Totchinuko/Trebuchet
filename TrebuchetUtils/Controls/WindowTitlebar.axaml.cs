@@ -1,48 +1,34 @@
-﻿#region
-
-using System;
+﻿using System;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 
-#endregion
-
 namespace TrebuchetUtils.Controls
 {
     /// <summary>
-    ///     Interaction logic for WindowTitlebar.xaml
+    /// Interaction logic for WindowTitlebar.xaml
     /// </summary>
     public partial class WindowTitlebar : UserControl
     {
-        public static readonly StyledProperty<string> CloseIconProperty =
-            AvaloniaProperty.Register<WindowTitlebar, string>(nameof(CloseIcon));
+        public static readonly StyledProperty<string> CloseIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(CloseIcon));
 
-        public static readonly StyledProperty<bool> DisableCloseProperty =
-            AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableClose));
+        public static readonly StyledProperty<bool> DisableCloseProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableClose));
 
-        public static readonly StyledProperty<bool> DisableMaximizeProperty =
-            AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableMaximize));
+        public static readonly StyledProperty<bool> DisableMaximizeProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableMaximize));
+        
+        public static readonly StyledProperty<bool> DisableMinimizeProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableMinimize));
 
-        public static readonly StyledProperty<bool> DisableMinimizeProperty =
-            AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableMinimize));
+        public static readonly StyledProperty<object?> HeaderProperty = AvaloniaProperty.Register<WindowTitlebar, object?>(nameof(Header));
 
-        public static readonly StyledProperty<object?> HeaderProperty =
-            AvaloniaProperty.Register<WindowTitlebar, object?>(nameof(Header));
+        public static readonly StyledProperty<string> LogoIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(LogoIcon));
 
-        public static readonly StyledProperty<string> LogoIconProperty =
-            AvaloniaProperty.Register<WindowTitlebar, string>(nameof(LogoIcon));
+        public static readonly StyledProperty<string> MaximizeIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(MaximizeIcon));
 
-        public static readonly StyledProperty<string> MaximizeIconProperty =
-            AvaloniaProperty.Register<WindowTitlebar, string>(nameof(MaximizeIcon));
+        public static readonly StyledProperty<string> MinimizeIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(MinimizeIcon));
 
-        public static readonly StyledProperty<string> MinimizeIconProperty =
-            AvaloniaProperty.Register<WindowTitlebar, string>(nameof(MinimizeIcon));
+        public static readonly StyledProperty<string> RestoreIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(RestoreIcon));
 
-        public static readonly StyledProperty<string> RestoreIconProperty =
-            AvaloniaProperty.Register<WindowTitlebar, string>(nameof(RestoreIcon));
-
-        public static readonly StyledProperty<string> TitleProperty =
-            AvaloniaProperty.Register<WindowTitlebar, string>(nameof(Title));
+        public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(Title));
 
         private WindowState _state;
 
@@ -161,14 +147,14 @@ namespace TrebuchetUtils.Controls
 
         private void Close_MouseLeftButtonUp(object sender, RoutedEventArgs e)
         {
-            if (TopLevel.GetTopLevel(this) is Window window)
+            if(TopLevel.GetTopLevel(this) is Window window)
                 window.Close();
         }
 
         private void MaximizeButton_MouseLeftButtonUp(object sender, RoutedEventArgs e)
         {
             if (TopLevel.GetTopLevel(this) is not Window window) return;
-
+            
             if (window.WindowState == WindowState.Normal)
             {
                 window.WindowState = WindowState.Maximized;

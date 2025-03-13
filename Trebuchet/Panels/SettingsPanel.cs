@@ -1,6 +1,7 @@
 ﻿using System.IO;
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
+using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
 namespace Trebuchet.Panels

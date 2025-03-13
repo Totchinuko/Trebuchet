@@ -602,7 +602,7 @@ namespace Trebuchet.Panels
         {
             if (obj is not ModFile modFile) return;
 
-            TrebuchetUtils.Utils.OpenWeb(string.Format(Config.SteamWorkshopURL, modFile.PublishedFileID));
+            global::TrebuchetUtils.Utils.OpenWeb(string.Format(Config.SteamWorkshopURL, modFile.PublishedFileID));
         }
 
         private void OnSearchClosing(object? sender, CancelEventArgs e)

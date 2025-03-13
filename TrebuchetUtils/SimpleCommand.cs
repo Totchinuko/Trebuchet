@@ -8,19 +8,11 @@ using System.Windows.Input;
 
 namespace TrebuchetUtils
 {
-    public class SimpleCommand : ICommand
+    public class SimpleCommand(Action<object?> execute, bool enabled = true) : ICommand
     {
-        private bool _enabled = true;
+        private bool _enabled = enabled;
 
         public event EventHandler? CanExecuteChanged;
-
-        private readonly Action<object?> _execute;
-
-        public SimpleCommand(Action<object?> execute, bool enabled = true)
-        {
-            _execute = execute;
-            _enabled = enabled;
-        }
 
         public bool CanExecute(object? parameter)
         {
@@ -30,7 +22,7 @@ namespace TrebuchetUtils
         public void Execute(object? parameter)
         {
             if(_enabled)
-                _execute(parameter);
+                execute(parameter);
         }
 
         public void Toggle(bool enabled)

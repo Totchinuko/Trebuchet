@@ -14,7 +14,7 @@ namespace Trebuchet
                 errorMessage = string.Empty;
                 return true;
             }
-            if (!GuiExtensions.ValidateGameDirectory(value, out errorMessage))
+            if (!TrebuchetUtils.ValidateGameDirectory(value, out errorMessage))
                 return false;
 
             if (!Tools.ValidateDirectoryUAC(value))

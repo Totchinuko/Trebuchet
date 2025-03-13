@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
@@ -13,8 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-
-#endregion
+using SteamWorksWebAPI;
 
 namespace TrebuchetUtils
 {
@@ -33,6 +30,15 @@ namespace TrebuchetUtils
         {
             if (!Directory.Exists(directory))
                 Directory.CreateDirectory(directory);
+        }
+        
+        public static IEnumerable<(ulong, ulong)> GetManifestKeyValuePairs(this List<PublishedFile> list)
+        {
+            foreach (var file in list)
+            {
+                if (ulong.TryParse(file.HcontentFile, out var manifest))
+                    yield return (file.PublishedFileID, manifest);
+            }
         }
 
         public static void OpenWeb(string url)

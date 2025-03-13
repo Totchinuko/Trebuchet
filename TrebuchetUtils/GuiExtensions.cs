@@ -1,13 +1,36 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.IO;
+using System.Reflection;
 using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using TrebuchetLib;
+using TrebuchetUtils.Modals;
 using VisualExtensions = Avalonia.VisualTree.VisualExtensions;
 
 namespace TrebuchetUtils
 {
     public static class GuiExtensions
     {
+        /// <summary>
+        /// Asserts that the given assertion is true, and if not, shows an error modal with the given message.
+        /// </summary>
+        /// <param name="assertion"></param>
+        /// <param name="message"></param>
+        /// <returns>Return false if the assertion failled</returns>
+        public static bool Assert(bool assertion, string message)
+        {
+            if (!assertion)
+            {
+                new ErrorModal("Error", message).OpenDialogue();
+                return false;
+            }
+            return true;
+        }
+        
         public static IEnumerable<T> FindVisualChildren<T>(Visual depObj) where T : Visual
         {
             foreach (var child in VisualExtensions.GetVisualChildren(depObj))
@@ -17,6 +40,22 @@ namespace TrebuchetUtils
             }
         }
         
+        public static string GetEmbededTextFile(string path)
+        {
+            var assembly = Assembly.GetExecutingAssembly();
+            using (Stream stream = assembly.GetManifestResourceStream(path) ?? throw new Exception($"Could not find resource {path}."))
+            using (StreamReader reader = new StreamReader(stream))
+            {
+                return reader.ReadToEnd();
+            }
+        }
+        public static string GetFileVersion()
+        {
+            if (string.IsNullOrEmpty(System.Environment.ProcessPath))
+                return string.Empty;
+            System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Environment.ProcessPath);
+            return fvi.FileVersion ?? string.Empty;
+        }
         public static IEnumerable<Visual> FindVisualChildren(Visual depObj)
         {
             foreach (var child in VisualExtensions.GetVisualChildren(depObj))
@@ -24,6 +63,20 @@ namespace TrebuchetUtils
                 yield return child;
                 foreach(var childOfChild in FindVisualChildren(child)) yield return childOfChild;
             }
+        }
+        
+        public static void RestartProcess(bool testlive, bool asAdmin = false)
+        {
+            var data = Tools.GetProcess(Environment.ProcessId);
+            Process process = new Process();
+            process.StartInfo.FileName = data.filename;
+            process.StartInfo.Arguments = data.args + (testlive ? " -testlive" : " -live");
+            process.StartInfo.UseShellExecute = true;
+            if (asAdmin)
+                process.StartInfo.Verb = "runas";
+            process.Start();
+            if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                desktop.Shutdown();
         }
 
         public static void SetParentValue<TParent>(this Visual child, AvaloniaProperty property, object value) where TParent : Visual

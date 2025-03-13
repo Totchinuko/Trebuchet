@@ -1,26 +1,29 @@
-﻿namespace Trebuchet
+﻿using Avalonia.Platform.Storage;
+
+namespace Trebuchet.Utils
 {
-    public struct FileType
+    public static class FileType
     {
-        public string extention;
-        public string name;
-
-        public static FileType Json => new FileType
+        public const string JsonExt = "json";
+        public const string PakExt = "pak";
+        public const string TxtExt = "txt";
+        
+        public static readonly FilePickerFileType Json = new("Json Text")
         {
-            extention = "json",
-            name = "Json Text"
+            MimeTypes = ["application/json"],
+            Patterns = ["*.json"],
         };
-
-        public static FileType Pak => new FileType
+        
+        public static readonly FilePickerFileType Pak = new ("Unreal Pak")
         {
-            extention = "pak",
-            name = "Unreal Pak"
+            Patterns = ["*.pak"],
+            MimeTypes = ["application/octet-stream"],
         };
-        public static FileType Txt => new FileType
+        
+        public static readonly FilePickerFileType Txt = new ("Plain Text")
         {
-            extention = "txt",
-            name = "Plain Text"
+            Patterns = ["*.txt"],
+            MimeTypes = ["text/plain"],
         };
-        public string Filter => $"{name} (*.{extention})|*.{extention}";
     }
 }

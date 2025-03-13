@@ -17,7 +17,7 @@ namespace Trebuchet.Validation
                 return true;
             }
             value = Config.ResolveInstallPath(value);
-            if (!GuiExtensions.ValidateInstallDirectory(value, out errorMessage))
+            if (!TrebuchetUtils.ValidateInstallDirectory(value, out errorMessage))
             {
                 return false;
             }

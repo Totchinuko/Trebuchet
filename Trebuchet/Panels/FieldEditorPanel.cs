@@ -14,7 +14,7 @@ namespace Trebuchet.Panels
 
         protected virtual void BuildFields(string path, object target, string property = "")
         {
-            var fields = Field.BuildFieldList(GuiExtensions.GetEmbededTextFile(path), target, string.IsNullOrEmpty(property) ? null : target.GetType().GetProperty(property));
+            var fields = Field.BuildFieldList(TrebuchetUtils.Utils.GetEmbeddedTextFile(path), target, string.IsNullOrEmpty(property) ? null : target.GetType().GetProperty(property));
             foreach (var field in fields)
             {
                 field.ValueChanged += OnFieldValueChanged;
