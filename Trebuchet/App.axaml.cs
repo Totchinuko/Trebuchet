@@ -51,7 +51,8 @@ public partial class App : Application, IApplication
         Config = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
 
         TrebuchetApp app = new (testlive, catapult);
-        MainWindow mainWindow = new (app);
+        MainWindow mainWindow = new ();
+        mainWindow.SetApp(app);
         if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.MainWindow = mainWindow;
         else throw new Exception("Application not initialized");

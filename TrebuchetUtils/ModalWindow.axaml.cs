@@ -15,18 +15,22 @@ namespace TrebuchetUtils
     /// </summary>
     public partial class ModalWindow : Window, IShownWindow
     {
-        public ModalWindow(BaseModal modal)
+        public ModalWindow()
         {
-            App = modal;
-            DataContext = this;
             InitializeComponent();
         }
 
-        public BaseModal App { get; private set; }
+        public BaseModal? App { get; private set; }
 
         public string AppIconPath => Application.Current is IApplication app ? app.AppIconPath : string.Empty;
 
         public bool WasShown { get; private set; }
+
+        public void SetModal(BaseModal modal)
+        {
+            App = modal;
+            DataContext = this;
+        }
 
         public event EventHandler? WindowClosed;
 
@@ -69,12 +73,12 @@ namespace TrebuchetUtils
 
         protected virtual void OnSubmit(object? sender)
         {
-            App.Submit();
+            App?.Submit();
         }
 
         protected virtual void OnCancel(object? sender)
         {
-            App.Cancel();
+            App?.Cancel();
         }
 
         private void OnPreviewKeyDown(object? sender, KeyEventArgs e)

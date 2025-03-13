@@ -139,7 +139,7 @@ namespace Trebuchet.Panels
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
                 throw new NotSupportedException("The application lifetime is not supported.");
 
-            if (CanExecute(parameter) && (desktop.MainWindow as MainWindow)?.App.ActivePanel != this)
+            if (CanExecute(parameter) && (desktop.MainWindow as MainWindow)?.App?.ActivePanel != this)
             {
                 Client.RefreshSelection();
                 foreach (var i in Instances)

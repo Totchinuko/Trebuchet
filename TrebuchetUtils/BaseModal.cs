@@ -14,11 +14,12 @@ namespace TrebuchetUtils
         {
             ModalTitle = title;
             _template = template;
-            _window = new ModalWindow(this)
+            _window = new ModalWindow()
             {
                 Height = height,
                 Width = width,
             };
+            _window.SetModal(this);
 
             _window.WindowClosed += OnWindowClose;
         }

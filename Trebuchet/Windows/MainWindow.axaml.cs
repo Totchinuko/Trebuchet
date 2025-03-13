@@ -10,21 +10,25 @@ namespace Trebuchet
     {
         private bool _shown;
 
-        public MainWindow(TrebuchetApp app)
+        public MainWindow()
         {
-            App = app;
             InitializeComponent();
-            DataContext = this;
         }
 
-        public TrebuchetApp App { get; }
+        public TrebuchetApp? App { get; private set; }
 
         public bool WasShown => _shown;
 
+        public void SetApp(TrebuchetApp app)
+        {
+            App = app;
+            DataContext = this;
+        }
+        
         protected override void OnClosed(EventArgs e)
         {
             base.OnClosed(e);
-            App.OnAppClose();
+            App?.OnAppClose();
             if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 desktop.Shutdown();
         }
@@ -40,7 +44,7 @@ namespace Trebuchet
 
         protected virtual void OnWindowShown()
         {
-            App.OnWindowShow();
+            App?.OnWindowShow();
         }
     }
 }
