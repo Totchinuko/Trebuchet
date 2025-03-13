@@ -2,6 +2,7 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Avalonia.Media;
 
 namespace TrebuchetUtils.Controls
 {
@@ -10,7 +11,7 @@ namespace TrebuchetUtils.Controls
     /// </summary>
     public partial class WindowTitlebar : UserControl
     {
-        public static readonly StyledProperty<string> CloseIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(CloseIcon));
+        public static readonly StyledProperty<IImage?> CloseIconProperty = AvaloniaProperty.Register<WindowTitlebar, IImage?>(nameof(CloseIcon));
 
         public static readonly StyledProperty<bool> DisableCloseProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableClose));
 
@@ -20,13 +21,13 @@ namespace TrebuchetUtils.Controls
 
         public static readonly StyledProperty<object?> HeaderProperty = AvaloniaProperty.Register<WindowTitlebar, object?>(nameof(Header));
 
-        public static readonly StyledProperty<string> LogoIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(LogoIcon));
+        public static readonly StyledProperty<IImage?> LogoIconProperty = AvaloniaProperty.Register<WindowTitlebar, IImage?>(nameof(LogoIcon));
 
-        public static readonly StyledProperty<string> MaximizeIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(MaximizeIcon));
+        public static readonly StyledProperty<IImage?> MaximizeIconProperty = AvaloniaProperty.Register<WindowTitlebar, IImage?>(nameof(MaximizeIcon));
 
-        public static readonly StyledProperty<string> MinimizeIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(MinimizeIcon));
+        public static readonly StyledProperty<IImage?> MinimizeIconProperty = AvaloniaProperty.Register<WindowTitlebar, IImage?>(nameof(MinimizeIcon));
 
-        public static readonly StyledProperty<string> RestoreIconProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(RestoreIcon));
+        public static readonly StyledProperty<IImage?> RestoreIconProperty = AvaloniaProperty.Register<WindowTitlebar, IImage?>(nameof(RestoreIcon));
 
         public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(Title));
 
@@ -46,7 +47,7 @@ namespace TrebuchetUtils.Controls
             InitializeComponent();
         }
 
-        public string CloseIcon
+        public IImage? CloseIcon
         {
             get => GetValue(CloseIconProperty);
             set => SetValue(CloseIconProperty, value);
@@ -76,25 +77,25 @@ namespace TrebuchetUtils.Controls
             set => SetValue(HeaderProperty, value);
         }
 
-        public string LogoIcon
+        public IImage? LogoIcon
         {
             get => GetValue(LogoIconProperty);
             set => SetValue(LogoIconProperty, value);
         }
 
-        public string MaximizeIcon
+        public IImage? MaximizeIcon
         {
             get => GetValue(MaximizeIconProperty);
             set => SetValue(MaximizeIconProperty, value);
         }
 
-        public string MinimizeIcon
+        public IImage? MinimizeIcon
         {
             get => GetValue(MinimizeIconProperty);
             set => SetValue(MinimizeIconProperty, value);
         }
 
-        public string RestoreIcon
+        public IImage? RestoreIcon
         {
             get => GetValue(RestoreIconProperty);
             set => SetValue(RestoreIconProperty, value);
@@ -108,7 +109,7 @@ namespace TrebuchetUtils.Controls
 
         private static void OnCloseIconChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
         {
-            sender.CloseImage.Source = Utils.LoadFromResource(new Uri(sender.CloseIcon));
+            sender.CloseImage.Source = sender.CloseIcon;
         }
 
         private static void OnDisableChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
@@ -120,24 +121,24 @@ namespace TrebuchetUtils.Controls
 
         private static void OnLogoIconChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
         {
-            sender.AppLogo.Source = Utils.LoadFromResource(new Uri(sender.LogoIcon));
+            sender.AppLogo.Source = sender.LogoIcon;
         }
 
         private static void OnMaximizeIconChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
         {
             if (sender._state == WindowState.Normal)
-                sender.MaximizeImage.Source = Utils.LoadFromResource(new Uri(sender.MaximizeIcon));
+                sender.MaximizeImage.Source = sender.MaximizeIcon;
         }
 
         private static void OnMinimizeIconChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
         {
-            sender.MinimizeImage.Source = Utils.LoadFromResource(new Uri(sender.MinimizeIcon));
+            sender.MinimizeImage.Source = sender.MinimizeIcon;
         }
 
         private static void OnRestoreIconChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
         {
             if (sender._state == WindowState.Maximized)
-                sender.MaximizeImage.Source = Utils.LoadFromResource(new Uri(sender.RestoreIcon));
+                sender.MaximizeImage.Source = sender.RestoreIcon;
         }
 
         private static void OnTitleChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
@@ -159,13 +160,13 @@ namespace TrebuchetUtils.Controls
             {
                 window.WindowState = WindowState.Maximized;
                 _state = WindowState.Maximized;
-                MaximizeImage.Source = Utils.LoadFromResource(new Uri(RestoreIcon));
+                MaximizeImage.Source = RestoreIcon;
             }
             else if (window.WindowState == WindowState.Maximized)
             {
                 window.WindowState = WindowState.Normal;
                 _state = WindowState.Normal;
-                MaximizeImage.Source = Utils.LoadFromResource(new Uri(MaximizeIcon));
+                MaximizeImage.Source = MaximizeIcon;
             }
         }
 

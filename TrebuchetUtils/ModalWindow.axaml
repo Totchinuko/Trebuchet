@@ -25,12 +25,12 @@
                 DisableMaximize="{Binding App.MaximizeDisabled}"
                 DisableMinimize="{Binding App.MinimizeDisabled}"
                 DisableClose="{Binding App.CloseDisabled}"
-                CloseIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Close.png"
-                RestoreIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Restore.png"
-                MaximizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Maximize.png"
-                MinimizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Minimize.png"
+                CloseIcon="avares://TrebuchetUtils/Icons/Close.png"
+                RestoreIcon="avares://TrebuchetUtils/Icons/Restore.png"
+                MaximizeIcon="avares://TrebuchetUtils/Icons/Maximize.png"
+                MinimizeIcon="avares://TrebuchetUtils/Icons/Minimize.png"
                 LogoIcon="{Binding AppIconPath}" />
             <ContentPresenter Grid.Row="1" Content="{Binding App}" Name="WindowContent" ContentTemplate="{Binding Template}" />
         </Grid>
-    </Border>
+    </Border> 
 </Window>
