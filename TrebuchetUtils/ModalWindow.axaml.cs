@@ -13,7 +13,7 @@ namespace TrebuchetUtils
     /// <summary>
     ///     Interaction logic for ModalWindow.xaml
     /// </summary>
-    public partial class ModalWindow : Window, IShownWindow
+    public sealed partial class ModalWindow : Window, IShownWindow
     {
         public ModalWindow()
         {
@@ -54,7 +54,7 @@ namespace TrebuchetUtils
             OnShown();
         }
 
-        protected virtual void OnShown()
+        private void OnShown()
         {
             if (WasShown) return;
             WasShown = true;
@@ -71,12 +71,12 @@ namespace TrebuchetUtils
                 KeyDown += OnPreviewKeyDown;
         }
 
-        protected virtual void OnSubmit(object? sender)
+        private void OnSubmit(object? _)
         {
             App?.Submit();
         }
 
-        protected virtual void OnCancel(object? sender)
+        private void OnCancel(object? _)
         {
             App?.Cancel();
         }

@@ -31,7 +31,7 @@ public partial class App : Application, IApplication
 
     public static UIConfig Config { get; private set; } = null!;
 
-    public string AppIconPath => "pack://application:,,,/Trebuchet;component/Icons/AppIcon.ico";
+    public string AppIconPath => "avares://Trebuchet/Assets/Icons/AppIcon.ico";
     public bool IsShutingDown { get; } = false;
 
     public static string GetAppText(string key, params object[] args)

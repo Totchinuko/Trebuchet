@@ -27,7 +27,6 @@ namespace TrebuchetUtils
                 Width = width,
             };
             _window.SetModal(this);
-
             _window.WindowClosed += OnWindowClose;
         }
 

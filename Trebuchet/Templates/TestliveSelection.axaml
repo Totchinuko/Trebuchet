@@ -20,7 +20,7 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
-                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Window.png" Width="32" Height="32" />
+                    <Image Source="avares://Trebuchet/Assets/Icons/Window.png" Width="32" Height="32" />
                     <TextBlock FontWeight="Bold" FontSize="16" Grid.Row="2" Text="Live" />
                 </Grid>
             </Button>
@@ -35,7 +35,7 @@
                         <RowDefinition Height="12" />
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
-                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/BugWindow.png" Width="32" Height="32" />
+                    <Image Source="avares://Trebuchet/Assets/Icons/BugWindow.png" Width="32" Height="32" />
                     <TextBlock FontWeight="Bold" FontSize="16" Grid.Row="2" Text="Test Live" />
                 </Grid>
             </Button>
