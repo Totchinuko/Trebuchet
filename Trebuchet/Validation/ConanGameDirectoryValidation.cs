@@ -1,9 +1,10 @@
 ﻿using System.IO;
 
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
+using TrebuchetLib;
+using TrebuchetUtils.Modals;
 
-namespace Trebuchet
+namespace Trebuchet.Validation
 {
     public class ConanGameDirectoryValidation : BaseValidation<string>
     {
@@ -14,7 +15,7 @@ namespace Trebuchet
                 errorMessage = string.Empty;
                 return true;
             }
-            if (!TrebuchetUtils.ValidateGameDirectory(value, out errorMessage))
+            if (!Utils.Utils.ValidateGameDirectory(value, out errorMessage))
                 return false;
 
             if (!Tools.ValidateDirectoryUAC(value))
@@ -45,7 +46,7 @@ namespace Trebuchet
             QuestionModal question = new QuestionModal(
                 App.GetAppText("Validation_HandleOriginalSavedDirectory_Title"),
                 App.GetAppText("Validation_HandleOriginalSavedDirectory"));
-            question.ShowDialog();
+            question.OpenDialogue();
 
             if (!question.Result)
                 return false;
@@ -62,9 +63,9 @@ namespace Trebuchet
                 errorMessage = App.GetAppText("Validation_PotatoError");
                 return false;
             }
-            ClientProfile Original = ClientProfile.CreateProfile(config, ClientProfile.GetUniqueOriginalProfile(config));
-            Original.SaveFile();
-            string profileFolder = Path.GetDirectoryName(Original.FilePath) ?? throw new DirectoryNotFoundException($"{Original.FilePath} path is invalid");
+            ClientProfile original = ClientProfile.CreateProfile(config, ClientProfile.GetUniqueOriginalProfile(config));
+            original.SaveFile();
+            string profileFolder = Path.GetDirectoryName(original.FilePath) ?? throw new DirectoryNotFoundException($"{original.FilePath} path is invalid");
             Tools.DeepCopy(newPath, profileFolder);
             return true;
         }
