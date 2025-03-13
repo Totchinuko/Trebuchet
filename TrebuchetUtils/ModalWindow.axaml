@@ -6,19 +6,20 @@
         mc:Ignorable="d"
         CanResize="{Binding App.CanResize}"
         UseLayoutRounding="True"
+        xmlns:controls="clr-namespace:TrebuchetUtils.Controls"
         Title="{Binding App.ModalTitle}"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        ExtendClientAreaTitleBarHeightHint="40"
         Height="200"
         Width="650">
-    <!--<WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="40" UseAeroCaptionButtons="False" />
-    </WindowChrome.WindowChrome>-->
     <Border Classes="TotBackPanel" x:Name="MainBorder">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <!--<TrebGUI:WindowTitlebar
+            <controls:WindowTitlebar
                 x:Name="TitleBar"
                 Title="{Binding App.ModalTitle}"
                 DisableMaximize="{Binding App.MaximizeDisabled}"
@@ -28,7 +29,7 @@
                 RestoreIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Restore.png"
                 MaximizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Maximize.png"
                 MinimizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Minimize.png"
-                LogoIcon="{Binding AppIconPath}" />-->
+                LogoIcon="{Binding AppIconPath}" />
             <ContentPresenter Grid.Row="1" Content="{Binding App}" Name="WindowContent" ContentTemplate="{Binding Template}" />
         </Grid>
     </Border>

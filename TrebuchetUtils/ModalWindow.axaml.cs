@@ -1,32 +1,34 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 
+#endregion
+
 namespace TrebuchetUtils
 {
     /// <summary>
-    /// Interaction logic for ModalWindow.xaml
+    ///     Interaction logic for ModalWindow.xaml
     /// </summary>
     public partial class ModalWindow : Window, IShownWindow
     {
-        private BaseModal _app;
-
         public ModalWindow(BaseModal modal)
         {
-            _app = modal;
+            App = modal;
             DataContext = this;
             InitializeComponent();
         }
 
-        public BaseModal App { get => _app; private set => _app = value; }
-
-        public event EventHandler? WindowClosed;
-        
-        public bool WasShown { get; private set; }
+        public BaseModal App { get; private set; }
 
         public string AppIconPath => Application.Current is IApplication app ? app.AppIconPath : string.Empty;
+
+        public bool WasShown { get; private set; }
+
+        public event EventHandler? WindowClosed;
 
         public void OpenDialogue(Window? window = null)
         {
@@ -35,7 +37,7 @@ namespace TrebuchetUtils
             else
                 Show();
         }
-        
+
         protected override void OnClosed(EventArgs e)
         {
             WindowClosed?.Invoke(this, e);
@@ -50,9 +52,9 @@ namespace TrebuchetUtils
 
         protected virtual void OnShown()
         {
-            if(WasShown) return;
+            if (WasShown) return;
             WasShown = true;
-            var children = GuiExtensions.FindVisualChildren<TextBox>(WindowContent).Where((x) =>
+            var children = GuiExtensions.FindVisualChildren<TextBox>(WindowContent).Where(x =>
             {
                 if (x.Tag is string value)
                     return value == "Submit";
@@ -67,12 +69,12 @@ namespace TrebuchetUtils
 
         protected virtual void OnSubmit(object? sender)
         {
-            _app.Submit();
+            App.Submit();
         }
 
         protected virtual void OnCancel(object? sender)
         {
-            _app.Cancel();
+            App.Cancel();
         }
 
         private void OnPreviewKeyDown(object? sender, KeyEventArgs e)

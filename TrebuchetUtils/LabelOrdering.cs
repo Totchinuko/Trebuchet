@@ -7,12 +7,12 @@ using System.Threading.Tasks;
 
 namespace TrebuchetUtils
 {
-    public class LabelOrdering : IComparer
+    public class LabelOrdering : IComparer<ITag>
     {
-        public int Compare(object? x, object? y)
+        public int Compare(ITag? x, ITag? y)
         {
             if (x == null || y == null) return 0;
-            return ((ITag)x).Name.CompareTo(((ITag)y).Name);
+            return String.Compare(x.Name, y.Name, StringComparison.Ordinal);
         }
     }
 }
