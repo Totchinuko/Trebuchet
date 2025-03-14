@@ -2,7 +2,7 @@
 
 namespace Trebuchet.SettingFields
 {
-    public class CpuAffinityField() : Field<long, long>("CPUAffinityField")
+    public class CpuAffinityField() : Field<long, long>("CpuAffinityField")
     {
         public override bool IsDefault => Value == GetDefaultValue();
 

@@ -1,85 +1,64 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:local="clr-namespace:Trebuchet.SettingFields" 
+                    xmlns:hyper="clr-namespace:HyperText.Avalonia.Controls;assembly=HyperText.Avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- <DataTemplate x:Key="FieldRow"> -->
-    <!--     <Border CornerRadius="3" Padding="0,12" Margin="0,0,0,12" Visibility="{Binding IsVisible}"> -->
-    <!--         <Border.Style> -->
-    <!--             <Style TargetType="Border" BasedOn="{StaticResource TPnlMid}"> -->
-    <!--                 <Setter Property="Background" Value="{StaticResource GPanel}" /> -->
-    <!--                 <Style.Triggers> -->
-    <!--                     <Trigger Property="IsMouseOver" Value="True"> -->
-    <!--                         <Setter Property="Background" Value="#20FFFFFF" /> -->
-    <!--                     </Trigger> -->
-    <!--                 </Style.Triggers> -->
-    <!--             </Style> -->
-    <!--         </Border.Style> -->
-    <!--         <Grid> -->
-    <!--             <Grid.ColumnDefinitions> -->
-    <!--                 <ColumnDefinition Width="auto" /> -->
-    <!--                 <ColumnDefinition Width="*" /> -->
-    <!--                 <ColumnDefinition Width="auto" /> -->
-    <!--             </Grid.ColumnDefinitions> -->
-    <!--             <Border> -->
-    <!--                 <Border.Style> -->
-    <!--                     <Style TargetType="Border" BasedOn="{StaticResource Accent}"> -->
-    <!--                         <Style.Triggers> -->
-    <!--                             <DataTrigger Binding="{Binding IsDefault}" Value="True"> -->
-    <!--                                 <Setter Property="Visibility" Value="Hidden" /> -->
-    <!--                             </DataTrigger> -->
-    <!--                         </Style.Triggers> -->
-    <!--                     </Style> -->
-    <!--                 </Border.Style> -->
-    <!--             </Border> -->
-    <!--             <StackPanel Grid.Column="1" Margin="12,0,0,0"> -->
-    <!--                 <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" Margin="0,0,0,6" /> -->
-    <!--                 <Border  Margin="0,0,0,6" MinHeight="0"> -->
-    <!--                     <Border.Style> -->
-    <!--                         <Style TargetType="Border"> -->
-    <!--                             <Setter Property="Visibility" Value="{Binding Description, Converter={StaticResource Null2Collapsed}}" /> -->
-    <!--                             <Style.Triggers> -->
-    <!--                                 <DataTrigger Binding="{Binding DisplayGenericDescription}" Value="False"> -->
-    <!--                                     <Setter Property="Visibility" Value="Collapsed" /> -->
-    <!--                                 </DataTrigger> -->
-    <!--                             </Style.Triggers> -->
-    <!--                         </Style> -->
-    <!--                     </Border.Style> -->
-    <!--                     <StackPanel> -->
-    <!--                         <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Foreground="{StaticResource GDescription}" FontWeight="Normal" /> -->
-    <!--                         <TextBlock Visibility="{Binding Hyperlink, Converter={StaticResource Null2Collapsed}}"> -->
-    <!--                             <Hyperlink NavigateUri="{Binding Hyperlink}" Command="{Binding HyperlinkCommand}"><Run Text="{Binding Hyperlink}" /></Hyperlink> -->
-    <!--                         </TextBlock> -->
-    <!--                     </StackPanel> -->
-    <!--                 </Border> -->
-    <!--                 <ContentPresenter IsEnabled="{Binding IsEnabled}" Content="{Binding .}" ContentTemplate="{Binding Template}"> -->
-    <!--                     <ContentPresenter.Style> -->
-    <!--                         <Style TargetType="ContentPresenter"> -->
-    <!--                             <Style.Triggers> -->
-    <!--                                 <Trigger Property="IsEnabled" Value="False"> -->
-    <!--                                     <Setter Property="Opacity" Value="0.5" /> -->
-    <!--                                 </Trigger> -->
-    <!--                             </Style.Triggers> -->
-    <!--                         </Style> -->
-    <!--                     </ContentPresenter.Style> -->
-    <!--                 </ContentPresenter> -->
-    <!--             </StackPanel> -->
-    <!--             <Button Grid.Column="2" -->
-    <!--                     ToolTip="Reset to default" -->
-    <!--                     ToolTipService.InitialShowDelay="0" -->
-    <!--                     x:Name="Reset" -->
-    <!--                     VerticalAlignment="Top" -->
-    <!--                     Margin="12,0,3,0" -->
-    <!--                     Command="{Binding ResetCommand}"> -->
-    <!--                 <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" /> -->
-    <!--                 <Button.Style> -->
-    <!--                     <Style TargetType="Button" BasedOn="{StaticResource TBtnStrokeBlueOver}"> -->
-    <!--                         <Style.Triggers> -->
-    <!--                             <DataTrigger Binding="{Binding IsDefault}" Value="True"> -->
-    <!--                                 <Setter Property="Visibility" Value="Hidden" /> -->
-    <!--                             </DataTrigger> -->
-    <!--                         </Style.Triggers> -->
-    <!--                     </Style> -->
-    <!--                 </Button.Style> -->
-    <!--             </Button> -->
-    <!--         </Grid> -->
-    <!--     </Border> -->
-    <!-- </DataTemplate> -->
+    <DataTemplate x:Key="FieldRow" x:DataType="local:Field">
+        <Border CornerRadius="3" Classes="Main" Classes.MainHover="{Binding $self.IsPointerOver}" Padding="0,12" Margin="0,0,0,12" IsVisible="{Binding IsVisible}">
+            <Border.Styles>
+                <Style Selector="Border.Main">
+                    <Setter Property="Background" Value="#10FFFFFF" /><!-- TODO: Theme here -->
+                </Style>
+                <Style Selector="Border.MainHover">
+                    <Setter Property="Background" Value="#20FFFFFF" /><!-- TODO: Theme here -->
+                </Style>
+                <Style Selector="Visual.Hidden"><!-- TODO: Move the theme -->
+                    <Setter Property="Opacity" Value="0" />
+                    <Setter Property="IsHitTestVisible" Value="False" />
+                </Style>
+                <Style Selector="Visual.Disabled"><!-- TODO: Move the theme -->
+                    <Setter Property="Opacity" Value="0.5" />
+                    <Setter Property="IsHitTestVisible" Value="False" />
+                </Style>
+            </Border.Styles>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <Border Classes.Hidden="{Binding IsDefault}" Width="4" Background="DodgerBlue"><!-- TODO: Theme HERE -->
+                </Border>
+                <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                    <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" Margin="0,0,0,6" />
+                    <Border  Margin="0,0,0,6" MinHeight="0">
+                        <Border.IsVisible>
+                            <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                                <MultiBinding.Bindings>
+                                    <Binding Path="Description" />
+                                    <Binding Path="DisplayGenericDescription" />
+                                </MultiBinding.Bindings>
+                            </MultiBinding>
+                        </Border.IsVisible>
+                        <StackPanel>
+                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" FontWeight="Normal" />
+                            <TextBlock IsVisible="{Binding Hyperlink}">
+                                <hyper:Hyperlink Url="{Binding Hyperlink}" Command="{Binding HyperlinkCommand}"><Run Text="{Binding Hyperlink}" /></hyper:Hyperlink>
+                            </TextBlock>
+                        </StackPanel>
+                    </Border>
+                    <ContentPresenter IsEnabled="{Binding IsEnabled}" Classes.Disabled="{Binding $self.IsEnabled}" Content="{Binding .}" ContentTemplate="{Binding Template}" />
+                </StackPanel>
+                <Button Grid.Column="2"
+                        ToolTip.Tip="Reset to default"
+                        ToolTip.ShowDelay="0"
+                        x:Name="Reset"
+                        VerticalAlignment="Top"
+                        Margin="12,0,3,0"
+                        Classes.Hidden="{Binding !IsDefault}"
+                        Command="{Binding ResetCommand}">
+                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
+                </Button>
+            </Grid>
+        </Border>
+    </DataTemplate>
 </ResourceDictionary>

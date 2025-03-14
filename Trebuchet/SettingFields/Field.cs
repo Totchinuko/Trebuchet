@@ -30,8 +30,17 @@ namespace Trebuchet.SettingFields
     [JsonDerivedType(typeof(TitleField), "Title")]
     [JsonDerivedType(typeof(RawUdpField), "RawUDPPort")]
     [JsonDerivedType(typeof(FloatField), "FloatField")]
-    public abstract class Field(string template) : INotifyPropertyChanged
+    public abstract class Field : INotifyPropertyChanged
     {
+        private readonly string _template;
+
+        protected Field(string template)
+        {
+            _template = template;
+            HyperlinkCommand = new SimpleCommand(OnHyperlinkClicked);
+            ResetCommand = new SimpleCommand(OnReset);
+        }
+
         private static readonly JsonSerializerOptions Options = new();
 
         public IDataTemplate Template
@@ -40,21 +49,29 @@ namespace Trebuchet.SettingFields
             {
                 if (Application.Current == null) throw new Exception("Application.Current is null");
 
-                if (Application.Current.Resources.TryGetResource(template, Application.Current.ActualThemeVariant,
+                if (Application.Current.Resources.TryGetResource(_template, Application.Current.ActualThemeVariant,
                         out var resource) && resource is IDataTemplate template1)
                 {
                     return template1;
                 }
 
-                throw new Exception($"Template {template} not found");
+                throw new Exception($"Template {_template} not found");
             }
         }
+
+        public abstract bool IsDefault { get; }
+
+        public virtual bool IsVisible => true;
 
         public string Description { get; set; } = string.Empty;
 
         public virtual bool DisplayGenericDescription => true;
 
         public string Hyperlink { get; set; } = string.Empty;
+
+        public ICommand HyperlinkCommand { get; private set; }
+        
+        public ICommand ResetCommand { get; private set; }
 
         public bool IsEnabled { get; set; } = true;
 
@@ -97,6 +114,19 @@ namespace Trebuchet.SettingFields
         {
             ValueChanged?.Invoke(this, this);
         }
+        
+        private void OnHyperlinkClicked(object? obj)
+        {
+            using var process = new Process();
+            process.StartInfo.UseShellExecute = true;
+            process.StartInfo.FileName = Hyperlink;
+            process.Start();
+        }
+        
+        private void OnReset(object? obj)
+        {
+            ResetToDefault();
+        }
     }
 
     public abstract class Field<T, TD> : Field
@@ -107,22 +137,15 @@ namespace Trebuchet.SettingFields
 
         protected Field(string template) : base(template)
         {
-            ResetCommand = new SimpleCommand(OnReset);
-            HyperlinkCommand = new SimpleCommand(OnHyperlinkClicked);
         }
-
 
         public FieldCondition? Condition { get; set; } = null;
 
         public virtual TD? Default { get; set; }
 
-        public ICommand HyperlinkCommand { get; private set; }
 
-        public abstract bool IsDefault { get; }
+        public override bool IsVisible => Condition == null || Condition.IsVisible(GetTarget());
 
-        public bool IsVisible => Condition == null || Condition.IsVisible(GetTarget());
-
-        public ICommand ResetCommand { get; private set; }
 
         public BaseValidation? Validation { get; set; } = null;
 
@@ -189,18 +212,7 @@ namespace Trebuchet.SettingFields
             OnPropertyChanged(nameof(IsDefault));
         }
 
-        private void OnHyperlinkClicked(object? obj)
-        {
-            using var process = new Process();
-            process.StartInfo.UseShellExecute = true;
-            process.StartInfo.FileName = Hyperlink;
-            process.Start();
-        }
 
-        private void OnReset(object? obj)
-        {
-            ResetToDefault();
-        }
 
         private void RemoveCollectionEvent()
         {

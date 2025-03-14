@@ -17,7 +17,7 @@
             <Image Name="IconTag" Source="pack://application:,,,/TrebuchetGUILib;component/icons/TagSearch.png" Opacity="1.0" Height="16" Width="16" />
         </Button>
         <Popup IsOpen="{Binding ResultsOpen, Mode=OneWay, RelativeSource={RelativeSource AncestorType=UserControl}}" PlacementTarget="{Binding ElementName=SearchField}" Placement="Bottom">
-            <Border Classes="WindowBackPanel" Width="{Binding #SearchField.Bounds.Width}" MinHeight="200" MaxHeight="450">
+            <Border Width="{Binding #SearchField.Bounds.Width}" MinHeight="200" MaxHeight="450">
                 <Border>
                     <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
                         <ItemsControl Margin="5" ItemsSource="{Binding Results, RelativeSource={RelativeSource AncestorType=UserControl}}">
