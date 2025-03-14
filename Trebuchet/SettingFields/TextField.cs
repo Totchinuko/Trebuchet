@@ -32,5 +32,9 @@ namespace Trebuchet.SettingFields
         {
             return value;
         }
+
+        public TextField() : this("TextboxField")
+        {
+        }
     }
 }

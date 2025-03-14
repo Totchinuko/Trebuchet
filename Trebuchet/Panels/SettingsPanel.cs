@@ -32,8 +32,8 @@ namespace Trebuchet.Panels
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.SettingsPanel.Fields.json", this, "Config");
-            BuildFields("Trebuchet.Panels.SettingsPanel.UI.Fields.json", this, "UIConfig");
+            BuildFields("Trebuchet.Panels.SettingsPanel.Fields.json", this, nameof(Config));
+            BuildFields("Trebuchet.Panels.SettingsPanel.UI.Fields.json", this, nameof(UiConfig));
         }
 
         protected override void OnValueChanged(string property)

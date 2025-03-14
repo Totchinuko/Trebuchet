@@ -59,7 +59,7 @@ namespace Trebuchet.Panels
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.ClientProfilePanel.Fields.json", this, "Profile");
+            BuildFields("Trebuchet.Panels.ClientProfilePanel.Fields.json", this, nameof(Profile));
         }
 
         protected override void OnValueChanged(string property)
