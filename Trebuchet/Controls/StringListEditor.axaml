@@ -6,48 +6,48 @@
              xmlns:local="clr-namespace:Trebuchet.Controls"
              mc:Ignorable="d"
              d:DesignHeight="40" d:DesignWidth="800">
-    <!-- <Grid> -->
-    <!--     <Grid.ColumnDefinitions> -->
-    <!--         <ColumnDefinition Width="auto" /> -->
-    <!--         <ColumnDefinition Width="*" MaxWidth="300" /> -->
-    <!--     </Grid.ColumnDefinitions> -->
-    <!--     <Button Style="{StaticResource TBtnStrokeGreenOver}" -->
-    <!--             VerticalAlignment="Top" -->
-    <!--             Padding="8" -->
-    <!--             x:Name="AddBtn" -->
-    <!--             Click="AddBtn_Click" -->
-    <!--             Margin="0,3,12,3"> -->
-    <!--         <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Add.png" Width="16" Height="16" /> -->
-    <!--     </Button> -->
-    <!--     <StackPanel Orientation="Vertical" Grid.Column="1"> -->
-    <!--         <ItemsControl x:Name="InstanceList" ItemsSource="{Binding Values, RelativeSource={RelativeSource AncestorType=local:StringListEditor}}"> -->
-    <!--             <ItemsControl.ItemTemplate> -->
-    <!--                 <DataTemplate> -->
-    <!--                     <Border Height="38" Margin="0,3"> -->
-    <!--                         <Grid> -->
-    <!--                             <Grid.ColumnDefinitions> -->
-    <!--                                 <ColumnDefinition Width="*" /> -->
-    <!--                                 <ColumnDefinition Width="auto" /> -->
-    <!--                             </Grid.ColumnDefinitions> -->
-    <!--                             <TextBox VerticalAlignment="Center" -->
-    <!--                                      Height="25" -->
-    <!--                                      VerticalContentAlignment="Center" -->
-    <!--                                      PreviewLostKeyboardFocus="TextBox_PreviewLostKeyboardFocus" -->
-    <!--                                      Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, Delay=300}" -->
-    <!--                                      Margin="0,0,12,0" /> -->
-    <!--                             <Button Style="{StaticResource TBtnStrokeYellowOver}" -->
-    <!--                                     x:Name="TrashBtn" -->
-    <!--                                     VerticalAlignment="Center" -->
-    <!--                                     Command="{Binding DeleteCommand, RelativeSource={RelativeSource AncestorType=local:StringListEditor}}" -->
-    <!--                                     CommandParameter="{Binding .}" -->
-    <!--                                     Grid.Column="1"> -->
-    <!--                                 <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Trash.png" Width="16" Height="16" /> -->
-    <!--                             </Button> -->
-    <!--                         </Grid> -->
-    <!--                     </Border> -->
-    <!--                 </DataTemplate> -->
-    <!--             </ItemsControl.ItemTemplate> -->
-    <!--         </ItemsControl> -->
-    <!--     </StackPanel> -->
-    <!-- </Grid> -->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="auto" />
+            <ColumnDefinition Width="*" MaxWidth="300" />
+        </Grid.ColumnDefinitions>
+        <Button
+                VerticalAlignment="Top"
+                Padding="8"
+                x:Name="AddBtn"
+                Click="AddBtn_Click"
+                Margin="0,3,12,3">
+            <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Add.png" Width="16" Height="16" />
+        </Button>
+        <StackPanel Orientation="Vertical" Grid.Column="1">
+            <ItemsControl x:Name="InstanceList" ItemsSource="{Binding Values, RelativeSource={RelativeSource AncestorType=local:StringListEditor}}">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border Height="38" Margin="0,3">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBox VerticalAlignment="Center"
+                                         Height="25"
+                                         VerticalContentAlignment="Center"
+                                         LostFocus="TextBox_PreviewLostKeyboardFocus"
+                                         Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                         Margin="0,0,12,0" />
+                                <Button 
+                                        x:Name="TrashBtn"
+                                        VerticalAlignment="Center"
+                                        Command="{Binding DeleteCommand, RelativeSource={RelativeSource AncestorType=local:StringListEditor}}"
+                                        CommandParameter="{Binding .}"
+                                        Grid.Column="1">
+                                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Trash.png" Width="16" Height="16" />
+                                </Button>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </StackPanel>
+    </Grid>
 </UserControl>

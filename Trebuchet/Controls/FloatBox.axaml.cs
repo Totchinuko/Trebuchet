@@ -1,11 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+using System.Globalization;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
+using Avalonia.Interactivity;
 
 namespace Trebuchet.Controls
 {
@@ -14,84 +13,75 @@ namespace Trebuchet.Controls
     /// </summary>
     public partial class FloatBox : UserControl
     {
-        // public static readonly DependencyProperty MaxValueProperty = DependencyProperty.Register("MaxValue", typeof(float), typeof(FloatBox), new PropertyMetadata(float.MaxValue));
-        // public static readonly DependencyProperty MinValueProperty = DependencyProperty.Register("MinValue", typeof(float), typeof(FloatBox), new PropertyMetadata(float.MinValue));
-        // public static readonly DependencyProperty ValueProperty = DependencyProperty.Register("Value", typeof(float), typeof(FloatBox), new PropertyMetadata(0f, OnValueChanged));
+        public static readonly StyledProperty<float> MaxValueProperty =  AvaloniaProperty.Register<FloatBox, float>(nameof(MaxValue), float.MaxValue);
+        public static readonly StyledProperty<float> MinValueProperty =  AvaloniaProperty.Register<FloatBox, float>(nameof(MinValue), float.MinValue);
+        public static readonly StyledProperty<float> ValueProperty =  AvaloniaProperty.Register<FloatBox, float>(nameof(Value));
 
-        private static readonly Regex _regex = new Regex("[^0-9.-]+");
+        private static readonly Regex Regex = new Regex("[^0-9.-]+");
 
         public FloatBox()
         {
+            ValueProperty.Changed.AddClassHandler<FloatBox>(OnValueChanged);
             InitializeComponent();
         }
-        //
-        // public float MaxValue
-        // {
-        //     get => (int)GetValue(MaxValueProperty);
-        //     set => SetValue(MaxValueProperty, value);
-        // }
-        //
-        // public float MinValue
-        // {
-        //     get => (int)GetValue(MinValueProperty);
-        //     set => SetValue(MinValueProperty, value);
-        // }
-        //
-        // public float Value
-        // {
-        //     get => MathF.Min(MaxValue, MathF.Max(MinValue, (float)GetValue(ValueProperty)));
-        //     set => SetValue(ValueProperty, MathF.Min(MaxValue, MathF.Max(MinValue, value)));
-        // }
-        //
-        // private static void OnValueChanged(DependencyObject d, DependencyPropertyChangedEventArgs e)
-        // {
-        //     if (d is not FloatBox box) return;
-        //     float value = (float)e.NewValue;
-        //     box.TextField.Text = value.ToString();
-        // }
-        //
-        // private bool IsTextAllowed(string text)
-        // {
-        //     return !_regex.IsMatch(text);
-        // }
-        //
-        // private void TextBox_Pasting(object sender, DataObjectPastingEventArgs e)
-        // {
-        //     if (e.DataObject.GetDataPresent(typeof(String)))
-        //     {
-        //         String text = (String)e.DataObject.GetData(typeof(String));
-        //         if (!IsTextAllowed(text))
-        //         {
-        //             e.CancelCommand();
-        //         }
-        //     }
-        //     else
-        //     {
-        //         e.CancelCommand();
-        //     }
-        // }
-        //
-        // private void TextBox_PreviewTextInput(object sender, TextCompositionEventArgs e)
-        // {
-        //     if (!IsTextAllowed(e.Text))
-        //     {
-        //         e.Handled = true;
-        //         return;
-        //     }
-        // }
-        //
-        // private void TextField_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        // {
-        //     if (float.TryParse(TextField.Text, out float number))
-        //     {
-        //         Value = number;
-        //         TextField.Text = Value.ToString();
-        //     }
-        //     else
-        //     {
-        //         Value = 0;
-        //         TextField.Text = "0";
-        //     }
-        // }
+        
+        public float MaxValue
+        {
+            get => GetValue(MaxValueProperty);
+            set => SetValue(MaxValueProperty, value);
+        }
+        
+        public float MinValue
+        {
+            get => GetValue(MinValueProperty);
+            set => SetValue(MinValueProperty, value);
+        }
+        
+        public float Value
+        {
+            get => MathF.Min(MaxValue, MathF.Max(MinValue, GetValue(ValueProperty)));
+            set => SetValue(ValueProperty, MathF.Min(MaxValue, MathF.Max(MinValue, value)));
+        }
+        
+        private static void OnValueChanged(FloatBox sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            float value = (float)(e.NewValue ?? 0);
+            sender.TextField.Text = value.ToString(CultureInfo.InvariantCulture);
+        }
+        
+        private bool IsTextAllowed(string text)
+        {
+            return !Regex.IsMatch(text);
+        }
+        
+
+
+
+
+        private void TextField_PreviewLostKeyboardFocus(object? sender, RoutedEventArgs e)
+        {
+            if (float.TryParse(TextField.Text, out float number))
+            {
+                Value = number;
+                TextField.Text = Value.ToString(CultureInfo.InvariantCulture);
+            }
+            else
+            {
+                Value = 0;
+                TextField.Text = "0";
+            }
+        }
+
+        private void TextBox_PreviewTextInput(object? sender, TextInputEventArgs e)
+        {
+            if (!IsTextAllowed(e.Text ?? string.Empty))
+                e.Handled = true;
+        }
+
+        private void TextBox_Pasting(object? sender, RoutedEventArgs e)
+        {
+            if (!IsTextAllowed(TextField.Text ?? string.Empty))
+                TextField.Text = Value.ToString(CultureInfo.InvariantCulture);
+        }
     }
 }

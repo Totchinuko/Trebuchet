@@ -6,28 +6,28 @@
              xmlns:local="clr-namespace:Trebuchet.Controls"
              mc:Ignorable="d"
              d:DesignHeight="32" d:DesignWidth="32">
-    <!-- <StackPanel> -->
-    <!--     <Button x:Name="MapListButton" -->
-    <!--             Click="MapList_Click" -->
-    <!--             ToolTip="Map Selection" -->
-    <!--             ToolTipService.InitialShowDelay="0" -->
-    <!--             Style="{StaticResource TBtnStrokeNormalOver}" Padding="8"> -->
-    <!--         <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Map.png" Width="16" /> -->
-    <!--     </Button> -->
-    <!--     <Popup Name="MapListPopup" StaysOpen="False" AllowsTransparency="True"> -->
-    <!--         <Border BorderThickness="1" BorderBrush="{StaticResource GPanel}" CornerRadius="3" Background="{StaticResource GBackground}" MaxHeight="300" MinWidth="100" Width="200"> -->
-    <!--             <ScrollViewer> -->
-    <!--                 <StackPanel> -->
-    <!--                     <ItemsControl ItemsSource="{Binding MapListData, RelativeSource={RelativeSource AncestorType=local:MapList}}"> -->
-    <!--                         <ItemsControl.ItemTemplate> -->
-    <!--                             <DataTemplate> -->
-    <!--                                 <Button Style="{StaticResource TBtnStrokeBlueStealth}" Content="{Binding Key}" Command="{Binding MapSelectCommand, RelativeSource={RelativeSource AncestorType=local:MapList}}" CommandParameter="{Binding Value}" Padding="4" HorizontalContentAlignment="Left" /> -->
-    <!--                             </DataTemplate> -->
-    <!--                         </ItemsControl.ItemTemplate> -->
-    <!--                     </ItemsControl> -->
-    <!--                 </StackPanel> -->
-    <!--             </ScrollViewer> -->
-    <!--         </Border> -->
-    <!--     </Popup> -->
-    <!-- </StackPanel> -->
+    <StackPanel>
+        <Button x:Name="MapListButton"
+                Click="MapList_Click"
+                ToolTip.Tip="Map Selection"
+                ToolTip.ShowDelay="0"
+                Padding="8">
+            <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Map.png" Width="16" />
+        </Button>
+        <Popup Name="MapListPopup" IsLightDismissEnabled="True">
+            <Border BorderThickness="1" CornerRadius="3" MaxHeight="300" MinWidth="100" Width="200">
+                <ScrollViewer>
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding MapListData, RelativeSource={RelativeSource AncestorType=local:MapList}}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Key}" Command="{Binding MapSelectCommand, RelativeSource={RelativeSource AncestorType=local:MapList}}" CommandParameter="{Binding Value}" Padding="4" HorizontalContentAlignment="Left" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Popup>
+    </StackPanel>
 </UserControl>

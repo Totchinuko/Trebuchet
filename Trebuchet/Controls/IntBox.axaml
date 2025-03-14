@@ -6,9 +6,9 @@
              xmlns:local="clr-namespace:Trebuchet.Controls"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
-    <!-- <TextBox x:Name="TextField" -->
-    <!--          VerticalContentAlignment="Center" -->
-    <!--          PreviewTextInput="TextBox_PreviewTextInput" -->
-    <!--          PreviewLostKeyboardFocus="TextField_PreviewLostKeyboardFocus" -->
-    <!--          DataObject.Pasting="TextBox_Pasting" /> -->
+    <TextBox x:Name="TextField"
+             VerticalContentAlignment="Center"
+             TextInput="TextBox_PreviewTextInput"
+             LostFocus="TextField_PreviewLostKeyboardFocus"
+             PastingFromClipboard="TextBox_Pasting" />
 </UserControl>

@@ -1,5 +1,6 @@
 ﻿using System.ComponentModel;
 using System.Windows.Input;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
 using TrebuchetUtils;
@@ -9,55 +10,41 @@ namespace Trebuchet.Controls
     /// <summary>
     /// Interaction logic for StringListEditor.xaml
     /// </summary>
-    public partial class StringListEditor : UserControl, INotifyPropertyChanged
+    public partial class StringListEditor : UserControl
     {
-        // public static readonly DependencyProperty ValuesProperty = DependencyProperty.Register(
-        //     "Values",
-        //     typeof(TrulyObservableCollection<ObservableString>),
-        //     typeof(StringListEditor),
-        //     new PropertyMetadata(
-        //         new TrulyObservableCollection<ObservableString>())
-        //     );
+        public static readonly StyledProperty<TrulyObservableCollection<ObservableString>> ValuesProperty =
+            AvaloniaProperty.Register<StringListEditor, TrulyObservableCollection<ObservableString>>(nameof(Values), defaultValue: []);
 
         public StringListEditor()
         {
-            // DeleteCommand = new SimpleCommand(OnInstanceDelete);
+            DeleteCommand = new SimpleCommand(OnInstanceDelete);
             InitializeComponent();
         }
-        //
-        // public event PropertyChangedEventHandler? PropertyChanged;
-        //
-        // public ICommand DeleteCommand { get; private set; }
-        //
-        // public TrulyObservableCollection<ObservableString> Values
-        // {
-        //     get => (TrulyObservableCollection<ObservableString>)GetValue(ValuesProperty);
-        //     set => SetValue(ValuesProperty, value);
-        // }
-        //
-        // protected virtual void OnPropertyChanged(string name)
-        // {
-        //     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        // }
-        //
-        // private void AddBtn_Click(object sender, RoutedEventArgs e)
-        // {
-        //     if (Values == null)
-        //         Values = new TrulyObservableCollection<ObservableString>();
-        //     Values.Add(new ObservableString());
-        // }
-        //
-        // private void OnInstanceDelete(object? obj)
-        // {
-        //     if (Values.Count == 0) return;
-        //     if (obj is ObservableString value)
-        //         Values.Remove(value);
-        //     InstanceList.ItemsSource = Values;
-        // }
-        //
-        // private void TextBox_PreviewLostKeyboardFocus(object sender, KeyboardFocusChangedEventArgs e)
-        // {
-        //     Values = Values;
-        // }
+        
+        public ICommand DeleteCommand { get; private set; }
+        
+        public TrulyObservableCollection<ObservableString> Values
+        {
+            get => (TrulyObservableCollection<ObservableString>)GetValue(ValuesProperty);
+            set => SetValue(ValuesProperty, value);
+        }
+        
+        private void AddBtn_Click(object sender, RoutedEventArgs e)
+        {
+            Values.Add(new ObservableString());
+        }
+        
+        private void OnInstanceDelete(object? obj)
+        {
+            if (Values.Count == 0) return;
+            if (obj is ObservableString value)
+                Values.Remove(value);
+            InstanceList.ItemsSource = Values;
+        }
+        
+        private void TextBox_PreviewLostKeyboardFocus(object? sender, RoutedEventArgs routedEventArgs)
+        {
+            Values = Values;
+        }
     }
 }
