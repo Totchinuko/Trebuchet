@@ -8,11 +8,12 @@
     </Application.DataTemplates>
     <Application.Styles>
         <FluentTheme />
+        <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"></StyleInclude>
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <MergeResourceInclude Source="Templates\Selectors.axaml" />
+                <MergeResourceInclude Source="avares://TrebuchetUtils/Converters/Converters.axaml"/>
                 <MergeResourceInclude Source="Templates\FieldRow.axaml" />
                 <MergeResourceInclude Source="Templates\TitleField.axaml" />
                 <MergeResourceInclude Source="Templates\CPUAffinityField.axaml" />

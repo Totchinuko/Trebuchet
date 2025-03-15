@@ -1,14 +1,14 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:local="clr-namespace:Trebuchet.Panels"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- <DataTemplate x:Key="TabButtonTemplate"> -->
-    <!--     <Button Style="{Binding TabStyle}" -->
-    <!--             Margin="0,3,0,3" -->
-    <!--             Command="{Binding .}" -->
-    <!--             HorizontalContentAlignment="Left"> -->
-    <!--         <StackPanel Orientation="Horizontal"> -->
-    <!--             <Image Source="{Binding Icon}" Height="16" Width="16" Margin="0 0 6 0" /> -->
-    <!--             <TextBlock Text="{Binding Label}" FontSize="14" /> -->
-    <!--         </StackPanel> -->
-    <!--     </Button> -->
-    <!-- </DataTemplate> -->
+    <DataTemplate x:Key="TabButtonTemplate" x:DataType="local:Panel">
+        <Button Margin="0,3,0,3"
+                Command="{Binding .}"
+                HorizontalContentAlignment="Left">
+            <StackPanel Orientation="Horizontal">
+                <Image Source="{Binding Icon}" Height="16" Width="16" Margin="0 0 6 0" />
+                <TextBlock Text="{Binding Label}" FontSize="14" />
+            </StackPanel>
+        </Button>
+    </DataTemplate>
 </ResourceDictionary>

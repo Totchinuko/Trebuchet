@@ -1,70 +1,67 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:local="clr-namespace:Trebuchet"
+                    xmlns:panel="clr-namespace:Trebuchet.Panels"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <!-- <DataTemplate x:Key="ModlistItems"> -->
-    <!--     <Border Margin="0 0 0 12" CornerRadius="3" Cursor="SizeNS" Padding="8" ToolTip="Drag to reorder"> -->
-    <!--         <Border.Style> -->
-    <!--             <Style TargetType="Border" BasedOn="{StaticResource TPnlMid}"> -->
-    <!--                 <Style.Triggers> -->
-    <!--                     <Trigger Property="IsMouseOver" Value="True"> -->
-    <!--                         <Setter Property="Background" Value="{StaticResource GPanelTwice}" /> -->
-    <!--                     </Trigger> -->
-    <!--                 </Style.Triggers> -->
-    <!--             </Style> -->
-    <!--         </Border.Style> -->
-    <!--         <Grid> -->
-    <!--             <Grid.ColumnDefinitions> -->
-    <!--                 <ColumnDefinition Width="auto" /> -->
-    <!--                 <ColumnDefinition Width="1.7*" /> -->
-    <!--                 <ColumnDefinition Width="1*" /> -->
-    <!--                 <ColumnDefinition Width="auto" /> -->
-    <!--             </Grid.ColumnDefinitions> -->
-    <!--             <Image Margin="0,0,12,0"> -->
-    <!--                 <Image.Style> -->
-    <!--                     <Style TargetType="Image"> -->
-    <!--                         <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUILib;component/Icons/Steam.png" /> -->
-    <!--                         <Setter Property="ToolTip" Value="Steam Workshop (Live)" /> -->
-    <!--                         <Style.Triggers> -->
-    <!--                             <DataTrigger Binding="{Binding IsPublished}" Value="False"> -->
-    <!--                                 <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUILib;component/Icons/File.png" /> -->
-    <!--                                 <Setter Property="ToolTip" Value="Local File" /> -->
-    <!--                             </DataTrigger> -->
-    <!--                             <DataTrigger Binding="{Binding IsTestLive}" Value="True"> -->
-    <!--                                 <Setter Property="Source" Value="pack://application:,,,/TrebuchetGUILib;component/Icons/Bug.png" /> -->
-    <!--                                 <Setter Property="ToolTip" Value="Steam Workshop (TestLive)" /> -->
-    <!--                             </DataTrigger> -->
-    <!--                         </Style.Triggers> -->
-    <!--                     </Style> -->
-    <!--                 </Image.Style> -->
-    <!--             </Image> -->
-    <!--             <Grid Grid.Column="1"> -->
-    <!--                 <Grid.ColumnDefinitions> -->
-    <!--                     <ColumnDefinition Width="*" /> -->
-    <!--                     <ColumnDefinition Width="auto" /> -->
-    <!--                 </Grid.ColumnDefinitions> -->
-    <!--                 <TextBlock VerticalAlignment="Center"> -->
-    <!--                     <Run Text="{Binding Title, Mode=OneWay}" /> -->
-    <!--                 </TextBlock> -->
-    <!--                 <Border Grid.Column="1" Background="{Binding StatusColor}" BorderBrush="{Binding BorderColor}" BorderThickness="0 1 0 0" Margin="0,0,12,0" CornerRadius="3" Padding="8"> -->
-    <!--                     <TextBlock Text="{Binding StatusTooltip}" /> -->
-    <!--                 </Border> -->
-    <!--             </Grid> -->
-    <!--             <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0"> -->
-    <!--                 <TextBlock> -->
-    <!--                     <Run Text="{Binding LastUpdate, Mode=OneWay}" /> -->
-    <!--                 </TextBlock> -->
-    <!--             </StackPanel> -->
-    <!--             <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center"> -->
-    <!--                 <Button Grid.Column="1" Style="{StaticResource TBtnStrokeBlueOver}" Visibility="{Binding IsPublished, Converter={StaticResource False2Collapsed}}" Cursor="Hand" Margin="0,0,3,0" ToolTip="Open Workshop Page" Command="{Binding Content.OpenWorkshopCommand, RelativeSource={RelativeSource AncestorType=ContentPresenter, AncestorLevel=3}}" CommandParameter="{Binding .}"> -->
-    <!--                     <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Steam.png" Width="16" Height="16" /> -->
-    <!--                 </Button> -->
-    <!--                 <Button Grid.Column="1" Style="{StaticResource TBtnStrokeBlueOver}" Cursor="Hand" Margin="0,0,3,0" ToolTip="Update Mod" Command="{Binding Content.UpdateModCommand, RelativeSource={RelativeSource AncestorType=ContentPresenter, AncestorLevel=3}}" CommandParameter="{Binding .}"> -->
-    <!--                     <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" /> -->
-    <!--                 </Button> -->
-    <!--                 <Button Grid.Column="1" Style="{StaticResource TBtnStrokeRedOver}" Cursor="Hand" ToolTip="Remove from list" Command="{Binding Content.RemoveModCommand, RelativeSource={RelativeSource AncestorType=ContentPresenter, AncestorLevel=3}}" CommandParameter="{Binding .}"> -->
-    <!--                     <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Trash.png" Width="16" Height="16" /> -->
-    <!--                 </Button> -->
-    <!--             </StackPanel> -->
-    <!--         </Grid> -->
-    <!--     </Border> -->
-    <!-- </DataTemplate> -->
+    <DataTemplate x:Key="ModlistItems" x:DataType="local:ModFile">
+        <Border Margin="0 0 0 12" CornerRadius="3" Cursor="SizeNS" Padding="8" ToolTip.Tip="Drag to reorder"><!-- TODO: Hover effect -->
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="1.7*" />
+                    <ColumnDefinition Width="1*" />
+                    <ColumnDefinition Width="auto" />
+                </Grid.ColumnDefinitions>
+                <Image Margin="0,0,12,0" Classes="Steam" Classes.Bug="{Binding IsTestLive}" Classes.File="{Binding !IsPublished}">
+                    <Image.Styles>
+                        <Style Selector="Image.Steam">
+                            <Setter Property="Source" Value="avares://Trebuchet/Assets/Icons/Steam.png"/>
+                        </Style>
+                        <Style Selector="Image.File">
+                            <Setter Property="Source" Value="avares://Trebuchet/Assets/Icons/FIle.png"/>
+                        </Style>
+                        <Style Selector="Image.Bug">
+                            <Setter Property="Source" Value="avares://Trebuchet/Assets/Icons/Bug.png"/>
+                        </Style>
+                        <Style Selector="Image.Steam > ToolTip">
+                            <Setter Property="Tip" Value="Steam Workshop (Live)"/>
+                        </Style>
+                        <Style Selector="Image.File > ToolTip">
+                            <Setter Property="Tip" Value="Local File"/>
+                        </Style>
+                        <Style Selector="Image.Bug > ToolTip">
+                            <Setter Property="Tip" Value="Steam Workshop (TestLive)"/>
+                        </Style>
+                    </Image.Styles>
+                </Image>
+                <Grid Grid.Column="1">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock VerticalAlignment="Center">
+                        <Run Text="{Binding Title, Mode=OneWay}" />
+                    </TextBlock>
+                    <Border Grid.Column="1" Background="{Binding StatusColor}" BorderBrush="{Binding BorderColor}" BorderThickness="0 1 0 0" Margin="0,0,12,0" CornerRadius="3" Padding="8">
+                        <TextBlock Text="{Binding StatusTooltip}" />
+                    </Border>
+                </Grid>
+                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <TextBlock>
+                        <Run Text="{Binding LastUpdate, Mode=OneWay}" />
+                    </TextBlock>
+                </StackPanel>
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Button IsVisible="{Binding IsPublished}" Cursor="Hand" Margin="0,0,3,0" ToolTip.Tip="Open Workshop Page" Command="{Binding $parent[panel:ModlistPanel].OpenWorkshopCommand}" CommandParameter="{Binding .}">
+                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Steam.png" Width="16" Height="16" />
+                    </Button>
+                    <Button Cursor="Hand" Margin="0,0,3,0" ToolTip.Tip="Update Mod" Command="{Binding $parent[panel:ModlistPanel].UpdateModCommand}" CommandParameter="{Binding .}">
+                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
+                    </Button>
+                    <Button Cursor="Hand" ToolTip.Tip="Remove from list" Command="{Binding $parent[panel:ModlistPanel].RemoveModCommand}" CommandParameter="{Binding .}">
+                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Trash.png" Width="16" Height="16" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </DataTemplate>
 </ResourceDictionary>

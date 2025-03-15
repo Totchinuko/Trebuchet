@@ -11,14 +11,6 @@
                 <Style Selector="Border.MainHover">
                     <Setter Property="Background" Value="#20FFFFFF" /><!-- TODO: Theme here -->
                 </Style>
-                <Style Selector="Visual.Hidden"><!-- TODO: Move the theme -->
-                    <Setter Property="Opacity" Value="0" />
-                    <Setter Property="IsHitTestVisible" Value="False" />
-                </Style>
-                <Style Selector="Visual.Disabled"><!-- TODO: Move the theme -->
-                    <Setter Property="Opacity" Value="0.5" />
-                    <Setter Property="IsHitTestVisible" Value="False" />
-                </Style>
             </Border.Styles>
             <Grid>
                 <Grid.ColumnDefinitions>
