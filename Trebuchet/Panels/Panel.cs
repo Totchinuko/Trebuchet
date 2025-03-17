@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Windows.Input;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.Templates;
 using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Messaging;
@@ -14,12 +15,11 @@ namespace Trebuchet.Panels
         INotifyPropertyChanged,
         IRecipient<PanelRefreshConfigMessage>
     {
-        private readonly string _template;
+        
         private bool _active;
 
-        public Panel(string template)
+        public Panel(string template) : base(template, "TabButtonTemplate")
         {
-            _template = template;
             StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
@@ -41,21 +41,6 @@ namespace Trebuchet.Panels
         public Bitmap? Icon => string.IsNullOrEmpty(IconPath) ? null : global::TrebuchetUtils.Utils.LoadFromResource(new Uri(IconPath, UriKind.Relative));
         public string IconPath { get; set; } = string.Empty;
         public string TabClass => Active ? "AppTabBlue" : "AppTabNeutral";
-        
-        public IDataTemplate Template {
-            get
-            {
-                if(Application.Current == null) throw new Exception("Application.Current is null");
-
-                if (Application.Current.Resources.TryGetResource(_template, Application.Current.ActualThemeVariant,
-                        out var resource) && resource is IDataTemplate template)
-                {
-                    return template;
-                }
-
-                throw new Exception($"Template {_template} not found");
-            }
-        }
 
         public virtual bool CanExecute(object? parameter)
         {
@@ -74,6 +59,10 @@ namespace Trebuchet.Panels
         }
 
         public virtual void RefreshPanel()
+        {
+        }
+
+        public virtual void PanelDisplayed()
         {
         }
 

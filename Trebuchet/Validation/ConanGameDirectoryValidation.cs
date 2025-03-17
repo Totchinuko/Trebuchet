@@ -18,7 +18,7 @@ namespace Trebuchet.Validation
             if (!Utils.Utils.ValidateGameDirectory(value, out errorMessage))
                 return false;
 
-            if (!Tools.ValidateDirectoryUAC(value))
+            if (!Tools.ValidateDirectoryUac(value))
             {
                 StrongReferenceMessenger.Default.Send(new UACPromptRequest(value));
                 errorMessage = string.Empty;

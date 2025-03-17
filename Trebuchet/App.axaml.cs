@@ -11,6 +11,7 @@ using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
 using Serilog;
 using Trebuchet.Modals;
+using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
@@ -30,7 +31,7 @@ public partial class App : Application, IApplication
     public static Dictionary<string, string> AppText { get; set; } = [];
 
     public static UIConfig Config { get; private set; } = null!;
-
+    
     public string AppIconPath => "avares://Trebuchet/Assets/Icons/AppIcon.ico";
     public bool IsShutingDown { get; } = false;
 
@@ -50,9 +51,8 @@ public partial class App : Application, IApplication
         Log.Information($"Selecting {(testlive ? "testlive" : "live")}");
         Config = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
 
-        TrebuchetApp app = new (testlive, catapult);
         MainWindow mainWindow = new ();
-        mainWindow.SetApp(app);
+        mainWindow.SetApp(new (testlive, catapult));
         if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.MainWindow = mainWindow;
         else throw new Exception("Application not initialized");

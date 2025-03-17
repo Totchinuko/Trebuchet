@@ -34,7 +34,7 @@ namespace Trebuchet
     {
         private readonly TaskBlocker _taskBlocker = new();
         private readonly TrebuchetLauncher _trebuchet;
-        private Panel? _activePanel;
+        private Panel _activePanel;
 
         private bool _catapult;
 
@@ -64,12 +64,12 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<UACPromptRequest>(this);
             StrongReferenceMessenger.Default.Register<SteamModlistIDRequest>(this);
 
-            if (!WriteAccessCheck()) return;
-
             var menuConfig = TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
-            ActivePanel = Menu.Bottom.Where(x => x is Panel).Cast<Panel>().FirstOrDefault(x => x.CanExecute(null));
-
+            _activePanel = Menu.Bottom.Where(x => x is Panel).Cast<Panel>().First(x => x.CanExecute(null));
+            if (!WriteAccessCheck()) return;
+            _activePanel.Active = true;
+            
             _trebuchet.Steam.Connected += OnSteamConnected;
             _trebuchet.Steam.Disconnected += OnSteamDisconnected;
             _trebuchet.Steam.Connect();
@@ -79,20 +79,20 @@ namespace Trebuchet
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public static string AppTitle => $"Tot ! Trebuchet {TrebuchetUtils.Utils.GetFileVersion()}";
-        public Panel? ActivePanel
+        public Panel ActivePanel
         {
             get => _activePanel;
             set
             {
-                if (_activePanel != null)
-                    _activePanel.Active = false;
+                if(_activePanel == value) return;
+                _activePanel.Active = false;
                 _activePanel = value;
-                if (_activePanel != null)
-                    _activePanel.Active = true;
+                _activePanel.Active = true;
+                _activePanel.PanelDisplayed();
                 OnPropertyChanged(nameof(ActivePanel));
             }
         }
-        public Menu Menu { get; set; } = new Menu();
+        public Menu Menu { get; set; }
 
         public SteamWidget SteamWidget { get; } = new SteamWidget();
 
@@ -385,12 +385,12 @@ namespace Trebuchet
 
         private bool WriteAccessCheck()
         {
-            if (Trebuchet.Utils.Utils.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ResolvedInstallPath))
+            if (Trebuchet.Utils.Utils.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUac(_trebuchet.Config.ResolvedInstallPath))
             {
                 Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;
             }
-            if (Trebuchet.Utils.Utils.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ClientPath))
+            if (Trebuchet.Utils.Utils.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUac(_trebuchet.Config.ClientPath))
             {
                 Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;

@@ -1,36 +1,40 @@
-﻿<Window x:Class="Trebuchet.MainWindow"
+﻿<Window x:Class="Trebuchet.Windows.MainWindow"
         xmlns="https://github.com/avaloniaui"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Trebuchet"
+        xmlns:local="clr-namespace:Trebuchet.Windows"
+        xmlns:treb="clr-namespace:Trebuchet"
+        xmlns:utilsControls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         mc:Ignorable="d"
         Title="Tot ! Trebuchet"
         Height="650" Width="1010"
         MinHeight="550" MinWidth="800"
         WindowStartupLocation="CenterScreen"
-        UseLayoutRounding="True" Background="Black"><!-- TODO: Standard app color -->
-    <!--<WindowChrome.WindowChrome>
-        <WindowChrome CaptionHeight="40" UseAeroCaptionButtons="False" />
-    </WindowChrome.WindowChrome>
-    <Border Style="{StaticResource WindowBackPanel}" x:Name="MainBorder">
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        SystemDecorations="None"
+        ExtendClientAreaTitleBarHeightHint="40"
+        UseLayoutRounding="True"
+        x:DataType="treb:TrebuchetApp"><!-- TODO: Standard app color -->
+    <Border x:Name="MainBorder">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <TrebGUI:WindowTitlebar
+            <utilsControls:WindowTitlebar
                 x:Name="TitleBar"
-                Title="{x:Static local:TrebuchetApp.AppTitle}"
-                CloseIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Close.png"
-                RestoreIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Restore.png"
-                MaximizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Maximize.png"
-                MinimizeIcon="pack://application:,,,/TrebuchetGUILib;component/icons/Minimize.png">
-                <TrebGUI:WindowTitlebar.Header>
-                    <ContentPresenter ContentTemplate="{StaticResource SteamWidget}" Content="{Binding App.SteamWidget}" />
-                </TrebGUI:WindowTitlebar.Header>
-            </TrebGUI:WindowTitlebar>
-            <Grid x:Name="WindowContent" Grid.Row="2" Margin="0,12,0,0">
+                Title="{x:Static treb:TrebuchetApp.AppTitle}"
+                CloseIcon="avares://TrebuchetUtils/Icons/Close.png"
+                RestoreIcon="avares://TrebuchetUtils/Icons/Restore.png"
+                MaximizeIcon="avares://TrebuchetUtils/Icons/Maximize.png"
+                MinimizeIcon="avares://TrebuchetUtils/Icons/Minimize.png">
+                <utilsControls:WindowTitlebar.Header>
+                    <ContentControl ContentTemplate="{StaticResource SteamWidget}" Content="{Binding SteamWidget}" />
+                </utilsControls:WindowTitlebar.Header>
+            </utilsControls:WindowTitlebar>
+            <Grid x:Name="WindowContent" Grid.Row="1" Margin="0,12,0,0">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="240" />
                     <ColumnDefinition Width="*" />
@@ -41,16 +45,16 @@
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
                     <StackPanel>
-                        <ItemsControl ItemsSource="{Binding App.Menu.Top}" ItemTemplateSelector="{StaticResource TabTemplateSelector}" />
+                        <ItemsControl ItemsSource="{Binding Menu.Top}" ItemTemplate="{Binding MenuTemplate}" />
                     </StackPanel>
-                    <StackPanel Grid.Row="2">
-                        <ItemsControl ItemsSource="{Binding App.Menu.Bottom}" ItemTemplateSelector="{StaticResource TabTemplateSelector}" />
+                    <StackPanel Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding Menu.Bottom}" ItemTemplate="{Binding MenuTemplate}" />
                     </StackPanel>
                 </Grid>
-                <Border x:Name="ContentPanel" Style="{StaticResource DarkPanel}" Grid.Column="2" CornerRadius="10,0,0,0" Padding="12,12,2,12">
-                    <ContentPresenter Content="{Binding App.ActivePanel}" ContentTemplateSelector="{StaticResource TemplateHolderSelector}" />
+                <Border x:Name="ContentPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
+                    <ContentControl Content="{Binding}" ContentTemplate="{Binding ActivePanel.Template}" />
                 </Border>
             </Grid>
         </Grid>
-    </Border>-->
+    </Border>
 </Window>

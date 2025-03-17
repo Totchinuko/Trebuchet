@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet.Panels"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="TabLabel" x:DataType="local:Panel">
+    <DataTemplate x:Key="TabLabel" x:DataType="local:MenuElement">
         <StackPanel Orientation="Vertical">
             <TextBlock Text="{Binding Label}" Margin="12,6,0,6" FontWeight="Bold" />
             <Border Margin="0" />

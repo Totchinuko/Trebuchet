@@ -9,6 +9,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
+using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
@@ -130,25 +131,13 @@ namespace Trebuchet.Panels
                     yield return i.SelectedModlist;
         }
 
-        /// <summary>
-        ///     Show the panel.
-        /// </summary>
-        /// <param name="parameter">Unused</param>
-        public override void Execute(object? parameter)
+        public override void PanelDisplayed()
         {
-            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-                throw new NotSupportedException("The application lifetime is not supported.");
-
-            if (CanExecute(parameter) && (desktop.MainWindow as MainWindow)?.App?.ActivePanel != this)
-            {
-                Client.RefreshSelection();
-                foreach (var i in Instances)
-                    i.RefreshSelection();
-                CreateInstancesIfNeeded();
-                Task.Run(WaitModUpdateCheck);
-            }
-
-            base.Execute(parameter);
+            Client.RefreshSelection();
+            foreach (var i in Instances)
+                i.RefreshSelection();
+            CreateInstancesIfNeeded();
+            Task.Run(WaitModUpdateCheck);
         }
 
         public override void RefreshPanel()

@@ -12,6 +12,7 @@
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="40"
+        SystemDecorations="None"
         Height="200"
         Width="650">
     <Border x:Name="MainBorder">

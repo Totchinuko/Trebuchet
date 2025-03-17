@@ -456,7 +456,7 @@ namespace TrebuchetLib
                     entry.ExtractToFile(Path.Join(destination, entry.FullName));
         }
 
-        public static bool ValidateDirectoryUAC(string directory)
+        public static bool ValidateDirectoryUac(string directory)
         {
             if (!Directory.Exists(directory)) return false;
             return IsDirectoryWritable(directory, false);

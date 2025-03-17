@@ -22,7 +22,7 @@ namespace Trebuchet.Validation
             {
                 return false;
             }
-            if (!Tools.ValidateDirectoryUAC(value))
+            if (!Tools.ValidateDirectoryUac(value))
             {
                 StrongReferenceMessenger.Default.Send(new UACPromptRequest(value));
                 errorMessage = string.Empty;
