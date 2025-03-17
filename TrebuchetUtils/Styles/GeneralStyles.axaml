@@ -11,10 +11,20 @@
     <Style Selector="Visual.Disabled">
         <Setter Property="Opacity" Value="0.5" />
     </Style>
+    <Style Selector="Border.Hidden">
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="IsHitTestVisible" Value="False"/>
+    </Style>
+    <Style Selector="Border.Disabled">
+        <Setter Property="Opacity" Value="0.5" />
+        <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
     <Style Selector="InputElement.Hidden">
+        <Setter Property="Opacity" Value="0" />
         <Setter Property="IsHitTestVisible" Value="False" />
     </Style>
     <Style Selector="InputElement.Disabled">
+        <Setter Property="Opacity" Value="0.5" />
         <Setter Property="IsHitTestVisible" Value="False" />
     </Style>
 </Styles>

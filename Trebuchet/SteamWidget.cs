@@ -45,6 +45,8 @@ namespace Trebuchet
         }
 
         public bool IsConnected { get; private set; }
+        
+        public bool IsLoading => !string.IsNullOrEmpty(Description);
 
         public double Progress { get; private set; }
 

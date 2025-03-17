@@ -24,7 +24,7 @@
                     </TextBlock>
                 </StackPanel>
             </Button>
-            <Border VerticalAlignment="Center" Height="32" Classes.Hidden="{Binding !Description}" MinWidth="400" HorizontalAlignment="Center" CornerRadius="3" Padding="0,0,0,0">
+            <Border VerticalAlignment="Center" Height="32" Classes.Hidden="{Binding !IsLoading}" MinWidth="400" HorizontalAlignment="Center" CornerRadius="3" Padding="0,0,0,0">
                 <Grid>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
