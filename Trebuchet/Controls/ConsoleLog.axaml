@@ -4,6 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Trebuchet.Controls"
+             xmlns:panels="clr-namespace:Trebuchet.Panels"
              mc:Ignorable="d"
              d:DesignHeight="450" d:DesignWidth="800">
     <UserControl.Styles>
@@ -15,9 +16,9 @@
         </Style>
     </UserControl.Styles>
     <ScrollViewer x:Name="LogScrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
-        <ItemsControl ItemsSource="{Binding ConsoleLogs, Mode=OneWay, RelativeSource={RelativeSource AncestorType=local:ConsoleLog}}">
+        <ItemsControl ItemsSource="{Binding $parent[local:ConsoleLog].ConsoleLogs, Mode=OneWay}">
             <ItemsControl.ItemTemplate>
-                <DataTemplate>
+                <DataTemplate DataType="panels:ObservableConsoleLog">
                     <TextBlock TextWrapping="Wrap" Margin="0,0,0,12">
                         <Run Text="{Binding Header, Mode=OneWay}" />
                         <Run Classes="LogRun" Classes.LogRunError="{Binding IsError}" Text="{Binding Body, Mode=OneWay}"/>

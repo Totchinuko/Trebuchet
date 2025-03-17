@@ -7,10 +7,14 @@
     </Design.PreviewWith>
     <Style Selector="Visual.Hidden">
         <Setter Property="Opacity" Value="0" />
-        <Setter Property="IsHitTestVisible" Value="False" />
     </Style>
     <Style Selector="Visual.Disabled">
         <Setter Property="Opacity" Value="0.5" />
+    </Style>
+    <Style Selector="InputElement.Hidden">
+        <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+    <Style Selector="InputElement.Disabled">
         <Setter Property="IsHitTestVisible" Value="False" />
     </Style>
 </Styles>

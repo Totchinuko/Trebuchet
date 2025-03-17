@@ -13,7 +13,8 @@
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
-                <MergeResourceInclude Source="avares://TrebuchetUtils/Converters/Converters.axaml"/>
+                <ResourceInclude Source="avares://TrebuchetUtils/Converters/Converters.axaml" />
+                <ResourceInclude Source="avares://TrebuchetUtils/Modals/Modals.axaml" />
                 <MergeResourceInclude Source="Templates\FieldRow.axaml" />
                 <MergeResourceInclude Source="Templates\TitleField.axaml" />
                 <MergeResourceInclude Source="Templates\CPUAffinityField.axaml" />

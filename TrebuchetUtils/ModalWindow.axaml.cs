@@ -58,7 +58,7 @@ namespace TrebuchetUtils
         {
             if (WasShown) return;
             WasShown = true;
-            var children = GuiExtensions.FindVisualChildren<TextBox>(WindowContent).Where(x =>
+            var children = GuiExtensions.FindVisualChildren<TextBox>(this).Where(x =>
             {
                 if (x.Tag is string value)
                     return value == "Submit";

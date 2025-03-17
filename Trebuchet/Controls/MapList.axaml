@@ -4,7 +4,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Trebuchet.Controls"
+             xmlns:sys="clr-namespace:System.Collections.Generic;assembly=System.Runtime"
              mc:Ignorable="d"
+             x:CompileBindings="False"
              d:DesignHeight="32" d:DesignWidth="32">
     <StackPanel>
         <Button x:Name="MapListButton"
@@ -18,10 +20,10 @@
             <Border BorderThickness="1" CornerRadius="3" MaxHeight="300" MinWidth="100" Width="200">
                 <ScrollViewer>
                     <StackPanel>
-                        <ItemsControl ItemsSource="{Binding MapListData, RelativeSource={RelativeSource AncestorType=local:MapList}}">
+                        <ItemsControl ItemsSource="{Binding $parent[local:MapList].MapListData}">
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate>
-                                    <Button Content="{Binding Key}" Command="{Binding MapSelectCommand, RelativeSource={RelativeSource AncestorType=local:MapList}}" CommandParameter="{Binding Value}" Padding="4" HorizontalContentAlignment="Left" />
+                                    <Button Content="{Binding Key}" Command="{Binding $parent[local:MapList].MapSelectCommand}" CommandParameter="{Binding Value}" Padding="4" HorizontalContentAlignment="Left" />
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>

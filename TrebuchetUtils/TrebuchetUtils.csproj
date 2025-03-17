@@ -24,7 +24,6 @@
 
     <ItemGroup>
       <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
-      <ProjectReference Include="..\TrebuchetLib\TrebuchetLib.csproj" />
     </ItemGroup>
 
     <ItemGroup>

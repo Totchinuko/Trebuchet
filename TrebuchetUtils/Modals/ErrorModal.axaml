@@ -1,17 +1,14 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:TrebGUI="clr-namespace:TrebuchetUtils">
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/TrebuchetGUILib;component/Styles/Styles.xaml" />
-    </ResourceDictionary.MergedDictionaries>
-    <DataTemplate x:Key="ErrorModal">
+                    xmlns:local="clr-namespace:TrebuchetUtils.Modals">
+    <DataTemplate x:Key="ErrorModal" DataType="local:ErrorModal">
         <Grid Margin="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}" Foreground="{StaticResource GRed}">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="IndianRed"><!-- TODO: Theme --> 
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
@@ -19,13 +16,13 @@
                     <Run Text="{Binding ErrorMessage}" />
                 </TextBlock>
             </StackPanel>
-            <Button Style="{StaticResource TBtnStrokeRedOver}"
+            <Button
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Grid.Row="1">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/close.png" Height="13" Width="13" Margin="0 0 6 0" />
+                    <Image Source="avares://Icons/close.png" Height="13" Width="13" Margin="0 0 6 0" />
                     <TextBlock Text="Close" />
                 </StackPanel>
             </Button>

@@ -1,10 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:TrebGUI="clr-namespace:TrebuchetUtils">
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/TrebuchetGUILib;component/Styles/Styles.xaml" />
-    </ResourceDictionary.MergedDictionaries>
-    <DataTemplate x:Key="ExceptionModal">
+                    xmlns:local="clr-namespace:TrebuchetUtils.Modals">
+    <DataTemplate x:Key="ExceptionModal" DataType="local:ExceptionModal">
         <Grid Margin="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
@@ -17,7 +14,7 @@
                     <RowDefinition Height="12" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}" Foreground="{StaticResource GRed}">
+                <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="IndianRed"><!-- TODO: Theme -->
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
@@ -26,13 +23,13 @@
                     </TextBlock>
                 </ScrollViewer>
             </Grid>
-            <Button Style="{StaticResource TBtnStrokeRedOver}"
+            <Button
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Grid.Row="2">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/close.png" Height="13" Width="13" Margin="0 0 6 0" />
+                    <Image Source="avares://Icons/close.png" Height="13" Width="13" Margin="0 0 6 0" />
                     <TextBlock Text="Close" />
                 </StackPanel>
             </Button>

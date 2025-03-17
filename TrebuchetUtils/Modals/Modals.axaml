@@ -1,0 +1,11 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <ResourceDictionary.MergedDictionaries>
+        <MergeResourceInclude Source="ErrorModal.axaml" />
+        <MergeResourceInclude Source="ExceptionModal.axaml" />
+        <MergeResourceInclude Source="InputTextModal.axaml" />
+        <MergeResourceInclude Source="MessageModal.axaml" />
+        <MergeResourceInclude Source="QuestionModal.axaml" />
+        <MergeResourceInclude Source="WaitModal.axaml" />
+    </ResourceDictionary.MergedDictionaries>
+</ResourceDictionary>

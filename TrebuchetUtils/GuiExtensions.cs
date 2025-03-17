@@ -7,7 +7,6 @@ using System.IO;
 using System.Reflection;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using TrebuchetLib;
 using TrebuchetUtils.Modals;
 using VisualExtensions = Avalonia.VisualTree.VisualExtensions;
 
@@ -65,20 +64,6 @@ namespace TrebuchetUtils
             }
         }
         
-        public static void RestartProcess(bool testlive, bool asAdmin = false)
-        {
-            var data = Tools.GetProcess(Environment.ProcessId);
-            Process process = new Process();
-            process.StartInfo.FileName = data.filename;
-            process.StartInfo.Arguments = data.args + (testlive ? " -testlive" : " -live");
-            process.StartInfo.UseShellExecute = true;
-            if (asAdmin)
-                process.StartInfo.Verb = "runas";
-            process.Start();
-            if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-                desktop.Shutdown();
-        }
-
         public static void SetParentValue<TParent>(this Visual child, AvaloniaProperty property, object value) where TParent : Visual
         {
             if(child.Parent is TParent)

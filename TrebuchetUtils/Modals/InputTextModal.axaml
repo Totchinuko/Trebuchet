@@ -1,0 +1,17 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:local="clr-namespace:TrebuchetUtils.Modals"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="InputTextModal" DataType="local:InputTextModal">
+        <Grid VerticalAlignment="Center" Margin="12" HorizontalAlignment="Center">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="450" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <Grid>
+                <TextBox x:Name="ToFocus" Tag="Submit" Padding="3" MaxLength="{Binding MaxLength}" AcceptsReturn="{Binding AcceptReturn}" TextWrapping="{Binding AcceptReturn}" Height="{Binding FieldHeight}" VerticalContentAlignment="Top" Text="{Binding Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0" />
+                <TextBlock Text="{Binding Watermark}" IsVisible="{Binding !#ToFocus.Text}" IsHitTestVisible="False" Opacity="0.4" Margin="6" />
+            </Grid>
+            <Button Grid.Column="1" VerticalAlignment="Top" Content="{Binding ButtonLabel}" Command="{Binding ValidateCommand}" />
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

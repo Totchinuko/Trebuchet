@@ -37,6 +37,20 @@ namespace Trebuchet.Utils
             }
             return true;
         }
+        
+        public static void RestartProcess(bool testlive, bool asAdmin = false)
+        {
+            var data = Tools.GetProcess(Environment.ProcessId);
+            Process process = new Process();
+            process.StartInfo.FileName = data.filename;
+            process.StartInfo.Arguments = data.args + (testlive ? " -testlive" : " -live");
+            process.StartInfo.UseShellExecute = true;
+            if (asAdmin)
+                process.StartInfo.Verb = "runas";
+            process.Start();
+            if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+                desktop.Shutdown();
+        }
 
         public static bool ValidateInstallDirectory(string installPath, out string errorMessage)
         {

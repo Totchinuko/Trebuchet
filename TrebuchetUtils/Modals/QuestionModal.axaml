@@ -1,17 +1,14 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:TrebGUI="clr-namespace:TrebuchetGUILib;assembly=TrebuchetGUILib">
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/TrebuchetGUILib;component/Styles/Styles.xaml" />
-    </ResourceDictionary.MergedDictionaries>
-    <DataTemplate x:Key="QuestionModal">
+                    xmlns:local="clr-namespace:TrebuchetUtils.Modals">
+    <DataTemplate x:Key="QuestionModal" DataType="local:QuestionModal">
         <Grid Margin="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left">
                     <Run Text="{Binding MessageTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
@@ -20,8 +17,7 @@
                 </TextBlock>
             </StackPanel>
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
-                <Button Style="{StaticResource TBtnStrokeGreenOver}"
-                        Content="Yes"
+                <Button Content="Yes"
                         Command="{Binding YesCommand}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
@@ -29,8 +25,7 @@
                         Width="50"
                         Margin="0,0,12,0"
                         Grid.Row="1" />
-                <Button Style="{StaticResource TBtnStrokeNormalOver}"
-                        Content="Cancel"
+                <Button Content="Cancel"
                         Command="{Binding CancelCommand}"
                         HorizontalAlignment="Right"
                         HorizontalContentAlignment="Center"

@@ -144,7 +144,7 @@ namespace Trebuchet
 
             if (modal.Result)
             {
-                TrebuchetUtils.GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 message.Reply(true);
             }
             else
@@ -387,12 +387,12 @@ namespace Trebuchet
         {
             if (Trebuchet.Utils.Utils.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ResolvedInstallPath))
             {
-                TrebuchetUtils.GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;
             }
             if (Trebuchet.Utils.Utils.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ClientPath))
             {
-                TrebuchetUtils.GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;
             }
             return true;

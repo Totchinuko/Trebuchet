@@ -1,26 +1,22 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:TrebGUI="clr-namespace:TrebuchetGUILib;assembly=TrebuchetGUILib">
-    <ResourceDictionary.MergedDictionaries>
-        <ResourceDictionary Source="pack://application:,,,/TrebuchetGUILib;component/Styles/Styles.xaml" />
-    </ResourceDictionary.MergedDictionaries>
-    <DataTemplate x:Key="WaitModal">
+                    xmlns:local="clr-namespace:TrebuchetUtils.Modals"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="MessageModal" DataType="local:MessageModal">
         <Grid Margin="12">
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Style="{StaticResource TitleText}">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left">
                     <Run Text="{Binding MessageTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left">
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap">
                     <Run Text="{Binding Message}" />
                 </TextBlock>
             </StackPanel>
-            <Button Style="{StaticResource TBtnStrokeNormalOver}"
-                    Content="Cancel"
+            <Button Content="Ok"
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"

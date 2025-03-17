@@ -22,7 +22,7 @@ namespace Trebuchet.Controls
 
         public ObservableCollection<ObservableConsoleLog> ConsoleLogs
         {
-            get => (ObservableCollection<ObservableConsoleLog>)GetValue(ConsoleLogsProperty);
+            get => GetValue(ConsoleLogsProperty);
             set => SetValue(ConsoleLogsProperty, value);
         }
         

@@ -77,7 +77,7 @@ namespace Trebuchet.Panels
 
         private void OnAppRestart(object? obj)
         {
-            GuiExtensions.RestartProcess(Config.IsTestLive);
+            Utils.Utils.RestartProcess(Config.IsTestLive);
         }
 
         private void OnServerInstanceInstall(object? obj)
