@@ -242,7 +242,8 @@ namespace TrebuchetLib
         [SupportedOSPlatform("linux")]
         private static ProcessData GetProcessLinux(int processId)
         {
-            throw new NotImplementedException();
+            // TODO: Linux process discovery
+            return ProcessData.Empty;
         }
 
         public static IEnumerable<ProcessData> GetProcessesWithName(string processName)
@@ -267,7 +268,8 @@ namespace TrebuchetLib
         [SupportedOSPlatform("linux")]
         private static IEnumerable<ProcessData> GetProcessesWithNameLinux(string processName)
         {
-            throw new NotImplementedException();
+            // TODO: Linux process discovery
+            yield break;
         }
         
         [SupportedOSPlatform("linux")]

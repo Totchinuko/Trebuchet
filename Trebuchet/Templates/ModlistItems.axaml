@@ -52,13 +52,13 @@
                 </StackPanel>
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button IsVisible="{Binding IsPublished}" Cursor="Hand" Margin="0,0,3,0" ToolTip.Tip="Open Workshop Page" Command="{Binding $parent[panel:ModlistPanel].OpenWorkshopCommand}" CommandParameter="{Binding .}">
-                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Steam.png" Width="16" Height="16" />
+                        <Image Source="avares://Trebuchet/Assets/Icons/Steam.png" Width="16" Height="16" />
                     </Button>
                     <Button Cursor="Hand" Margin="0,0,3,0" ToolTip.Tip="Update Mod" Command="{Binding $parent[panel:ModlistPanel].UpdateModCommand}" CommandParameter="{Binding .}">
-                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
+                        <Image Source="avares://Trebuchet/Assets/Icons/Reset.png" Width="16" Height="16" />
                     </Button>
                     <Button Cursor="Hand" ToolTip.Tip="Remove from list" Command="{Binding $parent[panel:ModlistPanel].RemoveModCommand}" CommandParameter="{Binding .}">
-                        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Trash.png" Width="16" Height="16" />
+                        <Image Source="avares://Trebuchet/Assets/Icons/Trash.png" Width="16" Height="16" />
                     </Button>
                 </StackPanel>
             </Grid>

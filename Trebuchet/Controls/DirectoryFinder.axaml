@@ -8,6 +8,6 @@
     <Button x:Name="FindButton"
             Click="FindButton_MouseDown"
             Padding="8">
-        <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/LocalStorage.png" Width="16" />
+        <Image Source="avares://Trebuchet/Assets/Icons/LocalStorage.png" Width="16" />
     </Button>
 </UserControl>

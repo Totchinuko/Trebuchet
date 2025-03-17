@@ -48,7 +48,7 @@
                         Margin="12,0,3,0"
                         Classes.Hidden="{Binding !IsDefault}"
                         Command="{Binding ResetCommand}">
-                    <Image Source="pack://application:,,,/TrebuchetGUILib;component/Icons/Reset.png" Width="16" Height="16" />
+                    <Image Source="avares://Trebuchet/Assets/Icons/Reset.png" Width="16" Height="16" />
                 </Button>
             </Grid>
         </Border>

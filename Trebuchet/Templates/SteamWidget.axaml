@@ -9,7 +9,7 @@
                     Padding="8"
                     Command="{Binding ConnectCommand}">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="avares://Assets/Icons/Steam.png" Width="16" Height="16" Margin="0,0,12,0" VerticalAlignment="Center" />
+                    <Image Source="avares://Trebuchet/Assets/Icons/Steam.png" Width="16" Height="16" Margin="0,0,12,0" VerticalAlignment="Center" />
                     <TextBlock VerticalAlignment="Center" Classes="Connected" Classes.Disconnected="{Binding !IsConnected}">
                         <TextBlock.Styles>
                             <Style Selector="TextBlock.Connected">

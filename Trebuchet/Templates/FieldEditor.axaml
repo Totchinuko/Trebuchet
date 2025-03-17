@@ -11,9 +11,9 @@
             <ItemsControl ItemsSource="{Binding RequiredActions}" ItemTemplate="{StaticResource RequiredAction}" />
             <ScrollViewer Grid.Row="1">
                 <ItemsControl ItemsSource="{Binding Fields}" Margin="0,0,6,0">
-                    <DataTemplate>
+                    <ItemsControl.ItemTemplate>
                         <fields:FieldDataTemplate/>
-                    </DataTemplate>
+                    </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
         </Grid>
