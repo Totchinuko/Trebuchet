@@ -110,6 +110,9 @@ public partial class App : Application, IApplication
             TestliveModal modal = new (desktop.Args?.Contains("-catapult") ?? false);
             desktop.MainWindow = modal.Window;
             modal.OpenDialogue();
+            // TestWindow window = new TestWindow();
+            // desktop.MainWindow = window;
+            // window.Show();
         }
         base.OnFrameworkInitializationCompleted();
     }

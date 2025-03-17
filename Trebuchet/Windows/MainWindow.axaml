@@ -9,7 +9,7 @@
         xmlns:panels="clr-namespace:Trebuchet.Panels"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         mc:Ignorable="d"
-        Title="Tot ! Trebuchet"
+        Title="{x:Static treb:TrebuchetApp.AppTitle}"
         Height="650" Width="1010"
         MinHeight="550" MinWidth="800"
         WindowStartupLocation="CenterScreen"

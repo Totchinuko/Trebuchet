@@ -107,6 +107,8 @@ namespace TrebuchetUtils.Controls
             set => SetValue(TitleProperty, value);
         }
 
+        public bool DisplayWindowControls => OperatingSystem.IsWindows();
+
         private static void OnCloseIconChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
         {
             sender.CloseImage.Source = sender.CloseIcon;
