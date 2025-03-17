@@ -1,5 +1,65 @@
 <Styles xmlns="https://github.com/avaloniaui"
+        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Styles.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.ThemeDictionaries>
+                <ResourceDictionary x:Key="Light">
+                    <SolidColorBrush x:Key="TBackground" Color="#FFFFFFFF" />
+                    <SolidColorBrush x:Key="TForeground" Color="#000000" />
+                    <SolidColorBrush x:Key="TPanel" Color="#11000000" />
+                    <SolidColorBrush x:Key="TPanelAccent" Color="#18000000" />
+                    <SolidColorBrush x:Key="TDarkPanel" Color="#19FFFFFF" />
+                    <SolidColorBrush x:Key="TSubText" Color="#19FFFFFF" />
+                    <SolidColorBrush x:Key="TGrayDim" Color="#AA595959" />
+                    <SolidColorBrush x:Key="TGray" Color="#FF595959" />
+                    <SolidColorBrush x:Key="TRedFaded" Color="#11c42b1c" />
+                    <SolidColorBrush x:Key="TRedDim" Color="#AAc42b1c" />
+                    <SolidColorBrush x:Key="TRed" Color="#FFc42b1c" />
+                    <SolidColorBrush x:Key="TGreenFaded" Color="#115a9b40" />
+                    <SolidColorBrush x:Key="TGreenDim" Color="#AA5a9b40" />
+                    <SolidColorBrush x:Key="TGreen" Color="#FF5a9b40" />
+                    <SolidColorBrush x:Key="TYellowFaded" Color="#11ffb300" />
+                    <SolidColorBrush x:Key="TYellowDim" Color="#AAffb300" />
+                    <SolidColorBrush x:Key="TYellow" Color="#FFffb300" />
+                    <SolidColorBrush x:Key="TPurpleFaded" Color="#118729CA" />
+                    <SolidColorBrush x:Key="TPurpleDim" Color="#AA8729CA" />
+                    <SolidColorBrush x:Key="TPurple" Color="#FF8729CA" />
+                    <SolidColorBrush x:Key="TBlueFaded" Color="#113a8eda" />
+                    <SolidColorBrush x:Key="TBlueDim" Color="#AA3a8eda" />
+                    <SolidColorBrush x:Key="TBlue" Color="#FF3a8eda" />
+                    <system:String x:Key="TIconCssColor">#Union { fill: #000000; }</system:String>
+                </ResourceDictionary>
+                <ResourceDictionary x:Key="Dark">
+                    <SolidColorBrush x:Key="TBackground" Color="#FF202020" />
+                    <SolidColorBrush x:Key="TForeground" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="TPanel" Color="#11FFFFFF" />
+                    <SolidColorBrush x:Key="TPanelAccent" Color="#18FFFFFF" />
+                    <SolidColorBrush x:Key="TDarkPanel" Color="#19000000" />
+                    <SolidColorBrush x:Key="TSubText" Color="#19000000" />
+                    <SolidColorBrush x:Key="TGrayDim" Color="#AA595959" />
+                    <SolidColorBrush x:Key="TGray" Color="#FF595959" />
+                    <SolidColorBrush x:Key="TRedFaded" Color="#11c42b1c" />
+                    <SolidColorBrush x:Key="TRedDim" Color="#AAc42b1c" />
+                    <SolidColorBrush x:Key="TRed" Color="#FFc42b1c" />
+                    <SolidColorBrush x:Key="TGreenFaded" Color="#115a9b40" />
+                    <SolidColorBrush x:Key="TGreenDim" Color="#AA5a9b40" />
+                    <SolidColorBrush x:Key="TGreen" Color="#FF5a9b40" />
+                    <SolidColorBrush x:Key="TYellowFaded" Color="#11ffb300" />
+                    <SolidColorBrush x:Key="TYellowDim" Color="#AAffb300" />
+                    <SolidColorBrush x:Key="TYellow" Color="#FFffb300" />
+                    <SolidColorBrush x:Key="TPurpleFaded" Color="#118729CA" />
+                    <SolidColorBrush x:Key="TPurpleDim" Color="#AA8729CA" />
+                    <SolidColorBrush x:Key="TPurple" Color="#FF8729CA" />
+                    <SolidColorBrush x:Key="TBlueFaded" Color="#113a8eda" />
+                    <SolidColorBrush x:Key="TBlueDim" Color="#AA3a8eda" />
+                    <SolidColorBrush x:Key="TBlue" Color="#FF3a8eda" />
+                    <system:String x:Key="TIconCssColor">#Union { fill: #FFFFFF; }</system:String>
+                </ResourceDictionary>
+            </ResourceDictionary.ThemeDictionaries>
+        </ResourceDictionary>
+    </Styles.Resources>
+    
     <Design.PreviewWith>
         <Border Padding="20">
             <!-- Add Controls for Previewer Here -->
@@ -26,5 +86,104 @@
     <Style Selector="InputElement.Disabled">
         <Setter Property="Opacity" Value="0.5" />
         <Setter Property="IsHitTestVisible" Value="False" />
+    </Style>
+    <Style Selector="Window.Trebuchet">
+        <Setter Property="Background" Value="{DynamicResource TBackground}"/>
+    </Style>
+    <Style Selector="Svg.SvgIcon">
+        <Setter Property="Height" Value="16"/>
+        <Setter Property="Width" Value="16"/>
+    </Style>
+    
+    <Style Selector="Button.Base /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TPanel}"/>
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="BorderThickness" Value="0 1 0 0"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="BorderBrush" Duration="0:0:0.1"/>
+                <BrushTransition Property="Background" Duration="0:0:0.1"/>
+            </Transitions>
+        </Setter>
+    </Style>
+    <Style Selector="Svg">
+        
+        <Setter Property="(Svg.Css)" Value="{DynamicResource TIconCssColor}" />
+    </Style>
+    <Style Selector="Button.Colored.Red /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TRedFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TRedDim}"/>
+    </Style>
+    <Style Selector="Button.Colored.Blue /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TBlueFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
+    </Style>
+    <Style Selector="Button.Colored.Yellow /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TYellowFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TYellowDim}"/>
+    </Style>
+    <Style Selector="Button.Colored.Purple /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TPurpleFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPurpleDim}"/>
+    </Style>
+    <Style Selector="Button.Colored.Green /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TGreenFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TGreenDim}"/>
+    </Style>
+    <Style Selector="Button.Heavy /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.TabRight /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="0 1 1 1" />
+    </Style>
+    <Style Selector="Button.TabLeft /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1 1 0 1" />
+    </Style>
+    <Style Selector="Button.TabTop /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1 1 1 0" />
+    </Style>
+    <Style Selector="Button.TabBottom /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1 0 1 1" />
+    </Style>
+    <Style Selector="Button.Base:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="BorderThickness" Value="0 1 0 0"/>
+    </Style>
+    <Style Selector="Button.Red:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{DynamicResource TRedDim}"/>
+        <Setter Property="Background" Value="{DynamicResource TRedFaded}"/>
+    </Style>
+    <Style Selector="Button.Blue:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
+        <Setter Property="Background" Value="{DynamicResource TBlueFaded}"/>
+    </Style>
+    <Style Selector="Button.Green:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{DynamicResource TGreenDim}"/>
+        <Setter Property="Background" Value="{DynamicResource TGreenFaded}"/>
+    </Style>
+    <Style Selector="Button.Purple:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{DynamicResource TPurpleDim}"/>
+        <Setter Property="Background" Value="{DynamicResource TPurpleFaded}"/>
+    </Style>
+    <Style Selector="Button.Yellow:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderBrush" Value="{DynamicResource TYellowDim}"/>
+        <Setter Property="Background" Value="{DynamicResource TYellowFaded}"/>
+    </Style>
+    <Style Selector="Button.Red.Colored:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TRedDim}"/>
+    </Style>
+    <Style Selector="Button.Blue.Colored:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TBlueDim}"/>
+    </Style>
+    <Style Selector="Button.Green.Colored:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TGreenDim}"/>
+    </Style>
+    <Style Selector="Button.Purple.Colored:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TPurpleDim}"/>
+    </Style>
+    <Style Selector="Button.Yellow.Colored:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TYellowDim}"/>
     </Style>
 </Styles>

@@ -13,8 +13,12 @@
         ExtendClientAreaChromeHints="NoChrome"
         ExtendClientAreaTitleBarHeightHint="40"
         SystemDecorations="Full"
+        Classes="Trebuchet"
         Height="200"
         Width="650">
+    <Window.Styles>
+        <StyleInclude Source="Styles/GeneralStyles.axaml"></StyleInclude>
+    </Window.Styles>
     <Border x:Name="MainBorder">
         <Grid>
             <Grid.RowDefinitions>

@@ -8,6 +8,6 @@
     <Button x:Name="FindButton"
             Click="FindButton_MouseDown"
             Padding="8">
-        <Image Source="avares://Trebuchet/Assets/Icons/LocalStorage.png" Width="16" />
+        <Svg Path="avares://TrebuchetUtils/Assets/SvgIcons/folder.svg" Classes="SvgIcon" />
     </Button>
 </UserControl>

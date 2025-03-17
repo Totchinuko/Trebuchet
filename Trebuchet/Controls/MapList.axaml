@@ -14,7 +14,7 @@
                 ToolTip.Tip="Map Selection"
                 ToolTip.ShowDelay="0"
                 Padding="8">
-            <Image Source="avares://Trebuchet/Assets/Icons/Map.png" Width="16" />
+            <Svg Path="avares://TrebuchetUtils/Assets/SvgIcons/map.svg" Classes="SvgIcon" />
         </Button>
         <Popup Name="MapListPopup" IsLightDismissEnabled="True">
             <Border BorderThickness="1" CornerRadius="3" MaxHeight="300" MinWidth="100" Width="200">

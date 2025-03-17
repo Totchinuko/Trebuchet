@@ -18,7 +18,7 @@
                 x:Name="AddBtn"
                 Click="AddBtn_Click"
                 Margin="0,3,12,3">
-            <Image Source="avares://Trebuchet/Assets/Icons/Add.png" Width="16" Height="16" />
+            <Svg Path="avares://TrebuchetUtils/Assets/SvgIcons/add.svg"  Classes="SvgIcon" />
         </Button>
         <StackPanel Orientation="Vertical" Grid.Column="1">
             <ItemsControl x:Name="InstanceList" ItemsSource="{Binding Values, RelativeSource={RelativeSource AncestorType=local:StringListEditor}}">
@@ -42,7 +42,7 @@
                                         Command="{Binding DeleteCommand, RelativeSource={RelativeSource AncestorType=local:StringListEditor}}"
                                         CommandParameter="{Binding .}"
                                         Grid.Column="1">
-                                    <Image Source="avares://Trebuchet/Assets/Icons/Trash.png" Width="16" Height="16" />
+                                    <Svg Path="avares://TrebuchetUtils/Assets/SvgIcons/trash.svg" Classes="SvgIcon" />
                                 </Button>
                             </Grid>
                         </Border>
