@@ -39,7 +39,8 @@
                     <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.1" />
                     <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
-                    <system:String x:Key="TIconCssColor">#Union { fill: #000000; }</system:String>
+                    <system:String x:Key="TIconCssColor">#Union, #Subtract { fill: rgba(0, 0, 0, 1.0); }</system:String>
+                    <system:String x:Key="TIconCssDisabled">#Union, #Subtract { fill: rgba(0, 0, 0, 0.5); }</system:String>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <Color x:Key="TRedBase">#c42b1c</Color>
@@ -76,7 +77,8 @@
                     <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.1" />
                     <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
-                    <system:String x:Key="TIconCssColor">#Union { fill: #FFFFFF; }</system:String>
+                    <system:String x:Key="TIconCssColor">#Union, #Subtract { fill: rgba(255, 255, 255, 1.0); }</system:String>
+                    <system:String x:Key="TIconCssDisabled">#Union, #Subtract { fill: rgba(255, 255, 255, 0.5); }</system:String>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
@@ -113,8 +115,8 @@
         <Setter Property="Background" Value="{DynamicResource TBackground}"/>
     </Style>
     <Style Selector="Svg.SvgIcon">
-        <Setter Property="Height" Value="16"/>
-        <Setter Property="Width" Value="16"/>
+        <Setter Property="Height" Value="18"/>
+        <Setter Property="Width" Value="18"/>
     </Style>
     
     <!-- Button Base -->
@@ -133,6 +135,10 @@
     </Style>
     <Style Selector="Svg">
         <Setter Property="(Svg.Css)" Value="{DynamicResource TIconCssColor}" />
+    </Style>
+    
+    <Style Selector="Button:disabled Svg">
+        <Setter Property="(Svg.Css)" Value="{DynamicResource TIconCssDisabled}" />
     </Style>
     
     <Style Selector="Button.Base:pointerover /template/ ContentPresenter#PART_ContentPresenter">

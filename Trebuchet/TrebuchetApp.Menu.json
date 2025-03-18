@@ -3,7 +3,7 @@
     {
       "$type": "Modlist",
       "Label": "Mod Lists",
-      "IconPath": "avares://Trebuchet/Assets/Icons/List.png"
+      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/list.svg"
     },
     {
       "Label": "Game"
@@ -11,7 +11,7 @@
     {
       "$type": "ClientSettings",
       "Label": "Profiles",
-      "IconPath": "avares://Trebuchet/Assets/Icons/Game.png"
+      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/controller.svg"
     },
     {
       "Label": "Server"
@@ -19,29 +19,29 @@
     {
       "$type": "ServerSettings",
       "Label": "Profiles",
-      "IconPath": "avares://Trebuchet/Assets/Icons/Server.png"
+      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/server.svg"
     },
     {
       "$type": "Rcon",
       "Label": "Console",
-      "IconPath": "avares://Trebuchet/Assets/Icons/Console.png"
+      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/window.hash.svg"
     },
     {
       "$type": "LogFilter",
       "Label": "Log Filter",
-      "IconPath": "avares://Trebuchet/Assets/Icons/Filter.png"
+      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/filter.svg"
     }
   ],
   "Bottom": [
     {
       "$type": "Dashboard",
       "Label": "Dashboard",
-      "IconPath": "avares://Trebuchet/Assets/Icons/Dashboard.png"
+      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/dashboard.svg"
     },
     {
       "$type": "Settings",
       "Label": "Settings",
-      "IconPath": "avares://Trebuchet/Assets/Icons/Settings.png"
+      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/settings.svg"
     }
   ]
 }

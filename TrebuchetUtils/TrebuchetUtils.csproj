@@ -500,6 +500,16 @@
       <AvaloniaResource Include="Assets\SvgIcons\window.remove.svg" />
       <None Remove="Assets\SvgIcons\window.valid.svg" />
       <AvaloniaResource Include="Assets\SvgIcons\window.valid.svg" />
+      <None Remove="Assets\SvgIcons\controller.svg" />
+      <AvaloniaResource Include="Assets\SvgIcons\controller.svg" />
+      <None Remove="Assets\SvgIcons\controller.wired.svg" />
+      <AvaloniaResource Include="Assets\SvgIcons\controller.wired.svg" />
+      <None Remove="Assets\SvgIcons\controller.wireless.svg" />
+      <AvaloniaResource Include="Assets\SvgIcons\controller.wireless.svg" />
+      <None Remove="Assets\SvgIcons\gameboy.svg" />
+      <AvaloniaResource Include="Assets\SvgIcons\gameboy.svg" />
+      <None Remove="Assets\SvgIcons\server.svg" />
+      <AvaloniaResource Include="Assets\SvgIcons\server.svg" />
     </ItemGroup>
 
     <ItemGroup>

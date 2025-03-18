@@ -38,7 +38,6 @@ namespace Trebuchet.Panels
             }
         }
 
-        public Bitmap? Icon => string.IsNullOrEmpty(IconPath) ? null : TrebuchetUtils.Utils.LoadFromResource(new Uri(IconPath, UriKind.Absolute));
         public string IconPath { get; set; } = string.Empty;
         public string TabClass => Active ? "AppTabBlue" : "AppTabNeutral";
 
