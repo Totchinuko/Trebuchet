@@ -120,6 +120,7 @@
         <Setter Property="CornerRadius" Value="3" />
         <Setter Property="BorderThickness" Value="0 1 0 0"/>
         <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="Cursor" Value="Hand" />
         <Setter Property="Transitions">
             <Transitions>
                 <BrushTransition Property="BorderBrush" Duration="0:0:0.1"/>
