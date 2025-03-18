@@ -3,10 +3,11 @@ using System.IO;
 using Avalonia.Controls;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using TrebuchetUtils;
 
 namespace Trebuchet.Windows
 {
-    public partial class MainWindow : Window
+    public partial class MainWindow : WindowAutoPadding
     {
         private bool _shown;
         private TrebuchetApp? _app;

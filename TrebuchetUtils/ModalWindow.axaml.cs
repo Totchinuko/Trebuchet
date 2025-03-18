@@ -13,7 +13,7 @@ namespace TrebuchetUtils
     /// <summary>
     ///     Interaction logic for ModalWindow.xaml
     /// </summary>
-    public sealed partial class ModalWindow : Window, IShownWindow
+    public sealed partial class ModalWindow : WindowAutoPadding, IShownWindow
     {
         public ModalWindow()
         {

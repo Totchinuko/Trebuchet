@@ -107,7 +107,7 @@ namespace TrebuchetUtils.Controls
             set => SetValue(TitleProperty, value);
         }
 
-        public bool DisplayWindowControls => OperatingSystem.IsWindows();
+        public bool DisplayWindowControls => !Utils.UseOsChrome();
 
         private static void OnCloseIconChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
         {

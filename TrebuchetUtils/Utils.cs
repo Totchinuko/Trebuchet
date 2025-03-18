@@ -41,6 +41,11 @@ namespace TrebuchetUtils
             }
         }
 
+        public static bool UseOsChrome()
+        {
+            return !OperatingSystem.IsWindows();
+        }
+
         public static void OpenWeb(string url)
         {
             var proc = new Process();

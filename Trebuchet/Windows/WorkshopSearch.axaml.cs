@@ -20,7 +20,7 @@ namespace Trebuchet.Windows
     /// <summary>
     /// Interaction logic for WorkshopSearch.xaml
     /// </summary>
-    public partial class WorkshopSearch : Window
+    public partial class WorkshopSearch : WindowAutoPadding
     {
         public static readonly DirectProperty<WorkshopSearch, List<WorkshopSearchResult>> SearchResultsProperty =
             AvaloniaProperty.RegisterDirect<WorkshopSearch, List<WorkshopSearchResult>>(nameof(SearchResults),
