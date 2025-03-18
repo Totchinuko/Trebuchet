@@ -5,6 +5,11 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
+                    <Color x:Key="TRedBase">#88281B</Color>
+                    <Color x:Key="TGreenBase">#45853F</Color>
+                    <Color x:Key="TYellowBase">#A68438</Color>
+                    <Color x:Key="TPurpleBase">#634295</Color>
+                    <Color x:Key="TBlueBase">#5173A2</Color>
                     <SolidColorBrush x:Key="TBackground" Color="#FFFFFFFF" />
                     <SolidColorBrush x:Key="TForeground" Color="#000000" />
                     <SolidColorBrush x:Key="TPanel" Color="#11000000" />
@@ -13,47 +18,62 @@
                     <SolidColorBrush x:Key="TSubText" Color="#19FFFFFF" />
                     <SolidColorBrush x:Key="TGrayDim" Color="#AA595959" />
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
-                    <SolidColorBrush x:Key="TRedFaded" Color="#11c42b1c" />
-                    <SolidColorBrush x:Key="TRedDim" Color="#AAc42b1c" />
-                    <SolidColorBrush x:Key="TRed" Color="#FFc42b1c" />
-                    <SolidColorBrush x:Key="TGreenFaded" Color="#115a9b40" />
-                    <SolidColorBrush x:Key="TGreenDim" Color="#AA5a9b40" />
-                    <SolidColorBrush x:Key="TGreen" Color="#FF5a9b40" />
-                    <SolidColorBrush x:Key="TYellowFaded" Color="#11ffb300" />
-                    <SolidColorBrush x:Key="TYellowDim" Color="#AAffb300" />
-                    <SolidColorBrush x:Key="TYellow" Color="#FFffb300" />
-                    <SolidColorBrush x:Key="TPurpleFaded" Color="#118729CA" />
-                    <SolidColorBrush x:Key="TPurpleDim" Color="#AA8729CA" />
-                    <SolidColorBrush x:Key="TPurple" Color="#FF8729CA" />
-                    <SolidColorBrush x:Key="TBlueFaded" Color="#113a8eda" />
-                    <SolidColorBrush x:Key="TBlueDim" Color="#AA3a8eda" />
-                    <SolidColorBrush x:Key="TBlue" Color="#FF3a8eda" />
+                    <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TRedFaded" Color="{DynamicResource TRedBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TRedDim" Color="{DynamicResource TRedBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TRed" Color="{DynamicResource TRedBase}" />
+                    <SolidColorBrush x:Key="TGreenAbsent" Color="{DynamicResource TGreenBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TGreenFaded" Color="{DynamicResource TGreenBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TGreenDim" Color="{DynamicResource TGreenBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TGreen" Color="{DynamicResource TGreenBase}" />
+                    <SolidColorBrush x:Key="TYellowAbsent" Color="{DynamicResource TYellowBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TYellowFaded" Color="{DynamicResource TYellowBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TYellowDim" Color="{DynamicResource TYellowBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TYellow" Color="{DynamicResource TYellowBase}" />
+                    <SolidColorBrush x:Key="TPurpleAbsent" Color="{DynamicResource TPurpleBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TPurpleFaded" Color="{DynamicResource TPurpleBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TPurpleDim" Color="{DynamicResource TPurpleBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TPurple" Color="{DynamicResource TPurpleBase}" />
+                    <SolidColorBrush x:Key="TBlueAbsent" Color="{DynamicResource TBlueBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
                     <system:String x:Key="TIconCssColor">#Union { fill: #000000; }</system:String>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
+                    <Color x:Key="TRedBase">#c42b1c</Color>
+                    <Color x:Key="TGreenBase">#5a9b40</Color>
+                    <Color x:Key="TYellowBase">#ffb300</Color>
+                    <Color x:Key="TPurpleBase">#8729CA</Color>
+                    <Color x:Key="TBlueBase">#3a8eda</Color>
                     <SolidColorBrush x:Key="TBackground" Color="#FF202020" />
                     <SolidColorBrush x:Key="TForeground" Color="#FFFFFF" />
-                    <SolidColorBrush x:Key="TPanel" Color="#11FFFFFF" />
-                    <SolidColorBrush x:Key="TPanelAccent" Color="#18FFFFFF" />
-                    <SolidColorBrush x:Key="TDarkPanel" Color="#19000000" />
-                    <SolidColorBrush x:Key="TSubText" Color="#19000000" />
+                    <SolidColorBrush x:Key="TPanel" Color="#FFFFFF" Opacity="0.07" />
+                    <SolidColorBrush x:Key="TPanelAccent" Color="#FFFFFF"  Opacity="0.15" />
+                    <SolidColorBrush x:Key="TDarkPanel" Color="#000000" Opacity="0.15" />
+                    <SolidColorBrush x:Key="TSubText" Color="#000000" Opacity="0.15" />
                     <SolidColorBrush x:Key="TGrayDim" Color="#AA595959" />
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
-                    <SolidColorBrush x:Key="TRedFaded" Color="#11c42b1c" />
-                    <SolidColorBrush x:Key="TRedDim" Color="#AAc42b1c" />
-                    <SolidColorBrush x:Key="TRed" Color="#FFc42b1c" />
-                    <SolidColorBrush x:Key="TGreenFaded" Color="#115a9b40" />
-                    <SolidColorBrush x:Key="TGreenDim" Color="#AA5a9b40" />
-                    <SolidColorBrush x:Key="TGreen" Color="#FF5a9b40" />
-                    <SolidColorBrush x:Key="TYellowFaded" Color="#11ffb300" />
-                    <SolidColorBrush x:Key="TYellowDim" Color="#AAffb300" />
-                    <SolidColorBrush x:Key="TYellow" Color="#FFffb300" />
-                    <SolidColorBrush x:Key="TPurpleFaded" Color="#118729CA" />
-                    <SolidColorBrush x:Key="TPurpleDim" Color="#AA8729CA" />
-                    <SolidColorBrush x:Key="TPurple" Color="#FF8729CA" />
-                    <SolidColorBrush x:Key="TBlueFaded" Color="#113a8eda" />
-                    <SolidColorBrush x:Key="TBlueDim" Color="#AA3a8eda" />
-                    <SolidColorBrush x:Key="TBlue" Color="#FF3a8eda" />
+                    <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TRedFaded" Color="{DynamicResource TRedBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TRedDim" Color="{DynamicResource TRedBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TRed" Color="{DynamicResource TRedBase}" />
+                    <SolidColorBrush x:Key="TGreenAbsent" Color="{DynamicResource TGreenBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TGreenFaded" Color="{DynamicResource TGreenBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TGreenDim" Color="{DynamicResource TGreenBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TGreen" Color="{DynamicResource TGreenBase}" />
+                    <SolidColorBrush x:Key="TYellowAbsent" Color="{DynamicResource TYellowBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TYellowFaded" Color="{DynamicResource TYellowBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TYellowDim" Color="{DynamicResource TYellowBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TYellow" Color="{DynamicResource TYellowBase}" />
+                    <SolidColorBrush x:Key="TPurpleAbsent" Color="{DynamicResource TPurpleBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TPurpleFaded" Color="{DynamicResource TPurpleBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TPurpleDim" Color="{DynamicResource TPurpleBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TPurple" Color="{DynamicResource TPurpleBase}" />
+                    <SolidColorBrush x:Key="TBlueAbsent" Color="{DynamicResource TBlueBase}" Opacity="0" />
+                    <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
+                    <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
                     <system:String x:Key="TIconCssColor">#Union { fill: #FFFFFF; }</system:String>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
@@ -108,7 +128,6 @@
         </Setter>
     </Style>
     <Style Selector="Svg">
-        
         <Setter Property="(Svg.Css)" Value="{DynamicResource TIconCssColor}" />
     </Style>
     <Style Selector="Button.Colored.Red /template/ ContentPresenter#PART_ContentPresenter">

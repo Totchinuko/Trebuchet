@@ -6,6 +6,38 @@
              xmlns:local="clr-namespace:TrebuchetUtils.Controls"
              mc:Ignorable="d"
              d:DesignHeight="30" d:DesignWidth="800">
+    <UserControl.Styles>
+        <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml" />
+        <Style Selector="Button.WinNormal /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.1"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.WinClose">
+            <Setter Property="Background" Value="{DynamicResource TRedAbsent}"/>
+        </Style>
+        <Style Selector="Button.WinClose /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="CornerRadius" Value="0"/>
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="{DynamicResource TRedAbsent}"/>
+            <Setter Property="Transitions">
+                <Transitions>
+                    <BrushTransition Property="Background" Duration="0:0:0.1"/>
+                </Transitions>
+            </Setter>
+        </Style>
+        <Style Selector="Button.WinNormal:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource TPanel}"/>
+        </Style>
+        <Style Selector="Button.WinClose:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource TRed}"/>
+        </Style>
+    </UserControl.Styles>
     <Border Height="40">
         <Grid>
             <Grid.ColumnDefinitions>
@@ -21,12 +53,14 @@
             <ContentPresenter Grid.Column="2" Content="{Binding $parent[UserControl].Header}" Margin="0,0,12,0" />
             <StackPanel Orientation="Horizontal" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" VerticalAlignment="Top" Grid.Column="3">
                 <Button x:Name="MinimizeBtn"
+                        Classes="WinNormal"
                         Width="40"
                         Height="30"
                         Click="Minimize_MouseLeftButtonUp">
                     <Image x:Name="MinimizeImage" Width="12" Height="12" VerticalAlignment="Center" />
                 </Button>
                 <Button x:Name="MaximizeBtn"
+                        Classes="WinNormal"
                         Width="40"
                         Height="30"
                         Click="MaximizeButton_MouseLeftButtonUp"> 
@@ -34,6 +68,7 @@
                 </Button>
 
                 <Button x:Name="CloseBtn"
+                        Classes="WinClose"
                         Width="40"
                         Height="30"
                         Click="Close_MouseLeftButtonUp">
