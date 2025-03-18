@@ -12,10 +12,11 @@
                     <Color x:Key="TBlueBase">#5173A2</Color>
                     <SolidColorBrush x:Key="TBackground" Color="#FFFFFFFF" />
                     <SolidColorBrush x:Key="TForeground" Color="#000000" />
-                    <SolidColorBrush x:Key="TPanel" Color="#11000000" />
-                    <SolidColorBrush x:Key="TPanelAccent" Color="#18000000" />
-                    <SolidColorBrush x:Key="TDarkPanel" Color="#19FFFFFF" />
-                    <SolidColorBrush x:Key="TSubText" Color="#19FFFFFF" />
+                    <SolidColorBrush x:Key="TPanelOff" Color="#000000" Opacity="0.0" />
+                    <SolidColorBrush x:Key="TPanel" Color="#000000" Opacity="0.07" />
+                    <SolidColorBrush x:Key="TPanelAccent" Color="#000000" Opacity="0.15" />
+                    <SolidColorBrush x:Key="TDarkPanel" Color="#FFFFFF" Opacity="0.15" />
+                    <SolidColorBrush x:Key="TSubText" Color="#000000" Opacity="0.85" />
                     <SolidColorBrush x:Key="TGrayDim" Color="#AA595959" />
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
@@ -48,6 +49,7 @@
                     <Color x:Key="TBlueBase">#3a8eda</Color>
                     <SolidColorBrush x:Key="TBackground" Color="#FF202020" />
                     <SolidColorBrush x:Key="TForeground" Color="#FFFFFF" />
+                    <SolidColorBrush x:Key="TPanelOff" Color="#FFFFFF" Opacity="0.0" />
                     <SolidColorBrush x:Key="TPanel" Color="#FFFFFF" Opacity="0.07" />
                     <SolidColorBrush x:Key="TPanelAccent" Color="#FFFFFF"  Opacity="0.15" />
                     <SolidColorBrush x:Key="TDarkPanel" Color="#000000" Opacity="0.15" />
@@ -115,6 +117,7 @@
         <Setter Property="Width" Value="16"/>
     </Style>
     
+    <!-- Button Base -->
     <Style Selector="Button.Base /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource TPanel}"/>
         <Setter Property="CornerRadius" Value="3" />
@@ -131,41 +134,7 @@
     <Style Selector="Svg">
         <Setter Property="(Svg.Css)" Value="{DynamicResource TIconCssColor}" />
     </Style>
-    <Style Selector="Button.Colored.Red /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource TRedFaded}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource TRedDim}"/>
-    </Style>
-    <Style Selector="Button.Colored.Blue /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource TBlueFaded}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
-    </Style>
-    <Style Selector="Button.Colored.Yellow /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource TYellowFaded}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource TYellowDim}"/>
-    </Style>
-    <Style Selector="Button.Colored.Purple /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource TPurpleFaded}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource TPurpleDim}"/>
-    </Style>
-    <Style Selector="Button.Colored.Green /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="Background" Value="{DynamicResource TGreenFaded}"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource TGreenDim}"/>
-    </Style>
-    <Style Selector="Button.Heavy /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BorderThickness" Value="1" />
-    </Style>
-    <Style Selector="Button.TabRight /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BorderThickness" Value="0 1 1 1" />
-    </Style>
-    <Style Selector="Button.TabLeft /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BorderThickness" Value="1 1 0 1" />
-    </Style>
-    <Style Selector="Button.TabTop /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BorderThickness" Value="1 1 1 0" />
-    </Style>
-    <Style Selector="Button.TabBottom /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BorderThickness" Value="1 0 1 1" />
-    </Style>
+    
     <Style Selector="Button.Base:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource TPanelAccent}"/>
         <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
@@ -191,6 +160,28 @@
         <Setter Property="BorderBrush" Value="{DynamicResource TYellowDim}"/>
         <Setter Property="Background" Value="{DynamicResource TYellowFaded}"/>
     </Style>
+    
+    <!-- Colored Variant -->
+    <Style Selector="Button.Colored.Red /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TRedFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TRedDim}"/>
+    </Style>
+    <Style Selector="Button.Colored.Blue /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TBlueFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
+    </Style>
+    <Style Selector="Button.Colored.Yellow /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TYellowFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TYellowDim}"/>
+    </Style>
+    <Style Selector="Button.Colored.Purple /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TPurpleFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPurpleDim}"/>
+    </Style>
+    <Style Selector="Button.Colored.Green /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TGreenFaded}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TGreenDim}"/>
+    </Style>
     <Style Selector="Button.Red.Colored:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource TRedDim}"/>
     </Style>
@@ -205,5 +196,37 @@
     </Style>
     <Style Selector="Button.Yellow.Colored:pointerover /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="Background" Value="{DynamicResource TYellowDim}"/>
+    </Style>
+    
+    <!-- Sneak Variant -->
+    <Style Selector="Button.Sneak /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TPanelOff}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelOff}"/>
+    </Style>
+    
+    <Style Selector="Button.Sneak:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="Background" Value="{DynamicResource TPanel}"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+    </Style>
+    
+    <!-- Border Variation -->
+    <Style Selector="Button.Heavy /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.TabRight /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1 1 0 1" />
+        <Setter Property="CornerRadius" Value="3 0 0 3"/>
+    </Style>
+    <Style Selector="Button.TabLeft /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="0 1 1 1" />
+        <Setter Property="CornerRadius" Value="0 3 3 0"/>
+    </Style>
+    <Style Selector="Button.TabTop /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1 1 1 0" />
+        <Setter Property="CornerRadius" Value="3 3 0 0"/>
+    </Style>
+    <Style Selector="Button.TabBottom /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="1 0 1 1" />
+        <Setter Property="CornerRadius" Value="0 0 3 3"/>
     </Style>
 </Styles>
