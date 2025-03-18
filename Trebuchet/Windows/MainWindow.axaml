@@ -18,6 +18,7 @@
         SystemDecorations="Full"
         ExtendClientAreaTitleBarHeightHint="40"
         UseLayoutRounding="True"
+        Classes="Trebuchet"
         x:DataType="treb:TrebuchetApp"><!-- TODO: Standard app color -->
     <Border x:Name="MainBorder">
         <Grid>
