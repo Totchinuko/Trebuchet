@@ -11,7 +11,7 @@
                 <ColumnDefinition Width="*" />
             </Grid.ColumnDefinitions>
             <Button Grid.Column="1"
-                    Classes="Base Blue Colored"
+                    Classes="Base Blue"
                     Height="128"
                     Width="128"
                     Command="{Binding LiveCommand}">
