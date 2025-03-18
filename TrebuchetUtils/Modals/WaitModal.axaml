@@ -3,12 +3,15 @@
                     xmlns:local="clr-namespace:TrebuchetUtils.Modals">
     <DataTemplate x:Key="WaitModal" DataType="local:WaitModal">
         <Grid Margin="12">
+            <Grid.Styles>
+                <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"/>
+            </Grid.Styles>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left">
+                <TextBlock VerticalAlignment="Center" Classes="Title" HorizontalAlignment="Left">
                     <Run Text="{Binding MessageTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
@@ -17,6 +20,7 @@
                 </TextBlock>
             </StackPanel>
             <Button Content="Cancel"
+                    Classes="Base"
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"

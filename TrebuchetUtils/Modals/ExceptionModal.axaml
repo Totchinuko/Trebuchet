@@ -3,6 +3,9 @@
                     xmlns:local="clr-namespace:TrebuchetUtils.Modals">
     <DataTemplate x:Key="ExceptionModal" DataType="local:ExceptionModal">
         <Grid Margin="12">
+            <Grid.Styles>
+                <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"/>
+            </Grid.Styles>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="12" />
@@ -14,7 +17,7 @@
                     <RowDefinition Height="12" />
                     <RowDefinition Height="*" />
                 </Grid.RowDefinitions>
-                <TextBlock Grid.Row="0" VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="IndianRed"><!-- TODO: Theme -->
+                <TextBlock Grid.Row="0" VerticalAlignment="Center" Classes="Title" HorizontalAlignment="Left" Foreground="IndianRed"><!-- TODO: Theme -->
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
@@ -23,13 +26,13 @@
                     </TextBlock>
                 </ScrollViewer>
             </Grid>
-            <Button
+            <Button Classes="Base Red"
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Grid.Row="2">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="avares://Icons/close.png" Height="13" Width="13" Margin="0 0 6 0" />
+                    <Svg Path="avares://Assets/SvgIcons/win.close.svg" Classes="SvgIcon" Margin="0 0 6 0" />
                     <TextBlock Text="Close" />
                 </StackPanel>
             </Button>

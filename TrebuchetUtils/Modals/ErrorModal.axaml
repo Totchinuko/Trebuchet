@@ -3,12 +3,15 @@
                     xmlns:local="clr-namespace:TrebuchetUtils.Modals">
     <DataTemplate x:Key="ErrorModal" DataType="local:ErrorModal">
         <Grid Margin="12">
+            <Grid.Styles>
+                <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"/>
+            </Grid.Styles>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" Foreground="IndianRed"><!-- TODO: Theme --> 
+                <TextBlock VerticalAlignment="Center" Classes="Title" HorizontalAlignment="Left" Foreground="IndianRed"><!-- TODO: Theme --> 
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
@@ -16,13 +19,13 @@
                     <Run Text="{Binding ErrorMessage}" />
                 </TextBlock>
             </StackPanel>
-            <Button
+            <Button Classes="Base Red"
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Grid.Row="1">
                 <StackPanel Orientation="Horizontal">
-                    <Image Source="avares://Icons/close.png" Height="13" Width="13" Margin="0 0 6 0" />
+                    <Svg Path="avares://Assets/SvgIcons/win.close.svg" Classes="SvgIcon" Margin="0 0 6 0" />
                     <TextBlock Text="Close" />
                 </StackPanel>
             </Button>

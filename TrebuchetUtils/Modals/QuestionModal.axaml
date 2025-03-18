@@ -3,12 +3,15 @@
                     xmlns:local="clr-namespace:TrebuchetUtils.Modals">
     <DataTemplate x:Key="QuestionModal" DataType="local:QuestionModal">
         <Grid Margin="12">
+            <Grid.Styles>
+                <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"/>
+            </Grid.Styles>
             <Grid.RowDefinitions>
                 <RowDefinition Height="*" />
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left">
+                <TextBlock VerticalAlignment="Center" Classes="Title" HorizontalAlignment="Left">
                     <Run Text="{Binding MessageTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />
@@ -18,6 +21,7 @@
             </StackPanel>
             <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right">
                 <Button Content="Yes"
+                        Classes="Base Green"
                         Command="{Binding YesCommand}"
                         HorizontalAlignment="Right"
                         VerticalAlignment="Center"
@@ -26,6 +30,7 @@
                         Margin="0,0,12,0"
                         Grid.Row="1" />
                 <Button Content="Cancel"
+                        Classes="Base"
                         Command="{Binding CancelCommand}"
                         HorizontalAlignment="Right"
                         HorizontalContentAlignment="Center"
