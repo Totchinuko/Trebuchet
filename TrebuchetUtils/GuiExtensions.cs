@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Reflection;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using TrebuchetUtils.Modals;
@@ -24,10 +25,15 @@ namespace TrebuchetUtils
         {
             if (!assertion)
             {
-                new ErrorModal("Error", message).OpenDialogue();
+                DisplayError(message);
                 return false;
             }
             return true;
+        }
+
+        public static async void DisplayError(string message)
+        {
+            await new ErrorModal("Error", message).OpenDialogue();
         }
         
         public static IEnumerable<T> FindVisualChildren<T>(Visual depObj) where T : Visual

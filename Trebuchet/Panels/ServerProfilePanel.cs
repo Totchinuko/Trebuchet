@@ -109,16 +109,16 @@ namespace Trebuchet.Panels
             LoadProfile();
         }
 
-        private void OnProfileCreate(object? obj)
+        private async void OnProfileCreate(object? obj)
         {
             InputTextModal modal = new InputTextModal("Create", "Profile Name");
-            modal.OpenDialogue();
+            await modal.OpenDialogue();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
                 //TODO: Add to AppText
-                new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
                 return;
             }
 
@@ -128,13 +128,13 @@ namespace Trebuchet.Panels
             SelectedProfile = name;
         }
 
-        private void OnProfileDelete(object? obj)
+        private async void OnProfileDelete(object? obj)
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
 
             //TODO: Add to AppText
             QuestionModal question = new("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
-            question.OpenDialogue();
+            await question.OpenDialogue();
             if (question.Result)
             {
                 _profile.DeleteFolder();
@@ -146,17 +146,17 @@ namespace Trebuchet.Panels
             }
         }
 
-        private void OnProfileDuplicate(object? obj)
+        private async void OnProfileDuplicate(object? obj)
         {
             InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
             modal.SetValue(_selectedProfile);
-            modal.OpenDialogue();
+            await modal.OpenDialogue();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
                 //TODO: Add to AppText
-                new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
                 return;
             }
 

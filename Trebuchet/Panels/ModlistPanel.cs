@@ -229,7 +229,7 @@ namespace Trebuchet.Panels
                 }).Start();
         }
 
-        private void FetchSteamCollection(UriBuilder builder)
+        private async void FetchSteamCollection(UriBuilder builder)
         {
             if (!GuiExtensions.Assert(
                     !StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamCollectionFetch)),
@@ -240,7 +240,7 @@ namespace Trebuchet.Panels
             if (id == null || !ulong.TryParse(id, out var collectionId))
             {
                 //TODO: Move into AppText
-                new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").OpenDialogue();
+                await new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").OpenDialogue();
                 return;
             }
 
@@ -344,36 +344,36 @@ namespace Trebuchet.Panels
             _searchWindow.Show();
         }
 
-        private void OnExportToJson(object? obj)
+        private async void OnExportToJson(object? obj)
         {
             var json = JsonSerializer.Serialize(new ModlistExport { Modlist = _profile.Modlist });
-            new ModlistTextImport(json, true, FileType.Json).OpenDialogue();
+            await new ModlistTextImport(json, true, FileType.Json).OpenDialogue();
         }
 
-        private void OnExportToTxt(object? obj)
+        private async void OnExportToTxt(object? obj)
         {
             try
             {
                 var content = string.Join("\r\n", _profile.GetResolvedModlist());
-                new ModlistTextImport(content, true, FileType.Txt).OpenDialogue();
+                await new ModlistTextImport(content, true, FileType.Txt).OpenDialogue();
             }
             catch
             {
-                new ErrorModal("Error",
+                await new ErrorModal("Error",
                         "Some of the mods path cannot be resolved because the mod file was not found. " +
                         "In order to export your modlist, please unsure that all of the mods are not marked as missing.")
                     .OpenDialogue();
             }
         }
 
-        private void OnFetchClicked(object? obj)
+        private async void OnFetchClicked(object? obj)
         {
             if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.DownloadModlist))) return;
             if (string.IsNullOrEmpty(_modlistUrl)) return;
 
             var question = new QuestionModal("Replacement",
                 "This action will replace your modlist, do you wish to continue ?");
-            question.OpenDialogue();
+            await question.OpenDialogue();
             if (!question.Result) return;
 
             UriBuilder builder;
@@ -383,7 +383,7 @@ namespace Trebuchet.Panels
             }
             catch
             {
-                new ErrorModal("Error", "Invalid URL.").OpenDialogue();
+                await new ErrorModal("Error", "Invalid URL.").OpenDialogue();
                 return;
             }
 
@@ -416,16 +416,16 @@ namespace Trebuchet.Panels
             else if (ext == FileType.TxtExt)
                 OnImportFromTxtFile(await File.ReadAllTextAsync(path));
             else
-                new ErrorModal("Wrong Type", "The type of file provided is unsupported.").OpenDialogue();
+                await new ErrorModal("Wrong Type", "The type of file provided is unsupported.").OpenDialogue();
         }
 
-        private void OnImportFromJsonFile(string json)
+        private async void OnImportFromJsonFile(string json)
         {
             var modlist = JsonSerializer.Deserialize<ModlistExport>(json);
             if (modlist == null)
             {
                 //TODO: Add to AppText
-                new ErrorModal("Invalid Json", "Loaded json could not be parsed.").OpenDialogue();
+                await new ErrorModal("Invalid Json", "Loaded json could not be parsed.").OpenDialogue();
                 return;
             }
 
@@ -434,10 +434,10 @@ namespace Trebuchet.Panels
             LoadModlist();
         }
 
-        private void OnImportFromText(object? obj)
+        private async void OnImportFromText(object? obj)
         {
             var import = new ModlistTextImport(string.Empty, false, FileType.Json);
-            import.OpenDialogue();
+            await import.OpenDialogue();
 
             if (import.Canceled) return;
 
@@ -516,16 +516,16 @@ namespace Trebuchet.Panels
             OnModlistChanged();
         }
 
-        private void OnModlistCreate(object? obj)
+        private async void OnModlistCreate(object? obj)
         {
             var modal = new InputTextModal("Create", "Modlist Name");
-            modal.OpenDialogue();
+            await modal.OpenDialogue();
             if (string.IsNullOrEmpty(modal.Text)) return;
             var name = modal.Text;
             if (Profiles.Contains(name))
             {
                 //TODO: Add to AppText
-                new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogue();
                 return;
             }
 
@@ -535,13 +535,13 @@ namespace Trebuchet.Panels
             SelectedModlist = name;
         }
 
-        private void OnModlistDelete(object? obj)
+        private async void OnModlistDelete(object? obj)
         {
             if (string.IsNullOrEmpty(_selectedModlist)) return;
 
             var question = new QuestionModal("Deletion",
                 $"Do you wish to delete the selected modlist {_selectedModlist} ?");
-            question.OpenDialogue();
+            await question.OpenDialogue();
             if (!question.Result) return;
             
             _profile.DeleteFile();
@@ -553,17 +553,17 @@ namespace Trebuchet.Panels
             OnPropertyChanged(nameof(SelectedModlist));
         }
 
-        private void OnModlistDuplicate(object? obj)
+        private async void OnModlistDuplicate(object? obj)
         {
             var modal = new InputTextModal("Duplicate", "Modlist Name");
             modal.SetValue(_selectedModlist);
-            modal.OpenDialogue();
+            await modal.OpenDialogue();
             if (string.IsNullOrEmpty(modal.Text)) return;
             var name = modal.Text;
             if (Profiles.Contains(name))
             {
                 //TODO: Add to AppText
-                new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogue();
                 return;
             }
 

@@ -134,13 +134,13 @@ namespace Trebuchet
             message.Reply(updated);
         }
 
-        public void Receive(UACPromptRequest message)
+        public async void Receive(UACPromptRequest message)
         {
             QuestionModal modal = new(
                 App.GetAppText("UACDialog_Title"),
                 App.GetAppText("UACDialog", message.Directory)
                 );
-            modal.OpenDialogue();
+            await modal.OpenDialogue();
 
             if (modal.Result)
             {

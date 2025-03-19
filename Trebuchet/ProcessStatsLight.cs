@@ -11,8 +11,8 @@ namespace Trebuchet
     {
         protected const string CpuFormat = "{0}%";
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
-        private static DateTime? _previousCpuStartTime;
-        private static long? _previousTotalProcessorTime;
+        private static DateTime _previousCpuStartTime;
+        private static TimeSpan _previousTotalProcessorTime;
         private ProcessDetails? _details;
         private long _peakMemoryConsumption;
         private Process? _process;
@@ -53,7 +53,7 @@ namespace Trebuchet
 
             SetDetails(details);
             _previousCpuStartTime = DateTime.UtcNow;
-            _previousTotalProcessorTime = process.TotalProcessorTime.Ticks;
+            _previousTotalProcessorTime = process.TotalProcessorTime;
             _timer.Start();
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(PID));
@@ -102,15 +102,11 @@ namespace Trebuchet
         {
             if (_process == null) return 0;
 
-            // If no start time set then set to now
-            if (_previousCpuStartTime == null || _previousTotalProcessorTime == null)
-                throw new Exception("Time values have not been initialized properly");
-
             var currentCpuStartTime = DateTime.UtcNow;
-            var currentCpuUsage = _process.TotalProcessorTime.Ticks;
+            var currentCpuUsage = _process.TotalProcessorTime;
 
-            var cpuUsedMs = (currentCpuUsage - (long)_previousTotalProcessorTime);
-            var totalMsPassed = (currentCpuStartTime - (DateTime)_previousCpuStartTime).Ticks;
+            var cpuUsedMs = (currentCpuUsage - _previousTotalProcessorTime).TotalMilliseconds;
+            var totalMsPassed = (currentCpuStartTime - _previousCpuStartTime).TotalMilliseconds;
             var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
 
             // Set previous times.

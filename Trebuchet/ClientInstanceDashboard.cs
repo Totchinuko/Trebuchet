@@ -80,7 +80,7 @@ namespace Trebuchet
 
         public List<ulong> UpdateNeeded { get; private set; } = new List<ulong>();
 
-        public void Kill()
+        public async void Kill()
         {
             if (!ProcessRunning) return;
 
@@ -89,7 +89,7 @@ namespace Trebuchet
                 //TODO: Add to AppText
                 QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
                     "Do you wish to continue ?");
-                question.OpenDialogue();
+                await question.OpenDialogue();
                 if (!question.Result) return;
             }
 
@@ -185,12 +185,12 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(ModListProfile.CollectAllMods(_config, SelectedModlist).Distinct()));
         }
 
-        private void OnProcessFailed()
+        private async void OnProcessFailed()
         {
             KillCommand.Toggle(false);
             LaunchCommand.Toggle(true);
             LaunchBattleEyeCommand.Toggle(true);
-            new ErrorModal("Client failed to start", "See the logs for more informations.").OpenDialogue();
+            await new ErrorModal("Client failed to start", "See the logs for more information.").OpenDialogue();
         }
 
         private void OnProcessStarted(ProcessDetails details)

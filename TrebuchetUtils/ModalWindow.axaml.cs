@@ -2,6 +2,7 @@
 
 using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
@@ -13,7 +14,7 @@ namespace TrebuchetUtils
     /// <summary>
     ///     Interaction logic for ModalWindow.xaml
     /// </summary>
-    public sealed partial class ModalWindow : WindowAutoPadding, IShownWindow
+    public sealed partial class ModalWindow : WindowAutoPadding
     {
         public ModalWindow()
         {
@@ -34,12 +35,14 @@ namespace TrebuchetUtils
 
         public event EventHandler? WindowClosed;
 
-        public void OpenDialogue(Window? window = null)
+        public async Task OpenDialogue(Window window)
         {
-            if (window != null)
-                ShowDialog(window);
-            else
-                Show();
+            await ShowDialog(window);
+        }
+        
+        public void OpenDialogue()
+        {
+            Show();
         }
 
         protected override void OnClosed(EventArgs e)

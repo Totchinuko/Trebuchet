@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -77,17 +78,17 @@ namespace TrebuchetUtils
 
         public void Open() => _window.OpenDialogue();
         
-        public void OpenDialogue(Window window) => _window.OpenDialogue(window);
+        public async Task OpenDialogue(Window window) => await _window.OpenDialogue(window);
 
-        public void OpenDialogue()
+        public async Task OpenDialogue()
         {
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
                 throw new ApplicationException("This is a desktop application");
             
-            if (desktop.MainWindow is IShownWindow { WasShown: true })
+            if (desktop.MainWindow is not null && desktop.MainWindow != _window)
             {
                 _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                _window.OpenDialogue(desktop.MainWindow);
+                await _window.OpenDialogue(desktop.MainWindow);
             }
             else
             {
@@ -96,7 +97,7 @@ namespace TrebuchetUtils
             }
         }
 
-        public void OpenDialogue<T>() where T : Window
+        public async Task OpenDialogue<T>() where T : Window
         {
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
                 throw new ApplicationException("This is a desktop application");
@@ -104,7 +105,7 @@ namespace TrebuchetUtils
             {
                 if (win is not T) continue;
                 _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                _window.OpenDialogue(win);
+                await _window.OpenDialogue(win);
                 return;
             }
             _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
