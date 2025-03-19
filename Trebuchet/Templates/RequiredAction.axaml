@@ -11,7 +11,7 @@
                 <TextBlock TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,12,0">
                     <Run Text="{Binding Message}" />
                 </TextBlock>
-                <Button
+                <Button Classes="Base Blue"
                         Grid.Column="1"
                         Command="{Binding .}"
                         Content="{Binding Button}" />

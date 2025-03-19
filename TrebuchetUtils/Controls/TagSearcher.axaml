@@ -17,7 +17,7 @@
                 <KeyBinding Gesture="Esc" Command="{Binding ClearCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" />
             </TextBox.KeyBindings>
         </TextBox>
-        <Button Name="SearchButton" HorizontalAlignment="Left" ToolTip.Tip="Search By Tags"  ToolTip.ShowDelay="0" Margin="0 0 0 0" Classes.current="{Binding $parent[UserControl].ButtonClass}" VerticalAlignment="Center" Command="{Binding $parent[UserControl].StartSearch}">
+        <Button Name="SearchButton" HorizontalAlignment="Left" Classes="Base" ToolTip.Tip="Search By Tags"  ToolTip.ShowDelay="0" Margin="0 0 0 0" Classes.current="{Binding $parent[UserControl].ButtonClass}" VerticalAlignment="Center" Command="{Binding $parent[UserControl].StartSearch}">
             <i:Icon Name="IconTag" Value="mdi-tag-search" Classes="Normal" Margin="0,0,12,0"/>
         </Button>
         <Popup IsOpen="{Binding ResultsOpen, Mode=OneWay, RelativeSource={RelativeSource AncestorType=UserControl}}" PlacementTarget="{Binding ElementName=SearchField}" Placement="Bottom">

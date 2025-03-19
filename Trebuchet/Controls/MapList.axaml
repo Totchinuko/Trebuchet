@@ -11,6 +11,7 @@
              d:DesignHeight="32" d:DesignWidth="32">
     <StackPanel>
         <Button x:Name="MapListButton"
+                Classes="Base"
                 Click="MapList_Click"
                 ToolTip.Tip="Map Selection"
                 ToolTip.ShowDelay="0"

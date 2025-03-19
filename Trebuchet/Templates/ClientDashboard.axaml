@@ -36,26 +36,26 @@
                         </Grid>
                     </WrapPanel>
                     <WrapPanel Grid.Row="1">
-                        <Button Command="{Binding LaunchCommand}" ToolTip.Tip="Launch Game" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <Button Command="{Binding LaunchCommand}" Classes="Base Green" ToolTip.Tip="Launch Game" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-pac-man" Classes="Normal" />
                                 <TextBlock Text="Launch" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding LaunchBattleEyeCommand}" ToolTip.Tip="Launch Game" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <Button Command="{Binding LaunchBattleEyeCommand}" Classes="Base Yellow" ToolTip.Tip="Launch Game" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-shield" Classes="Normal" />
                                 <TextBlock Text="Battle Eye" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding KillCommand}" ToolTip.Tip="Kill Game Process" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <Button Command="{Binding KillCommand}" Classes="Base Red" ToolTip.Tip="Kill Game Process" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-skull" Classes="Normal" />
                                 <TextBlock Text="Kill" />
                             </StackPanel>
                         </Button>
                         <Border VerticalAlignment="Center" IsVisible="{Binding IsUpdateNeeded}" Margin="0,0,6,0">
-                            <Button Command="{Binding UpdateModsCommand}" ToolTip.Tip="Mod update available !" ToolTip.ShowDelay="0">
+                            <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue" ToolTip.Tip="Mod update available !" ToolTip.ShowDelay="0">
                                 <StackPanel Orientation="Horizontal">
                                     <i:Icon Value="mdi-update" Classes="Normal" />
                                     <TextBlock Text="Update Mods" />

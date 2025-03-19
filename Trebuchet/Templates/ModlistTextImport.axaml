@@ -10,24 +10,24 @@
                 </Grid.RowDefinitions>
                 <TextBox x:Name="ToFocus" Text="{Binding Text}" AcceptsReturn="True" Margin="0,0,0,12" /><!-- TODO: Check Scroll bars ? --> 
                 <WrapPanel Grid.Row="1" Orientation="Horizontal">
-                    <Button
-                        Content="Save As"
-                        IsVisible="{Binding SaveAsVisible}"
-                        Command="{Binding SaveCommand}"
-                        Width="70"
-                        Margin="0" />
-                    <Button
-                        Content="Append"
-                        IsVisible="{Binding ImportVisible}"
-                        Command="{Binding AppendCommand}"
-                        Width="70"
-                        Margin="0,0,12,0" />
-                    <Button
-                        Content="Replace"
-                        IsVisible="{Binding ImportVisible}"
-                        Command="{Binding ApplyCommand}"
-                        Width="70"
-                        Margin="0" />
+                    <Button Classes="Base"
+                            Content="Save As"
+                            IsVisible="{Binding SaveAsVisible}"
+                            Command="{Binding SaveCommand}"
+                            Width="70"
+                            Margin="0" />
+                    <Button Classes="Base Green"
+                            Content="Append"
+                            IsVisible="{Binding ImportVisible}"
+                            Command="{Binding AppendCommand}"
+                            Width="70"
+                            Margin="0,0,12,0" />
+                    <Button Classes="Base Yellow"
+                            Content="Replace"
+                            IsVisible="{Binding ImportVisible}"
+                            Command="{Binding ApplyCommand}"
+                            Width="70"
+                            Margin="0" />
                 </WrapPanel>
             </Grid>
         </Border>
