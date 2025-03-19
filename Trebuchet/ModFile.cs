@@ -108,25 +108,25 @@ namespace Trebuchet
 
         protected virtual IBrush GetBorderBrush()
         {
-            if (!_infos.Exists) return GetBrush("GRed");
-            if (PublishedFileId == 0) return GetBrush("GBlue");
-            if (!_needUpdate) return GetBrush("GGreen");
-            return GetBrush("GYellow");
+            if (!_infos.Exists) return GetBrush("TRed");
+            if (PublishedFileId == 0) return GetBrush("TBlue");
+            if (!_needUpdate) return GetBrush("TGreen");
+            return GetBrush("TYellow");
         }
 
         protected virtual IBrush GetStatusBrush()
         {
-            if (!_infos.Exists) return GetBrush("GDimRed");
-            if (PublishedFileId == 0) return GetBrush("GDimBlue");
-            if (!_needUpdate) return GetBrush("GDimGreen");
-            return GetBrush("GDimYellow");
+            if (!_infos.Exists) return GetBrush("TRedDim");
+            if (PublishedFileId == 0) return GetBrush("TBlueDim");
+            if (!_needUpdate) return GetBrush("TGreenDim");
+            return GetBrush("TYellowDim");
         }
 
         private IBrush GetBrush(string name)
         {
             if(Application.Current == null) throw new Exception("Application.Current is null");
 
-            if (Application.Current.Resources.TryGetResource(name, Application.Current.ActualThemeVariant,
+            if (Application.Current.Styles.TryGetResource(name, Application.Current.ActualThemeVariant,
                     out var resource) && resource is IBrush brush)
             {
                 return brush;

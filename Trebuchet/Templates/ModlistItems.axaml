@@ -4,15 +4,19 @@
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ModlistItems" x:DataType="local:ModFile">
-        <Border Margin="0 0 0 12" CornerRadius="3" Cursor="SizeNS" Padding="8" ToolTip.Tip="Drag to reorder"><!-- TODO: Hover effect -->
+        <Border Margin="0 0 12 12" Classes="HPanel"  Padding="0 8 8 8" >
             <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="1.7*" />
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <i:Icon Margin="0,0,12,0" Classes="Steam Normal" Classes.Bug="{Binding IsTestLive}" Classes.File="{Binding !IsPublished}">
+                <Border Margin="0 0 6 0" ToolTip.Tip="Drag to reorder" Background="Transparent" Cursor="SizeNorthSouth">
+                    <i:Icon Value="mdi-drag-vertical" Foreground="{DynamicResource TPanelAccent}" FontSize="30"  />
+                </Border>
+                <i:Icon Margin="0,0,12,0" Grid.Column="1" Classes="Steam Normal" Classes.Bug="{Binding IsTestLive}" Classes.File="{Binding !IsPublished}">
                     <i:Icon.Styles>
                         <Style Selector="i|Icon.Steam">
                             <Setter Property="Value" Value="mdi-steam"/>
@@ -34,7 +38,7 @@
                         </Style>
                     </i:Icon.Styles>
                 </i:Icon>
-                <Grid Grid.Column="1">
+                <Grid Grid.Column="2">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="auto" />
@@ -46,12 +50,12 @@
                         <TextBlock Text="{Binding StatusTooltip}" />
                     </Border>
                 </Grid>
-                <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
+                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
                     <TextBlock>
                         <Run Text="{Binding LastUpdate, Mode=OneWay}" />
                     </TextBlock>
                 </StackPanel>
-                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
+                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button IsVisible="{Binding IsPublished}" Classes="Base" Cursor="Hand" Margin="0,0,3,0" ToolTip.Tip="Open Workshop Page" Command="{Binding $parent[panel:ModlistPanel].OpenWorkshopCommand}" CommandParameter="{Binding .}">
                         <i:Icon Value="mdi-steam" Classes="Normal"/>
                     </Button>

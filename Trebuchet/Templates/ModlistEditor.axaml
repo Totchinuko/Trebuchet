@@ -86,7 +86,7 @@
             </WrapPanel>
             <Border Grid.Row="1" Padding="0,12,0,0">
                 <ScrollViewer x:Name="ModlistScroll">
-                    <ItemsControl ItemsSource="{Binding Modlist}" ItemTemplate="{Binding $parent[local:ModlistPanel].ItemTemplate}"  /><!-- TODO: Add drag and drop -->
+                    <ItemsControl ItemsSource="{Binding Modlist}" ItemTemplate="{StaticResource ModlistItems}"  /><!-- TODO: Add drag and drop -->
                 </ScrollViewer>
             </Border>
         </Grid>

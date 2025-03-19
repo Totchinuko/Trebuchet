@@ -198,6 +198,20 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
+    <Style Selector="Border.HPanel">
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Background" Value="{DynamicResource TPanel}" />
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.1"/>
+            </Transitions>
+        </Setter>
+        <Style Selector="^:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+        </Style>
+    </Style>
     
     <!-- Button Base -->
     <Style Selector="Button.Base /template/ ContentPresenter#PART_ContentPresenter">

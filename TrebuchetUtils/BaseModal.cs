@@ -76,7 +76,11 @@ namespace TrebuchetUtils
 
         protected abstract void OnWindowClose(object? sender, EventArgs e);
 
-        public void Open() => _window.OpenDialogue();
+        public void Open()
+        {
+            _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+            _window.OpenDialogue();
+        }
         
         public async Task OpenDialogue(Window window) => await _window.OpenDialogueAsync(window);
 
