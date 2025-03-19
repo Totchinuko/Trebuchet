@@ -78,7 +78,8 @@ namespace Trebuchet
             });
 
             if (file is null) return;
-            var path = Path.GetFullPath(file.Path.ToString());
+            if (!file.Path.IsFile) return;
+            var path = Path.GetFullPath(file.Path.LocalPath);
             await File.WriteAllTextAsync(path, _text);
         }
     }

@@ -64,7 +64,8 @@ namespace Trebuchet.Controls
             });
 
             if (folder.Count == 0) return;
-            Path = folder[0].Path.ToString();
+            if (!folder[0].Path.IsFile) return;
+            Path = folder[0].Path.LocalPath;
         }
     }
 }

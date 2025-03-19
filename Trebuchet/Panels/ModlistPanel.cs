@@ -329,7 +329,8 @@ namespace Trebuchet.Panels
 
             foreach (var file in files)
             {
-                var path = Path.GetFullPath(file.Path.ToString());
+                if(!file.Path.IsFile) continue; 
+                var path = Path.GetFullPath(file.Path.LocalPath);
                 _modlist.Add(new ModFile(path));
             }
         }
@@ -406,7 +407,8 @@ namespace Trebuchet.Panels
             });
 
             if (files.Count <= 0) return;
-            var file = files[0].Path.ToString();
+            if (!files[0].Path.IsFile) return;
+            var file = files[0].Path.LocalPath;
             var path = Path.GetFullPath(file);
             var ext = Path.GetExtension(file);
             if (ext == FileType.JsonExt)
