@@ -2,7 +2,7 @@
 
 namespace Trebuchet.SettingFields
 {
-    public class TitleField() : Field("TitleField")
+    public class TitleField() : Field("TitleField", false)
     {
         public override bool IsDefault { get; } = true;
         public override bool UseFieldRow => false;

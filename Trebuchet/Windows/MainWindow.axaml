@@ -69,7 +69,7 @@
                         </ItemsControl>
                     </StackPanel>
                 </Grid>
-                <Border x:Name="ContentPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
+                <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
                     <ContentControl Content="{Binding ActivePanel}">
                         <ContentControl.ContentTemplate>
                             <utils:PanelSelector/>

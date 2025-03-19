@@ -1,5 +1,4 @@
 <Styles xmlns="https://github.com/avaloniaui"
-        xmlns:system="clr-namespace:System;assembly=System.Runtime"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Styles.Resources>
@@ -12,12 +11,12 @@
                     <Color x:Key="TPurpleBase">#8A08CE</Color>
                     <Color x:Key="TBlueBase">#015CD4</Color>
                     <SolidColorBrush x:Key="TBackground" Color="#FFFFFFFF" />
-                    <SolidColorBrush x:Key="TForeground" Color="#000000" />
+                    <SolidColorBrush x:Key="TForeground" Color="#000000" Opacity="0.95" />
                     <SolidColorBrush x:Key="TPanelOff" Color="#000000" Opacity="0.0" />
                     <SolidColorBrush x:Key="TPanel" Color="#000000" Opacity="0.07" />
-                    <SolidColorBrush x:Key="TPanelAccent" Color="#000000" Opacity="0.15" />
+                    <SolidColorBrush x:Key="TPanelAccent" Color="#000000" Opacity="0.1" />
                     <SolidColorBrush x:Key="TDarkPanel" Color="#FFFFFF" Opacity="0.15" />
-                    <SolidColorBrush x:Key="TSubText" Color="#000000" Opacity="0.85" />
+                    <SolidColorBrush x:Key="TSubText" Color="#000000" Opacity="0.75" />
                     <SolidColorBrush x:Key="TGrayDim" Color="#AA595959" />
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
@@ -51,9 +50,9 @@
                     <SolidColorBrush x:Key="TForeground" Color="#FFFFFF" />
                     <SolidColorBrush x:Key="TPanelOff" Color="#FFFFFF" Opacity="0.0" />
                     <SolidColorBrush x:Key="TPanel" Color="#FFFFFF" Opacity="0.07" />
-                    <SolidColorBrush x:Key="TPanelAccent" Color="#FFFFFF"  Opacity="0.15" />
+                    <SolidColorBrush x:Key="TPanelAccent" Color="#FFFFFF"  Opacity="0.1" />
                     <SolidColorBrush x:Key="TDarkPanel" Color="#000000" Opacity="0.15" />
-                    <SolidColorBrush x:Key="TSubText" Color="#000000" Opacity="0.15" />
+                    <SolidColorBrush x:Key="TSubText" Color="#FFFFFF" Opacity="0.75" />
                     <SolidColorBrush x:Key="TGrayDim" Color="#AA595959" />
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
@@ -134,6 +133,22 @@
         <Setter Property="Width" Value="2" />
         <Setter Property="Margin" Value="12,6" />
     </Style>
+    <Style Selector="Border.Panel">
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Background" Value="{DynamicResource TPanel}" />
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+    </Style>
+    <Style Selector="Border.DarkPanel">
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Background" Value="{DynamicResource TDarkPanel}" />
+        <Setter Property="BorderThickness" Value="0"/>
+        <Setter Property="BorderBrush" Value="Transparent"/>
+    </Style>
+    <Style Selector="TextBlock.SubText">
+        <Setter Property="Foreground" Value="{DynamicResource TSubText}"/>
+        <Setter Property="FontWeight" Value="Light"/>
+    </Style>
     
     <!-- Button Base -->
     <Style Selector="Button.Base /template/ ContentPresenter#PART_ContentPresenter">
@@ -142,6 +157,7 @@
         <Setter Property="BorderThickness" Value="0 1 0 0"/>
         <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
         <Setter Property="Cursor" Value="Hand" />
+        <Setter Property="Padding" Value="6"/>
         <Setter Property="Transitions">
             <Transitions>
                 <BrushTransition Property="BorderBrush" Duration="0:0:0.1"/>

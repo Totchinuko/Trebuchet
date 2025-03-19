@@ -33,10 +33,12 @@ namespace Trebuchet.SettingFields
     public abstract class Field : INotifyPropertyChanged
     {
         private readonly string _template;
+        public bool DisplayPanel { get; }
 
-        protected Field(string template)
+        protected Field(string template, bool displayPanel)
         {
             _template = template;
+            DisplayPanel = displayPanel;
             HyperlinkCommand = new SimpleCommand(OnHyperlinkClicked);
             ResetCommand = new SimpleCommand(OnReset);
         }
@@ -58,12 +60,14 @@ namespace Trebuchet.SettingFields
                 throw new Exception($"Template {_template} not found");
             }
         }
-
+        
         public abstract bool IsDefault { get; }
 
         public virtual bool IsVisible => true;
 
         public string Description { get; set; } = string.Empty;
+        
+        public bool DisplayDescription => !string.IsNullOrEmpty(Description) && DisplayGenericDescription;
 
         public virtual bool DisplayGenericDescription => true;
 
@@ -135,7 +139,11 @@ namespace Trebuchet.SettingFields
         private object? _target;
         private PropertyInfo? _targetProperty;
 
-        protected Field(string template) : base(template)
+        protected Field(string template, bool displayPanel) : base(template, displayPanel)
+        {
+        }
+        
+        protected Field(string template) : base(template, true)
         {
         }
 

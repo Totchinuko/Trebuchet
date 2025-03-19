@@ -12,7 +12,7 @@
             <ScrollViewer Grid.Row="1">
                 <ItemsControl ItemsSource="{Binding Fields}" Margin="0,0,6,0">
                     <ItemsControl.ItemTemplate>
-                        <fields:FieldDataTemplate/>
+                        <fields:FieldPanelTemplate/>
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>

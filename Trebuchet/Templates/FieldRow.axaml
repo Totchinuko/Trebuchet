@@ -4,23 +4,14 @@
                     xmlns:hyper="clr-namespace:HyperText.Avalonia.Controls;assembly=HyperText.Avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="FieldRow" x:DataType="local:Field">
-        <Border CornerRadius="3" Classes="Main" Classes.MainHover="{Binding $self.IsPointerOver}" Padding="0,12" Margin="0,0,0,12" IsVisible="{Binding IsVisible}">
-            <Border.Styles>
-                <Style Selector="Border.Main">
-                    <Setter Property="Background" Value="#10FFFFFF" /><!-- TODO: Theme here -->
-                </Style>
-                <Style Selector="Border.MainHover">
-                    <Setter Property="Background" Value="#20FFFFFF" /><!-- TODO: Theme here -->
-                </Style>
-            </Border.Styles>
+        <Border Classes="Panel" Padding="0,12" Margin="0,0,0,12" IsVisible="{Binding IsVisible}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <Border Classes.Hidden="{Binding IsDefault}" Width="4" Background="DodgerBlue"><!-- TODO: Theme HERE -->
-                </Border>
+                <Border Classes.Hidden="{Binding IsDefault}" Width="4" Background="{DynamicResource TBlueDim}" />
                 <StackPanel Grid.Column="1" Margin="12,0,0,0">
                     <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" Margin="0,0,0,6" />
                     <Border  Margin="0,0,0,6" MinHeight="0">
@@ -32,14 +23,18 @@
                                 </MultiBinding.Bindings>
                             </MultiBinding>
                         </Border.IsVisible>
-                        <StackPanel>
-                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" FontWeight="Normal" />
+                        <StackPanel IsVisible="{Binding DisplayDescription}">
+                            <TextBlock Text="{Binding Description}" Classes="SubText" TextWrapping="Wrap" FontWeight="Normal" />
                             <TextBlock IsVisible="{Binding Hyperlink}">
                                 <hyper:Hyperlink Url="{Binding Hyperlink}" Command="{Binding HyperlinkCommand}"><Run Text="{Binding Hyperlink}" /></hyper:Hyperlink>
                             </TextBlock>
                         </StackPanel>
                     </Border>
-                    <ContentPresenter IsEnabled="{Binding IsEnabled}" Classes.Disabled="{Binding $self.IsEnabled}" Content="{Binding .}" ContentTemplate="{Binding Template}" />
+                    <ContentControl IsEnabled="{Binding IsEnabled}" Classes.Disabled="{Binding $self.IsEnabled}" Content="{Binding}">
+                        <ContentControl.ContentTemplate>
+                            <local:FieldDataTemplate/>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
                 </StackPanel>
                 <Button Grid.Column="2"
                         ToolTip.Tip="Reset to default"

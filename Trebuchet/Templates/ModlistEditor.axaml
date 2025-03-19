@@ -10,7 +10,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <WrapPanel Margin="0 0 0 0">
-                <Border CornerRadius="3" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
+                <Border Classes="Panel" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
                     <StackPanel Orientation="Horizontal">
                         <Button Command="{Binding CreateModlistCommand}" Classes="Base Green" ToolTip.Tip="Create" Margin="0,0,3,0" VerticalAlignment="Top">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
@@ -32,7 +32,7 @@
                         </Button>
                     </StackPanel>
                 </Border>
-                <Border CornerRadius="3" Padding="8" Margin="0,0,6,6">
+                <Border Classes="Panel" Padding="8" Margin="0,0,6,6">
                     <StackPanel Orientation="Horizontal">
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
@@ -45,7 +45,7 @@
                                 Command="{Binding ExploreLocalCommand}" />
                     </StackPanel>
                 </Border>
-                <Border CornerRadius="3" Padding="8" Margin="0,0,6,6">
+                <Border Classes="Panel" Padding="8" Margin="0,0,6,6">
                     <StackPanel Orientation="Horizontal">
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
@@ -58,7 +58,7 @@
                                 Command="{Binding ImportFromFileCommand}" />
                     </StackPanel>
                 </Border>
-                <Border CornerRadius="3" Padding="8" Margin="0,0,6,6">
+                <Border Classes="Panel" Padding="8" Margin="0,0,6,6">
                     <StackPanel Orientation="Horizontal">
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
@@ -71,7 +71,7 @@
                                 Command="{Binding ExportToTxtCommand}" />
                     </StackPanel>
                 </Border>
-                <Border CornerRadius="3" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
+                <Border Classes="Panel" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
                     <WrapPanel>
                         <Grid Margin="0,0,12,0" VerticalAlignment="Center">
                             <TextBox Name="ModlistUrl" Text="{Binding ModlistUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="400" FontSize="16" VerticalContentAlignment="Center" ToolTip.Tip="Valid URL are either pointing to a steam collection or a json response/file" />
