@@ -4,7 +4,7 @@
     <DataTemplate x:Key="TabLabel" DataType="{x:Type local:MenuElement}">
         <StackPanel Orientation="Vertical">
             <TextBlock Text="{Binding Label}" Margin="12,6,0,6" FontWeight="SemiBold" />
-            <Border Margin="0" Background="{DynamicResource TPanel}" Height="1" />
+            <Border Margin="0" Classes="HSeparator" />
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>
