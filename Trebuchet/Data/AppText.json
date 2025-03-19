@@ -19,5 +19,9 @@
   "Create": "Create",
   "ProfileName": "Profile Name",
   "AlreadyExists": "Already Exists",
-  "AlreadyExists_Message": "This profile name is already used"
+  "AlreadyExists_Message": "This profile name is already used",
+  "Deletion": "Deletion",
+  "Deletion_Message": "Do you wish to delete the selected profile {0} ?",
+  "Duplicate":"Duplicate"
+
 }

@@ -6,8 +6,7 @@
         <BuiltInComInteropSupport>true</BuiltInComInteropSupport>
         <ApplicationIcon>AppIcon.ico</ApplicationIcon>
         <Authors>Totchinuko</Authors>
-        <FileVersion>0.3.7</FileVersion>
-        <AssemblyVersion>0.2.0</AssemblyVersion>
+        <Version>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\\..\\VERSION"))</Version>
         <PublishSingleFile>true</PublishSingleFile>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <Deterministic>true</Deterministic>

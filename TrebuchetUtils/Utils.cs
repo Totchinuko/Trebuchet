@@ -89,7 +89,9 @@ namespace TrebuchetUtils
             if (string.IsNullOrEmpty(Environment.ProcessPath))
                 return string.Empty;
             var fvi = FileVersionInfo.GetVersionInfo(Environment.ProcessPath);
-            return fvi.FileVersion ?? string.Empty;
+            string tag = string.Empty;
+            if (fvi.FileMajorPart == 0) tag = " [Dev]";
+            return $"{fvi.FileMajorPart}.{fvi.FileMinorPart}.{fvi.FileBuildPart}{tag}";
         }
 
         public static Bitmap LoadFromResource(Uri resourceUri)
