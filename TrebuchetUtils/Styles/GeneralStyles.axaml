@@ -6,11 +6,11 @@
         <ResourceDictionary>
             <ResourceDictionary.ThemeDictionaries>
                 <ResourceDictionary x:Key="Light">
-                    <Color x:Key="TRedBase">#88281B</Color>
-                    <Color x:Key="TGreenBase">#45853F</Color>
-                    <Color x:Key="TYellowBase">#A68438</Color>
-                    <Color x:Key="TPurpleBase">#634295</Color>
-                    <Color x:Key="TBlueBase">#5173A2</Color>
+                    <Color x:Key="TRedBase">#c42b1c</Color>
+                    <Color x:Key="TGreenBase">#0CD600</Color>
+                    <Color x:Key="TYellowBase">#DEB700</Color>
+                    <Color x:Key="TPurpleBase">#8A08CE</Color>
+                    <Color x:Key="TBlueBase">#015CD4</Color>
                     <SolidColorBrush x:Key="TBackground" Color="#FFFFFFFF" />
                     <SolidColorBrush x:Key="TForeground" Color="#000000" />
                     <SolidColorBrush x:Key="TPanelOff" Color="#000000" Opacity="0.0" />
