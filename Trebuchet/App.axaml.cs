@@ -62,11 +62,11 @@ public partial class App : Application, IApplication
     public void Crash() => HasCrashed = true;
         
         
-    private void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    private async void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
         Log.Error(e.Exception, "DispatcherUnhandledException");
         e.Handled = true;
-        new ExceptionModal(e.Exception).OpenDialogue();
+        await new ExceptionModal(e.Exception).OpenDialogueAsync();
         ShutdownOnError();
     }
     
@@ -109,10 +109,7 @@ public partial class App : Application, IApplication
             }
             TestliveModal modal = new (desktop.Args?.Contains("-catapult") ?? false);
             desktop.MainWindow = modal.Window;
-            modal.OpenDialogue();
-            // TestWindow window = new TestWindow();
-            // desktop.MainWindow = window;
-            // window.Show();
+            modal.Open();
         }
         base.OnFrameworkInitializationCompleted();
     }
@@ -129,7 +126,7 @@ public partial class App : Application, IApplication
         await Dispatcher.UIThread.InvokeAsync(() => Log.Error((Exception)e.ExceptionObject, "UnhandledException"));
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            new ExceptionModal(((Exception)e.ExceptionObject)).OpenDialogue();
+            new ExceptionModal(((Exception)e.ExceptionObject)).Open();
             ShutdownOnError();
         });
     }
@@ -139,9 +136,14 @@ public partial class App : Application, IApplication
         await Dispatcher.UIThread.InvokeAsync(() => Log.Error(e.Exception, "UnobservedTaskException"));
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
-            new ExceptionModal(e.Exception).OpenDialogue();
-            ShutdownOnError();
+            DisplayExceptionAndExit(e.Exception);
         });
+    }
+
+    private async void DisplayExceptionAndExit(Exception ex)
+    {
+        await new ExceptionModal(ex).OpenDialogueAsync();
+        ShutdownOnError();
     }
 
     private void ReadAppText()
@@ -164,11 +166,7 @@ public partial class App : Application, IApplication
         
     public void Handle(ITinyMessage message, Exception exception)
     {
-        new ExceptionModal(exception).OpenDialogue();
-        IsShuttingDown = true;
-        if(Application.Current?.ApplicationLifetime is IControlledApplicationLifetime app)
-            app.Shutdown();
-        else  throw new Exception("Application not initialized");
+        DisplayExceptionAndExit(exception);
     }
 
     private void ShutdownOnError()

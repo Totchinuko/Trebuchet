@@ -89,7 +89,7 @@ namespace Trebuchet
                 //TODO: Add to AppText
                 QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
                     "Do you wish to continue ?");
-                await question.OpenDialogue();
+                await question.OpenDialogueAsync();
                 if (!question.Result) return;
             }
 
@@ -190,7 +190,7 @@ namespace Trebuchet
             KillCommand.Toggle(false);
             LaunchCommand.Toggle(true);
             LaunchBattleEyeCommand.Toggle(true);
-            await new ErrorModal("Client failed to start", "See the logs for more information.").OpenDialogue();
+            await new ErrorModal("Client failed to start", "See the logs for more information.").OpenDialogueAsync();
         }
 
         private void OnProcessStarted(ProcessDetails details)

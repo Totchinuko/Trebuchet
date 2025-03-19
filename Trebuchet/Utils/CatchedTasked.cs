@@ -47,7 +47,7 @@ namespace Trebuchet.Utils
             catch (Exception ex)
             {
                 Log.Error(ex, "CatchedTasked failed to complete");
-                await new ErrorModal("Error", $"{ex.Message + Environment.NewLine}Please check the log for more information.").OpenDialogue();
+                await new ErrorModal("Error", $"{ex.Message + Environment.NewLine}Please check the log for more information.").OpenDialogueAsync();
                 return;
             }
             finally

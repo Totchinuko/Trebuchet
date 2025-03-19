@@ -19,7 +19,6 @@ namespace Trebuchet.Utils
     {
         public static bool ValidateGameDirectory(string gameDirectory, out string errorMessage)
         {
-            errorMessage = string.Empty;
             if (string.IsNullOrEmpty(gameDirectory))
             {
                 errorMessage = App.GetAppText("InvalidDirectory");
@@ -35,6 +34,7 @@ namespace Trebuchet.Utils
                 errorMessage = App.GetAppText("GameDirectoryInvalidError");
                 return false;
             }
+            errorMessage = string.Empty;
             return true;
         }
         

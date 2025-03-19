@@ -90,7 +90,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new CloseProcessMessage(Instance));
         }
 
-        public void Kill()
+        public async void Kill()
         {
             if (!ProcessRunning) return;
 
@@ -99,7 +99,7 @@ namespace Trebuchet
                 //TODO: Add to AppText
                 QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
                     "Do you wish to continue ?");
-                question.OpenDialogue();
+                await question.OpenDialogueAsync();
                 if (!question.Result) return;
             }
 
@@ -194,12 +194,12 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(ModListProfile.CollectAllMods(_config, SelectedModlist).Distinct()));
         }
 
-        private void OnProcessFailed()
+        private async void OnProcessFailed()
         {
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
             LaunchCommand.Toggle(true);
-            new ErrorModal("Server failed to start", "Server failed to start properly. See the logs for more information.").OpenDialogue();
+            await new ErrorModal("Server failed to start", "Server failed to start properly. See the logs for more information.").OpenDialogueAsync(); //TODO
         }
 
         private void OnProcessStarted(ProcessServerDetails details)

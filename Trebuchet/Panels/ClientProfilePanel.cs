@@ -93,7 +93,7 @@ namespace Trebuchet.Panels
             OnPropertyChanged(nameof(Profiles));
         }
 
-        private void MoveOriginalSavedFolder()
+        private async void MoveOriginalSavedFolder()
         {
             if (string.IsNullOrEmpty(_config.ClientPath)) return;
             string savedFolder = Path.Combine(_config.ClientPath, Config.FolderGameSave);
@@ -102,7 +102,7 @@ namespace Trebuchet.Panels
 
             //TODO: Move that text into AppText.json
             ErrorModal question = new("Game Folder Reset", "Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.");
-            question.OpenDialogue();
+            await question.OpenDialogueAsync();
 
             _config.ClientPath = string.Empty;
             _config.SaveFile();
@@ -124,16 +124,16 @@ namespace Trebuchet.Panels
             LoadProfile();
         }
 
-        private void OnProfileCreate(object? obj)
+        private async void OnProfileCreate(object? obj)
         {
             //TODO: Move that text into AppText
             InputTextModal modal = new("Create", "Profile Name");
-            modal.OpenDialogue();
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogueAsync();
                 return;
             }
 
@@ -143,13 +143,13 @@ namespace Trebuchet.Panels
             SelectedProfile = name;
         }
 
-        private void OnProfileDelete(object? obj)
+        private async void OnProfileDelete(object? obj)
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
 
             //TODO: Move that text into AppText
             QuestionModal question = new("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
-            question.OpenDialogue();
+            await question.OpenDialogueAsync();
             if (!question.Result) return;
             
             _profile.DeleteFolder();
@@ -160,17 +160,17 @@ namespace Trebuchet.Panels
             SelectedProfile = profile;
         }
 
-        private void OnProfileDuplicate(object? obj)
+        private async void OnProfileDuplicate(object? obj)
         {
             //TODO: Move that text into AppText
             InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
             modal.SetValue(_selectedProfile);
-            modal.OpenDialogue();
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogueAsync(); // TODO
                 return;
             }
 

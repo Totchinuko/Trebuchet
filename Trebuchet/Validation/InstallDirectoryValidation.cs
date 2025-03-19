@@ -10,25 +10,26 @@ namespace Trebuchet.Validation
 {
     public class InstallDirectoryValidation : BaseValidation<string>
     {
-        public override bool IsValid(string? value, out string errorMessage)
+        public override Task<bool> IsValid(string? value)
         {
             if (string.IsNullOrEmpty(value))
             {
-                errorMessage = string.Empty;
-                return true;
+                LastError = string.Empty;
+                return Task.FromResult(true);
             }
             value = Config.ResolveInstallPath(value);
-            if (!Utils.Utils.ValidateInstallDirectory(value, out errorMessage))
+            if (!Utils.Utils.ValidateInstallDirectory(value, out var installDirError))
             {
-                return false;
+                LastError = installDirError;
+                return Task.FromResult(false);
             }
             if (!Tools.ValidateDirectoryUac(value))
             {
                 StrongReferenceMessenger.Default.Send(new UACPromptRequest(value));
-                errorMessage = string.Empty;
-                return false;
+                LastError = string.Empty;
+                return Task.FromResult(true);
             }
-            return true;
+            return Task.FromResult(true);
         }
     }
 }

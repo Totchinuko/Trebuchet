@@ -78,9 +78,9 @@ namespace TrebuchetUtils
 
         public void Open() => _window.OpenDialogue();
         
-        public async Task OpenDialogue(Window window) => await _window.OpenDialogue(window);
+        public async Task OpenDialogue(Window window) => await _window.OpenDialogueAsync(window);
 
-        public async Task OpenDialogue()
+        public async Task OpenDialogueAsync()
         {
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
                 throw new ApplicationException("This is a desktop application");
@@ -88,7 +88,24 @@ namespace TrebuchetUtils
             if (desktop.MainWindow is not null && desktop.MainWindow != _window)
             {
                 _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                await _window.OpenDialogue(desktop.MainWindow);
+                await _window.OpenDialogueAsync(desktop.MainWindow);
+            }
+            else
+            {
+                _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;
+                _window.OpenDialogue();
+            }
+        }
+        
+        public void OpenDialogue()
+        {
+            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+                throw new ApplicationException("This is a desktop application");
+            
+            if (desktop.MainWindow is not null && desktop.MainWindow != _window)
+            {
+                _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
+                _window.OpenDialogue(desktop.MainWindow);
             }
             else
             {
@@ -105,7 +122,7 @@ namespace TrebuchetUtils
             {
                 if (win is not T) continue;
                 _window.WindowStartupLocation = WindowStartupLocation.CenterOwner;
-                await _window.OpenDialogue(win);
+                await _window.OpenDialogueAsync(win);
                 return;
             }
             _window.WindowStartupLocation = WindowStartupLocation.CenterScreen;

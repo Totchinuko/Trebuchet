@@ -1,5 +1,5 @@
 ﻿using System.IO;
-
+using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
 using TrebuchetUtils.Modals;
@@ -8,48 +8,50 @@ namespace Trebuchet.Validation
 {
     public class ConanGameDirectoryValidation : BaseValidation<string>
     {
-        public override bool IsValid(string? value, out string errorMessage)
+        public override async Task<bool> IsValid(string? value)
         {
             if (string.IsNullOrEmpty(value))
             {
-                errorMessage = string.Empty;
                 return true;
             }
-            if (!Utils.Utils.ValidateGameDirectory(value, out errorMessage))
+
+            if (!Utils.Utils.ValidateGameDirectory(value, out string errorMessage))
+            {
+                LastError = errorMessage;
                 return false;
+            }
 
             if (!Tools.ValidateDirectoryUac(value))
             {
                 StrongReferenceMessenger.Default.Send(new UACPromptRequest(value));
-                errorMessage = string.Empty;
                 return false;
             }
 
             if (!HandlePotatoes(value))
             {
-                errorMessage = App.GetAppText("Validation_PotatoError");
+                LastError = App.GetAppText("Validation_PotatoError");
                 return false;
             }
 
-            if (!HandleOriginalSavedDirectory(value, out errorMessage))
+            LastError = await HandleOriginalSavedDirectory(value);
+            if (!string.IsNullOrEmpty(LastError))
                 return false;
 
             return true;
         }
 
-        private bool HandleOriginalSavedDirectory(string value, out string errorMessage)
+        private async Task<string> HandleOriginalSavedDirectory(string value)
         {
-            errorMessage = string.Empty;
             string savedFolder = Path.Combine(value, Config.FolderGameSave);
-            if (Tools.IsSymbolicLink(savedFolder)) return true;
+            if (Tools.IsSymbolicLink(savedFolder)) return string.Empty;
 
             QuestionModal question = new QuestionModal(
                 App.GetAppText("Validation_HandleOriginalSavedDirectory_Title"),
                 App.GetAppText("Validation_HandleOriginalSavedDirectory"));
-            question.OpenDialogue();
+            await question.OpenDialogueAsync();
 
             if (!question.Result)
-                return false;
+                return "Canceled";
 
             Config config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
             string newPath = savedFolder + "_Original";
@@ -60,14 +62,13 @@ namespace Trebuchet.Validation
             }
             catch
             {
-                errorMessage = App.GetAppText("Validation_PotatoError");
-                return false;
+                return App.GetAppText("Validation_PotatoError");
             }
             ClientProfile original = ClientProfile.CreateProfile(config, ClientProfile.GetUniqueOriginalProfile(config));
             original.SaveFile();
             string profileFolder = Path.GetDirectoryName(original.FilePath) ?? throw new DirectoryNotFoundException($"{original.FilePath} path is invalid");
             Tools.DeepCopy(newPath, profileFolder);
-            return true;
+            return string.Empty;
         }
 
         // Are you fucking running the game? -Potato 2024-

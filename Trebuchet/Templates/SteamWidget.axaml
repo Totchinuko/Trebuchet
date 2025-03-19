@@ -16,11 +16,11 @@
                     <TextBlock VerticalAlignment="Center" Classes="Connected" Classes.Disconnected="{Binding !IsConnected}">
                         <TextBlock.Styles>
                             <Style Selector="TextBlock.Connected">
-                                <Setter Property="Foreground" Value="CornflowerBlue" /><!-- TODO: Theme Here -->
+                                <Setter Property="Foreground" Value="{DynamicResource TBlue}" />
                                 <Setter Property="Text" Value="Connected to Steam" />
                             </Style>
                             <Style Selector="TextBlock.Disconnected">
-                                <Setter Property="Foreground" Value="IndianRed" /><!-- TODO: Theme Here -->
+                                <Setter Property="Foreground" Value="{DynamicResource TRed}" />
                                 <Setter Property="Text" Value="Connected to Steam" />
                             </Style>
                         </TextBlock.Styles>

@@ -8,9 +8,11 @@ using System.Diagnostics;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.Templates;
+using Trebuchet.Validation;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
@@ -164,17 +166,7 @@ namespace Trebuchet.SettingFields
                 if (_propertyInfos == null) throw new Exception($"Missing property information for {Property}.");
                 return GetConvert(_propertyInfos.GetValue(GetTarget()));
             }
-            set
-            {
-                if (!Validate(value)) return;
-                if (_propertyInfos == null) throw new Exception($"Missing property information for {Property}.");
-                RemoveCollectionEvent();
-                _propertyInfos.SetValue(GetTarget(), SetConvert(value));
-                AddCollectionEvent();
-                OnValueChanged();
-                OnPropertyChanged(nameof(Value));
-                OnPropertyChanged(nameof(IsDefault));
-            }
+            set => SetValue(value);
         }
 
         public override void RefreshValue()
@@ -206,6 +198,18 @@ namespace Trebuchet.SettingFields
                 collection.CollectionChanged += OnCollectionChanged;
         }
 
+        private async void SetValue(T? value)
+        {
+            if (!await Validate(value)) return;
+            if (_propertyInfos == null) throw new Exception($"Missing property information for {Property}.");
+            RemoveCollectionEvent();
+            _propertyInfos.SetValue(GetTarget(), SetConvert(value));
+            AddCollectionEvent();
+            OnValueChanged();
+            OnPropertyChanged(nameof(Value));
+            OnPropertyChanged(nameof(IsDefault));
+        }
+
         private object GetTarget()
         {
             if (_targetProperty == null)
@@ -228,15 +232,14 @@ namespace Trebuchet.SettingFields
                 collection.CollectionChanged -= OnCollectionChanged;
         }
 
-        private bool Validate(T? value)
+        private async Task<bool> Validate(T? value)
         {
             if (Validation == null) return true;
             if (Validation is not BaseValidation<T> validation) return false;
-            if (validation.IsValid(value, out var errorMessage)) return true;
-            if (string.IsNullOrEmpty(errorMessage)) return false;
+            if (await validation.IsValid(value)) return true;
+            if (string.IsNullOrEmpty(validation.LastError)) return false;
 
-            var modal = new ErrorModal("Invalid Value", errorMessage);
-            modal.OpenDialogue();
+            TrebuchetUtils.GuiExtensions.DisplayError(validation.LastError);
             return false;
         }
     }

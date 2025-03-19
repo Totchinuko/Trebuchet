@@ -35,9 +35,14 @@ namespace TrebuchetUtils
 
         public event EventHandler? WindowClosed;
 
-        public async Task OpenDialogue(Window window)
+        public async Task OpenDialogueAsync(Window window)
         {
             await ShowDialog(window);
+        }
+        
+        public void OpenDialogue(Window window)
+        {
+            ShowDialog(window);
         }
         
         public void OpenDialogue()

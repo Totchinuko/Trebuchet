@@ -43,7 +43,7 @@ namespace Trebuchet.Panels
             UpdateRequiredActions();
         }
 
-        private void DisplaySetupHelp()
+        private async void DisplaySetupHelp()
         {
             if (_displayedHelp) return;
             _displayedHelp = true;
@@ -56,7 +56,7 @@ namespace Trebuchet.Panels
                 ErrorModal modal = new ErrorModal(
                     App.GetAppText("Welcome_InstallPathInvalid_Title"),
                     App.GetAppText("Welcome_InstallPathInvalid"));
-                modal.OpenDialogue();
+                await modal.OpenDialogueAsync();
             }
 
             if ((!Tools.IsClientInstallValid(Config) && !Tools.IsServerInstallValid(Config)))
@@ -65,7 +65,7 @@ namespace Trebuchet.Panels
                   App.GetAppText("Welcome_SettingTutorial_Title"),
                   App.GetAppText("Welcome_SettingTutorial"),
                   250);
-                modal.OpenDialogue();
+                await modal.OpenDialogueAsync();
             }
         }
 

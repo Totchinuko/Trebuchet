@@ -112,13 +112,13 @@ namespace Trebuchet.Panels
         private async void OnProfileCreate(object? obj)
         {
             InputTextModal modal = new InputTextModal("Create", "Profile Name");
-            await modal.OpenDialogue();
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
                 //TODO: Add to AppText
-                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogueAsync();
                 return;
             }
 
@@ -134,7 +134,7 @@ namespace Trebuchet.Panels
 
             //TODO: Add to AppText
             QuestionModal question = new("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
-            await question.OpenDialogue();
+            await question.OpenDialogueAsync();
             if (question.Result)
             {
                 _profile.DeleteFolder();
@@ -150,13 +150,13 @@ namespace Trebuchet.Panels
         {
             InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
             modal.SetValue(_selectedProfile);
-            await modal.OpenDialogue();
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
                 //TODO: Add to AppText
-                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogueAsync();
                 return;
             }
 

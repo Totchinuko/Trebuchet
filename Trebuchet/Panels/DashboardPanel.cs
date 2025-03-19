@@ -197,11 +197,11 @@ namespace Trebuchet.Panels
                 i.Close();
         }
 
-        private void OnFileVerification(object? obj)
+        private async void OnFileVerification(object? obj)
         {
             var question = new QuestionModal("Verify files",
                 "This will verify all server and mod files. This may take a while. Do you want to continue?");
-            question.OpenDialogue();
+            await question.OpenDialogueAsync();
             if (!question.Result) return;
 
             StrongReferenceMessenger.Default.Send(

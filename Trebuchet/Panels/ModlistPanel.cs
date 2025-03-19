@@ -240,7 +240,7 @@ namespace Trebuchet.Panels
             if (id == null || !ulong.TryParse(id, out var collectionId))
             {
                 //TODO: Move into AppText
-                await new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").OpenDialogue();
+                await new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").OpenDialogueAsync();
                 return;
             }
 
@@ -347,7 +347,7 @@ namespace Trebuchet.Panels
         private async void OnExportToJson(object? obj)
         {
             var json = JsonSerializer.Serialize(new ModlistExport { Modlist = _profile.Modlist });
-            await new ModlistTextImport(json, true, FileType.Json).OpenDialogue();
+            await new ModlistTextImport(json, true, FileType.Json).OpenDialogueAsync();
         }
 
         private async void OnExportToTxt(object? obj)
@@ -355,14 +355,14 @@ namespace Trebuchet.Panels
             try
             {
                 var content = string.Join("\r\n", _profile.GetResolvedModlist());
-                await new ModlistTextImport(content, true, FileType.Txt).OpenDialogue();
+                await new ModlistTextImport(content, true, FileType.Txt).OpenDialogueAsync();
             }
             catch
             {
                 await new ErrorModal("Error",
                         "Some of the mods path cannot be resolved because the mod file was not found. " +
                         "In order to export your modlist, please unsure that all of the mods are not marked as missing.")
-                    .OpenDialogue();
+                    .OpenDialogueAsync();
             }
         }
 
@@ -373,7 +373,7 @@ namespace Trebuchet.Panels
 
             var question = new QuestionModal("Replacement",
                 "This action will replace your modlist, do you wish to continue ?");
-            await question.OpenDialogue();
+            await question.OpenDialogueAsync();
             if (!question.Result) return;
 
             UriBuilder builder;
@@ -383,7 +383,7 @@ namespace Trebuchet.Panels
             }
             catch
             {
-                await new ErrorModal("Error", "Invalid URL.").OpenDialogue();
+                await new ErrorModal("Error", "Invalid URL.").OpenDialogueAsync();
                 return;
             }
 
@@ -416,7 +416,7 @@ namespace Trebuchet.Panels
             else if (ext == FileType.TxtExt)
                 OnImportFromTxtFile(await File.ReadAllTextAsync(path));
             else
-                await new ErrorModal("Wrong Type", "The type of file provided is unsupported.").OpenDialogue();
+                await new ErrorModal("Wrong Type", "The type of file provided is unsupported.").OpenDialogueAsync();
         }
 
         private async void OnImportFromJsonFile(string json)
@@ -425,7 +425,7 @@ namespace Trebuchet.Panels
             if (modlist == null)
             {
                 //TODO: Add to AppText
-                await new ErrorModal("Invalid Json", "Loaded json could not be parsed.").OpenDialogue();
+                await new ErrorModal("Invalid Json", "Loaded json could not be parsed.").OpenDialogueAsync();
                 return;
             }
 
@@ -437,7 +437,7 @@ namespace Trebuchet.Panels
         private async void OnImportFromText(object? obj)
         {
             var import = new ModlistTextImport(string.Empty, false, FileType.Json);
-            await import.OpenDialogue();
+            await import.OpenDialogueAsync();
 
             if (import.Canceled) return;
 
@@ -519,13 +519,13 @@ namespace Trebuchet.Panels
         private async void OnModlistCreate(object? obj)
         {
             var modal = new InputTextModal("Create", "Modlist Name");
-            await modal.OpenDialogue();
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             var name = modal.Text;
             if (Profiles.Contains(name))
             {
                 //TODO: Add to AppText
-                await new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogueAsync();
                 return;
             }
 
@@ -541,7 +541,7 @@ namespace Trebuchet.Panels
 
             var question = new QuestionModal("Deletion",
                 $"Do you wish to delete the selected modlist {_selectedModlist} ?");
-            await question.OpenDialogue();
+            await question.OpenDialogueAsync();
             if (!question.Result) return;
             
             _profile.DeleteFile();
@@ -557,13 +557,13 @@ namespace Trebuchet.Panels
         {
             var modal = new InputTextModal("Duplicate", "Modlist Name");
             modal.SetValue(_selectedModlist);
-            await modal.OpenDialogue();
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             var name = modal.Text;
             if (Profiles.Contains(name))
             {
                 //TODO: Add to AppText
-                await new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogue();
+                await new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogueAsync();
                 return;
             }
 

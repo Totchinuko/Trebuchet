@@ -140,7 +140,7 @@ namespace Trebuchet
                 App.GetAppText("UACDialog_Title"),
                 App.GetAppText("UACDialog", message.Directory)
                 );
-            await modal.OpenDialogue();
+            await modal.OpenDialogueAsync();
 
             if (modal.Result)
             {

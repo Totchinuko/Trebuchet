@@ -33,7 +33,7 @@ namespace TrebuchetUtils
 
         public static async void DisplayError(string message)
         {
-            await new ErrorModal("Error", message).OpenDialogue();
+            await new ErrorModal("Error", message).OpenDialogueAsync();
         }
         
         public static IEnumerable<T> FindVisualChildren<T>(Visual depObj) where T : Visual

@@ -23,7 +23,7 @@ namespace TrebuchetUtils.Modals
         {
             if(Dispatcher.UIThread.CheckAccess())
             {
-                await new ErrorModal(title, error).OpenDialogue();
+                await new ErrorModal(title, error).OpenDialogueAsync();
             }
             else
                 await Dispatcher.UIThread.InvokeAsync(() => ShowError(error, title));
