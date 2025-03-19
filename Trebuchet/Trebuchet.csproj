@@ -12,6 +12,15 @@
         <Deterministic>true</Deterministic>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+
+        <Product>Trebuchet</Product>
+        <Description>Open Source Conan Exile Launcher</Description>
+        <Company>tot-soft</Company>
+        <Copyright>Copyright © $([System.DateTime]::Now.Year) tot-soft.</Copyright>
+        <PackageLicenseExpression>GPL-2.0</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Totchinuko/Trebuchet.git</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Totchinuko/Trebuchet.git</RepositoryUrl>
+        <RepositoryType>Private</RepositoryType>
     </PropertyGroup>
 
     <ItemGroup>
