@@ -89,8 +89,11 @@ namespace TrebuchetUtils
             if (string.IsNullOrEmpty(Environment.ProcessPath))
                 return string.Empty;
             var fvi = FileVersionInfo.GetVersionInfo(Environment.ProcessPath);
+            #if DEBUG
+            string tag = " [Dev]";
+            #else
             string tag = string.Empty;
-            if (fvi.FileMajorPart == 0) tag = " [Dev]";
+            #endif
             return $"{fvi.FileMajorPart}.{fvi.FileMinorPart}.{fvi.FileBuildPart}{tag}";
         }
 
