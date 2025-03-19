@@ -22,11 +22,13 @@
         <RepositoryUrl>https://github.com/Totchinuko/Trebuchet.git</RepositoryUrl>
         <RepositoryType>Private</RepositoryType>
     </PropertyGroup>
+    
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <DebugType>none</DebugType>
+    </PropertyGroup>
 
     <ItemGroup>
         <AvaloniaResource Include="Assets\**"/>
-        <AvaloniaResource Remove="Assets\Icons\AppIcon.ico" />
-        <AvaloniaResource Remove="Assets\Icons\AppIcon.ico" />
     </ItemGroup>
 
     <ItemGroup>
@@ -68,12 +70,6 @@
         <None Update="Json\Maps.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <UpToDateCheckInput Remove="Assets\Icons\AppIcon.ico" />
-      <UpToDateCheckInput Remove="Assets\Icons\AppIcon.ico" />
-      <UpToDateCheckInput Remove="Assets\Icons\AppIcon.ico" />
     </ItemGroup>
 
 </Project>

@@ -1,30 +1,34 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
-    <ImplicitUsings>enable</ImplicitUsings>
-    <Nullable>enable</Nullable>
-	<EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
-	<Deterministic>true</Deterministic>
-	<TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-  </PropertyGroup>
+    <PropertyGroup>
+        <TargetFramework>net8.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <Deterministic>true</Deterministic>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    </PropertyGroup>
 
-  <ItemGroup>
-	  <PackageReference Include="protobuf-net" Version="3.2.30" />
-	  <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-	  <PackageReference Include="SteamKit2" Version="3.0.0-Beta.4" />
-    <PackageReference Include="System.Management" Version="8.0.0" />
-    <PackageReference Include="Yuu.Ini" Version="0.2.0" />
-  </ItemGroup>
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DebugType>none</DebugType>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Reference Include="DepotDownloader">
-      <HintPath>..\..\DepotDownloader\DepotDownloader\bin\Release\net8.0\DepotDownloader.dll</HintPath>
-    </Reference>
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="protobuf-net" Version="3.2.30" />
+        <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
+        <PackageReference Include="SteamKit2" Version="3.0.0-Beta.4" />
+        <PackageReference Include="System.Management" Version="8.0.0" />
+        <PackageReference Include="Yuu.Ini" Version="0.2.0" />
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\TrebuchetUtils\TrebuchetUtils.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <Reference Include="DepotDownloader">
+            <HintPath>..\..\DepotDownloader\DepotDownloader\bin\Release\net8.0\DepotDownloader.dll</HintPath>
+        </Reference>
+    </ItemGroup>
+
+    <ItemGroup>
+        <ProjectReference Include="..\TrebuchetUtils\TrebuchetUtils.csproj" />
+    </ItemGroup>
 
 </Project>
