@@ -4,6 +4,7 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:local="clr-namespace:Trebuchet.Controls"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:sys="clr-namespace:System.Collections.Generic;assembly=System.Runtime"
              mc:Ignorable="d"
              x:CompileBindings="False"
@@ -14,7 +15,7 @@
                 ToolTip.Tip="Map Selection"
                 ToolTip.ShowDelay="0"
                 Padding="8">
-            <Svg Path="avares://TrebuchetUtils/Assets/SvgIcons/map.svg" Classes="SvgIcon" />
+            <i:Icon Value="mdi-map" Classes="Normal" />
         </Button>
         <Popup Name="MapListPopup" IsLightDismissEnabled="True">
             <Border BorderThickness="1" CornerRadius="3" MaxHeight="300" MinWidth="100" Width="200">

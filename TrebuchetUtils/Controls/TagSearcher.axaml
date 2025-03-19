@@ -3,9 +3,13 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
              xmlns:local="clr-namespace:TrebuchetUtils.Controls"
              mc:Ignorable="d"
              d:DesignHeight="35" d:DesignWidth="250">
+    <UserControl.Styles>
+        <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml" />
+    </UserControl.Styles>
     <Grid>
         <TextBox FontSize="14" Width="{Binding $parent[UserControl].DeployedWidth}" VerticalContentAlignment="Center" Padding="2 2 2 2" Name="SearchField" Text="{Binding SearchContent, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged, RelativeSource={RelativeSource AncestorType=UserControl}}">
             <TextBox.KeyBindings>
@@ -14,7 +18,7 @@
             </TextBox.KeyBindings>
         </TextBox>
         <Button Name="SearchButton" HorizontalAlignment="Left" ToolTip.Tip="Search By Tags"  ToolTip.ShowDelay="0" Margin="0 0 0 0" Classes.current="{Binding $parent[UserControl].ButtonClass}" VerticalAlignment="Center" Command="{Binding $parent[UserControl].StartSearch}">
-            <Image Name="IconTag" Source="pack://application:,,,/TrebuchetGUILib;component/icons/TagSearch.png" Opacity="1.0" Height="16" Width="16" />
+            <i:Icon Name="IconTag" Value="mdi-tag-search" Classes="Normal" Margin="0,0,12,0"/>
         </Button>
         <Popup IsOpen="{Binding ResultsOpen, Mode=OneWay, RelativeSource={RelativeSource AncestorType=UserControl}}" PlacementTarget="{Binding ElementName=SearchField}" Placement="Bottom">
             <Border Width="{Binding #SearchField.Bounds.Width}" MinHeight="200" MaxHeight="450">

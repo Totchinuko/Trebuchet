@@ -3,7 +3,7 @@
     {
       "$type": "Modlist",
       "Label": "Mod Lists",
-      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/list.svg"
+      "IconPath": "mdi-toy-brick"
     },
     {
       "Label": "Game"
@@ -11,7 +11,7 @@
     {
       "$type": "ClientSettings",
       "Label": "Profiles",
-      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/controller.svg"
+      "IconPath": "mdi-controller"
     },
     {
       "Label": "Server"
@@ -19,29 +19,29 @@
     {
       "$type": "ServerSettings",
       "Label": "Profiles",
-      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/server.svg"
+      "IconPath": "mdi-server-network"
     },
     {
       "$type": "Rcon",
       "Label": "Console",
-      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/window.hash.svg"
+      "IconPath": "mdi-console-line"
     },
     {
       "$type": "LogFilter",
       "Label": "Log Filter",
-      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/filter.svg"
+      "IconPath": "mdi-filter"
     }
   ],
   "Bottom": [
     {
       "$type": "Dashboard",
       "Label": "Dashboard",
-      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/dashboard.svg"
+      "IconPath": "mdi-view-dashboard"
     },
     {
       "$type": "Settings",
       "Label": "Settings",
-      "IconPath": "avares://TrebuchetUtils/Assets/SvgIcons/settings.svg"
+      "IconPath": "mdi-cog"
     }
   ]
 }

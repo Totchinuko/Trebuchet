@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet.SettingFields" 
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:hyper="clr-namespace:HyperText.Avalonia.Controls;assembly=HyperText.Avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="FieldRow" x:DataType="local:Field">
@@ -48,7 +49,7 @@
                         Margin="12,0,3,0"
                         Classes.Hidden="{Binding !IsDefault}"
                         Command="{Binding ResetCommand}">
-                    <Image Source="avares://Trebuchet/Assets/Icons/Reset.png" Width="16" Height="16" />
+                    <i:Icon Value="mdi-undo" Classes="Normal"/>
                 </Button>
             </Grid>
         </Border>

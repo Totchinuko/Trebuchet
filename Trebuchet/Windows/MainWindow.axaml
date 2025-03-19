@@ -29,10 +29,7 @@
             <controls:WindowTitlebar
                 x:Name="TitleBar"
                 Title="{x:Static treb:TrebuchetApp.AppTitle}"
-                CloseIcon="avares://TrebuchetUtils/Icons/Close.png"
-                RestoreIcon="avares://TrebuchetUtils/Icons/Restore.png"
-                MaximizeIcon="avares://TrebuchetUtils/Icons/Maximize.png"
-                MinimizeIcon="avares://TrebuchetUtils/Icons/Minimize.png">
+                >
                 <controls:WindowTitlebar.Header>
                     <ContentControl ContentTemplate="{StaticResource SteamWidget}" Content="{Binding SteamWidget}" />
                 </controls:WindowTitlebar.Header>

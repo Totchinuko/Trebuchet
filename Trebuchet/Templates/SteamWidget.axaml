@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="SteamWidget" x:DataType="local:SteamWidget">
         <Grid>
@@ -10,7 +11,7 @@
                     IsVisible="{Binding !IsLoading}"
                     Command="{Binding ConnectCommand}">
                 <StackPanel Orientation="Horizontal">
-                    <Svg Path="avares://TrebuchetUtils/Assets/SvgIcons/steam.svg" Classes="SvgIcon" Margin="0 0 12 0" VerticalAlignment="Center" />
+                    <i:Icon Value="mdi-steam" Classes="Normal" Margin="0 0 12 0" VerticalAlignment="Center" />
                     <TextBlock VerticalAlignment="Center" Classes="Connected" Classes.Disconnected="{Binding !IsConnected}">
                         <TextBlock.Styles>
                             <Style Selector="TextBlock.Connected">

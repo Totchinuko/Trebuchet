@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet.Panels"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="TabButtonTemplate" x:DataType="local:Panel">
         <Button Margin="0,3,0,3"
@@ -11,8 +12,8 @@
                 Command="{Binding .}"
                 HorizontalContentAlignment="Left">
             <StackPanel Orientation="Horizontal">
-                <Svg Path="{Binding IconPath}" Classes="SvgIcon" Margin="0 0 6 0" />
-                <TextBlock Text="{Binding Label}" FontSize="14" />
+                <i:Icon Value="{Binding IconPath}" Classes="Normal" VerticalAlignment="Center" Margin="0 0 12 0" />
+                <TextBlock Text="{Binding Label}" FontSize="14" VerticalAlignment="Center" />
             </StackPanel>
         </Button>
     </DataTemplate>

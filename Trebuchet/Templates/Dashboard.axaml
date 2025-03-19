@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet.Panels"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="Dashboard" x:DataType="local:DashboardPanel">
         <ScrollViewer>
@@ -14,19 +15,19 @@
                     <WrapPanel Orientation="Horizontal">
                         <Button Command="{Binding UpdateServerCommand}" Margin="0,0,6,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="avares://Trebuchet/Assets/Icons/Server.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                <i:Icon Value="mdi-server-network" Classes="Normal" />
                                 <TextBlock Text="Update Servers" />
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding UpdateAllModsCommand}" Margin="0,0,6,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="avares://Trebuchet/Assets/Icons/List.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                <i:Icon Value="mdi-update" Classes="Normal" />
                                 <TextBlock Text="Update All Mods" />
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding VerifyFilesCommand}" Margin="0,0,6,0">
                             <StackPanel Orientation="Horizontal">
-                                <Image Source="avares://Trebuchet/Assets/Icons/Magnifying.png" Width="16" Height="16" Margin="0,0,6,0" />
+                                <i:Icon Value="mdi-wrench" Classes="Normal" />
                                 <TextBlock Text="Verify Files" />
                             </StackPanel>
                         </Button>
@@ -39,19 +40,19 @@
                         <WrapPanel Orientation="Horizontal" Margin="0,20,0,0">
                             <Button Command="{Binding LaunchAllCommand}" ToolTip.Tip="Launch All Server Intances" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="avares://Trebuchet/Assets/Icons/Pacman.png" Width="16" Height="16" Margin="0,0,12,0" />
+                                    <i:Icon Value="mdi-play" Classes="Normal" />
                                     <TextBlock Text="Launch All" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding CloseAllCommand}" ToolTip.Tip="Stop All Server Instances" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="avares://Trebuchet/Assets/Icons/Close.png" Width="16" Height="16" Margin="0,0,12,0" />
+                                    <i:Icon Value="mdi-stop" Classes="Normal" />
                                     <TextBlock Text="Stop All" />
                                 </StackPanel>
                             </Button>
                             <Button Command="{Binding KillAllCommand}" ToolTip.Tip="Kill All Server Instances" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Source="avares://Trebuchet/Assets/Icons/Skull.png" Width="16" Height="16" Margin="0,0,12,0" />
+                                    <i:Icon Value="mdi-skull" Classes="Normal" />
                                     <TextBlock Text="Kill All" />
                                 </StackPanel>
                             </Button>

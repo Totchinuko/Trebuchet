@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:local="clr-namespace:Trebuchet.Panels"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:dd="urn:gong-wpf-dragdrop">
     <DataTemplate x:Key="ModlistEditor" x:DataType="local:ModlistPanel">
         <Grid>
@@ -12,22 +13,22 @@
                 <Border CornerRadius="3" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
                     <StackPanel Orientation="Horizontal">
                         <Button Command="{Binding CreateModlistCommand}" ToolTip.Tip="Create" Margin="0,0,3,0" VerticalAlignment="Top">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Add.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
                         <Border VerticalAlignment="Center" Height="32">
                             <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center" />
                         </Border>
                         <Button Command="{Binding DeleteModlistCommand}" ToolTip.Tip="Delete" Margin="0,0,3,0" VerticalAlignment="Center">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Trash.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-delete" Classes="Normal"/>
                         </Button>
                         <Button Command="{Binding DuplicateModlistCommand}" ToolTip.Tip="Duplicate" Margin="0 0 3 0" VerticalAlignment="Center">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Duplicate.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-content-copy" Classes="Normal"/>
                         </Button>
                         <Button Command="{Binding RefreshModlistCommand}" ToolTip.Tip="Refresh mod infos" Margin="0 0 3 0" VerticalAlignment="Center">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Reset.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-refresh" Classes="Normal"/>
                         </Button>
                         <Button Command="{Binding ModFilesDownloadCommand}" ToolTip.Tip="Update Mods" Margin="0 0 3 0" VerticalAlignment="Center">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Download.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-update" Classes="Normal"/>
                         </Button>
                     </StackPanel>
                 </Border>

@@ -31,10 +31,6 @@
                 DisableMaximize="{Binding App.MaximizeDisabled}"
                 DisableMinimize="{Binding App.MinimizeDisabled}"
                 DisableClose="{Binding App.CloseDisabled}"
-                CloseIcon="avares://TrebuchetUtils/Icons/Close.png"
-                RestoreIcon="avares://TrebuchetUtils/Icons/Restore.png"
-                MaximizeIcon="avares://TrebuchetUtils/Icons/Maximize.png"
-                MinimizeIcon="avares://TrebuchetUtils/Icons/Minimize.png"
                 LogoIcon="{Binding AppIconPath}" />
             <ContentControl Grid.Row="1" Content="{Binding App}" Name="WindowContent" ContentTemplate="{Binding App.Template}" />
         </Grid>

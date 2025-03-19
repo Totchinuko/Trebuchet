@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:local="clr-namespace:TrebuchetUtils.Modals">
     <DataTemplate x:Key="ExceptionModal" DataType="local:ExceptionModal">
         <Grid Margin="12">
@@ -32,7 +33,7 @@
                     VerticalAlignment="Center"
                     Grid.Row="2">
                 <StackPanel Orientation="Horizontal">
-                    <Svg Path="avares://Assets/SvgIcons/win.close.svg" Classes="SvgIcon" Margin="0 0 6 0" />
+                    <i:Icon  Value="mdi-window-close" Margin="0 0 6 0"/>
                     <TextBlock Text="Close" />
                 </StackPanel>
             </Button>

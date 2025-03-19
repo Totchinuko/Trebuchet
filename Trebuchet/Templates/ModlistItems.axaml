@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet"
                     xmlns:panel="clr-namespace:Trebuchet.Panels"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ModlistItems" x:DataType="local:ModFile">
         <Border Margin="0 0 0 12" CornerRadius="3" Cursor="SizeNS" Padding="8" ToolTip.Tip="Drag to reorder"><!-- TODO: Hover effect -->
@@ -11,28 +12,28 @@
                     <ColumnDefinition Width="1*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <Image Margin="0,0,12,0" Classes="Steam" Classes.Bug="{Binding IsTestLive}" Classes.File="{Binding !IsPublished}">
-                    <Image.Styles>
-                        <Style Selector="Image.Steam">
-                            <Setter Property="Source" Value="avares://Trebuchet/Assets/Icons/Steam.png"/>
+                <i:Icon Margin="0,0,12,0" Classes="Steam Normal" Classes.Bug="{Binding IsTestLive}" Classes.File="{Binding !IsPublished}">
+                    <i:Icon.Styles>
+                        <Style Selector="i|Icon.Steam">
+                            <Setter Property="Value" Value="mdi-steam"/>
                         </Style>
-                        <Style Selector="Image.File">
-                            <Setter Property="Source" Value="avares://Trebuchet/Assets/Icons/FIle.png"/>
+                        <Style Selector="i|Icon.File">
+                            <Setter Property="Value" Value="mdi-file"/>
                         </Style>
-                        <Style Selector="Image.Bug">
-                            <Setter Property="Source" Value="avares://Trebuchet/Assets/Icons/Bug.png"/>
+                        <Style Selector="i|Icon.Bug">
+                            <Setter Property="Value" Value="mdi-test-tube"/>
                         </Style>
-                        <Style Selector="Image.Steam > ToolTip">
+                        <Style Selector="i|Icon.Steam > ToolTip">
                             <Setter Property="Tip" Value="Steam Workshop (Live)"/>
                         </Style>
-                        <Style Selector="Image.File > ToolTip">
+                        <Style Selector="i|Icon.File > ToolTip">
                             <Setter Property="Tip" Value="Local File"/>
                         </Style>
-                        <Style Selector="Image.Bug > ToolTip">
+                        <Style Selector="i|Icon.Bug > ToolTip">
                             <Setter Property="Tip" Value="Steam Workshop (TestLive)"/>
                         </Style>
-                    </Image.Styles>
-                </Image>
+                    </i:Icon.Styles>
+                </i:Icon>
                 <Grid Grid.Column="1">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -52,13 +53,13 @@
                 </StackPanel>
                 <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center">
                     <Button IsVisible="{Binding IsPublished}" Cursor="Hand" Margin="0,0,3,0" ToolTip.Tip="Open Workshop Page" Command="{Binding $parent[panel:ModlistPanel].OpenWorkshopCommand}" CommandParameter="{Binding .}">
-                        <Image Source="avares://Trebuchet/Assets/Icons/Steam.png" Width="16" Height="16" />
+                        <i:Icon Value="mdi-steam" Classes="Normal"/>
                     </Button>
                     <Button Cursor="Hand" Margin="0,0,3,0" ToolTip.Tip="Update Mod" Command="{Binding $parent[panel:ModlistPanel].UpdateModCommand}" CommandParameter="{Binding .}">
-                        <Image Source="avares://Trebuchet/Assets/Icons/Reset.png" Width="16" Height="16" />
+                        <i:Icon Value="mdi-update" Classes="Normal"/>
                     </Button>
                     <Button Cursor="Hand" ToolTip.Tip="Remove from list" Command="{Binding $parent[panel:ModlistPanel].RemoveModCommand}" CommandParameter="{Binding .}">
-                        <Image Source="avares://Trebuchet/Assets/Icons/Trash.png" Width="16" Height="16" />
+                        <i:Icon Value="mdi-delete" Classes="Normal"/>
                     </Button>
                 </StackPanel>
             </Grid>

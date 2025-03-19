@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:system="clr-namespace:System;assembly=System.Runtime"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Styles.Resources>
         <ResourceDictionary>
@@ -39,8 +40,6 @@
                     <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.1" />
                     <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
-                    <system:String x:Key="TIconCssColor">#Union, #Subtract { fill: rgba(0, 0, 0, 1.0); }</system:String>
-                    <system:String x:Key="TIconCssDisabled">#Union, #Subtract { fill: rgba(0, 0, 0, 0.5); }</system:String>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <Color x:Key="TRedBase">#c42b1c</Color>
@@ -77,8 +76,6 @@
                     <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.1" />
                     <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
-                    <system:String x:Key="TIconCssColor">#Union, #Subtract { fill: rgba(255, 255, 255, 1.0); }</system:String>
-                    <system:String x:Key="TIconCssDisabled">#Union, #Subtract { fill: rgba(255, 255, 255, 0.5); }</system:String>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
@@ -114,9 +111,8 @@
     <Style Selector="Window.Trebuchet">
         <Setter Property="Background" Value="{DynamicResource TBackground}"/>
     </Style>
-    <Style Selector="Svg.SvgIcon">
-        <Setter Property="Height" Value="18"/>
-        <Setter Property="Width" Value="18"/>
+    <Style Selector="i|Icon.Normal">
+        <Setter Property="FontSize" Value="20"/>
     </Style>
     
     <Style Selector="TextBlock.Title">
@@ -138,13 +134,6 @@
                 <BrushTransition Property="Background" Duration="0:0:0.1"/>
             </Transitions>
         </Setter>
-    </Style>
-    <Style Selector="Svg">
-        <Setter Property="(Svg.Css)" Value="{DynamicResource TIconCssColor}" />
-    </Style>
-    
-    <Style Selector="Button:disabled Svg">
-        <Setter Property="(Svg.Css)" Value="{DynamicResource TIconCssDisabled}" />
     </Style>
     
     <Style Selector="Button.Base:pointerover /template/ ContentPresenter#PART_ContentPresenter">

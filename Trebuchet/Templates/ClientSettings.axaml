@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet.Panels"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ClientSettings" x:DataType="local:ClientProfilePanel">
         <Grid>
@@ -11,19 +12,19 @@
                 <Border CornerRadius="3" HorizontalAlignment="Left" Padding="8,8,8,0" Margin="0,0,12,0">
                     <WrapPanel Orientation="Horizontal">
                         <Button Command="{Binding CreateProfileCommand}" ToolTip.Tip="Create" Margin="0,0,6,0" VerticalAlignment="Top">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Add.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
                         <Border VerticalAlignment="Top" Height="32">
                             <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center" />
                         </Border>
                         <Button Command="{Binding DeleteProfileCommand}" ToolTip.Tip="Delete" Margin="0,0,3,6" VerticalAlignment="Top">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Trash.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-delete" Classes="Normal"/>
                         </Button>
                         <Button Command="{Binding DuplicateProfileCommand}" ToolTip.Tip="Duplicate" Margin="0 0 3 0" VerticalAlignment="Top">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Duplicate.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-content-copy" Classes="Normal"/>
                         </Button>
                         <Button Command="{Binding OpenFolderProfileCommand}" ToolTip.Tip="Open Profile Folder" Margin="0 0 3 0" VerticalAlignment="Top">
-                            <Image Source="avares://Trebuchet/Assets/Icons/Folder.png" Width="16" Height="16" />
+                            <i:Icon Value="mdi-folder-open" Classes="Normal" />
                         </Button>
                     </WrapPanel>
                 </Border>
