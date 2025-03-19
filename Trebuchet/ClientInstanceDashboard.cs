@@ -86,9 +86,7 @@ namespace Trebuchet
 
             if (App.Config.DisplayWarningOnKill)
             {
-                //TODO: Add to AppText
-                QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
-                    "Do you wish to continue ?");
+                QuestionModal question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
                 await question.OpenDialogueAsync();
                 if (!question.Result) return;
             }

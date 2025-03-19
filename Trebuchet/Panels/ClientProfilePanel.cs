@@ -100,8 +100,7 @@ namespace Trebuchet.Panels
             if (!Directory.Exists(savedFolder)) return;
             if (Tools.IsSymbolicLink(savedFolder)) return;
 
-            //TODO: Move that text into AppText.json
-            ErrorModal question = new("Game Folder Reset", "Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.");
+            ErrorModal question = new(App.GetAppText("GameFolderReset_Title"), App.GetAppText("GameFolderReset_Message"));
             await question.OpenDialogueAsync();
 
             _config.ClientPath = string.Empty;
@@ -126,14 +125,13 @@ namespace Trebuchet.Panels
 
         private async void OnProfileCreate(object? obj)
         {
-            //TODO: Move that text into AppText
-            InputTextModal modal = new("Create", "Profile Name");
+            InputTextModal modal = new(App.GetAppText("Create"), App.GetAppText("ProfileName"));
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogueAsync();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 
@@ -147,8 +145,7 @@ namespace Trebuchet.Panels
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
 
-            //TODO: Move that text into AppText
-            QuestionModal question = new("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
+            QuestionModal question = new(App.GetAppText("Deletion"), App.GetAppText("Deletion_Message", _selectedProfile));
             await question.OpenDialogueAsync();
             if (!question.Result) return;
             
@@ -162,15 +159,14 @@ namespace Trebuchet.Panels
 
         private async void OnProfileDuplicate(object? obj)
         {
-            //TODO: Move that text into AppText
-            InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
+            InputTextModal modal = new InputTextModal(App.GetAppText("Duplicate"), App.GetAppText("ProfileName"));
             modal.SetValue(_selectedProfile);
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogueAsync(); // TODO
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 

@@ -17,8 +17,6 @@ namespace Trebuchet.Windows
             InitializeComponent();
         }
 
-        public bool WasShown => _shown;
-
         public void SetApp(TrebuchetApp app)
         {
             _app = app;
@@ -33,7 +31,6 @@ namespace Trebuchet.Windows
                 desktop.Shutdown();
         }
 
-        //TODO: Test that this event actually work for this purpose
         protected override void OnOpened(EventArgs e)
         {
             base.OnOpened(e);

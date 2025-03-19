@@ -11,5 +11,13 @@
   "Welcome_SettingTutorial": "Welcome to Trebuchet.\n\nIn order to use the software for launching your game or servers you need to point the location of your game, or select how many server you wish the launcher to handle, or both.\n\nOther section of the launcher will unlock as you set those settings up.",
   "Welcome_SettingTutorial_Title": "Welcome",
   "UACDialog": "The following folder is protected by administrator rights, Trebuchet need access to manage your game and data. Restart Trebuchet in Admin mode ?\n{0}",
-  "UACDialog_Title": "Administrator"
+  "UACDialog_Title": "Administrator",
+  "Kill_Title": "Kill",
+  "Kill_Message": "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. Do you wish to continue ?",
+  "GameFolderReset_Title": "Game Folder Reset",
+  "GameFolderReset_Message": "Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.",
+  "Create": "Create",
+  "ProfileName": "Profile Name",
+  "AlreadyExists": "Already Exists",
+  "AlreadyExists_Message": "This profile name is already used"
 }
