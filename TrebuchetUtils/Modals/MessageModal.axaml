@@ -25,7 +25,6 @@
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Center"
-                    Width="50"
                     Grid.Row="1" />
         </Grid>
     </DataTemplate>
