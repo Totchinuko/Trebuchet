@@ -81,9 +81,41 @@
     </Styles.Resources>
     
     <Design.PreviewWith>
-        <Border Padding="20">
-            <!-- Add Controls for Previewer Here -->
-        </Border>
+        <ThemeVariantScope RequestedThemeVariant="Dark">
+            <Border Padding="20" Background="{DynamicResource TBackground}">
+                <StackPanel>
+                    <Slider Value="5" Maximum="10" Width="200" />
+                    <TextBox Watermark="Watermark"  />
+                    <ComboBox Width="200">
+                        <ComboBoxItem>Text Item 1</ComboBoxItem>
+                        <ComboBoxItem>Text Item 2</ComboBoxItem>
+                        <ComboBoxItem>Text Item 3</ComboBoxItem>
+                        <ComboBoxItem>Text Item 4</ComboBoxItem>
+                        <ComboBoxItem>Text Item 5</ComboBoxItem>
+                        <ComboBoxItem>Text Item 6</ComboBoxItem>
+                        <ComboBoxItem>Text Item 7</ComboBoxItem>
+                        <ComboBoxItem>Text Item 8</ComboBoxItem>
+                        <ComboBoxItem>Text Item 9</ComboBoxItem>
+                    </ComboBox>
+                    <CheckBox>Test</CheckBox>
+                    <Slider Value="5" Maximum="10" Width="200"  IsEnabled="false" />
+                    <TextBox Watermark="Watermark"  IsEnabled="false"  />
+                    <ComboBox Width="200" IsEnabled="false">
+                        <ComboBoxItem>Text Item 1</ComboBoxItem>
+                        <ComboBoxItem>Text Item 2</ComboBoxItem>
+                        <ComboBoxItem>Text Item 3</ComboBoxItem>
+                        <ComboBoxItem>Text Item 4</ComboBoxItem>
+                        <ComboBoxItem>Text Item 5</ComboBoxItem>
+                        <ComboBoxItem>Text Item 6</ComboBoxItem>
+                        <ComboBoxItem>Text Item 7</ComboBoxItem>
+                        <ComboBoxItem>Text Item 8</ComboBoxItem>
+                        <ComboBoxItem>Text Item 9</ComboBoxItem>
+                    </ComboBox>
+                    <CheckBox IsEnabled="False">Test</CheckBox>
+                </StackPanel>
+            </Border>
+        </ThemeVariantScope>
+        
     </Design.PreviewWith>
     <Style Selector="Visual.Hidden">
         <Setter Property="Opacity" Value="0" />
@@ -119,6 +151,10 @@
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="FontSize" Value="22" />
     </Style>
+    <Style Selector="TextBlock.SubText">
+        <Setter Property="Foreground" Value="{DynamicResource TSubText}"/>
+        <Setter Property="FontWeight" Value="Light"/>
+    </Style>
     <Style Selector="Border.HSeparator">
         <Setter Property="Background" Value="#55000000" />
         <Setter Property="BorderBrush" Value="#15FFFFFF" />
@@ -133,21 +169,34 @@
         <Setter Property="Width" Value="2" />
         <Setter Property="Margin" Value="12,6" />
     </Style>
+
+    <!-- Panels -->
     <Style Selector="Border.Panel">
         <Setter Property="CornerRadius" Value="3" />
         <Setter Property="Background" Value="{DynamicResource TPanel}" />
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
     </Style>
+    <Style Selector="Border.Panel.Blue">
+        <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
+    </Style>
+    <Style Selector="Border.Panel.Red">
+        <Setter Property="BorderBrush" Value="{DynamicResource TRedDim}"/>
+    </Style>
+    <Style Selector="Border.Panel.Yellow">
+        <Setter Property="BorderBrush" Value="{DynamicResource TYellowDim}"/>
+    </Style>
+    <Style Selector="Border.Panel.Purple">
+        <Setter Property="BorderBrush" Value="{DynamicResource TPurpleDim}"/>
+    </Style>
+    <Style Selector="Border.Panel.Green">
+        <Setter Property="BorderBrush" Value="{DynamicResource TGreenDim}"/>
+    </Style>
     <Style Selector="Border.DarkPanel">
         <Setter Property="CornerRadius" Value="3" />
         <Setter Property="Background" Value="{DynamicResource TDarkPanel}" />
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
-    </Style>
-    <Style Selector="TextBlock.SubText">
-        <Setter Property="Foreground" Value="{DynamicResource TSubText}"/>
-        <Setter Property="FontWeight" Value="Light"/>
     </Style>
     
     <!-- Button Base -->
@@ -259,5 +308,190 @@
     <Style Selector="Button.TabBottom /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="BorderThickness" Value="1 0 1 1" />
         <Setter Property="CornerRadius" Value="0 0 3 3"/>
+    </Style>
+    
+    <!-- Slider -->
+    <Style Selector="Slider">
+        <Style Selector="^:horizontal">
+            <Style Selector="^ /template/RepeatButton#PART_IncreaseButton/template/Border#TrackBackground">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="Height" Value="6"/>
+                <Setter Property="Margin" Value="-6 0 0 0" />
+                <Setter Property="CornerRadius" Value="0 3 3 0"/>
+                <Setter Property="BorderThickness" Value="0 1 1 1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+            </Style>
+            <Style Selector="^ /template/RepeatButton#PART_DecreaseButton/template/Border#TrackBackground">
+                <Setter Property="Background" Value="{DynamicResource TBlueFaded}" />
+                <Setter Property="Height" Value="6"/>
+                <Setter Property="Margin" Value="0 0 -6 0" />
+                <Setter Property="CornerRadius" Value="3 0 0 3"/>
+                <Setter Property="BorderThickness" Value="1 1 0 1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
+            </Style>
+            <Style Selector="^/template/Thumb#thumb">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+        </Style>
+        <Style Selector="^:pointerover">
+            <Style Selector="^:horizontal">
+                <Style Selector="^ /template/RepeatButton#PART_IncreaseButton/template/Border#TrackBackground">
+                    <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+                </Style>
+                <Style Selector="^ /template/RepeatButton#PART_DecreaseButton/template/Border#TrackBackground">
+                    <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
+                </Style>
+                <Style Selector="^/template/Thumb#thumb">
+                    <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+                </Style>
+            </Style>
+        </Style>
+        <Style Selector="^:disabled">
+            <Style Selector="^:horizontal">
+                <Style Selector="^ /template/RepeatButton#PART_IncreaseButton/template/Border#TrackBackground">
+                    <Setter Property="Background" Value="{DynamicResource TDarkPanel}" />
+                    <Setter Property="BorderThickness" Value="0" />
+                </Style>
+                <Style Selector="^ /template/RepeatButton#PART_DecreaseButton/template/Border#TrackBackground">
+                    <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                    <Setter Property="BorderThickness" Value="0" />
+                </Style>
+                <Style Selector="^/template/Thumb#thumb">
+                    <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+                    <Setter Property="BorderThickness" Value="0" />
+                </Style>
+            </Style>
+        </Style>
+        <Style Selector="^:vertical">
+            <Style Selector="^ /template/RepeatButton#PART_IncreaseButton/template/Border#TrackBackground">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="Width" Value="6"/>
+                <Setter Property="Margin" Value="0 0 0 -6" />
+                <Setter Property="CornerRadius" Value="3 3 0 0"/>
+                <Setter Property="BorderThickness" Value="1 1 1 0"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+            </Style>
+            <Style Selector="^ /template/RepeatButton#PART_DecreaseButton/template/Border#TrackBackground">
+                <Setter Property="Background" Value="{DynamicResource TBlueFaded}" />
+                <Setter Property="Width" Value="6"/>
+                <Setter Property="Margin" Value="0 -6 0 0" />
+                <Setter Property="CornerRadius" Value="0 0 3 3"/>
+                <Setter Property="BorderThickness" Value="1 0 1 1"/>
+                <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
+            </Style>
+            <Style Selector="^/template/Thumb#SliderThumb">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+                <Setter Property="BorderThickness" Value="1" />
+            </Style>
+        </Style>
+        <Style Selector="^:pointerover">
+            <Style Selector="^:vertical">
+                <Style Selector="^ /template/RepeatButton#PART_IncreaseButton/template/Border#TrackBackground">
+                    <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+                    <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+                </Style>
+                <Style Selector="^ /template/RepeatButton#PART_DecreaseButton/template/Border#TrackBackground">
+                    <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
+                </Style>
+                <Style Selector="^/template/Thumb#SliderThumb">
+                    <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+                </Style>
+            </Style>
+        </Style>
+    </Style>
+    
+    <!-- TextBox -->
+    <Style Selector="TextBox">
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="Background" Value="{DynamicResource TDarkPanel}"/>
+        <Setter Property="CornerRadius" Value="3" />
+        <Style Selector="^:pointerover">
+            <Style Selector="^/template/Border#PART_BorderElement">
+                <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
+                <Setter Property="Background" Value="{DynamicResource TDarkPanel}"/>
+            </Style>
+        </Style>
+        <Style Selector="^:focus">
+            <Style Selector="^/template/Border#PART_BorderElement">
+                <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
+                <Setter Property="BorderThickness" Value="2" />
+                <Setter Property="Background" Value="{DynamicResource TDarkPanel}"/>
+            </Style>
+        </Style>
+        <Style Selector="^:disabled">
+            <Style Selector="^/template/Border#PART_BorderElement">
+                <Setter Property="BorderBrush" Value="{DynamicResource TDarkPanel}"/>
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Background" Value="{DynamicResource TDarkPanel}"/>
+            </Style>
+        </Style>
+    </Style>
+    
+    <!-- ComboBox -->
+    <Style Selector="ComboBox">
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="Background" Value="{DynamicResource TDarkPanel}"/>
+        <Setter Property="CornerRadius" Value="3" />
+        <Style Selector="^:pointerover">
+            <Style Selector="^/template/ Border#Background">
+                <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
+                <Setter Property="Background" Value="{DynamicResource TDarkPanel}"/>
+            </Style>
+        </Style>
+        <Style Selector="^:disabled">
+            <Style Selector="^/template/ Border#Background">
+                <Setter Property="BorderBrush" Value="{DynamicResource TDarkPanel}"/>
+                <Setter Property="BorderThickness" Value="0"/>
+                <Setter Property="Background" Value="{DynamicResource TDarkPanel}"/>
+            </Style>
+        </Style>
+    </Style>
+    <Style Selector="ComboBoxItem">
+        <Style Selector="^:selected">
+            <Style Selector="^ /template/ ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+        </Style>
+        <Style Selector="^:pointerover">
+            <Style Selector="^ /template/ ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+        </Style>
+    </Style>
+    
+    <!-- CheckBox -->
+    <Style Selector="CheckBox">
+        <Style Selector="^:unchecked">
+            <Style Selector="^/template/Border#NormalRectangle">
+                <Setter Property="Background" Value="{DynamicResource TDarkPanel}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+            </Style>
+        </Style>
+        <Style Selector="^:pointerover">
+            <Style Selector="^/template/Border#NormalRectangle">
+                <Setter Property="Background" Value="{DynamicResource TDarkPanel}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
+            </Style>
+        </Style>
+        <Style Selector="^:checked">
+            <Style Selector="^/template/Border#NormalRectangle">
+                <Setter Property="Background" Value="{DynamicResource TBlueFaded}" />
+                <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
+            </Style>
+        </Style>
+        <Style Selector="^:disabled">
+            <Style Selector="^/template/Border#NormalRectangle">
+                <Setter Property="Background" Value="{DynamicResource TDarkPanel}" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+            </Style>
+        </Style>
     </Style>
 </Styles>

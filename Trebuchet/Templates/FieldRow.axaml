@@ -4,14 +4,13 @@
                     xmlns:hyper="clr-namespace:HyperText.Avalonia.Controls;assembly=HyperText.Avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="FieldRow" x:DataType="local:Field">
-        <Border Classes="Panel" Padding="0,12" Margin="0,0,0,12" IsVisible="{Binding IsVisible}">
+        <Border Classes="Panel" Padding="0,12" Margin="0,0,0,12" Classes.Blue="{Binding !IsDefault}" IsVisible="{Binding IsVisible}">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
-                <Border Classes.Hidden="{Binding IsDefault}" Width="4" Background="{DynamicResource TBlueDim}" />
                 <StackPanel Grid.Column="1" Margin="12,0,0,0">
                     <TextBlock Text="{Binding Name}" Foreground="White" FontWeight="Bold" Margin="0,0,0,6" />
                     <Border  Margin="0,0,0,6" MinHeight="0">
@@ -43,7 +42,7 @@
                         x:Name="Reset"
                         VerticalAlignment="Top"
                         Margin="12,0,3,0"
-                        Classes.Hidden="{Binding !IsDefault}"
+                        IsVisible="{Binding !IsDefault}"
                         Command="{Binding ResetCommand}">
                     <i:Icon Value="mdi-undo" Classes="Normal"/>
                 </Button>

@@ -3,54 +3,66 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ProcessStats" x:DataType="local:IProcessStats">
         <StackPanel Grid.Row="2" Orientation="Vertical" Classes.Hidden="{Binding !Running}">
-            <Grid Margin="0,0,0,6"  Height="25">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="PID" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding PID, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6"  Height="25">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Uptime" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding Uptime, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6"  Height="25" IsVisible="{Binding CpuUsage}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="CPU" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding CpuUsage, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6" Height="25" IsVisible="{Binding MemoryConsumption}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Memory" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding MemoryConsumption, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6" Height="25" IsVisible="{Binding ProcessStatus}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Status" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding ProcessStatus, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
-            <Grid Margin="0,0,0,6" Height="25" IsVisible="{Binding PlayerCount}">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Players" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding PlayerCount, Mode=OneWay}" VerticalAlignment="Center" />
-            </Grid>
+            <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="PID" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding PID, Mode=OneWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Uptime" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding Uptime, Mode=OneWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25" IsVisible="{Binding CpuUsage}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="CPU" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding CpuUsage, Mode=OneWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25" IsVisible="{Binding MemoryConsumption}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Memory" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding MemoryConsumption, Mode=OneWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25" IsVisible="{Binding ProcessStatus}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Status" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding ProcessStatus, Mode=OneWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
+            <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25" IsVisible="{Binding PlayerCount}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="Players" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding PlayerCount, Mode=OneWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
         </StackPanel>
     </DataTemplate>
 </ResourceDictionary>

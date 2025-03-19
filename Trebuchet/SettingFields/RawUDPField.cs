@@ -2,7 +2,7 @@
 
 namespace Trebuchet.SettingFields
 {
-    public class RawUdpField() : Field<int, int>("IntField")
+    public class RawUdpField() : IntField()
     {
         public override bool IsDefault => true;
 

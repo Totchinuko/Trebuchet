@@ -5,7 +5,6 @@
     <DataTemplate x:Key="IntField" x:DataType="local:IntField">
         <Border Height="38" Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
             <controls:IntBox VerticalAlignment="Center"
-                             Height="25"
                              MinValue="{Binding Minimum}"
                              MaxValue="{Binding Maximum}"
                              Value="{Binding Value, Mode=TwoWay}" />

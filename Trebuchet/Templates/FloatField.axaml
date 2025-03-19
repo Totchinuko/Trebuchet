@@ -5,7 +5,6 @@
     <DataTemplate x:Key="FloatField" x:DataType="local:FloatField">
         <Border Height="38" Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
             <controls:FloatBox VerticalAlignment="Center"
-                             Height="25"
                              MinValue="{Binding Minimum}"
                              MaxValue="{Binding Maximum}"
                              Value="{Binding Value, Mode=TwoWay}" />
