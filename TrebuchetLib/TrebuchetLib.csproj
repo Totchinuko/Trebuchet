@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFramework>net8.0</TargetFramework>
+        <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
@@ -14,16 +14,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <PackageReference Include="protobuf-net" Version="3.2.30" />
+        <PackageReference Include="SteamKit2" Version="3.0.0" />
         <PackageReference Include="Serilog.Sinks.File" Version="6.0.0" />
-        <PackageReference Include="SteamKit2" Version="3.0.0-Beta.4" />
         <PackageReference Include="System.Management" Version="8.0.0" />
         <PackageReference Include="Yuu.Ini" Version="0.2.0" />
     </ItemGroup>
 
     <ItemGroup>
         <Reference Include="DepotDownloader">
-            <HintPath>..\..\DepotDownloader\DepotDownloader\bin\Release\net8.0\DepotDownloader.dll</HintPath>
+            <HintPath>..\..\DepotDownloader\DepotDownloader\bin\Release\net9.0\DepotDownloader.dll</HintPath>
         </Reference>
     </ItemGroup>
 
