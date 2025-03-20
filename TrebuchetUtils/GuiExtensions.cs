@@ -154,5 +154,22 @@ namespace TrebuchetUtils
             parent = null;
             return false;
         }
+        
+        public static bool TryGetParent<TParent>(this Visual child, string name, [NotNullWhen(true)] out TParent? parent) where TParent : Visual
+        {
+            var current = child;
+            while (current != null && (current is not TParent || current.Name != name))
+            {
+                current = current.Parent as Visual;
+            }
+            if (current is TParent result && current.Name == name)
+            {
+                parent = result;
+                return true;
+            }
+
+            parent = null;
+            return false;
+        }
     }
 }

@@ -1,5 +1,6 @@
 <Styles xmlns="https://github.com/avaloniaui"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
+        xmlns:u="clr-namespace:TrebuchetUtils"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <Styles.Resources>
         <ResourceDictionary>
@@ -198,11 +199,7 @@
         <Setter Property="BorderThickness" Value="0"/>
         <Setter Property="BorderBrush" Value="Transparent"/>
     </Style>
-    <Style Selector="Border.HPanel">
-        <Setter Property="CornerRadius" Value="3" />
-        <Setter Property="Background" Value="{DynamicResource TPanel}" />
-        <Setter Property="BorderThickness" Value="1"/>
-        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+    <Style Selector="Border.Panel.Interactive">
         <Setter Property="Transitions">
             <Transitions>
                 <BrushTransition Property="Background" Duration="0:0:0.1"/>
@@ -508,4 +505,109 @@
             </Style>
         </Style>
     </Style>
+    
+    <!-- Draggable ListBoxes -->
+    <Style Selector=":is(ListBox).draggableVirtualizing">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="ItemsPanel">
+            <Setter.Value>
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel Orientation="Vertical" />
+                </ItemsPanelTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
+    <Style Selector=":is(ListBox).draggableVirtualizing > :is(ListBoxItem)">
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Background" Value="{DynamicResource TPanel}" />
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="ZIndex" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="Margin" Value="0 0 12 12"/>
+        <Setter Property="Transitions">
+            <Transitions>
+                <BrushTransition Property="Background" Duration="0:0:0.1"/>
+            </Transitions>
+        </Setter>
+        <Style Selector="^:pointerover">
+            <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+        </Style>
+        <Setter Property="(Interaction.Behaviors)">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <u:ItemDragBehavior HorizontalDragThreshold="3" VerticalDragThreshold="3" Orientation="Vertical" />
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
+    </Style>
+    <Style Selector=":is(ListBox).draggableVirtualizing > :is(ListBoxItem)">
+        <Style Selector="^:pressed">
+            <Setter Property="ZIndex" Value="1" />
+        </Style>
+        <Style Selector="^:not(:dragging)">
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <!--  Selected State  -->
+        <Style Selector="^:selected">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TBlueFaded}" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+
+            <!--  Selected Unfocused State  -->
+            <Style Selector="^:not(:focus) /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TBlueFaded}" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+
+            <!--  Selected PointerOver State  -->
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+
+            <!--  Selected Pressed State  -->
+            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TBlueFaded}" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+        </Style>
+        <!--  Selected State (Hidden)  -->
+        
+    </Style>
+    <Style Selector=":is(ListBox).draggableVirtualizing.NoSelection > :is(ListBoxItem)">
+        <Style Selector="^:selected">
+            <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+
+            <!--  Selected Unfocused State  -->
+            <Style Selector="^:not(:focus) /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+
+            <!--  Selected PointerOver State  -->
+            <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+
+            <!--  Selected Pressed State  -->
+            <Style Selector="^:pressed /template/ ContentPresenter#PART_ContentPresenter">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+            </Style>
+        </Style>
+    </Style>
+    
 </Styles>

@@ -4,7 +4,7 @@
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="ModlistItems" x:DataType="local:ModFile">
-        <Border Margin="0 0 12 12" Classes="HPanel"  Padding="0 8 8 8" >
+        <Border Padding="0 8 8 8">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="auto" />

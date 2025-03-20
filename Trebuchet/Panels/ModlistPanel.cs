@@ -165,35 +165,6 @@ namespace Trebuchet.Panels
             return _config.IsInstallPathValid;
         }
 
-        //TODO: More Drag And Drop to replace
-        
-        // public void DragOver(IDropInfo dropInfo)
-        // {
-        //     ModFile? SourceMod = dropInfo.Data as ModFile;
-        //     ModFile? TargetMod = dropInfo.TargetItem as ModFile;
-        //
-        //     if (SourceMod != null && TargetMod != null)
-        //     {
-        //         dropInfo.DropTargetAdorner = DropTargetAdorners.Insert;
-        //         dropInfo.Effects = DragDropEffects.Move;
-        //     }
-        // }
-
-        // public void Drop(IDropInfo dropInfo)
-        // {
-        //     ModFile? SourceMod = dropInfo.Data as ModFile;
-        //     ModFile? TargetMod = dropInfo.TargetItem as ModFile;
-        //     if (SourceMod != null && TargetMod != null)
-        //     {
-        //         int index = Modlist.IndexOf(SourceMod);
-        //         int target = dropInfo.InsertIndex;
-        //         if (index < target)
-        //             target--;
-        //         Modlist.RemoveAt(index);
-        //         Modlist.Insert(target, SourceMod);
-        //     }
-        // }
-
         public override void Execute(object? parameter)
         {
             base.Execute(parameter);
