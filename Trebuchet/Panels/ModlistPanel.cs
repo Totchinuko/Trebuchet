@@ -445,8 +445,8 @@ namespace Trebuchet.Panels
 
         private void OnModAdded(object? sender, WorkshopSearchResult mod)
         {
-            if (_modlist.Any(x => x.IsPublished && x.PublishedFileId == mod.PublishedFileID)) return;
-            var path = mod.PublishedFileID.ToString();
+            if (_modlist.Any(x => x.IsPublished && x.PublishedFileId == mod.PublishedFileId)) return;
+            var path = mod.PublishedFileId.ToString();
             _profile.ResolveMod(ref path);
             var file = new ModFile(mod, path);
             _modlist.Add(file);

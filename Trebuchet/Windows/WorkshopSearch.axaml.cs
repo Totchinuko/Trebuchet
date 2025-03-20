@@ -76,7 +76,7 @@ namespace Trebuchet.Windows
 
             var enumeration =
                 from result in SearchResults
-                join player in task.Result.Players on result.CreatorID equals player.SteamID
+                join player in task.Result.Players on result.CreatorId equals player.SteamID
                 select new KeyValuePair<WorkshopSearchResult, PlayerSummary>(result, player);
             foreach (var e in enumeration)
                 e.Key.SetCreator(e.Value);
@@ -117,7 +117,7 @@ namespace Trebuchet.Windows
         {
             if (SearchResults.Count == 0) return new GetPlayerSummariesResponse();
 
-            var query = new GetPlayerSummariesQuery(App.ApiKey, SearchResults.Select(r => r.CreatorID));
+            var query = new GetPlayerSummariesQuery(App.ApiKey, SearchResults.Select(r => r.CreatorId));
             return await SteamUser.GetPlayerSummaries(query, ct);
         }
 

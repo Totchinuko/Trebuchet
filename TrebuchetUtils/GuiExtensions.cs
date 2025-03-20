@@ -4,10 +4,12 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Media.Imaging;
 using TrebuchetUtils.Modals;
 using VisualExtensions = Avalonia.VisualTree.VisualExtensions;
 
@@ -15,6 +17,9 @@ namespace TrebuchetUtils
 {
     public static class GuiExtensions
     {
+        private static readonly Dictionary<Uri, Bitmap> Cache = [];
+        private static readonly HttpClient HttpClient = new();
+        
         /// <summary>
         /// Asserts that the given assertion is true, and if not, shows an error modal with the given message.
         /// </summary>
@@ -74,6 +79,21 @@ namespace TrebuchetUtils
         {
             if(child.Parent is TParent)
                 child.Parent.SetValue(property, value);
+        }
+        
+        public static async Task<Bitmap> DownloadImage(Uri uri)
+        {
+            if (Cache.TryGetValue(uri, out var image))
+            {
+                return image;
+            }
+            else
+            {
+                var data = await HttpClient.GetByteArrayAsync(uri);
+                var bitmap = new Bitmap(new MemoryStream(data));
+                Cache.Add(uri, bitmap);
+                return bitmap;
+            }
         }
 
         // See if Avalonia still need a shitty hack like that for links

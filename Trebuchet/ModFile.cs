@@ -32,8 +32,8 @@ namespace Trebuchet
         public ModFile(WorkshopSearchResult search, string path)
         {
             _title = search.Title;
-            PublishedFileId = search.PublishedFileID;
-            _appId = search.AppID;
+            PublishedFileId = search.PublishedFileId;
+            _appId = search.AppId;
             _size = search.Size;
             _lastUpdate = search.LastUpdate;
             _infos = new FileInfo(path);

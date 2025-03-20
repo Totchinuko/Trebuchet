@@ -1,84 +1,79 @@
 ﻿using System;
 using System.ComponentModel;
+using Avalonia.Media;
 using Humanizer;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Response;
 using TrebuchetLib;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {
     public class WorkshopSearchResult : INotifyPropertyChanged
     {
-        private uint _appID;
-        private string _creator = string.Empty;
-        private string _creatorAvatar = string.Empty;
-        private string _creatorID;
-        private DateTime _lastUpdate;
-        private string _previewURL;
-        private ulong _publishedFileID;
-        private string _shortDescription;
-        private long _size;
-        private uint _subs;
-        private string _title;
-        private uint _voteDown;
-        private uint _voteUp;
-
         public WorkshopSearchResult(QueriedPublishedFile result)
         {
-            _previewURL = result.PreviewUrl;
-            _publishedFileID = result.PublishedFileID;
-            _title = result.Title;
-            _voteDown = result.VoteData.VotesDown;
-            _voteUp = result.VoteData.VotesUp;
-            _size = result.FileSize;
-            _lastUpdate = Tools.UnixTimeStampToDateTime(result.TimeUpdated);
-            _creatorID = result.Creator;
-            _shortDescription = result.ShortDescription;
-            _subs = result.Subscriptions;
-            _appID = result.ConsumerAppID;
+            AppId = result.ConsumerAppID;
+            CreatorId = result.Creator;
+            LastUpdate = Tools.UnixTimeStampToDateTime(result.TimeUpdated);
+            PublishedFileId = result.PublishedFileID;
+            ShortDescription = result.ShortDescription;
+            Size = result.FileSize;
+            Subs = result.Subscriptions;
+            Title = result.Title;
+            VoteDown = result.VoteData.VotesDown;
+            VoteUp = result.VoteData.VotesUp;
+            DownloadCover(result.PreviewUrl);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public uint AppID => _appID;
+        public uint AppId { get; }
 
-        public string Creator => _creator;
+        public string Creator { get; private set; } = string.Empty;
 
-        public string CreatorAvatar => _creatorAvatar;
+        public string CreatorAvatar { get; private set; } = string.Empty;
 
-        public string CreatorID => _creatorID;
+        public string CreatorId { get; }
 
-        public DateTime LastUpdate => _lastUpdate;
+        public DateTime LastUpdate { get; }
 
-        public string LastUpdateReadable => $"{_lastUpdate.Humanize()}";
+        public string LastUpdateReadable => $"{LastUpdate.Humanize()}";
 
-        public string PreviewURL => _previewURL;
+        public IImage? PreviewUrl { get; private set; }
 
-        public ulong PublishedFileID => _publishedFileID;
+        public ulong PublishedFileId { get; }
 
-        public string ShortDescription => _shortDescription;
+        public string ShortDescription { get; }
 
-        public long Size => _size;
+        public long Size { get; }
 
-        public uint Subs => _subs;
+        public uint Subs { get; }
 
-        public string Title => _title;
+        public string Title { get; }
 
-        public uint VoteDown => _voteDown;
+        public uint VoteDown { get; }
 
-        public uint VoteUp => _voteUp;
+        public uint VoteUp { get; }
 
         public void SetCreator(PlayerSummary summary)
         {
-            _creator = summary.PersonaName;
-            _creatorAvatar = summary.Avatar;
+            Creator = summary.PersonaName;
+            CreatorAvatar = summary.Avatar;
             OnPropertyChanged(nameof(CreatorAvatar));
             OnPropertyChanged(nameof(Creator));
         }
 
-        protected void OnPropertyChanged(string name)
+        private void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+
+        private async void DownloadCover(string url)
+        {
+            var cover = await GuiExtensions.DownloadImage(new Uri(url));
+            PreviewUrl = cover;
+            OnPropertyChanged(nameof(PreviewUrl));
         }
     }
 }
