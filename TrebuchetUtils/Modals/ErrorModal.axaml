@@ -12,7 +12,7 @@
                 <RowDefinition Height="auto" />
             </Grid.RowDefinitions>
             <StackPanel>
-                <TextBlock VerticalAlignment="Center" Classes="Title" HorizontalAlignment="Left" Foreground="IndianRed"><!-- TODO: Theme --> 
+                <TextBlock VerticalAlignment="Center" Classes="Title" HorizontalAlignment="Left" Foreground="{DynamicResource TRedDim}"> 
                     <Run Text="{Binding ErrorTitle}" />
                 </TextBlock>
                 <Separator Opacity="0" Height="6" />

@@ -111,14 +111,13 @@ namespace Trebuchet.Panels
 
         private async void OnProfileCreate(object? obj)
         {
-            InputTextModal modal = new InputTextModal("Create", "Profile Name");
+            InputTextModal modal = new InputTextModal(App.GetAppText("Create"), App.GetAppText("ProfileName"));
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                //TODO: Add to AppText
-                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogueAsync();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 
@@ -132,8 +131,7 @@ namespace Trebuchet.Panels
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
 
-            //TODO: Add to AppText
-            QuestionModal question = new("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
+            QuestionModal question = new(App.GetAppText("Deletion"), App.GetAppText("Deletion_Message", _selectedProfile));
             await question.OpenDialogueAsync();
             if (question.Result)
             {
@@ -148,15 +146,14 @@ namespace Trebuchet.Panels
 
         private async void OnProfileDuplicate(object? obj)
         {
-            InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
+            InputTextModal modal = new InputTextModal(App.GetAppText("Duplicate"), App.GetAppText("ProfileName"));
             modal.SetValue(_selectedProfile);
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                //TODO: Add to AppText
-                await new ErrorModal("Already Exists", "This profile name is already used").OpenDialogueAsync();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 

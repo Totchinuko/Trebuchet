@@ -29,8 +29,6 @@ using TrebuchetUtils.Modals;
 namespace Trebuchet.Panels
 {
     public class ModlistPanel : Panel,
-        //TODO: Find Drag/Drop replacement
-        //IDropTarget,
         IRecipient<SteamModlistReceived>
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
@@ -85,23 +83,6 @@ namespace Trebuchet.Panels
         public SimpleCommand ImportFromFileCommand { get; }
 
         public SimpleCommand ImportFromTextCommand { get; }
-
-        //TODO: This seem unnecessary
-        public IDataTemplate ItemTemplate
-        {
-            get
-            {
-                if (Application.Current == null) throw new Exception("Application.Current is null");
-
-                if (Application.Current.Resources.TryGetResource("ModlistItems", Application.Current.ActualThemeVariant,
-                        out var resource) && resource is IDataTemplate template)
-                {
-                    return template;
-                }
-
-                throw new Exception("Template ModlistItems not found");
-            }
-        }
 
         public TaskBlockedCommand ModFilesDownloadCommand { get; }
 
@@ -204,14 +185,13 @@ namespace Trebuchet.Panels
         {
             if (!GuiExtensions.Assert(
                     !StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamCollectionFetch)),
-                    "Trebuchet is busy.")) return;
+                    App.GetAppText("TrebuchetBusy"))) return;
 
             var query = HttpUtility.ParseQueryString(builder.Query);
             var id = query.Get("id");
             if (id == null || !ulong.TryParse(id, out var collectionId))
             {
-                //TODO: Move into AppText
-                await new ErrorModal("Invalid URL", "The steam URL seems to be missing its ID to be valid.").OpenDialogueAsync();
+                await new ErrorModal(App.GetAppText("InvalidURL"), App.GetAppText("InvalidURL_Message")).OpenDialogueAsync();
                 return;
             }
 
@@ -395,8 +375,7 @@ namespace Trebuchet.Panels
             var modlist = JsonSerializer.Deserialize<ModlistExport>(json);
             if (modlist == null)
             {
-                //TODO: Add to AppText
-                await new ErrorModal("Invalid Json", "Loaded json could not be parsed.").OpenDialogueAsync();
+                await new ErrorModal(App.GetAppText("InvalidJson"), App.GetAppText("InvalidJson_Message")).OpenDialogueAsync();
                 return;
             }
 
@@ -489,14 +468,13 @@ namespace Trebuchet.Panels
 
         private async void OnModlistCreate(object? obj)
         {
-            var modal = new InputTextModal("Create", "Modlist Name");
+            var modal = new InputTextModal(App.GetAppText("Create"), App.GetAppText("ModlistName"));
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             var name = modal.Text;
             if (Profiles.Contains(name))
             {
-                //TODO: Add to AppText
-                await new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogueAsync();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 
@@ -526,15 +504,14 @@ namespace Trebuchet.Panels
 
         private async void OnModlistDuplicate(object? obj)
         {
-            var modal = new InputTextModal("Duplicate", "Modlist Name");
+            var modal = new InputTextModal(App.GetAppText("Duplicate"), App.GetAppText("ModlistName"));
             modal.SetValue(_selectedModlist);
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             var name = modal.Text;
             if (Profiles.Contains(name))
             {
-                //TODO: Add to AppText
-                await new ErrorModal("Already Exists", "This mod list name is already used").OpenDialogueAsync();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 

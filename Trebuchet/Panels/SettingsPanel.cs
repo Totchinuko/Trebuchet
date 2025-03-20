@@ -89,10 +89,9 @@ namespace Trebuchet.Panels
         {
             RequiredActions.Clear();
 
-            //TODO: Add to AppText
             int installed = StrongReferenceMessenger.Default.Send<InstanceInstalledCountRequest>();
             if (Directory.Exists(Config.ResolvedInstallPath) && Config.ServerInstanceCount > installed)
-                RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, Operations.SteamDownload));
+                RequiredActions.Add(new RequiredCommand(App.GetAppText("ServerNotInstalled"), App.GetAppText("Install"), OnServerInstanceInstall, Operations.SteamDownload));
         }
     }
 }
