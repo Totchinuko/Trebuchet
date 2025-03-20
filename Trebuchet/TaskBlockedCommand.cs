@@ -7,9 +7,9 @@ namespace Trebuchet
 {
     public class TaskBlockedCommand : ICommand, IRecipient<OperationStateChanged>
     {
-        private Action<object?> _command;
+        private readonly Action<object?> _command;
         private bool _enabled;
-        private Operations[] _tasks;
+        private readonly Operations[] _tasks;
 
         public TaskBlockedCommand(Action<object?> command, bool enabled = true, params Operations[] tasks)
         {

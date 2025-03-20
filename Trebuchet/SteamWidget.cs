@@ -1,9 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Windows;
-using System.Windows.Threading;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
@@ -13,10 +13,10 @@ namespace Trebuchet
         IRecipient<OperationStateChanged>
     {
         private readonly object _descriptionLock = new();
-        private readonly object _progressLock = new();
+        private readonly object _progressLock;
         private string _description = string.Empty;
         private double _progress;
-        private DispatcherTimer _timer;
+        private readonly DispatcherTimer _timer;
 
         public SteamWidget()
         {
@@ -26,7 +26,7 @@ namespace Trebuchet
             CancelCommand = new SimpleCommand(OnCancel);
             ConnectCommand = new SimpleCommand(OnConnect);
 
-            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick, Application.Current.Dispatcher);
+            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -45,6 +45,8 @@ namespace Trebuchet
         }
 
         public bool IsConnected { get; private set; }
+        
+        public bool IsLoading => !string.IsNullOrEmpty(Description);
 
         public double Progress { get; private set; }
 
@@ -53,7 +55,7 @@ namespace Trebuchet
             if (!IsConnected)
             {
                 if (displayError)
-                    new ErrorModal("Steam Error", "You must be connected to Steam for this opperation.").ShowDialog();
+                    new ErrorModal("Steam Error", "You must be connected to Steam for this operation.").OpenDialogue();
                 return false;
             }
             return true;
@@ -61,7 +63,7 @@ namespace Trebuchet
 
         public void Receive(SteamConnectionChangedMessage message)
         {
-            Application.Current?.Dispatcher.Invoke(() =>
+            Dispatcher.UIThread.Invoke(() =>
             {
                 IsConnected = message.Value;
                 OnPropertyChanged(nameof(IsConnected));

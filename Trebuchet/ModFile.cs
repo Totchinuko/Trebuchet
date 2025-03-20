@@ -1,21 +1,21 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
-using System.Windows;
-using System.Windows.Media;
+using Avalonia;
+using Avalonia.Media;
 using Humanizer;
 using SteamWorksWebAPI;
+using TrebuchetLib;
 
 namespace Trebuchet
 {
     public class ModFile : INotifyPropertyChanged
     {
-        private uint _appID = 0;
+        private uint _appId;
         private FileInfo _infos;
         private DateTime _lastUpdate;
-        private bool _needUpdate = false;
-        private ulong _publishedFileID = 0;
-        private long _size = 0;
+        private bool _needUpdate;
+        private long _size;
         private string _title = string.Empty;
 
         public ModFile(string path)
@@ -23,26 +23,26 @@ namespace Trebuchet
             _infos = new FileInfo(path);
         }
 
-        public ModFile(ulong publishedFileID, string path)
+        public ModFile(ulong publishedFileId, string path)
         {
-            _publishedFileID = publishedFileID;
+            PublishedFileId = publishedFileId;
             _infos = new FileInfo(path);
         }
 
         public ModFile(WorkshopSearchResult search, string path)
         {
             _title = search.Title;
-            _publishedFileID = search.PublishedFileID;
-            _appID = search.AppID;
+            PublishedFileId = search.PublishedFileId;
+            _appId = search.AppId;
             _size = search.Size;
             _lastUpdate = search.LastUpdate;
             _infos = new FileInfo(path);
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
-        public Brush BorderColor => GetBorderBrush();
-        public bool IsPublished => _publishedFileID > 0;
-        public bool IsTestLive => _appID == Config.AppIDTestLiveClient;
+        public IBrush BorderColor => GetBorderBrush();
+        public bool IsPublished => PublishedFileId > 0;
+        public bool IsTestLive => _appId == Config.AppIDTestLiveClient;
         public string LastUpdate
         {
             get
@@ -60,8 +60,9 @@ namespace Trebuchet
             }
         }
         public string ModType => IsTestLive ? "TestLive" : "Live";
-        public ulong PublishedFileID => _publishedFileID;
-        public Brush StatusColor => GetStatusBrush();
+        public ulong PublishedFileId { get; }
+
+        public IBrush StatusColor => GetStatusBrush();
         public string StatusTooltip => GetStatusText();
 
         public string Title
@@ -71,7 +72,7 @@ namespace Trebuchet
                 if (!string.IsNullOrEmpty(_title))
                     return _title;
                 if (IsPublished)
-                    return _publishedFileID.ToString();
+                    return PublishedFileId.ToString();
                 return _infos.Name;
             }
         }
@@ -91,7 +92,7 @@ namespace Trebuchet
             _lastUpdate = Tools.UnixTimeStampToDateTime(file.TimeUpdated);
             _title = file.Title;
             _size = file.FileSize;
-            _appID = file.ConsumerAppId;
+            _appId = file.ConsumerAppId;
             _needUpdate = needUpdate;
             OnPropertyChanged(nameof(Title));
             OnPropertyChanged(nameof(LastUpdate));
@@ -102,29 +103,41 @@ namespace Trebuchet
 
         public override string ToString()
         {
-            return IsPublished ? PublishedFileID.ToString() : _infos.FullName;
+            return IsPublished ? PublishedFileId.ToString() : _infos.FullName;
         }
 
-        protected virtual Brush GetBorderBrush()
+        protected virtual IBrush GetBorderBrush()
         {
-            if (!_infos.Exists) return (Brush)Application.Current.Resources["GRed"];
-            if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GBlue"];
-            if (!_needUpdate) return (Brush)Application.Current.Resources["GGreen"];
-            return (Brush)Application.Current.Resources["GYellow"];
+            if (!_infos.Exists) return GetBrush("TRed");
+            if (PublishedFileId == 0) return GetBrush("TBlue");
+            if (!_needUpdate) return GetBrush("TGreen");
+            return GetBrush("TYellow");
         }
 
-        protected virtual Brush GetStatusBrush()
+        protected virtual IBrush GetStatusBrush()
         {
-            if (!_infos.Exists) return (Brush)Application.Current.Resources["GDimRed"];
-            if (_publishedFileID == 0) return (Brush)Application.Current.Resources["GDimBlue"];
-            if (!_needUpdate) return (Brush)Application.Current.Resources["GDimGreen"];
-            return (Brush)Application.Current.Resources["GDimYellow"];
+            if (!_infos.Exists) return GetBrush("TRedDim");
+            if (PublishedFileId == 0) return GetBrush("TBlueDim");
+            if (!_needUpdate) return GetBrush("TGreenDim");
+            return GetBrush("TYellowDim");
+        }
+
+        private IBrush GetBrush(string name)
+        {
+            if(Application.Current == null) throw new Exception("Application.Current is null");
+
+            if (Application.Current.Styles.TryGetResource(name, Application.Current.ActualThemeVariant,
+                    out var resource) && resource is IBrush brush)
+            {
+                return brush;
+            }
+            throw new Exception("Resource not found: " + name);
         }
 
         protected virtual string GetStatusText()
         {
             if (!_infos.Exists) return "Missing";
-            if (_publishedFileID == 0) return "Found";
+            if (PublishedFileId == 0) return "Found";
             if (!_needUpdate) return "Up to Date";
             //if (_lastUpdate < _infos.LastWriteTimeUtc) return "Up to Date";
             //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return "Corrupted";

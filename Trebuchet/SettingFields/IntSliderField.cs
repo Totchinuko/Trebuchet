@@ -1,25 +1,18 @@
 ﻿using System;
-using System.Windows;
 
-namespace Trebuchet
+namespace Trebuchet.SettingFields
 {
-    public class IntSliderField : Field<int, int>
+    public class IntSliderField() : Field<int, int>("IntSliderField")
     {
-        private int _frequency = -1;
-        private int _maximum = 100;
-        private int _minimum = 0;
-
-        public int Frequency { get => _frequency; set => _frequency = value; }
+        public int Frequency { get; set; } = -1;
 
         public override bool IsDefault => Value == Default;
 
-        public int Maximum { get => _maximum; set => _maximum = value; }
+        public int Maximum { get; set; } = 100;
 
-        public int Minimum { get => _minimum; set => _minimum = value; }
+        public int Minimum { get; set; } = 0;
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["IntSliderField"];
-
-        public bool TickEnabled => _frequency > 0;
+        public bool TickEnabled => Frequency > 0;
 
         public override void ResetToDefault()
         {

@@ -1,12 +1,10 @@
 ﻿using System.Reflection;
-using System.Windows;
 
 namespace Trebuchet.SettingFields
 {
-    public class TitleField : Field
+    public class TitleField() : Field("TitleField", false)
     {
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["TitleField"];
-
+        public override bool IsDefault { get; } = true;
         public override bool UseFieldRow => false;
 
         public override void RefreshValue()

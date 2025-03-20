@@ -1,15 +1,12 @@
 ﻿using System;
-using System.Windows;
 
 namespace Trebuchet.SettingFields
 {
-    public class ToggleField : Field<bool, bool>
+    public class ToggleField() : Field<bool, bool>("ToggleField")
     {
         public override bool DisplayGenericDescription => false;
 
         public override bool IsDefault => Default == Value;
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ToggleField"];
 
         public override void ResetToDefault()
         {
@@ -22,7 +19,7 @@ namespace Trebuchet.SettingFields
             return n;
         }
 
-        protected override object? SetConvert(bool value)
+        protected override object SetConvert(bool value)
         {
             return value;
         }

@@ -1,25 +1,24 @@
 ﻿using System;
 using System.ComponentModel;
-using System.Windows;
 using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.Templates;
+using Avalonia.Media.Imaging;
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
-using TrebuchetGUILib;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public abstract class Panel : MenuElement,
         ICommand,
         INotifyPropertyChanged,
-        ITemplateHolder,
         IRecipient<PanelRefreshConfigMessage>
     {
-        protected bool _active;
+        
+        private bool _active;
 
-        public Panel()
+        public Panel(string template) : base(template, "TabButtonTemplate")
         {
             StrongReferenceMessenger.Default.RegisterAll(this);
         }
@@ -35,14 +34,12 @@ namespace Trebuchet
             {
                 _active = value;
                 OnPropertyChanged(nameof(Active));
-                OnPropertyChanged(nameof(TabStyle));
+                OnPropertyChanged(nameof(TabClass));
             }
         }
 
-        public ImageSource? Icon => string.IsNullOrEmpty(IconPath) ? null : new BitmapImage(new Uri(IconPath, UriKind.Relative));
         public string IconPath { get; set; } = string.Empty;
-        public Style TabStyle => (Style)(Active ? Application.Current.Resources["TTabLMidBlueBright"] : Application.Current.Resources["TTabLMidNormalStealth"]);
-        public abstract DataTemplate Template { get; }
+        public string TabClass => Active ? "AppTabBlue" : "AppTabNeutral";
 
         public virtual bool CanExecute(object? parameter)
         {
@@ -61,6 +58,10 @@ namespace Trebuchet
         }
 
         public virtual void RefreshPanel()
+        {
+        }
+
+        public virtual void PanelDisplayed()
         {
         }
 

@@ -1,0 +1,50 @@
+﻿<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Trebuchet.App"
+             xmlns:local="using:Trebuchet"
+             RequestedThemeVariant="Default">
+    <Application.DataTemplates>
+        <local:ViewLocator/>
+    </Application.DataTemplates>
+    <Application.Styles>
+        <FluentTheme />
+        <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"></StyleInclude>
+    </Application.Styles>
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceInclude Source="avares://TrebuchetUtils/Converters/Converters.axaml" />
+                <ResourceInclude Source="avares://TrebuchetUtils/Modals/Modals.axaml" />
+                <MergeResourceInclude Source="Templates\FieldRow.axaml" />
+                <MergeResourceInclude Source="Templates\TitleField.axaml" />
+                <MergeResourceInclude Source="Templates\CPUAffinityField.axaml" />
+                <MergeResourceInclude Source="Templates\DirectoryField.axaml" />
+                <MergeResourceInclude Source="Templates\ComboBoxField.axaml" />
+                <MergeResourceInclude Source="Templates\RequiredAction.axaml" />
+                <MergeResourceInclude Source="Templates\FieldEditor.axaml" />
+                <MergeResourceInclude Source="Templates\ToggleField.axaml" />
+                <MergeResourceInclude Source="Templates\IntSliderField.axaml" />
+                <MergeResourceInclude Source="Templates\TestliveSelection.axaml" />
+                <MergeResourceInclude Source="Templates\StringListFields.axaml" />
+                <MergeResourceInclude Source="Templates\TextboxField.axaml" />
+                <MergeResourceInclude Source="Templates\ModlistEditor.axaml" />
+                <MergeResourceInclude Source="Templates\ModlistItems.axaml" />
+                <MergeResourceInclude Source="Templates\ModlistTextImport.axaml" />
+                <MergeResourceInclude Source="Templates\ClientSettings.axaml" />
+                <MergeResourceInclude Source="Templates\ServerSettings.axaml" />
+                <MergeResourceInclude Source="Templates\TabButton.axaml" />
+                <MergeResourceInclude Source="Templates\TabLabel.axaml" />
+                <MergeResourceInclude Source="Templates\MapField.axaml" />
+                <MergeResourceInclude Source="Templates\IntField.axaml" />
+                <MergeResourceInclude Source="Templates\FloatField.axaml" />
+                <MergeResourceInclude Source="Templates\ProcessStats.axaml" />
+                <MergeResourceInclude Source="Templates\ClientDashboard.axaml" />
+                <MergeResourceInclude Source="Templates\ServerDashboard.axaml" />
+                <MergeResourceInclude Source="Templates\Dashboard.axaml" />
+                <MergeResourceInclude Source="Templates\RconPanel.axaml" />
+                <MergeResourceInclude Source="Templates\LogFilterPanel.axaml" />
+                <MergeResourceInclude Source="Templates\SteamWidget.axaml" />
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

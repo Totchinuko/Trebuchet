@@ -1,35 +1,30 @@
 ﻿using System;
 using System.Linq;
 using System.Windows.Input;
-
 using CommunityToolkit.Mvvm.Messaging;
 
 namespace Trebuchet
 {
     public class RequiredCommand : ICommand, IRecipient<OperationStateChanged>
     {
-        private string _button;
-        private Action<object?> _callback;
+        private readonly Action<object?> _callback;
         private bool _launched;
-        private string _message;
-        private Operations[] _tasks;
+        private readonly Operations[] _tasks;
 
         public RequiredCommand(string message, string button, Action<object?> callback, params Operations[] tasks)
         {
             _tasks = tasks;
             _callback = callback;
-            _message = message;
-            _button = button;
+            Message = message;
+            Button = button;
             StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
         public event EventHandler? CanExecuteChanged;
 
-        public string Button { get => _button; set => _button = value; }
+        public string Button { get; set; }
 
-        public bool Launched { get => _launched; private set => _launched = value; }
-
-        public string Message { get => _message; set => _message = value; }
+        public string Message { get; set; }
 
         public bool CanExecute(object? parameter)
         {

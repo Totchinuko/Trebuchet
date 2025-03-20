@@ -2,13 +2,13 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
+using TrebuchetLib;
 using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public class ServerProfilePanel : FieldEditorPanel
     {
@@ -18,7 +18,7 @@ namespace Trebuchet
         private string _selectedProfile;
         private TrulyObservableCollection<ObservableString> _sudoList = new TrulyObservableCollection<ObservableString>();
 
-        public ServerProfilePanel()
+        public ServerProfilePanel() : base("ServerSettings")
         {
             LoadPanel();
         }
@@ -47,8 +47,6 @@ namespace Trebuchet
             }
         }
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ClientSettings"];
-
         public override bool CanExecute(object? parameter)
         {
             return _config.IsInstallPathValid && Tools.IsServerInstallValid(_config);
@@ -62,7 +60,7 @@ namespace Trebuchet
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.ServerProfilePanel.Fields.json", this, "Profile");
+            BuildFields("Trebuchet.Panels.ServerProfilePanel.Fields.json", this, nameof(Profile));
         }
 
         protected override void OnValueChanged(string property)
@@ -111,15 +109,15 @@ namespace Trebuchet
             LoadProfile();
         }
 
-        private void OnProfileCreate(object? obj)
+        private async void OnProfileCreate(object? obj)
         {
-            InputTextModal modal = new InputTextModal("Create", "Profile Name");
-            modal.ShowDialog();
+            InputTextModal modal = new InputTextModal(App.GetAppText("Create"), App.GetAppText("ProfileName"));
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 
@@ -129,13 +127,12 @@ namespace Trebuchet
             SelectedProfile = name;
         }
 
-        private void OnProfileDelete(object? obj)
+        private async void OnProfileDelete(object? obj)
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
-            if (_profile == null) return;
 
-            QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
-            question.ShowDialog();
+            QuestionModal question = new(App.GetAppText("Deletion"), App.GetAppText("Deletion_Message", _selectedProfile));
+            await question.OpenDialogueAsync();
             if (question.Result)
             {
                 _profile.DeleteFolder();
@@ -147,16 +144,16 @@ namespace Trebuchet
             }
         }
 
-        private void OnProfileDuplicate(object? obj)
+        private async void OnProfileDuplicate(object? obj)
         {
-            InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
+            InputTextModal modal = new InputTextModal(App.GetAppText("Duplicate"), App.GetAppText("ProfileName"));
             modal.SetValue(_selectedProfile);
-            modal.ShowDialog();
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 

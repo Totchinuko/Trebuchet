@@ -3,7 +3,7 @@ using System.Net.Sockets;
 using System.Text;
 using Serilog;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public class SourceQueryReader
     {

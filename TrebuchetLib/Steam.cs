@@ -1,7 +1,6 @@
 ﻿using DepotDownloader;
 using Serilog;
 using SteamKit2;
-using Trebuchet;
 
 namespace TrebuchetLib
 {

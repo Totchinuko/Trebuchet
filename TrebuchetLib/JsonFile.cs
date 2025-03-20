@@ -1,7 +1,7 @@
 ﻿using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public abstract class JsonFile<T> where T : JsonFile<T>
     {

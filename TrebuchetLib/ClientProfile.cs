@@ -3,7 +3,7 @@ using System.Reflection;
 using System.Text.Json.Serialization;
 using Yuu.Ini;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public sealed class ClientProfile : ProfileFile<ClientProfile>
     {

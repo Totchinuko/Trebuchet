@@ -1,0 +1,82 @@
+﻿<Window x:Class="Trebuchet.Windows.MainWindow"
+        xmlns="https://github.com/avaloniaui"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:Trebuchet.Windows"
+        xmlns:treb="clr-namespace:Trebuchet"
+        xmlns:utils="clr-namespace:Trebuchet.Utils"
+        xmlns:panels="clr-namespace:Trebuchet.Panels"
+        xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+        mc:Ignorable="d"
+        Title="{x:Static treb:TrebuchetApp.AppTitle}"
+        Height="650" Width="1010"
+        MinHeight="550" MinWidth="800"
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        SystemDecorations="Full"
+        ExtendClientAreaTitleBarHeightHint="40"
+        UseLayoutRounding="True"
+        Classes="Trebuchet"
+        x:DataType="treb:TrebuchetApp">
+    <Border x:Name="MainBorder">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <controls:WindowTitlebar
+                x:Name="TitleBar"
+                Title="{x:Static treb:TrebuchetApp.AppTitle}"
+                >
+                <controls:WindowTitlebar.Header>
+                    <ContentControl ContentTemplate="{StaticResource SteamWidget}" Content="{Binding SteamWidget}" />
+                </controls:WindowTitlebar.Header>
+            </controls:WindowTitlebar>
+            <Grid x:Name="WindowContent" Grid.Row="1" Margin="0,12,0,0">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="240" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid x:Name="Navigation" Margin="0,0,5,6">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="auto" />
+                    </Grid.RowDefinitions>
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding Menu.Top}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <utils:MenuElementSelector/>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                    <StackPanel Grid.Row="1">
+                        <ItemsControl ItemsSource="{Binding Menu.Bottom}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel/>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <utils:MenuElementSelector/>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </Grid>
+                <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
+                    <ContentControl Content="{Binding ActivePanel}">
+                        <ContentControl.ContentTemplate>
+                            <utils:PanelSelector/>
+                        </ContentControl.ContentTemplate>
+                    </ContentControl>
+                </Border>
+            </Grid>
+        </Grid>
+    </Border>
+</Window>

@@ -1,9 +1,8 @@
 ﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using Serilog;
-using TrebuchetLib;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public class ClientProcess
     {
@@ -137,7 +136,8 @@ namespace Trebuchet
             ProcessData = target;
 
             _process.PriorityClass = GetPriority(Profile.ProcessPriority);
-            _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
+            if(OperatingSystem.IsWindows() ||  OperatingSystem.IsLinux())
+                _process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(Profile.CPUThreadAffinity);
 
             OnProcessStateChanged(new ProcessDetails(ProcessDetails, ProcessData, ProcessState.RUNNING));
         }

@@ -11,5 +11,28 @@
   "Welcome_SettingTutorial": "Welcome to Trebuchet.\n\nIn order to use the software for launching your game or servers you need to point the location of your game, or select how many server you wish the launcher to handle, or both.\n\nOther section of the launcher will unlock as you set those settings up.",
   "Welcome_SettingTutorial_Title": "Welcome",
   "UACDialog": "The following folder is protected by administrator rights, Trebuchet need access to manage your game and data. Restart Trebuchet in Admin mode ?\n{0}",
-  "UACDialog_Title": "Administrator"
+  "UACDialog_Title": "Administrator",
+  "Kill_Title": "Kill",
+  "Kill_Message": "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. Do you wish to continue ?",
+  "GameFolderReset_Title": "Game Folder Reset",
+  "GameFolderReset_Message": "Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.",
+  "Create": "Create",
+  "ProfileName": "Profile Name",
+  "AlreadyExists": "Already Exists",
+  "AlreadyExists_Message": "This name is already used",
+  "Deletion": "Deletion",
+  "Deletion_Message": "Do you wish to delete the selected profile {0} ?",
+  "Duplicate":"Duplicate",
+  "InvalidURL": "Invalid URL",
+  "InvalidURL_Message": "The steam URL seems to be missing its ID to be valid.",
+  "TrebuchetBusy": "Trebuchet is busy.",
+  "ModlistName": "Modlist Name",
+  "InvalidJson": "Invalid Json",
+  "InvalidJson_Message": "Loaded json could not be parsed.",
+  "ServerFailedStart": "Server failed to start",
+  "ServerFailedStart_Message": "Server failed to start properly. See the logs for more information.",
+  "ServerNotInstalled": "Some server instances are not yet installed.",
+  "Install": "Install"
+
+
 }

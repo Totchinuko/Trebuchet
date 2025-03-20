@@ -1,12 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Windows;
 using TrebuchetUtils;
 
 namespace Trebuchet.SettingFields
 {
-    internal class TextListField : Field<TrulyObservableCollection<ObservableString>, List<string>>
+    internal class TextListField() : Field<TrulyObservableCollection<ObservableString>, List<string>>("StringListFields")
     {
         public override bool IsDefault
         {
@@ -18,8 +17,6 @@ namespace Trebuchet.SettingFields
                 return Default.SequenceEqual(Value.Select(x => (string)x));
             }
         }
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["StringListFields"];
 
         public override void ResetToDefault()
         {

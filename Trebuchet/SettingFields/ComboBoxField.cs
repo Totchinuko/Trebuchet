@@ -1,16 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Windows;
 
-namespace Trebuchet
+namespace Trebuchet.SettingFields
 {
-    public class ComboBoxField : Field<int, int>
+    public class ComboBoxField() : Field<int, int>("ComboBoxField")
     {
         public override bool IsDefault => Default == Value;
 
         public List<string> Options { get; set; } = new List<string>();
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ComboBoxField"];
 
         public override void ResetToDefault()
         {

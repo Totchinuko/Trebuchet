@@ -1,12 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 using System.Threading.Tasks;
-using Trebuchet.Validation;
 
-namespace Trebuchet
+namespace Trebuchet.Validation
 {
     [JsonDerivedType(typeof(InstallDirectoryValidation), "InstallDirectory")]
     [JsonDerivedType(typeof(ConanGameDirectoryValidation), "GameDirectory")]
@@ -18,6 +13,8 @@ namespace Trebuchet
 
     public abstract class BaseValidation<T> : BaseValidation
     {
-        public abstract bool IsValid(T? value, out string errorMessage);
+        public string LastError { get; protected set; } = string.Empty;
+        
+        public abstract Task<bool> IsValid(T? value);
     }
 }

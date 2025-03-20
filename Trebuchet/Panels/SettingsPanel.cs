@@ -1,23 +1,23 @@
 ﻿using System.IO;
-
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
+using TrebuchetLib;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public class SettingsPanel : FieldEditorPanel
     {
-        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
-        private bool _displayedHelp = false;
+        private bool _displayedHelp;
 
-        public SettingsPanel()
+        public SettingsPanel() : base(string.Empty)
         {
             LoadPanel();
         }
 
-        public Config Config => _config;
+        public Config Config { get; } = StrongReferenceMessenger.Default.Send<ConfigRequest>();
 
-        public UIConfig UIConfig => App.Config;
+        public UIConfig UiConfig => App.Config;
 
         public override void OnWindowShow()
         {
@@ -32,40 +32,40 @@ namespace Trebuchet
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.SettingsPanel.Fields.json", this, "Config");
-            BuildFields("Trebuchet.Panels.SettingsPanel.UI.Fields.json", this, "UIConfig");
+            BuildFields("Trebuchet.Panels.SettingsPanel.Fields.json", this, nameof(Config));
+            BuildFields("Trebuchet.Panels.SettingsPanel.UI.Fields.json", this, nameof(UiConfig));
         }
 
         protected override void OnValueChanged(string property)
         {
-            _config.SaveFile();
+            Config.SaveFile();
             App.Config.SaveFile();
             UpdateRequiredActions();
         }
 
-        private void DisplaySetupHelp()
+        private async void DisplaySetupHelp()
         {
             if (_displayedHelp) return;
             _displayedHelp = true;
 
-            if (_config.IsInstallPathValid && (Tools.IsClientInstallValid(_config) || Tools.IsServerInstallValid(_config)))
+            if (Config.IsInstallPathValid && (Tools.IsClientInstallValid(Config) || Tools.IsServerInstallValid(Config)))
                 return;
 
-            if (!_config.IsInstallPathValid)
+            if (!Config.IsInstallPathValid)
             {
                 ErrorModal modal = new ErrorModal(
                     App.GetAppText("Welcome_InstallPathInvalid_Title"),
                     App.GetAppText("Welcome_InstallPathInvalid"));
-                modal.ShowDialog();
+                await modal.OpenDialogueAsync();
             }
 
-            if ((!Tools.IsClientInstallValid(_config) && !Tools.IsServerInstallValid(_config)))
+            if ((!Tools.IsClientInstallValid(Config) && !Tools.IsServerInstallValid(Config)))
             {
                 MessageModal modal = new MessageModal(
                   App.GetAppText("Welcome_SettingTutorial_Title"),
                   App.GetAppText("Welcome_SettingTutorial"),
                   250);
-                modal.ShowDialog();
+                await modal.OpenDialogueAsync();
             }
         }
 
@@ -77,7 +77,7 @@ namespace Trebuchet
 
         private void OnAppRestart(object? obj)
         {
-            GuiExtensions.RestartProcess(_config.IsTestLive, false);
+            Utils.Utils.RestartProcess(Config.IsTestLive);
         }
 
         private void OnServerInstanceInstall(object? obj)
@@ -90,8 +90,8 @@ namespace Trebuchet
             RequiredActions.Clear();
 
             int installed = StrongReferenceMessenger.Default.Send<InstanceInstalledCountRequest>();
-            if (Directory.Exists(_config.ResolvedInstallPath) && _config.ServerInstanceCount > installed)
-                RequiredActions.Add(new RequiredCommand("Some server instances are not yet installed.", "Install", OnServerInstanceInstall, Operations.SteamDownload));
+            if (Directory.Exists(Config.ResolvedInstallPath) && Config.ServerInstanceCount > installed)
+                RequiredActions.Add(new RequiredCommand(App.GetAppText("ServerNotInstalled"), App.GetAppText("Install"), OnServerInstanceInstall, Operations.SteamDownload));
         }
     }
 }

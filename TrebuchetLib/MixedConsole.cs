@@ -1,10 +1,4 @@
-﻿using SteamKit2.Internal;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
+﻿
 namespace TrebuchetLib
 {
     public class MixedConsole : IDisposable, IConsole

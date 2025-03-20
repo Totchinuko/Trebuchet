@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics;
 
-namespace Trebuchet
+namespace TrebuchetLib
 {
     public class TrebuchetStartEventArgs : EventArgs
     {

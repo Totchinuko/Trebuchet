@@ -1,13 +1,10 @@
 ﻿using System;
-using System.Windows;
 
 namespace Trebuchet.SettingFields
 {
-    public class RawUDPField : Field<int, int>
+    public class RawUdpField() : IntField()
     {
         public override bool IsDefault => true;
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["IntField"];
 
         public override int Value
         {
@@ -35,7 +32,7 @@ namespace Trebuchet.SettingFields
             return n;
         }
 
-        protected override object? SetConvert(int value)
+        protected override object SetConvert(int value)
         {
             return value;
         }

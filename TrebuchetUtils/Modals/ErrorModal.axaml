@@ -1,0 +1,35 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:local="clr-namespace:TrebuchetUtils.Modals">
+    <DataTemplate x:Key="ErrorModal" DataType="local:ErrorModal">
+        <Grid Margin="12">
+            <Grid.Styles>
+                <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"/>
+            </Grid.Styles>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <StackPanel>
+                <TextBlock VerticalAlignment="Center" Classes="Title" HorizontalAlignment="Left" Foreground="{DynamicResource TRedDim}"> 
+                    <Run Text="{Binding ErrorTitle}" />
+                </TextBlock>
+                <Separator Opacity="0" Height="6" />
+                <TextBlock VerticalAlignment="Center" HorizontalAlignment="Left" TextWrapping="Wrap">
+                    <Run Text="{Binding ErrorMessage}" />
+                </TextBlock>
+            </StackPanel>
+            <Button Classes="Base Red"
+                    Command="{Binding CloseCommand}"
+                    HorizontalAlignment="Right"
+                    VerticalAlignment="Center"
+                    Grid.Row="1">
+                <StackPanel Orientation="Horizontal">
+                    <i:Icon  Value="mdi-window-close" Margin="0 0 6 0"/>
+                    <TextBlock Text="Close" />
+                </StackPanel>
+            </Button>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

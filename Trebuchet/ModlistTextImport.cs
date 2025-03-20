@@ -1,8 +1,12 @@
 ﻿using System;
 using System.IO;
-using System.Windows;
+using System.Threading.Tasks;
 using System.Windows.Input;
-using TrebuchetGUILib;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
+using SteamKit2;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {
@@ -10,15 +14,18 @@ namespace Trebuchet
     {
         private bool _append = false;
         private bool _canceled = true;
-        private bool _export;
-        private FileType _fileType = FileType.Json;
-        private string _text = string.Empty;
+        private readonly bool _export;
+        private readonly FilePickerFileType _fileType;
+        private string _text;
 
-        public ModlistTextImport(string text, bool export, FileType fileType)
+        public ModlistTextImport(string text, bool export, FilePickerFileType fileType) : base(650,600,"Mod List", "ModlistTextImport")
         {
             _text = text;
             _export = export;
             _fileType = fileType;
+            CloseDisabled = false;
+            MaximizeDisabled = false;
+            MinimizeDisabled = false;
         }
 
         public bool Append { get => _append; set => _append = value; }
@@ -29,64 +36,51 @@ namespace Trebuchet
 
         public bool Canceled { get => _canceled; set => _canceled = value; }
 
-        public override bool CloseDisabled => false;
+        public bool ImportVisible => !_export;
 
-        public Visibility ImportVisible => _export ? Visibility.Collapsed : Visibility.Visible;
-
-        public override bool MaximizeDisabled => false;
-
-        public override bool MinimizeDisabled => false;
-
-        public override int ModalHeight => 600;
-
-        public override string ModalTitle => "Mod List";
-
-        public override int ModalWidth => 650;
-
-        public Visibility SaveAsVisible => _export ? Visibility.Visible : Visibility.Collapsed;
+        public bool SaveAsVisible => _export;
 
         public ICommand SaveCommand => new SimpleCommand(OnSave);
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ModlistTextImport"];
-
-        public string Text { get => _text; set => _text = value; }
-
-        public override void OnWindowClose()
+        protected override void OnWindowClose(object? sender, EventArgs e)
         {
         }
+
+        public string Text { get => _text; set => _text = value; }
 
         private void OnAppend(object? obj)
         {
             if (_export) return;
             _append = true;
             _canceled = false;
-            _window.Close();
+            Window.Close();
         }
 
         private void OnApply(object? obj)
         {
             if (_export) return;
             _canceled = false;
-            _window.Close();
+            Window.Close();
         }
 
-        private void OnSave(object? obj)
+        private async void OnSave(object? sender)
         {
             if (!_export) return;
             if (string.IsNullOrEmpty(_text)) return;
+            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+            if (desktop.MainWindow == null) return;
 
-            System.Windows.Forms.SaveFileDialog dialog = new System.Windows.Forms.SaveFileDialog();
-            dialog.DefaultExt = _fileType.extention;
-            dialog.AddExtension = true;
-            dialog.FileName = "Untitled";
-            dialog.Filter = $"{_fileType.name} (*.{_fileType.extention})|*.{_fileType.extention}";
-            dialog.InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
-            System.Windows.Forms.DialogResult result = dialog.ShowDialog(NativeWindow.GetIWin32Window(_window));
-            if (result == System.Windows.Forms.DialogResult.OK)
+            var file = await desktop.MainWindow.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
             {
-                var path = Path.GetFullPath(dialog.FileName);
-                File.WriteAllText(path, _text);
-            }
+                Title = "Save File",
+                SuggestedFileName = "Untitled",
+                FileTypeChoices = [_fileType]
+            });
+
+            if (file is null) return;
+            if (!file.Path.IsFile) return;
+            var path = Path.GetFullPath(file.Path.LocalPath);
+            await File.WriteAllTextAsync(path, _text);
         }
     }
 }

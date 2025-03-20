@@ -4,18 +4,19 @@ using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
-using System.Windows;
+using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Messages;
+using Trebuchet.Panels;
 using Trebuchet.Utils;
-using TrebuchetGUILib;
 using TrebuchetLib;
+using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
-    public class TrebuchetApp : INotifyPropertyChanged,
+    public sealed class TrebuchetApp : INotifyPropertyChanged,
         IRecipient<SteamConnectMessage>,
         IRecipient<CatapultMessage>,
         IRecipient<ConfigRequest>,
@@ -33,7 +34,7 @@ namespace Trebuchet
     {
         private readonly TaskBlocker _taskBlocker = new();
         private readonly TrebuchetLauncher _trebuchet;
-        private Panel? _activePanel;
+        private Panel _activePanel;
 
         private bool _catapult;
 
@@ -63,12 +64,12 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Register<UACPromptRequest>(this);
             StrongReferenceMessenger.Default.Register<SteamModlistIDRequest>(this);
 
-            if (!WriteAccessCheck()) return;
-
-            var menuConfig = GuiExtensions.GetEmbededTextFile("Trebuchet.TrebuchetApp.Menu.json");
+            var menuConfig = TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.TrebuchetApp.Menu.json");
             Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
-            ActivePanel = Menu.Bottom.Where(x => x is Panel).Cast<Panel>().Where(x => x.CanExecute(null)).FirstOrDefault();
-
+            _activePanel = Menu.Bottom.Where(x => x is Panel).Cast<Panel>().First(x => x.CanExecute(null));
+            if (!WriteAccessCheck()) return;
+            _activePanel.Active = true;
+            
             _trebuchet.Steam.Connected += OnSteamConnected;
             _trebuchet.Steam.Disconnected += OnSteamDisconnected;
             _trebuchet.Steam.Connect();
@@ -77,21 +78,21 @@ namespace Trebuchet
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
-        public static string AppTitle => $"Tot ! Trebuchet {GuiExtensions.GetFileVersion()}";
-        public Panel? ActivePanel
+        public static string AppTitle => $"Tot ! Trebuchet {TrebuchetUtils.Utils.GetFileVersion()}";
+        public Panel ActivePanel
         {
             get => _activePanel;
             set
             {
-                if (_activePanel != null)
-                    _activePanel.Active = false;
+                if(_activePanel == value) return;
+                _activePanel.Active = false;
                 _activePanel = value;
-                if (_activePanel != null)
-                    _activePanel.Active = true;
+                _activePanel.Active = true;
+                _activePanel.PanelDisplayed();
                 OnPropertyChanged(nameof(ActivePanel));
             }
         }
-        public Menu Menu { get; set; } = new Menu();
+        public Menu Menu { get; set; }
 
         public SteamWidget SteamWidget { get; } = new SteamWidget();
 
@@ -124,26 +125,26 @@ namespace Trebuchet
         public void Receive(SteamModlistUpdateRequest message)
         {
             var updated = _trebuchet.Steam.GetUpdatedUGCFileIDs(message.keyValuePairs).ToList();
-            foreach (var (PubID, _) in message.keyValuePairs)
+            foreach (var (pubId, _) in message.keyValuePairs)
             {
-                string mod = PubID.ToString();
-                if (!ModListProfile.ResolveMod(_trebuchet.Config, ref mod) && !updated.Contains(PubID))
-                    updated.Add(PubID);
+                string mod = pubId.ToString();
+                if (!ModListProfile.ResolveMod(_trebuchet.Config, ref mod) && !updated.Contains(pubId))
+                    updated.Add(pubId);
             }
             message.Reply(updated);
         }
 
-        public void Receive(UACPromptRequest message)
+        public async void Receive(UACPromptRequest message)
         {
             QuestionModal modal = new(
                 App.GetAppText("UACDialog_Title"),
                 App.GetAppText("UACDialog", message.Directory)
                 );
-            modal.ShowDialog();
+            await modal.OpenDialogueAsync();
 
             if (modal.Result)
             {
-                GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 message.Reply(true);
             }
             else
@@ -206,7 +207,7 @@ namespace Trebuchet
             message.Reply(_trebuchet.Steam.GetInstalledInstances());
         }
 
-        internal virtual void OnAppClose()
+        internal void OnAppClose()
         {
             _trebuchet.Launcher.Dispose();
             _trebuchet.Steam.Disconnect();
@@ -217,14 +218,14 @@ namespace Trebuchet
             }).Wait();
         }
 
-        protected virtual void OnPropertyChanged(string property)
+        private void OnPropertyChanged(string property)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
         private static void RegisterEvent<T>(T message) where T : ProcessStateChanged
         {
-            Application.Current.Dispatcher.Invoke(() =>
+            Dispatcher.UIThread.Invoke(() =>
             {
                 StrongReferenceMessenger.Default.Send(message);
             });
@@ -232,16 +233,14 @@ namespace Trebuchet
 
         private static void RequestModlistManifests(List<ulong> list)
         {
-            if (!GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
+            if (!TrebuchetUtils.GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
             if (list.Count == 0) return;
 
             new CatchedTasked(Operations.SteamPublishedFilesFetch, 15 * 1000)
                 .Add(async (cts) =>
                 {
-                    PublishedFilesResponse? result = null;
-                    result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
-                    if (result == null) return;
-                    Application.Current.Dispatcher.Invoke(() =>
+                    var result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
+                    Dispatcher.UIThread.Invoke(() =>
                     {
                         StrongReferenceMessenger.Default.Send(new SteamModlistReceived(result));
                     });
@@ -279,7 +278,7 @@ namespace Trebuchet
 
         private void UpdateServerMods(IEnumerable<ulong> modlist)
         {
-            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.ServerRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!TrebuchetUtils.GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.ServerRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
             //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Updating mods...");
@@ -297,7 +296,7 @@ namespace Trebuchet
 
         private void UpdateServers()
         {
-            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.ServerRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!TrebuchetUtils.GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.ServerRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
             //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Updating servers...");
@@ -309,7 +308,7 @@ namespace Trebuchet
 
         private void UpdateThenCatapultClient(string profile, string modlist, bool isBattlEye)
         {
-            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!TrebuchetUtils.GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
 
             if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never || _trebuchet.Launcher.IsAnyServerRunning())
             {
@@ -332,7 +331,7 @@ namespace Trebuchet
 
         private void UpdateThenCatapultServer(IEnumerable<(string profile, string modlist, int instance)> instances)
         {
-            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
+            if (!TrebuchetUtils.GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
 
             if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never || _trebuchet.Launcher.IsAnyServerRunning())
             {
@@ -367,7 +366,7 @@ namespace Trebuchet
 
         private void VerifyFiles(IEnumerable<ulong> modlist)
         {
-            if (!GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload, Operations.ServerRunning), "Trebuchet is busy.")) return;
+            if (!TrebuchetUtils.GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.GameRunning, Operations.SteamDownload, Operations.ServerRunning), "Trebuchet is busy.")) return;
             //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
 
             SteamWidget.Start("Verifying server files...");
@@ -386,14 +385,14 @@ namespace Trebuchet
 
         private bool WriteAccessCheck()
         {
-            if (GuiExtensions.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ResolvedInstallPath))
+            if (Trebuchet.Utils.Utils.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUac(_trebuchet.Config.ResolvedInstallPath))
             {
-                GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;
             }
-            if (GuiExtensions.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUAC(_trebuchet.Config.ClientPath))
+            if (Trebuchet.Utils.Utils.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUac(_trebuchet.Config.ClientPath))
             {
-                GuiExtensions.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
                 return false;
             }
             return true;

@@ -1,0 +1,10 @@
+namespace TrebuchetUtils;
+
+public interface IApplication
+{
+    string AppIconPath { get; }
+    bool HasCrashed { get; }
+    bool IsShutingDown { get; }
+
+    void Crash();
+}

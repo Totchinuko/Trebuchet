@@ -3,7 +3,7 @@
     {
       "$type": "Modlist",
       "Label": "Mod Lists",
-      "IconPath": "/Icons/List.png"
+      "IconPath": "mdi-toy-brick"
     },
     {
       "Label": "Game"
@@ -11,7 +11,7 @@
     {
       "$type": "ClientSettings",
       "Label": "Profiles",
-      "IconPath": "/Icons/Game.png"
+      "IconPath": "mdi-controller"
     },
     {
       "Label": "Server"
@@ -19,29 +19,29 @@
     {
       "$type": "ServerSettings",
       "Label": "Profiles",
-      "IconPath": "/Icons/Server.png"
+      "IconPath": "mdi-server-network"
     },
     {
       "$type": "Rcon",
       "Label": "Console",
-      "IconPath": "/Icons/Console.png"
+      "IconPath": "mdi-console-line"
     },
     {
       "$type": "LogFilter",
       "Label": "Log Filter",
-      "IconPath": "/Icons/FIlter.png"
+      "IconPath": "mdi-filter"
     }
   ],
   "Bottom": [
     {
       "$type": "Dashboard",
       "Label": "Dashboard",
-      "IconPath": "/Icons/Dashboard.png"
+      "IconPath": "mdi-view-dashboard"
     },
     {
       "$type": "Settings",
       "Label": "Settings",
-      "IconPath": "/Icons/Settings.png"
+      "IconPath": "mdi-cog"
     }
   ]
 }

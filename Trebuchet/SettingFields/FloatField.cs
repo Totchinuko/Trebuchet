@@ -1,14 +1,14 @@
 ﻿using System;
-using System.Windows;
 
-namespace Trebuchet
+namespace Trebuchet.SettingFields
 {
-    public class FloatField : Field<float, float>
+    public class FloatField() : Field<float, float>("FloatField")
     {
-        public override bool IsDefault => Value == Default;
+        public override bool IsDefault => Math.Abs(Value - Default) < Tolerance;
         public float Maximum { get; set; } = float.MaxValue;
         public float Minimum { get; set; } = float.MinValue;
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["FloatField"];
+        
+        public float Tolerance { get; set; } =  0.001f;
 
         public override void ResetToDefault()
         {
@@ -21,7 +21,7 @@ namespace Trebuchet
             return MathF.Min(Maximum, MathF.Max(Minimum, f));
         }
 
-        protected override object? SetConvert(float value)
+        protected override object SetConvert(float value)
         {
             return value;
         }

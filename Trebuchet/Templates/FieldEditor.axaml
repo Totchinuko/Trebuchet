@@ -1,0 +1,21 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:local="clr-namespace:Trebuchet.Panels"
+                    xmlns:fields="clr-namespace:Trebuchet.SettingFields"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="FieldEditor" x:DataType="local:FieldEditorPanel">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <ItemsControl ItemsSource="{Binding RequiredActions}" ItemTemplate="{StaticResource RequiredAction}" />
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl ItemsSource="{Binding Fields}" Margin="0,0,6,0">
+                    <ItemsControl.ItemTemplate>
+                        <fields:FieldPanelTemplate/>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>

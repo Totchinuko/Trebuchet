@@ -1,4 +1,4 @@
-﻿namespace Trebuchet
+﻿namespace TrebuchetLib
 {
     public abstract class ProfileFile<T> : JsonFile<T> where T : ProfileFile<T>
     {

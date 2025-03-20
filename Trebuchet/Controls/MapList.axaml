@@ -1,0 +1,37 @@
+﻿<UserControl x:Class="Trebuchet.Controls.MapList"
+             xmlns="https://github.com/avaloniaui"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:local="clr-namespace:Trebuchet.Controls"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
+             xmlns:sys="clr-namespace:System.Collections.Generic;assembly=System.Runtime"
+             mc:Ignorable="d"
+             x:CompileBindings="False"
+             d:DesignHeight="32" d:DesignWidth="32">
+    <StackPanel>
+        <Button x:Name="MapListButton"
+                Classes="Base"
+                Click="MapList_Click"
+                ToolTip.Tip="Map Selection"
+                ToolTip.ShowDelay="0"
+                Padding="8">
+            <i:Icon Value="mdi-map" Classes="Normal" />
+        </Button>
+        <Popup Name="MapListPopup" IsLightDismissEnabled="True">
+            <Border BorderThickness="1" CornerRadius="3" MaxHeight="300" MinWidth="100" Width="200">
+                <ScrollViewer>
+                    <StackPanel>
+                        <ItemsControl ItemsSource="{Binding $parent[local:MapList].MapListData}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Button Content="{Binding Key}" Command="{Binding $parent[local:MapList].MapSelectCommand}" CommandParameter="{Binding Value}" Padding="4" HorizontalContentAlignment="Left" />
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </StackPanel>
+                </ScrollViewer>
+            </Border>
+        </Popup>
+    </StackPanel>
+</UserControl>

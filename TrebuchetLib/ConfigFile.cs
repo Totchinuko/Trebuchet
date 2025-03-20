@@ -1,4 +1,4 @@
-﻿namespace Trebuchet
+﻿namespace TrebuchetLib
 {
     public abstract class ConfigFile<T> : JsonFile<T> where T : ConfigFile<T>
     {

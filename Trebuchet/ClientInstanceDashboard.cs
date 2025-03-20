@@ -3,8 +3,9 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
 using TrebuchetLib;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
@@ -48,7 +49,7 @@ namespace Trebuchet
 
         public bool ProcessRunning { get; private set; }
 
-        public IProcessStats ProcessStats { get; } = new ProcessStats();
+        public IProcessStats ProcessStats { get; } = new ProcessStatsLight();
 
         public List<string> Profiles { get; private set; } = new List<string>();
 
@@ -79,15 +80,14 @@ namespace Trebuchet
 
         public List<ulong> UpdateNeeded { get; private set; } = new List<ulong>();
 
-        public void Kill()
+        public async void Kill()
         {
             if (!ProcessRunning) return;
 
             if (App.Config.DisplayWarningOnKill)
             {
-                QuestionModal question = new QuestionModal("Kill", "Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. " +
-                    "Do you wish to continue ?");
-                question.ShowDialog();
+                QuestionModal question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
+                await question.OpenDialogueAsync();
                 if (!question.Result) return;
             }
 
@@ -183,12 +183,12 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(ModListProfile.CollectAllMods(_config, SelectedModlist).Distinct()));
         }
 
-        private void OnProcessFailed()
+        private async void OnProcessFailed()
         {
             KillCommand.Toggle(false);
             LaunchCommand.Toggle(true);
             LaunchBattleEyeCommand.Toggle(true);
-            new ErrorModal("Client failed to start", "See the logs for more informations.").ShowDialog();
+            await new ErrorModal("Client failed to start", "See the logs for more information.").OpenDialogueAsync();
         }
 
         private void OnProcessStarted(ProcessDetails details)

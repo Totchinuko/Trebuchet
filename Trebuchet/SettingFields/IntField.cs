@@ -1,9 +1,8 @@
 ﻿using System;
-using System.Windows;
 
-namespace Trebuchet
+namespace Trebuchet.SettingFields
 {
-    public class IntField : Field<int, int>
+    public class IntField() : Field<int, int>("IntField")
     {
         private int _maximum = int.MaxValue;
         private int _minimum = int.MinValue;
@@ -13,8 +12,6 @@ namespace Trebuchet
         public int Maximum { get => _maximum; set => _maximum = value; }
 
         public int Minimum { get => _minimum; set => _minimum = value; }
-
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["IntField"];
 
         public override void ResetToDefault()
         {

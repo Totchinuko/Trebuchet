@@ -4,7 +4,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using Serilog;
-using TrebuchetGUILib;
+using TrebuchetUtils.Modals;
 
 namespace Trebuchet.Utils
 {
@@ -47,7 +47,7 @@ namespace Trebuchet.Utils
             catch (Exception ex)
             {
                 Log.Error(ex, "CatchedTasked failed to complete");
-                new ErrorModal("Error", $"{ex.Message + Environment.NewLine}Please check the log for more information.").ShowDialog();
+                await new ErrorModal("Error", $"{ex.Message + Environment.NewLine}Please check the log for more information.").OpenDialogueAsync();
                 return;
             }
             finally

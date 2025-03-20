@@ -1,4 +1,4 @@
-﻿namespace Trebuchet
+﻿namespace TrebuchetLib
 {
     public static class AutoUpdateStatus
     {

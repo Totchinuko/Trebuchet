@@ -1,0 +1,13 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:local="clr-namespace:Trebuchet.SettingFields"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="TextboxField" DataType="local:TextField">
+        <Border Height="38" Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
+            <TextBox
+            VerticalAlignment="Center"
+            Height="25"
+            VerticalContentAlignment="Center"
+            Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>

@@ -2,12 +2,13 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Windows;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using TrebuchetGUILib;
+using TrebuchetLib;
+using TrebuchetUtils;
+using TrebuchetUtils.Modals;
 
-namespace Trebuchet
+namespace Trebuchet.Panels
 {
     public class ClientProfilePanel : FieldEditorPanel
     {
@@ -16,7 +17,7 @@ namespace Trebuchet
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private string _selectedProfile;
 
-        public ClientProfilePanel()
+        public ClientProfilePanel() : base("ClientSettings")
         {
             LoadPanel();
         }
@@ -45,8 +46,6 @@ namespace Trebuchet
             }
         }
 
-        public override DataTemplate Template => (DataTemplate)Application.Current.Resources["ClientSettings"];
-
         public override bool CanExecute(object? parameter)
         {
             return _config.IsInstallPathValid && Tools.IsClientInstallValid(_config);
@@ -60,7 +59,7 @@ namespace Trebuchet
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.ClientProfilePanel.Fields.json", this, "Profile");
+            BuildFields("Trebuchet.Panels.ClientProfilePanel.Fields.json", this, nameof(Profile));
         }
 
         protected override void OnValueChanged(string property)
@@ -94,19 +93,18 @@ namespace Trebuchet
             OnPropertyChanged(nameof(Profiles));
         }
 
-        private void MoveOriginalSavedFolder()
+        private async void MoveOriginalSavedFolder()
         {
             if (string.IsNullOrEmpty(_config.ClientPath)) return;
             string savedFolder = Path.Combine(_config.ClientPath, Config.FolderGameSave);
             if (!Directory.Exists(savedFolder)) return;
             if (Tools.IsSymbolicLink(savedFolder)) return;
 
-            ErrorModal question = new ErrorModal("Game Folder Reset", "Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.");
-            question.ShowDialog();
+            ErrorModal question = new(App.GetAppText("GameFolderReset_Title"), App.GetAppText("GameFolderReset_Message"));
+            await question.OpenDialogueAsync();
 
             _config.ClientPath = string.Empty;
             _config.SaveFile();
-            return;
         }
 
         private void OnOpenFolderProfile(object? obj)
@@ -125,15 +123,15 @@ namespace Trebuchet
             LoadProfile();
         }
 
-        private void OnProfileCreate(object? obj)
+        private async void OnProfileCreate(object? obj)
         {
-            InputTextModal modal = new InputTextModal("Create", "Profile Name");
-            modal.ShowDialog();
+            InputTextModal modal = new(App.GetAppText("Create"), App.GetAppText("ProfileName"));
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 
@@ -143,34 +141,32 @@ namespace Trebuchet
             SelectedProfile = name;
         }
 
-        private void OnProfileDelete(object? obj)
+        private async void OnProfileDelete(object? obj)
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
-            if (_profile == null) return;
 
-            QuestionModal question = new QuestionModal("Deletion", $"Do you wish to delete the selected profile {_selectedProfile} ?");
-            question.ShowDialog();
-            if (question.Result)
-            {
-                _profile.DeleteFolder();
+            QuestionModal question = new(App.GetAppText("Deletion"), App.GetAppText("Deletion_Message", _selectedProfile));
+            await question.OpenDialogueAsync();
+            if (!question.Result) return;
+            
+            _profile.DeleteFolder();
 
-                string profile = string.Empty;
-                ClientProfile.ResolveProfile(_config, ref profile);
-                LoadProfileList();
-                SelectedProfile = profile;
-            }
+            string profile = string.Empty;
+            ClientProfile.ResolveProfile(_config, ref profile);
+            LoadProfileList();
+            SelectedProfile = profile;
         }
 
-        private void OnProfileDuplicate(object? obj)
+        private async void OnProfileDuplicate(object? obj)
         {
-            InputTextModal modal = new InputTextModal("Duplicate", "Profile Name");
+            InputTextModal modal = new InputTextModal(App.GetAppText("Duplicate"), App.GetAppText("ProfileName"));
             modal.SetValue(_selectedProfile);
-            modal.ShowDialog();
+            await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                new ErrorModal("Already Exitsts", "This profile name is already used").ShowDialog();
+                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
                 return;
             }
 

@@ -1,0 +1,26 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:local="clr-namespace:Trebuchet.Panels"
+                    xmlns:controls="clr-namespace:Trebuchet.Controls">
+    <DataTemplate x:Key="RconPanel" x:DataType="local:RconPanel">
+        <Grid Margin="0,0,6,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="auto" />
+            </Grid.RowDefinitions>
+            <Border Grid.Row="0" HorizontalAlignment="Left" Padding="8" CornerRadius="3" Margin="0,0,0,12">
+                <ComboBox MinWidth="250" ItemsSource="{Binding AvailableConsoles, Mode=OneWay}" SelectedIndex="{Binding SelectedConsole, Mode=TwoWay}" />
+            </Border>
+    
+            <Border Grid.Row="1" Padding="8" CornerRadius="3" Margin="0,0,0,12">
+                <Border>
+                    <controls:ConsoleLog ConsoleLogs="{Binding ConsoleLogs, Mode=OneWay}" />
+                </Border>
+            </Border>
+            <Border Grid.Row="2" Padding="8" CornerRadius="3" Margin="0,0,0,0">
+                <controls:ConsoleField Foreground="White" Height="25" Command="{Binding SendCommand}" MaxLength="4000" Placeholder="Console Command" />
+            </Border>
+        </Grid>
+    </DataTemplate>
+</ResourceDictionary>
