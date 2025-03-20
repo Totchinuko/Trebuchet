@@ -8,6 +8,7 @@
         <Authors>Totchinuko</Authors>
         <Version>$([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\\..\\VERSION"))</Version>
         <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <Deterministic>true</Deterministic>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
