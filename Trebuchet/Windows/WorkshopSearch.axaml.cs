@@ -12,6 +12,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
+using Trebuchet.ViewModels;
 using TrebuchetLib;
 using TrebuchetUtils;
 
@@ -29,9 +30,11 @@ namespace Trebuchet.Windows
         private List<WorkshopSearchResult> _searchResults = new List<WorkshopSearchResult>();
         private string _searchTerm = string.Empty;
         private bool _testLiveWorkshop;
+        private WorkshopSearchViewModel _workshopSearchViewModel;
 
-        public WorkshopSearch()
+        public WorkshopSearch(WorkshopSearchViewModel viewModel)
         {
+            _workshopSearchViewModel = viewModel;
             SearchCommand = new TaskBlockedCommand(OnSearch, true, Operations.SteamSearch);
             AddModCommand = new SimpleCommand(OnModAdded);
             InitializeComponent();
@@ -87,7 +90,7 @@ namespace Trebuchet.Windows
             if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamSearch))) return;
             if (string.IsNullOrEmpty(_searchTerm)) return;
 
-            var query = new QueryFilesQuery(App.ApiKey)
+            var query = new QueryFilesQuery()
             {
                 Page = 0,
                 SearchText = _searchTerm,
@@ -101,7 +104,8 @@ namespace Trebuchet.Windows
                 ReturnShortDescription = true
             };
 
-            CancellationTokenSource cts = StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.SteamSearch, 15 * 1000));
+            CancellationTokenSource cts
+                = StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.SteamSearch, 15 * 1000));
             Task.Run(() => PublishedFileService.QueryFiles(query, cts.Token), cts.Token)
                 .ContinueWith((x) => Dispatcher.UIThread.Invoke(() => OnSearchCompleted(x)), cts.Token)
                 .ContinueWith((_) => OnSearchCreators(cts.Token), cts.Token)
@@ -110,7 +114,9 @@ namespace Trebuchet.Windows
 
         private void OnSearchCompleted(Task<QueryFilesResponse> task)
         {
-            SearchResults = task.Result.Total == 0 ? [] : task.Result.PublishedFileDetails.Select(file => new WorkshopSearchResult(file)).ToList();
+            SearchResults = task.Result.Total == 0
+                ? []
+                : task.Result.PublishedFileDetails.Select(file => new WorkshopSearchResult(file)).ToList();
         }
 
         private async Task<GetPlayerSummariesResponse> OnSearchCreators(CancellationToken ct)

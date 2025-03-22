@@ -148,10 +148,10 @@ namespace TrebuchetLib
             }
         }
 
-        public static string GetFileContent(string path)
+        public static async Task<string> GetFileContent(string path)
         {
             if (!File.Exists(path)) return string.Empty;
-            return File.ReadAllText(path);
+            return await File.ReadAllTextAsync(path);
         }
         
         public static ProcessData GetFirstChildProcesses(int parentId)
@@ -200,13 +200,6 @@ namespace TrebuchetLib
             if (profiles.Length == 0)
                 return string.Empty;
             return Path.GetFileNameWithoutExtension(profiles[0]);
-        }
-
-        public static IEnumerable<MethodInfo> GetIniMethod(object target)
-        {
-            return target.GetType().GetMethods()
-                .Where(meth => meth.GetCustomAttributes(typeof(IniSettingAttribute), true).Any())
-                .Where(meth => meth.GetParameters().Length == 1 && meth.GetParameters()[0].ParameterType == typeof(IniDocument));
         }
 
         public static IEnumerable<KeyValuePair<ulong, FileInfo>> GetModFiles(IEnumerable<string> files)
@@ -300,7 +293,7 @@ namespace TrebuchetLib
         public static bool IsClientInstallValid(Config config)
         {
             return !string.IsNullOrEmpty(config.ClientPath) &&
-                File.Exists(Path.Combine(config.ClientPath, Config.FolderGameBinaries, Config.FileClientBin));
+                File.Exists(Path.Combine(config.ClientPath, Constants.FolderGameBinaries, Constants.FileClientBin));
         }
 
         public static bool IsDirectoryWritable(string dirPath, bool throwIfFails = false)
@@ -387,12 +380,12 @@ namespace TrebuchetLib
                 Directory.Delete(path, true);
         }
 
-        public static void SetFileContent(string path, string content)
+        public static async Task SetFileContent(string path, string content)
         {
             string? folder = Path.GetDirectoryName(path);
             if (folder == null) throw new Exception($"Invalid folder for {path}.");
             CreateDir(folder);
-            File.WriteAllText(path, content);
+            await File.WriteAllTextAsync(path, content);
         }
 
         public static void SetupSymboliclink(string path, string targetPath)

@@ -2,8 +2,6 @@
 {
     public abstract class ProfileFile<T> : JsonFile<T> where T : ProfileFile<T>
     {
-        protected Config Config { get; set; } = default!;
-
         /// <summary>
         /// Create a new profile file in memory. Use SaveFile to write it down.
         /// </summary>
@@ -11,12 +9,11 @@
         /// <param name="path"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static T CreateProfile(Config config, string path)
+        public static T CreateProfile(string path)
         {
             try
             {
                 var profile = CreateFile(path);
-                profile.Config = config;
                 return profile;
             }
             catch (Exception ex)
@@ -32,12 +29,11 @@
         /// <param name="path"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static T LoadProfile(Config config, string path)
+        public static T LoadProfile(string path)
         {
             try
             {
                 var profile = LoadFile(path);
-                profile.Config = config;
                 return profile;
             }
             catch (Exception ex)

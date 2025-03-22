@@ -1,7 +1,6 @@
 ﻿using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using Serilog;
 
 namespace TrebuchetLib
 {
@@ -110,7 +109,7 @@ namespace TrebuchetLib
 
         public VisibilityFlags Visibility { get; private set; }
 
-        public void Refresh()
+        public async Task Refresh()
         {
             if ((DateTime.Now - _lastUpdate).TotalMilliseconds < _refreshRate)
                 return;
@@ -118,28 +117,23 @@ namespace TrebuchetLib
 
             try
             {
-                ProcessQuery();
+                await ProcessQuery().ConfigureAwait(false);
             }
-            catch (SocketException ex)
+            catch
             {
-                Log.Debug($"Endpoint={_endpoint.Address.ToString()}:{_endpoint.Port} {ex.SocketErrorCode}.");
-                Online = false;
-            }
-            catch (Exception ex)
-            {
-                Log.Error(ex, "Could not process Source Query");
                 Online = false;
             }
         }
 
-        private void ProcessQuery()
+        private async Task ProcessQuery()
         {
             using UdpClient udp = new UdpClient();
             udp.Client.ReceiveTimeout = _timeout;
-            udp.Send(REQUEST, REQUEST.Length, _endpoint);
-            var result = udp.Receive(ref _endpoint);
+            udp.Connect(_endpoint);
+            await udp.SendAsync(REQUEST, REQUEST.Length).ConfigureAwait(false);
+            var result = await udp.ReceiveAsync().ConfigureAwait(false);
 
-            using MemoryStream ms = new MemoryStream(result);
+            using MemoryStream ms = new MemoryStream(result.Buffer);
             using BinaryReader br = new BinaryReader(ms, Encoding.UTF8);
             ReadResponse(ms, br);
             br.Close();
@@ -166,7 +160,6 @@ namespace TrebuchetLib
             VAC = (VACFlags)br.ReadByte();
             Version = br.ReadNullTerminatedString() ?? string.Empty;
             Online = true;
-            Log.Debug($"Endpoint={_endpoint.Address}:{_endpoint.Port} Name={Name}, Online={Online}, Players={Players}/{MaxPlayers}");
         }
 
         //ExtraDataFlag = (ExtraDataFlags)br.ReadByte();

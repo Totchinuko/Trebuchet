@@ -7,8 +7,11 @@ using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
 using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.VisualBasic;
 using Serilog;
 using Trebuchet.Modals;
 using Trebuchet.Windows;
@@ -25,15 +28,12 @@ namespace Trebuchet;
 public partial class App : Application, IApplication
 {
     public bool HasCrashed { get; private set; }
-    public bool IsShuttingDown { get; private set; }
-    public static string ApiKey { get; private set; } = string.Empty;
 
     public static Dictionary<string, string> AppText { get; set; } = [];
 
     public static UIConfig Config { get; private set; } = null!;
     
     public string AppIconPath => "avares://Trebuchet/Assets/Icons/AppIcon.ico";
-    public bool IsShutingDown { get; } = false;
 
     public static string GetAppText(string key, params object[] args)
     {
@@ -72,6 +72,12 @@ public partial class App : Application, IApplication
     
     public override void OnFrameworkInitializationCompleted()
     {
+        BindingPlugins.DataValidators.RemoveAt(0);
+
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection);
+        
+        var services = serviceCollection.BuildServiceProvider();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             Log.Logger = new LoggerConfiguration()
@@ -92,7 +98,6 @@ public partial class App : Application, IApplication
 
 
             ReadAppText();
-            ReadSettings();
 
             if (desktop.Args?.Length > 0)
             {
@@ -114,9 +119,13 @@ public partial class App : Application, IApplication
         base.OnFrameworkInitializationCompleted();
     }
 
+    private void ConfigureServices(IServiceCollection services)
+    {
+        services.AddSingleton<AppSettings>(GetAppSettings());
+    }
+
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
     {
-        IsShuttingDown = true;
         Log.Information("Trebuchet off");
         Log.Information("----------------------------------------");
     }
@@ -156,12 +165,12 @@ public partial class App : Application, IApplication
             AppText.Add(n.Key, n.Value?.GetValue<string>() ?? $"<INVALID_{n.Key}>");
     }
 
-    private static void ReadSettings()
+    private static AppSettings GetAppSettings()
     {
-        var node = JsonSerializer.Deserialize<JsonNode>(TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.AppSettings.json"));
-        if (node == null) return;
-
-        ApiKey = node["apikey"]?.GetValue<string>() ?? string.Empty;
+        var settings = JsonSerializer.Deserialize<AppSettings>(
+            TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.AppSettings.json"));
+        if(settings == null) throw new JsonException("AppSettings could not be loaded");
+        return settings;
     }
         
     public void Handle(ITinyMessage message, Exception exception)
@@ -171,7 +180,6 @@ public partial class App : Application, IApplication
 
     private void ShutdownOnError()
     {
-        IsShuttingDown = true;
         if(Current?.ApplicationLifetime is  IControlledApplicationLifetime app)
             app.Shutdown();
     }

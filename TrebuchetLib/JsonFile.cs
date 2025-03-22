@@ -143,7 +143,7 @@ namespace TrebuchetLib
         /// <param name="constructor"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        protected static T CreateFile(string path, params object[] constructor)
+        public static T CreateFile(string path, params object[] constructor)
         {
             T? file = (T?)Activator.CreateInstance(typeof(T), constructor);
             if (file == null)
