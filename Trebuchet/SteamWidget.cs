@@ -81,6 +81,7 @@ namespace Trebuchet
                 _timer.Stop();
                 _progress = 0;
                 OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(IsLoading));
                 OnPropertyChanged(nameof(Progress));
             }
         }
@@ -99,6 +100,7 @@ namespace Trebuchet
             {
                 _description = description;
                 OnPropertyChanged(nameof(Description));
+                OnPropertyChanged(nameof(IsLoading));
             }
         }
 
@@ -106,6 +108,7 @@ namespace Trebuchet
         {
             SetDescription(description);
             OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(IsLoading));
             _timer.Start();
         }
 
@@ -119,6 +122,7 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new OperationCancelMessage(Operations.SteamDownload));
             SetDescription("Canceling...");
             OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(IsLoading));
         }
 
         private void OnConnect(object? obj)

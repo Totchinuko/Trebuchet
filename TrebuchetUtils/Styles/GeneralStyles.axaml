@@ -99,6 +99,8 @@
                         <ComboBoxItem>Text Item 9</ComboBoxItem>
                     </ComboBox>
                     <CheckBox>Test</CheckBox>
+                    <ProgressBar Classes="large" Value="0.5" Minimum="0.0" Maximum="1.0" Margin="0 0 0 12" />
+                    <ProgressBar Value="0.5" Minimum="0.0" Maximum="1.0" />
                     <Slider Value="5" Maximum="10" Width="200"  IsEnabled="false" />
                     <TextBox Watermark="Watermark"  IsEnabled="false"  />
                     <ComboBox Width="200" IsEnabled="false">
@@ -113,6 +115,8 @@
                         <ComboBoxItem>Text Item 9</ComboBoxItem>
                     </ComboBox>
                     <CheckBox IsEnabled="False">Test</CheckBox>
+                    <ProgressBar IsEnabled="false" Classes="large" Value="0.5" Minimum="0.0" Maximum="1.0" Margin="0 0 0 12" />
+                    <ProgressBar IsEnabled="false" Value="0.5" Minimum="0.0" Maximum="1.0" />
                 </StackPanel>
             </Border>
         </ThemeVariantScope>
@@ -610,4 +614,28 @@
         </Style>
     </Style>
     
+    <Style Selector="ProgressBar.large">
+        <Setter Property="Background" Value="{DynamicResource TPanel}" />
+        <Setter Property="Foreground" Value="{DynamicResource TBlueDim}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Height" Value="25" />
+        <Style Selector="^/template/Border#PART_Indicator">
+            <Setter Property="CornerRadius" Value="3" />
+        </Style>
+    </Style>
+    <Style Selector=":is(ProgressBar)">
+        <Setter Property="Background" Value="{DynamicResource TPanel}" />
+        <Setter Property="Foreground" Value="{DynamicResource TBlueDim}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+        <Setter Property="BorderThickness" Value="1" />
+        <Style Selector="^:disabled">
+            <Setter Property="BorderThickness" Value="0" />
+            <Style Selector="^/template/Border#PART_Indicator">
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
+                <Setter Property="BorderThickness" Value="0" />
+            </Style>
+        </Style>
+    </Style>
 </Styles>
