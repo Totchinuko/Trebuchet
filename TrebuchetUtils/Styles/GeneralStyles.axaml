@@ -618,9 +618,13 @@
         <Setter Property="Background" Value="{DynamicResource TPanel}" />
         <Setter Property="Foreground" Value="{DynamicResource TBlueDim}" />
         <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderThickness" Value="0" />
         <Setter Property="CornerRadius" Value="3" />
         <Setter Property="Height" Value="25" />
+        <Style Selector="^/template/Border#PART_Indicator">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TBlueFaded}"/>
+        </Style>
         <Style Selector="^/template/Border#PART_Indicator">
             <Setter Property="CornerRadius" Value="3" />
         </Style>
@@ -629,7 +633,11 @@
         <Setter Property="Background" Value="{DynamicResource TPanel}" />
         <Setter Property="Foreground" Value="{DynamicResource TBlueDim}" />
         <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
-        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Style Selector="^/template/Border#PART_Indicator">
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TBlueFaded}"/>
+        </Style>
         <Style Selector="^:disabled">
             <Setter Property="BorderThickness" Value="0" />
             <Style Selector="^/template/Border#PART_Indicator">
