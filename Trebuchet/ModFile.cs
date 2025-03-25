@@ -43,6 +43,11 @@ namespace Trebuchet
         public IBrush BorderColor => GetBorderBrush();
         public bool IsPublished => PublishedFileId > 0;
         public bool IsTestLive => _appId == Config.AppIDTestLiveClient;
+        public string TypeTooltip => GetTypeText();
+        public string ModType => IsTestLive ? "TestLive" : "Live";
+        public ulong PublishedFileId { get; }
+        public IBrush StatusColor => GetStatusBrush();
+        public string StatusTooltip => GetStatusText();
         public string LastUpdate
         {
             get
@@ -59,12 +64,6 @@ namespace Trebuchet
                 return $"Last Update: {local.Humanize()}";
             }
         }
-        public string ModType => IsTestLive ? "TestLive" : "Live";
-        public ulong PublishedFileId { get; }
-
-        public IBrush StatusColor => GetStatusBrush();
-        public string StatusTooltip => GetStatusText();
-
         public string Title
         {
             get
@@ -132,6 +131,13 @@ namespace Trebuchet
                 return brush;
             }
             throw new Exception("Resource not found: " + name);
+        }
+
+        private string GetTypeText()
+        {
+            if(IsPublished)
+                return IsTestLive ? App.GetAppText("TestLiveMod") : App.GetAppText("LiveMod");
+            return App.GetAppText("LocalMod");
         }
 
         protected virtual string GetStatusText()

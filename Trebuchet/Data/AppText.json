@@ -32,7 +32,10 @@
   "ServerFailedStart": "Server failed to start",
   "ServerFailedStart_Message": "Server failed to start properly. See the logs for more information.",
   "ServerNotInstalled": "Some server instances are not yet installed.",
-  "Install": "Install"
+  "Install": "Install",
+  "TestLiveMod": "Steam Workshop (TestLive)",
+  "LiveMod": "Steam Workshop (Live)",
+  "LocalMod": "Local File"
 
 
 }
