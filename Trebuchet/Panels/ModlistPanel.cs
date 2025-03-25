@@ -18,6 +18,7 @@ using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
+using Trebuchet.Messages;
 using Trebuchet.Utils;
 using Trebuchet.Windows;
 using TrebuchetLib;
@@ -29,7 +30,8 @@ using TrebuchetUtils.Modals;
 namespace Trebuchet.Panels
 {
     public class ModlistPanel : Panel,
-        IRecipient<SteamModlistReceived>
+        IRecipient<SteamModlistReceived>,
+        ITinyRecipient<ModListMessages>
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
         private TrulyObservableCollection<ModFile> _modlist = new();
@@ -54,14 +56,12 @@ namespace Trebuchet.Panels
             FetchCommand = new TaskBlockedCommand(OnFetchClicked, true, Operations.DownloadModlist);
             ImportFromFileCommand = new SimpleCommand(OnImportFromFile);
             ImportFromTextCommand = new SimpleCommand(OnImportFromText);
-            RemoveModCommand = new SimpleCommand(OnModRemoved);
-            OpenWorkshopCommand = new SimpleCommand(OnOpenWorkshop);
-            UpdateModCommand = new TaskBlockedCommand(OnModUpdated, true, Operations.DownloadModlist);
             ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload,
                 Operations.GameRunning, Operations.ServerRunning);
             RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh, true, Operations.SteamPublishedFilesFetch);
 
             StrongReferenceMessenger.Default.Register<SteamModlistReceived>(this);
+            TinyMessengerHub.Default.Subscribe<ModListMessages>(this);
         }
 
         public SimpleCommand CreateModlistCommand { get; }
@@ -106,13 +106,9 @@ namespace Trebuchet.Panels
             }
         }
 
-        public SimpleCommand OpenWorkshopCommand { get; }
-
         public ObservableCollection<string> Profiles { get; set; } = new();
 
         public TaskBlockedCommand RefreshModlistCommand { get; }
-
-        public SimpleCommand RemoveModCommand { get; }
 
         public string SelectedModlist
         {
@@ -123,8 +119,6 @@ namespace Trebuchet.Panels
                 OnSelectionChanged();
             }
         }
-
-        public TaskBlockedCommand UpdateModCommand { get; }
 
         public void Receive(SteamModlistReceived message)
         {
@@ -160,6 +154,16 @@ namespace Trebuchet.Panels
         {
             OnCanExecuteChanged();
             _needRefresh = true;
+        }
+        
+        public void Receive(ModListMessages message)
+        {
+            if(message is ModListOpenModSteamMessage openSteam)
+                TrebuchetUtils.Utils.OpenWeb(string.Format(Config.SteamWorkshopURL, openSteam.ModFile.PublishedFileId));
+            else if(message is ModListRemoveModMessage removeMod)
+                _modlist.Remove(removeMod.ModFile);
+            else if(message is ModListUpdateModMessage updateMod)
+                StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage([updateMod.ModFile.PublishedFileId]));
         }
 
         private void FetchJsonList(UriBuilder builder)
@@ -535,27 +539,6 @@ namespace Trebuchet.Panels
             OnPropertyChanged(nameof(ModlistUrl));
         }
 
-        private void OnModRemoved(object? obj)
-        {
-            if (obj is not ModFile modFile) return;
-
-            _modlist.Remove(modFile);
-        }
-
-        private void OnModUpdated(object? obj)
-        {
-            if (obj is not ModFile modFile) return;
-
-            StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage([modFile.PublishedFileId]));
-        }
-
-        private void OnOpenWorkshop(object? obj)
-        {
-            if (obj is not ModFile modFile) return;
-
-            global::TrebuchetUtils.Utils.OpenWeb(string.Format(Config.SteamWorkshopURL, modFile.PublishedFileId));
-        }
-
         private void OnSearchClosing(object? sender, CancelEventArgs e)
         {
             if (_searchWindow == null) return;
@@ -619,5 +602,7 @@ namespace Trebuchet.Panels
             _modWatcher.IncludeSubdirectories = true;
             _modWatcher.EnableRaisingEvents = true;
         }
+
+
     }
 }

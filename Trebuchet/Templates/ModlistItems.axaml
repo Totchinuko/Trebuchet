@@ -54,13 +54,13 @@
                     </TextBlock>
                 </StackPanel>
                 <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button IsVisible="{Binding IsPublished}" Classes="Base" Cursor="Hand" Margin="0,0,3,0" ToolTip.Tip="Open Workshop Page" Command="{Binding $parent[panel:ModlistPanel].OpenWorkshopCommand}" CommandParameter="{Binding .}">
+                    <Button IsVisible="{Binding IsPublished}" Classes="Base" Margin="0,0,3,0" ToolTip.Tip="Open Workshop Page" Command="{Binding OpenModPageCommand}" CommandParameter="{Binding .}">
                         <i:Icon Value="mdi-steam" Classes="Normal"/>
                     </Button>
-                    <Button Cursor="Hand" Margin="0,0,3,0" Classes="Base Blue" ToolTip.Tip="Update Mod" Command="{Binding $parent[panel:ModlistPanel].UpdateModCommand}" CommandParameter="{Binding .}">
+                    <Button Margin="0,0,3,0" Classes="Base Blue" ToolTip.Tip="Update Mod" Command="{Binding UpdateModCommand}" CommandParameter="{Binding .}">
                         <i:Icon Value="mdi-update" Classes="Normal"/>
                     </Button>
-                    <Button Cursor="Hand" ToolTip.Tip="Remove from list" Classes="Base Red" Command="{Binding $parent[panel:ModlistPanel].RemoveModCommand}" CommandParameter="{Binding .}">
+                    <Button ToolTip.Tip="Remove from list" Classes="Base Red" Command="{Binding RemoveModCommand}" CommandParameter="{Binding .}">
                         <i:Icon Value="mdi-delete" Classes="Normal"/>
                     </Button>
                 </StackPanel>
