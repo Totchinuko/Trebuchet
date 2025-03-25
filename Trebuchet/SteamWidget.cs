@@ -49,6 +49,8 @@ namespace Trebuchet
         public bool IsLoading => !string.IsNullOrEmpty(Description);
 
         public double Progress { get; private set; }
+        
+        public bool IsIndeterminate => Progress == 0;
 
         public bool CanExecute(bool displayError = true)
         {
@@ -83,6 +85,7 @@ namespace Trebuchet
                 OnPropertyChanged(nameof(Description));
                 OnPropertyChanged(nameof(IsLoading));
                 OnPropertyChanged(nameof(Progress));
+                OnPropertyChanged(nameof(IsIndeterminate));
             }
         }
 
@@ -101,6 +104,7 @@ namespace Trebuchet
                 _description = description;
                 OnPropertyChanged(nameof(Description));
                 OnPropertyChanged(nameof(IsLoading));
+                OnPropertyChanged(nameof(IsIndeterminate));
             }
         }
 
@@ -109,6 +113,7 @@ namespace Trebuchet
             SetDescription(description);
             OnPropertyChanged(nameof(Description));
             OnPropertyChanged(nameof(IsLoading));
+            OnPropertyChanged(nameof(IsIndeterminate));
             _timer.Start();
         }
 
@@ -123,6 +128,7 @@ namespace Trebuchet
             SetDescription("Canceling...");
             OnPropertyChanged(nameof(Description));
             OnPropertyChanged(nameof(IsLoading));
+            OnPropertyChanged(nameof(IsIndeterminate));
         }
 
         private void OnConnect(object? obj)
@@ -140,6 +146,7 @@ namespace Trebuchet
             {
                 Progress = _progress;
                 OnPropertyChanged(nameof(Progress));
+                OnPropertyChanged(nameof(IsIndeterminate));
             }
         }
     }

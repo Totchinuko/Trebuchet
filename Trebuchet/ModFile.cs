@@ -25,7 +25,7 @@ namespace Trebuchet
             _infos = new FileInfo(path);
             RemoveModCommand = new SimpleCommand(OnRemoveModCommand);
             OpenModPageCommand = new SimpleCommand(OnOpenModPageCommand);
-            UpdateModCommand = new TaskBlockedCommand(OnUpdateModCommand, true, Operations.DownloadModlist);
+            UpdateModCommand = new TaskBlockedCommand(OnUpdateModCommand, true, Operations.SteamDownload);
         }
 
         public ModFile(ulong publishedFileId, string path) : this(path)
