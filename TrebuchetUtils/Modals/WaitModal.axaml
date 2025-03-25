@@ -23,6 +23,7 @@
                     Classes="Base"
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"
+                    HotKey="Escape"
                     VerticalAlignment="Center"
                     HorizontalContentAlignment="Center"
                     Grid.Row="1" />

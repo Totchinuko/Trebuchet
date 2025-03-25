@@ -646,4 +646,15 @@
             </Style>
         </Style>
     </Style>
+    
+    <!-- Auto Focus Element -->
+    <Style Selector="TextBox.AutoFocus">
+        <Setter Property="(Interaction.Behaviors)">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <u:AutoFocusBehavior />
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
+    </Style>
 </Styles>
