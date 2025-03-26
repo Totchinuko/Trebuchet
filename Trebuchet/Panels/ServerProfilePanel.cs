@@ -18,7 +18,7 @@ namespace Trebuchet.Panels
         private string _selectedProfile;
         private TrulyObservableCollection<ObservableString> _sudoList = new TrulyObservableCollection<ObservableString>();
 
-        public ServerProfilePanel() : base("ServerSettings")
+        public ServerProfilePanel() : base("Profiles", "ServerSettings", "mdi-server-network", PanelPosition.Server)
         {
             LoadPanel();
         }

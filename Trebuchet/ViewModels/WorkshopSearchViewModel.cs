@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using SteamWorksWebAPI;
+using Trebuchet.Messages;
 using Trebuchet.Services;
 using TrebuchetLib;
 

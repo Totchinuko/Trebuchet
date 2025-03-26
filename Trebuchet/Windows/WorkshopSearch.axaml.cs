@@ -12,6 +12,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
 using Avalonia.Threading;
+using Trebuchet.Messages;
 using Trebuchet.ViewModels;
 using TrebuchetLib;
 using TrebuchetUtils;

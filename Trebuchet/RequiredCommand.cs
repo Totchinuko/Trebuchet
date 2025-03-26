@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Trebuchet.Messages;
 
 namespace Trebuchet
 {

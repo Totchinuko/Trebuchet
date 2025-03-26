@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Text.Json;
@@ -10,8 +11,10 @@ using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Messages;
 using Trebuchet.Panels;
+using Trebuchet.Services;
 using Trebuchet.Utils;
 using TrebuchetLib;
+using TrebuchetLib.Services;
 using TrebuchetUtils.Modals;
 
 namespace Trebuchet
@@ -19,60 +22,49 @@ namespace Trebuchet
     public sealed class TrebuchetApp : INotifyPropertyChanged,
         IRecipient<SteamConnectMessage>,
         IRecipient<CatapultMessage>,
-        IRecipient<ConfigRequest>,
         IRecipient<CloseProcessMessage>,
-        IRecipient<ServerMessages>,
         IRecipient<VerifyFilesMessage>,
         IRecipient<InstanceInstalledCountRequest>,
         IRecipient<PanelActivateMessage>,
         IRecipient<ServerConsoleRequest>,
         IRecipient<ProcessServerDetailsRequest>,
-        IRecipient<SteamModlistRequest>,
-        IRecipient<SteamModlistUpdateRequest>,
-        IRecipient<UACPromptRequest>,
-        IRecipient<SteamModlistIDRequest>
+        IRecipient<UACPromptRequest>
     {
+        private readonly Launcher _launcher;
+        private readonly AppSetup _setup;
+        private readonly Steam _steam;
         private readonly TaskBlocker _taskBlocker = new();
-        private readonly TrebuchetLauncher _trebuchet;
         private Panel _activePanel;
+        private List<Panel> _panels;
 
-        private bool _catapult;
 
-        public TrebuchetApp(bool testlive, bool catapult)
+        public TrebuchetApp(Launcher launcher, AppSetup setup, Steam steam, IEnumerable<Panel> panels)
         {
-            _trebuchet = new TrebuchetLauncher(testlive);
-            _catapult = catapult;
-
-            RegisterEvents();
+            _launcher = launcher;
+            _setup = setup;
+            _steam = steam;
+            _panels = panels.ToList();
 
             StrongReferenceMessenger.Default.Register<SteamConnectMessage>(this);
             StrongReferenceMessenger.Default.Register<CatapultServerMessage>(this);
             StrongReferenceMessenger.Default.Register<CatapultClientMessage>(this);
-            StrongReferenceMessenger.Default.Register<ConfigRequest>(this);
             StrongReferenceMessenger.Default.Register<CloseProcessMessage>(this);
             StrongReferenceMessenger.Default.Register<KillProcessMessage>(this);
             StrongReferenceMessenger.Default.Register<ShutdownProcessMessage>(this);
-            StrongReferenceMessenger.Default.Register<ServerUpdateModsMessage>(this);
             StrongReferenceMessenger.Default.Register<ServerConsoleRequest>(this);
-            StrongReferenceMessenger.Default.Register<ServerUpdateMessage>(this);
             StrongReferenceMessenger.Default.Register<VerifyFilesMessage>(this);
             StrongReferenceMessenger.Default.Register<InstanceInstalledCountRequest>(this);
             StrongReferenceMessenger.Default.Register<PanelActivateMessage>(this);
             StrongReferenceMessenger.Default.Register<ProcessServerDetailsRequest>(this);
-            StrongReferenceMessenger.Default.Register<SteamModlistRequest>(this);
-            StrongReferenceMessenger.Default.Register<SteamModlistUpdateRequest>(this);
             StrongReferenceMessenger.Default.Register<UACPromptRequest>(this);
-            StrongReferenceMessenger.Default.Register<SteamModlistIDRequest>(this);
 
-            var menuConfig = TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.TrebuchetApp.Menu.json");
-            Menu = JsonSerializer.Deserialize<Menu>(menuConfig) ?? throw new Exception("Could not deserialize the menu.");
-            _activePanel = Menu.Bottom.Where(x => x is Panel).Cast<Panel>().First(x => x.CanExecute(null));
+            OrderPanels(_panels);
+            _activePanel = BottomPanels.First(x => x.CanExecute(null));
             if (!WriteAccessCheck()) return;
             _activePanel.Active = true;
             
-            _trebuchet.Steam.Connected += OnSteamConnected;
-            _trebuchet.Steam.Disconnected += OnSteamDisconnected;
-            _trebuchet.Steam.Connect();
+            _steam.Connected += OnSteamConnected;
+            _steam.Disconnected += OnSteamDisconnected;
             Steam.SetProgress(SteamWidget);
         }
 
@@ -92,14 +84,18 @@ namespace Trebuchet
                 OnPropertyChanged(nameof(ActivePanel));
             }
         }
-        public Menu Menu { get; set; }
+
+        public ObservableCollection<Panel> TopPanels { get; } = [];
+        public ObservableCollection<Panel> ClientPanels { get; } = [];
+        public ObservableCollection<Panel> ServerPanels { get; } = [];
+        public ObservableCollection<Panel> BottomPanels { get; } = [];
 
         public SteamWidget SteamWidget { get; } = new SteamWidget();
 
-        public void OnWindowShow()
+        public async void OnWindowShow()
         {
-            Menu.Top.ForEach(x => x.OnWindowShow());
-            Menu.Bottom.ForEach(x => x.OnWindowShow());
+            _panels.ForEach(x => x.OnWindowShow());
+            await _steam.Connect();
         }
 
         public void Receive(PanelActivateMessage message)
@@ -109,29 +105,12 @@ namespace Trebuchet
 
         public void Receive(ServerConsoleRequest message)
         {
-            message.Reply(_trebuchet.Launcher.GetServerConsole(message.instance));
+            message.Reply(_launcher.GetServerConsole(message.instance));
         }
 
         public void Receive(ProcessServerDetailsRequest message)
         {
-            message.Reply(_trebuchet.Launcher.GetServersDetails().ToList());
-        }
-
-        public void Receive(SteamModlistRequest message)
-        {
-            RequestModlistManifests(message.modlist);
-        }
-
-        public void Receive(SteamModlistUpdateRequest message)
-        {
-            var updated = _trebuchet.Steam.GetUpdatedUGCFileIDs(message.keyValuePairs).ToList();
-            foreach (var (pubId, _) in message.keyValuePairs)
-            {
-                string mod = pubId.ToString();
-                if (!ModListProfile.ResolveMod(_trebuchet.Config, ref mod) && !updated.Contains(pubId))
-                    updated.Add(pubId);
-            }
-            message.Reply(updated);
+            message.Reply(_launcher.GetServerProcesses().ToList());
         }
 
         public async void Receive(UACPromptRequest message)
@@ -144,26 +123,16 @@ namespace Trebuchet
 
             if (modal.Result)
             {
-                Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
+                Utils.Utils.RestartProcess(_setup.IsTestLive, true);
                 message.Reply(true);
             }
             else
                 message.Reply(false);
         }
-
-        public void Receive(SteamModlistIDRequest message)
+        
+        async void IRecipient<SteamConnectMessage>.Receive(SteamConnectMessage message)
         {
-            RequestModlistManifests(message.Modlist.ToList());
-        }
-
-        void IRecipient<SteamConnectMessage>.Receive(SteamConnectMessage message)
-        {
-            _trebuchet.Steam.Connect();
-        }
-
-        void IRecipient<ConfigRequest>.Receive(ConfigRequest message)
-        {
-            message.Reply(_trebuchet.Config);
+            await _steam.Connect().ConfigureAwait(false);
         }
 
         void IRecipient<CatapultMessage>.Receive(CatapultMessage message)
@@ -176,25 +145,17 @@ namespace Trebuchet
                 UpdateThenCatapultServer(server.instances);
         }
 
-        void IRecipient<CloseProcessMessage>.Receive(CloseProcessMessage message)
+        async void IRecipient<CloseProcessMessage>.Receive(CloseProcessMessage message)
         {
             if (message.instance >= 0)
                 if (message is ShutdownProcessMessage)
                     throw new NotImplementedException();
                 else if (message is KillProcessMessage)
-                    _trebuchet.Launcher.KillServer(message.instance);
+                    await _launcher.KillServer(message.instance);
                 else
-                    _trebuchet.Launcher.CloseServer(message.instance);
+                    await _launcher.CloseServer(message.instance);
             else
-                _trebuchet.Launcher.KillClient();
-        }
-
-        void IRecipient<ServerMessages>.Receive(ServerMessages message)
-        {
-            if (message is ServerUpdateModsMessage mods)
-                UpdateServerMods(mods.modlist);
-            else if (message is ServerUpdateMessage)
-                UpdateServers();
+                await _launcher.KillClient();
         }
 
         void IRecipient<VerifyFilesMessage>.Receive(VerifyFilesMessage message)
@@ -204,18 +165,40 @@ namespace Trebuchet
 
         void IRecipient<InstanceInstalledCountRequest>.Receive(InstanceInstalledCountRequest message)
         {
-            message.Reply(_trebuchet.Steam.GetInstalledInstances());
+            message.Reply(_steam.GetInstalledInstances());
         }
 
         internal void OnAppClose()
         {
-            _trebuchet.Launcher.Dispose();
-            _trebuchet.Steam.Disconnect();
+            _launcher.Dispose();
+            _steam.Disconnect();
             Task.Run(() =>
             {
-                while (_trebuchet.Steam.IsConnected)
+                while (_steam.IsConnected)
                     Task.Delay(100);
             }).Wait();
+        }
+
+        private void OrderPanels(List<Panel> panels)
+        {
+            foreach (var panel in panels)
+            {
+                switch (panel.Position)
+                {
+                    case PanelPosition.Top:
+                        TopPanels.Add(panel);
+                        break;
+                    case PanelPosition.Bottom:
+                        BottomPanels.Add(panel);
+                        break;
+                    case PanelPosition.Client:
+                        ClientPanels.Add(panel);
+                        break;
+                    case PanelPosition.Server:
+                        ServerPanels.Add(panel);
+                        break;
+                }
+            }
         }
 
         private void OnPropertyChanged(string property)
@@ -223,37 +206,11 @@ namespace Trebuchet
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        private static void RegisterEvent<T>(T message) where T : ProcessStateChanged
-        {
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                StrongReferenceMessenger.Default.Send(message);
-            });
-        }
-
-        private static void RequestModlistManifests(List<ulong> list)
-        {
-            if (!TrebuchetUtils.GuiExtensions.Assert(!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
-            if (list.Count == 0) return;
-
-            new CatchedTasked(Operations.SteamPublishedFilesFetch, 15 * 1000)
-                .Add(async (cts) =>
-                {
-                    var result = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), cts.Token);
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        StrongReferenceMessenger.Default.Send(new SteamModlistReceived(result));
-                    });
-                }
-                ).Start();
-        }
-
         private void OnSteamConnected(object? sender, EventArgs e)
         {
             StrongReferenceMessenger.Default.Send(new SteamConnectionChangedMessage(true));
-            if (_catapult)
+            if (_setup.CatapultTrigger())
             {
-                _catapult = false;
                 StrongReferenceMessenger.Default.Send<CatapulServersMessage>();
             }
         }
@@ -263,37 +220,6 @@ namespace Trebuchet
             StrongReferenceMessenger.Default.Send(new SteamConnectionChangedMessage(false));
         }
 
-        private void RegisterEvents()
-        {
-            _trebuchet.Launcher.ServerProcessStateChanged += (_, e) => RegisterEvent(new ServerProcessStateChanged(e));
-            _trebuchet.Launcher.ClientProcessStateChanged += (_, e) => RegisterEvent(new ClientProcessStateChanged(e));
-        }
-
-        private void RequestModlistManifests(string modlistName)
-        {
-            if (!ModListProfile.TryLoadProfile(_trebuchet.Config, modlistName, out ModListProfile? profile)) return;
-
-            RequestModlistManifests(profile.GetModIDList().ToList());
-        }
-
-        private void UpdateServerMods(IEnumerable<ulong> modlist)
-        {
-            if (!TrebuchetUtils.GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.ServerRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
-            //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
-
-            SteamWidget.Start("Updating mods...");
-            new CatchedTasked(Operations.SteamDownload)
-                .Add(async (cts) =>
-                {
-                    await _trebuchet.Steam.UpdateMods(modlist, cts);
-                })
-                .Then(() =>
-                {
-                    RequestModlistManifests(modlist.ToList());
-                })
-                .Start();
-        }
-
         private void UpdateServers()
         {
             if (!TrebuchetUtils.GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.ServerRunning, Operations.SteamDownload), "Trebuchet is busy.")) return;
@@ -301,31 +227,8 @@ namespace Trebuchet
 
             SteamWidget.Start("Updating servers...");
             new CatchedTasked(Operations.SteamDownload)
-                .Add(_trebuchet.Steam.UpdateServerInstances)
+                .Add(_steam.UpdateServerInstances)
                 .Then(() => StrongReferenceMessenger.Default.Send<PanelRefreshConfigMessage>())
-                .Start();
-        }
-
-        private void UpdateThenCatapultClient(string profile, string modlist, bool isBattlEye)
-        {
-            if (!TrebuchetUtils.GuiExtensions.Assert(!_taskBlocker.IsSet(Operations.SteamDownload), "Trebuchet is busy.")) return;
-
-            if (_trebuchet.Config.AutoUpdateStatus == AutoUpdateStatus.Never || _trebuchet.Launcher.IsAnyServerRunning())
-            {
-                _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye);
-                return;
-            }
-
-            //if (!GuiExtensions.Assert(_trebuchet.Steam.IsConnected, "Steam is not available.")) return;
-
-            SteamWidget.Start("Checking mod files...");
-            var allmodlist = ModListProfile.CollectAllMods(_trebuchet.Config, [modlist]).Distinct();
-            new CatchedTasked(Operations.SteamDownload)
-                .Add(async (cts) =>
-                {
-                    await _trebuchet.Steam.UpdateMods(allmodlist, cts);
-                })
-                .Then(() => _trebuchet.Launcher.CatapultClient(profile, modlist, isBattlEye))
                 .Start();
         }
 

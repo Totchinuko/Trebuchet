@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
+using Trebuchet.Messages;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 

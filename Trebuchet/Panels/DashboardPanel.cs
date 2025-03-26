@@ -9,8 +9,10 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
+using Trebuchet.Messages;
 using Trebuchet.Windows;
 using TrebuchetLib;
+using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
@@ -23,14 +25,17 @@ namespace Trebuchet.Panels
         IRecipient<DashboardStateChanged>,
         IRecipient<SteamModlistReceived>
     {
+        private readonly AppSteam _steam;
         private readonly Config _config;
         private bool _hasModRefreshScheduled;
         private readonly object _lock = new();
         private DispatcherTimer _timer;
 
-        public DashboardPanel() : base("Dashboard")
+        public DashboardPanel(AppSteam steam, Config config) : 
+            base("Dashboard", "Dashboard", "mdi-view-dashboard", PanelPosition.Bottom)
         {
-            _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+            _steam = steam;
+            _config = config;
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
             LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll, true, Operations.SteamDownload);
@@ -101,9 +106,7 @@ namespace Trebuchet.Panels
 
         public void Receive(SteamModlistReceived message)
         {
-            List<ulong> updates =
-                StrongReferenceMessenger.Default.Send(
-                    new SteamModlistUpdateRequest(message.Modlist.GetManifestKeyValuePairs()));
+            var updates = _steam.CheckModsForUpdate(message.Modlist.GetManifestKeyValuePairs().ToList());
             var queried = message.Modlist.Select(x => x.PublishedFileID).ToList();
 
             Client.RefreshUpdateStatus(queried, updates);

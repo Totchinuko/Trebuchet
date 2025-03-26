@@ -150,7 +150,7 @@ namespace TrebuchetLib
         /// </summary>
         /// <param name="keyValuePairs"></param>
         /// <returns></returns>
-        public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubID, ulong manisfestID)> keyValuePairs)
+        public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubId, ulong manisfestId)> keyValuePairs)
         {
             UpdateDownloaderConfig();
 

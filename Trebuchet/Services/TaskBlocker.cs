@@ -2,21 +2,17 @@
 using System.Linq;
 using System.Threading;
 using CommunityToolkit.Mvvm.Messaging;
+using Trebuchet.Messages;
+using TrebuchetLib;
 
-namespace Trebuchet
+namespace Trebuchet.Services
 {
-    internal class TaskBlocker : IRecipient<OperationMessage>,
-        IRecipient<OperationStartMessage>,
-        IRecipient<OperationStateRequest>
+    public class TaskBlocker
     {
-        private Dictionary<Operations, CancellationTokenSource> _taskSources = new Dictionary<Operations, CancellationTokenSource>();
+        private Dictionary<Operations, CancellationTokenSource> _taskSources = [];
 
         public TaskBlocker()
         {
-            StrongReferenceMessenger.Default.Register<OperationReleaseMessage>(this);
-            StrongReferenceMessenger.Default.Register<OperationCancelMessage>(this);
-            StrongReferenceMessenger.Default.Register<OperationStartMessage>(this);
-            StrongReferenceMessenger.Default.Register<OperationStateRequest>(this);
         }
 
         public void Cancel(Operations operation)
@@ -29,25 +25,7 @@ namespace Trebuchet
         {
             return operation.Any(_taskSources.ContainsKey);
         }
-
-        public void Receive(OperationMessage message)
-        {
-            if (message is OperationCancelMessage cancelMessage)
-                Cancel(cancelMessage.key);
-            else if (message is OperationReleaseMessage releaseMessage)
-                Release(releaseMessage.key);
-        }
-
-        public void Receive(OperationStartMessage message)
-        {
-            message.Reply(Set(message.key, message.cancelAfter));
-        }
-
-        public void Receive(OperationStateRequest message)
-        {
-            message.Reply(IsSet(message.keys));
-        }
-
+        
         public void Release(Operations operation)
         {
             if (_taskSources.TryGetValue(operation, out var source))
@@ -60,6 +38,9 @@ namespace Trebuchet
 
         public CancellationTokenSource Set(Operations operation, int cancelAfter = 0)
         {
+            if(IsSet(operation))
+                throw new TrebException("Operation is already running");
+            
             CancellationTokenSource cts = new CancellationTokenSource();
             _taskSources.Add(operation, cts);
             OnTaskSourceChanged(operation);

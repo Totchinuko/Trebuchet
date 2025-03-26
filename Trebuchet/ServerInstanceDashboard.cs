@@ -21,7 +21,7 @@ namespace Trebuchet
             LaunchCommand = new TaskBlockedCommand(OnLaunched, true, Operations.SteamDownload);
             UpdateModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning, Operations.ServerRunning);
 
-            _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+            _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();s
             Instance = instance;
 
             StrongReferenceMessenger.Default.Register(this);

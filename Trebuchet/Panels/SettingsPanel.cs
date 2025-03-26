@@ -10,7 +10,7 @@ namespace Trebuchet.Panels
     {
         private bool _displayedHelp;
 
-        public SettingsPanel() : base(string.Empty)
+        public SettingsPanel() : base("Settings", string.Empty, "mdi-cog", PanelPosition.Bottom)
         {
             LoadPanel();
         }

@@ -9,7 +9,7 @@ namespace Trebuchet.Panels
     {
         private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
 
-        public LogFilterPanel() : base("LogFilterPanel")
+        public LogFilterPanel() : base("Log Filter", "LogFilterPanel", "mdi-filter", PanelPosition.Server)
         {
             LoadPanel();
         }

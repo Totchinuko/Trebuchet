@@ -6,8 +6,8 @@ namespace Trebuchet
 {
     public sealed class UIConfig : ConfigFile<UIConfig>
     {
-        private string[] _dashboardServerModlist = new string[0];
-        private string[] _dashboardServerProfiles = new string[0];
+        private string[] _dashboardServerModlist = [];
+        private string[] _dashboardServerProfiles = [];
 
         public bool AutoRefreshModlist { get; set; } = true;
 
@@ -30,15 +30,6 @@ namespace Trebuchet
         public bool DisplayWarningOnKill { get; set; } = true;
 
         public bool UseHardwareAcceleration { get; set; } = true;
-
-        public static string GetPath(bool testlive)
-        {
-            string? ConfigPath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-            if (string.IsNullOrEmpty(ConfigPath))
-                throw new Exception("Path to assembly is invalid.");
-            ConfigPath = Path.Combine(ConfigPath, $"{(testlive ? Config.FolderTestLive : Config.FolderLive)}.UIConfig.json");
-            return ConfigPath;
-        }
 
         public void GetInstanceParameters(int instance, out string modlist, out string profile)
         {

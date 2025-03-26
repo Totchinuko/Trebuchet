@@ -36,7 +36,6 @@
         <EmbeddedResource Include="AppSettings.json.sample" />
         <EmbeddedResource Include="AppSettings.json" />
         <EmbeddedResource Include="Data\AppText.json" />
-        <EmbeddedResource Include="TrebuchetApp.Menu.json" />
         <EmbeddedResource Include="Panels\ClientProfilePanel.Fields.json" />
         <EmbeddedResource Include="Panels\ServerProfilePanel.Fields.json" />
         <EmbeddedResource Include="Panels\SettingsPanel.UI.Fields.json" />
@@ -73,10 +72,6 @@
         <None Update="Json\Maps.json">
             <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
-    </ItemGroup>
-
-    <ItemGroup>
-      <Folder Include="Services\" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,5 @@
 ﻿using TrebuchetLib;
+using TrebuchetLib.Processes;
 
 namespace Trebuchet
 {
@@ -12,10 +13,10 @@ namespace Trebuchet
         bool Running { get; }
         string Uptime { get; }
 
-        void SetDetails(ProcessDetails details);
+        void SetDetails(IConanProcess details);
 
-        void StartStats(ProcessDetails details);
+        void StartStats(IConanProcess details);
 
-        void StopStats(ProcessDetails details);
+        void StopStats();
     }
 }

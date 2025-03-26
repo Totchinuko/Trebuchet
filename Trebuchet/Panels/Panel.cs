@@ -18,14 +18,18 @@ namespace Trebuchet.Panels
         
         private bool _active;
 
-        public Panel(string template) : base(template, "TabButtonTemplate")
+        public Panel(string label, string template, string iconPath, PanelPosition position) : base(label, template)
         {
+            IconPath = iconPath;
+            Position = position;
             StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
         public event EventHandler? CanExecuteChanged;
-
         public event PropertyChangedEventHandler? PropertyChanged;
+        
+        public string IconPath { get; }
+        public PanelPosition Position { get; }
 
         public bool Active
         {
@@ -38,7 +42,6 @@ namespace Trebuchet.Panels
             }
         }
 
-        public string IconPath { get; set; } = string.Empty;
         public string TabClass => Active ? "AppTabBlue" : "AppTabNeutral";
 
         public virtual bool CanExecute(object? parameter)

@@ -49,7 +49,7 @@ namespace Trebuchet
         public event PropertyChangedEventHandler? PropertyChanged;
         public IBrush BorderColor => GetBorderBrush();
         public bool IsPublished => PublishedFileId > 0;
-        public bool IsTestLive => _appId == Config.AppIDTestLiveClient;
+        public bool IsTestLive => _appId == Constants.AppIDTestLiveClient;
         public string TypeTooltip => GetTypeText();
         public string ModType => IsTestLive ? "TestLive" : "Live";
         public ulong PublishedFileId { get; }

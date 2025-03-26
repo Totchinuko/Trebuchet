@@ -2,6 +2,8 @@ namespace TrebuchetLib.Services;
 
 public class AppSetup(bool isTestLive, bool catapult)
 {
+    private bool _hasCatapulted = false;
+    
     public bool IsTestLive { get; } = isTestLive;
     
     public bool Catapult { get; } = catapult;
@@ -18,5 +20,15 @@ public class AppSetup(bool isTestLive, bool catapult)
         configPath = Path.Combine(configPath,
             $"{(IsTestLive ? Constants.FolderTestLive : Constants.FolderLive)}.{Constants.FileConfig}");
         return configPath;
+    }
+
+    public bool CatapultTrigger()
+    {
+        if (!_hasCatapulted)
+        {
+            _hasCatapulted = true;
+            return true;
+        }
+        return false;
     }
 }

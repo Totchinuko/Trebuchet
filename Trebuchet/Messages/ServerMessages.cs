@@ -2,6 +2,7 @@
 
 using CommunityToolkit.Mvvm.Messaging.Messages;
 using TrebuchetLib;
+using TrebuchetLib.Processes;
 
 namespace Trebuchet
 {
@@ -9,7 +10,7 @@ namespace Trebuchet
     {
     }
 
-    public class ProcessServerDetailsRequest : RequestMessage<List<ProcessServerDetails>>
+    public class ProcessServerDetailsRequest : RequestMessage<List<IConanServerProcess>>
     {
     }
 
@@ -20,23 +21,6 @@ namespace Trebuchet
         public ServerConsoleRequest(int instance)
         {
             this.instance = instance;
-        }
-    }
-
-    public abstract class ServerMessages
-    {
-    }
-
-    public class ServerUpdateMessage : ServerMessages
-    { }
-
-    public class ServerUpdateModsMessage : ServerMessages
-    {
-        public readonly IEnumerable<ulong> modlist;
-
-        public ServerUpdateModsMessage(IEnumerable<ulong> modlist)
-        {
-            this.modlist = modlist;
         }
     }
 }

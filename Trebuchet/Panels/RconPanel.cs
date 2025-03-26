@@ -28,7 +28,7 @@ namespace Trebuchet.Panels
         private int _selectedConsole;
         private List<ProcessServerDetails> _servers = new List<ProcessServerDetails>();
 
-        public RconPanel() : base("RconPanel")
+        public RconPanel() : base("Console", "RconPanel", "mdi-console-line", PanelPosition.Server)
         {
             SendCommand = new SimpleCommand(OnSendCommand, false);
 

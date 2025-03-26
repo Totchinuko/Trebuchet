@@ -12,7 +12,6 @@ using System.Text.Json;
 using System.Web;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Controls.Templates;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
@@ -22,6 +21,7 @@ using Trebuchet.Messages;
 using Trebuchet.Utils;
 using Trebuchet.Windows;
 using TrebuchetLib;
+using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
@@ -33,7 +33,8 @@ namespace Trebuchet.Panels
         IRecipient<SteamModlistReceived>,
         ITinyRecipient<ModListMessages>
     {
-        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+        private readonly AppSteam _steam;
+        private readonly Config _config;
         private TrulyObservableCollection<ModFile> _modlist = new();
         private string _modlistUrl = string.Empty;
         private FileSystemWatcher? _modWatcher;
@@ -42,8 +43,11 @@ namespace Trebuchet.Panels
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
 
-        public ModlistPanel() : base("ModlistEditor")
+        public ModlistPanel(AppSteam steam, Config config) : 
+            base("Mod List", "ModlistEditor", "mdi-toy-brick", PanelPosition.Top)
         {
+            _steam = steam;
+            _config = config;
             LoadPanel();
 
             CreateModlistCommand = new SimpleCommand(OnModlistCreate);
@@ -127,10 +131,7 @@ namespace Trebuchet.Panels
                 join details in message.Modlist on file.PublishedFileId equals details.PublishedFileID
                 select new KeyValuePair<ModFile, PublishedFile>(file, details);
 
-            List<ulong> updates =
-                StrongReferenceMessenger.Default.Send(
-                    new SteamModlistUpdateRequest(message.Modlist.GetManifestKeyValuePairs()));
-
+            var updates = _steam.CheckModsForUpdate(message.Modlist.GetManifestKeyValuePairs().ToList());
             foreach (var u in update)
                 u.Key.SetManifest(u.Value, updates.Contains(u.Value.PublishedFileID));
         }
@@ -159,7 +160,7 @@ namespace Trebuchet.Panels
         public void Receive(ModListMessages message)
         {
             if(message is ModListOpenModSteamMessage openSteam)
-                TrebuchetUtils.Utils.OpenWeb(string.Format(Config.SteamWorkshopURL, openSteam.ModFile.PublishedFileId));
+                TrebuchetUtils.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, openSteam.ModFile.PublishedFileId));
             else if(message is ModListRemoveModMessage removeMod)
                 _modlist.Remove(removeMod.ModFile);
             else if(message is ModListUpdateModMessage updateMod)

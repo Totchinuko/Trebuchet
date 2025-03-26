@@ -6,7 +6,8 @@ using Trebuchet.SettingFields;
 
 namespace Trebuchet.Panels
 {
-    public abstract class FieldEditorPanel(string template) : Panel(string.IsNullOrEmpty(template) ? "FieldEditor" : template)
+    public abstract class FieldEditorPanel(string label, string template, string iconPath, PanelPosition position) : 
+        Panel(label, string.IsNullOrEmpty(template) ? "FieldEditor" : template, iconPath, position)
     {
         public List<Field> Fields { get; set; } = [];
 

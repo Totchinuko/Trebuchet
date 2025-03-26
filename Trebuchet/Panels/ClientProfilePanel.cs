@@ -17,7 +17,7 @@ namespace Trebuchet.Panels
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private string _selectedProfile;
 
-        public ClientProfilePanel() : base("ClientSettings")
+        public ClientProfilePanel() : base("Profiles", "mdi-controller", "ClientSettings", PanelPosition.Client)
         {
             LoadPanel();
         }
