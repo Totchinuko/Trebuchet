@@ -5,7 +5,9 @@ using Avalonia;
 using Avalonia.Media;
 using Humanizer;
 using SteamWorksWebAPI;
+using Trebuchet.Messages;
 using TrebuchetLib;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {
@@ -21,28 +23,38 @@ namespace Trebuchet
         public ModFile(string path)
         {
             _infos = new FileInfo(path);
+            RemoveModCommand = new SimpleCommand(OnRemoveModCommand);
+            OpenModPageCommand = new SimpleCommand(OnOpenModPageCommand);
+            UpdateModCommand = new TaskBlockedCommand(OnUpdateModCommand, true, Operations.SteamDownload);
         }
 
-        public ModFile(ulong publishedFileId, string path)
+        public ModFile(ulong publishedFileId, string path) : this(path)
         {
             PublishedFileId = publishedFileId;
-            _infos = new FileInfo(path);
         }
 
-        public ModFile(WorkshopSearchResult search, string path)
+        public ModFile(WorkshopSearchResult search, string path) : this(path)
         {
             _title = search.Title;
             PublishedFileId = search.PublishedFileId;
             _appId = search.AppId;
             _size = search.Size;
             _lastUpdate = search.LastUpdate;
-            _infos = new FileInfo(path);
         }
 
+        public SimpleCommand RemoveModCommand { get; }
+        public SimpleCommand OpenModPageCommand { get; }
+        public TaskBlockedCommand UpdateModCommand { get; }
+        
         public event PropertyChangedEventHandler? PropertyChanged;
         public IBrush BorderColor => GetBorderBrush();
         public bool IsPublished => PublishedFileId > 0;
         public bool IsTestLive => _appId == Config.AppIDTestLiveClient;
+        public string TypeTooltip => GetTypeText();
+        public string ModType => IsTestLive ? "TestLive" : "Live";
+        public ulong PublishedFileId { get; }
+        public IBrush StatusColor => GetStatusBrush();
+        public string StatusTooltip => GetStatusText();
         public string LastUpdate
         {
             get
@@ -59,12 +71,6 @@ namespace Trebuchet
                 return $"Last Update: {local.Humanize()}";
             }
         }
-        public string ModType => IsTestLive ? "TestLive" : "Live";
-        public ulong PublishedFileId { get; }
-
-        public IBrush StatusColor => GetStatusBrush();
-        public string StatusTooltip => GetStatusText();
-
         public string Title
         {
             get
@@ -134,6 +140,13 @@ namespace Trebuchet
             throw new Exception("Resource not found: " + name);
         }
 
+        private string GetTypeText()
+        {
+            if(IsPublished)
+                return IsTestLive ? App.GetAppText("TestLiveMod") : App.GetAppText("LiveMod");
+            return App.GetAppText("LocalMod");
+        }
+
         protected virtual string GetStatusText()
         {
             if (!_infos.Exists) return "Missing";
@@ -147,6 +160,21 @@ namespace Trebuchet
         protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+        }
+        
+        private void OnUpdateModCommand(object? obj)
+        {
+            TinyMessengerHub.Default.Publish(new ModListUpdateModMessage(this, this));
+        }
+
+        private void OnOpenModPageCommand(object? obj)
+        {
+            TinyMessengerHub.Default.Publish(new ModListOpenModSteamMessage(this, this));
+        }
+
+        private void OnRemoveModCommand(object? obj)
+        {
+            TinyMessengerHub.Default.Publish(new ModListRemoveModMessage(this, this));
         }
     }
 }

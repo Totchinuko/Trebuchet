@@ -38,7 +38,7 @@
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <Image x:Name="AppLogo" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" IsHitTestVisible="false" Height="20" Width="20" VerticalAlignment="Center" Margin="6,0,6,0" />
-            <TextBlock Grid.Column="1" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" IsHitTestVisible="false" FontWeight="Bold" VerticalAlignment="Center" Foreground="White" Margin="6,0,12,0">
+            <TextBlock Grid.Column="1" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" IsHitTestVisible="false" FontWeight="Bold" VerticalAlignment="Center" Margin="6,0,12,0">
                 <Run x:Name="TitleRun" />
             </TextBlock>
             <ContentPresenter Grid.Column="2" Content="{Binding $parent[UserControl].Header}" Margin="0,0,12,0" />

@@ -80,6 +80,8 @@ public partial class App : Application, IApplication
         var services = serviceCollection.BuildServiceProvider();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
+            // todo di:this will need to be service
+            TinyMessengerHub.Default = new TinyMessengerHub();
             Log.Logger = new LoggerConfiguration()
 #if !DEBUG
                     .MinimumLevel.Information()

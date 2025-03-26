@@ -29,6 +29,7 @@
             </Grid>
             <Button Classes="Base Red"
                     Command="{Binding CloseCommand}"
+                    HotKey="Enter"
                     HorizontalAlignment="Right"
                     VerticalAlignment="Center"
                     Grid.Row="2">

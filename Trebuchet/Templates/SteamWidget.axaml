@@ -33,7 +33,7 @@
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="auto" />
                     </Grid.ColumnDefinitions>
-                    <ProgressBar Grid.ColumnSpan="2" Value="{Binding Progress, Mode=OneWay}" Background="Transparent" />
+                    <ProgressBar Grid.ColumnSpan="2" IsIndeterminate="{Binding IsIndeterminate}" Height="32" Value="{Binding Progress, Mode=OneWay}" />
                     <TextBlock Text="{Binding Description}" Margin="6,0,12,0" VerticalAlignment="Center" />
                     <Button Grid.Column="1"
                             Classes="Base Sneak Yellow"

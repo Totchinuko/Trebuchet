@@ -23,6 +23,7 @@
             <Button Classes="Base Red"
                     Command="{Binding CloseCommand}"
                     HorizontalAlignment="Right"
+                    HotKey="Enter"
                     VerticalAlignment="Center"
                     Grid.Row="1">
                 <StackPanel Orientation="Horizontal">
