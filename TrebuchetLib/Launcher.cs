@@ -1,339 +1,382 @@
-﻿using System.Collections.Concurrent;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Text.RegularExpressions;
+﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using TrebuchetLib.Processes;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
 
-namespace TrebuchetLib
+namespace TrebuchetLib;
+
+public class Launcher : IDisposable
 {
-    public partial class Launcher : IDisposable
+    private readonly AppClientFiles _clientFiles;
+    private readonly IIniGenerator _iniHandler;
+    private readonly ILogger<Launcher> _logger;
+    private readonly AppModlistFiles _modlistFiles;
+    private readonly AppServerFiles _serverFiles;
+    private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
+    private IConanProcess? _conanClientProcess;
+
+    public Launcher(AppClientFiles clientFiles, AppServerFiles serverFiles, IIniGenerator iniHandler,
+        ILogger<Launcher> logger, AppModlistFiles modlistFiles)
     {
-        private readonly AppClientFiles _clientFiles;
-        private readonly AppServerFiles _serverFiles;
-        private readonly IIniGenerator _iniHandler;
-        private readonly ILogger<Launcher> _logger;
-        private bool _isRunning = true;
-        private readonly Lock _lock = new();
-        private readonly HashSet<string> _lockedFolders = [];
-        private readonly ConcurrentQueue<Action> _threadQueue = new();
-        private Dictionary<int, IConanServerProcess> _serverProcesses = [];
-        private IConanProcess? _conanProcess;
+        _clientFiles = clientFiles;
+        _serverFiles = serverFiles;
+        _iniHandler = iniHandler;
+        _logger = logger;
+        _modlistFiles = modlistFiles;
+    }
 
-        public Launcher(Config config, AppClientFiles clientFiles, AppServerFiles serverFiles, IIniGenerator iniHandler, ILogger<Launcher> logger)
+    public void Dispose()
+    {
+        _conanClientProcess?.Dispose();
+        foreach (var item in _serverProcesses)
+            item.Value.Dispose();
+        _serverProcesses.Clear();
+    }
+
+    /// <summary>
+    ///     Launch a client process while taking care of everything. Generate the modlist, generate the ini settings, etc.
+    ///     Process is created on a separate thread, and fire the event ClientProcessStarted when the process is running.
+    /// </summary>
+    /// <param name="profileName"></param>
+    /// <param name="modlistName"></param>
+    /// <param name="isBattleEye">Launch with BattlEye anti cheat.</param>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <exception cref="ArgumentException">
+    ///     Profiles can only be used by one process at a times, since they contain the db of
+    ///     the game.
+    /// </exception>
+    public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye)
+    {
+        if (_conanClientProcess != null) return;
+
+        if (!_clientFiles.TryLoadProfile(profileName, out var profile))
+            throw new TrebException($"{profileName} profile not found.");
+        if (!_modlistFiles.TryLoadProfile(modlistName, out var modlist))
+            throw new TrebException($"{modlistName} modlist not found.");
+        if (IsClientProfileLocked(profileName))
+            throw new TrebException($"Profile {profileName} folder is currently locked by another process.");
+
+        SetupJunction(_clientFiles.GetClientFolder(), profile.ProfileFolder);
+
+        _logger.LogDebug($"Locking folder {profile.ProfileName}");
+        _logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
+
+        var process = CreateClientProcess(profile, isBattleEye);
+        await WriteClientConfiguration(profile, modlist);
+
+        process.Start();
+
+        var childProcess = await CatchClientChildProcess(process);
+        if (childProcess == null)
+            throw new TrebException("Could not launch the game");
+
+        ConfigureProcess(profile.ProcessPriority, profile.CPUThreadAffinity, childProcess);
+
+        _conanClientProcess = new ConanClientProcess(childProcess);
+    }
+
+    private Process CreateClientProcess(ClientProfile profile, bool isBattleEye)
+    {
+        var filename = isBattleEye ? _clientFiles.GetBattleEyeBinaryPath() : _clientFiles.GetGameBinaryPath();
+        var args = profile.GetClientArgs();
+
+        var dir = Path.GetDirectoryName(filename);
+        if (dir == null)
+            throw new Exception($"Failed to start process, invalid directory {filename}");
+
+        var process = new Process();
+        process.StartInfo.FileName = filename;
+        process.StartInfo.WorkingDirectory = dir;
+        process.StartInfo.Arguments = args;
+        process.StartInfo.UseShellExecute = false;
+        process.EnableRaisingEvents = true;
+
+        return process;
+    }
+
+    private async Task WriteClientConfiguration(ClientProfile profile, ModListProfile modlist)
+    {
+        var tmpFile = Path.GetTempFileName();
+        await File.WriteAllLinesAsync(tmpFile, _modlistFiles.GetResolvedModlist(modlist.Modlist));
+        await _iniHandler.WriteClientSettingsAsync(profile);
+    }
+
+    private async Task<Process?> CatchClientChildProcess(Process parent)
+    {
+        var target = ProcessData.Empty;
+        while (target.IsEmpty && !parent.HasExited)
         {
-            _clientFiles = clientFiles;
-            _serverFiles = serverFiles;
-            _iniHandler = iniHandler;
-            _logger = logger;
-            Config = config;
-
-            Task.Run(ThreadLoop);
+            target = Tools.GetProcessesWithName(Constants.FileClientBin).FirstOrDefault();
+            await Task.Delay(50);
         }
 
-        public Config Config { get; }
+        if (target.IsEmpty) return null;
+        return !target.TryGetProcess(out var targetProcess) ? null : targetProcess;
+    }
 
-        private IConanProcess? ClientProcess { get; set; }
-        
-        [GeneratedRegex(@"-TotInstance=([0-9+])")]
-        private static partial Regex InstanceRegex();
+    private void ConfigureProcess(int priority, long threadAffinity, Process process)
+    {
+        process.PriorityClass = GetPriority(priority);
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+            process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(threadAffinity);
+    }
 
-        /// <summary>
-        /// Launch a client process while taking care of everything. Generate the modlist, generate the ini settings, etc.
-        /// Process is created on a separate thread, and fire the event ClientProcessStarted when the process is running.
-        /// </summary>
-        /// <param name="profileName"></param>
-        /// <param name="modlistName"></param>
-        /// <param name="isBattleEye">Launch with BattlEye anti cheat.</param>
-        /// <exception cref="FileNotFoundException"></exception>
-        /// <exception cref="ArgumentException">Profiles can only be used by one process at a times, since they contain the db of the game.</exception>
-        public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye)
+    private ProcessPriorityClass GetPriority(int index)
+    {
+        switch (index)
         {
-            Invoke(() =>
-            {
-                if (ClientProcess != null) return;
+            case 1:
+                return ProcessPriorityClass.AboveNormal;
 
-                if (!_clientFiles.TryLoadProfile(profileName, out ClientProfile? profile))
-                    throw new FileNotFoundException($"{profileName} profile not found.");
-                if (!ModListProfile.TryLoadProfile(Config, modlistName, out ModListProfile? modlist))
-                    throw new FileNotFoundException($"{modlistName} modlist not found.");
+            case 2:
+                return ProcessPriorityClass.High;
 
-                if (_lockedFolders.Contains(profile.ProfileFolder))
-                    throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
+            case 3:
+                return ProcessPriorityClass.RealTime;
 
-                SetupJunction(Config.ClientPath, profile.ProfileFolder);
+            default:
+                return ProcessPriorityClass.Normal;
+        }
+    }
 
-                ClientProcess = new ClientProcess(profile, modlist, isBattleEye);
-                ClientProcess.ProcessStateChanged += OnClientProcessStateChanged;
+    /// <summary>
+    ///     Launch a server process while taking care of everything. Generate the modlist, generate the ini settings, etc.
+    ///     Process is created on a separate thread, and fire the event ServerProcessStarted when the process is running.
+    /// </summary>
+    /// <param name="profileName"></param>
+    /// <param name="modlistName"></param>
+    /// <param name="instance">Index of the instance you want to launch</param>
+    /// <exception cref="FileNotFoundException"></exception>
+    /// <exception cref="ArgumentException">
+    ///     Profiles can only be used by one process at a times, since they contain the db of
+    ///     the game.
+    /// </exception>
+    public async Task CatapultServer(string profileName, string modlistName, int instance)
+    {
+        if (_serverProcesses.ContainsKey(instance)) return;
 
-                _lockedFolders.Add(GetCurrentClientJunction());
-                _logger.LogDebug($"Locking folder {profile.ProfileName}");
-                _logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
-                await _iniHandler.WriteClientSettingsAsync(profile);
-                Task.Run(ClientProcess.StartProcessAsync);
-            });
+        if (!_serverFiles.TryLoadProfile(profileName, out var profile))
+            throw new FileNotFoundException($"{profileName} profile not found.");
+        if (!_modlistFiles.TryLoadProfile(modlistName, out var modlist))
+            throw new FileNotFoundException($"{modlistName} modlist not found.");
+        if (IsServerProfileLocked(profileName))
+            throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
+
+        SetupJunction(_serverFiles.GetInstancePath(instance), profile.ProfileFolder);
+
+        _logger.LogDebug($"Locking folder {profile.ProfileName}");
+        _logger.LogInformation(
+            $"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}");
+
+        var process = CreateServerProcess(instance, profile);
+        await WriteServerConfiguration(profile, modlist, instance);
+        process.Start();
+
+        var childProcess = await CatchServerChildProcess(process);
+        if (childProcess == null)
+            throw new TrebException("Could not launch the server");
+
+        ConfigureProcess(profile.ProcessPriority, profile.CPUThreadAffinity, childProcess);
+
+        var serverInfos = new ConanServerInfos(profile, instance);
+        var conanServerProcess = new ConanServerProcess(childProcess, serverInfos);
+        _serverProcesses.TryAdd(instance, conanServerProcess);
+    }
+
+    private Process CreateServerProcess(int instance, ServerProfile profile)
+    {
+        var process = new Process();
+
+        var filename = _serverFiles.GetIntanceBinary(instance);
+        var args = profile.GetServerArgs(instance);
+
+        var dir = Path.GetDirectoryName(filename);
+        if (dir == null)
+            throw new Exception($"Failed to start process, invalid directory {filename}");
+
+        process.StartInfo.FileName = filename;
+        process.StartInfo.WorkingDirectory = dir;
+        process.StartInfo.Arguments = args;
+        process.StartInfo.UseShellExecute = false;
+        process.EnableRaisingEvents = true;
+        return process;
+    }
+
+    private async Task WriteServerConfiguration(ServerProfile profile, ModListProfile modlist, int instance)
+    {
+        var tmpFile = Path.GetTempFileName();
+        await File.WriteAllLinesAsync(tmpFile, _modlistFiles.GetResolvedModlist(modlist.Modlist));
+        await _iniHandler.WriteServerSettingsAsync(profile, instance);
+    }
+
+    private async Task<Process?> CatchServerChildProcess(Process process)
+    {
+        var child = ProcessData.Empty;
+        while (child.IsEmpty && !process.HasExited)
+        {
+            child = Tools.GetFirstChildProcesses(process.Id);
+            await Task.Delay(50);
         }
 
-        /// <summary>
-        /// Launch a server process while taking care of everything. Generate the modlist, generate the ini settings, etc.
-        /// Process is created on a separate thread, and fire the event ServerProcessStarted when the process is running.
-        /// </summary>
-        /// <param name="profileName"></param>
-        /// <param name="modlistName"></param>
-        /// <param name="instance">Index of the instance you want to launch</param>
-        /// <exception cref="FileNotFoundException"></exception>
-        /// <exception cref="ArgumentException">Profiles can only be used by one process at a times, since they contain the db of the game.</exception>
-        public void CatapultServer(string profileName, string modlistName, int instance)
+        if (child.IsEmpty) return null;
+        if (!child.TryGetProcess(out var targetProcess)) return null;
+        return targetProcess;
+    }
+
+    /// <summary>
+    ///     Ask a particular server instance to close. If the process is borked, this will not work.
+    /// </summary>
+    /// <param name="instance"></param>
+    public async Task CloseServer(int instance)
+    {
+        _logger.LogInformation($"Requesting server instance {instance} stop");
+        if (_serverProcesses.TryGetValue(instance, out var watcher))
+            await watcher.StopAsync();
+    }
+
+    public IConanProcess? GetClientProcess()
+    {
+        return _conanClientProcess;
+    }
+
+    public IConsole GetServerConsole(int instance)
+    {
+        if (_serverProcesses.TryGetValue(instance, out var watcher))
+            return watcher.Console;
+        throw new ArgumentException($"Server instance {instance} is not running.");
+    }
+
+    public IRcon GetServerRcon(int instance)
+    {
+        if (_serverProcesses.TryGetValue(instance, out var watcher))
+            return watcher.RCon;
+        throw new ArgumentException($"Server instance {instance} is not running.");
+    }
+
+    /// <summary>
+    ///     Get the server port informations for all the running server processes.
+    /// </summary>
+    /// <returns></returns>
+    public IEnumerable<IConanServerProcess> GetServerProcesses()
+    {
+        foreach (var p in _serverProcesses.Values)
+            yield return p;
+    }
+
+    public bool IsAnyServerRunning()
+    {
+        return _serverProcesses.Count > 0;
+    }
+
+    public bool IsClientRunning()
+    {
+        return _conanClientProcess != null;
+    }
+
+    /// <summary>
+    ///     Kill the client process.
+    /// </summary>
+    public async Task KillClient()
+    {
+        if (_conanClientProcess == null) return;
+        _logger.LogInformation("Requesting client process kill");
+        await _conanClientProcess.KillAsync();
+    }
+
+    /// <summary>
+    ///     Kill a particular server instance.
+    /// </summary>
+    /// <param name="instance"></param>
+    public async Task KillServer(int instance)
+    {
+        if (_serverProcesses.TryGetValue(instance, out var watcher))
         {
-            Invoke(() =>
-            {
-                if (_serverProcesses.ContainsKey(instance)) return;
+            _logger.LogInformation($"Requesting server process kill on instance {instance}");
+            await watcher.KillAsync();
+        }
+    }
 
-                if (!_serverFiles.TryLoadProfile(profileName, out ServerProfile? profile))
-                    throw new FileNotFoundException($"{profileName} profile not found.");
-                if (!ModListProfile.TryLoadProfile(Config, modlistName, out ModListProfile? modlist))
-                    throw new FileNotFoundException($"{modlistName} modlist not found.");
+    public async Task Tick()
+    {
+        FindExistingClient();
+        await FindExistingServers();
 
-                if (_lockedFolders.Contains(profile.ProfileFolder))
-                    throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
+        if(_conanClientProcess is not null)
+            await _conanClientProcess.RefreshAsync();
+        foreach (var process in _serverProcesses.Values)
+            await process.RefreshAsync();
+    }
 
-                SetupJunction(_serverFiles.GetInstancePath(instance), profile.ProfileFolder);
+    private void FindExistingClient()
+    {
+        var data = Tools.GetProcessesWithName(Constants.FileClientBin).FirstOrDefault();
 
-                ServerProcess watcher = new ServerProcess(profile, modlist, instance);
-                watcher.ProcessStateChanged += OnServerProcessStateChanged;
-                _serverProcesses.TryAdd(instance, watcher);
+        if (_conanClientProcess != null) return;
+        if (data.IsEmpty) return;
+        if (!data.TryGetProcess(out var process)) return;
 
-                _lockedFolders.Add(GetCurrentServerJunction(instance));
-                _logger.LogDebug($"Locking folder {profile.ProfileName}");
-                _logger.LogInformation($"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}");
-                Task.Run(watcher.StartProcessAsync);
-            });
+        IConanProcess client = new ConanClientProcess(process);
+        _conanClientProcess = client;
+    }
+
+    private async Task FindExistingServers()
+    {
+        var processes = Tools.GetProcessesWithName(Constants.FileServerBin);
+        foreach (var p in processes)
+        {
+            if (!_serverFiles.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
+            if (_serverProcesses.ContainsKey(instance)) continue;
+            if (!p.TryGetProcess(out var process)) continue;
+
+            var infos = await _iniHandler.GetInfosFromServerAsync(instance).ConfigureAwait(false);
+            IConanServerProcess server = new ConanServerProcess(process, infos);
+            _serverProcesses.TryAdd(instance, server);
+        }
+    }
+
+    public bool IsClientProfileLocked(string profileName)
+    {
+        if (_conanClientProcess == null) return false;
+        var junction = Path.GetFullPath(GetCurrentClientJunction());
+        var profilePath = Path.GetFullPath(_clientFiles.GetFolder(profileName));
+        return string.Equals(junction, profilePath, StringComparison.Ordinal);
+    }
+
+    public bool IsServerProfileLocked(string profileName)
+    {
+        var profilePath = Path.GetFullPath(_serverFiles.GetFolder(profileName));
+        foreach (var s in _serverProcesses.Values)
+        {
+            var instance = s.Instance;
+            var junction = Path.GetFullPath(GetCurrentServerJunction(instance));
+            if (string.Equals(junction, profilePath, StringComparison.Ordinal))
+                return true;
         }
 
-        /// <summary>
-        /// Ask a particular server instance to close. If the process is borked, this will not work.
-        /// </summary>
-        /// <param name="instance"></param>
-        public void CloseServer(int instance)
-        {
-            _logger.LogInformation($"Requesting server instance {instance} stop");
-            Invoke(() =>
-            {
-                if (_serverProcesses.TryGetValue(instance, out var watcher))
-                    watcher.Close();
-            });
-        }
+        return false;
+    }
 
-        public void Dispose()
-        {
-            Invoke(() =>
-            {
-                _isRunning = false;
-                foreach (var item in _serverProcesses)
-                    item.Value.Dispose();
-                _serverProcesses.Clear();
-            });
-        }
+    private string GetCurrentClientJunction()
+    {
+        var path = Path.Combine(_clientFiles.GetClientFolder(), Constants.FolderGameSave);
+        if (JunctionPoint.Exists(path))
+            return JunctionPoint.GetTarget(path);
+        return string.Empty;
+    }
 
-        public ProcessDetails? GetClientDetails()
-        {
-            return ClientProcess?.ProcessDetails;
-        }
+    private string GetCurrentServerJunction(int instance)
+    {
+        var path = Path.Combine(_serverFiles.GetInstancePath(instance), Constants.FolderGameSave);
+        if (JunctionPoint.Exists(path))
+            return JunctionPoint.GetTarget(path);
+        return string.Empty;
+    }
 
-        public IConsole GetServerConsole(int instance)
-        {
-            if (_serverProcesses.TryGetValue(instance, out var watcher))
-                return watcher.Console;
-            throw new ArgumentException($"Server instance {instance} is not running.");
-        }
-
-        public IRcon GetServerRcon(int instance)
-        {
-            if (_serverProcesses.TryGetValue(instance, out var watcher))
-                return watcher.Rcon;
-            throw new ArgumentException($"Server instance {instance} is not running.");
-        }
-
-        /// <summary>
-        /// Get the server port informations for all the running server processes.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<ProcessServerDetails> GetServersDetails()
-        {
-            foreach (ServerProcess p in _serverProcesses.Values)
-                yield return p.ProcessDetails;
-        }
-
-        public void Invoke(Action action)
-        {
-            _threadQueue.Enqueue(action);
-        }
-
-        public bool IsAnyServerRunning()
-        {
-            return _serverProcesses.Count > 0;
-        }
-
-        public bool IsClientRunning()
-        {
-            return ClientProcess != null;
-        }
-
-        /// <summary>
-        /// Kill the client process.
-        /// </summary>
-        public void KillClient()
-        {
-            Invoke(() =>
-            {
-                if (ClientProcess == null) return;
-                _logger.LogInformation("Requesting client process kill");
-                ClientProcess.Kill();
-            });
-        }
-
-        /// <summary>
-        /// Kill a particular server instance.
-        /// </summary>
-        /// <param name="instance"></param>
-        public void KillServer(int instance)
-        {
-            Invoke(() =>
-            {
-                if (_serverProcesses.TryGetValue(instance, out var watcher))
-                {
-                    _logger.LogInformation($"Requesting server process kill on instance {instance}");
-                    watcher.Kill();
-                }
-            });
-        }
-
-        public async void Tick()
-        {
-            await Task.Run(FindExistingClient);
-        }
-
-        private static bool GetInstance(string path, out int instance)
-        {
-            instance = 0;
-            var match = InstanceRegex().Match(path);
-            if (!match.Success) return false;
-
-            return int.TryParse(match.Groups[1].Value, out instance);
-        }
-
-        private void FindExistingClient()
-        {
-            var data = Tools.GetProcessesWithName(Constants.FileClientBin).FirstOrDefault();
-
-            if (ClientProcess != null) return;
-            if (data.IsEmpty) return;
-            if (!data.TryGetProcess(out Process? process)) return;
-
-            IConanProcess client = new ConanClientProcess(process);
-            ClientProcess = client;
-            _lockedFolders.Add(GetCurrentClientJunction());
-        }
-
-        private async Task FindExistingServers()
-        {
-            var processes = Tools.GetProcessesWithName(Constants.FileServerBin);
-            foreach (var p in processes)
-            {
-                if (!GetInstance(p.args, out int instance)) continue;
-                if (_serverProcesses.ContainsKey(instance)) continue;
-                if (!p.TryGetProcess(out Process? process)) continue;
-
-                var infos = await _iniHandler.GetInfosFromServerAsync(instance).ConfigureAwait(false);
-                IConanServerProcess server = new ConanServerProcess(process, infos);
-                _serverProcesses.TryAdd(instance, server);
-                _lockedFolders.Add(GetCurrentServerJunction(instance));
-            }
-        }
-
-        private string GetCurrentClientJunction()
-        {
-            string path = Path.Combine(Config.ClientPath, Constants.FolderGameSave);
-            if (JunctionPoint.Exists(path))
-                return JunctionPoint.GetTarget(path);
-            else return string.Empty;
-        }
-
-        private string GetCurrentServerJunction(int instance)
-        {
-            string path = Path.Combine(_serverFiles.GetInstancePath(instance), Constants.FolderGameSave);
-            if (JunctionPoint.Exists(path))
-                return JunctionPoint.GetTarget(path);
-            else return string.Empty;
-        }
-
-        private bool IsRestartWhenDown(string profileName)
-        {
-            if (!_serverFiles.TryLoadProfile(profileName, out ServerProfile? profile)) return false;
-            return profile.RestartWhenDown;
-        }
-
-        private void OnClientProcessStateChanged(object? sender, ProcessDetailsEventArgs e)
-        {
-            ClientProcessStateChanged?.Invoke(this, e);
-            if (e.NewDetails.State.IsRunning()) return;
-
-            Invoke(() =>
-            {
-                ClientProcess = null;
-                _lockedFolders.Remove(GetCurrentClientJunction());
-            });
-        }
-
-        private void OnServerProcessStateChanged(object? sender, ProcessServerDetailsEventArgs e)
-        {
-            ServerProcessStateChanged?.Invoke(this, e);
-            if (e.NewDetails.State.IsRunning()) return;
-            Invoke(() =>
-            {
-                _serverProcesses.TryRemove(e.NewDetails.Instance, out _);
-                _lockedFolders.Remove(GetCurrentServerJunction(e.NewDetails.Instance));
-                _logger.LogInformation($"Server intance {e.NewDetails.Instance} terminated");
-
-                if (e.NewDetails.State == ProcessState.CRASHED && IsRestartWhenDown(e.NewDetails.Profile))
-                {
-                    _logger.LogInformation($"Restarting server instance {e.NewDetails.Instance}");
-                    CatapultServer(e.NewDetails.Profile, e.NewDetails.Modlist, e.NewDetails.Instance);
-                }
-            });
-        }
-
-        private void SetupJunction(string gamePath, string targetPath)
-        {
-            string junction = Path.Combine(gamePath, Constants.FolderGameSave);
-            Tools.RemoveSymboliclink(junction);
-            Tools.SetupSymboliclink(junction, targetPath);
-        }
-
-        /// <summary>
-        /// Tick the trebuchet. This will check if client or any server is already running and catch them if they where started by trebuchet.
-        /// </summary>
-        private void ThreadLoop()
-        {
-            DateTime lastSearch = DateTime.UtcNow;
-            while (_isRunning)
-            {
-                while (_threadQueue.TryDequeue(out Action? action))
-                    action();
-
-                if (DateTime.UtcNow - lastSearch > TimeSpan.FromSeconds(1))
-                {
-                    lastSearch = DateTime.UtcNow;
-                    FindExistingClient();
-                    FindExistingServers();
-                }
-
-                Thread.Sleep(100);
-            }
-        }
-
-   
+    private void SetupJunction(string gamePath, string targetPath)
+    {
+        var junction = Path.Combine(gamePath, Constants.FolderGameSave);
+        Tools.RemoveSymboliclink(junction);
+        Tools.SetupSymboliclink(junction, targetPath);
     }
 }

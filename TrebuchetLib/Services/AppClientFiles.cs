@@ -4,16 +4,6 @@ namespace TrebuchetLib.Services;
 
 public class AppClientFiles(Config config, AppSetup appSetup)
 {
-    public string GetConfigPath()
-    {
-        string? configPath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-        if (string.IsNullOrEmpty(configPath))
-            throw new Exception("Path to assembly is invalid.");
-        configPath = Path.Combine(configPath,
-            $"{(appSetup.IsTestLive ? Constants.FolderTestLive : Constants.FolderLive)}.{Constants.FileConfig}");
-        return configPath;
-    }
-    
     public string GetFolder(string name)
     {
         return Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles, name);

@@ -19,6 +19,10 @@ public interface IConanServerProcess : IConanProcess
     public string Title { get; }
     
     public bool Online { get; }
+    
+    public IConsole Console { get; }
+    
+    public IRcon RCon { get; }
 
     Task StopAsync();
 }

@@ -123,4 +123,19 @@ public class AppServerFiles(Config config, AppSetup appSetup)
             }
             catch { return false; }
         }
+
+        public bool TryGetInstanceIndexFromPath(string path, out int instance)
+        {
+            instance = -1;
+            for (int i = 0; i < config.ServerInstanceCount; i++)
+            {
+                var instancePath = Path.GetFullPath(GetIntanceBinary(i));
+                if (string.Equals(instancePath, path, StringComparison.Ordinal))
+                {
+                    instance = i;
+                    return true;
+                }
+            }
+            return false;
+        }
 }

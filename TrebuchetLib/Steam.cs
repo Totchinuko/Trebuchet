@@ -1,17 +1,22 @@
 ﻿using DepotDownloader;
-using Serilog;
+using Microsoft.Extensions.Logging;
 using SteamKit2;
+using TrebuchetLib.Services;
 
 namespace TrebuchetLib
 {
     public class Steam : IDebugListener
     {
         private readonly Config _config;
+        private readonly ILogger<Steam> _logger;
+        private readonly AppSetup _appSetup;
         private readonly Steam3Session _session;
 
-        public Steam(Config config)
+        public Steam(Config config, ILogger<Steam> logger, AppSetup appSetup)
         {
             _config = config;
+            _logger = logger;
+            _appSetup = appSetup;
 
             DebugLog.AddListener(this);
             Util.ConsoleWriteRedirect += OnConsoleWriteRedirect;
@@ -20,13 +25,13 @@ namespace TrebuchetLib
             ContentDownloader.Config.LoginID = null;
             UpdateDownloaderConfig();
             _session = ContentDownloader.InitializeSteam3(null, null);
-            _session.Connected += (sender, args) => Connected?.Invoke(this, EventArgs.Empty);
-            _session.Disconnected += (sender, args) => Disconnected?.Invoke(this, EventArgs.Empty);
+            _session.Connected += (_, _) => Connected?.Invoke(this, EventArgs.Empty);
+            _session.Disconnected += (_, _) => Disconnected?.Invoke(this, EventArgs.Empty);
         }
 
         public event EventHandler? Connected;
         public event EventHandler? Disconnected;
-        public bool IsConnected => _session?.steamClient?.IsConnected ?? false;
+        public bool IsConnected => _session.steamClient?.IsConnected ?? false;
 
         public static void SetProgress(IProgress<double> progress)
         {
@@ -39,7 +44,7 @@ namespace TrebuchetLib
             Tools.DeleteIfExists(ContentDownloader.Config.DepotConfigDirectory);
         }
 
-        public async void Connect()
+        public async Task Connect()
         {
             await _session.Connect();
         }
@@ -52,20 +57,19 @@ namespace TrebuchetLib
         /// <summary>
         /// Count the amount of instances currently installed. This does not verify if the files are valid, just the main binary.
         /// </summary>
-        /// <param name="config"></param>
         /// <returns></returns>
         public int GetInstalledInstances()
         {
             int count = 0;
 
-            string folder = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances);
+            string folder = Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances);
             if (!Directory.Exists(folder))
                 return 0;
 
             string[] instances = Directory.GetDirectories(folder);
             foreach (string instance in instances)
             {
-                string bin = Path.Combine(instance, Config.FolderGameBinaries, Config.FileServerBin);
+                string bin = Path.Combine(instance, Constants.FolderGameBinaries, Constants.FileServerBin);
                 if (File.Exists(bin))
                     count++;
             }
@@ -76,18 +80,17 @@ namespace TrebuchetLib
         /// <summary>
         /// Get the installed local build id of a specified instance
         /// </summary>
-        /// <param name="config"></param>
         /// <param name="instance"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
         public ulong GetInstanceBuildID(int instance)
         {
             string manifest = Path.Combine(
-                _config.ResolvedInstallPath,
-                _config.VersionFolder,
-                Config.FolderServerInstances,
-                string.Format(Config.FolderInstancePattern, instance),
-                Config.FileBuildID);
+                _config.ResolvedInstallPath(),
+                _appSetup.VersionFolder,
+                Constants.FolderServerInstances,
+                string.Format(Constants.FolderInstancePattern, instance),
+                Constants.FileBuildID);
 
             if (!File.Exists(manifest))
                 return 0;
@@ -100,7 +103,7 @@ namespace TrebuchetLib
 
         public string GetServerInstancePath(int instanceNumber)
         {
-            return Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
+            return Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, instanceNumber));
         }
 
         public uint GetSteam3AppBuildNumber(uint appId, string branch)
@@ -128,8 +131,6 @@ namespace TrebuchetLib
         /// <summary>
         /// Force refresh of the steam app info cache and get the current build id of the server app.
         /// </summary>
-        /// <param name="config"></param>
-        /// <param name="steam"></param>
         /// <returns></returns>
         public async Task<ulong> GetSteamBuildID()
         {
@@ -139,8 +140,8 @@ namespace TrebuchetLib
                 throw new InvalidOperationException("Steam session is not functioning");
             return await Task.Run(() =>
             {
-                _session.RequestAppInfo(_config.ServerAppID, true);
-                return ContentDownloader.GetSteam3AppBuildNumber(_config.ServerAppID, ContentDownloader.DEFAULT_BRANCH);
+                _session.RequestAppInfo(_appSetup.ServerAppId, true);
+                return ContentDownloader.GetSteam3AppBuildNumber(_appSetup.ServerAppId, ContentDownloader.DEFAULT_BRANCH);
             }).ConfigureAwait(false);
         }
 
@@ -153,7 +154,7 @@ namespace TrebuchetLib
         {
             UpdateDownloaderConfig();
 
-            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.CONFIG_DIR, ContentDownloader.DEPOT_CONFIG));
+            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_config.ResolvedInstallPath(), Constants.FolderWorkshop, ContentDownloader.CONFIG_DIR, ContentDownloader.DEPOT_CONFIG));
             foreach (var (pubID, manisfestID) in keyValuePairs)
             {
                 if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pubID, out ulong manisfest))
@@ -166,33 +167,32 @@ namespace TrebuchetLib
         /// <summary>
         /// Remove all junctions present in any server instance folder. Used before update to avoid crash du to copy error on junction folders.
         /// </summary>
-        /// <param name="config"></param>
         public void RemoveAllSymbolicLinks()
         {
-            string folder = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances);
+            string folder = Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances);
             if (!Directory.Exists(folder))
                 return;
             string[] instances = Directory.GetDirectories(folder);
             foreach (string instance in instances)
-                Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
+                Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
         }
 
         public bool SetupFolders()
         {
-            if (!Tools.ValidateInstallDirectory(_config.ResolvedInstallPath)) return false;
+            if (!Tools.ValidateInstallDirectory(_config.ResolvedInstallPath())) return false;
 
             try
             {
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances));
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderClientProfiles));
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerProfiles));
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderModlistProfiles));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderClientProfiles));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerProfiles));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderModlistProfiles));
 
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop));
+                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), Constants.FolderWorkshop));
             }
             catch (Exception ex)
             {
-                Log.Error(ex, "Failed to create app folders.");
+                _logger.LogError(ex, "Failed to create app folders.");
                 throw new Exception("Failed to create app folders.", ex);
             }
 
@@ -204,15 +204,13 @@ namespace TrebuchetLib
             ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
             ContentDownloader.Config.MaxDownloads = _config.MaxDownloads;
             ContentDownloader.Config.MaxServers = Math.Max(_config.MaxServers, ContentDownloader.Config.MaxDownloads);
-            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop, ContentDownloader.CONFIG_DIR);
-            AccountSettingsStore.LoadFromFile(Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, "account.config"));
+            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_config.ResolvedInstallPath(), Constants.FolderWorkshop, ContentDownloader.CONFIG_DIR);
+            AccountSettingsStore.LoadFromFile(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, "account.config"));
         }
 
         /// <summary>
         /// Update a list of mods from the steam workshop.
         /// </summary>
-        /// <param name="config"></param>
-        /// <param name="steam"></param>
         /// <param name="enumerable"></param>
         /// <param name="cts"></param>
         /// <returns></returns>
@@ -222,16 +220,15 @@ namespace TrebuchetLib
             if (!await WaitSteamConnectionAsync()) return;
 
             UpdateDownloaderConfig();
-            ContentDownloader.Config.InstallDirectory = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop);
-            await Task.Run(() => ContentDownloader.DownloadUGCAsync([Config.AppIDLiveClient, Config.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts));
+            ContentDownloader.Config.InstallDirectory = Path.Combine(_config.ResolvedInstallPath(), Constants.FolderWorkshop);
+            await Task.Run(() => ContentDownloader.DownloadUGCAsync([Constants.AppIDLiveClient, Constants.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts));
         }
 
         /// <summary>
         /// Performs a server update on a targeted instance.
         /// </summary>
-        /// <param name="config"></param>
         /// <param name="instanceNumber"></param>
-        /// <param name="token"></param>
+        /// <param name="cts"></param>
         /// <param name="reinstall"></param>
         /// <returns></returns>
         public async Task UpdateServer(int instanceNumber, CancellationTokenSource cts, bool reinstall = false)
@@ -242,25 +239,24 @@ namespace TrebuchetLib
 
             if (!await WaitSteamConnectionAsync().ConfigureAwait(false)) return;
 
-            Log.Information($"Updating server instance {instanceNumber}.");
+            _logger.LogInformation($"Updating server instance {instanceNumber}.");
 
             string instance = GetServerInstancePath(instanceNumber);
             if (reinstall)
             {
-                Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
+                Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
                 Tools.DeleteIfExists(instance);
             }
 
             Tools.CreateDir(instance);
             UpdateDownloaderConfig();
             ContentDownloader.Config.InstallDirectory = instance;
-            await Task.Run(() => ContentDownloader.DownloadAppAsync(_config.ServerAppID, [], ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts), cts.Token).ConfigureAwait(false);
+            await Task.Run(() => ContentDownloader.DownloadAppAsync(_appSetup.ServerAppId, [], ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts), cts.Token).ConfigureAwait(false);
         }
 
         /// <summary>
         /// Update a server instance other than 0, from the content of instance 0.
         /// </summary>
-        /// <param name="config"></param>
         /// <param name="instanceNumber"></param>
         /// <param name="token"></param>
         /// <returns></returns>
@@ -272,17 +268,17 @@ namespace TrebuchetLib
             if (instanceNumber == 0)
                 throw new Exception("Can't update instance 0 with itself.");
 
-            Log.Information("Updating server instance {0} from instance 0.");
+            _logger.LogInformation("Updating server instance {0} from instance 0.", instanceNumber);
             if (!SetupFolders()) return;
 
-            string instance = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, instanceNumber));
-            string instance0 = Path.Combine(_config.ResolvedInstallPath, _config.VersionFolder, Config.FolderServerInstances, string.Format(Config.FolderInstancePattern, 0));
+            string instance = Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, instanceNumber));
+            string instance0 = Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, 0));
 
             if (!Directory.Exists(instance0))
                 throw new DirectoryNotFoundException($"{instance0} was not found.");
 
-            Tools.RemoveSymboliclink(Path.Combine(instance0, Config.FolderGameSave));
-            Tools.RemoveSymboliclink(Path.Combine(instance, Config.FolderGameSave));
+            Tools.RemoveSymboliclink(Path.Combine(instance0, Constants.FolderGameSave));
+            Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
             Tools.DeleteIfExists(instance);
             Tools.CreateDir(instance);
 
@@ -292,8 +288,6 @@ namespace TrebuchetLib
         /// <summary>
         /// Update instance 0 using steamcmd, then copy the files of instance0 to update other instances.
         /// </summary>
-        /// <param name="config"></param>
-        /// <param name="token"></param>
         /// <returns></returns>
         public async Task UpdateServerInstances(CancellationTokenSource cts)
         {
@@ -301,13 +295,13 @@ namespace TrebuchetLib
 
             if (!await WaitSteamConnectionAsync()) return;
 
-            Log.Information("Updating all server instances...");
+            _logger.LogInformation("Updating all server instances...");
             int count = _config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
             {
                 if (i == 0)
                 {
-                    await UpdateServer(i, cts, false);
+                    await UpdateServer(i, cts);
                 }
                 else
                 {
@@ -326,20 +320,19 @@ namespace TrebuchetLib
         public async Task<bool> WaitSteamConnectionAsync()
         {
             if (IsConnected) return true;
-            if (_session == null) return false;
             await _session.Connect();
             return IsConnected;
         }
 
         public void WriteLine(string category, string msg)
         {
-            Log.Information($"[{category}] {msg}");
+            _logger.LogInformation($"[{category}] {msg}");
         }
 
         private void OnConsoleWriteRedirect(string obj)
         {
             obj = obj.Replace(Environment.NewLine, string.Empty);
-            Log.Information($"[ContentDownloader] {obj}");
+            _logger.LogInformation($"[ContentDownloader] {obj}");
         }
     }
 }

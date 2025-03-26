@@ -26,6 +26,9 @@ public sealed class ConanServerProcess : IConanServerProcess
         _lastResponse = DateTime.UtcNow;
         _sourceQueryReader
             = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, _infos.QueryPort), 4 * 1000, 5 * 1000);
+        
+        RCon = new Rcon(new IPEndPoint(IPAddress.Loopback, _infos.RConPort), _infos.RConPassword);
+        Console = new MixedConsole(RCon);
     }
 
     public bool ZombieKill { get; set; }
@@ -58,6 +61,10 @@ public sealed class ConanServerProcess : IConanServerProcess
         get => _online;
         private set => SetField(ref _online, value);
     }
+
+    public IConsole Console { get; }
+    
+    public IRcon RCon { get; }
 
     public int Instance => _infos.Instance;
     public int Port => _infos.Port;

@@ -202,15 +202,6 @@ namespace TrebuchetLib
             return Path.GetFileNameWithoutExtension(profiles[0]);
         }
 
-        public static IEnumerable<KeyValuePair<ulong, FileInfo>> GetModFiles(IEnumerable<string> files)
-        {
-            foreach (var file in files)
-            {
-                if (ModListProfile.TryParseModID(file, out ulong id))
-                    yield return new KeyValuePair<ulong, FileInfo>(id, new FileInfo(file));
-            }
-        }
-
         public static ProcessData GetProcess(int processId)
         {
             if(OperatingSystem.IsWindows())
@@ -463,7 +454,7 @@ namespace TrebuchetLib
                 return false;
             if (!Directory.Exists(installPath))
                 return false;
-            if (Regex.IsMatch(installPath, Config.RegexSavedFolder))
+            if (Regex.IsMatch(installPath, Constants.RegexSavedFolder))
                 return false;
             return true;
         }
