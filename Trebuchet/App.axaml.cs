@@ -31,8 +31,6 @@ public partial class App : Application, IApplication
 
     public static Dictionary<string, string> AppText { get; set; } = [];
 
-    public static UIConfig Config { get; private set; } = null!;
-    
     public string AppIconPath => "avares://Trebuchet/Assets/Icons/AppIcon.ico";
 
     public static string GetAppText(string key, params object[] args)

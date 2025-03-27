@@ -57,7 +57,7 @@
                                 <TextBlock Text="Kill" />
                             </StackPanel>
                         </Button>
-                        <Border Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{Binding IsUpdateNeeded}">
+                        <Border Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{Binding UpdateNeeded.Count}">
                             <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue" ToolTip.Tip="Mod update available !" ToolTip.ShowDelay="0">
                                 <StackPanel Orientation="Horizontal">
                                     <i:Icon Value="mdi-update" Classes="Normal" Margin="0,0,6,0"/>

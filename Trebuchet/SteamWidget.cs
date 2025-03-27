@@ -3,6 +3,7 @@ using System.ComponentModel;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
+using Trebuchet.Services.TaskBlocker;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
@@ -11,7 +12,7 @@ namespace Trebuchet
     public class SteamWidget : IProgress<double>,
         INotifyPropertyChanged,
         IRecipient<SteamConnectionChangedMessage>,
-        IRecipient<OperationStateChanged>
+        IRecipient<BlockedTaskStateChanged>
     {
         private readonly object _descriptionLock = new();
         private readonly object _progressLock;
@@ -74,7 +75,7 @@ namespace Trebuchet
             });
         }
 
-        public void Receive(OperationStateChanged message)
+        public void Receive(BlockedTaskStateChanged message)
         {
             if (message.key != Operations.SteamDownload) return;
 

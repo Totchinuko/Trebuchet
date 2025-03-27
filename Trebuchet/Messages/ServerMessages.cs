@@ -6,10 +6,6 @@ using TrebuchetLib.Processes;
 
 namespace Trebuchet
 {
-    public class InstanceInstalledCountRequest : RequestMessage<int>
-    {
-    }
-
     public class ProcessServerDetailsRequest : RequestMessage<List<IConanServerProcess>>
     {
     }

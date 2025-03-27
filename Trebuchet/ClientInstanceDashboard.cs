@@ -5,21 +5,23 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
+using Trebuchet.Messages;
 using Trebuchet.Services;
+using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
-using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
+using AppFiles = TrebuchetLib.Services.AppFiles;
 
 namespace Trebuchet;
 
-public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<ClientProcessStateChanged>
+public class ClientInstanceDashboard : INotifyPropertyChanged
 {
-    private readonly AppClientFiles _clientFiles;
     private readonly Config _config;
-    private readonly ILogger<ClientInstanceDashboard> _logger;
-    private readonly AppModlistFiles _modlistFiles;
+    private readonly UIConfig _uiConfig;
+    private readonly ILogger _logger;
+    private readonly AppFiles _appFiles;
     private readonly SteamAPI _steamApi;
     private ProcessState _lastState;
     private string _selectedModlist;
@@ -28,29 +30,31 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
 
     public ClientInstanceDashboard(
         Config config, 
-        AppModlistFiles modlistFiles,
+        UIConfig uiConfig,
+        AppFiles appFiles,
         SteamAPI steamApi,
-        AppClientFiles clientFiles, 
         Launcher launcher,
-        ILogger<ClientInstanceDashboard> logger)
+        ILogger logger)
     {
         _config = config;
-        _modlistFiles = modlistFiles;
+        _uiConfig = uiConfig;
+        _appFiles = appFiles;
         _steamApi = steamApi;
-        _clientFiles = clientFiles;
         _logger = logger;
         _launcher = launcher;
 
         KillCommand = new SimpleCommand(OnKilled, false);
-        LaunchCommand = new TaskBlockedCommand(OnLaunched, true, Operations.SteamDownload);
-        LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched, true, Operations.SteamDownload);
-        UpdateModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload, Operations.GameRunning,
-            Operations.ServerRunning);
+        LaunchCommand = new TaskBlockedCommand(OnLaunched)
+            .SetBlockingType<SteamDownload>();
+        LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched)
+            .SetBlockingType<SteamDownload>();
+        UpdateModsCommand = new TaskBlockedCommand(OnModUpdate)
+            .SetBlockingType<SteamDownload>()
+            .SetBlockingType<ClientRunning>()
+            .SetBlockingType<ServersRunning>();
 
-        StrongReferenceMessenger.Default.Register(this);
-
-        _selectedProfile = App.Config.DashboardClientProfile;
-        _selectedModlist = App.Config.DashboardClientModlist;
+        _selectedProfile = _uiConfig.DashboardClientProfile;
+        _selectedModlist = _uiConfig.DashboardClientModlist;
 
         Resolve();
         ListProfiles();
@@ -83,8 +87,8 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
         set
         {
             _selectedModlist = value;
-            App.Config.DashboardClientModlist = _selectedModlist;
-            App.Config.SaveFile();
+            _uiConfig.DashboardClientModlist = _selectedModlist;
+            _uiConfig.SaveFile();
         }
     }
 
@@ -94,8 +98,8 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
         set
         {
             _selectedProfile = value;
-            App.Config.DashboardClientProfile = _selectedProfile;
-            App.Config.SaveFile();
+            _uiConfig.DashboardClientProfile = _selectedProfile;
+            _uiConfig.SaveFile();
         }
     }
 
@@ -105,15 +109,11 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
 
     public event PropertyChangedEventHandler? PropertyChanged;
 
-    void IRecipient<ClientProcessStateChanged>.Receive(ClientProcessStateChanged message)
-    {
-    }
-
     public async void Kill()
     {
         if (!ProcessRunning) return;
 
-        if (App.Config.DisplayWarningOnKill)
+        if (_uiConfig.DisplayWarningOnKill)
         {
             var question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
             await question.OpenDialogueAsync();
@@ -133,7 +133,7 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
 
         if (_config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
         {
-            var modlist = _modlistFiles.CollectAllMods(SelectedModlist).ToList();
+            var modlist = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
             await _steamApi.UpdateMods(modlist);
         }
         
@@ -172,7 +172,7 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
     {
         ClearUpdates();
         if (string.IsNullOrEmpty(SelectedModlist)) return;
-        var mods = _modlistFiles.CollectAllMods(SelectedModlist).ToList();
+        var mods = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
         var response = await _steamApi.RequestModDetails(mods);
         UpdateNeeded = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList());
         OnPropertyChanged(nameof(UpdateNeeded));
@@ -188,8 +188,8 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
 
     private void ListProfiles()
     {
-        Modlists = _modlistFiles.ListProfiles().ToList();
-        Profiles = _clientFiles.ListProfiles().ToList();
+        Modlists = _appFiles.Client.ListProfiles().ToList();
+        Profiles = _appFiles.Client.ListProfiles().ToList();
         OnPropertyChanged(nameof(Modlists));
         OnPropertyChanged(nameof(Profiles));
     }
@@ -213,16 +213,8 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
     {
         if (string.IsNullOrEmpty(SelectedModlist)) return;
 
-        try
-        {
-            var modlist = _modlistFiles.CollectAllMods(SelectedModlist).ToList();
-            await _steamApi.UpdateMods(modlist);
-        }
-        catch (TrebException ex)
-        {
-            _logger.LogError(ex.Message);
-            await new ErrorModal(App.GetAppText("Error"), App.GetAppText("ModsDowndloadFailed")).OpenDialogueAsync();
-        }
+        var modlist = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
+        await _steamApi.UpdateMods(modlist);
     }
 
     private async void OnProcessFailed()
@@ -260,12 +252,12 @@ public class ClientInstanceDashboard : INotifyPropertyChanged, IRecipient<Client
 
     private void Resolve()
     {
-        _clientFiles.ResolveProfile(ref _selectedProfile);
-        _modlistFiles.ResolveProfile(ref _selectedModlist);
+        _appFiles.Client.ResolveProfile(ref _selectedProfile);
+        _appFiles.Mods.ResolveProfile(ref _selectedModlist);
 
-        App.Config.DashboardClientModlist = _selectedModlist;
-        App.Config.DashboardClientProfile = _selectedProfile;
-        App.Config.SaveFile();
+        _uiConfig.DashboardClientModlist = _selectedModlist;
+        _uiConfig.DashboardClientProfile = _selectedProfile;
+        _uiConfig.SaveFile();
         OnPropertyChanged(nameof(SelectedModlist));
         OnPropertyChanged(nameof(SelectedProfile));
     }

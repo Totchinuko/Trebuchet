@@ -1,30 +1,38 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
+using Trebuchet.Services.TaskBlocker;
 
 namespace Trebuchet
 {
-    public class TaskBlockedCommand : ICommand, IRecipient<OperationStateChanged>
+    public class TaskBlockedCommand : ICommand, IRecipient<BlockedTaskStateChanged>
     {
         private readonly Action<object?> _command;
         private bool _enabled;
-        private readonly Operations[] _tasks;
+        private bool _blocked;
+        private readonly List<Type> _types = [];
 
-        public TaskBlockedCommand(Action<object?> command, bool enabled = true, params Operations[] tasks)
+        public TaskBlockedCommand(Action<object?> command, bool enabled = true)
         {
             _command = command;
-            _tasks = tasks;
             _enabled = enabled;
             StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
         public event EventHandler? CanExecuteChanged;
 
+        public TaskBlockedCommand SetBlockingType<T>() where T : IBlockedTaskType
+        {
+            _types.Add(typeof(T));
+            return this;
+        }
+
         public bool CanExecute(object? parameter)
         {
-            return !StrongReferenceMessenger.Default.Send(new OperationStateRequest(_tasks)) && _enabled;
+            return !_blocked && _enabled;
         }
 
         public void Execute(object? parameter)
@@ -39,10 +47,13 @@ namespace Trebuchet
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
         }
 
-        void IRecipient<OperationStateChanged>.Receive(OperationStateChanged message)
+        void IRecipient<BlockedTaskStateChanged>.Receive(BlockedTaskStateChanged message)
         {
-            if (_tasks.Contains(message.key))
+            if (_types.Contains(message.Type.GetType()))
+            {
+                _blocked = message.Value;
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }

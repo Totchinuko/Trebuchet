@@ -5,12 +5,13 @@ using System.Threading;
 using System.Threading.Tasks;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
+using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
 
-public class SteamAPI(Steam steam, AppModlistFiles modlistFiles, TaskBlocker taskBlocker)
+public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker taskBlocker)
 {
     private Dictionary<ulong, PublishedFile> _publishedFiles = [];
     
@@ -54,7 +55,7 @@ public class SteamAPI(Steam steam, AppModlistFiles modlistFiles, TaskBlocker tas
         foreach (var (pubId, _) in mods)
         {
             string mod = pubId.ToString();
-            if (!modlistFiles.ResolveMod(ref mod) && !updated.Contains(pubId))
+            if (!appFiles.Mods.ResolveMod(ref mod) && !updated.Contains(pubId))
                 updated.Add(pubId);
         } 
         return updated;
@@ -62,8 +63,26 @@ public class SteamAPI(Steam steam, AppModlistFiles modlistFiles, TaskBlocker tas
 
     public async Task UpdateMods(List<ulong> list)
     {
-        var cts = taskBlocker.Set(Operations.SteamDownload);
-        await steam.UpdateMods(list, cts);
-        taskBlocker.Release(Operations.SteamDownload);
+        var task = await taskBlocker.EnterAsync(new SteamDownload(App.GetAppText("UpdateModsLabel")));
+        await steam.UpdateMods(list, task.Cts);
+        task.Release();
+    }
+
+    public async Task UpdateServers()
+    {
+        var task = await taskBlocker.EnterAsync(new SteamDownload(App.GetAppText("UpdateServersLabel")));
+        await steam.UpdateServerInstances(task.Cts);
+        task.Release();
+    }
+
+    public async Task VerifyFiles(IEnumerable<ulong> modlist)
+    {
+        var task = await taskBlocker.EnterAsync(new SteamDownload(App.GetAppText("VerifyServersLabel")));
+        steam.ClearCache();
+        await steam.UpdateServerInstances(task.Cts);
+        task.Release();
+        task = await taskBlocker.EnterAsync(new SteamDownload(App.GetAppText("VerifyModsLabel")));
+        await steam.UpdateMods(modlist, task.Cts);
+        task.Release();
     }
 }

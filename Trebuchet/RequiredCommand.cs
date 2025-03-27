@@ -3,10 +3,11 @@ using System.Linq;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
+using Trebuchet.Services.TaskBlocker;
 
 namespace Trebuchet
 {
-    public class RequiredCommand : ICommand, IRecipient<OperationStateChanged>
+    public class RequiredCommand : ICommand, IRecipient<BlockedTaskStateChanged>
     {
         private readonly Action<object?> _callback;
         private bool _launched;
@@ -40,7 +41,7 @@ namespace Trebuchet
             _callback.Invoke(parameter);
         }
 
-        void IRecipient<OperationStateChanged>.Receive(OperationStateChanged message)
+        void IRecipient<BlockedTaskStateChanged>.Receive(BlockedTaskStateChanged message)
         {
             if (_tasks.Contains(message.key))
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
