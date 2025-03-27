@@ -1,12 +1,19 @@
 namespace TrebuchetLib.Services;
 
-public class AppSetup(bool isTestLive, bool catapult)
+public class AppSetup
 {
-    private bool _hasCatapulted = false;
+    public AppSetup(bool isTestLive, bool catapult)
+    {
+        IsTestLive = isTestLive;
+        Catapult = catapult;
+        Config = Config.LoadConfig(GetConfigPath());
+    }
+
+    public Config Config { get; }
     
-    public bool IsTestLive { get; } = isTestLive;
+    public bool IsTestLive { get; }
     
-    public bool Catapult { get; } = catapult;
+    public bool Catapult { get; }
 
     public uint ServerAppId => IsTestLive ? Constants.AppIDTestLiveServer : Constants.AppIDLiveServer;
     
@@ -20,15 +27,5 @@ public class AppSetup(bool isTestLive, bool catapult)
         configPath = Path.Combine(configPath,
             $"{(IsTestLive ? Constants.FolderTestLive : Constants.FolderLive)}.{Constants.FileConfig}");
         return configPath;
-    }
-
-    public bool CatapultTrigger()
-    {
-        if (!_hasCatapulted)
-        {
-            _hasCatapulted = true;
-            return true;
-        }
-        return false;
     }
 }

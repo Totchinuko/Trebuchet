@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TrebuchetLib.Services;
 
-public class AppModlistFiles(AppSetup setup, Config config)
+public class AppModlistFiles(AppSetup setup)
 {
         public IEnumerable<ulong> CollectAllMods(IEnumerable<string> modlists)
         {
@@ -30,12 +30,12 @@ public class AppModlistFiles(AppSetup setup, Config config)
 
         public string GetPath(string modlistName)
         {
-            return Path.Combine(config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles, modlistName + ".json");
+            return Path.Combine(setup.Config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles, modlistName + ".json");
         }
 
         public IEnumerable<string> ListProfiles()
         {
-            string folder = Path.Combine(config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles);
+            string folder = Path.Combine(setup.Config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles);
             if (!Directory.Exists(folder))
                 yield break;
 
@@ -57,7 +57,7 @@ public class AppModlistFiles(AppSetup setup, Config config)
         {
             string file = mod;
             if (long.TryParse(mod, out _))
-                file = Path.Combine(config.ResolvedInstallPath(), Constants.FolderWorkshop, appID.ToString(), mod, "none");
+                file = Path.Combine(setup.Config.ResolvedInstallPath(), Constants.FolderWorkshop, appID.ToString(), mod, "none");
 
             string? folder = Path.GetDirectoryName(file);
             if (folder == null)
@@ -106,7 +106,7 @@ public class AppModlistFiles(AppSetup setup, Config config)
                     return profileName;
             }
 
-            profileName = Tools.GetFirstFileName(Path.Combine(config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
+            profileName = Tools.GetFirstFileName(Path.Combine(setup.Config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
             if (!string.IsNullOrEmpty(profileName)) 
                 return profileName;
 

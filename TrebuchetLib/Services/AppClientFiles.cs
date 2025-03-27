@@ -2,22 +2,22 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TrebuchetLib.Services;
 
-public class AppClientFiles(Config config, AppSetup appSetup)
+public class AppClientFiles(AppSetup appSetup)
 {
     public string GetFolder(string name)
     {
-        return Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles, name);
+        return Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles, name);
     }
 
     public string GetPath(string name)
     {
-        return Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles, name, 
+        return Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles, name, 
             Constants.FileProfileConfig);
     }
     
     public IEnumerable<string> ListProfiles()
     {
-        string folder = Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles);
+        string folder = Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles);
         if (!Directory.Exists(folder))
             yield break;
 
@@ -34,7 +34,7 @@ public class AppClientFiles(Config config, AppSetup appSetup)
             if (File.Exists(path)) return;
         }
 
-        profileName = Tools.GetFirstDirectoryName(Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
+        profileName = Tools.GetFirstDirectoryName(Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
         if (!string.IsNullOrEmpty(profileName)) return;
 
         profileName = "Default";
@@ -69,15 +69,15 @@ public class AppClientFiles(Config config, AppSetup appSetup)
 
     public string GetGameBinaryPath()
     {
-        return Path.Combine(config.ClientPath, Constants.FolderGameBinaries, Constants.FileClientBin);
+        return Path.Combine(appSetup.Config.ClientPath, Constants.FolderGameBinaries, Constants.FileClientBin);
     }
     public string GetBattleEyeBinaryPath()
     {
-        return Path.Combine(config.ClientPath, Constants.FolderGameBinaries, Constants.FileClientBEBin);
+        return Path.Combine(appSetup.Config.ClientPath, Constants.FolderGameBinaries, Constants.FileClientBEBin);
     }
 
     public string GetClientFolder()
     {
-        return config.ClientPath;
+        return appSetup.Config.ClientPath;
     }
 }

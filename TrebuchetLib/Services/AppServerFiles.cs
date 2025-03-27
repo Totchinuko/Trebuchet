@@ -4,7 +4,7 @@ using TrebuchetLib.Processes;
 
 namespace TrebuchetLib.Services;
 
-public class AppServerFiles(Config config, AppSetup appSetup)
+public class AppServerFiles(AppSetup appSetup)
 {
 
     /// <summary>
@@ -14,7 +14,7 @@ public class AppServerFiles(Config config, AppSetup appSetup)
     /// <returns></returns>
     public string GetFolder(string name)
     {
-        return Path.Combine(config.ResolvedInstallPath(),
+        return Path.Combine(appSetup.Config.ResolvedInstallPath(),
             appSetup.VersionFolder, Constants.FolderServerProfiles, name);
     }
 
@@ -25,7 +25,7 @@ public class AppServerFiles(Config config, AppSetup appSetup)
     /// <returns></returns>
     public string GetInstancePath(int instance)
     {
-        return Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerInstances,
+        return Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerInstances,
             string.Format(Constants.FolderInstancePattern, instance));
     }
 
@@ -36,7 +36,7 @@ public class AppServerFiles(Config config, AppSetup appSetup)
     /// <returns></returns>
     public string GetIntanceBinary(int instance)
     {
-        return Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerInstances,
+        return Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerInstances,
             string.Format(Constants.FolderInstancePattern, instance), Constants.FileServerProxyBin);
     }
 
@@ -66,7 +66,7 @@ public class AppServerFiles(Config config, AppSetup appSetup)
     /// <returns></returns>
     public string GetPath(string name)
     {
-        return Path.Combine(config.ResolvedInstallPath(),
+        return Path.Combine(appSetup.Config.ResolvedInstallPath(),
             appSetup.VersionFolder, Constants.FolderServerProfiles, name, Constants.FileProfileConfig);
     }
 
@@ -76,7 +76,7 @@ public class AppServerFiles(Config config, AppSetup appSetup)
         /// <returns></returns>
         public IEnumerable<string> ListProfiles()
         {
-            string folder = Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerProfiles);
+            string folder = Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerProfiles);
             if (!Directory.Exists(folder))
                 yield break;
 
@@ -98,7 +98,7 @@ public class AppServerFiles(Config config, AppSetup appSetup)
                     return profileName;
             }
 
-            profileName = Tools.GetFirstDirectoryName(Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
+            profileName = Tools.GetFirstDirectoryName(Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
             if (!string.IsNullOrEmpty(profileName)) 
                 return profileName;
 
@@ -130,7 +130,7 @@ public class AppServerFiles(Config config, AppSetup appSetup)
         public bool TryGetInstanceIndexFromPath(string path, out int instance)
         {
             instance = -1;
-            for (int i = 0; i < config.ServerInstanceCount; i++)
+            for (int i = 0; i < appSetup.Config.ServerInstanceCount; i++)
             {
                 var instancePath = Path.GetFullPath(GetIntanceBinary(i));
                 if (string.Equals(instancePath, path, StringComparison.Ordinal))

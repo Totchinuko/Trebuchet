@@ -6,14 +6,12 @@ namespace TrebuchetLib.Services
 {
     public class Steam : IDebugListener
     {
-        private readonly Config _config;
         private readonly ILogger<Steam> _logger;
         private readonly AppSetup _appSetup;
         private readonly Steam3Session _session;
 
-        public Steam(Config config, ILogger<Steam> logger, AppSetup appSetup, IProgress<double> progress)
+        public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgress<double> progress)
         {
-            _config = config;
             _logger = logger;
             _appSetup = appSetup;
 
@@ -57,7 +55,7 @@ namespace TrebuchetLib.Services
         {
             int count = 0;
 
-            string folder = Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances);
+            string folder = Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances);
             if (!Directory.Exists(folder))
                 return 0;
 
@@ -81,7 +79,7 @@ namespace TrebuchetLib.Services
         public ulong GetInstanceBuildID(int instance)
         {
             string manifest = Path.Combine(
-                _config.ResolvedInstallPath(),
+                _appSetup.Config.ResolvedInstallPath(),
                 _appSetup.VersionFolder,
                 Constants.FolderServerInstances,
                 string.Format(Constants.FolderInstancePattern, instance),
@@ -98,7 +96,7 @@ namespace TrebuchetLib.Services
 
         public string GetServerInstancePath(int instanceNumber)
         {
-            return Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, instanceNumber));
+            return Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, instanceNumber));
         }
 
         public uint GetSteam3AppBuildNumber(uint appId, string branch)
@@ -149,7 +147,7 @@ namespace TrebuchetLib.Services
         {
             UpdateDownloaderConfig();
 
-            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_config.ResolvedInstallPath(), Constants.FolderWorkshop, ContentDownloader.CONFIG_DIR, ContentDownloader.DEPOT_CONFIG));
+            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_appSetup.Config.ResolvedInstallPath(), Constants.FolderWorkshop, ContentDownloader.CONFIG_DIR, ContentDownloader.DEPOT_CONFIG));
             foreach (var (pubID, manisfestID) in keyValuePairs)
             {
                 if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pubID, out ulong manisfest))
@@ -164,7 +162,7 @@ namespace TrebuchetLib.Services
         /// </summary>
         public void RemoveAllSymbolicLinks()
         {
-            string folder = Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances);
+            string folder = Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances);
             if (!Directory.Exists(folder))
                 return;
             string[] instances = Directory.GetDirectories(folder);
@@ -174,16 +172,16 @@ namespace TrebuchetLib.Services
 
         public bool SetupFolders()
         {
-            if (!Tools.ValidateInstallDirectory(_config.ResolvedInstallPath())) return false;
+            if (!Tools.ValidateInstallDirectory(_appSetup.Config.ResolvedInstallPath())) return false;
 
             try
             {
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances));
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderClientProfiles));
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerProfiles));
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderModlistProfiles));
+                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances));
+                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderClientProfiles));
+                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerProfiles));
+                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderModlistProfiles));
 
-                Tools.CreateDir(Path.Combine(_config.ResolvedInstallPath(), Constants.FolderWorkshop));
+                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), Constants.FolderWorkshop));
             }
             catch (Exception ex)
             {
@@ -197,10 +195,10 @@ namespace TrebuchetLib.Services
         public void UpdateDownloaderConfig()
         {
             ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
-            ContentDownloader.Config.MaxDownloads = _config.MaxDownloads;
-            ContentDownloader.Config.MaxServers = Math.Max(_config.MaxServers, ContentDownloader.Config.MaxDownloads);
-            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_config.ResolvedInstallPath(), Constants.FolderWorkshop, ContentDownloader.CONFIG_DIR);
-            AccountSettingsStore.LoadFromFile(Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, "account.config"));
+            ContentDownloader.Config.MaxDownloads = _appSetup.Config.MaxDownloads;
+            ContentDownloader.Config.MaxServers = Math.Max(_appSetup.Config.MaxServers, ContentDownloader.Config.MaxDownloads);
+            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_appSetup.Config.ResolvedInstallPath(), Constants.FolderWorkshop, ContentDownloader.CONFIG_DIR);
+            AccountSettingsStore.LoadFromFile(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, "account.config"));
         }
 
         /// <summary>
@@ -215,7 +213,7 @@ namespace TrebuchetLib.Services
             if (!await WaitSteamConnectionAsync()) return;
 
             UpdateDownloaderConfig();
-            ContentDownloader.Config.InstallDirectory = Path.Combine(_config.ResolvedInstallPath(), Constants.FolderWorkshop);
+            ContentDownloader.Config.InstallDirectory = Path.Combine(_appSetup.Config.ResolvedInstallPath(), Constants.FolderWorkshop);
             await Task.Run(() => ContentDownloader.DownloadUGCAsync([Constants.AppIDLiveClient, Constants.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts));
         }
 
@@ -228,7 +226,7 @@ namespace TrebuchetLib.Services
         /// <returns></returns>
         public async Task UpdateServer(int instanceNumber, CancellationTokenSource cts, bool reinstall = false)
         {
-            if (_config.ServerInstanceCount <= 0) return;
+            if (_appSetup.Config.ServerInstanceCount <= 0) return;
 
             if (!SetupFolders()) return;
 
@@ -259,15 +257,15 @@ namespace TrebuchetLib.Services
         /// <exception cref="DirectoryNotFoundException"></exception>
         public async Task UpdateServerFromInstance0(int instanceNumber, CancellationToken token)
         {
-            if (_config.ServerInstanceCount <= 0) return;
+            if (_appSetup.Config.ServerInstanceCount <= 0) return;
             if (instanceNumber == 0)
                 throw new Exception("Can't update instance 0 with itself.");
 
             _logger.LogInformation("Updating server instance {0} from instance 0.", instanceNumber);
             if (!SetupFolders()) return;
 
-            string instance = Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, instanceNumber));
-            string instance0 = Path.Combine(_config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, 0));
+            string instance = Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, instanceNumber));
+            string instance0 = Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, 0));
 
             if (!Directory.Exists(instance0))
                 throw new DirectoryNotFoundException($"{instance0} was not found.");
@@ -286,12 +284,12 @@ namespace TrebuchetLib.Services
         /// <returns></returns>
         public async Task UpdateServerInstances(CancellationTokenSource cts)
         {
-            if (_config.ServerInstanceCount <= 0) return;
+            if (_appSetup.Config.ServerInstanceCount <= 0) return;
 
             if (!await WaitSteamConnectionAsync()) return;
 
             _logger.LogInformation("Updating all server instances...");
-            int count = _config.ServerInstanceCount;
+            int count = _appSetup.Config.ServerInstanceCount;
             for (int i = 0; i < count; i++)
             {
                 if (i == 0)
