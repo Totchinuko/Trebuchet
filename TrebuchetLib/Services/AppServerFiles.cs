@@ -89,20 +89,23 @@ public class AppServerFiles(Config config, AppSetup appSetup)
         /// Resolve a server profile name, if it is not valid, it will be set to the first profile found, if no profile is found, it will be set to "Default" and a new profile will be created.
         /// </summary>
         /// <param name="profileName"></param>
-        public void ResolveProfile(ref string profileName)
+        public string ResolveProfile(string profileName)
         {
             if (!string.IsNullOrEmpty(profileName))
             {
                 string path = GetPath(profileName);
-                if (File.Exists(path)) return;
+                if (File.Exists(path)) 
+                    return profileName;
             }
 
             profileName = Tools.GetFirstDirectoryName(Path.Combine(config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
-            if (!string.IsNullOrEmpty(profileName)) return;
+            if (!string.IsNullOrEmpty(profileName)) 
+                return profileName;
 
             profileName = "Default";
             if (!File.Exists(GetPath(profileName)))
                 ServerProfile.CreateFile(GetPath(profileName)).SaveFile();
+            return profileName;
         }
 
         /// <summary>

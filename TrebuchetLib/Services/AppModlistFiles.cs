@@ -97,20 +97,23 @@ public class AppModlistFiles(AppSetup setup, Config config)
             }
         }
 
-        public void ResolveProfile(ref string profileName)
+        public string ResolveProfile(string profileName)
         {
             if (!string.IsNullOrEmpty(profileName))
             {
                 string path = GetPath(profileName);
-                if (File.Exists(path)) return;
+                if (File.Exists(path)) 
+                    return profileName;
             }
 
             profileName = Tools.GetFirstFileName(Path.Combine(config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
-            if (!string.IsNullOrEmpty(profileName)) return;
+            if (!string.IsNullOrEmpty(profileName)) 
+                return profileName;
 
             profileName = "Default";
             if (!File.Exists(GetPath(profileName)))
                 ModListProfile.CreateFile(GetPath(profileName)).SaveFile();
+            return profileName;
         }
 
         public bool TryLoadProfile(string name, [NotNullWhen(true)] out ModListProfile? profile)
