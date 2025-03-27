@@ -5,7 +5,7 @@ using Yuu.Ini;
 
 namespace TrebuchetLib.YuuIni;
 
-public class YuuIniServerFiles(AppServerFiles serverFiles)
+public class YuuIniServerFiles(AppFiles appFiles)
 {
     public async Task WriteIni(ServerProfile profile, int instance)
     {
@@ -16,7 +16,7 @@ public class YuuIniServerFiles(AppServerFiles serverFiles)
             IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
             if (!documents.TryGetValue(attr.Path, out IniDocument? document))
             {
-                var path = Path.Combine(serverFiles.GetInstancePath(instance), attr.Path);
+                var path = Path.Combine(appFiles.Server.GetInstancePath(instance), attr.Path);
                 var content = await Tools.GetFileContent(path);
                 document = IniParser.Parse(content);
                 documents.Add(attr.Path, document);
@@ -27,7 +27,7 @@ public class YuuIniServerFiles(AppServerFiles serverFiles)
         foreach (var document in documents)
         {
             document.Value.MergeDuplicateSections();
-            var path = Path.Combine(serverFiles.GetInstancePath(instance), document.Key);
+            var path = Path.Combine(appFiles.Server.GetInstancePath(instance), document.Key);
             await Tools.SetFileContent(path, document.Value.ToString()).ConfigureAwait(false);
         }
     }
@@ -37,7 +37,7 @@ public class YuuIniServerFiles(AppServerFiles serverFiles)
         var infos = new ConanServerInfos();
         infos.Instance = instance;
 
-        var instancePath = serverFiles.GetInstancePath(instance);
+        var instancePath = appFiles.Server.GetInstancePath(instance);
         string initPath = Path.Combine(instancePath, string.Format(Constants.FileIniServer, "Engine"));
         IniDocument document = IniParser.Parse(await Tools.GetFileContent(initPath));
 

@@ -8,22 +8,17 @@ namespace TrebuchetLib;
 
 public class Launcher : IDisposable
 {
-    private readonly AppClientFiles _clientFiles;
+    private readonly AppFiles _appFiles;
     private readonly IIniGenerator _iniHandler;
     private readonly ILogger<Launcher> _logger;
-    private readonly AppModlistFiles _modlistFiles;
-    private readonly AppServerFiles _serverFiles;
     private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
     private IConanProcess? _conanClientProcess;
 
-    public Launcher(AppClientFiles clientFiles, AppServerFiles serverFiles, IIniGenerator iniHandler,
-        ILogger<Launcher> logger, AppModlistFiles modlistFiles)
+    public Launcher(AppFiles appFiles, IIniGenerator iniHandler, ILogger<Launcher> logger)
     {
-        _clientFiles = clientFiles;
-        _serverFiles = serverFiles;
+        _appFiles = appFiles;
         _iniHandler = iniHandler;
         _logger = logger;
-        _modlistFiles = modlistFiles;
     }
 
     public void Dispose()
@@ -50,14 +45,14 @@ public class Launcher : IDisposable
     {
         if (_conanClientProcess != null) return;
 
-        if (!_clientFiles.TryLoadProfile(profileName, out var profile))
+        if (!_appFiles.Client.TryLoadProfile(profileName, out var profile))
             throw new TrebException($"{profileName} profile not found.");
-        if (!_modlistFiles.TryLoadProfile(modlistName, out var modlist))
+        if (!_appFiles.Mods.TryLoadProfile(modlistName, out var modlist))
             throw new TrebException($"{modlistName} modlist not found.");
         if (IsClientProfileLocked(profileName))
             throw new TrebException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(_clientFiles.GetClientFolder(), profile.ProfileFolder);
+        SetupJunction(_appFiles.Client.GetClientFolder(), profile.ProfileFolder);
 
         _logger.LogDebug($"Locking folder {profile.ProfileName}");
         _logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
@@ -78,7 +73,7 @@ public class Launcher : IDisposable
 
     private Process CreateClientProcess(ClientProfile profile, bool isBattleEye)
     {
-        var filename = isBattleEye ? _clientFiles.GetBattleEyeBinaryPath() : _clientFiles.GetGameBinaryPath();
+        var filename = isBattleEye ? _appFiles.Client.GetBattleEyeBinaryPath() : _appFiles.Client.GetGameBinaryPath();
         var args = profile.GetClientArgs();
 
         var dir = Path.GetDirectoryName(filename);
@@ -98,7 +93,7 @@ public class Launcher : IDisposable
     private async Task WriteClientConfiguration(ClientProfile profile, ModListProfile modlist)
     {
         var tmpFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(tmpFile, _modlistFiles.GetResolvedModlist(modlist.Modlist));
+        await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
         await _iniHandler.WriteClientSettingsAsync(profile);
     }
 
@@ -156,14 +151,14 @@ public class Launcher : IDisposable
     {
         if (_serverProcesses.ContainsKey(instance)) return;
 
-        if (!_serverFiles.TryLoadProfile(profileName, out var profile))
+        if (!_appFiles.Server.TryLoadProfile(profileName, out var profile))
             throw new FileNotFoundException($"{profileName} profile not found.");
-        if (!_modlistFiles.TryLoadProfile(modlistName, out var modlist))
+        if (!_appFiles.Mods.TryLoadProfile(modlistName, out var modlist))
             throw new FileNotFoundException($"{modlistName} modlist not found.");
         if (IsServerProfileLocked(profileName))
             throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(_serverFiles.GetInstancePath(instance), profile.ProfileFolder);
+        SetupJunction(_appFiles.Server.GetInstancePath(instance), profile.ProfileFolder);
 
         _logger.LogDebug($"Locking folder {profile.ProfileName}");
         _logger.LogInformation(
@@ -188,7 +183,7 @@ public class Launcher : IDisposable
     {
         var process = new Process();
 
-        var filename = _serverFiles.GetIntanceBinary(instance);
+        var filename = _appFiles.Server.GetIntanceBinary(instance);
         var args = profile.GetServerArgs(instance);
 
         var dir = Path.GetDirectoryName(filename);
@@ -206,7 +201,7 @@ public class Launcher : IDisposable
     private async Task WriteServerConfiguration(ServerProfile profile, ModListProfile modlist, int instance)
     {
         var tmpFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(tmpFile, _modlistFiles.GetResolvedModlist(modlist.Modlist));
+        await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
         await _iniHandler.WriteServerSettingsAsync(profile, instance);
     }
 
@@ -325,7 +320,7 @@ public class Launcher : IDisposable
         var processes = Tools.GetProcessesWithName(Constants.FileServerBin);
         foreach (var p in processes)
         {
-            if (!_serverFiles.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
+            if (!_appFiles.Server.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
             if (_serverProcesses.ContainsKey(instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
@@ -339,13 +334,13 @@ public class Launcher : IDisposable
     {
         if (_conanClientProcess == null) return false;
         var junction = Path.GetFullPath(GetCurrentClientJunction());
-        var profilePath = Path.GetFullPath(_clientFiles.GetFolder(profileName));
+        var profilePath = Path.GetFullPath(_appFiles.Client.GetFolder(profileName));
         return string.Equals(junction, profilePath, StringComparison.Ordinal);
     }
 
     public bool IsServerProfileLocked(string profileName)
     {
-        var profilePath = Path.GetFullPath(_serverFiles.GetFolder(profileName));
+        var profilePath = Path.GetFullPath(_appFiles.Server.GetFolder(profileName));
         foreach (var s in _serverProcesses.Values)
         {
             var instance = s.Instance;
@@ -359,7 +354,7 @@ public class Launcher : IDisposable
 
     private string GetCurrentClientJunction()
     {
-        var path = Path.Combine(_clientFiles.GetClientFolder(), Constants.FolderGameSave);
+        var path = Path.Combine(_appFiles.Client.GetClientFolder(), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;
@@ -367,7 +362,7 @@ public class Launcher : IDisposable
 
     private string GetCurrentServerJunction(int instance)
     {
-        var path = Path.Combine(_serverFiles.GetInstancePath(instance), Constants.FolderGameSave);
+        var path = Path.Combine(_appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;

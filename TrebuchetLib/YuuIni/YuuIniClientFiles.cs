@@ -5,7 +5,7 @@ using Yuu.Ini;
 
 namespace TrebuchetLib.YuuIni;
 
-public class YuuIniClientFiles(AppClientFiles clientFiles)
+public class YuuIniClientFiles(AppFiles appFiles)
 {
     public async Task WriteIni(ClientProfile profile)
     {
@@ -16,7 +16,7 @@ public class YuuIniClientFiles(AppClientFiles clientFiles)
             IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
             if (!documents.TryGetValue(attr.Path, out IniDocument? document))
             {
-                document = IniParser.Parse(await Tools.GetFileContent(Path.Combine(clientFiles.GetClientFolder(), attr.Path)));
+                document = IniParser.Parse(await Tools.GetFileContent(Path.Combine(appFiles.Client.GetClientFolder(), attr.Path)));
                 documents.Add(attr.Path, document);
             }
             method.Invoke(this, [profile, document]);
@@ -25,7 +25,7 @@ public class YuuIniClientFiles(AppClientFiles clientFiles)
         foreach (var document in documents)
         {
             document.Value.MergeDuplicateSections();
-            await Tools.SetFileContent(Path.Combine(clientFiles.GetClientFolder(), document.Key), document.Value.ToString());
+            await Tools.SetFileContent(Path.Combine(appFiles.Client.GetClientFolder(), document.Key), document.Value.ToString());
         }
     }
     
