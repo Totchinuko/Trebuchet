@@ -1,9 +1,8 @@
 ﻿using DepotDownloader;
 using Microsoft.Extensions.Logging;
 using SteamKit2;
-using TrebuchetLib.Services;
 
-namespace TrebuchetLib
+namespace TrebuchetLib.Services
 {
     public class Steam : IDebugListener
     {
@@ -12,7 +11,7 @@ namespace TrebuchetLib
         private readonly AppSetup _appSetup;
         private readonly Steam3Session _session;
 
-        public Steam(Config config, ILogger<Steam> logger, AppSetup appSetup)
+        public Steam(Config config, ILogger<Steam> logger, AppSetup appSetup, IProgress<double> progress)
         {
             _config = config;
             _logger = logger;
@@ -23,6 +22,7 @@ namespace TrebuchetLib
             ContentDownloader.Config.RememberPassword = false;
             ContentDownloader.Config.DownloadManifestOnly = false;
             ContentDownloader.Config.LoginID = null;
+            ContentDownloader.Config.Progress = progress;
             UpdateDownloaderConfig();
             _session = ContentDownloader.InitializeSteam3(null, null);
             _session.Connected += (_, _) => Connected?.Invoke(this, EventArgs.Empty);
@@ -32,11 +32,6 @@ namespace TrebuchetLib
         public event EventHandler? Connected;
         public event EventHandler? Disconnected;
         public bool IsConnected => _session.steamClient?.IsConnected ?? false;
-
-        public static void SetProgress(IProgress<double> progress)
-        {
-            ContentDownloader.Config.Progress = progress;
-        }
 
         public void ClearCache()
         {
