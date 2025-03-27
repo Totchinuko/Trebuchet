@@ -1,50 +1,45 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
-using Trebuchet.Windows;
+using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
-#endregion
-
 namespace Trebuchet.Panels
 {
     public class DashboardPanel : Panel,
-        IRecipient<CatapulServersMessage>,
-        IRecipient<DashboardStateChanged>,
-        IRecipient<SteamModlistReceived>
+        IRecipient<DashboardStateChanged>
     {
-        private readonly AppSteam _steam;
-        private readonly Config _config;
+        private readonly AppSetup _appSetup;
         private bool _hasModRefreshScheduled;
         private readonly object _lock = new();
         private DispatcherTimer _timer;
 
-        public DashboardPanel(AppSteam steam, Config config) : 
+        public DashboardPanel(AppSetup appSetup) : 
             base("Dashboard", "Dashboard", "mdi-view-dashboard", PanelPosition.Bottom)
         {
-            _steam = steam;
-            _config = config;
+            _appSetup = appSetup;
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
-            LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll, true, Operations.SteamDownload);
-            UpdateServerCommand =
-                new TaskBlockedCommand(OnServerUpdate, true, Operations.SteamDownload, Operations.ServerRunning);
-            UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate, true, Operations.SteamDownload,
-                Operations.GameRunning, Operations.ServerRunning);
-            VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification, true, Operations.SteamDownload,
-                Operations.GameRunning, Operations.ServerRunning);
+            LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll)
+                .SetBlockingType<SteamDownload>();
+            UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate)
+                    .SetBlockingType<SteamDownload>();
+            UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate)
+                .SetBlockingType<SteamDownload>()
+                .SetBlockingType<ClientRunning>()
+                .SetBlockingType<ServersRunning>();
+            VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification)
+                .SetBlockingType<SteamDownload>()
+                .SetBlockingType<ClientRunning>()
+                .SetBlockingType<ServersRunning>();
 
             Client = new ClientInstanceDashboard();
             CreateInstancesIfNeeded();

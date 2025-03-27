@@ -19,7 +19,6 @@ namespace Trebuchet
 {
     public sealed class ServerInstanceDashboard : INotifyPropertyChanged
     {
-        private readonly Config _config;
         private readonly UIConfig _uiConfig;
         private readonly AppFiles _appFiles;
         private readonly SteamAPI _steamApi;
@@ -35,14 +34,13 @@ namespace Trebuchet
 
         public ServerInstanceDashboard(
             int instance,
-            Config config, 
             UIConfig uiConfig,
             AppFiles appFiles,
             SteamAPI steamApi,
             Launcher launcher,
+            AppSetup setup,
             ILogger logger)
         {
-            _config = config;
             _uiConfig = uiConfig;
             _appFiles = appFiles;
             _steamApi = steamApi;
@@ -63,6 +61,9 @@ namespace Trebuchet
 
             Resolve();
             ListProfiles();
+
+            if (setup.Catapult)
+                Launch();
         }
 
         public bool CanUseDashboard => _config.IsInstallPathValid &&
@@ -187,7 +188,7 @@ namespace Trebuchet
             _lastState = state;
         }
 
-        public async Task Launch()
+        public async void Launch()
         {
             if(ProcessRunning) return;
             LaunchCommand.Toggle(false);
@@ -198,6 +199,7 @@ namespace Trebuchet
                     !_launcher.IsClientRunning())
                 {
                     var modlist = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
+                    await _steamApi.UpdateServers();
                     await _steamApi.UpdateMods(modlist);
                 }
 
@@ -246,11 +248,11 @@ namespace Trebuchet
             Kill();
         }
 
-        private async void OnLaunched(object? obj)
+        private void OnLaunched(object? obj)
         {
             if (!CanUseDashboard) return;
 
-            await Launch();
+            Launch();
         }
 
         private async void OnModUpdate(object? obj)
