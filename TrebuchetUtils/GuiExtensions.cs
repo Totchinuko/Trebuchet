@@ -19,22 +19,6 @@ namespace TrebuchetUtils
     {
         private static readonly Dictionary<Uri, Bitmap> Cache = [];
         private static readonly HttpClient HttpClient = new();
-        
-        /// <summary>
-        /// Asserts that the given assertion is true, and if not, shows an error modal with the given message.
-        /// </summary>
-        /// <param name="assertion"></param>
-        /// <param name="message"></param>
-        /// <returns>Return false if the assertion failled</returns>
-        public static bool Assert(bool assertion, string message)
-        {
-            if (!assertion)
-            {
-                DisplayError(message);
-                return false;
-            }
-            return true;
-        }
 
         public static async void DisplayError(string message)
         {
