@@ -15,6 +15,15 @@ namespace TrebuchetLib
         {
             return string.Join("\r\n", Modlist);
         }
+
+        public IEnumerable<ulong> GetWorkshopMods()
+        {
+            foreach (var mod in Modlist)
+            {
+                if(ulong.TryParse(mod, out var result))
+                    yield return result;
+            }
+        }
         
         public void SetModList(string modlist)
         {
