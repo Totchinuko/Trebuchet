@@ -5,7 +5,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
-using Trebuchet.Messages;
+using Microsoft.Extensions.Logging;
+using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -14,25 +15,38 @@ using TrebuchetUtils.Modals;
 
 namespace Trebuchet.Panels
 {
-    public class DashboardPanel : Panel,
-        IRecipient<DashboardStateChanged>
+    public class DashboardPanel : Panel
     {
-        private readonly AppSetup _appSetup;
-        private bool _hasModRefreshScheduled;
-        private readonly object _lock = new();
+        private readonly AppSetup _setup;
+        private readonly UIConfig _uiConfig;
+        private readonly AppFiles _appFiles;
+        private readonly SteamAPI _steamApi;
+        private readonly Launcher _launcher;
+        private readonly ILogger<DashboardPanel> _logger;
         private DispatcherTimer _timer;
 
-        public DashboardPanel(AppSetup appSetup) : 
-            base("Dashboard", "Dashboard", "mdi-view-dashboard", PanelPosition.Bottom)
+        public DashboardPanel(
+            AppSetup setup, 
+            UIConfig uiConfig, 
+            AppFiles appFiles, 
+            SteamAPI steamApi,
+            Launcher launcher, 
+            ILogger<DashboardPanel> logger) : 
+            base("Dashboard", "Dashboard", "mdi-view-dashboard", true)
         {
-            _appSetup = appSetup;
+            _setup = setup;
+            _uiConfig = uiConfig;
+            _appFiles = appFiles;
+            _steamApi = steamApi;
+            _launcher = launcher;
+            _logger = logger;
             CloseAllCommand = new SimpleCommand(OnCloseAll);
             KillAllCommand = new SimpleCommand(OnKillAll);
             LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll)
                 .SetBlockingType<SteamDownload>();
-            UpdateServerCommand = new TaskBlockedCommand(OnServerUpdate)
+            UpdateServerCommand = new TaskBlockedCommand((_) => UpdateServer())
                     .SetBlockingType<SteamDownload>();
-            UpdateAllModsCommand = new TaskBlockedCommand(OnModUpdate)
+            UpdateAllModsCommand = new TaskBlockedCommand((_) => UpdateMods())
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
                 .SetBlockingType<ServersRunning>();
@@ -41,15 +55,15 @@ namespace Trebuchet.Panels
                 .SetBlockingType<ClientRunning>()
                 .SetBlockingType<ServersRunning>();
 
-            Client = new ClientInstanceDashboard();
-            CreateInstancesIfNeeded();
+            Client = new ClientInstanceDashboard(new ProcessStatsLight(_uiConfig));
+            Initialize();
 
             StrongReferenceMessenger.Default.RegisterAll(this);
-
+            
             _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, OnCheckModUpdate);
         }
 
-        public bool CanDisplayServers => _config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
+        public bool CanDisplayServers => _setup.Config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
 
         public ClientInstanceDashboard Client { get; }
 
@@ -67,52 +81,10 @@ namespace Trebuchet.Panels
 
         public TaskBlockedCommand VerifyFilesCommand { get; private set; }
 
-        public void Receive(CatapulServersMessage message)
-        {
-            StrongReferenceMessenger.Default.Send(new CatapultServerMessage(
-                Instances.Where(i => !i.ProcessRunning).Select(i => (i.SelectedProfile, i.SelectedModlist, i.Instance))
-            ));
-        }
-
-        public void Receive(DashboardStateChanged message)
-        {
-            if (Client.ProcessRunning)
-            {
-                if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.GameRunning))) return;
-                StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.GameRunning));
-            }
-            else
-            {
-                if (!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.GameRunning))) return;
-                StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.GameRunning));
-            }
-
-            if (Instances.Any(i => i.ProcessRunning))
-            {
-                if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.ServerRunning))) return;
-                StrongReferenceMessenger.Default.Send(new OperationStartMessage(Operations.ServerRunning));
-            }
-            else
-            {
-                if (!StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.ServerRunning))) return;
-                StrongReferenceMessenger.Default.Send(new OperationReleaseMessage(Operations.ServerRunning));
-            }
-        }
-
-        public void Receive(SteamModlistReceived message)
-        {
-            var updates = _steam.CheckModsForUpdate(message.Modlist.GetManifestKeyValuePairs().ToList());
-            var queried = message.Modlist.Select(x => x.PublishedFileID).ToList();
-
-            Client.RefreshUpdateStatus(queried, updates);
-            foreach (var item in Instances)
-                item.RefreshUpdateStatus(queried, updates);
-        }
-
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid &&
-                   (Tools.IsClientInstallValid(_config) || Tools.IsServerInstallValid(_config));
+            return _setup.Config.IsInstallPathValid &&
+                   (Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config));
         }
 
         /// <summary>
@@ -129,13 +101,12 @@ namespace Trebuchet.Panels
                     yield return i.SelectedModlist;
         }
 
-        public override void PanelDisplayed()
+        public override async void PanelDisplayed()
         {
-            Client.RefreshSelection();
-            foreach (var i in Instances)
-                i.RefreshSelection();
             CreateInstancesIfNeeded();
-            Task.Run(WaitModUpdateCheck);
+            RefreshClientSelection();
+            RefreshServerSelection();
+            await CheckModUpdates();
         }
 
         public override void RefreshPanel()
@@ -147,52 +118,282 @@ namespace Trebuchet.Panels
         ///     Collect all used mods of all the client and server instances and update them. Will not perform any action if the
         ///     game is running or the main task is blocked.
         /// </summary>
-        public void UpdateMods()
+        public async void UpdateMods()
         {
-            StrongReferenceMessenger.Default.Send(
-                new ServerUpdateModsMessage(ModListProfile.CollectAllMods(_config, CollectAllModlistNames())
-                    .Distinct()));
+            try
+            {
+                var modlists = Instances.Select(i => i.SelectedModlist).ToList();
+                modlists.Add(Client.SelectedModlist);
+                var mods = modlists.Distinct()
+                    .Select(l => _appFiles.Mods.CollectAllMods(l))
+                    .SelectMany(x => x)
+                    .Distinct().ToList();
+                await _steamApi.UpdateMods(mods);
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+            }
         }
 
         /// <summary>
         ///     Update all server instances. Will not perform any action if the game is running or the main task is blocked.
         /// </summary>
-        public void UpdateServer()
+        public async void UpdateServer()
         {
-            StrongReferenceMessenger.Default.Send<ServerUpdateMessage>();
+            try
+            {
+                await _steamApi.UpdateServers();
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+            }
+        }
+        
+        public async void KillClient()
+        {
+            if (!Client.ProcessRunning) return;
+
+            if (_uiConfig.DisplayWarningOnKill)
+            {
+                var question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
+                await question.OpenDialogueAsync();
+                if (!question.Result) return;
+            }
+            
+            Client.KillCommand.Toggle(false);
+            try
+            {
+                await _launcher.KillClient();
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+            }
+        }
+        
+        public async void LaunchClient(bool isBattleEye)
+        {
+            if (Client.ProcessRunning) return;
+
+            Client.LaunchCommand.Toggle(false);
+            Client.LaunchBattleEyeCommand.Toggle(false);
+
+            if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
+            {
+                var modlist = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
+                await _steamApi.UpdateMods(modlist);
+            }
+        
+            await _launcher.CatapultClient(Client.SelectedProfile, Client.SelectedModlist, isBattleEye);
+        }
+        
+        public async void CloseServer(int instance)
+        {
+            var dashboard = GetServerInstance(instance);
+            if (!dashboard.ProcessRunning) return;
+
+            dashboard.CloseCommand.Toggle(false);
+            await _launcher.CloseServer(instance);
+        }
+        
+        public async void KillServer(int instance)
+        {
+            var dashboard = GetServerInstance(instance);
+            if (!dashboard.ProcessRunning) return;
+
+            if (_uiConfig.DisplayWarningOnKill)
+            {
+                QuestionModal question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
+                await question.OpenDialogueAsync();
+                if (!question.Result) return;
+            }
+
+            dashboard.KillCommand.Toggle(false);
+            dashboard.CloseCommand.Toggle(false);
+            await _launcher.KillServer(dashboard.Instance);
+        }
+        
+        public async void LaunchServer(int instance)
+        {
+            var dashboard = GetServerInstance(instance);
+            if(dashboard.ProcessRunning) return;
+            dashboard.LaunchCommand.Toggle(false);
+
+            try
+            {
+                if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning() &&
+                    !_launcher.IsClientRunning())
+                {
+                    var modlist = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
+                    await _steamApi.UpdateServers();
+                    await _steamApi.UpdateMods(modlist);
+                }
+
+                await _launcher.CatapultServer(dashboard.SelectedProfile, dashboard.SelectedModlist, instance);
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+            }
+            finally
+            {
+                dashboard.LaunchCommand.Toggle(true);
+            }
         }
 
-        private void CheckModUpdates()
+        public ServerInstanceDashboard GetServerInstance(int instance)
         {
-            if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamPublishedFilesFetch)))
-                return;
-            StrongReferenceMessenger.Default.Send(
-                new SteamModlistIDRequest(ModListProfile.CollectAllMods(_config, CollectAllModlistNames()).Distinct()));
+            if(instance < 0 || instance >= Instances.Count)
+                throw new Exception("Instance out of range");
+            return Instances[instance];
+        }
+
+        public override void Tick()
+        {
+            Client.ProcessRefresh(_launcher.GetClientProcess());
+            foreach (var instance in _launcher.GetServerProcesses())
+                Instances[instance.Instance].ProcessRefresh(instance);
+        }
+
+        private async void Initialize()
+        {
+            Client.ModlistSelected += (_, modlist) =>
+            {
+                _uiConfig.DashboardClientModlist = modlist;
+                _uiConfig.SaveFile();
+            };
+            Client.ProfileSelected += (_, profile) =>
+            {
+                _uiConfig.DashboardClientProfile = profile;
+                _uiConfig.SaveFile();
+            };
+            Client.KillClicked += (_, _)  => KillClient();
+            Client.LaunchClicked += (_, battleEye) => LaunchClient(battleEye);
+            Client.UpdateClicked += (_, _) => UpdateMods();
+            CreateInstancesIfNeeded();
+            RefreshClientSelection();
+            RefreshServerSelection();
+            await CheckModUpdates();
+        }
+
+        private void RefreshClientSelection()
+        {
+            var modlist = _appFiles.Mods.ResolveProfile(Client.SelectedModlist);
+            var profile = _appFiles.Client.ResolveProfile(Client.SelectedProfile);
+
+            Client.Modlists = _appFiles.Mods.ListProfiles().ToList();
+            Client.Profiles = _appFiles.Client.ListProfiles().ToList();
+            Client.SelectedProfile = profile;
+            Client.SelectedModlist = modlist;
+        }
+
+        private void RefreshServerSelection()
+        {
+            foreach (var dashboard in Instances)
+                RefreshServerSelection(dashboard);
+        }
+
+        private void RefreshServerSelection(ServerInstanceDashboard dashboard)
+        {
+            var modlist = _appFiles.Mods.ResolveProfile(dashboard.SelectedModlist);
+            var profile = _appFiles.Client.ResolveProfile(dashboard.SelectedProfile);
+            
+            dashboard.Profiles = _appFiles.Client.ListProfiles().ToList();
+            dashboard.Modlists = _appFiles.Mods.ListProfiles().ToList();
+            dashboard.SelectedModlist = modlist;
+            dashboard.SelectedProfile = profile;
+        }
+
+        private void RefreshClientNeededUpdates(List<ulong> neededUpdates)
+        {
+            var mods = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
+            Client.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
+        }
+
+        private void RefreshServerNeededUpdates(List<ulong> neededUpdates)
+        {
+            foreach (var dashboard in Instances)
+                RefreshServerNeededUpdates(dashboard, neededUpdates);
+        }
+
+        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<ulong> neededUpdates)
+        {
+            var mods = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
+            dashboard.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
+        }
+        
+        private async Task CheckModUpdates()
+        {
+            try
+            {
+                var modlists = Instances.Select(i => i.SelectedModlist).ToList();
+                modlists.Add(Client.SelectedModlist);
+                var mods = modlists.Distinct()
+                    .Select(l => _appFiles.Mods.CollectAllMods(l))
+                    .SelectMany(x => x)
+                    .Distinct().ToList();
+                var response = await _steamApi.RequestModDetails(mods);
+                var neededUpdates = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList());
+                RefreshClientNeededUpdates(neededUpdates);
+                RefreshServerNeededUpdates(neededUpdates);
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+            }
         }
 
         private void CreateInstancesIfNeeded()
         {
-            if (Instances.Count >= _config.ServerInstanceCount)
+            if (Instances.Count >= _setup.Config.ServerInstanceCount)
             {
                 OnPropertyChanged(nameof(Instances));
                 return;
             }
 
-            for (var i = Instances.Count; i < _config.ServerInstanceCount; i++)
-                Instances.Add(new ServerInstanceDashboard(i));
+            for (var i = Instances.Count; i < _setup.Config.ServerInstanceCount; i++)
+            {
+                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(_uiConfig));
+                RegisterServerInstanceEvents(instance);
+                Instances.Add(instance);
+            }
             OnPropertyChanged(nameof(Instances));
         }
 
-        private void OnCheckModUpdate(object? sender, EventArgs e)
+        private void RegisterServerInstanceEvents(ServerInstanceDashboard instance)
         {
-            if (!App.Config.AutoRefreshModlist) return;
-            CheckModUpdates();
+            instance.ModlistSelected += (_, arg) =>
+            {
+                _uiConfig.SetInstanceModlist(arg.Instance, arg.Selection);
+                _uiConfig.SaveFile();
+            };
+            instance.ProfileSelected += (_, arg) =>
+            {
+                _uiConfig.SetInstanceProfile(arg.Instance, arg.Selection);
+                _uiConfig.SaveFile();
+            };
+            instance.KillClicked += (_, arg) => KillServer(arg);
+            instance.LaunchClicked += (_, arg) => LaunchServer(arg);
+            instance.CloseClicked += (_, arg) => CloseServer(arg);
+        }
+
+        private async void OnCheckModUpdate(object? sender, EventArgs e)
+        {
+            if (!_uiConfig.AutoRefreshModlist) return;
+            await CheckModUpdates();
         }
 
         private void OnCloseAll(object? obj)
         {
             foreach (var i in Instances)
-                i.Close();
+                CloseServer(i.Instance);
         }
 
         private async void OnFileVerification(object? obj)
@@ -202,49 +403,29 @@ namespace Trebuchet.Panels
             await question.OpenDialogueAsync();
             if (!question.Result) return;
 
-            StrongReferenceMessenger.Default.Send(
-                new VerifyFilesMessage(ModListProfile.CollectAllMods(_config, CollectAllModlistNames()).Distinct()));
+            try
+            {
+                _steamApi.InvalidateCache();
+                UpdateServer();
+                UpdateMods();
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+            }
         }
 
         private void OnKillAll(object? obj)
         {
             foreach (var i in Instances)
-                i.Kill();
+                KillServer(i.Instance);
         }
 
         private void OnLaunchAll(object? obj)
         {
-            StrongReferenceMessenger.Default.Send(new CatapultServerMessage(
-                Instances.Where(i => !i.ProcessRunning).Select(i => (i.SelectedProfile, i.SelectedModlist, i.Instance))
-            ));
-        }
-
-        private void OnModUpdate(object? obj)
-        {
-            UpdateMods();
-        }
-
-        private void OnServerUpdate(object? obj)
-        {
-            UpdateServer();
-        }
-
-        private async Task WaitModUpdateCheck()
-        {
-            lock (_lock)
-            {
-                if (_hasModRefreshScheduled) return;
-                _hasModRefreshScheduled = true;
-            }
-
-            while (StrongReferenceMessenger.Default.Send(
-                       new OperationStateRequest(Operations.SteamPublishedFilesFetch)))
-                await Task.Delay(200);
-
-            Dispatcher.UIThread.Invoke(CheckModUpdates);
-
-            lock (_lock)
-                _hasModRefreshScheduled = false;
+            foreach(var i in Instances)
+                LaunchServer(i.Instance);
         }
     }
 }

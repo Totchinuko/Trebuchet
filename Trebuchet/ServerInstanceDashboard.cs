@@ -1,52 +1,37 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Extensions.Logging;
-using Trebuchet.Messages;
-using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
-using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
+    public class ServerInstanceSelectionEventArgs(int instance, string selection) : EventArgs
+    {
+        public int Instance { get; } = instance;
+        public string Selection { get; } = selection;
+    }
+    
     public sealed class ServerInstanceDashboard : INotifyPropertyChanged
     {
-        private readonly UIConfig _uiConfig;
-        private readonly AppFiles _appFiles;
-        private readonly SteamAPI _steamApi;
-        private readonly Launcher _launcher;
-        private readonly ILogger _logger;
         private ProcessState _lastState;
-        private string _selectedModlist;
-        private string _selectedProfile;
+        private string _selectedModlist = string.Empty;
+        private string _selectedProfile = string.Empty;
         private bool _processRunning;
         private List<ulong> _updateNeeded = [];
         private List<string> _modlists = [];
         private List<string> _profiles = [];
+        private bool _canUseDashboard;
 
-        public ServerInstanceDashboard(
-            int instance,
-            UIConfig uiConfig,
-            AppFiles appFiles,
-            SteamAPI steamApi,
-            Launcher launcher,
-            AppSetup setup,
-            ILogger logger)
+        public ServerInstanceDashboard(int instance, IProcessStats stats)
         {
-            _uiConfig = uiConfig;
-            _appFiles = appFiles;
-            _steamApi = steamApi;
-            _launcher = launcher;
-            _logger = logger;
             Instance = instance;
+            ProcessStats = stats;
             
             KillCommand = new SimpleCommand(OnKilled, false);
             CloseCommand = new SimpleCommand(OnClose, false);
@@ -56,50 +41,56 @@ namespace Trebuchet
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
                 .SetBlockingType<ServersRunning>();
-
-            uiConfig.GetInstanceParameters(Instance, out _selectedModlist, out _selectedProfile);
-
-            Resolve();
-            ListProfiles();
-
-            if (setup.Catapult)
-                Launch();
         }
 
-        public bool CanUseDashboard => _config.IsInstallPathValid &&
-                (_config.ServerInstanceCount > Instance || ProcessRunning);
+        // public bool CanUseDashboard => _setup.Config.IsInstallPathValid &&
+        //         (_setup.Config.ServerInstanceCount > Instance || ProcessRunning);
 
-        public SimpleCommand CloseCommand { get; private set; }
+        public event EventHandler<int>? LaunchClicked;
+        public event EventHandler<int>? KillClicked;
+        public event EventHandler<int>? CloseClicked;
+        public event EventHandler<ServerInstanceSelectionEventArgs>? ModlistSelected;
+        public event EventHandler<ServerInstanceSelectionEventArgs>? ProfileSelected;
+
+        public event EventHandler<int>? UpdateClicked;
+
+        public bool CanUseDashboard
+        {
+            get => _canUseDashboard;
+            set => SetField(ref _canUseDashboard, value);
+        }
+
+        public SimpleCommand CloseCommand { get; }
 
         public int Instance { get; }
 
         public bool IsUpdateNeeded => UpdateNeeded.Count > 0;
 
-        public SimpleCommand KillCommand { get; private set; }
+        public SimpleCommand KillCommand { get; }
 
-        public TaskBlockedCommand LaunchCommand { get; private set; }
+        public TaskBlockedCommand LaunchCommand { get; }
 
         public List<string> Modlists
         {
             get => _modlists;
-            private set => SetField(ref _modlists, value);
+            set => SetField(ref _modlists, value);
         }
 
         public bool ProcessRunning
         {
             get => _processRunning;
-            private set
+            set
             {
                 if (SetField(ref _processRunning, value)) OnPropertyChanged(nameof(CanUseDashboard));
             }
         }
 
-        public IProcessStats ProcessStats { get; } = new ProcessStatsLight();
+        public IProcessStats ProcessStats { get; }
 
         public List<string> Profiles
         {
             get => _profiles;
-            private set => SetField(ref _profiles, value);
+            set => SetField(ref _profiles, value);
         }
 
         public string SelectedModlist
@@ -107,10 +98,8 @@ namespace Trebuchet
             get => _selectedModlist;
             set
             {
-                _selectedModlist = value;
-                CheckModUpdate();
-                _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
-                _uiConfig.SaveFile();
+                if(SetField(ref _selectedModlist, value))
+                    ModlistSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, value));
             }
         }
 
@@ -119,9 +108,8 @@ namespace Trebuchet
             get => _selectedProfile;
             set
             {
-                _selectedProfile = value;
-                _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
-                _uiConfig.SaveFile();
+                if(SetField(ref _selectedProfile, value))
+                    ProfileSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, value));
             }
         }
 
@@ -130,46 +118,7 @@ namespace Trebuchet
         public List<ulong> UpdateNeeded
         {
             get => _updateNeeded;
-            private set => SetField(ref _updateNeeded, value);
-        }
-
-        public void Close()
-        {
-            if (!ProcessRunning) return;
-
-            CloseCommand.Toggle(false);
-            StrongReferenceMessenger.Default.Send(new CloseProcessMessage(Instance));
-        }
-
-        public async void Kill()
-        {
-            if (!ProcessRunning) return;
-
-            if (_uiConfig.DisplayWarningOnKill)
-            {
-                QuestionModal question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
-                await question.OpenDialogueAsync();
-                if (!question.Result) return;
-            }
-
-            KillCommand.Toggle(false);
-            CloseCommand.Toggle(false);
-            StrongReferenceMessenger.Default.Send(new KillProcessMessage(Instance));
-        }
-
-        public void RefreshSelection()
-        {
-            Resolve();
-            ListProfiles();
-        }
-
-        public void RefreshUpdateStatus(List<ulong> queried, List<ulong> updated)
-        {
-            if (CanUseDashboard && !string.IsNullOrEmpty(SelectedModlist))
-            {
-                var mods = _appFiles.Mods.CollectAllMods(SelectedModlist);
-                UpdateNeeded = mods.Intersect(updated).Union(UpdateNeeded.Except(queried)).ToList();
-            }
+            set => SetField(ref _updateNeeded, value);
         }
 
         public void ProcessRefresh(IConanProcess? process)
@@ -186,97 +135,29 @@ namespace Trebuchet
                 ProcessStats.SetDetails(process);
 
             _lastState = state;
-        }
-
-        public async void Launch()
-        {
-            if(ProcessRunning) return;
-            LaunchCommand.Toggle(false);
-
-            try
-            {
-                if (_config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning() &&
-                    !_launcher.IsClientRunning())
-                {
-                    var modlist = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
-                    await _steamApi.UpdateServers();
-                    await _steamApi.UpdateMods(modlist);
-                }
-
-                await _launcher.CatapultServer(SelectedProfile, SelectedModlist, Instance);
-            }
-            catch (TrebException tex)
-            {
-                _logger.LogError(tex.Message);
-                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-            }
-            finally
-            {
-                LaunchCommand.Toggle(true);
-            }
-        }
-
-        private void CheckModUpdate()
-        {
-            ClearUpdates();
-            if (string.IsNullOrEmpty(SelectedModlist)) return;
-            
-        }
-
-        private void ClearUpdates()
-        {
-            UpdateNeeded.Clear();
-        }
-
-        private void ListProfiles()
-        {
-            Modlists = _appFiles.Mods.ListProfiles().ToList();
-            Profiles = _appFiles.Server.ListProfiles().ToList();
+            ProcessStats.Tick();
         }
 
         private void OnClose(object? obj)
         {
-            Close();
+            CloseClicked?.Invoke(this, Instance);
         }
 
         private void OnKilled(object? obj)
         {
-            Kill();
+            KillClicked?.Invoke(this, Instance);
         }
 
         private void OnLaunched(object? obj)
         {
             if (!CanUseDashboard) return;
-
-            Launch();
+            LaunchClicked?.Invoke(this, Instance);
         }
 
-        private async void OnModUpdate(object? obj)
+        private void OnModUpdate(object? obj)
         {
             if (string.IsNullOrEmpty(SelectedModlist)) return;
-            await UpdateMods();
-        }
-
-        public async Task UpdateMods()
-        {
-            try
-            {
-                var modlist = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
-                await _steamApi.UpdateMods(modlist);
-            }
-            catch (TrebException tex)
-            {
-                _logger.LogError(tex.Message);
-                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex.Message);
-            }
+            UpdateClicked?.Invoke(this, Instance);
         }
 
         private async void OnProcessFailed()
@@ -295,7 +176,6 @@ namespace Trebuchet
 
             ProcessRunning = true;
             ProcessStats.StartStats(details);
-            StrongReferenceMessenger.Default.Send<DashboardStateChanged>();
         }
 
         private void OnProcessTerminated()
@@ -305,18 +185,6 @@ namespace Trebuchet
             CloseCommand.Toggle(false);
             LaunchCommand.Toggle(true);
             ProcessRunning = false;
-            StrongReferenceMessenger.Default.Send<DashboardStateChanged>();
-        }
-
-        private void Resolve()
-        {
-            var profile = _appFiles.Server.ResolveProfile(_selectedProfile);
-            var modlist = _appFiles.Mods.ResolveProfile(_selectedModlist);
-
-            _uiConfig.SetInstanceParameters(Instance, _selectedModlist, _selectedProfile);
-            _uiConfig.SaveFile();
-            SelectedProfile = profile;
-            SelectedModlist = modlist;
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

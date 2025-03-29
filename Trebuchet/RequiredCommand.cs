@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Messaging;
@@ -11,11 +12,11 @@ namespace Trebuchet
     {
         private readonly Action<object?> _callback;
         private bool _launched;
-        private readonly Operations[] _tasks;
+        private bool _blocked;
+        private readonly List<Type> _types = [];
 
-        public RequiredCommand(string message, string button, Action<object?> callback, params Operations[] tasks)
+        public RequiredCommand(string message, string button, Action<object?> callback)
         {
-            _tasks = tasks;
             _callback = callback;
             Message = message;
             Button = button;
@@ -28,9 +29,15 @@ namespace Trebuchet
 
         public string Message { get; set; }
 
+        public RequiredCommand SetBlockingType<T>() where T : IBlockedTaskType
+        {
+            _types.Add(typeof(T));
+            return this;
+        }
+        
         public bool CanExecute(object? parameter)
         {
-            return !StrongReferenceMessenger.Default.Send(new OperationStateRequest(_tasks)) && !_launched;
+            return !_blocked && !_launched;
         }
 
         public void Execute(object? parameter)
@@ -43,8 +50,11 @@ namespace Trebuchet
 
         void IRecipient<BlockedTaskStateChanged>.Receive(BlockedTaskStateChanged message)
         {
-            if (_tasks.Contains(message.key))
+            if (_types.Contains(message.Type.GetType()))
+            {
+                _blocked = message.Value;
                 CanExecuteChanged?.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }

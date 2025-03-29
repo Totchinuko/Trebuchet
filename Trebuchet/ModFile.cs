@@ -6,6 +6,7 @@ using Avalonia.Media;
 using Humanizer;
 using SteamWorksWebAPI;
 using Trebuchet.Messages;
+using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetUtils;
 
@@ -25,7 +26,8 @@ namespace Trebuchet
             _infos = new FileInfo(path);
             RemoveModCommand = new SimpleCommand(OnRemoveModCommand);
             OpenModPageCommand = new SimpleCommand(OnOpenModPageCommand);
-            UpdateModCommand = new TaskBlockedCommand(OnUpdateModCommand, true, Operations.SteamDownload);
+            UpdateModCommand = new TaskBlockedCommand(OnUpdateModCommand)
+                .SetBlockingType<SteamDownload>();
         }
 
         public ModFile(ulong publishedFileId, string path) : this(path)

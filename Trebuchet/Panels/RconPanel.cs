@@ -5,6 +5,8 @@ using System.Net;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
+using TrebuchetLib.Processes;
+using TrebuchetLib.Services;
 using TrebuchetUtils;
 
 namespace Trebuchet.Panels
@@ -20,24 +22,24 @@ namespace Trebuchet.Panels
         public bool IsError => ConsoleLog.IsError;
     }
 
-    public class RconPanel : Panel,
-            IRecipient<ServerProcessStateChanged>
+    public class RconPanel : Panel
     {
-        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+        private readonly AppSetup _setup;
+        private readonly Launcher _launcher;
         private IConsole? _console;
         private int _selectedConsole;
-        private List<ProcessServerDetails> _servers = new List<ProcessServerDetails>();
+        private List<IConanServerProcess> _servers = [];
 
-        public RconPanel() : base("Console", "RconPanel", "mdi-console-line", PanelPosition.Server)
+        public RconPanel(AppSetup setup, Launcher launcher) : base("Server Consoles", "RconPanel", "mdi-console-line", false)
         {
+            _setup = setup;
+            _launcher = launcher;
             SendCommand = new SimpleCommand(OnSendCommand, false);
-
-            StrongReferenceMessenger.Default.Register<ServerProcessStateChanged>(this);
 
             LoadPanel();
         }
 
-        public List<string> AvailableConsoles { get; } = new List<string>();
+        public List<string> AvailableConsoles { get; } = [];
 
         public ObservableCollection<ObservableConsoleLog> ConsoleLogs { get; private set; } = new ObservableCollection<ObservableConsoleLog>();
 
@@ -56,13 +58,15 @@ namespace Trebuchet.Panels
 
         public override bool CanExecute(object? parameter)
         {
-            return _config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
+            return _setup.Config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
         }
 
-        public void Receive(ServerProcessStateChanged message)
+        public void RefreshConsoleList(List<IConanServerProcess> servers)
         {
+            _servers = servers;
             RefreshConsoleList();
         }
+
 
         public override void RefreshPanel()
         {
@@ -113,12 +117,12 @@ namespace Trebuchet.Panels
         private void RefreshConsoleList()
         {
             AvailableConsoles.Clear();
-            _servers = StrongReferenceMessenger.Default.Send<ProcessServerDetailsRequest>().Response;
-            for (int i = 0; i < _config.ServerInstanceCount; i++)
+            _servers = _launcher.GetServerProcesses().ToList();
+            for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
             {
                 var server = _servers.FirstOrDefault(x => x.Instance == i);
-                AvailableConsoles.Add(server is { RconPort: > 0, State: ProcessState.ONLINE }
-                    ? $"RCON - {server.Title} ({server.Instance}) - {IPAddress.Loopback}:{server.RconPort}"
+                AvailableConsoles.Add(server is { RConPort: > 0, State: ProcessState.ONLINE }
+                    ? $"RCON - {server.Title} ({server.Instance}) - {IPAddress.Loopback}:{server.RConPort}"
                     : $"Unavailable - Instance {i}");
             }
             OnPropertyChanged(nameof(AvailableConsoles));
@@ -127,10 +131,10 @@ namespace Trebuchet.Panels
 
         private void RefreshValidity()
         {
-            var valid = _servers.Any(server => server.Instance == _selectedConsole && server is { RconPort: > 0, State: ProcessState.ONLINE });
+            var valid = _servers.Any(server => server.Instance == _selectedConsole && server is { RConPort: > 0, State: ProcessState.ONLINE });
             SendCommand.Toggle(valid);
             if (valid)
-                LoadConsole(StrongReferenceMessenger.Default.Send(new ServerConsoleRequest(_selectedConsole)).Response);
+                LoadConsole(_launcher.GetServerConsole(_selectedConsole));
         }
     }
 }

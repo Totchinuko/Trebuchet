@@ -18,10 +18,10 @@ namespace Trebuchet.Panels
         
         private bool _active;
 
-        public Panel(string label, string template, string iconPath, PanelPosition position) : base(label, template)
+        public Panel(string label, string template, string iconPath, bool bottom) : base(label, template)
         {
             IconPath = iconPath;
-            Position = position;
+            BottomPosition = bottom;
             StrongReferenceMessenger.Default.RegisterAll(this);
         }
 
@@ -29,7 +29,7 @@ namespace Trebuchet.Panels
         public event PropertyChangedEventHandler? PropertyChanged;
         
         public string IconPath { get; }
-        public PanelPosition Position { get; }
+        public bool BottomPosition { get; }
 
         public bool Active
         {
@@ -63,6 +63,8 @@ namespace Trebuchet.Panels
         public virtual void RefreshPanel()
         {
         }
+        
+        public virtual void Tick() {}
 
         public virtual void PanelDisplayed()
         {

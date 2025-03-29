@@ -1,23 +1,31 @@
 ﻿using System.IO;
-using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Logging;
+using Trebuchet.Services;
+using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
-using TrebuchetUtils;
+using TrebuchetLib.Services;
 using TrebuchetUtils.Modals;
 
 namespace Trebuchet.Panels
 {
     public class SettingsPanel : FieldEditorPanel
     {
+        private readonly SteamAPI _steamApi;
+        private readonly ILogger<SettingsPanel> _logger;
         private bool _displayedHelp;
 
-        public SettingsPanel() : base("Settings", string.Empty, "mdi-cog", PanelPosition.Bottom)
+        public SettingsPanel(AppSetup setup, UIConfig uiConfig, SteamAPI steamApi, ILogger<SettingsPanel> logger) : base("Settings", string.Empty, "mdi-cog", true)
         {
+            _steamApi = steamApi;
+            _logger = logger;
+            AppSetup = setup;
+            UiConfig = uiConfig;
             LoadPanel();
         }
 
-        public Config Config { get; } = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+        public AppSetup AppSetup { get; }
 
-        public UIConfig UiConfig => App.Config;
+        public UIConfig UiConfig { get; }
 
         public override void OnWindowShow()
         {
@@ -32,14 +40,14 @@ namespace Trebuchet.Panels
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.SettingsPanel.Fields.json", this, nameof(Config));
+            BuildFields("Trebuchet.Panels.SettingsPanel.Fields.json", AppSetup, nameof(AppSetup.Config));
             BuildFields("Trebuchet.Panels.SettingsPanel.UI.Fields.json", this, nameof(UiConfig));
         }
 
         protected override void OnValueChanged(string property)
         {
-            Config.SaveFile();
-            App.Config.SaveFile();
+            AppSetup.Config.SaveFile();
+            UiConfig.SaveFile();
             UpdateRequiredActions();
         }
 
@@ -48,10 +56,10 @@ namespace Trebuchet.Panels
             if (_displayedHelp) return;
             _displayedHelp = true;
 
-            if (Config.IsInstallPathValid && (Tools.IsClientInstallValid(Config) || Tools.IsServerInstallValid(Config)))
+            if (AppSetup.Config.IsInstallPathValid && (Tools.IsClientInstallValid(AppSetup.Config) || Tools.IsServerInstallValid(AppSetup.Config)))
                 return;
 
-            if (!Config.IsInstallPathValid)
+            if (!AppSetup.Config.IsInstallPathValid)
             {
                 ErrorModal modal = new ErrorModal(
                     App.GetAppText("Welcome_InstallPathInvalid_Title"),
@@ -59,7 +67,7 @@ namespace Trebuchet.Panels
                 await modal.OpenDialogueAsync();
             }
 
-            if ((!Tools.IsClientInstallValid(Config) && !Tools.IsServerInstallValid(Config)))
+            if ((!Tools.IsClientInstallValid(AppSetup.Config) && !Tools.IsServerInstallValid(AppSetup.Config)))
             {
                 MessageModal modal = new MessageModal(
                   App.GetAppText("Welcome_SettingTutorial_Title"),
@@ -75,23 +83,31 @@ namespace Trebuchet.Panels
             UpdateRequiredActions();
         }
 
-        private void OnAppRestart(object? obj)
+        private async void OnServerInstanceInstall(object? obj)
         {
-            Utils.Utils.RestartProcess(Config.IsTestLive);
-        }
-
-        private void OnServerInstanceInstall(object? obj)
-        {
-            StrongReferenceMessenger.Default.Send<ServerUpdateMessage>();
+            try
+            {
+                await _steamApi.UpdateServers();
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+            }
         }
 
         private void UpdateRequiredActions()
         {
             RequiredActions.Clear();
 
-            int installed = StrongReferenceMessenger.Default.Send<InstanceInstalledCountRequest>();
-            if (Directory.Exists(Config.ResolvedInstallPath) && Config.ServerInstanceCount > installed)
-                RequiredActions.Add(new RequiredCommand(App.GetAppText("ServerNotInstalled"), App.GetAppText("Install"), OnServerInstanceInstall, Operations.SteamDownload));
+            int installed = _steamApi.GetInstalledServerInstanceCount();
+            if (Directory.Exists(AppSetup.Config.ResolvedInstallPath()) && AppSetup.Config.ServerInstanceCount > installed)
+                RequiredActions.Add(
+                    new RequiredCommand(
+                        App.GetAppText("ServerNotInstalled"), 
+                        App.GetAppText("Install"), 
+                        OnServerInstanceInstall)
+                        .SetBlockingType<SteamDownload>());
         }
     }
 }

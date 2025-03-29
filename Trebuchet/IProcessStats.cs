@@ -1,4 +1,5 @@
-﻿using TrebuchetLib;
+﻿using System.Threading.Tasks;
+using TrebuchetLib;
 using TrebuchetLib.Processes;
 
 namespace Trebuchet
@@ -16,6 +17,8 @@ namespace Trebuchet
         void SetDetails(IConanProcess details);
 
         void StartStats(IConanProcess details);
+
+        void Tick();
 
         void StopStats();
     }

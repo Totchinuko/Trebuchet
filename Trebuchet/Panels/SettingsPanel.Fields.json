@@ -11,20 +11,14 @@
     "RefreshApp": true,
     "Default": "%APP_DIRECTORY%\\TrebuchetData",
     "DefaultFolder": "%APP_DIRECTORY%\\TrebuchetData",
-    "CreateDefaultFolder": true,
-    "Validation": {
-      "$type": "InstallDirectory"
-    }
+    "CreateDefaultFolder": true
   },
   {
     "$type": "Directory",
     "Property": "ClientPath",
     "Name": "Conan Exile Installation Directory",
     "Description": "This is the path to your game. Leave it empty if you do not wish trebuchet to handle game launch.",
-    "RefreshApp": true,
-    "Validation": {
-      "$type": "GameDirectory"
-    }
+    "RefreshApp": true
   },
   {
     "$type": "IntSlider",

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
@@ -10,18 +11,16 @@ namespace Trebuchet
 {
     public class ProcessStatsLight : INotifyPropertyChanged, IProcessStats
     {
+        private readonly UIConfig _uiConfig;
         protected const string CpuFormat = "{0}%";
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
-        private static DateTime _previousCpuStartTime;
-        private static TimeSpan _previousTotalProcessorTime;
         private IConanProcess? _details;
         private long _peakMemoryConsumption;
         private Process? _process;
-        private readonly DispatcherTimer _timer;
 
-        public ProcessStatsLight()
+        public ProcessStatsLight(UIConfig uiConfig)
         {
-            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(1000), DispatcherPriority.Background, OnTick);
+            _uiConfig = uiConfig;
             CpuUsage = string.Empty;
             MemoryConsumption = string.Empty;
         }
@@ -31,7 +30,7 @@ namespace Trebuchet
         public string CpuUsage { get; private set; }
         public string MemoryConsumption { get; private set; }
 
-        public int PID => (int)(_details?.PId ?? 0);
+        public int PID => (_details?.PId ?? 0);
 
         public string PlayerCount { get; private set; } = string.Empty;
 
@@ -49,13 +48,10 @@ namespace Trebuchet
 
         public void StartStats(IConanProcess details)
         {
-            if (!TryGetProcess((int)details.PId, out Process? process)) return;
+            if (!TryGetProcess(details.PId, out Process? process)) return;
             _process = process;
 
             SetDetails(details);
-            _previousCpuStartTime = DateTime.UtcNow;
-            _previousTotalProcessorTime = process.TotalProcessorTime;
-            _timer.Start();
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(PID));
             OnPropertyChanged(nameof(ProcessStatus));
@@ -65,25 +61,19 @@ namespace Trebuchet
         {
             _details = null;
             _process = null;
-            _timer.Stop();
             _peakMemoryConsumption = 0;
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(ProcessStatus));
         }
-
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        protected virtual void OnTick(object? sender, EventArgs e)
+        
+        public async void Tick()
         {
             if (!Running) return;
 
-            if (App.Config.DisplayProcessPerformance)
+            if (_uiConfig.DisplayProcessPerformance)
             {
                 long memoryConsumption = GetMemoryUsageForProcess();
-                CpuUsage = string.Format(CpuFormat, GetCpuUsageForProcess().ToString("N2"));
+                CpuUsage = string.Format(CpuFormat, (await GetCpuUsageForProcess()).ToString("N2"));
                 _peakMemoryConsumption = Math.Max(memoryConsumption, _peakMemoryConsumption);
                 MemoryConsumption = string.Format(MemoryFormat, (memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
             }
@@ -99,20 +89,26 @@ namespace Trebuchet
             OnPropertyChanged(nameof(Uptime));
         }
 
-        private double GetCpuUsageForProcess()
+        protected void OnPropertyChanged(string propertyName)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private async Task<double> GetCpuUsageForProcess()
         {
             if (_process == null) return 0;
+            
+            var startTime = DateTime.UtcNow;
+            var startUsage = _process.TotalProcessorTime;
 
-            var currentCpuStartTime = DateTime.UtcNow;
-            var currentCpuUsage = _process.TotalProcessorTime;
+            await Task.Delay(500);
+            
+            var endTime = DateTime.UtcNow;
+            var endUsage = _process.TotalProcessorTime;
 
-            var cpuUsedMs = (currentCpuUsage - _previousTotalProcessorTime).TotalMilliseconds;
-            var totalMsPassed = (currentCpuStartTime - _previousCpuStartTime).TotalMilliseconds;
+            var cpuUsedMs = (endUsage - startUsage).TotalMilliseconds;
+            var totalMsPassed = (endTime - startTime).TotalMilliseconds;
             var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
-
-            // Set previous times.
-            _previousCpuStartTime = currentCpuStartTime;
-            _previousTotalProcessorTime = currentCpuUsage;
 
             return cpuUsageTotal * 100.0;
         }
@@ -120,10 +116,8 @@ namespace Trebuchet
         private long GetMemoryUsageForProcess()
         {
             if (_details == null) return 0;
-            if (!TryGetProcess((int)_details.PId, out Process? process)) return 0;
+            if (!TryGetProcess(_details.PId, out Process? process)) return 0;
             var workingSet64 = process.WorkingSet64;
-            var privateMemorySize64 = process.PrivateMemorySize64;
-            var virtualMemorySize64 = process.VirtualMemorySize64;
 
             return workingSet64;
         }

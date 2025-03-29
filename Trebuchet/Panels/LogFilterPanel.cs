@@ -2,21 +2,23 @@
 using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Panels;
 using TrebuchetLib;
+using TrebuchetLib.Services;
 
 namespace Trebuchet.Panels
 {
     public class LogFilterPanel : Panel
     {
-        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+        private readonly AppSetup _setup;
 
-        public LogFilterPanel() : base("Log Filter", "LogFilterPanel", "mdi-filter", PanelPosition.Server)
+        public LogFilterPanel(AppSetup setup) : base("Log Filter", "LogFilterPanel", "mdi-filter", false)
         {
+            _setup = setup;
             LoadPanel();
         }
 
         public override bool CanExecute(object? parameter)
         {
-            return _config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
+            return _setup.Config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
         }
 
         public override void RefreshPanel()

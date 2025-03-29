@@ -3,7 +3,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:w="clr-namespace:Trebuchet.Windows"
+        xmlns:vm="clr-namespace:Trebuchet.ViewModels"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         mc:Ignorable="d"
@@ -16,7 +16,7 @@
         SystemDecorations="Full"
         ExtendClientAreaTitleBarHeightHint="40"
         Classes="Trebuchet"
-        x:DataType="w:WorkshopSearch"
+        x:DataType="vm:WorkshopSearchViewModel"
         UseLayoutRounding="True">
     <Border x:Name="MainBorder">
         <Grid>
@@ -67,7 +67,7 @@
                                                         <Image Width="150" Source="{Binding PreviewUrl, Mode=OneWay}" Margin="0,0,0,12" />
                                                         <Button Classes="Base Green"
                                                                 HorizontalAlignment="Right"
-                                                                Command="{Binding $parent[w:WorkshopSearch].AddModCommand}"
+                                                                Command="{Binding $parent[vm:WorkshopSearchViewModel].AddModCommand}"
                                                                 CommandParameter="{Binding .}"
                                                                 Padding="8">
                                                             <StackPanel Orientation="Horizontal">

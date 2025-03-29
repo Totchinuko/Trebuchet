@@ -9,7 +9,7 @@ public static class Constants
     public const string FileBuildID = "buildid";
     public const string FileClientBEBin = "ConanSandbox_BE.exe";
     public const string FileClientBin = "ConanSandbox.exe";
-    public const string FileConfig = "Config.json";
+    public const string FileConfig = "settings.json";
     public const string FileGeneratedModlist = "modlist.txt";
     public const string FileIniBase = "Engine\\Config\\Base{0}.ini";
     public const string FileIniDefault = "ConanSandbox\\Config\\Default{0}.ini";

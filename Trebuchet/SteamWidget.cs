@@ -1,37 +1,52 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
+using System.Runtime.CompilerServices;
 using Avalonia.Threading;
 using CommunityToolkit.Mvvm.Messaging;
-using Trebuchet.Messages;
 using Trebuchet.Services.TaskBlocker;
+using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
-    public class SteamWidget : IProgress<double>,
-        INotifyPropertyChanged,
-        IRecipient<SteamConnectionChangedMessage>,
-        IRecipient<BlockedTaskStateChanged>
+    public class SteamWidget : INotifyPropertyChanged, IRecipient<BlockedTaskStateChanged>
     {
+        private readonly Steam _steam;
+        private readonly TaskBlocker _taskBlocker;
         private readonly object _descriptionLock = new();
         private readonly object _progressLock;
         private string _description = string.Empty;
-        private double _progress;
         private readonly DispatcherTimer _timer;
+        private bool _isConnected;
+        private double _progress;
 
-        public SteamWidget()
+        public SteamWidget(Progress progress, Steam steam, TaskBlocker taskBlocker)
         {
+            _steam = steam;
+            _taskBlocker = taskBlocker;
+            progress.ProgressChanged += OnProgressChanged;
+            
             StrongReferenceMessenger.Default.RegisterAll(this);
 
             _progressLock = new object();
+            _steam.Connected += OnSteamConnected;
+            _steam.Disconnected += OnSteamDisconnected;
             CancelCommand = new SimpleCommand(OnCancel);
             ConnectCommand = new SimpleCommand(OnConnect);
 
             _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        private void OnProgressChanged(object? sender, double e)
+        {
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                Progress = e;
+            });
+        }
+
 
         public SimpleCommand CancelCommand { get; }
 
@@ -39,19 +54,28 @@ namespace Trebuchet
 
         public string Description
         {
-            get
+            get => _description;
+            set => SetField(ref _description, value);
+        }
+
+        public bool IsConnected
+        {
+            get => _isConnected;
+            private set => SetField(ref _isConnected, value);
+        }
+
+        public bool IsLoading => !string.IsNullOrEmpty(Description);
+
+        public double Progress
+        {
+            get => _progress;
+            set
             {
-                lock (_descriptionLock)
-                    return _description;
+                if (SetField(ref _progress, value)) 
+                    OnPropertyChanged(nameof(IsIndeterminate));
             }
         }
 
-        public bool IsConnected { get; private set; }
-        
-        public bool IsLoading => !string.IsNullOrEmpty(Description);
-
-        public double Progress { get; private set; }
-        
         public bool IsIndeterminate => Progress == 0;
 
         public bool CanExecute(bool displayError = true)
@@ -65,19 +89,9 @@ namespace Trebuchet
             return true;
         }
 
-        public void Receive(SteamConnectionChangedMessage message)
-        {
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                IsConnected = message.Value;
-                OnPropertyChanged(nameof(IsConnected));
-                ConnectCommand.Toggle(true);
-            });
-        }
-
         public void Receive(BlockedTaskStateChanged message)
         {
-            if (message.key != Operations.SteamDownload) return;
+            if (message.Type.GetType() != typeof(SteamDownload)) return;
 
             if (!message.Value)
             {
@@ -119,26 +133,21 @@ namespace Trebuchet
             _timer.Start();
         }
 
-        protected void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-
         private void OnCancel(object? obj)
         {
-            StrongReferenceMessenger.Default.Send(new OperationCancelMessage(Operations.SteamDownload));
+            _taskBlocker.Cancel<SteamDownload>();
             SetDescription("Canceling...");
             OnPropertyChanged(nameof(Description));
             OnPropertyChanged(nameof(IsLoading));
             OnPropertyChanged(nameof(IsIndeterminate));
         }
 
-        private void OnConnect(object? obj)
+        private async void OnConnect(object? obj)
         {
             if (!IsConnected)
             {
                 ConnectCommand.Toggle(false);
-                StrongReferenceMessenger.Default.Send<SteamConnectMessage>();
+                await _steam.Connect();
             }
         }
 
@@ -150,6 +159,41 @@ namespace Trebuchet
                 OnPropertyChanged(nameof(Progress));
                 OnPropertyChanged(nameof(IsIndeterminate));
             }
+        }
+        
+        private void OnSteamDisconnected(object? sender, EventArgs e)
+        {
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                IsConnected = false;
+                OnPropertyChanged(nameof(IsConnected));
+                ConnectCommand.Toggle(true);
+            });
+        }
+
+        private void OnSteamConnected(object? sender, EventArgs e)
+        {
+            Dispatcher.UIThread.Invoke(() =>
+            {
+                IsConnected = true;
+                OnPropertyChanged(nameof(IsConnected));
+                ConnectCommand.Toggle(true);
+            });
+        }
+
+        public event PropertyChangedEventHandler? PropertyChanged;
+
+        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+        {
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
     }
 }

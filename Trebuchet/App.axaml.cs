@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Data.Core.Plugins;
 using Avalonia.Markup.Xaml;
@@ -14,8 +15,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualBasic;
 using Serilog;
 using Trebuchet.Modals;
+using Trebuchet.Services;
+using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Windows;
 using TrebuchetLib;
+using TrebuchetLib.Services;
+using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
@@ -44,16 +49,55 @@ public partial class App : Application, IApplication
     }
 
 
-    public static void OpenApp(bool testlive, bool catapult)
+    public async void OpenApp()
     {
-        Log.Information($"Selecting {(testlive ? "testlive" : "live")}");
-        Config = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            throw new Exception("Not supported");
 
+        bool? testlive = null;
+        bool catapult = false;
+
+        if (desktop.Args?.Length > 0)
+        {
+            if (desktop.Args.Contains("-testlive"))
+                testlive = true;
+            else if (desktop.Args.Contains("-live"))
+                testlive = false;
+            if(desktop.Args.Contains("-catapult"))
+                catapult = true;
+        }
+        
         MainWindow mainWindow = new ();
-        mainWindow.SetApp(new (testlive, catapult));
-        if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = mainWindow;
-        else throw new Exception("Application not initialized");
+        desktop.MainWindow = mainWindow;
+
+        if (testlive is null)
+        {
+            TestliveModal modal = new ();
+            await modal.OpenDialogueAsync();
+            testlive = modal.Result;
+        }
+        
+        TinyMessengerHub.Default = new TinyMessengerHub();
+        
+        Log.Logger = new LoggerConfiguration()
+#if !DEBUG
+                    .MinimumLevel.Information()
+#endif
+            .WriteTo.File(
+                Path.Combine(Tools.GetRootPath(), "Logs/app.log"),
+                retainedFileTimeLimit: TimeSpan.FromDays(7),
+                rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+        Log.Information("Starting Taskmaster");
+        
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection, (bool)testlive, catapult);
+        
+        var services = serviceCollection.BuildServiceProvider();
+        
+        Log.Information($"Selecting {((bool)testlive ? "testlive" : "live")}");
+
+        mainWindow.SetApp(services.GetRequiredService<TrebuchetApp>());
         mainWindow.Show();
     }
         
@@ -72,56 +116,42 @@ public partial class App : Application, IApplication
     {
         BindingPlugins.DataValidators.RemoveAt(0);
 
-        var serviceCollection = new ServiceCollection();
-        ConfigureServices(serviceCollection);
-        
-        var services = serviceCollection.BuildServiceProvider();
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // todo di:this will need to be service
-            TinyMessengerHub.Default = new TinyMessengerHub();
-            Log.Logger = new LoggerConfiguration()
-#if !DEBUG
-                    .MinimumLevel.Information()
-#endif
-                .WriteTo.File(
-                    Path.Combine(Tools.GetRootPath(), "Logs/app.log"),
-                    retainedFileTimeLimit: TimeSpan.FromDays(7),
-                    rollingInterval: RollingInterval.Day)
-                .CreateLogger();
-            Log.Information("Starting Taskmaster");
-            
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             Dispatcher.UIThread.UnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
             desktop.ShutdownRequested += OnShutdownRequested;
 
-
             ReadAppText();
-
-            if (desktop.Args?.Length > 0)
-            {
-                if (desktop.Args.Contains("-testlive"))
-                {
-                    OpenApp(true, desktop.Args.Contains("-catapult"));
-                    return;
-                }
-                else if (desktop.Args.Contains("-live"))
-                {
-                    OpenApp(false, desktop.Args.Contains("-catapult"));
-                    return;
-                }
-            }
-            TestliveModal modal = new (desktop.Args?.Contains("-catapult") ?? false);
-            desktop.MainWindow = modal.Window;
-            modal.Open();
+            
+            OpenApp();
         }
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void ConfigureServices(IServiceCollection services)
+    private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult)
     {
         services.AddSingleton<AppSettings>(GetAppSettings());
+        services.AddSingleton<AppClientFiles>();
+        services.AddSingleton<AppServerFiles>();
+        services.AddSingleton<AppModlistFiles>();
+        services.AddSingleton<AppFiles>();
+        services.AddSingleton<AppSetup>(
+            new AppSetup(Config.LoadConfig(Utils.Utils.GetConfigPath()), testlive, catapult));
+        services.AddSingleton<IIniGenerator, YuuIniGenerator>();
+        services.AddSingleton<IProgress<double>, Progress>();
+        services.AddSingleton<Steam>();
+        services.AddSingleton<Launcher>();
+        services.AddSingleton<UIConfig>(UIConfig.LoadConfig(UIConfig.GetUIConfigPath()));
+        services.AddSingleton<TaskBlocker>();
+        services.AddSingleton<SteamAPI>();
+
+        services.AddTransient<TrebuchetApp>();
+
+        var panels = typeof(Panel).Assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(Panel))).ToList();
+        foreach (var panel in panels)
+            services.AddTransient(panel);
     }
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
@@ -172,7 +202,7 @@ public partial class App : Application, IApplication
         if(settings == null) throw new JsonException("AppSettings could not be loaded");
         return settings;
     }
-        
+    
     public void Handle(ITinyMessage message, Exception exception)
     {
         DisplayExceptionAndExit(exception);

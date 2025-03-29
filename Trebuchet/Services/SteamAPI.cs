@@ -85,4 +85,9 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
         await steam.UpdateMods(modlist, task.Cts);
         task.Release();
     }
+
+    public int GetInstalledServerInstanceCount()
+    {
+        return steam.GetInstalledInstances();
+    }
 }

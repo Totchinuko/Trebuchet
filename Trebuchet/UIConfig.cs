@@ -1,11 +1,14 @@
 ﻿using System;
 using System.IO;
 using TrebuchetLib;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {
     public sealed class UIConfig : ConfigFile<UIConfig>
     {
+        public const string ConfigFileName = "settings.ui.json";
+        
         private string[] _dashboardServerModlist = [];
         private string[] _dashboardServerProfiles = [];
 
@@ -43,13 +46,30 @@ namespace Trebuchet
 
         public void SetInstanceParameters(int instance, string modlist, string profile)
         {
+            SetInstanceModlist(instance, modlist);
+            SetInstanceProfile(instance, profile);
+        }
+
+        public void SetInstanceModlist(int instance, string modlist)
+        {
             if (DashboardServerModlist.Length <= instance)
                 Array.Resize(ref _dashboardServerModlist, instance + 1);
             DashboardServerModlist[instance] = modlist;
+        }
 
+        public void SetInstanceProfile(int instance, string profile)
+        {
             if (DashboardServerProfiles.Length <= instance)
                 Array.Resize(ref _dashboardServerProfiles, instance + 1);
             DashboardServerProfiles[instance] = profile;
+        }
+
+        public static string GetUIConfigPath()
+        {
+            var folder = typeof(UIConfig).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
+            if(!folder.Exists)
+                Directory.CreateDirectory(folder.FullName);
+            return Path.Combine(folder.FullName, ConfigFileName);
         }
     }
 }

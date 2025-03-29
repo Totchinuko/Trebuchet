@@ -3,8 +3,6 @@ using System.Threading.Tasks;
 
 namespace Trebuchet.Validation
 {
-    [JsonDerivedType(typeof(InstallDirectoryValidation), "InstallDirectory")]
-    [JsonDerivedType(typeof(ConanGameDirectoryValidation), "GameDirectory")]
     public abstract class BaseValidation
     {
         protected BaseValidation()

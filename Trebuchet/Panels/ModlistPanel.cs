@@ -1,6 +1,4 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Collections.Specialized;
@@ -9,32 +7,36 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Web;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
-using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Logging;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Messages;
+using Trebuchet.Services;
+using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
+using Trebuchet.ViewModels;
 using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
-#endregion
-
 namespace Trebuchet.Panels
 {
-    public class ModlistPanel : Panel,
-        IRecipient<SteamModlistReceived>,
-        ITinyRecipient<ModListMessages>
+    public class ModlistPanel : Panel, ITinyRecipient<ModListMessages>
     {
-        private readonly AppSteam _steam;
-        private readonly Config _config;
+        private readonly SteamAPI _steamApi;
+        private readonly AppSetup _setup;
+        private readonly AppFiles _appFiles;
+        private readonly UIConfig _uiConfig;
+        private readonly WorkshopSearchViewModel _workshop;
+        private readonly ILogger<ModlistPanel> _logger;
         private TrulyObservableCollection<ModFile> _modlist = new();
         private string _modlistUrl = string.Empty;
         private FileSystemWatcher? _modWatcher;
@@ -43,11 +45,21 @@ namespace Trebuchet.Panels
         private WorkshopSearch? _searchWindow;
         private string _selectedModlist = string.Empty;
 
-        public ModlistPanel(AppSteam steam, Config config) : 
-            base("Mod List", "ModlistEditor", "mdi-toy-brick", PanelPosition.Top)
+        public ModlistPanel(
+            SteamAPI steamApi, 
+            AppSetup setup,
+            AppFiles appFiles,
+            UIConfig uiConfig, 
+            WorkshopSearchViewModel workshop,
+            ILogger<ModlistPanel> logger) : 
+            base("Mods", "ModlistEditor", "mdi-toy-brick", false)
         {
-            _steam = steam;
-            _config = config;
+            _steamApi = steamApi;
+            _setup = setup;
+            _appFiles = appFiles;
+            _uiConfig = uiConfig;
+            _workshop = workshop;
+            _logger = logger;
             LoadPanel();
 
             CreateModlistCommand = new SimpleCommand(OnModlistCreate);
@@ -57,15 +69,18 @@ namespace Trebuchet.Panels
             ExploreWorkshopCommand = new SimpleCommand(OnExploreWorkshop);
             ExportToJsonCommand = new SimpleCommand(OnExportToJson);
             ExportToTxtCommand = new SimpleCommand(OnExportToTxt);
-            FetchCommand = new TaskBlockedCommand(OnFetchClicked, true, Operations.DownloadModlist);
+            FetchCommand = new TaskBlockedCommand(OnFetchClicked)
+                .SetBlockingType<DownloadModlist>();
             ImportFromFileCommand = new SimpleCommand(OnImportFromFile);
             ImportFromTextCommand = new SimpleCommand(OnImportFromText);
-            ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload, true, Operations.SteamDownload,
-                Operations.GameRunning, Operations.ServerRunning);
-            RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh, true, Operations.SteamPublishedFilesFetch);
+            ModFilesDownloadCommand = new TaskBlockedCommand(OnModFilesDownload)
+                .SetBlockingType<SteamDownload>()
+                .SetBlockingType<ClientRunning>()
+                .SetBlockingType<ServersRunning>();
+            RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh)
+                .SetBlockingType<DownloadModlist>();
 
-            StrongReferenceMessenger.Default.Register<SteamModlistReceived>(this);
-            TinyMessengerHub.Default.Subscribe<ModListMessages>(this);
+            TinyMessengerHub.Default.Subscribe(this);
         }
 
         public SimpleCommand CreateModlistCommand { get; }
@@ -124,21 +139,9 @@ namespace Trebuchet.Panels
             }
         }
 
-        public void Receive(SteamModlistReceived message)
-        {
-            var update = from file in _modlist
-                where file.IsPublished
-                join details in message.Modlist on file.PublishedFileId equals details.PublishedFileID
-                select new KeyValuePair<ModFile, PublishedFile>(file, details);
-
-            var updates = _steam.CheckModsForUpdate(message.Modlist.GetManifestKeyValuePairs().ToList());
-            foreach (var u in update)
-                u.Key.SetManifest(u.Value, updates.Contains(u.Value.PublishedFileID));
-        }
-
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid;
+            return _setup.Config.IsInstallPathValid;
         }
 
         public override void Execute(object? parameter)
@@ -164,34 +167,51 @@ namespace Trebuchet.Panels
             else if(message is ModListRemoveModMessage removeMod)
                 _modlist.Remove(removeMod.ModFile);
             else if(message is ModListUpdateModMessage updateMod)
-                StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage([updateMod.ModFile.PublishedFileId]));
+                UpdateMods([updateMod.ModFile.PublishedFileId]);
         }
 
-        private void FetchJsonList(UriBuilder builder)
+        public async void UpdateMods(List<ulong> mods)
         {
-            if (!GuiExtensions.Assert(
-                    !StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.DownloadModlist)),
-                    "Trebuchet is busy.")) return;
+            try
+            {
+                await _steamApi.UpdateMods(mods);
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+            }
+        }
+        
+        public void AddModFromWorkshop(WorkshopSearchResult mod)
+        {
+            if (_modlist.Any(x => x.IsPublished && x.PublishedFileId == mod.PublishedFileId)) return;
+            var path = mod.PublishedFileId.ToString();
+            _appFiles.Mods.ResolveMod(ref path);
+            var file = new ModFile(mod, path);
+            _modlist.Add(file);
+            LoadManifests();
+        }
 
-            new CatchedTasked(Operations.DownloadModlist, 15 * 1000)
-                .Add(async cts =>
-                {
-                    var result = await Tools.DownloadModList(builder.ToString(), cts.Token);
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        _profile.Modlist = ModListProfile.ParseModList(result.Modlist).ToList();
-                        _profile.SaveFile();
-                        LoadModlist();
-                    });
-                }).Start();
+        private async void FetchJsonList(UriBuilder builder)
+        {
+            try
+            {
+                var result = await Tools.DownloadModList(builder.ToString(), CancellationToken.None);
+                _profile.Modlist = _appFiles.Mods.ParseModList(result.Modlist).ToList();
+                _profile.SaveFile();
+                LoadModlist();
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+            }
+
         }
 
         private async void FetchSteamCollection(UriBuilder builder)
         {
-            if (!GuiExtensions.Assert(
-                    !StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.SteamCollectionFetch)),
-                    App.GetAppText("TrebuchetBusy"))) return;
-
             var query = HttpUtility.ParseQueryString(builder.Query);
             var id = query.Get("id");
             if (id == null || !ulong.TryParse(id, out var collectionId))
@@ -200,32 +220,42 @@ namespace Trebuchet.Panels
                 return;
             }
 
-            new CatchedTasked(Operations.SteamCollectionFetch, 15 * 1000)
-                .Add(async cts =>
-                {
-                    var result =
-                        await SteamRemoteStorage.GetCollectionDetails(new GetCollectionDetailsQuery(collectionId),
-                            cts.Token);
-                    Dispatcher.UIThread.Invoke(() =>
-                    {
-                        var modlist = new List<string>();
-                        foreach (var child in result.CollectionDetails.First().Children)
-                            modlist.Add(child.PublishedFileId);
-                        _profile.Modlist = modlist;
-                        _profile.SaveFile();
-                        LoadModlist();
-                    });
-                }).Start();
+            try
+            {
+                var result = await SteamRemoteStorage.GetCollectionDetails(
+                    new GetCollectionDetailsQuery(collectionId), CancellationToken.None);
+                var modlist = new List<string>();
+                foreach (var child in result.CollectionDetails.First().Children)
+                    modlist.Add(child.PublishedFileId);
+                _profile.Modlist = modlist;
+                _profile.SaveFile();
+                LoadModlist();
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+            }
         }
 
-        private void LoadManifests()
+        private async void LoadManifests()
         {
-            if (!GuiExtensions.Assert(
-                    !StrongReferenceMessenger.Default.Send(
-                        new OperationStateRequest(Operations.SteamPublishedFilesFetch)), "Trebuchet is busy.")) return;
-            if (_modlist.Count == 0) return;
-
-            StrongReferenceMessenger.Default.Send(new SteamModlistRequest(_selectedModlist));
+            try
+            {
+                var response = await _steamApi.RequestModDetails(_profile.GetWorkshopMods().ToList());
+                var neededUpdate = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList());
+                foreach (var modFile in Modlist)
+                {
+                    var pubFile = response.FirstOrDefault(x => x.PublishedFileID == modFile.PublishedFileId);
+                    if (pubFile == null) continue;
+                    modFile.SetManifest(pubFile, neededUpdate.Contains(modFile.PublishedFileId));
+                }
+            }
+            catch (TrebException tex)
+            {
+                _logger.LogError(tex.Message);
+                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+            }
         }
 
         private void LoadModlist()
@@ -236,7 +266,7 @@ namespace Trebuchet.Panels
             foreach (var mod in _profile.Modlist)
             {
                 var path = mod;
-                _profile.ResolveMod(ref path);
+                _appFiles.Mods.ResolveMod(ref path);
 
                 _modlist.Add(ulong.TryParse(mod, out var publishedFileId)
                     ? new ModFile(publishedFileId, path)
@@ -253,8 +283,8 @@ namespace Trebuchet.Panels
         {
             SetupFileWatcher();
 
-            _selectedModlist = App.Config.CurrentModlistProfile;
-            ModListProfile.ResolveProfile(_config, ref _selectedModlist);
+            _selectedModlist = _uiConfig.CurrentModlistProfile;
+            _selectedModlist = _appFiles.Mods.ResolveProfile(_selectedModlist);
 
             OnPropertyChanged(nameof(SelectedModlist));
             LoadProfile();
@@ -264,7 +294,7 @@ namespace Trebuchet.Panels
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            _profile = ModListProfile.LoadProfile(_config, ModListProfile.GetPath(_config, _selectedModlist));
+            _profile = ModListProfile.LoadProfile(_appFiles.Mods.GetPath(_selectedModlist));
             _modlistUrl = _profile.SyncURL;
             OnPropertyChanged(nameof(ModlistUrl));
 
@@ -295,8 +325,9 @@ namespace Trebuchet.Panels
         {
             if (_searchWindow != null) return;
             _searchWindow = new WorkshopSearch();
+            _searchWindow.SearchViewModel = _workshop;
+            _searchWindow.DataContext = _workshop;
             _searchWindow.Closing += OnSearchClosing;
-            _searchWindow.ModAdded += OnModAdded;
             _searchWindow.Show();
         }
 
@@ -310,7 +341,7 @@ namespace Trebuchet.Panels
         {
             try
             {
-                var content = string.Join("\r\n", _profile.GetResolvedModlist());
+                var content = string.Join("\r\n", _appFiles.Mods.GetResolvedModlist(_profile.Modlist));
                 await new ModlistTextImport(content, true, FileType.Txt).OpenDialogueAsync();
             }
             catch
@@ -324,7 +355,6 @@ namespace Trebuchet.Panels
 
         private async void OnFetchClicked(object? obj)
         {
-            if (StrongReferenceMessenger.Default.Send(new OperationStateRequest(Operations.DownloadModlist))) return;
             if (string.IsNullOrEmpty(_modlistUrl)) return;
 
             var question = new QuestionModal("Replacement",
@@ -408,7 +438,7 @@ namespace Trebuchet.Panels
             catch
             {
                 var split = text.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
-                modlist = ModListProfile.ParseModList(split).ToList();
+                modlist = _appFiles.Mods.ParseModList(split).ToList();
             }
 
             if (import.Append)
@@ -422,31 +452,21 @@ namespace Trebuchet.Panels
         private void OnImportFromTxtFile(string text)
         {
             var split = text.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
-            _profile.Modlist = ModListProfile.ParseModList(split).ToList();
+            _profile.Modlist = _appFiles.Mods.ParseModList(split).ToList();
             _profile.SaveFile();
             LoadModlist();
         }
 
-        private void OnModAdded(object? sender, WorkshopSearchResult mod)
-        {
-            if (_modlist.Any(x => x.IsPublished && x.PublishedFileId == mod.PublishedFileId)) return;
-            var path = mod.PublishedFileId.ToString();
-            _profile.ResolveMod(ref path);
-            var file = new ModFile(mod, path);
-            _modlist.Add(file);
-            LoadManifests();
-        }
-
         private void OnModFileChanged(object sender, FileSystemEventArgs e)
         {
-            if (!ModListProfile.TryParseDirectory2ModID(e.FullPath, out var id)) return;
+            if (!_appFiles.Mods.TryParseDirectory2ModID(e.FullPath, out var id)) return;
 
             Dispatcher.UIThread.Invoke(() =>
             {
                 foreach (var file in _modlist.Where(file => file.PublishedFileId == id))
                 {
                     var path = file.PublishedFileId.ToString();
-                    _profile.ResolveMod(ref path);
+                    _appFiles.Mods.ResolveMod(ref path);
                     file.RefreshFile(path);
                 }
             });
@@ -454,7 +474,7 @@ namespace Trebuchet.Panels
 
         private void OnModFilesDownload(object? obj)
         {
-            StrongReferenceMessenger.Default.Send(new ServerUpdateModsMessage(_profile.GetModIDList()));
+            UpdateMods(_profile.GetWorkshopMods().ToList());
         }
 
         private void OnModlistChanged()
@@ -483,7 +503,7 @@ namespace Trebuchet.Panels
                 return;
             }
 
-            _profile = ModListProfile.CreateProfile(_config, ModListProfile.GetPath(_config, name));
+            _profile = ModListProfile.CreateProfile(_appFiles.Mods.GetPath(name));
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;
@@ -501,7 +521,7 @@ namespace Trebuchet.Panels
             _profile.DeleteFile();
 
             var profile = string.Empty;
-            ModListProfile.ResolveProfile(_config, ref profile);
+            profile = _appFiles.Mods.ResolveProfile(profile);
             RefreshProfiles();
             _selectedModlist = profile;
             OnPropertyChanged(nameof(SelectedModlist));
@@ -520,9 +540,9 @@ namespace Trebuchet.Panels
                 return;
             }
 
-            var path = Path.Combine(ModListProfile.GetPath(_config, name));
+            var path = Path.Combine(_appFiles.Mods.GetPath(name));
             _profile.CopyFileTo(path);
-            _profile = ModListProfile.LoadProfile(_config, path);
+            _profile = ModListProfile.LoadProfile(path);
             _profile.SaveFile();
             RefreshProfiles();
             SelectedModlist = name;
@@ -544,16 +564,15 @@ namespace Trebuchet.Panels
         {
             if (_searchWindow == null) return;
             _searchWindow.Closing -= OnSearchClosing;
-            _searchWindow.ModAdded -= OnModAdded;
             _searchWindow = null;
         }
 
         private void OnSelectionChanged()
         {
-            ModListProfile.ResolveProfile(_config, ref _selectedModlist);
+            _selectedModlist = _appFiles.Mods.ResolveProfile(_selectedModlist);
             OnPropertyChanged(nameof(SelectedModlist));
-            App.Config.CurrentModlistProfile = _selectedModlist;
-            App.Config.SaveFile();
+            _uiConfig.CurrentModlistProfile = _selectedModlist;
+            _uiConfig.SaveFile();
             LoadProfile();
         }
 
@@ -562,14 +581,14 @@ namespace Trebuchet.Panels
             foreach (var file in _modlist)
             {
                 var path = file.PublishedFileId.ToString();
-                _profile.ResolveMod(ref path);
+                _appFiles.Mods.ResolveMod(ref path);
                 file.RefreshFile(path);
             }
         }
 
         private void RefreshProfiles()
         {
-            Profiles = new ObservableCollection<string>(ModListProfile.ListProfiles(_config));
+            Profiles = new ObservableCollection<string>(_appFiles.Mods.ListProfiles());
             OnPropertyChanged(nameof(Profiles));
         }
 
@@ -581,9 +600,9 @@ namespace Trebuchet.Panels
                 _modWatcher = null;
             }
 
-            var path = Path.Combine(_config.ResolvedInstallPath, Config.FolderWorkshop);
-            if (string.IsNullOrWhiteSpace(_config.ResolvedInstallPath) ||
-                !Directory.Exists(_config.ResolvedInstallPath)) return;
+            var path = Path.Combine(_setup.Config.ResolvedInstallPath(), Constants.FolderWorkshop);
+            if (string.IsNullOrWhiteSpace(_setup.Config.ResolvedInstallPath()) ||
+                !Directory.Exists(_setup.Config.ResolvedInstallPath())) return;
             if (!Directory.Exists(path))
                 Tools.CreateDir(path);
 

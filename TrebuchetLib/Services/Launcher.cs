@@ -1,10 +1,9 @@
 ﻿using System.Diagnostics;
 using Microsoft.Extensions.Logging;
 using TrebuchetLib.Processes;
-using TrebuchetLib.Services;
 using TrebuchetUtils;
 
-namespace TrebuchetLib;
+namespace TrebuchetLib.Services;
 
 public class Launcher : IDisposable
 {

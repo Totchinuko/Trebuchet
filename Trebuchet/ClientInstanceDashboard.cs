@@ -1,47 +1,32 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.IO;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Extensions.Logging;
 using Trebuchet.Messages;
-using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
-using AppFiles = TrebuchetLib.Services.AppFiles;
 
 namespace Trebuchet;
 
 public class ClientInstanceDashboard : INotifyPropertyChanged
 {
-    private readonly Config _config;
-    private readonly UIConfig _uiConfig;
-    private readonly ILogger _logger;
-    private readonly AppFiles _appFiles;
-    private readonly SteamAPI _steamApi;
     private ProcessState _lastState;
-    private string _selectedModlist;
-    private string _selectedProfile;
-    private readonly Launcher _launcher;
+    private string _selectedModlist = string.Empty;
+    private string _selectedProfile = string.Empty;
+    private bool _processRunning;
+    private List<string> _modlists = new();
+    private List<string> _profiles = new();
+    private List<ulong> _updateNeeded = new();
+    private bool _canUseDashboard;
 
-    public ClientInstanceDashboard(
-        Config config, 
-        UIConfig uiConfig,
-        AppFiles appFiles,
-        SteamAPI steamApi,
-        Launcher launcher,
-        ILogger logger)
+    public ClientInstanceDashboard(IProcessStats processStats)
     {
-        _config = config;
-        _uiConfig = uiConfig;
-        _appFiles = appFiles;
-        _steamApi = steamApi;
-        _logger = logger;
-        _launcher = launcher;
+        ProcessStats = processStats;
 
         KillCommand = new SimpleCommand(OnKilled, false);
         LaunchCommand = new TaskBlockedCommand(OnLaunched)
@@ -52,20 +37,25 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
             .SetBlockingType<SteamDownload>()
             .SetBlockingType<ClientRunning>()
             .SetBlockingType<ServersRunning>();
-
-        _selectedProfile = _uiConfig.DashboardClientProfile;
-        _selectedModlist = _uiConfig.DashboardClientModlist;
-
-        Resolve();
-        ListProfiles();
     }
 
-    public bool CanUseDashboard => _config.IsInstallPathValid &&
-                                   !string.IsNullOrEmpty(_config.ClientPath) &&
-                                   File.Exists(Path.Combine(_config.ClientPath, Constants.FolderGameBinaries,
-                                       Constants.FileClientBin));
+    public event EventHandler? KillClicked;
+    public event EventHandler<bool>? LaunchClicked;
+    public event EventHandler<string>? ProfileSelected;
+    public event EventHandler<string>? ModlistSelected;
 
-    public bool IsUpdateNeeded => UpdateNeeded.Count > 0;
+    public event EventHandler? UpdateClicked;
+
+    // public bool CanUseDashboard => _setup.Config.IsInstallPathValid &&
+    //                                !string.IsNullOrEmpty(_setup.Config.ClientPath) &&
+    //                                File.Exists(Path.Combine(_setup.Config.ClientPath, Constants.FolderGameBinaries,
+    //                                    Constants.FileClientBin));
+
+    public bool CanUseDashboard
+    {
+        get => _canUseDashboard;
+        set => SetField(ref _canUseDashboard, value);
+    }
 
     public SimpleCommand KillCommand { get; }
 
@@ -73,22 +63,33 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
 
     public TaskBlockedCommand LaunchCommand { get; }
 
-    public List<string> Modlists { get; private set; } = new();
+    public List<string> Modlists
+    {
+        get => _modlists;
+        set => SetField(ref _modlists, value);
+    }
 
-    public bool ProcessRunning { get; private set; }
+    public bool ProcessRunning
+    {
+        get => _processRunning;
+        set => SetField(ref _processRunning, value);
+    }
 
-    public IProcessStats ProcessStats { get; } = new ProcessStatsLight();
+    public IProcessStats ProcessStats { get; }
 
-    public List<string> Profiles { get; private set; } = new();
+    public List<string> Profiles
+    {
+        get => _profiles;
+        set => SetField(ref _profiles, value);
+    }
 
     public string SelectedModlist
     {
         get => _selectedModlist;
         set
         {
-            _selectedModlist = value;
-            _uiConfig.DashboardClientModlist = _selectedModlist;
-            _uiConfig.SaveFile();
+            if(SetField(ref _selectedModlist, value))
+                ModlistSelected?.Invoke(this, value);
         }
     }
 
@@ -97,53 +98,17 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
         get => _selectedProfile;
         set
         {
-            _selectedProfile = value;
-            _uiConfig.DashboardClientProfile = _selectedProfile;
-            _uiConfig.SaveFile();
+            if(SetField(ref _selectedProfile, value))
+                ProfileSelected?.Invoke(this, value);
         }
     }
 
     public TaskBlockedCommand UpdateModsCommand { get; private set; }
 
-    public List<ulong> UpdateNeeded { get; private set; } = new();
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    public async void Kill()
+    public List<ulong> UpdateNeeded
     {
-        if (!ProcessRunning) return;
-
-        if (_uiConfig.DisplayWarningOnKill)
-        {
-            var question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
-            await question.OpenDialogueAsync();
-            if (!question.Result) return;
-        }
-
-        KillCommand.Toggle(false);
-        StrongReferenceMessenger.Default.Send(new KillProcessMessage(-1));
-    }
-
-    public async Task Launch(bool isBattleEye)
-    {
-        if (ProcessRunning) return;
-
-        LaunchCommand.Toggle(false);
-        LaunchBattleEyeCommand.Toggle(false);
-
-        if (_config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
-        {
-            var modlist = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
-            await _steamApi.UpdateMods(modlist);
-        }
-        
-        await _launcher.CatapultClient(SelectedProfile, SelectedModlist, isBattleEye);
-    }
-
-    public void RefreshSelection()
-    {
-        Resolve();
-        ListProfiles();
+        get => _updateNeeded;
+        set => SetField(ref _updateNeeded, value);
     }
 
     public void ProcessRefresh(IConanProcess? process)
@@ -160,61 +125,28 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
             ProcessStats.SetDetails(process);
 
         _lastState = state;
+        ProcessStats.Tick();
     }
 
-    protected virtual void OnPropertyChanged(string name)
+    private void OnBattleEyeLaunched(object? obj)
     {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-    }
-
-    //todo: Need to update somewhere
-    private async Task CheckModUpdate()
-    {
-        ClearUpdates();
-        if (string.IsNullOrEmpty(SelectedModlist)) return;
-        var mods = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
-        var response = await _steamApi.RequestModDetails(mods);
-        UpdateNeeded = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList());
-        OnPropertyChanged(nameof(UpdateNeeded));
-        OnPropertyChanged(nameof(IsUpdateNeeded));
-    }
-
-    private void ClearUpdates()
-    {
-        UpdateNeeded.Clear();
-        OnPropertyChanged(nameof(UpdateNeeded));
-        OnPropertyChanged(nameof(IsUpdateNeeded));
-    }
-
-    private void ListProfiles()
-    {
-        Modlists = _appFiles.Client.ListProfiles().ToList();
-        Profiles = _appFiles.Client.ListProfiles().ToList();
-        OnPropertyChanged(nameof(Modlists));
-        OnPropertyChanged(nameof(Profiles));
-    }
-
-    private async void OnBattleEyeLaunched(object? obj)
-    {
-        await Launch(true);
+        LaunchClicked?.Invoke(this, true);
     }
 
     private void OnKilled(object? obj)
     {
-        Kill();
+        KillClicked?.Invoke(this, EventArgs.Empty);
     }
 
-    private async void OnLaunched(object? obj)
+    private void OnLaunched(object? obj)
     {
-        await Launch(false);
+        LaunchClicked?.Invoke(this, false);
     }
 
-    private async void OnModUpdate(object? obj)
+    private void OnModUpdate(object? obj)
     {
         if (string.IsNullOrEmpty(SelectedModlist)) return;
-
-        var modlist = _appFiles.Mods.CollectAllMods(SelectedModlist).ToList();
-        await _steamApi.UpdateMods(modlist);
+        UpdateClicked?.Invoke(this, EventArgs.Empty);
     }
 
     private async void OnProcessFailed()
@@ -232,10 +164,8 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
         KillCommand.Toggle(true);
 
         ProcessRunning = true;
-        OnPropertyChanged(nameof(ProcessRunning));
 
         ProcessStats.StartStats(details);
-        StrongReferenceMessenger.Default.Send<DashboardStateChanged>();
     }
 
     private void OnProcessTerminated()
@@ -246,19 +176,20 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
         LaunchBattleEyeCommand.Toggle(true);
 
         ProcessRunning = false;
-        OnPropertyChanged(nameof(ProcessRunning));
-        StrongReferenceMessenger.Default.Send<DashboardStateChanged>();
     }
 
-    private void Resolve()
-    {
-        _appFiles.Client.ResolveProfile(ref _selectedProfile);
-        _appFiles.Mods.ResolveProfile(ref _selectedModlist);
+    public event PropertyChangedEventHandler? PropertyChanged;
 
-        _uiConfig.DashboardClientModlist = _selectedModlist;
-        _uiConfig.DashboardClientProfile = _selectedProfile;
-        _uiConfig.SaveFile();
-        OnPropertyChanged(nameof(SelectedModlist));
-        OnPropertyChanged(nameof(SelectedProfile));
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
     }
 }

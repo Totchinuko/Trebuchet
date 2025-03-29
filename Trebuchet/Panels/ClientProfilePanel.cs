@@ -3,8 +3,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.Messaging;
 using TrebuchetLib;
+using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
@@ -12,13 +12,18 @@ namespace Trebuchet.Panels
 {
     public class ClientProfilePanel : FieldEditorPanel
     {
-        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+        private readonly AppSetup _setup;
+        private readonly AppFiles _appFiles;
+        private readonly UIConfig _uiConfig;
         private ClientProfile _profile;
-        private ObservableCollection<string> _profiles = new ObservableCollection<string>();
+        private ObservableCollection<string> _profiles = [];
         private string _selectedProfile;
 
-        public ClientProfilePanel() : base("Profiles", "mdi-controller", "ClientSettings", PanelPosition.Client)
+        public ClientProfilePanel(AppSetup setup, AppFiles appFiles, UIConfig uiConfig) : base("Game Saves", "mdi-controller", "ClientSettings", false)
         {
+            _setup = setup;
+            _appFiles = appFiles;
+            _uiConfig = uiConfig;
             LoadPanel();
         }
 
@@ -48,7 +53,7 @@ namespace Trebuchet.Panels
 
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid && Tools.IsClientInstallValid(_config);
+            return _setup.Config.IsInstallPathValid && Tools.IsClientInstallValid(_setup.Config);
         }
 
         public override void RefreshPanel()
@@ -71,8 +76,8 @@ namespace Trebuchet.Panels
         private void LoadPanel()
         {
             MoveOriginalSavedFolder();
-            _selectedProfile = App.Config.CurrentClientProfile;
-            ClientProfile.ResolveProfile(_config, ref _selectedProfile);
+            _selectedProfile = _uiConfig.CurrentClientProfile;
+            _selectedProfile = _appFiles.Client.ResolveProfile(_selectedProfile);
 
             OnPropertyChanged(nameof(SelectedProfile));
             LoadProfileList();
@@ -82,29 +87,29 @@ namespace Trebuchet.Panels
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            _profile = ClientProfile.LoadProfile(_config, ClientProfile.GetPath(_config, _selectedProfile));
+            _profile = ClientProfile.LoadProfile(_appFiles.Client.GetPath(_selectedProfile));
             OnPropertyChanged(nameof(ProfileSize));
             RefreshFields();
         }
 
         private void LoadProfileList()
         {
-            _profiles = new ObservableCollection<string>(ClientProfile.ListProfiles(_config));
+            _profiles = new ObservableCollection<string>(_appFiles.Client.ListProfiles());
             OnPropertyChanged(nameof(Profiles));
         }
 
         private async void MoveOriginalSavedFolder()
         {
-            if (string.IsNullOrEmpty(_config.ClientPath)) return;
-            string savedFolder = Path.Combine(_config.ClientPath, Config.FolderGameSave);
+            if (string.IsNullOrEmpty(_setup.Config.ClientPath)) return;
+            string savedFolder = Path.Combine(_setup.Config.ClientPath, Constants.FolderGameSave);
             if (!Directory.Exists(savedFolder)) return;
             if (Tools.IsSymbolicLink(savedFolder)) return;
 
             ErrorModal question = new(App.GetAppText("GameFolderReset_Title"), App.GetAppText("GameFolderReset_Message"));
             await question.OpenDialogueAsync();
 
-            _config.ClientPath = string.Empty;
-            _config.SaveFile();
+            _setup.Config.ClientPath = string.Empty;
+            _setup.Config.SaveFile();
         }
 
         private void OnOpenFolderProfile(object? obj)
@@ -116,9 +121,9 @@ namespace Trebuchet.Panels
 
         private void OnProfileChanged()
         {
-            ClientProfile.ResolveProfile(_config, ref _selectedProfile);
-            App.Config.CurrentClientProfile = _selectedProfile;
-            App.Config.SaveFile();
+            _selectedProfile = _appFiles.Client.ResolveProfile(_selectedProfile);
+            _uiConfig.CurrentClientProfile = _selectedProfile;
+            _uiConfig.SaveFile();
             OnPropertyChanged(nameof(SelectedProfile));
             LoadProfile();
         }
@@ -135,7 +140,7 @@ namespace Trebuchet.Panels
                 return;
             }
 
-            _profile = ClientProfile.CreateProfile(_config, Path.Combine(ClientProfile.GetPath(_config, name)));
+            _profile = ClientProfile.CreateProfile(_appFiles.Client.GetPath(name));
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
@@ -152,7 +157,7 @@ namespace Trebuchet.Panels
             _profile.DeleteFolder();
 
             string profile = string.Empty;
-            ClientProfile.ResolveProfile(_config, ref profile);
+            profile = _appFiles.Client.ResolveProfile(profile);
             LoadProfileList();
             SelectedProfile = profile;
         }
@@ -170,9 +175,9 @@ namespace Trebuchet.Panels
                 return;
             }
 
-            string path = Path.Combine(ClientProfile.GetPath(_config, name));
+            string path = Path.Combine(_appFiles.Client.GetPath(name));
             _profile.CopyFolderTo(path);
-            _profile = ClientProfile.LoadProfile(_config, path);
+            _profile = ClientProfile.LoadProfile(path);
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;

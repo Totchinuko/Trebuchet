@@ -3,33 +3,26 @@ using System.Runtime.CompilerServices;
 
 namespace TrebuchetLib.Services;
 
-public class Progress : IProgress<double>, INotifyPropertyChanged
+public class Progress : IProgress<double>
 {
     private double _value;
+    private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
+    
+    public event EventHandler<double>? ProgressChanged;
 
-    public double Value
+    public async void Report(double value)
     {
-        get => _value;
-        private set => SetField(ref _value, value);
+        await _semaphore.WaitAsync();
+        _value = value;
+        ProgressChanged?.Invoke(this, value);
+        _semaphore.Release();
     }
 
-    public void Report(double value)
+    public async Task<double> GetProgressAsync()
     {
-        Value = value;
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
+        await _semaphore.WaitAsync();
+        var value = _value;
+        _semaphore.Release();
+        return value;
     }
 }

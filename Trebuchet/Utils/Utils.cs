@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using SteamWorksWebAPI;
 using TrebuchetLib;
-using TrebuchetUtils.Modals;
+using TrebuchetUtils;
 
 namespace Trebuchet.Utils
 {
@@ -29,7 +23,7 @@ namespace Trebuchet.Utils
                 errorMessage = App.GetAppText("DirectoryNotFound");
                 return false;
             }
-            if (!File.Exists(Path.Join(gameDirectory, Config.FolderGameBinaries, Config.FileClientBin)))
+            if (!File.Exists(Path.Join(gameDirectory, Constants.FolderGameBinaries, Constants.FileClientBin)))
             {
                 errorMessage = App.GetAppText("GameDirectoryInvalidError");
                 return false;
@@ -65,12 +59,20 @@ namespace Trebuchet.Utils
                 errorMessage = App.GetAppText("DirectoryNotFound");
                 return false;
             }
-            if (Regex.IsMatch(installPath, Config.RegexSavedFolder))
+            if (Regex.IsMatch(installPath, Constants.RegexSavedFolder))
             {
                 errorMessage = App.GetAppText("InstallPathInGameError");
                 return false;
             }
             return true;
+        }
+
+        public static string GetConfigPath()
+        {
+            var folder = typeof(UIConfig).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
+            if(!folder.Exists)
+                Directory.CreateDirectory(folder.FullName);
+            return Path.Combine(folder.FullName, Constants.FileConfig);
         }
     }
 }

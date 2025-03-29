@@ -3,23 +3,34 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.Messaging;
+using Trebuchet.Messages;
+using Trebuchet.Services;
 using TrebuchetLib;
+using TrebuchetLib.Services;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
 namespace Trebuchet.Panels
 {
-    public class ServerProfilePanel : FieldEditorPanel
+    public class ServerProfilePanel : FieldEditorPanel, ITinyRecipient<MapListMessage>
     {
-        private readonly Config _config = StrongReferenceMessenger.Default.Send<ConfigRequest>();
+        private readonly AppSetup _setup;
+        private readonly AppFiles _appFiles;
+        private readonly UIConfig _uiConfig;
         private ServerProfile _profile;
         private ObservableCollection<string> _profiles = new ObservableCollection<string>();
         private string _selectedProfile;
         private TrulyObservableCollection<ObservableString> _sudoList = new TrulyObservableCollection<ObservableString>();
 
-        public ServerProfilePanel() : base("Profiles", "ServerSettings", "mdi-server-network", PanelPosition.Server)
+        public ServerProfilePanel(
+            AppSetup setup,
+            AppFiles appFiles,
+            UIConfig uiConfig
+            ) : base("Profiles", "ServerSettings", "mdi-server-network", false)
         {
+            _setup = setup;
+            _appFiles = appFiles;
+            _uiConfig = uiConfig;
             LoadPanel();
         }
 
@@ -49,7 +60,7 @@ namespace Trebuchet.Panels
 
         public override bool CanExecute(object? parameter)
         {
-            return _config.IsInstallPathValid && Tools.IsServerInstallValid(_config);
+            return _setup.Config.IsInstallPathValid && Tools.IsServerInstallValid(_setup.Config);
         }
 
         public override void RefreshPanel()
@@ -71,8 +82,8 @@ namespace Trebuchet.Panels
         [MemberNotNull("_selectedProfile", "_profile")]
         private void LoadPanel()
         {
-            _selectedProfile = App.Config.CurrentServerProfile;
-            ServerProfile.ResolveProfile(_config, ref _selectedProfile);
+            _selectedProfile = _uiConfig.CurrentServerProfile;
+            _selectedProfile = _appFiles.Server.ResolveProfile(_selectedProfile);
 
             OnPropertyChanged(nameof(SelectedProfile));
             LoadProfileList();
@@ -82,14 +93,14 @@ namespace Trebuchet.Panels
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            _profile = ServerProfile.LoadProfile(_config, ServerProfile.GetPath(_config, _selectedProfile));
+            _profile = ServerProfile.LoadProfile(_appFiles.Server.GetPath(_selectedProfile));
             OnPropertyChanged(nameof(ProfileSize));
             RefreshFields();
         }
 
         private void LoadProfileList()
         {
-            _profiles = new ObservableCollection<string>(ServerProfile.ListProfiles(_config));
+            _profiles = new ObservableCollection<string>(_appFiles.Server.ListProfiles());
             OnPropertyChanged(nameof(Profiles));
         }
 
@@ -102,9 +113,9 @@ namespace Trebuchet.Panels
 
         private void OnProfileChanged()
         {
-            ServerProfile.ResolveProfile(_config, ref _selectedProfile);
-            App.Config.CurrentServerProfile = _selectedProfile;
-            App.Config.SaveFile();
+            _selectedProfile = _appFiles.Server.ResolveProfile(_selectedProfile);
+            _uiConfig.CurrentServerProfile = _selectedProfile;
+            _uiConfig.SaveFile();
             OnPropertyChanged(nameof(SelectedProfile));
             LoadProfile();
         }
@@ -121,7 +132,7 @@ namespace Trebuchet.Panels
                 return;
             }
 
-            _profile = ServerProfile.CreateProfile(_config, Path.Combine(ServerProfile.GetPath(_config, name)));
+            _profile = ServerProfile.CreateProfile(_appFiles.Server.GetPath(name));
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
@@ -138,7 +149,7 @@ namespace Trebuchet.Panels
                 _profile.DeleteFolder();
 
                 string profile = string.Empty;
-                ServerProfile.ResolveProfile(_config, ref profile);
+                profile = _appFiles.Server.ResolveProfile(profile);
                 LoadProfileList();
                 SelectedProfile = profile;
             }
@@ -157,12 +168,17 @@ namespace Trebuchet.Panels
                 return;
             }
 
-            string path = Path.Combine(ServerProfile.GetPath(_config, name));
+            string path = Path.Combine(_appFiles.Server.GetPath(name));
             _profile.CopyFolderTo(path);
-            _profile = ServerProfile.LoadProfile(_config, path);
+            _profile = ServerProfile.LoadProfile(path);
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
+        }
+
+        public void Receive(MapListMessage message)
+        {
+            message.Respond(_appFiles.Server.GetMapList());
         }
     }
 }

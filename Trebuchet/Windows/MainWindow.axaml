@@ -3,10 +3,8 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Trebuchet.Windows"
         xmlns:treb="clr-namespace:Trebuchet"
         xmlns:utils="clr-namespace:Trebuchet.Utils"
-        xmlns:panels="clr-namespace:Trebuchet.Panels"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         mc:Ignorable="d"
         Title="{x:Static treb:TrebuchetApp.AppTitle}"
@@ -45,27 +43,21 @@
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
                     <StackPanel>
-                        <ItemsControl ItemsSource="{Binding Menu.Top}">
+                        <ItemsControl ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <utils:MenuElementSelector/>
-                            </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
                     <StackPanel Grid.Row="1">
-                        <ItemsControl ItemsSource="{Binding Menu.Bottom}">
+                        <ItemsControl ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}">
                             <ItemsControl.ItemsPanel>
                                 <ItemsPanelTemplate>
                                     <StackPanel/>
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <utils:MenuElementSelector/>
-                            </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
                 </Grid>
