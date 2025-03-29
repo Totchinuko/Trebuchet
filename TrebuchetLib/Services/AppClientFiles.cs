@@ -26,20 +26,23 @@ public class AppClientFiles(AppSetup appSetup)
             yield return Path.GetFileName(p);
     }
     
-    public void ResolveProfile(ref string profileName)
+    public string ResolveProfile(string profileName)
     {
         if (!string.IsNullOrEmpty(profileName))
         {
             string path = GetPath(profileName);
-            if (File.Exists(path)) return;
+            if (File.Exists(path)) 
+                return profileName;
         }
 
         profileName = Tools.GetFirstDirectoryName(Path.Combine(appSetup.Config.ResolvedInstallPath(), appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
-        if (!string.IsNullOrEmpty(profileName)) return;
+        if (!string.IsNullOrEmpty(profileName)) 
+            return profileName;
 
         profileName = "Default";
         if (!File.Exists(GetPath(profileName)))
             ClientProfile.CreateProfile(GetPath(profileName)).SaveFile();
+        return profileName;
     }
     
     public bool ProfileExists(string name)
