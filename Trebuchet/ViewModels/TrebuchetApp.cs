@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using Trebuchet.Messages;
 using Trebuchet.ViewModels.Panels;
+using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
 
@@ -20,12 +21,18 @@ namespace Trebuchet.ViewModels
         private List<Panel> _panels;
         private DispatcherTimer _timer;
 
-        public TrebuchetApp(Launcher launcher, Steam steam, SteamWidget steamWidget, IEnumerable<Panel> panels)
+        public TrebuchetApp(
+            Launcher launcher, 
+            Steam steam, 
+            SteamWidget steamWidget,
+            InnerContainer.InnerContainer innerContainer,
+            IEnumerable<Panel> panels)
         {
             _launcher = launcher;
             _steam = steam;
             _panels = panels.ToList();
             SteamWidget = steamWidget;
+            InnerContainer = innerContainer;
 
             TinyMessengerHub.Default.Subscribe(this);
 
@@ -67,6 +74,8 @@ namespace Trebuchet.ViewModels
         public ObservableCollection<Panel> BottomPanels { get; } = [];
 
         public SteamWidget SteamWidget { get; }
+        
+        public InnerContainer.InnerContainer InnerContainer { get; }
 
         public async void OnWindowShow()
         {
