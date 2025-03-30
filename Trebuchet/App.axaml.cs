@@ -15,6 +15,7 @@ using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels;
+using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.ViewModels.Panels;
 using Trebuchet.Windows;
 using TrebuchetLib;
@@ -134,8 +135,9 @@ public partial class App : Application, IApplication
         services.AddSingleton<SteamAPI>();
         services.AddSingleton<ILanguageManager, LanguageManager>();
 
-        services.AddTransient<WorkshopSearchViewModel>();
         services.AddSingleton<SteamWidget>();
+        services.AddSingleton<InnerContainer>();
+        services.AddTransient<WorkshopSearchViewModel>();
         services.AddTransient<TrebuchetApp>();
 
         services.AddTransient<Panel, ModlistPanel>();

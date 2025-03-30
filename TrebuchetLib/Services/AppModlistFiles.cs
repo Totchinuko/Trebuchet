@@ -28,14 +28,24 @@ public class AppModlistFiles(AppSetup setup)
                     yield return id;
         }
 
+        public string GetBaseFolder()
+        {
+            return Path.Combine(
+                setup.Config.InstallPath, 
+                setup.VersionFolder, 
+                Constants.FolderModlistProfiles);
+        }
+
         public string GetPath(string modlistName)
         {
-            return Path.Combine(setup.Config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles, modlistName + ".json");
+            return Path.Combine(
+                GetBaseFolder(),
+                modlistName + ".json");
         }
 
         public IEnumerable<string> ListProfiles()
         {
-            string folder = Path.Combine(setup.Config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles);
+            string folder = Path.Combine(setup.Config.InstallPath, setup.VersionFolder, Constants.FolderModlistProfiles);
             if (!Directory.Exists(folder))
                 yield break;
 
@@ -53,11 +63,19 @@ public class AppModlistFiles(AppSetup setup)
                     yield return mod;
         }
 
+        public string GetWorkshopFolder()
+        {
+            return Path.Combine(
+                Tools.GetCommonAppData().FullName,
+                Constants.FolderWorkshop
+            );
+        }
+
         public bool ResolveMod(uint appID, ref string mod)
         {
             string file = mod;
             if (long.TryParse(mod, out _))
-                file = Path.Combine(setup.Config.ResolvedInstallPath(), Constants.FolderWorkshop, appID.ToString(), mod, "none");
+                file = Path.Combine(GetWorkshopFolder(), appID.ToString(), mod, "none");
 
             string? folder = Path.GetDirectoryName(file);
             if (folder == null)
@@ -106,7 +124,7 @@ public class AppModlistFiles(AppSetup setup)
                     return profileName;
             }
 
-            profileName = Tools.GetFirstFileName(Path.Combine(setup.Config.ResolvedInstallPath(), setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
+            profileName = Tools.GetFirstFileName(Path.Combine(setup.Config.InstallPath, setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
             if (!string.IsNullOrEmpty(profileName)) 
                 return profileName;
 

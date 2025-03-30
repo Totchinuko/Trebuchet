@@ -560,7 +560,7 @@ public static class Utils
         if (string.IsNullOrEmpty(company)) company = "tot-software";
         string product = type.GetAssemblyAttribute<AssemblyProductAttribute>()?.Product ?? string.Empty;
         if (string.IsNullOrEmpty(product)) product = "tot-default";
-        var appData = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData);
+        var appData = Environment.GetFolderPath(folder);
         var directory = new DirectoryInfo(Path.Combine(appData, company, product));
         return directory;
     }

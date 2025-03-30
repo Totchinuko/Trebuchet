@@ -7,14 +7,17 @@ namespace TrebuchetLib.Services
     public class Steam : IDebugListener
     {
         private readonly ILogger<Steam> _logger;
+        private readonly AppFiles _appFiles;
         private readonly AppSetup _appSetup;
         private readonly Steam3Session _session;
 
-        public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgressCallback<double> progress)
+        public Steam(ILogger<Steam> logger, AppFiles appFiles, AppSetup appSetup, IProgressCallback<double> progress)
         {
             _logger = logger;
+            _appFiles = appFiles;
             _appSetup = appSetup;
 
+            _appFiles.SetupFolders();
             DebugLog.AddListener(this);
             Util.ConsoleWriteRedirect += OnConsoleWriteRedirect;
             ContentDownloader.Config.RememberPassword = false;
@@ -55,7 +58,7 @@ namespace TrebuchetLib.Services
         {
             int count = 0;
 
-            string folder = Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances);
+            string folder = Path.Combine(_appFiles.Server.GetBaseInstancePath());
             if (!Directory.Exists(folder))
                 return 0;
 
@@ -79,10 +82,7 @@ namespace TrebuchetLib.Services
         public ulong GetInstanceBuildID(int instance)
         {
             string manifest = Path.Combine(
-                _appSetup.Config.ResolvedInstallPath(),
-                _appSetup.VersionFolder,
-                Constants.FolderServerInstances,
-                string.Format(Constants.FolderInstancePattern, instance),
+                _appFiles.Server.GetInstancePath(instance),
                 Constants.FileBuildID);
 
             if (!File.Exists(manifest))
@@ -93,12 +93,7 @@ namespace TrebuchetLib.Services
                 return buildID;
             return 0;
         }
-
-        public string GetServerInstancePath(int instanceNumber)
-        {
-            return Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, instanceNumber));
-        }
-
+        
         public uint GetSteam3AppBuildNumber(uint appId, string branch)
         {
             UpdateDownloaderConfig();
@@ -147,7 +142,11 @@ namespace TrebuchetLib.Services
         {
             UpdateDownloaderConfig();
 
-            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(Path.Combine(_appSetup.Config.ResolvedInstallPath(), Constants.FolderWorkshop, ContentDownloader.CONFIG_DIR, ContentDownloader.DEPOT_CONFIG));
+            var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(
+                Path.Combine(
+                    _appFiles.Mods.GetWorkshopFolder(), 
+                    ContentDownloader.CONFIG_DIR, 
+                    ContentDownloader.DEPOT_CONFIG));
             foreach (var (pubID, manisfestID) in keyValuePairs)
             {
                 if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pubID, out ulong manisfest))
@@ -162,7 +161,7 @@ namespace TrebuchetLib.Services
         /// </summary>
         public void RemoveAllSymbolicLinks()
         {
-            string folder = Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances);
+            string folder = _appFiles.Server.GetBaseInstancePath();
             if (!Directory.Exists(folder))
                 return;
             string[] instances = Directory.GetDirectories(folder);
@@ -170,35 +169,16 @@ namespace TrebuchetLib.Services
                 Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
         }
 
-        public bool SetupFolders()
-        {
-            if (!Tools.ValidateInstallDirectory(_appSetup.Config.ResolvedInstallPath())) return false;
-
-            try
-            {
-                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances));
-                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderClientProfiles));
-                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerProfiles));
-                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderModlistProfiles));
-
-                Tools.CreateDir(Path.Combine(_appSetup.Config.ResolvedInstallPath(), Constants.FolderWorkshop));
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to create app folders.");
-                throw new Exception("Failed to create app folders.", ex);
-            }
-
-            return true;
-        }
-
         public void UpdateDownloaderConfig()
         {
             ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
             ContentDownloader.Config.MaxDownloads = _appSetup.Config.MaxDownloads;
             ContentDownloader.Config.MaxServers = Math.Max(_appSetup.Config.MaxServers, ContentDownloader.Config.MaxDownloads);
-            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_appSetup.Config.ResolvedInstallPath(), Constants.FolderWorkshop, ContentDownloader.CONFIG_DIR);
-            AccountSettingsStore.LoadFromFile(Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, "account.config"));
+            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_appFiles.Mods.GetWorkshopFolder(), ContentDownloader.CONFIG_DIR);
+            AccountSettingsStore.LoadFromFile(
+                Path.Combine(_appFiles.Mods.GetWorkshopFolder(), 
+                    _appSetup.VersionFolder, 
+                    "account.config"));
         }
 
         /// <summary>
@@ -209,11 +189,10 @@ namespace TrebuchetLib.Services
         /// <returns></returns>
         public async Task UpdateMods(IEnumerable<ulong> enumerable, CancellationTokenSource cts)
         {
-            if (!SetupFolders()) return;
             if (!await WaitSteamConnectionAsync()) return;
 
             UpdateDownloaderConfig();
-            ContentDownloader.Config.InstallDirectory = Path.Combine(_appSetup.Config.ResolvedInstallPath(), Constants.FolderWorkshop);
+            ContentDownloader.Config.InstallDirectory = Path.Combine(_appFiles.Mods.GetWorkshopFolder());
             await Task.Run(() => ContentDownloader.DownloadUGCAsync([Constants.AppIDLiveClient, Constants.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts));
         }
 
@@ -228,13 +207,11 @@ namespace TrebuchetLib.Services
         {
             if (_appSetup.Config.ServerInstanceCount <= 0) return;
 
-            if (!SetupFolders()) return;
-
             if (!await WaitSteamConnectionAsync().ConfigureAwait(false)) return;
 
             _logger.LogInformation($"Updating server instance {instanceNumber}.");
 
-            string instance = GetServerInstancePath(instanceNumber);
+            string instance = _appFiles.Server.GetInstancePath(instanceNumber);
             if (reinstall)
             {
                 Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
@@ -262,10 +239,9 @@ namespace TrebuchetLib.Services
                 throw new Exception("Can't update instance 0 with itself.");
 
             _logger.LogInformation("Updating server instance {0} from instance 0.", instanceNumber);
-            if (!SetupFolders()) return;
 
-            string instance = Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, instanceNumber));
-            string instance0 = Path.Combine(_appSetup.Config.ResolvedInstallPath(), _appSetup.VersionFolder, Constants.FolderServerInstances, string.Format(Constants.FolderInstancePattern, 0));
+            string instance = _appFiles.Server.GetInstancePath(instanceNumber);
+            string instance0 = _appFiles.Server.GetInstancePath(0);
 
             if (!Directory.Exists(instance0))
                 throw new DirectoryNotFoundException($"{instance0} was not found.");

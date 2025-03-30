@@ -5,6 +5,7 @@ using System.Runtime.Versioning;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using TrebuchetLib.Services;
 using TrebuchetUtils;
 
 namespace TrebuchetLib;
@@ -478,5 +479,10 @@ public static class Tools
         if (data == null) throw new Exception("Map list could ne be parsed.");
 
         return data;
+    }
+    
+    public static DirectoryInfo GetCommonAppData()
+    {
+        return typeof(Tools).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
     }
 }

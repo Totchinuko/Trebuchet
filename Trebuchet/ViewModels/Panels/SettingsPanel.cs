@@ -41,8 +41,8 @@ namespace Trebuchet.ViewModels.Panels
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.SettingsPanel.Fields.json", AppSetup, nameof(AppSetup.Config));
-            BuildFields("Trebuchet.Panels.SettingsPanel.UI.Fields.json", this, nameof(UiConfig));
+            BuildFields("Trebuchet.ViewModels.Panels.SettingsPanel.Fields.json", AppSetup, nameof(AppSetup.Config));
+            BuildFields("Trebuchet.ViewModels.Panels.SettingsPanel.UI.Fields.json", this, nameof(UiConfig));
         }
 
         protected override void OnValueChanged(string property)
@@ -102,7 +102,7 @@ namespace Trebuchet.ViewModels.Panels
             RequiredActions.Clear();
 
             int installed = _steamApi.GetInstalledServerInstanceCount();
-            if (Directory.Exists(AppSetup.Config.ResolvedInstallPath()) && AppSetup.Config.ServerInstanceCount > installed)
+            if (AppSetup.Config.ServerInstanceCount > installed)
                 RequiredActions.Add(
                     new RequiredCommand(
                         Resources.ServerNotInstalled, 

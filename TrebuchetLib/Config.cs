@@ -1,4 +1,6 @@
-﻿namespace TrebuchetLib
+﻿using TrebuchetUtils;
+
+namespace TrebuchetLib
 {
     public static class AutoUpdateStatus
     {
@@ -13,7 +15,7 @@
 
         public string ClientPath { get; set; } = string.Empty;
 
-        public string InstallPath { get; set; } = "%APP_DIRECTORY%\\TrebuchetData";
+        public string InstallPath { get; set; } = GetDefaultInstallPath();
 
         public int MaxDownloads { get; set; } = 8;
 
@@ -25,14 +27,11 @@
 
         public bool VerifyAll { get; set; } = false;
 
-        public bool IsInstallPathValid =>
-            !string.IsNullOrEmpty(InstallPath) && Directory.Exists(ResolvedInstallPath());
+        public bool IsInstallPathValid => !string.IsNullOrEmpty(InstallPath) && Directory.Exists(InstallPath);
 
-        public string ResolvedInstallPath()
+        public static string GetDefaultInstallPath()
         {
-            string appDir = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ??
-                            throw new Exception("App is installed in an invalid directory");
-            return InstallPath.Replace("%APP_DIRECTORY%", appDir);
+            return typeof(Config).GetStandardFolder(Environment.SpecialFolder.MyDocuments).FullName;
         }
     }
 }

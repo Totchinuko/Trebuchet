@@ -601,9 +601,9 @@ namespace Trebuchet.ViewModels.Panels
                 _modWatcher = null;
             }
 
-            var path = Path.Combine(_setup.Config.ResolvedInstallPath(), Constants.FolderWorkshop);
-            if (string.IsNullOrWhiteSpace(_setup.Config.ResolvedInstallPath()) ||
-                !Directory.Exists(_setup.Config.ResolvedInstallPath())) return;
+            var path = Path.Combine(_appFiles.Mods.GetWorkshopFolder());
+            if (string.IsNullOrWhiteSpace(_setup.Config.InstallPath) ||
+                !Directory.Exists(_setup.Config.InstallPath)) return;
             if (!Directory.Exists(path))
                 Tools.CreateDir(path);
 

@@ -70,7 +70,7 @@ namespace Trebuchet.ViewModels.Panels
 
         protected override void BuildFields()
         {
-            BuildFields("Trebuchet.Panels.ServerProfilePanel.Fields.json", this, nameof(Profile));
+            BuildFields("Trebuchet.ViewModels.Panels.ServerProfilePanel.Fields.json", this, nameof(Profile));
         }
 
         protected override void OnValueChanged(string property)

@@ -10,7 +10,7 @@
         <Company>totchinuko</Company>
         <Copyright>Copyright © $([System.DateTime]::Now.Year) Totchinuko https://github.com/Totchinuko</Copyright>
         <PackageLicenseExpression>GPL-2.0</PackageLicenseExpression>
-        <Product>trebuchet-lib</Product>
+        <Product>trebuchet</Product>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
