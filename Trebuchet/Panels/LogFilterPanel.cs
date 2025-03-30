@@ -7,7 +7,7 @@ namespace Trebuchet.Panels
     {
         private readonly AppSetup _setup;
 
-        public LogFilterPanel(AppSetup setup) : base(Resources.LogFilter, "LogFilterPanel", "mdi-filter", false)
+        public LogFilterPanel(AppSetup setup) : base(Resources.ServerLogFilter, "LogFilterPanel", "mdi-filter", false)
         {
             _setup = setup;
             LoadPanel();

@@ -18,112 +18,113 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
+
     <data name="HandleOriginalSavedDirectoryText" xml:space="preserve">
         <value>Your game directory contain saved data from your previous use of the game. In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original.\nDo you wish to continue ?</value>
     </data>
-        <data name="HandleOriginalSavedDirectory" xml:space="preserve">
+    <data name="HandleOriginalSavedDirectory" xml:space="preserve">
     <value>Saved Data</value>
     </data>
     <data name="InvalidDirectory" xml:space="preserve">
     <value>Directory is invalid</value>
     </data>
-        <data name="DirectoryNotFound" xml:space="preserve">
+    <data name="DirectoryNotFound" xml:space="preserve">
     <value>Directory does not exists</value>
     </data>
-        <data name="InstallPathInGameError" xml:space="preserve">
+    <data name="InstallPathInGameError" xml:space="preserve">
     <value>Install path cannot be in the game Saved folder</value>
     </data>
-        <data name="GameDirectoryInvalidError" xml:space="preserve">
+    <data name="GameDirectoryInvalidError" xml:space="preserve">
     <value>Game could not be found in this Directory</value>
     </data>
-        <data name="WelcomeInstallPathInvalidText" xml:space="preserve">
+    <data name="WelcomeInstallPathInvalidText" xml:space="preserve">
     <value>Your trebuchet data path is not found. Please choose a new one.</value>
     </data>
-        <data name="WelcomeInstallPathInvalid" xml:space="preserve">
+    <data name="WelcomeInstallPathInvalid" xml:space="preserve">
     <value>Invalid Install Path</value>
     </data>
-        <data name="WelcomeSettingTutorialText" xml:space="preserve">
+    <data name="WelcomeSettingTutorialText" xml:space="preserve">
     <value>Welcome to Trebuchet.\n\nIn order to use the software for launching your game or servers you need to point the location of your game, or select how many server you wish the launcher to handle, or both.\n\nOther section of the launcher will unlock as you set those settings up.</value>
     </data>
-        <data name="WelcomeSettingTutorial" xml:space="preserve">
+    <data name="WelcomeSettingTutorial" xml:space="preserve">
     <value>Welcome</value>
     </data>
-        <data name="UACDialogText" xml:space="preserve">
+    <data name="UACDialogText" xml:space="preserve">
     <value>The following folder is protected by administrator rights, Trebuchet need access to manage your game and data. Restart Trebuchet in Admin mode ?\n{0}</value>
     </data>
-        <data name="UACDialog" xml:space="preserve">
+    <data name="UACDialog" xml:space="preserve">
     <value>Administrator</value>
     </data>
-        <data name="Kill" xml:space="preserve">
+    <data name="Kill" xml:space="preserve">
     <value>Kill</value>
     </data>
-        <data name="KillText" xml:space="preserve">
+    <data name="KillText" xml:space="preserve">
     <value>Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. Do you wish to continue ?</value>
     </data>
-        <data name="GameFolderReset" xml:space="preserve">
+    <data name="GameFolderReset" xml:space="preserve">
     <value>Game Folder Reset</value>
     </data>
-        <data name="GameFolderResetText" xml:space="preserve">
+    <data name="GameFolderResetText" xml:space="preserve">
     <value>Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.</value>
     </data>
-        <data name="Create" xml:space="preserve">
+    <data name="Create" xml:space="preserve">
     <value>Create</value>
     </data>
-        <data name="ProfileName" xml:space="preserve">
+    <data name="ProfileName" xml:space="preserve">
     <value>Profile Name</value>
     </data>
-        <data name="AlreadyExists" xml:space="preserve">
+    <data name="AlreadyExists" xml:space="preserve">
     <value>Already Exists</value>
     </data>
-        <data name="AlreadyExistsText" xml:space="preserve">
+    <data name="AlreadyExistsText" xml:space="preserve">
     <value>This name is already used</value>
     </data>
-        <data name="Deletion" xml:space="preserve">
+    <data name="Deletion" xml:space="preserve">
     <value>Deletion</value>
     </data>
-        <data name="DeletionText" xml:space="preserve">
+    <data name="DeletionText" xml:space="preserve">
     <value>Do you wish to delete the selected profile {0} ?</value>
     </data>
-        <data name="Duplicate" xml:space="preserve">
+    <data name="Duplicate" xml:space="preserve">
     <value>Duplicate</value>
     </data>
-        <data name="InvalidURL" xml:space="preserve">
+    <data name="InvalidURL" xml:space="preserve">
     <value>Invalid URL</value>
     </data>
-        <data name="InvalidURLText" xml:space="preserve">
+    <data name="InvalidURLText" xml:space="preserve">
     <value>The steam URL seems to be missing its ID to be valid.</value>
     </data>
-        <data name="TrebuchetBusy" xml:space="preserve">
+    <data name="TrebuchetBusy" xml:space="preserve">
     <value>Trebuchet is busy.</value>
     </data>
-        <data name="ModlistName" xml:space="preserve">
+    <data name="ModlistName" xml:space="preserve">
     <value>Modlist Name</value>
     </data>
-        <data name="InvalidJson" xml:space="preserve">
+    <data name="InvalidJson" xml:space="preserve">
     <value>Invalid Json</value>
     </data>
-        <data name="InvalidJsonText" xml:space="preserve">
+    <data name="InvalidJsonText" xml:space="preserve">
     <value>Loaded json could not be parsed.</value>
     </data>
-        <data name="ServerFailedStart" xml:space="preserve">
+    <data name="ServerFailedStart" xml:space="preserve">
     <value>Server failed to start</value>
     </data>
-        <data name="ServerFailedStartText" xml:space="preserve">
+    <data name="ServerFailedStartText" xml:space="preserve">
     <value>Server failed to start properly. See the logs for more information.</value>
     </data>
-        <data name="ServerNotInstalled" xml:space="preserve">
+    <data name="ServerNotInstalled" xml:space="preserve">
     <value>Some server instances are not yet installed.</value>
     </data>
-        <data name="Install" xml:space="preserve">
+    <data name="Install" xml:space="preserve">
     <value>Install</value>
     </data>
-        <data name="TestLiveMod" xml:space="preserve">
+    <data name="TestLiveMod" xml:space="preserve">
     <value>Steam Workshop (TestLive)</value>
     </data>
-        <data name="LiveMod" xml:space="preserve">
+    <data name="LiveMod" xml:space="preserve">
     <value>Steam Workshop (Live)</value>
     </data>
-        <data name="LocalMod" xml:space="preserve">
+    <data name="LocalMod" xml:space="preserve">
     <value>Local File</value>
     </data>
     <data name="UpdateModsLabel" xml:space="preserve">
@@ -182,5 +183,8 @@
     </data>
     <data name="LastUpdate" xml:space="preserve">
         <value>Last Update</value>
+    </data>
+    <data name="ServerLogFilter" xml:space="preserve">
+        <value>Server Log Filters</value>
     </data>
 </root>

@@ -402,6 +402,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Server Log Filters.
+        /// </summary>
+        internal static string ServerLogFilter {
+            get {
+                return ResourceManager.GetString("ServerLogFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Some server instances are not yet installed..
         /// </summary>
         internal static string ServerNotInstalled {

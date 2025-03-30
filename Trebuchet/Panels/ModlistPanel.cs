@@ -61,6 +61,7 @@ namespace Trebuchet.Panels
             _uiConfig = uiConfig;
             _workshop = workshop;
             _logger = logger;
+            _workshop.ModAdded += (_,mod) => AddModFromWorkshop(mod);
             LoadPanel();
 
             CreateModlistCommand = new SimpleCommand(OnModlistCreate);

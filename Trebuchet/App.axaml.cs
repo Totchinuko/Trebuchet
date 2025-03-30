@@ -11,9 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Trebuchet.Modals;
+using Trebuchet.Panels;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
+using Trebuchet.ViewModels;
 using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -21,6 +23,7 @@ using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 using TrebuchetUtils.Services.Language;
+using Panel = Trebuchet.Panels.Panel;
 
 // GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
 // Copyright (C) 2025 Totchinuko https://github.com/Totchinuko
@@ -124,18 +127,24 @@ public partial class App : Application, IApplication
         services.AddSingleton<AppModlistFiles>();
         services.AddSingleton<AppFiles>();
         services.AddSingleton<IIniGenerator, YuuIniGenerator>();
-        services.AddSingleton<IProgress<double>, Progress>();
+        services.AddSingleton<IProgressCallback<double>, Progress>();
         services.AddSingleton<Steam>();
         services.AddSingleton<Launcher>();
         services.AddSingleton<TaskBlocker>();
         services.AddSingleton<SteamAPI>();
         services.AddSingleton<ILanguageManager, LanguageManager>();
 
+        services.AddTransient<WorkshopSearchViewModel>();
+        services.AddSingleton<SteamWidget>();
         services.AddTransient<TrebuchetApp>();
 
-        var panels = typeof(Panel).Assembly.GetTypes().Where(t => t.IsSubclassOf(typeof(Panel))).ToList();
-        foreach (var panel in panels)
-            services.AddTransient(panel);
+        services.AddTransient<Panel, ModlistPanel>();
+        services.AddTransient<Panel, ClientProfilePanel>();
+        services.AddTransient<Panel, ServerProfilePanel>();
+        services.AddTransient<Panel, RconPanel>();
+        services.AddTransient<Panel, LogFilterPanel>();
+        services.AddTransient<Panel, DashboardPanel>();
+        services.AddTransient<Panel, SettingsPanel>();
     }
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)

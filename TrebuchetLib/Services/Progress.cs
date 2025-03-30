@@ -3,7 +3,7 @@ using System.Runtime.CompilerServices;
 
 namespace TrebuchetLib.Services;
 
-public class Progress : IProgress<double>
+public class Progress : IProgressCallback<double>
 {
     private double _value;
     private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);

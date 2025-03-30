@@ -4,8 +4,6 @@ using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows.Input;
 using Trebuchet.Assets;
-using Trebuchet.Messages;
-using Trebuchet.Services;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
@@ -13,7 +11,7 @@ using TrebuchetUtils.Modals;
 
 namespace Trebuchet.Panels
 {
-    public class ServerProfilePanel : FieldEditorPanel, ITinyRecipient<MapListMessage>
+    public class ServerProfilePanel : FieldEditorPanel
     {
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
@@ -175,11 +173,6 @@ namespace Trebuchet.Panels
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
-        }
-
-        public void Receive(MapListMessage message)
-        {
-            message.Respond(_appFiles.Server.GetMapList());
         }
     }
 }

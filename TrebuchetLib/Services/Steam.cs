@@ -10,7 +10,7 @@ namespace TrebuchetLib.Services
         private readonly AppSetup _appSetup;
         private readonly Steam3Session _session;
 
-        public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgress<double> progress)
+        public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgressCallback<double> progress)
         {
             _logger = logger;
             _appSetup = appSetup;

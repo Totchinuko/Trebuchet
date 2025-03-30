@@ -2,7 +2,6 @@
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
-using Trebuchet.Messages;
 using TrebuchetLib;
 using TrebuchetUtils;
 
@@ -17,7 +16,7 @@ namespace Trebuchet.Controls
 
         public MapList()
         {
-            MapListData = TinyMessengerHub.Default.InstantReturn(new MapListMessage());
+            MapListData = Tools.GetMapList();
             MapSelectCommand = new SimpleCommand(OnMapSelect);
             InitializeComponent();
         }

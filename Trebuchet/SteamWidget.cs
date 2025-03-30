@@ -21,7 +21,7 @@ namespace Trebuchet
         private bool _isConnected;
         private double _progress;
 
-        public SteamWidget(Progress progress, Steam steam, TaskBlocker taskBlocker)
+        public SteamWidget(IProgressCallback<double> progress, Steam steam, TaskBlocker taskBlocker)
         {
             _steam = steam;
             _taskBlocker = taskBlocker;

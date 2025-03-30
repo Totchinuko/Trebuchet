@@ -18,8 +18,6 @@ namespace Trebuchet.Messages
         public Panel Panel { get; } = panel;
     }
 
-
-
     public class PanelRefreshConfigMessage() : PanelMessage(null)
     {
     }

@@ -1,3 +1,4 @@
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
@@ -16,19 +17,19 @@ namespace Trebuchet.ViewModels;
 
 public class WorkshopSearchViewModel : INotifyPropertyChanged
 {
-    private readonly ModlistPanel _modlist;
     private List<WorkshopSearchResult> _searchResults = [];
     private bool _testLiveWorkshop;
     private string _searchTerm = string.Empty;
     private readonly AppSettings _appSettings;
 
-    public WorkshopSearchViewModel(AppSettings appSettings, ModlistPanel modlist)
+    public WorkshopSearchViewModel(AppSettings appSettings)
     {
         _appSettings = appSettings;
-        _modlist = modlist;
         SearchCommand = new SimpleCommand((_) => OnSearch());
         AddModCommand = new SimpleCommand(OnModAdded);
     }
+
+    public event EventHandler<WorkshopSearchResult>? ModAdded;
 
     public List<WorkshopSearchResult> SearchResults
     {
@@ -103,7 +104,7 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
     protected virtual void OnModAdded(object? obj)
     {
         if (obj is WorkshopSearchResult value)
-            _modlist.AddModFromWorkshop(value);
+            ModAdded?.Invoke(this, value);
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

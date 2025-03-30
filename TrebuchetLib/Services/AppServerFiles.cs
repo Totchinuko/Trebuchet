@@ -41,25 +41,6 @@ public class AppServerFiles(AppSetup appSetup)
     }
 
     /// <summary>
-    /// Get the map preset list saved in JSon/Maps.json.
-    /// </summary>
-    /// <returns></returns>
-    /// <exception cref="Exception"></exception>
-    public Dictionary<string, string> GetMapList()
-    {
-        string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-        if (string.IsNullOrEmpty(appFolder)) throw new Exception("Path to assembly is invalid.");
-
-        string file = Path.Combine(appFolder, Constants.FileMapJson);
-        if (!File.Exists(file)) throw new Exception("Map list file is missing.");
-
-        var data = JsonSerializer.Deserialize<Dictionary<string, string>>(File.ReadAllText(file));
-        if (data == null) throw new Exception("Map list could ne be parsed.");
-
-        return data;
-    }
-
-    /// <summary>
     /// Get the path of the json file of a server profile.
     /// </summary>
     /// <param name="name"></param>
