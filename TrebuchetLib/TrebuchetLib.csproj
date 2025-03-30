@@ -7,6 +7,10 @@
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <Deterministic>true</Deterministic>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Company>totchinuko</Company>
+        <Copyright>Copyright © $([System.DateTime]::Now.Year) Totchinuko https://github.com/Totchinuko</Copyright>
+        <PackageLicenseExpression>GPL-2.0</PackageLicenseExpression>
+        <Product>trebuchet-lib</Product>
     </PropertyGroup>
 
     <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">

@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Windows.Input;
+using Trebuchet.Assets;
 using Trebuchet.Messages;
 using Trebuchet.Services;
 using TrebuchetLib;
@@ -26,7 +27,7 @@ namespace Trebuchet.Panels
             AppSetup setup,
             AppFiles appFiles,
             UIConfig uiConfig
-            ) : base("Profiles", "ServerSettings", "mdi-server-network", false)
+            ) : base(Resources.ServerSaves, "ServerSettings", "mdi-server-network", false)
         {
             _setup = setup;
             _appFiles = appFiles;
@@ -122,13 +123,13 @@ namespace Trebuchet.Panels
 
         private async void OnProfileCreate(object? obj)
         {
-            InputTextModal modal = new InputTextModal(App.GetAppText("Create"), App.GetAppText("ProfileName"));
+            InputTextModal modal = new InputTextModal(Resources.Create, Resources.ProfileName);
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
+                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
                 return;
             }
 
@@ -142,7 +143,7 @@ namespace Trebuchet.Panels
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
 
-            QuestionModal question = new(App.GetAppText("Deletion"), App.GetAppText("Deletion_Message", _selectedProfile));
+            QuestionModal question = new(Resources.Deletion, string.Format(Resources.DeletionText, _selectedProfile));
             await question.OpenDialogueAsync();
             if (question.Result)
             {
@@ -157,14 +158,14 @@ namespace Trebuchet.Panels
 
         private async void OnProfileDuplicate(object? obj)
         {
-            InputTextModal modal = new InputTextModal(App.GetAppText("Duplicate"), App.GetAppText("ProfileName"));
+            InputTextModal modal = new InputTextModal(Resources.Duplicate, Resources.ProfileName);
             modal.SetValue(_selectedProfile);
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             string name = modal.Text;
             if (_profiles.Contains(name))
             {
-                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
+                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
                 return;
             }
 

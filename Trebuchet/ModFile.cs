@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Media;
 using Humanizer;
 using SteamWorksWebAPI;
+using Trebuchet.Assets;
 using Trebuchet.Messages;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
@@ -65,12 +66,12 @@ namespace Trebuchet
                 if (!IsPublished)
                 {
                     DateTime lastModified = _infos.LastWriteTime;
-                    return $"Last Modified: {_infos.LastWriteTime.Humanize()}";
+                    return $"{Resources.LastModified}: {_infos.LastWriteTime.Humanize()}";
                 }
 
-                if (_lastUpdate == default) return "Loading...";
+                if (_lastUpdate == default) return $"{Resources.Loading}...";
                 DateTime local = _lastUpdate.ToLocalTime();
-                return $"Last Update: {local.Humanize()}";
+                return $"{Resources.LastUpdate}: {local.Humanize()}";
             }
         }
         public string Title
@@ -145,18 +146,18 @@ namespace Trebuchet
         private string GetTypeText()
         {
             if(IsPublished)
-                return IsTestLive ? App.GetAppText("TestLiveMod") : App.GetAppText("LiveMod");
-            return App.GetAppText("LocalMod");
+                return IsTestLive ? Resources.TestLiveMod : Resources.LiveMod;
+            return Resources.LocalMod;
         }
 
         protected virtual string GetStatusText()
         {
-            if (!_infos.Exists) return "Missing";
-            if (PublishedFileId == 0) return "Found";
-            if (!_needUpdate) return "Up to Date";
+            if (!_infos.Exists) return Resources.Missing;
+            if (PublishedFileId == 0) return Resources.Found;
+            if (!_needUpdate) return Resources.Up_to_Date;
             //if (_lastUpdate < _infos.LastWriteTimeUtc) return "Up to Date";
             //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return "Corrupted";
-            return "Update available";
+            return Resources.UpdateAvailable;
         }
 
         protected virtual void OnPropertyChanged(string name)

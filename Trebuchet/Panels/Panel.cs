@@ -1,19 +1,15 @@
 ﻿using System;
 using System.ComponentModel;
 using System.Windows.Input;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Controls.Templates;
-using Avalonia.Media.Imaging;
-using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
+using TrebuchetUtils;
 
 namespace Trebuchet.Panels
 {
     public abstract class Panel : MenuElement,
         ICommand,
         INotifyPropertyChanged,
-        IRecipient<PanelRefreshConfigMessage>
+        ITinyRecipient<PanelRefreshConfigMessage>
     {
         
         private bool _active;
@@ -22,7 +18,7 @@ namespace Trebuchet.Panels
         {
             IconPath = iconPath;
             BottomPosition = bottom;
-            StrongReferenceMessenger.Default.RegisterAll(this);
+            TinyMessengerHub.Default.Subscribe(this);
         }
 
         public event EventHandler? CanExecuteChanged;
@@ -52,7 +48,7 @@ namespace Trebuchet.Panels
         public virtual void Execute(object? parameter)
         {
             if (CanExecute(parameter))
-                StrongReferenceMessenger.Default.Send(new PanelActivateMessage(this));
+                TinyMessengerHub.Default.Publish(new PanelActivateMessage(this, this));
         }
 
         public void Receive(PanelRefreshConfigMessage message)

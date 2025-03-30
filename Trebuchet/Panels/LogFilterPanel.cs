@@ -1,7 +1,4 @@
-﻿using Avalonia.Markup.Xaml.Templates;
-using CommunityToolkit.Mvvm.Messaging;
-using Trebuchet.Panels;
-using TrebuchetLib;
+﻿using Trebuchet.Assets;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.Panels
@@ -10,7 +7,7 @@ namespace Trebuchet.Panels
     {
         private readonly AppSetup _setup;
 
-        public LogFilterPanel(AppSetup setup) : base("Log Filter", "LogFilterPanel", "mdi-filter", false)
+        public LogFilterPanel(AppSetup setup) : base(Resources.LogFilter, "LogFilterPanel", "mdi-filter", false)
         {
             _setup = setup;
             LoadPanel();

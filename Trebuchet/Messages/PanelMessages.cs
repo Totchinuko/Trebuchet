@@ -4,24 +4,23 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Trebuchet.Panels;
+using TrebuchetUtils;
 
 namespace Trebuchet.Messages
 {
-    public class PanelActivateMessage : PanelMessage
+    public class PanelMessage(object? sender) : ITinyMessage
     {
-        public readonly Panel panel;
-
-        public PanelActivateMessage(Panel panel)
-        {
-            this.panel = panel;
-        }
+        public object? Sender { get; } = sender;
+    }
+    
+    public class PanelActivateMessage(object? sender, Panel panel) : PanelMessage(sender)
+    {
+        public Panel Panel { get; } = panel;
     }
 
-    public class PanelMessage
-    {
-    }
 
-    public class PanelRefreshConfigMessage : PanelMessage
+
+    public class PanelRefreshConfigMessage() : PanelMessage(null)
     {
     }
 }

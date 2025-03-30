@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Windows.Input;
-using CommunityToolkit.Mvvm.Messaging;
-using Trebuchet.Messages;
 using Trebuchet.Services.TaskBlocker;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {
-    public class RequiredCommand : ICommand, IRecipient<BlockedTaskStateChanged>
+    public class RequiredCommand : ICommand, ITinyRecipient<BlockedTaskStateChanged>
     {
         private readonly Action<object?> _callback;
         private bool _launched;
@@ -20,7 +18,7 @@ namespace Trebuchet
             _callback = callback;
             Message = message;
             Button = button;
-            StrongReferenceMessenger.Default.RegisterAll(this);
+            TinyMessengerHub.Default.Subscribe(this);
         }
 
         public event EventHandler? CanExecuteChanged;
@@ -48,7 +46,7 @@ namespace Trebuchet
             _callback.Invoke(parameter);
         }
 
-        void IRecipient<BlockedTaskStateChanged>.Receive(BlockedTaskStateChanged message)
+        void ITinyRecipient<BlockedTaskStateChanged>.Receive(BlockedTaskStateChanged message)
         {
             if (_types.Contains(message.Type.GetType()))
             {

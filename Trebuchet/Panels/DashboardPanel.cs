@@ -4,8 +4,8 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Extensions.Logging;
+using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
@@ -32,7 +32,7 @@ namespace Trebuchet.Panels
             SteamAPI steamApi,
             Launcher launcher, 
             ILogger<DashboardPanel> logger) : 
-            base("Dashboard", "Dashboard", "mdi-view-dashboard", true)
+            base(Resources.Dashboard, "Dashboard", "mdi-view-dashboard", true)
         {
             _setup = setup;
             _uiConfig = uiConfig;
@@ -58,8 +58,6 @@ namespace Trebuchet.Panels
             Client = new ClientInstanceDashboard(new ProcessStatsLight(_uiConfig));
             Initialize();
 
-            StrongReferenceMessenger.Default.RegisterAll(this);
-            
             _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, OnCheckModUpdate);
         }
 
@@ -159,7 +157,7 @@ namespace Trebuchet.Panels
 
             if (_uiConfig.DisplayWarningOnKill)
             {
-                var question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
+                var question = new QuestionModal(Resources.Kill, Resources.KillText);
                 await question.OpenDialogueAsync();
                 if (!question.Result) return;
             }
@@ -208,7 +206,7 @@ namespace Trebuchet.Panels
 
             if (_uiConfig.DisplayWarningOnKill)
             {
-                QuestionModal question = new QuestionModal(App.GetAppText("Kill_Title"), App.GetAppText("Kill_Message"));
+                QuestionModal question = new QuestionModal(Resources.Kill, Resources.KillText);
                 await question.OpenDialogueAsync();
                 if (!question.Result) return;
             }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Services.TaskBlocker;
-using TrebuchetLib;
+using Trebuchet.Assets;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
@@ -63,25 +63,26 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
 
     public async Task UpdateMods(List<ulong> list)
     {
-        var task = await taskBlocker.EnterAsync(new SteamDownload(App.GetAppText("UpdateModsLabel")));
+        var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateModsLabel));
+        
         await steam.UpdateMods(list, task.Cts);
         task.Release();
     }
 
     public async Task UpdateServers()
     {
-        var task = await taskBlocker.EnterAsync(new SteamDownload(App.GetAppText("UpdateServersLabel")));
+        var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateServersLabel));
         await steam.UpdateServerInstances(task.Cts);
         task.Release();
     }
 
     public async Task VerifyFiles(IEnumerable<ulong> modlist)
     {
-        var task = await taskBlocker.EnterAsync(new SteamDownload(App.GetAppText("VerifyServersLabel")));
+        var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyServersLabel));
         steam.ClearCache();
         await steam.UpdateServerInstances(task.Cts);
         task.Release();
-        task = await taskBlocker.EnterAsync(new SteamDownload(App.GetAppText("VerifyModsLabel")));
+        task = await taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyModsLabel));
         await steam.UpdateMods(modlist, task.Cts);
         task.Release();
     }

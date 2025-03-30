@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
@@ -165,7 +166,7 @@ namespace Trebuchet
             KillCommand.Toggle(false);
             CloseCommand.Toggle(false);
             LaunchCommand.Toggle(true);
-            await new ErrorModal(App.GetAppText("ServerFailedStart"), "ServerFailedStart_Message").OpenDialogueAsync();
+            await new ErrorModal(Resources.ServerFailedStart, Resources.ServerFailedStartText).OpenDialogueAsync();
         }
 
         private void OnProcessStarted(IConanProcess details)

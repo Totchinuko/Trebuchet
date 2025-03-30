@@ -6,8 +6,11 @@ namespace Trebuchet.Modals
 {
     public class TestliveModal : BaseModal
     {
-        public TestliveModal() : base(400, 400, "Game Build", "TestliveSelection")
+        private readonly App _app;
+
+        public TestliveModal(App app) : base(400, 400, "Game Build", "TestliveSelection")
         {
+            _app = app;
             LiveCommand = new SimpleCommand(OnLiveClicked);
             TestLiveCommand = new SimpleCommand(OnTestLiveClicked);
             CloseDisabled = false;
@@ -16,17 +19,15 @@ namespace Trebuchet.Modals
         public ICommand LiveCommand { get; private set; }
         public ICommand TestLiveCommand { get; private set; }
         
-        public bool Result { get; private set; }
-
         private void OnLiveClicked(object? obj)
         {
-            Result = false;
+            _app.OpenApp(false);
             Window.Close();
         }
 
         private void OnTestLiveClicked(object? obj)
         {
-            Result = true;
+            _app.OpenApp(true);
             Window.Close();
         }
 

@@ -1,5 +1,6 @@
 ﻿using System.IO;
 using Microsoft.Extensions.Logging;
+using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
@@ -14,7 +15,7 @@ namespace Trebuchet.Panels
         private readonly ILogger<SettingsPanel> _logger;
         private bool _displayedHelp;
 
-        public SettingsPanel(AppSetup setup, UIConfig uiConfig, SteamAPI steamApi, ILogger<SettingsPanel> logger) : base("Settings", string.Empty, "mdi-cog", true)
+        public SettingsPanel(AppSetup setup, UIConfig uiConfig, SteamAPI steamApi, ILogger<SettingsPanel> logger) : base(Resources.Settings, string.Empty, "mdi-cog", true)
         {
             _steamApi = steamApi;
             _logger = logger;
@@ -62,16 +63,16 @@ namespace Trebuchet.Panels
             if (!AppSetup.Config.IsInstallPathValid)
             {
                 ErrorModal modal = new ErrorModal(
-                    App.GetAppText("Welcome_InstallPathInvalid_Title"),
-                    App.GetAppText("Welcome_InstallPathInvalid"));
+                    Resources.WelcomeInstallPathInvalid,
+                    Resources.WelcomeInstallPathInvalidText);
                 await modal.OpenDialogueAsync();
             }
 
             if ((!Tools.IsClientInstallValid(AppSetup.Config) && !Tools.IsServerInstallValid(AppSetup.Config)))
             {
                 MessageModal modal = new MessageModal(
-                  App.GetAppText("Welcome_SettingTutorial_Title"),
-                  App.GetAppText("Welcome_SettingTutorial"),
+                  Resources.WelcomeSettingTutorial,
+                  Resources.WelcomeSettingTutorialText,
                   250);
                 await modal.OpenDialogueAsync();
             }
@@ -92,7 +93,7 @@ namespace Trebuchet.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
 
@@ -104,8 +105,8 @@ namespace Trebuchet.Panels
             if (Directory.Exists(AppSetup.Config.ResolvedInstallPath()) && AppSetup.Config.ServerInstanceCount > installed)
                 RequiredActions.Add(
                     new RequiredCommand(
-                        App.GetAppText("ServerNotInstalled"), 
-                        App.GetAppText("Install"), 
+                        Resources.ServerNotInstalled, 
+                        Resources.Install, 
                         OnServerInstanceInstall)
                         .SetBlockingType<SteamDownload>());
         }

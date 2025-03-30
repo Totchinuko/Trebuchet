@@ -16,6 +16,7 @@ using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
+using Trebuchet.Assets;
 using Trebuchet.Messages;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
@@ -52,7 +53,7 @@ namespace Trebuchet.Panels
             UIConfig uiConfig, 
             WorkshopSearchViewModel workshop,
             ILogger<ModlistPanel> logger) : 
-            base("Mods", "ModlistEditor", "mdi-toy-brick", false)
+            base(Resources.Mods, "ModlistEditor", "mdi-toy-brick", false)
         {
             _steamApi = steamApi;
             _setup = setup;
@@ -80,7 +81,7 @@ namespace Trebuchet.Panels
             RefreshModlistCommand = new TaskBlockedCommand(OnModlistRefresh)
                 .SetBlockingType<DownloadModlist>();
 
-            TinyMessengerHub.Default.Subscribe(this);
+            TinyMessengerHub.Default.Subscribe<ModListMessages>(this);
         }
 
         public SimpleCommand CreateModlistCommand { get; }
@@ -179,7 +180,7 @@ namespace Trebuchet.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
         
@@ -205,7 +206,7 @@ namespace Trebuchet.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
 
         }
@@ -216,7 +217,7 @@ namespace Trebuchet.Panels
             var id = query.Get("id");
             if (id == null || !ulong.TryParse(id, out var collectionId))
             {
-                await new ErrorModal(App.GetAppText("InvalidURL"), App.GetAppText("InvalidURL_Message")).OpenDialogueAsync();
+                await new ErrorModal(Resources.InvalidURL, Resources.InvalidURLText).OpenDialogueAsync();
                 return;
             }
 
@@ -234,7 +235,7 @@ namespace Trebuchet.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
 
@@ -254,7 +255,7 @@ namespace Trebuchet.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(App.GetAppText("Error"), tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
 
@@ -410,7 +411,7 @@ namespace Trebuchet.Panels
             var modlist = JsonSerializer.Deserialize<ModlistExport>(json);
             if (modlist == null)
             {
-                await new ErrorModal(App.GetAppText("InvalidJson"), App.GetAppText("InvalidJson_Message")).OpenDialogueAsync();
+                await new ErrorModal(Resources.InvalidJson, Resources.InvalidJsonText).OpenDialogueAsync();
                 return;
             }
 
@@ -493,13 +494,13 @@ namespace Trebuchet.Panels
 
         private async void OnModlistCreate(object? obj)
         {
-            var modal = new InputTextModal(App.GetAppText("Create"), App.GetAppText("ModlistName"));
+            var modal = new InputTextModal(Resources.Create, Resources.ModlistName);
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             var name = modal.Text;
             if (Profiles.Contains(name))
             {
-                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
+                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
                 return;
             }
 
@@ -529,14 +530,14 @@ namespace Trebuchet.Panels
 
         private async void OnModlistDuplicate(object? obj)
         {
-            var modal = new InputTextModal(App.GetAppText("Duplicate"), App.GetAppText("ModlistName"));
+            var modal = new InputTextModal(Resources.Duplicate, Resources.ModlistName);
             modal.SetValue(_selectedModlist);
             await modal.OpenDialogueAsync();
             if (string.IsNullOrEmpty(modal.Text)) return;
             var name = modal.Text;
             if (Profiles.Contains(name))
             {
-                await new ErrorModal(App.GetAppText("AlreadyExists"), App.GetAppText("AlreadyExists_Message")).OpenDialogueAsync();
+                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
                 return;
             }
 

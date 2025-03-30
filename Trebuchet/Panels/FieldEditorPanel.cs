@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
 using Trebuchet.SettingFields;
+using TrebuchetUtils;
 
 namespace Trebuchet.Panels
 {
@@ -41,7 +41,7 @@ namespace Trebuchet.Panels
             OnValueChanged(e.Property);
             Fields.ForEach(f => f.RefreshVisibility());
             if (e.RefreshApp)
-                StrongReferenceMessenger.Default.Send<PanelRefreshConfigMessage>();
+                TinyMessengerHub.Default.Publish(new PanelRefreshConfigMessage());
         }
     }
 }

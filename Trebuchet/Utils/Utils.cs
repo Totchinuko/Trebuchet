@@ -4,8 +4,8 @@ using System.IO;
 using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Trebuchet.Assets;
 using TrebuchetLib;
-using TrebuchetUtils;
 
 namespace Trebuchet.Utils
 {
@@ -15,17 +15,17 @@ namespace Trebuchet.Utils
         {
             if (string.IsNullOrEmpty(gameDirectory))
             {
-                errorMessage = App.GetAppText("InvalidDirectory");
+                errorMessage = Resources.InvalidDirectory;
                 return false;
             }
             if (!Directory.Exists(gameDirectory))
             {
-                errorMessage = App.GetAppText("DirectoryNotFound");
+                errorMessage = Resources.DirectoryNotFound;
                 return false;
             }
             if (!File.Exists(Path.Join(gameDirectory, Constants.FolderGameBinaries, Constants.FileClientBin)))
             {
-                errorMessage = App.GetAppText("GameDirectoryInvalidError");
+                errorMessage = Resources.GameDirectoryInvalidError;
                 return false;
             }
             errorMessage = string.Empty;
@@ -51,28 +51,20 @@ namespace Trebuchet.Utils
             errorMessage = string.Empty;
             if (string.IsNullOrEmpty(installPath))
             {
-                errorMessage = App.GetAppText("InvalidDirectory");
+                errorMessage = Resources.InvalidDirectory;
                 return false;
             }
             if (!Directory.Exists(installPath))
             {
-                errorMessage = App.GetAppText("DirectoryNotFound");
+                errorMessage = Resources.DirectoryNotFound;
                 return false;
             }
             if (Regex.IsMatch(installPath, Constants.RegexSavedFolder))
             {
-                errorMessage = App.GetAppText("InstallPathInGameError");
+                errorMessage = Resources.InstallPathInGameError;
                 return false;
             }
             return true;
-        }
-
-        public static string GetConfigPath()
-        {
-            var folder = typeof(UIConfig).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
-            if(!folder.Exists)
-                Directory.CreateDirectory(folder.FullName);
-            return Path.Combine(folder.FullName, Constants.FileConfig);
         }
     }
 }

@@ -1,20 +1,5 @@
-﻿using CommunityToolkit.Mvvm.Messaging;
-using SteamWorksWebAPI;
-using SteamWorksWebAPI.Interfaces;
-using SteamWorksWebAPI.Response;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
-using System.Windows.Input;
-using Avalonia;
-using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Threading;
-using Trebuchet.Messages;
+﻿using Avalonia.Input;
 using Trebuchet.ViewModels;
-using TrebuchetLib;
 using TrebuchetUtils;
 
 namespace Trebuchet.Windows

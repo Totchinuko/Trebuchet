@@ -3,7 +3,7 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
 using Avalonia.Threading;
-using CommunityToolkit.Mvvm.Messaging;
+using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
 using TrebuchetLib.Services;
@@ -30,7 +30,7 @@ namespace Trebuchet.Panels
         private int _selectedConsole;
         private List<IConanServerProcess> _servers = [];
 
-        public RconPanel(AppSetup setup, Launcher launcher) : base("Server Consoles", "RconPanel", "mdi-console-line", false)
+        public RconPanel(AppSetup setup, Launcher launcher) : base(Resources.ServerConsoles, "RconPanel", "mdi-console-line", false)
         {
             _setup = setup;
             _launcher = launcher;

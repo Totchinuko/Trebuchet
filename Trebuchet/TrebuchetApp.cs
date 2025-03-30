@@ -5,16 +5,14 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Messages;
 using Trebuchet.Panels;
-using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils.Modals;
+using TrebuchetUtils;
 
 namespace Trebuchet
 {
-    public sealed class TrebuchetApp : INotifyPropertyChanged, IRecipient<PanelActivateMessage>
+    public sealed class TrebuchetApp : INotifyPropertyChanged, ITinyRecipient<PanelActivateMessage>
     {
         private readonly Launcher _launcher;
         private readonly Steam _steam;
@@ -29,7 +27,7 @@ namespace Trebuchet
             _panels = panels.ToList();
             SteamWidget = steamWidget;
 
-            StrongReferenceMessenger.Default.Register(this);
+            TinyMessengerHub.Default.Subscribe(this);
 
             OrderPanels(_panels);
             _activePanel = BottomPanels.First(x => x.CanExecute(null));
@@ -78,7 +76,7 @@ namespace Trebuchet
 
         public void Receive(PanelActivateMessage message)
         {
-            ActivePanel = message.panel;
+            ActivePanel = message.Panel;
         }
 
         

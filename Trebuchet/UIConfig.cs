@@ -7,8 +7,6 @@ namespace Trebuchet
 {
     public sealed class UIConfig : ConfigFile<UIConfig>
     {
-        public const string ConfigFileName = "settings.ui.json";
-        
         private string[] _dashboardServerModlist = [];
         private string[] _dashboardServerProfiles = [];
 
@@ -62,14 +60,6 @@ namespace Trebuchet
             if (DashboardServerProfiles.Length <= instance)
                 Array.Resize(ref _dashboardServerProfiles, instance + 1);
             DashboardServerProfiles[instance] = profile;
-        }
-
-        public static string GetUIConfigPath()
-        {
-            var folder = typeof(UIConfig).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
-            if(!folder.Exists)
-                Directory.CreateDirectory(folder.FullName);
-            return Path.Combine(folder.FullName, ConfigFileName);
         }
     }
 }

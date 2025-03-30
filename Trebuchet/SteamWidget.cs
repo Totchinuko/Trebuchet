@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using Avalonia.Threading;
-using CommunityToolkit.Mvvm.Messaging;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
@@ -11,7 +10,7 @@ using TrebuchetUtils.Modals;
 
 namespace Trebuchet
 {
-    public class SteamWidget : INotifyPropertyChanged, IRecipient<BlockedTaskStateChanged>
+    public class SteamWidget : INotifyPropertyChanged, ITinyRecipient<BlockedTaskStateChanged>
     {
         private readonly Steam _steam;
         private readonly TaskBlocker _taskBlocker;
@@ -28,7 +27,7 @@ namespace Trebuchet
             _taskBlocker = taskBlocker;
             progress.ProgressChanged += OnProgressChanged;
             
-            StrongReferenceMessenger.Default.RegisterAll(this);
+            TinyMessengerHub.Default.Subscribe(this);
 
             _progressLock = new object();
             _steam.Connected += OnSteamConnected;
