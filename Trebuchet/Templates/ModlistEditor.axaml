@@ -1,9 +1,8 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Trebuchet.Panels"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
-                    >
-    <DataTemplate x:Key="ModlistEditor" x:DataType="local:ModlistPanel">
+                    xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
+    <DataTemplate x:Key="ModlistEditor" x:DataType="panels:ModlistPanel">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />

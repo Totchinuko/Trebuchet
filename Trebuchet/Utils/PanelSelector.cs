@@ -1,7 +1,6 @@
 using Avalonia.Controls;
 using Avalonia.Controls.Templates;
-using Trebuchet.Panels;
-using Panel = Trebuchet.Panels.Panel;
+using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet.Utils;
 

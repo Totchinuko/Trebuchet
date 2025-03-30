@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="clr-namespace:Trebuchet.SettingFields"
-                    xmlns:controls="clr-namespace:Trebuchet.Controls">
-    <DataTemplate x:Key="CpuAffinityField" x:DataType="local:CpuAffinityField">
+                    xmlns:controls="clr-namespace:Trebuchet.Controls"
+                    xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
+    <DataTemplate x:Key="CpuAffinityField" x:DataType="settingFields:CpuAffinityField">
         <controls:CpuSelector CpuAffinity="{Binding Path=Value, Mode=TwoWay}" />
     </DataTemplate>
 </ResourceDictionary>

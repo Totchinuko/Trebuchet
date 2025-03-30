@@ -8,7 +8,6 @@ using System.Windows.Input;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using SteamWorksWebAPI.Response;
-using Trebuchet.Panels;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;

@@ -11,11 +11,11 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Trebuchet.Modals;
-using Trebuchet.Panels;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels;
+using Trebuchet.ViewModels.Panels;
 using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -23,7 +23,7 @@ using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 using TrebuchetUtils.Services.Language;
-using Panel = Trebuchet.Panels.Panel;
+using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 // GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
 // Copyright (C) 2025 Totchinuko https://github.com/Totchinuko

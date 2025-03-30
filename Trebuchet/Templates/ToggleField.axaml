@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:local="clr-namespace:Trebuchet.SettingFields"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ToggleField" DataType="local:ToggleField">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
+    <DataTemplate x:Key="ToggleField" DataType="settingFields:ToggleField">
         <CheckBox IsChecked="{Binding Value, Mode=TwoWay}" VerticalAlignment="Center" Cursor="Hand">
             <TextBlock VerticalAlignment="Center" Classes="SubText" TextWrapping="Wrap" Text="{Binding Description}" />
         </CheckBox>

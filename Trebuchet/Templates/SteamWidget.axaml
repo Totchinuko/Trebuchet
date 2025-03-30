@@ -1,8 +1,9 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="SteamWidget" x:DataType="local:SteamWidget">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
+    <DataTemplate x:Key="SteamWidget" x:DataType="viewModels:SteamWidget">
         <Grid>
             <Button VerticalAlignment="Center"
                     Classes="Base Sneak Blue"

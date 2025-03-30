@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ProcessStats" x:DataType="local:IProcessStats">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
+    <DataTemplate x:Key="ProcessStats" x:DataType="viewModels:IProcessStats">
         <StackPanel Grid.Row="2" Orientation="Vertical" IsVisible="{Binding Running}">
             <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25">
                 <Grid>

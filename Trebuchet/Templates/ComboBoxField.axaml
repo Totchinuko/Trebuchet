@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:local="clr-namespace:Trebuchet.SettingFields"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ComboBoxField" x:DataType="local:ComboBoxField">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
+    <DataTemplate x:Key="ComboBoxField" x:DataType="settingFields:ComboBoxField">
         <ComboBox HorizontalAlignment="Left" MinWidth="250" ItemsSource="{Binding Options}" SelectedIndex="{Binding Value}" MaxWidth="300" />
     </DataTemplate>
 </ResourceDictionary>

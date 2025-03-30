@@ -6,8 +6,9 @@
         xmlns:treb="clr-namespace:Trebuchet"
         xmlns:utils="clr-namespace:Trebuchet.Utils"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+        xmlns:viewModels="clr-namespace:Trebuchet.ViewModels"
         mc:Ignorable="d"
-        Title="{x:Static treb:TrebuchetApp.AppTitle}"
+        Title="{x:Static viewModels:TrebuchetApp.AppTitle}"
         Height="650" Width="1010"
         MinHeight="550" MinWidth="800"
         WindowStartupLocation="CenterScreen"
@@ -17,7 +18,7 @@
         ExtendClientAreaTitleBarHeightHint="40"
         UseLayoutRounding="True"
         Classes="Trebuchet"
-        x:DataType="treb:TrebuchetApp">
+        x:DataType="viewModels:TrebuchetApp">
     <Border x:Name="MainBorder">
         <Grid>
             <Grid.RowDefinitions>
@@ -26,49 +27,53 @@
             </Grid.RowDefinitions>
             <controls:WindowTitlebar
                 x:Name="TitleBar"
-                Title="{x:Static treb:TrebuchetApp.AppTitle}"
-                >
+                Title="{x:Static viewModels:TrebuchetApp.AppTitle}">
                 <controls:WindowTitlebar.Header>
                     <ContentControl ContentTemplate="{StaticResource SteamWidget}" Content="{Binding SteamWidget}" />
                 </controls:WindowTitlebar.Header>
             </controls:WindowTitlebar>
-            <Grid x:Name="WindowContent" Grid.Row="1" Margin="0,12,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="240" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid x:Name="Navigation" Margin="0,0,5,6">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="auto" />
-                    </Grid.RowDefinitions>
-                    <StackPanel>
-                        <ItemsControl ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1">
-                        <ItemsControl ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </StackPanel>
-                </Grid>
-                <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
-                    <ContentControl Content="{Binding ActivePanel}">
-                        <ContentControl.ContentTemplate>
-                            <utils:PanelSelector/>
-                        </ContentControl.ContentTemplate>
-                    </ContentControl>
+            <Panel Grid.Row="1">
+                <Border Classes="InnerContextual">
+                    <ContentControl />
                 </Border>
-            </Grid>
+                <Grid x:Name="WindowContent" Margin="0,12,0,0">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid x:Name="Navigation" Margin="0,0,5,6">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="*" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <StackPanel>
+                            <ItemsControl ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </StackPanel>
+                        <StackPanel Grid.Row="1">
+                            <ItemsControl ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}">
+                                <ItemsControl.ItemsPanel>
+                                    <ItemsPanelTemplate>
+                                        <StackPanel/>
+                                    </ItemsPanelTemplate>
+                                </ItemsControl.ItemsPanel>
+                            </ItemsControl>
+                        </StackPanel>
+                    </Grid>
+                    <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
+                        <ContentControl Content="{Binding ActivePanel}">
+                            <ContentControl.ContentTemplate>
+                                <utils:PanelSelector/>
+                            </ContentControl.ContentTemplate>
+                        </ContentControl>
+                    </Border>
+                </Grid>
+            </Panel>
         </Grid>
     </Border>
 </Window>

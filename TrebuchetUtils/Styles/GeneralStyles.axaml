@@ -22,6 +22,7 @@
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
                     <SolidColorBrush x:Key="SeparatorDark" Color="#55000000"/>
                     <SolidColorBrush x:Key="SeparatorLight" Color="#60FFFFFF"/>
+                    <SolidColorBrush x:Key="PopupOverlay" Color="#000000" Opacity="0.6"/>
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TRedFaded" Color="{DynamicResource TRedBase}" Opacity="0.4" />
                     <SolidColorBrush x:Key="TRedDim" Color="{DynamicResource TRedBase}" Opacity="0.65" />
@@ -60,6 +61,7 @@
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
                     <SolidColorBrush x:Key="SeparatorDark" Color="#55000000"/>
                     <SolidColorBrush x:Key="SeparatorLight" Color="#15FFFFFF"/>
+                    <SolidColorBrush x:Key="PopupOverlay" Color="#000000" Opacity="0.6"/>
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TRedFaded" Color="{DynamicResource TRedBase}" Opacity="0.1" />
                     <SolidColorBrush x:Key="TRedDim" Color="{DynamicResource TRedBase}" Opacity="0.65" />
@@ -660,5 +662,26 @@
                 </BehaviorCollection>
             </BehaviorCollectionTemplate>
         </Setter>
+    </Style>
+    
+    <!-- Window Inner Contextual --> 
+    <Style Selector="Border.InnerContextual">
+        <Setter Property="Background" Value="{DynamicResource PopupOverlay}" />
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="Padding" Value="30" /> 
+        <Setter Property="ZIndex" Value="1" />
+        <Setter Property="IsVisible" Value="False" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+        
+        <Style Selector="^.Active">
+            <Setter Property="Opacity" Value="1.0"/>
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
     </Style>
 </Styles>

@@ -32,10 +32,6 @@
         <CopyLocalFilesOutputGroupOutput Include="maps.json" />
         <EmbeddedResource Include="AppSettings.json.sample" />
         <EmbeddedResource Include="AppSettings.json" />
-        <EmbeddedResource Include="Panels\ClientProfilePanel.Fields.json" />
-        <EmbeddedResource Include="Panels\ServerProfilePanel.Fields.json" />
-        <EmbeddedResource Include="Panels\SettingsPanel.UI.Fields.json" />
-        <EmbeddedResource Include="Panels\SettingsPanel.Fields.json" />
         <EmbeddedResource Update="Assets\Resources.resx">
           <Generator>ResXFileCodeGenerator</Generator>
           <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -44,6 +40,10 @@
           <Generator>ResXFileCodeGenerator</Generator>
           <LastGenOutput>Resources.Designer.cs</LastGenOutput>
         </EmbeddedResource>
+        <EmbeddedResource Include="ViewModels\Panels\ClientProfilePanel.Fields.json" />
+        <EmbeddedResource Include="ViewModels\Panels\ServerProfilePanel.Fields.json" />
+        <EmbeddedResource Include="ViewModels\Panels\SettingsPanel.Fields.json" />
+        <EmbeddedResource Include="ViewModels\Panels\SettingsPanel.UI.Fields.json" />
     </ItemGroup>
 
     <ItemGroup>
@@ -76,6 +76,7 @@
       <None Update="Assets\maps.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
+      <None Remove="AppIcon.ico" />
     </ItemGroup>
 
     <ItemGroup>

@@ -3,6 +3,7 @@ using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using Trebuchet.ViewModels;
 using TrebuchetUtils;
 
 namespace Trebuchet.Controls

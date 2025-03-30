@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Trebuchet.Panels;
+using Trebuchet.ViewModels.Panels;
 using TrebuchetUtils;
 
 namespace Trebuchet.Messages

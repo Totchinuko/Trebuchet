@@ -1,3 +1,4 @@
+using Trebuchet.ViewModels;
 using TrebuchetUtils;
 
 namespace Trebuchet.Messages;

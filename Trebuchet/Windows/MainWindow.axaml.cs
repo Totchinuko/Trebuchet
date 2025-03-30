@@ -3,6 +3,8 @@ using System.IO;
 using Avalonia.Controls;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Controls.Primitives;
+using Trebuchet.ViewModels;
 using TrebuchetUtils;
 
 namespace Trebuchet.Windows
@@ -37,6 +39,7 @@ namespace Trebuchet.Windows
             if (_shown) return;
             _shown = true;
             OnWindowShown();
+            FlyoutBase.ShowAttachedFlyout(MainBorder);
         }
 
         protected virtual void OnWindowShown()

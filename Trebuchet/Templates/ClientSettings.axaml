@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:local="clr-namespace:Trebuchet.Panels"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ClientSettings" x:DataType="local:ClientProfilePanel">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
+    <DataTemplate x:Key="ClientSettings" x:DataType="panels:ClientProfilePanel">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
