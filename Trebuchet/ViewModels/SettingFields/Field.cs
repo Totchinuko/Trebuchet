@@ -9,6 +9,7 @@ using System.Text.Json.Serialization;
 using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.Templates;
+using Trebuchet.Assets;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.SettingFields
@@ -91,6 +92,7 @@ namespace Trebuchet.ViewModels.SettingFields
             List<Field>? fields = JsonSerializer.Deserialize<List<Field>>(json, Options);
             if (fields == null) throw new Exception("Could not deserialize json fields definition.");
 
+            ApplyTranslation(fields);
             foreach (var field in fields)
                 field.SetTarget(target, property);
             return fields;
@@ -125,6 +127,25 @@ namespace Trebuchet.ViewModels.SettingFields
         private void OnReset(object? obj)
         {
             ResetToDefault();
+        }
+
+        private static void ApplyTranslation(List<Field> fields)
+        {
+            foreach (var field in fields)
+            {
+                field.Name = ApplyTranslation(field.Name);
+                field.Description = ApplyTranslation(field.Description);
+            }
+        }
+
+        private static string ApplyTranslation(string content)
+        {
+            if(!content.StartsWith("resx:")) return content;
+            content = content.Substring(5);
+            var property = typeof(Resources).GetProperty(content, BindingFlags.Static | BindingFlags.Public);
+            if (property == null) return $"Invalid Property {content}";
+            if (property.PropertyType != typeof(string)) return $"Invalid Property {content}";
+            return property.GetValue(null, null) as string ?? $"Invalid Property {content}";
         }
     }
 

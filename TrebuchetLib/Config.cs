@@ -15,6 +15,7 @@ namespace TrebuchetLib
         public int AutoUpdateStatus { get; set; } = 1;
 
         public string ClientPath { get; set; } = string.Empty;
+        public bool ManageClient { get; set; } = false;
 
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         [Obsolete]

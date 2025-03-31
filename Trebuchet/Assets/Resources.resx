@@ -189,4 +189,10 @@ Do you wish to proceed ?</value>
     <data name="OnBoardingUpgradeCopy" xml:space="preserve">
         <value>Please wait while your files are being copied</value>
     </data>
+    <data name="ManageClient" xml:space="preserve">
+        <value>Manage Client Files</value>
+    </data>
+    <data name="ManageClientText" xml:space="preserve">
+        <value>Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer.</value>
+    </data>
 </root>

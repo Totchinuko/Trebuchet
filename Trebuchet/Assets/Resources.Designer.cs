@@ -330,6 +330,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Manage Client Files.
+        /// </summary>
+        public static string ManageClient {
+            get {
+                return ResourceManager.GetString("ManageClient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer..
+        /// </summary>
+        public static string ManageClientText {
+            get {
+                return ResourceManager.GetString("ManageClientText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Missing.
         /// </summary>
         public static string Missing {

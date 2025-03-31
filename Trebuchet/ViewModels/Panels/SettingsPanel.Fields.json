@@ -5,18 +5,17 @@
   },
   {
     "$type": "Directory",
-    "Property": "InstallPath",
-    "Name": "Trebuchet Data Directory",
-    "Description": "Folder for all the data needed by trebuchet. This will contains your mods, logs, saves, and most of your configurations.",
-    "RefreshApp": true,
-    "CreateDefaultFolder": true
-  },
-  {
-    "$type": "Directory",
     "Property": "ClientPath",
     "Name": "Conan Exile Installation Directory",
     "Description": "This is the path to your game. Leave it empty if you do not wish trebuchet to handle game launch.",
     "RefreshApp": true
+  },
+  {
+    "$type": "Toggle",
+    "Property": "ManageClient",
+    "Name": "resx:ManageClient",
+    "Description": "resx:ManageClientText",
+    "Default": false
   },
   {
     "$type": "IntSlider",
