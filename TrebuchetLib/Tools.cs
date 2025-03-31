@@ -2,6 +2,8 @@
 using System.IO.Compression;
 using System.Management;
 using System.Runtime.Versioning;
+using System.Security.AccessControl;
+using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -50,16 +52,18 @@ public static class Tools
             string dirToCreate = dir.Replace(directory, destinationDir);
             Directory.CreateDirectory(dirToCreate);
         }
+        var dirInfo = new DirectoryInfo(directory);
 
-        var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
-        int count = 0;
-        foreach (string newPath in files)
+        var files = dirInfo.GetFiles("*.*", SearchOption.AllDirectories);
+        long total = files.Select(f => f.Length).Aggregate((a, b) => a + b);
+        long count = 0;
+        foreach (FileInfo file in files)
         {
             if (token.IsCancellationRequested)
                 return;
-            await Task.Run(() => File.Copy(newPath, newPath.Replace(directory, destinationDir), true));
-            count++;
-            progress?.Report((double)count / files.Length);
+            await Task.Run(() => File.Copy(file.FullName, file.FullName.Replace(directory, destinationDir), true));
+            count += file.Length;
+            progress?.Report((double)count / total);
         }
     }
 
@@ -453,9 +457,18 @@ public static class Tools
                 entry.ExtractToFile(Path.Join(destination, entry.FullName));
     }
 
-    public static bool ValidateDirectoryUac(string directory)
+    public static bool IsProcessElevated()
     {
-        return IsDirectoryWritable(directory, false);
+        if (OperatingSystem.IsWindows())
+            return IsProcessElevatedWindows();
+        return false;
+    }
+    
+
+    [SupportedOSPlatform("windows")]
+    private static bool IsProcessElevatedWindows()
+    {
+        return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
     }
 
     public static bool ValidateInstallDirectory(string installPath)
@@ -499,5 +512,73 @@ public static class Tools
     public static DirectoryInfo GetCommonAppData()
     {
         return typeof(Tools).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
+    }
+
+    /// <summary>
+    /// Set Everyone Full Control permissions for selected directory
+    /// </summary>
+    /// <param name="dirName"></param>
+    /// <returns></returns>
+    public static bool SetEveryoneAccess(string dirName)
+    {
+       if(OperatingSystem.IsWindows())
+           return SetEveryoneAccessWindows(dirName);
+       return true;
+    }
+
+    public static void SetEveryoneAccess(DirectoryInfo dir)
+    {
+        if(OperatingSystem.IsWindows())
+            SetEveryoneAccessWindows(dir);
+    }
+    
+    [SupportedOSPlatform("windows")]
+    private static bool SetEveryoneAccessWindows(string dirName)
+    {
+        // Make sure directory exists
+        if (!Directory.Exists(dirName))
+            return false;
+        // Get directory access info
+        DirectoryInfo dinfo = new DirectoryInfo(dirName);
+        DirectorySecurity dSecurity = dinfo.GetAccessControl();
+        // Add the FileSystemAccessRule to the security settings. 
+        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+        // Set the access control
+        dinfo.SetAccessControl(dSecurity);
+
+        return true;
+    }
+
+    [SupportedOSPlatform("windows")]
+    private static void SetEveryoneAccessWindows(DirectoryInfo dir)
+    {
+        SetEveryoneAccessWindows(dir.GetDirectories("*", SearchOption.AllDirectories));
+        SetEveryoneAccessWindows(dir.GetFiles("*", SearchOption.AllDirectories));
+    }
+    
+    [SupportedOSPlatform("windows")]
+    private static void SetEveryoneAccessWindows(DirectoryInfo[] dirs)
+    {
+        foreach (var dir in dirs)
+        {
+            DirectorySecurity dSecurity = dir.GetAccessControl();
+            // Add the FileSystemAccessRule to the security settings. 
+            dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
+            // Set the access control
+            dir.SetAccessControl(dSecurity);
+        }
+    }
+    
+    [SupportedOSPlatform("windows")]
+    private static void SetEveryoneAccessWindows(FileInfo[] files)
+    {
+        foreach (var file in files)
+        {
+            FileSecurity dSecurity = file.GetAccessControl();
+            // Add the FileSystemAccessRule to the security settings. 
+            dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Allow));
+            // Set the access control
+            file.SetAccessControl(dSecurity);
+        }
     }
 }

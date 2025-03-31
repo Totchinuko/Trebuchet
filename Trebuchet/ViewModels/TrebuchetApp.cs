@@ -154,32 +154,38 @@ namespace Trebuchet.ViewModels
                 await InnerContainer.OpenAsync(upgrade);
                 if(upgrade.Result < 0) throw new Exception("OnBoardingUpgrade failed");
 
-                if (!await OnBoardingUacRequest(trebuchetDir, Resources.OnBoardingUpgradeUac)) return false;
+                if (!await OnBoardingElevationRequest(trebuchetDir, Resources.OnBoardingUpgradeUac)) return false;
 
                 var progress = new OnBoardingProgress(Resources.Upgrade, Resources.OnBoardingUpgradeCopy);
                 InnerContainer.Open(progress);
 
-                var configJson = await File.ReadAllTextAsync(configLive);
-                var configuration = JsonSerializer.Deserialize<Config>(configJson);
-                if (configuration is not null)
+                if (File.Exists(configLive))
                 {
-                    if (!await OnBoardingUpgradeTrebuchet(configuration.InstallPath, false, progress)) return false;
-                    configuration.InstallPath = string.Empty;
-                    configJson = JsonSerializer.Serialize(configuration);
-                    await File.WriteAllTextAsync(AppConstants.GetConfigPath(false), configJson);
+                    var configJson = await File.ReadAllTextAsync(configLive);
+                    var configuration = JsonSerializer.Deserialize<Config>(configJson);
+                    if (configuration is not null)
+                    {
+                        if (!await OnBoardingUpgradeTrebuchet(configuration.InstallPath, false, progress)) return false;
+                        configuration.InstallPath = string.Empty;
+                        configJson = JsonSerializer.Serialize(configuration);
+                        await File.WriteAllTextAsync(AppConstants.GetConfigPath(false), configJson);
+                    }
+                    File.Delete(configLive);
                 }
-                File.Delete(configLive);
-                
-                configJson = await File.ReadAllTextAsync(configTestlive);
-                configuration = JsonSerializer.Deserialize<Config>(configJson);
-                if (configuration is not null)
+
+                if (File.Exists(configTestlive))
                 {
-                    if(!await OnBoardingUpgradeTrebuchet(configuration.InstallPath, true, progress)) return false;
-                    configuration.InstallPath = string.Empty;
-                    configJson = JsonSerializer.Serialize(configuration);
-                    await File.WriteAllTextAsync(AppConstants.GetConfigPath(true), configJson);
+                    var configJson = await File.ReadAllTextAsync(configTestlive);
+                    var configuration = JsonSerializer.Deserialize<Config>(configJson);
+                    if (configuration is not null)
+                    {
+                        if(!await OnBoardingUpgradeTrebuchet(configuration.InstallPath, true, progress)) return false;
+                        configuration.InstallPath = string.Empty;
+                        configJson = JsonSerializer.Serialize(configuration);
+                        await File.WriteAllTextAsync(AppConstants.GetConfigPath(true), configJson);
+                    }
+                    File.Delete(configTestlive);
                 }
-                File.Delete(configTestlive);
                 
                 Utils.Utils.RestartProcess(_setup.IsTestLive, false);
                 return false;
@@ -191,11 +197,12 @@ namespace Trebuchet.ViewModels
 
         private async Task<bool> OnBoardingUpgradeTrebuchet(string installDir, bool testlive, IProgress<double> progress)
         {
+            bool isElevated = Tools.IsProcessElevated();
             string appDir = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
             installDir = installDir.Replace("%APP_DIRECTORY%", appDir); 
             if(string.IsNullOrEmpty(installDir)) return true;
             if(!Directory.Exists(installDir)) return true;
-            if (!await OnBoardingUacRequest(installDir, Resources.OnBoardingUpgradeUac)) return false;
+            if (!await OnBoardingElevationRequest(installDir, Resources.OnBoardingUpgradeUac)) return false;
             
             progress.Report(0.0);
             var versionDir = testlive ? Constants.FolderTestLive : Constants.FolderLive;
@@ -203,6 +210,8 @@ namespace Trebuchet.ViewModels
             if (Directory.Exists(workshopDir))
             {
                 await Tools.DeepCopyAsync(workshopDir, _appFiles.Mods.GetWorkshopFolder(), CancellationToken.None, progress);
+                if (isElevated)
+                    Tools.SetEveryoneAccess(new DirectoryInfo(_appFiles.Mods.GetWorkshopFolder()));
                 Directory.Delete(workshopDir, true);
             }
             
@@ -212,6 +221,8 @@ namespace Trebuchet.ViewModels
             {
                 Tools.RemoveAllJunctions(instanceDir); 
                 await Tools.DeepCopyAsync(instanceDir, _appFiles.Server.GetBaseInstancePath(testlive), CancellationToken.None, progress);
+                if(isElevated)
+                    Tools.SetEveryoneAccess(new DirectoryInfo(_appFiles.Server.GetBaseInstancePath(testlive)));
                 Directory.Delete(instanceDir, true);
             }
             progress.Report(0.0);
@@ -220,6 +231,8 @@ namespace Trebuchet.ViewModels
             if (Directory.Exists(dataDir))
             {
                 await Tools.DeepCopyAsync(dataDir, Path.Combine(AppFiles.GetDataFolder(), versionDir), CancellationToken.None, progress);
+                if(isElevated)
+                    Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(AppFiles.GetDataFolder(), versionDir)));
                 Directory.Delete(dataDir, true);
             }
             
@@ -232,11 +245,14 @@ namespace Trebuchet.ViewModels
             return true;
         }
 
-        private async Task<bool> OnBoardingUacRequest(string path, string reason)
+        private async Task<bool> OnBoardingElevationRequest(string path, string reason)
         {
-            var canWriteInTrebuchet = Tools.ValidateDirectoryUac(path);
+            var canWriteInTrebuchet = Tools.IsDirectoryWritable(path);
+            var isRoot = Tools.IsProcessElevated();
             if (!canWriteInTrebuchet)
             {
+                if(isRoot) 
+                    throw new Exception($"Can't write in {path}, permission denied");
                 var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
                     .SetSize<OnBoardingBranch>(650, 250)
                     .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
