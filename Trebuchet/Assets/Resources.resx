@@ -195,4 +195,10 @@ Do you wish to proceed ?</value>
     <data name="ManageClientText" xml:space="preserve">
         <value>Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer.</value>
     </data>
+    <data name="SteamConnected" xml:space="preserve">
+        <value>Connected to Steam</value>
+    </data>
+    <data name="SteamDisconnected" xml:space="preserve">
+        <value>Steam is unavailable</value>
+    </data>
 </root>

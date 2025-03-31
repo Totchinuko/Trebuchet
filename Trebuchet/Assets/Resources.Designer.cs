@@ -485,6 +485,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connected to Steam.
+        /// </summary>
+        public static string SteamConnected {
+            get {
+                return ResourceManager.GetString("SteamConnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Steam is unavailable.
+        /// </summary>
+        public static string SteamDisconnected {
+            get {
+                return ResourceManager.GetString("SteamDisconnected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Steam Workshop (TestLive).
         /// </summary>
         public static string TestLiveMod {
