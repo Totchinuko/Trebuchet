@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading;
+using Avalonia.Threading;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
@@ -51,6 +53,9 @@ public class OnBoardingProgress : InnerPopup, INotifyPropertyChanged, IProgress<
 
     public void Report(double value)
     {
-        Progress = value;
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            Progress = value;
+        });
     }
 }

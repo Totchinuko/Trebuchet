@@ -9,6 +9,7 @@ namespace TrebuchetLib.Services
         private readonly ILogger<Steam> _logger;
         private readonly AppFiles _appFiles;
         private readonly AppSetup _appSetup;
+        private readonly IProgressCallback<double> _progress;
         private readonly Steam3Session _session;
 
         public Steam(ILogger<Steam> logger, AppFiles appFiles, AppSetup appSetup, IProgressCallback<double> progress)
@@ -16,6 +17,7 @@ namespace TrebuchetLib.Services
             _logger = logger;
             _appFiles = appFiles;
             _appSetup = appSetup;
+            _progress = progress;
 
             DebugLog.AddListener(this);
             Util.ConsoleWriteRedirect += OnConsoleWriteRedirect;
@@ -47,6 +49,16 @@ namespace TrebuchetLib.Services
         public void Disconnect(bool sendLogOff = true)
         {
             _session.Disconnect(sendLogOff);
+        }
+
+        public void SetTemporaryProgress(IProgress<double> progress)
+        {
+            ContentDownloader.Config.Progress = progress;
+        }
+
+        public void RestoreProgress()
+        {
+            ContentDownloader.Config.Progress = _progress;
         }
 
         /// <summary>

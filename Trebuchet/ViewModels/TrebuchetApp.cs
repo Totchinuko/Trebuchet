@@ -164,14 +164,30 @@ namespace Trebuchet.ViewModels
                 case 1:
                     _setup.Config.AutoUpdateStatus = AutoUpdateStatus.CheckForUpdates;
                     _setup.Config.ServerInstanceCount = 1;
-                    return true;
+                    return await OnBoardingServerDownload();
                 case 2:
                     _setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
                     _setup.Config.ServerInstanceCount = 1;
-                    return await OnBoardingFindConanExile();
+                    if(!await OnBoardingFindConanExile()) return false;
+                    return await OnBoardingServerDownload();
                 default:
                     throw new Exception("OnBoarding Failed");
             }
+        }
+
+        private async Task<bool> OnBoardingServerDownload()
+        {
+            var progress = new OnBoardingProgress(Resources.UpdateServersLabel, string.Empty);
+            InnerContainer.Open(progress);
+            _steam.SetTemporaryProgress(progress);
+            if(!SteamWidget.IsConnected)
+                await _steam.Connect();
+            var cts = new CancellationTokenSource();
+            await _steam.UpdateServerInstances(cts);
+            progress.Progress = 1.0;
+            _steam.RestoreProgress();
+            progress.Close();
+            return true;
         }
 
         private async Task<bool> OnBoardingFindConanExile()
