@@ -1,0 +1,16 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:l="clr-namespace:Trebuchet.ViewModels.InnerContainer"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="OnBoardingListSelection" DataType="l:OnBoardingListSelection">
+        <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                <ComboBox ItemsSource="{Binding List}" VerticalAlignment="Center" Margin="0 0 12 0" SelectedItem="{Binding SelectedElement}" Width="250" />
+                <Button Classes="Base Green" Content="{x:Static a:Resources.Validate}" Command="{Binding ConfirmCommand}" />
+            </StackPanel>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

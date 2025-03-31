@@ -134,7 +134,193 @@ namespace Trebuchet.ViewModels
         {
             _appFiles.SetupFolders();
             if (!await OnBoardingCheckTrebuchet()) return;
+            if (!await OnBoardingFirstLaunch()) return;
         }
+
+        private async Task<bool> OnBoardingFirstLaunch()
+        {
+            var configPath = AppConstants.GetConfigPath(_setup.IsTestLive);
+            if(File.Exists(configPath)) return true;
+            if (!await OnBoardingUsageChoice()) return false;
+            _setup.Config.SaveFile();
+            TinyMessengerHub.Default.Publish(new PanelRefreshConfigMessage());
+            return true;
+        }
+
+        private async Task<bool> OnBoardingUsageChoice()
+        {
+            var choice = new OnBoardingBranch(Resources.OnBoardingUsageChoice, Resources.OnBoardingUsageChoiceText)
+                .SetSize<OnBoardingBranch>(750, 400)
+                .AddChoice(Resources.OnBoardingUsageChoicePlayer, Resources.OnBoardingUsageChoicePlayerSub)
+                .AddChoice(Resources.OnBoardingUsageChoiceServer, Resources.OnBoardingUsageChoiceServerSub)
+                .AddChoice(Resources.OnBoardingUsageChoiceModder, Resources.OnBoardingUsageChoiceModderSub);
+            await InnerContainer.OpenAsync(choice);
+            switch (choice.Result)
+            {
+                case 0:
+                    _setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
+                    _setup.Config.ServerInstanceCount = 0;
+                    return await OnBoardingFindConanExile();
+                case 1:
+                    _setup.Config.AutoUpdateStatus = AutoUpdateStatus.CheckForUpdates;
+                    _setup.Config.ServerInstanceCount = 1;
+                    return true;
+                case 2:
+                    _setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
+                    _setup.Config.ServerInstanceCount = 1;
+                    return await OnBoardingFindConanExile();
+                default:
+                    throw new Exception("OnBoarding Failed");
+            }
+        }
+
+        private async Task<bool> OnBoardingFindConanExile()
+        {
+            if (Tools.IsClientInstallValid(_setup.Config.ClientPath))
+                return await OnBoardingApplyConanManagement();
+            
+            var finder = new OnBoardingDirectory(
+                Resources.OnBoardingLocateConan,
+                Resources.OnBoardingLocateConanText,
+                ValidateConanExileLocation)
+                .SetSize<OnBoardingDirectory>(600, 200);
+            await InnerContainer.OpenAsync(finder);
+            if(finder.Result is null) throw new Exception("OnBoarding Failed");
+            _setup.Config.ClientPath = finder.Result.FullName;
+            return await OnBoardingAllowConanManagement();
+        }
+
+        private Validation ValidateConanExileLocation(string path)
+        {
+            if (!Tools.IsClientInstallValid(path))
+                return new Validation(false, Resources.OnBoardingLocateConanError);
+            return new Validation(true, string.Empty);
+        }
+
+        private async Task<bool> OnBoardingAllowConanManagement()
+        {
+            var choice = new OnBoardingBranch(Resources.OnBoardingManageConan, Resources.OnBoardingManageConanText)
+                .SetSize<OnBoardingBranch>(650, 300)
+                .AddChoice(Resources.OnBoardingManageConanNo, Resources.OnBoardingManageConanNoSub)
+                .AddChoice(Resources.OnBoardingManageConanYes, Resources.OnBoardingManageConanYesSub);
+            await InnerContainer.OpenAsync(choice);
+            if(choice.Result < 0) throw new Exception("OnBoarding Failed");
+            _setup.Config.ManageClient = choice.Result == 1;
+            return await OnBoardingApplyConanManagement();
+        }
+
+        private async Task<bool> OnBoardingApplyConanManagement()
+        {
+            var clientDirectory = Path.GetFullPath(_setup.Config.ClientPath);
+            if (!Tools.IsClientInstallValid(clientDirectory)) return false;
+            var savedDir = Path.Combine(clientDirectory, Constants.FolderGameSave);
+            
+            if (!Directory.Exists(savedDir))
+            {
+                if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
+                if(_setup.Config.ManageClient)
+                    Tools.SetupSymboliclink(savedDir, _appFiles.Client.GetPrimaryJunction());
+                else
+                {
+                    Directory.CreateDirectory(savedDir);
+                    if (!_appFiles.Client.ListProfiles().Any())
+                        return true;
+                    var saveName = await OnBoardingChooseClientSave();
+                    await Tools.DeepCopyAsync(_appFiles.Client.GetFolder(saveName), savedDir, CancellationToken.None);
+                }
+                return true;
+            }
+
+            if (JunctionPoint.Exists(savedDir) && !_setup.Config.ManageClient)
+            {
+                if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
+                JunctionPoint.Delete(savedDir);
+                Directory.CreateDirectory(savedDir);
+                if (!_appFiles.Client.ListProfiles().Any())
+                    return true;
+                var saveName = await OnBoardingChooseClientSave();
+                await Tools.DeepCopyAsync(_appFiles.Client.GetFolder(saveName), savedDir, CancellationToken.None);
+                return true;
+            }
+
+            if (!JunctionPoint.Exists(savedDir) && _setup.Config.ManageClient)
+            {
+                if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
+                var saveName = await OnBoardingChooseClientSaveName();
+                await Tools.DeepCopyAsync(savedDir, _appFiles.Client.GetFolder(saveName), CancellationToken.None);
+                Directory.Delete(savedDir, true);
+                Tools.SetupSymboliclink(savedDir, _appFiles.Client.GetPrimaryJunction());
+                return true;
+            }
+
+            if (JunctionPoint.Exists(savedDir))
+            {
+                var path = JunctionPoint.GetTarget(savedDir);
+                if (Path.GetFullPath(path) != Path.GetFullPath(_appFiles.Client.GetPrimaryJunction()))
+                    JunctionPoint.Create(savedDir, _appFiles.Client.GetPrimaryJunction(), true);
+            }
+
+            return true;
+        }
+
+        private async Task<string> OnBoardingChooseClientSave()
+        {
+            var list = _appFiles.Client.ListProfiles().ToList();
+            if (list.Count == 0)
+                return await OnBoardingChooseClientSaveName();
+            var choice = new OnBoardingListSelection(
+                    Resources.OnBoardingGameSave, 
+                    Resources.OnBoardingChooseGameSaveText, 
+                    _appFiles.Client.ListProfiles().ToList())
+                .SetSize<OnBoardingListSelection>(650, 200);
+            await InnerContainer.OpenAsync(choice);
+            if(string.IsNullOrEmpty(choice.SelectedElement)) throw new Exception("OnBoarding Failed");
+            return choice.SelectedElement;
+        }
+
+        private async Task<string> OnBoardingChooseClientSaveName()
+        {
+            var choice = new OnBoardingNameSelection(
+                Resources.OnBoardingGameSave,
+                Resources.OnBoardingNewGameSave,
+                ValidateClientSaveName)
+                .SetSize<OnBoardingNameSelection>(650, 200);
+            await InnerContainer.OpenAsync(choice);
+            if(string.IsNullOrEmpty(choice.SelectedName)) throw new Exception("OnBoarding Failed");
+            return choice.SelectedName;
+        }
+
+        private Validation ValidateClientSaveName(string name)
+        {
+            if (string.IsNullOrEmpty(name)) return new Validation(false, Resources.OnBoardingNewGameSaveEmpty);
+            if(_appFiles.Client.ListProfiles().Any(x => x == name))
+                return new Validation(false, Resources.OnBoardingNewGameSaveError);
+            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                return new Validation(false, Resources.OnBoardingNewGameSaveInvalid);
+            return new Validation(true, string.Empty);
+        }
+        
+        private async Task<bool> OnBoardingElevationRequest(string path, string reason)
+        {
+            var canWriteInTrebuchet = Tools.IsDirectoryWritable(path);
+            var isRoot = Tools.IsProcessElevated();
+            if (!canWriteInTrebuchet)
+            {
+                if(isRoot) 
+                    throw new Exception($"Can't write in {path}, permission denied");
+                var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
+                    .SetSize<OnBoardingBranch>(650, 250)
+                    .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
+                await InnerContainer.OpenAsync(uac);
+                if(uac.Result < 0) throw new Exception("Uac failed");
+                Utils.Utils.RestartProcess(_setup.IsTestLive, true);
+                return false;
+            }
+
+            return true;
+        }
+        
+        #region Onboarding Upgrade
 
 #pragma warning disable CS0612 // Type or member is obsolete
         private async Task<bool> OnBoardingCheckTrebuchet()
@@ -230,9 +416,9 @@ namespace Trebuchet.ViewModels
             var dataDir = Path.Combine(installDir, versionDir);
             if (Directory.Exists(dataDir))
             {
-                await Tools.DeepCopyAsync(dataDir, Path.Combine(AppFiles.GetDataFolder(), versionDir), CancellationToken.None, progress);
+                await Tools.DeepCopyAsync(dataDir, Path.Combine(AppFiles.GetDataDirectory().FullName, versionDir), CancellationToken.None, progress);
                 if(isElevated)
-                    Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(AppFiles.GetDataFolder(), versionDir)));
+                    Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(AppFiles.GetDataDirectory().FullName, versionDir)));
                 Directory.Delete(dataDir, true);
             }
             
@@ -244,25 +430,8 @@ namespace Trebuchet.ViewModels
             progress.Report(1.0);
             return true;
         }
+        
+        #endregion
 
-        private async Task<bool> OnBoardingElevationRequest(string path, string reason)
-        {
-            var canWriteInTrebuchet = Tools.IsDirectoryWritable(path);
-            var isRoot = Tools.IsProcessElevated();
-            if (!canWriteInTrebuchet)
-            {
-                if(isRoot) 
-                    throw new Exception($"Can't write in {path}, permission denied");
-                var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
-                    .SetSize<OnBoardingBranch>(650, 250)
-                    .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
-                await InnerContainer.OpenAsync(uac);
-                if(uac.Result < 0) throw new Exception("Uac failed");
-                Utils.Utils.RestartProcess(_setup.IsTestLive, true);
-                return false;
-            }
-
-            return true;
-        }
     }
 }

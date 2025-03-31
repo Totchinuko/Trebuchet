@@ -296,8 +296,13 @@ public static class Tools
 
     public static bool IsClientInstallValid(Config config)
     {
-        return !string.IsNullOrEmpty(config.ClientPath) &&
-               File.Exists(Path.Combine(config.ClientPath, Constants.FolderGameBinaries, Constants.FileClientBin));
+        return IsClientInstallValid(config.ClientPath);
+    }
+
+    public static bool IsClientInstallValid(string directory)
+    {
+        return !string.IsNullOrEmpty(directory) &&
+               File.Exists(Path.Combine(directory, Constants.FolderGameBinaries, Constants.FileClientBin));
     }
 
     public static bool IsDirectoryWritable(string dirPath, bool throwIfFails = false)
@@ -509,11 +514,6 @@ public static class Tools
         return data;
     }
     
-    public static DirectoryInfo GetCommonAppData()
-    {
-        return typeof(Tools).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
-    }
-
     /// <summary>
     /// Set Everyone Full Control permissions for selected directory
     /// </summary>

@@ -13,6 +13,9 @@
                 <ResourceInclude Source="avares://TrebuchetUtils/Modals/Modals.axaml" />
                 <MergeResourceInclude Source="Templates\EmptyTemplate.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingProgress.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingDirectory.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingListSelection.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingNameSelection.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingChoice.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingBranch.axaml" />
                 <MergeResourceInclude Source="Templates\FieldRow.axaml" />

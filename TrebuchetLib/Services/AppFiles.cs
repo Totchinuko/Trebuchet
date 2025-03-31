@@ -15,12 +15,20 @@ public class AppFiles(AppClientFiles clientFiles, AppServerFiles serverFiles, Ap
         Tools.CreateDir(Server.GetBaseFolder());
         Tools.CreateDir(Mods.GetBaseFolder());
         Tools.CreateDir(Mods.GetWorkshopFolder());
+        Tools.CreateDir(Client.GetEmptyJunction());
+        if(!JunctionPoint.Exists(Client.GetPrimaryJunction()))
+            Tools.SetupSymboliclink(Client.GetPrimaryJunction(), Client.GetEmptyJunction());
 
         return true;
     }
     
-    public static string GetDataFolder()
+    public static DirectoryInfo GetDataDirectory()
     {
-        return typeof(Config).GetStandardFolder(Environment.SpecialFolder.MyDocuments).FullName;
+        return typeof(Config).GetStandardFolder(Environment.SpecialFolder.MyDocuments);
+    }
+    
+    public static DirectoryInfo GetCommonAppDataDirectory()
+    {
+        return typeof(Tools).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
     }
 }

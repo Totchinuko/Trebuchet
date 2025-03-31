@@ -1,0 +1,127 @@
+using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Runtime.CompilerServices;
+using System.Windows.Input;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
+using SteamKit2.GC.Dota.Internal;
+using TrebuchetLib;
+using TrebuchetUtils;
+
+namespace Trebuchet.ViewModels.InnerContainer;
+
+public class OnBoardingDirectory : InnerPopup, INotifyPropertyChanged
+{
+    private readonly Func<string, Validation> _validation;
+    private DirectoryInfo? _result;
+    private bool _isDirectoryValid;
+    private bool _displayError;
+    private string _errorMessage;
+
+    public OnBoardingDirectory(string title, string description, Func<string, Validation> validation) : base("OnBoardingDirectory")
+    {
+        _validation = validation;
+        Title = title;
+        Description = description;
+        var result = _validation(string.Empty);
+        _isDirectoryValid = result.isValid;
+        _errorMessage = result.errorMessage;
+        SearchDirectoryCommand = new SimpleCommand((_) => OnSearchDirectory());
+        ConfirmCommand = new SimpleCommand((_) => Close());
+    }
+
+    public string Title { get; }
+    public string Description { get; }
+
+    public string ErrorMessage
+    {
+        get => _errorMessage;
+        private set => SetField(ref _errorMessage, value);
+    }
+
+    public bool DisplayError
+    {
+        get => _displayError;
+        private set => SetField(ref _displayError, value);
+    }
+
+    public DirectoryInfo? Result
+    {
+        get => _result;
+        private set
+        {
+            if(SetField(ref _result, value))
+                OnPropertyChanged(nameof(ResultPath));
+        }
+    }
+
+    public string ResultPath
+    {
+        get => Result?.FullName ?? string.Empty;
+        set
+        {
+            var result = _validation(value);
+            IsDirectoryValid = result.isValid;
+            ErrorMessage = result.errorMessage;
+            DisplayError = !IsDirectoryValid;
+            if(IsDirectoryValid)
+                Result = new DirectoryInfo(value);
+            else
+                Result = null;
+        }
+    }
+
+    public bool IsDirectoryValid
+    {
+        get => _isDirectoryValid;
+        private set => SetField(ref _isDirectoryValid, value);
+    }
+
+    public ICommand SearchDirectoryCommand { get; }
+    public ICommand ConfirmCommand { get; }
+    
+    private async void OnSearchDirectory()
+    {
+        var defaultFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
+        if(Application.Current is null || Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            throw new Exception("The current application is not a desktop application.");
+        
+        var toplevel = TopLevel.GetTopLevel(desktop.MainWindow);
+        if (toplevel == null) return;
+        var folder = await toplevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
+        {
+            AllowMultiple = false,
+            SuggestedStartLocation = await toplevel.StorageProvider.TryGetFolderFromPathAsync(defaultFolder)
+        });
+
+        if (folder.Count == 0) return;
+        if (!folder[0].Path.IsFile) return;
+        var result = _validation(folder[0].Path.LocalPath);
+        IsDirectoryValid = result.isValid;
+        ErrorMessage = result.errorMessage;
+        DisplayError = !IsDirectoryValid;
+        if(IsDirectoryValid)
+            Result = new DirectoryInfo(folder[0].Path.LocalPath);
+        else
+            Result = null;
+    }
+
+    public event PropertyChangedEventHandler? PropertyChanged;
+
+    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+}

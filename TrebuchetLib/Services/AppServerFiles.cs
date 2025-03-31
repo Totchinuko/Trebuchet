@@ -15,7 +15,7 @@ public class AppServerFiles(AppSetup appSetup)
     /// <returns></returns>
     public string GetFolder(string name)
     {
-        return Path.Combine(AppFiles.GetDataFolder(),
+        return Path.Combine(AppFiles.GetDataDirectory().FullName,
             appSetup.VersionFolder, Constants.FolderServerProfiles, name);
     }
 
@@ -42,7 +42,7 @@ public class AppServerFiles(AppSetup appSetup)
     public string GetBaseInstancePath()
     {
         return Path.Combine(
-            Tools.GetCommonAppData().FullName, 
+            AppFiles.GetCommonAppDataDirectory().FullName, 
             appSetup.VersionFolder, 
             Constants.FolderServerInstances);
     }
@@ -50,7 +50,7 @@ public class AppServerFiles(AppSetup appSetup)
     public string GetBaseInstancePath(bool testlive)
     {
         return Path.Combine(
-            Tools.GetCommonAppData().FullName, 
+            AppFiles.GetCommonAppDataDirectory().FullName, 
             testlive ? Constants.FolderTestLive : Constants.FolderLive, 
             Constants.FolderServerInstances);
     }
@@ -63,7 +63,7 @@ public class AppServerFiles(AppSetup appSetup)
     public string GetIntanceBinary(int instance)
     {
         return Path.Combine(
-            Tools.GetCommonAppData().FullName, 
+            AppFiles.GetCommonAppDataDirectory().FullName, 
             appSetup.VersionFolder, 
             Constants.FolderServerInstances,
             string.Format(Constants.FolderInstancePattern, instance), 
@@ -73,7 +73,7 @@ public class AppServerFiles(AppSetup appSetup)
     public string GetBaseFolder()
     {
         return Path.Combine(
-            AppFiles.GetDataFolder(),
+            AppFiles.GetDataDirectory().FullName,
             appSetup.VersionFolder,
             Constants.FolderServerProfiles);
     }
@@ -98,7 +98,7 @@ public class AppServerFiles(AppSetup appSetup)
     public IEnumerable<string> ListProfiles()
     {
         string folder = Path.Combine(
-            AppFiles.GetDataFolder(), 
+            AppFiles.GetDataDirectory().FullName, 
             appSetup.VersionFolder, 
             Constants.FolderServerProfiles);
         if (!Directory.Exists(folder))
@@ -122,7 +122,7 @@ public class AppServerFiles(AppSetup appSetup)
                 return profileName;
         }
 
-        profileName = Tools.GetFirstDirectoryName(Path.Combine(AppFiles.GetDataFolder(), appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
+        profileName = Tools.GetFirstDirectoryName(Path.Combine(AppFiles.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
         if (!string.IsNullOrEmpty(profileName)) 
             return profileName;
 

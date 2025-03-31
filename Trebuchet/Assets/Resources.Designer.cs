@@ -375,6 +375,152 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Choose which game save need to be copied back into the game files.
+        /// </summary>
+        public static string OnBoardingChooseGameSaveText {
+            get {
+                return ResourceManager.GetString("OnBoardingChooseGameSaveText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game Save.
+        /// </summary>
+        public static string OnBoardingGameSave {
+            get {
+                return ResourceManager.GetString("OnBoardingGameSave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Locate Conan Exiles.
+        /// </summary>
+        public static string OnBoardingLocateConan {
+            get {
+                return ResourceManager.GetString("OnBoardingLocateConan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The folder selected does not contain Conan Exiles.
+        /// </summary>
+        public static string OnBoardingLocateConanError {
+            get {
+                return ResourceManager.GetString("OnBoardingLocateConanError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Indicate to Trebuchet where to find your Conan Exile game.
+        /// </summary>
+        public static string OnBoardingLocateConanText {
+            get {
+                return ResourceManager.GetString("OnBoardingLocateConanText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game Files Management.
+        /// </summary>
+        public static string OnBoardingManageConan {
+            get {
+                return ResourceManager.GetString("OnBoardingManageConan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Leave Game Untouched.
+        /// </summary>
+        public static string OnBoardingManageConanNo {
+            get {
+                return ResourceManager.GetString("OnBoardingManageConanNo", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your files will remain in the Saved directory.
+        /// </summary>
+        public static string OnBoardingManageConanNoSub {
+            get {
+                return ResourceManager.GetString("OnBoardingManageConanNoSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow Trebuchet to handle your game files? If so, Trebuchet will move your game files located in the Saved folder, into your MyDocuments directory. This will allow two things:
+        /// (a) To be able to create as many saves as you wish, and start the game using any of them
+        /// (b) To offer extra settings for the game through Trebuchet.
+        /// </summary>
+        public static string OnBoardingManageConanText {
+            get {
+                return ResourceManager.GetString("OnBoardingManageConanText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to To apply your choice, Trebuchet need permission to write into your game directory.
+        /// </summary>
+        public static string OnBoardingManageConanUac {
+            get {
+                return ResourceManager.GetString("OnBoardingManageConanUac", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow Game Management.
+        /// </summary>
+        public static string OnBoardingManageConanYes {
+            get {
+                return ResourceManager.GetString("OnBoardingManageConanYes", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Files will be moved to MyDocuments.
+        /// </summary>
+        public static string OnBoardingManageConanYesSub {
+            get {
+                return ResourceManager.GetString("OnBoardingManageConanYesSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose a name for the new trebuchet save that will contain your files.
+        /// </summary>
+        public static string OnBoardingNewGameSave {
+            get {
+                return ResourceManager.GetString("OnBoardingNewGameSave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name cannot be empty.
+        /// </summary>
+        public static string OnBoardingNewGameSaveEmpty {
+            get {
+                return ResourceManager.GetString("OnBoardingNewGameSaveEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This name is already taken.
+        /// </summary>
+        public static string OnBoardingNewGameSaveError {
+            get {
+                return ResourceManager.GetString("OnBoardingNewGameSaveError", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This name contain invalid characters.
+        /// </summary>
+        public static string OnBoardingNewGameSaveInvalid {
+            get {
+                return ResourceManager.GetString("OnBoardingNewGameSaveInvalid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A previous installation of Trebuchet has been detected and must be upgraded to function with this version. Once this task is over, previous version of Trebuchet will not work anymore. 
         ///Do you wish to proceed ?.
         /// </summary>
@@ -409,6 +555,78 @@ namespace Trebuchet.Assets {
         public static string OnBoardingUpgradeUac {
             get {
                 return ResourceManager.GetString("OnBoardingUpgradeUac", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trebuchet&apos;s Features.
+        /// </summary>
+        public static string OnBoardingUsageChoice {
+            get {
+                return ResourceManager.GetString("OnBoardingUsageChoice", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Modding.
+        /// </summary>
+        public static string OnBoardingUsageChoiceModder {
+            get {
+                return ResourceManager.GetString("OnBoardingUsageChoiceModder", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This will enable both server and game features for mod testing.
+        /// </summary>
+        public static string OnBoardingUsageChoiceModderSub {
+            get {
+                return ResourceManager.GetString("OnBoardingUsageChoiceModderSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Play Conan Exiles.
+        /// </summary>
+        public static string OnBoardingUsageChoicePlayer {
+            get {
+                return ResourceManager.GetString("OnBoardingUsageChoicePlayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This will disable Trebuchet&apos;s server features.
+        /// </summary>
+        public static string OnBoardingUsageChoicePlayerSub {
+            get {
+                return ResourceManager.GetString("OnBoardingUsageChoicePlayerSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manage Servers.
+        /// </summary>
+        public static string OnBoardingUsageChoiceServer {
+            get {
+                return ResourceManager.GetString("OnBoardingUsageChoiceServer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This will disable Trebuchet&apos;s game features.
+        /// </summary>
+        public static string OnBoardingUsageChoiceServerSub {
+            get {
+                return ResourceManager.GetString("OnBoardingUsageChoiceServerSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please select what usage to intend to make of Trebuchet. This will preconfigure the app with base settings that you can change later if you change your mind..
+        /// </summary>
+        public static string OnBoardingUsageChoiceText {
+            get {
+                return ResourceManager.GetString("OnBoardingUsageChoiceText", resourceCulture);
             }
         }
         
@@ -580,6 +798,15 @@ namespace Trebuchet.Assets {
         public static string Upgrade {
             get {
                 return ResourceManager.GetString("Upgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Validate.
+        /// </summary>
+        public static string Validate {
+            get {
+                return ResourceManager.GetString("Validate", resourceCulture);
             }
         }
         

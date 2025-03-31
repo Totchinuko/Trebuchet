@@ -201,4 +201,81 @@ Do you wish to proceed ?</value>
     <data name="SteamDisconnected" xml:space="preserve">
         <value>Steam is unavailable</value>
     </data>
+    <data name="OnBoardingUsageChoice" xml:space="preserve">
+        <value>Trebuchet's Features</value>
+    </data>
+    <data name="OnBoardingUsageChoiceText" xml:space="preserve">
+        <value>Please select what usage to intend to make of Trebuchet. This will preconfigure the app with base settings that you can change later if you change your mind.</value>
+    </data>
+    <data name="OnBoardingUsageChoicePlayer" xml:space="preserve">
+        <value>Play Conan Exiles</value>
+    </data>
+    <data name="OnBoardingUsageChoicePlayerSub" xml:space="preserve">
+        <value>This will disable Trebuchet's server features</value>
+    </data>
+    <data name="OnBoardingUsageChoiceServer" xml:space="preserve">
+        <value>Manage Servers</value>
+    </data>
+    <data name="OnBoardingUsageChoiceServerSub" xml:space="preserve">
+        <value>This will disable Trebuchet's game features</value>
+    </data>
+    <data name="OnBoardingUsageChoiceModder" xml:space="preserve">
+        <value>Modding</value>
+    </data>
+    <data name="OnBoardingUsageChoiceModderSub" xml:space="preserve">
+        <value>This will enable both server and game features for mod testing</value>
+    </data>
+    <data name="Validate" xml:space="preserve">
+        <value>Validate</value>
+    </data>
+    <data name="OnBoardingLocateConan" xml:space="preserve">
+        <value>Locate Conan Exiles</value>
+    </data>
+    <data name="OnBoardingLocateConanText" xml:space="preserve">
+        <value>Indicate to Trebuchet where to find your Conan Exile game</value>
+    </data>
+    <data name="OnBoardingLocateConanError" xml:space="preserve">
+        <value>The folder selected does not contain Conan Exiles</value>
+    </data>
+    <data name="OnBoardingManageConan" xml:space="preserve">
+        <value>Game Files Management</value>
+    </data>
+    <data name="OnBoardingManageConanText" xml:space="preserve">
+        <value>Allow Trebuchet to handle your game files? If so, Trebuchet will move your game files located in the Saved folder, into your MyDocuments directory. This will allow two things:
+ (a) To be able to create as many saves as you wish, and start the game using any of them
+ (b) To offer extra settings for the game through Trebuchet</value>
+    </data>
+    <data name="OnBoardingManageConanYes" xml:space="preserve">
+        <value>Allow Game Management</value>
+    </data>
+    <data name="OnBoardingManageConanYesSub" xml:space="preserve">
+        <value>Files will be moved to MyDocuments</value>
+    </data>
+    <data name="OnBoardingManageConanNo" xml:space="preserve">
+        <value>Leave Game Untouched</value>
+    </data>
+    <data name="OnBoardingManageConanNoSub" xml:space="preserve">
+        <value>Your files will remain in the Saved directory</value>
+    </data>
+    <data name="OnBoardingManageConanUac" xml:space="preserve">
+        <value>To apply your choice, Trebuchet need permission to write into your game directory</value>
+    </data>
+    <data name="OnBoardingGameSave" xml:space="preserve">
+        <value>Game Save</value>
+    </data>
+    <data name="OnBoardingChooseGameSaveText" xml:space="preserve">
+        <value>Choose which game save need to be copied back into the game files</value>
+    </data>
+    <data name="OnBoardingNewGameSave" xml:space="preserve">
+        <value>Choose a name for the new trebuchet save that will contain your files</value>
+    </data>
+    <data name="OnBoardingNewGameSaveError" xml:space="preserve">
+        <value>This name is already taken</value>
+    </data>
+    <data name="OnBoardingNewGameSaveEmpty" xml:space="preserve">
+        <value>The name cannot be empty</value>
+    </data>
+    <data name="OnBoardingNewGameSaveInvalid" xml:space="preserve">
+        <value>This name contain invalid characters</value>
+    </data>
 </root>
