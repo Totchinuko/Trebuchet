@@ -15,7 +15,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public override bool CanExecute(object? parameter)
         {
-            return _setup.Config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
+            return _setup.Config is { ServerInstanceCount: > 0 };
         }
 
         public override void RefreshPanel()

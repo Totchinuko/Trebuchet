@@ -40,7 +40,7 @@ public class InnerContainer : INotifyPropertyChanged
 
     public void Close()
     {
-        Popup?.Close();
+        Popup?.OnClose();
         Popup = null;
     }
     

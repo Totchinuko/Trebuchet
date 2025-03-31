@@ -13,7 +13,6 @@ namespace Trebuchet.ViewModels.Panels
     {
         private readonly SteamAPI _steamApi;
         private readonly ILogger<SettingsPanel> _logger;
-        private bool _displayedHelp;
 
         public SettingsPanel(AppSetup setup, UIConfig uiConfig, SteamAPI steamApi, ILogger<SettingsPanel> logger) : base(Resources.Settings, string.Empty, "mdi-cog", true)
         {
@@ -30,7 +29,6 @@ namespace Trebuchet.ViewModels.Panels
 
         public override void OnWindowShow()
         {
-            DisplaySetupHelp();
         }
 
         public override void RefreshPanel()
@@ -50,32 +48,6 @@ namespace Trebuchet.ViewModels.Panels
             AppSetup.Config.SaveFile();
             UiConfig.SaveFile();
             UpdateRequiredActions();
-        }
-
-        private async void DisplaySetupHelp()
-        {
-            if (_displayedHelp) return;
-            _displayedHelp = true;
-
-            if (AppSetup.Config.IsInstallPathValid && (Tools.IsClientInstallValid(AppSetup.Config) || Tools.IsServerInstallValid(AppSetup.Config)))
-                return;
-
-            if (!AppSetup.Config.IsInstallPathValid)
-            {
-                ErrorModal modal = new ErrorModal(
-                    Resources.WelcomeInstallPathInvalid,
-                    Resources.WelcomeInstallPathInvalidText);
-                await modal.OpenDialogueAsync();
-            }
-
-            if ((!Tools.IsClientInstallValid(AppSetup.Config) && !Tools.IsServerInstallValid(AppSetup.Config)))
-            {
-                MessageModal modal = new MessageModal(
-                  Resources.WelcomeSettingTutorial,
-                  Resources.WelcomeSettingTutorialText,
-                  250);
-                await modal.OpenDialogueAsync();
-            }
         }
 
         private void LoadPanel()

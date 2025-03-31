@@ -9,7 +9,8 @@ public static class Constants
     public const string FileBuildID = "buildid";
     public const string FileClientBEBin = "ConanSandbox_BE.exe";
     public const string FileClientBin = "ConanSandbox.exe";
-    public const string FileConfig = "settings.json";
+    public const string FileLiveConfig = "settings.live.json";
+    public const string FileTestLiveConfig = "settings.testlive.json";
     public const string FileGeneratedModlist = "modlist.txt";
     public const string FileIniBase = "Engine\\Config\\Base{0}.ini";
     public const string FileIniDefault = "ConanSandbox\\Config\\Default{0}.ini";
@@ -19,7 +20,6 @@ public static class Constants
     public const string FileProfileConfig = "profile.json";
     public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
     public const string FileServerProxyBin = "ConanSandboxServer.exe";
-    public const string FileTrebuchetLaunch = "trebuchet.json";
     public const string FolderClientProfiles = "ClientProfiles";
     public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
     public const string FolderGameSave = "ConanSandbox\\Saved";

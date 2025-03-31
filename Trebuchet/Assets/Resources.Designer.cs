@@ -18,10 +18,10 @@ namespace Trebuchet.Assets {
     // class via a tool like ResGen or Visual Studio.
     // To add or remove a member, edit your .ResX file then rerun ResGen
     // with the /str option, or rebuild your VS project.
-    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "4.0.0.0")]
+    [global::System.CodeDom.Compiler.GeneratedCodeAttribute("System.Resources.Tools.StronglyTypedResourceBuilder", "15.1.0.0")]
     [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
     [global::System.Runtime.CompilerServices.CompilerGeneratedAttribute()]
-    internal class Resources {
+    public class Resources {
         
         private static global::System.Resources.ResourceManager resourceMan;
         
@@ -35,7 +35,7 @@ namespace Trebuchet.Assets {
         ///   Returns the cached ResourceManager instance used by this class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Resources.ResourceManager ResourceManager {
+        public static global::System.Resources.ResourceManager ResourceManager {
             get {
                 if (object.ReferenceEquals(resourceMan, null)) {
                     global::System.Resources.ResourceManager temp = new global::System.Resources.ResourceManager("Trebuchet.Assets.Resources", typeof(Resources).Assembly);
@@ -50,7 +50,7 @@ namespace Trebuchet.Assets {
         ///   resource lookups using this strongly typed resource class.
         /// </summary>
         [global::System.ComponentModel.EditorBrowsableAttribute(global::System.ComponentModel.EditorBrowsableState.Advanced)]
-        internal static global::System.Globalization.CultureInfo Culture {
+        public static global::System.Globalization.CultureInfo Culture {
             get {
                 return resourceCulture;
             }
@@ -62,7 +62,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Already Exists.
         /// </summary>
-        internal static string AlreadyExists {
+        public static string AlreadyExists {
             get {
                 return ResourceManager.GetString("AlreadyExists", resourceCulture);
             }
@@ -71,7 +71,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to This name is already used.
         /// </summary>
-        internal static string AlreadyExistsText {
+        public static string AlreadyExistsText {
             get {
                 return ResourceManager.GetString("AlreadyExistsText", resourceCulture);
             }
@@ -80,7 +80,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Create.
         /// </summary>
-        internal static string Create {
+        public static string Create {
             get {
                 return ResourceManager.GetString("Create", resourceCulture);
             }
@@ -89,7 +89,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Dashboard.
         /// </summary>
-        internal static string Dashboard {
+        public static string Dashboard {
             get {
                 return ResourceManager.GetString("Dashboard", resourceCulture);
             }
@@ -98,7 +98,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Deletion.
         /// </summary>
-        internal static string Deletion {
+        public static string Deletion {
             get {
                 return ResourceManager.GetString("Deletion", resourceCulture);
             }
@@ -107,7 +107,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Do you wish to delete the selected profile {0} ?.
         /// </summary>
-        internal static string DeletionText {
+        public static string DeletionText {
             get {
                 return ResourceManager.GetString("DeletionText", resourceCulture);
             }
@@ -116,7 +116,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Directory does not exists.
         /// </summary>
-        internal static string DirectoryNotFound {
+        public static string DirectoryNotFound {
             get {
                 return ResourceManager.GetString("DirectoryNotFound", resourceCulture);
             }
@@ -125,7 +125,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Duplicate.
         /// </summary>
-        internal static string Duplicate {
+        public static string Duplicate {
             get {
                 return ResourceManager.GetString("Duplicate", resourceCulture);
             }
@@ -134,7 +134,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Error.
         /// </summary>
-        internal static string Error {
+        public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
             }
@@ -143,7 +143,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Found.
         /// </summary>
-        internal static string Found {
+        public static string Found {
             get {
                 return ResourceManager.GetString("Found", resourceCulture);
             }
@@ -152,7 +152,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Game could not be found in this Directory.
         /// </summary>
-        internal static string GameDirectoryInvalidError {
+        public static string GameDirectoryInvalidError {
             get {
                 return ResourceManager.GetString("GameDirectoryInvalidError", resourceCulture);
             }
@@ -161,7 +161,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Game Folder Reset.
         /// </summary>
-        internal static string GameFolderReset {
+        public static string GameFolderReset {
             get {
                 return ResourceManager.GetString("GameFolderReset", resourceCulture);
             }
@@ -170,7 +170,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again..
         /// </summary>
-        internal static string GameFolderResetText {
+        public static string GameFolderResetText {
             get {
                 return ResourceManager.GetString("GameFolderResetText", resourceCulture);
             }
@@ -179,7 +179,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to GameSaves.
         /// </summary>
-        internal static string GameSaves {
+        public static string GameSaves {
             get {
                 return ResourceManager.GetString("GameSaves", resourceCulture);
             }
@@ -188,7 +188,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Saved Data.
         /// </summary>
-        internal static string HandleOriginalSavedDirectory {
+        public static string HandleOriginalSavedDirectory {
             get {
                 return ResourceManager.GetString("HandleOriginalSavedDirectory", resourceCulture);
             }
@@ -197,7 +197,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Your game directory contain saved data from your previous use of the game. In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original.\nDo you wish to continue ?.
         /// </summary>
-        internal static string HandleOriginalSavedDirectoryText {
+        public static string HandleOriginalSavedDirectoryText {
             get {
                 return ResourceManager.GetString("HandleOriginalSavedDirectoryText", resourceCulture);
             }
@@ -206,7 +206,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Install.
         /// </summary>
-        internal static string Install {
+        public static string Install {
             get {
                 return ResourceManager.GetString("Install", resourceCulture);
             }
@@ -215,7 +215,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Install path cannot be in the game Saved folder.
         /// </summary>
-        internal static string InstallPathInGameError {
+        public static string InstallPathInGameError {
             get {
                 return ResourceManager.GetString("InstallPathInGameError", resourceCulture);
             }
@@ -224,7 +224,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Directory is invalid.
         /// </summary>
-        internal static string InvalidDirectory {
+        public static string InvalidDirectory {
             get {
                 return ResourceManager.GetString("InvalidDirectory", resourceCulture);
             }
@@ -233,7 +233,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Invalid Json.
         /// </summary>
-        internal static string InvalidJson {
+        public static string InvalidJson {
             get {
                 return ResourceManager.GetString("InvalidJson", resourceCulture);
             }
@@ -242,7 +242,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Loaded json could not be parsed..
         /// </summary>
-        internal static string InvalidJsonText {
+        public static string InvalidJsonText {
             get {
                 return ResourceManager.GetString("InvalidJsonText", resourceCulture);
             }
@@ -251,7 +251,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Invalid URL.
         /// </summary>
-        internal static string InvalidURL {
+        public static string InvalidURL {
             get {
                 return ResourceManager.GetString("InvalidURL", resourceCulture);
             }
@@ -260,7 +260,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to The steam URL seems to be missing its ID to be valid..
         /// </summary>
-        internal static string InvalidURLText {
+        public static string InvalidURLText {
             get {
                 return ResourceManager.GetString("InvalidURLText", resourceCulture);
             }
@@ -269,7 +269,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Kill.
         /// </summary>
-        internal static string Kill {
+        public static string Kill {
             get {
                 return ResourceManager.GetString("Kill", resourceCulture);
             }
@@ -278,7 +278,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. Do you wish to continue ?.
         /// </summary>
-        internal static string KillText {
+        public static string KillText {
             get {
                 return ResourceManager.GetString("KillText", resourceCulture);
             }
@@ -287,7 +287,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Last Modified.
         /// </summary>
-        internal static string LastModified {
+        public static string LastModified {
             get {
                 return ResourceManager.GetString("LastModified", resourceCulture);
             }
@@ -296,7 +296,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Last Update.
         /// </summary>
-        internal static string LastUpdate {
+        public static string LastUpdate {
             get {
                 return ResourceManager.GetString("LastUpdate", resourceCulture);
             }
@@ -305,7 +305,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Steam Workshop (Live).
         /// </summary>
-        internal static string LiveMod {
+        public static string LiveMod {
             get {
                 return ResourceManager.GetString("LiveMod", resourceCulture);
             }
@@ -314,7 +314,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Loading.
         /// </summary>
-        internal static string Loading {
+        public static string Loading {
             get {
                 return ResourceManager.GetString("Loading", resourceCulture);
             }
@@ -323,25 +323,16 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Local File.
         /// </summary>
-        internal static string LocalMod {
+        public static string LocalMod {
             get {
                 return ResourceManager.GetString("LocalMod", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Log Filter.
-        /// </summary>
-        internal static string LogFilter {
-            get {
-                return ResourceManager.GetString("LogFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Missing.
         /// </summary>
-        internal static string Missing {
+        public static string Missing {
             get {
                 return ResourceManager.GetString("Missing", resourceCulture);
             }
@@ -350,7 +341,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Modlist Name.
         /// </summary>
-        internal static string ModlistName {
+        public static string ModlistName {
             get {
                 return ResourceManager.GetString("ModlistName", resourceCulture);
             }
@@ -359,16 +350,54 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Mods.
         /// </summary>
-        internal static string Mods {
+        public static string Mods {
             get {
                 return ResourceManager.GetString("Mods", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to A previous installation of Trebuchet has been detected and must be upgraded to function with this version. Once this task is over, previous version of Trebuchet will not work anymore. 
+        ///Do you wish to proceed ?.
+        /// </summary>
+        public static string OnBoardingUpgrade {
+            get {
+                return ResourceManager.GetString("OnBoardingUpgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Please wait while your files are being copied.
+        /// </summary>
+        public static string OnBoardingUpgradeCopy {
+            get {
+                return ResourceManager.GetString("OnBoardingUpgradeCopy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to If you do not wish to upgrade now, please close Trebuchet..
+        /// </summary>
+        public static string OnBoardingUpgradeSub {
+            get {
+                return ResourceManager.GetString("OnBoardingUpgradeSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In order to upgrade your installation of Trebuchet, Write permission are needed. 
+        ///With your permission, Trebuchet will restart and request administrative privileges..
+        /// </summary>
+        public static string OnBoardingUpgradeUac {
+            get {
+                return ResourceManager.GetString("OnBoardingUpgradeUac", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Profile Name.
         /// </summary>
-        internal static string ProfileName {
+        public static string ProfileName {
             get {
                 return ResourceManager.GetString("ProfileName", resourceCulture);
             }
@@ -377,7 +406,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Server Consoles.
         /// </summary>
-        internal static string ServerConsoles {
+        public static string ServerConsoles {
             get {
                 return ResourceManager.GetString("ServerConsoles", resourceCulture);
             }
@@ -386,7 +415,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Server failed to start.
         /// </summary>
-        internal static string ServerFailedStart {
+        public static string ServerFailedStart {
             get {
                 return ResourceManager.GetString("ServerFailedStart", resourceCulture);
             }
@@ -395,7 +424,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Server failed to start properly. See the logs for more information..
         /// </summary>
-        internal static string ServerFailedStartText {
+        public static string ServerFailedStartText {
             get {
                 return ResourceManager.GetString("ServerFailedStartText", resourceCulture);
             }
@@ -404,7 +433,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Server Log Filters.
         /// </summary>
-        internal static string ServerLogFilter {
+        public static string ServerLogFilter {
             get {
                 return ResourceManager.GetString("ServerLogFilter", resourceCulture);
             }
@@ -413,7 +442,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Some server instances are not yet installed..
         /// </summary>
-        internal static string ServerNotInstalled {
+        public static string ServerNotInstalled {
             get {
                 return ResourceManager.GetString("ServerNotInstalled", resourceCulture);
             }
@@ -422,7 +451,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Server Saves.
         /// </summary>
-        internal static string ServerSaves {
+        public static string ServerSaves {
             get {
                 return ResourceManager.GetString("ServerSaves", resourceCulture);
             }
@@ -431,7 +460,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Settings.
         /// </summary>
-        internal static string Settings {
+        public static string Settings {
             get {
                 return ResourceManager.GetString("Settings", resourceCulture);
             }
@@ -440,7 +469,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Steam Workshop (TestLive).
         /// </summary>
-        internal static string TestLiveMod {
+        public static string TestLiveMod {
             get {
                 return ResourceManager.GetString("TestLiveMod", resourceCulture);
             }
@@ -449,25 +478,25 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Trebuchet is busy..
         /// </summary>
-        internal static string TrebuchetBusy {
+        public static string TrebuchetBusy {
             get {
                 return ResourceManager.GetString("TrebuchetBusy", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Administrator.
+        ///   Looks up a localized string similar to Write Permission.
         /// </summary>
-        internal static string UACDialog {
+        public static string UACDialog {
             get {
                 return ResourceManager.GetString("UACDialog", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The following folder is protected by administrator rights, Trebuchet need access to manage your game and data. Restart Trebuchet in Admin mode ?\n{0}.
+        ///   Looks up a localized string similar to Trebuchet require administrative rights in order to handle protected files for the following reason(s):.
         /// </summary>
-        internal static string UACDialogText {
+        public static string UACDialogText {
             get {
                 return ResourceManager.GetString("UACDialogText", resourceCulture);
             }
@@ -476,7 +505,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to UpToDate.
         /// </summary>
-        internal static string Up_to_Date {
+        public static string Up_to_Date {
             get {
                 return ResourceManager.GetString("Up to Date", resourceCulture);
             }
@@ -485,7 +514,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Update Available.
         /// </summary>
-        internal static string UpdateAvailable {
+        public static string UpdateAvailable {
             get {
                 return ResourceManager.GetString("UpdateAvailable", resourceCulture);
             }
@@ -494,7 +523,7 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Updating mods.
         /// </summary>
-        internal static string UpdateModsLabel {
+        public static string UpdateModsLabel {
             get {
                 return ResourceManager.GetString("UpdateModsLabel", resourceCulture);
             }
@@ -503,16 +532,25 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Updating servers.
         /// </summary>
-        internal static string UpdateServersLabel {
+        public static string UpdateServersLabel {
             get {
                 return ResourceManager.GetString("UpdateServersLabel", resourceCulture);
             }
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Upgrade.
+        /// </summary>
+        public static string Upgrade {
+            get {
+                return ResourceManager.GetString("Upgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Verifying mod files.
         /// </summary>
-        internal static string VerifyModsLabel {
+        public static string VerifyModsLabel {
             get {
                 return ResourceManager.GetString("VerifyModsLabel", resourceCulture);
             }
@@ -521,45 +559,9 @@ namespace Trebuchet.Assets {
         /// <summary>
         ///   Looks up a localized string similar to Verifying server files.
         /// </summary>
-        internal static string VerifyServersLabel {
+        public static string VerifyServersLabel {
             get {
                 return ResourceManager.GetString("VerifyServersLabel", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Invalid Install Path.
-        /// </summary>
-        internal static string WelcomeInstallPathInvalid {
-            get {
-                return ResourceManager.GetString("WelcomeInstallPathInvalid", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your trebuchet data path is not found. Please choose a new one..
-        /// </summary>
-        internal static string WelcomeInstallPathInvalidText {
-            get {
-                return ResourceManager.GetString("WelcomeInstallPathInvalidText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome.
-        /// </summary>
-        internal static string WelcomeSettingTutorial {
-            get {
-                return ResourceManager.GetString("WelcomeSettingTutorial", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Welcome to Trebuchet.\n\nIn order to use the software for launching your game or servers you need to point the location of your game, or select how many server you wish the launcher to handle, or both.\n\nOther section of the launcher will unlock as you set those settings up..
-        /// </summary>
-        internal static string WelcomeSettingTutorialText {
-            get {
-                return ResourceManager.GetString("WelcomeSettingTutorialText", resourceCulture);
             }
         }
     }

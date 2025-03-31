@@ -1,7 +1,0 @@
-<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:l="clr-namespace:Trebuchet.ViewModels.InnerContainer"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="OnBoarding" DataType="l:OnBoarding">
-        
-    </DataTemplate>
-</ResourceDictionary>

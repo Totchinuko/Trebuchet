@@ -15,7 +15,7 @@ public class AppServerFiles(AppSetup appSetup)
     /// <returns></returns>
     public string GetFolder(string name)
     {
-        return Path.Combine(appSetup.Config.InstallPath,
+        return Path.Combine(AppFiles.GetDataFolder(),
             appSetup.VersionFolder, Constants.FolderServerProfiles, name);
     }
 
@@ -47,6 +47,14 @@ public class AppServerFiles(AppSetup appSetup)
             Constants.FolderServerInstances);
     }
 
+    public string GetBaseInstancePath(bool testlive)
+    {
+        return Path.Combine(
+            Tools.GetCommonAppData().FullName, 
+            testlive ? Constants.FolderTestLive : Constants.FolderLive, 
+            Constants.FolderServerInstances);
+    }
+
     /// <summary>
     /// Get the executable of a server instance.
     /// </summary>
@@ -65,7 +73,7 @@ public class AppServerFiles(AppSetup appSetup)
     public string GetBaseFolder()
     {
         return Path.Combine(
-            appSetup.Config.InstallPath,
+            AppFiles.GetDataFolder(),
             appSetup.VersionFolder,
             Constants.FolderServerProfiles);
     }
@@ -90,7 +98,7 @@ public class AppServerFiles(AppSetup appSetup)
     public IEnumerable<string> ListProfiles()
     {
         string folder = Path.Combine(
-            appSetup.Config.InstallPath, 
+            AppFiles.GetDataFolder(), 
             appSetup.VersionFolder, 
             Constants.FolderServerProfiles);
         if (!Directory.Exists(folder))
@@ -114,7 +122,7 @@ public class AppServerFiles(AppSetup appSetup)
                 return profileName;
         }
 
-        profileName = Tools.GetFirstDirectoryName(Path.Combine(appSetup.Config.InstallPath, appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
+        profileName = Tools.GetFirstDirectoryName(Path.Combine(AppFiles.GetDataFolder(), appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
         if (!string.IsNullOrEmpty(profileName)) 
             return profileName;
 

@@ -1,4 +1,5 @@
-﻿using TrebuchetUtils;
+﻿using System.Text.Json.Serialization;
+using TrebuchetUtils;
 
 namespace TrebuchetLib
 {
@@ -15,7 +16,9 @@ namespace TrebuchetLib
 
         public string ClientPath { get; set; } = string.Empty;
 
-        public string InstallPath { get; set; } = GetDefaultInstallPath();
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Obsolete]
+        public string InstallPath { get; set; } = string.Empty;
 
         public int MaxDownloads { get; set; } = 8;
 
@@ -26,8 +29,6 @@ namespace TrebuchetLib
         public int UpdateCheckInterval { get; set; } = 300;
 
         public bool VerifyAll { get; set; } = false;
-
-        public bool IsInstallPathValid => !string.IsNullOrEmpty(InstallPath) && Directory.Exists(InstallPath);
 
         public static string GetDefaultInstallPath()
         {

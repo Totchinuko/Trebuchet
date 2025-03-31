@@ -1,3 +1,5 @@
+using TrebuchetUtils;
+
 namespace TrebuchetLib.Services;
 
 public class AppFiles(AppClientFiles clientFiles, AppServerFiles serverFiles, AppModlistFiles modListFiles)
@@ -15,5 +17,10 @@ public class AppFiles(AppClientFiles clientFiles, AppServerFiles serverFiles, Ap
         Tools.CreateDir(Mods.GetWorkshopFolder());
 
         return true;
+    }
+    
+    public static string GetDataFolder()
+    {
+        return typeof(Config).GetStandardFolder(Environment.SpecialFolder.MyDocuments).FullName;
     }
 }

@@ -59,7 +59,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public override bool CanExecute(object? parameter)
         {
-            return _setup.Config.IsInstallPathValid && Tools.IsServerInstallValid(_setup.Config);
+            return Tools.IsServerInstallValid(_setup.Config);
         }
 
         public override void RefreshPanel()

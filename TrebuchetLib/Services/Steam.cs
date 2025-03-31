@@ -17,7 +17,6 @@ namespace TrebuchetLib.Services
             _appFiles = appFiles;
             _appSetup = appSetup;
 
-            _appFiles.SetupFolders();
             DebugLog.AddListener(this);
             Util.ConsoleWriteRedirect += OnConsoleWriteRedirect;
             ContentDownloader.Config.RememberPassword = false;

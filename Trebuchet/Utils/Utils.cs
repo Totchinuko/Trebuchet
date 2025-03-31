@@ -42,6 +42,11 @@ namespace Trebuchet.Utils
             if (asAdmin)
                 process.StartInfo.Verb = "runas";
             process.Start();
+            ShutdownDesktopProcess();
+        }
+
+        public static void ShutdownDesktopProcess()
+        {
             if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 desktop.Shutdown();
         }

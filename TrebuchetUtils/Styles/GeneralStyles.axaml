@@ -162,6 +162,11 @@
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="FontSize" Value="22" />
     </Style>
+    <Style Selector="TextBlock.SmallTitle">
+        <Setter Property="Foreground" Value="{DynamicResource TBlue}"/>
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
     <Style Selector="TextBlock.SubText">
         <Setter Property="Foreground" Value="{DynamicResource TSubText}"/>
         <Setter Property="FontWeight" Value="Light"/>
@@ -665,10 +670,8 @@
     </Style>
     
     <!-- Window Inner Contextual --> 
-    <Style Selector="Border.InnerContextual">
-        <Setter Property="Background" Value="{DynamicResource PopupOverlay}" />
+    <Style Selector="Panel.InnerContextual">
         <Setter Property="Opacity" Value="0" />
-        <Setter Property="Padding" Value="30" /> 
         <Setter Property="ZIndex" Value="1" />
         <Setter Property="IsVisible" Value="False" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
@@ -678,6 +681,34 @@
                 <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
             </Transitions>
         </Setter>
+        
+        <Style Selector="^ Border.Overlay">
+            <Setter Property="Background" Value="{DynamicResource PopupOverlay}" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        
+        <Style Selector="^ Border.Blocker">
+            <Setter Property="IsHitTestVisible" Value="True" />
+            <Setter Property="Margin" Value="0 40 0 0" />
+        </Style>
+        
+        <Style Selector="^ Border.Popup">
+            <Setter Property="Background" Value="{DynamicResource TBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Margin" Value="30" />
+            <Setter Property="BoxShadow" Value="2 2 15 0 #FF000000" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="12" />
+            
+            <Style Selector="^ TextBlock">
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            
+            <Style Selector="^ Button">
+                <Setter Property="Padding" Value="12" />
+            </Style>
+        </Style>
         
         <Style Selector="^.Active">
             <Setter Property="Opacity" Value="1.0"/>

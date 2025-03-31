@@ -61,7 +61,7 @@ namespace Trebuchet.ViewModels.Panels
             _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, OnCheckModUpdate);
         }
 
-        public bool CanDisplayServers => _setup.Config is { IsInstallPathValid: true, ServerInstanceCount: > 0 };
+        public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
 
         public ClientInstanceDashboard Client { get; }
 
@@ -81,8 +81,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public override bool CanExecute(object? parameter)
         {
-            return _setup.Config.IsInstallPathValid &&
-                   (Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config));
+            return (Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config));
         }
 
         /// <summary>

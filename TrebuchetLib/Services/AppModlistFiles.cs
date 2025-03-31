@@ -31,7 +31,7 @@ public class AppModlistFiles(AppSetup setup)
         public string GetBaseFolder()
         {
             return Path.Combine(
-                setup.Config.InstallPath, 
+                AppFiles.GetDataFolder(), 
                 setup.VersionFolder, 
                 Constants.FolderModlistProfiles);
         }
@@ -45,7 +45,7 @@ public class AppModlistFiles(AppSetup setup)
 
         public IEnumerable<string> ListProfiles()
         {
-            string folder = Path.Combine(setup.Config.InstallPath, setup.VersionFolder, Constants.FolderModlistProfiles);
+            string folder = Path.Combine(AppFiles.GetDataFolder(), setup.VersionFolder, Constants.FolderModlistProfiles);
             if (!Directory.Exists(folder))
                 yield break;
 
@@ -124,7 +124,7 @@ public class AppModlistFiles(AppSetup setup)
                     return profileName;
             }
 
-            profileName = Tools.GetFirstFileName(Path.Combine(setup.Config.InstallPath, setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
+            profileName = Tools.GetFirstFileName(Path.Combine(AppFiles.GetDataFolder(), setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
             if (!string.IsNullOrEmpty(profileName)) 
                 return profileName;
 

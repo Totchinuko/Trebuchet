@@ -11,6 +11,10 @@
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://TrebuchetUtils/Converters/Converters.axaml" />
                 <ResourceInclude Source="avares://TrebuchetUtils/Modals/Modals.axaml" />
+                <MergeResourceInclude Source="Templates\EmptyTemplate.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingProgress.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingChoice.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingBranch.axaml" />
                 <MergeResourceInclude Source="Templates\FieldRow.axaml" />
                 <MergeResourceInclude Source="Templates\TitleField.axaml" />
                 <MergeResourceInclude Source="Templates\CPUAffinityField.axaml" />

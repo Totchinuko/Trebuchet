@@ -107,7 +107,7 @@ public partial class App : Application, IApplication
     private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult)
     {
         services.AddSingleton<AppSetup>(
-            new AppSetup(Config.LoadConfig(AppConstants.GetConfigPath()), testlive, catapult));
+            new AppSetup(Config.LoadConfig(AppConstants.GetConfigPath(testlive)), testlive, catapult));
         services.AddSingleton<UIConfig>(UIConfig.LoadConfig(AppConstants.GetUIConfigPath()));
         
         var logger = new LoggerConfiguration()

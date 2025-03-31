@@ -37,23 +37,11 @@
     <data name="GameDirectoryInvalidError" xml:space="preserve">
     <value>Game could not be found in this Directory</value>
     </data>
-    <data name="WelcomeInstallPathInvalidText" xml:space="preserve">
-    <value>Your trebuchet data path is not found. Please choose a new one.</value>
-    </data>
-    <data name="WelcomeInstallPathInvalid" xml:space="preserve">
-    <value>Invalid Install Path</value>
-    </data>
-    <data name="WelcomeSettingTutorialText" xml:space="preserve">
-    <value>Welcome to Trebuchet.\n\nIn order to use the software for launching your game or servers you need to point the location of your game, or select how many server you wish the launcher to handle, or both.\n\nOther section of the launcher will unlock as you set those settings up.</value>
-    </data>
-    <data name="WelcomeSettingTutorial" xml:space="preserve">
-    <value>Welcome</value>
-    </data>
     <data name="UACDialogText" xml:space="preserve">
-    <value>The following folder is protected by administrator rights, Trebuchet need access to manage your game and data. Restart Trebuchet in Admin mode ?\n{0}</value>
+        <value>Trebuchet require administrative rights in order to handle protected files for the following reason(s):</value>
     </data>
     <data name="UACDialog" xml:space="preserve">
-    <value>Administrator</value>
+        <value>Write Permission</value>
     </data>
     <data name="Kill" xml:space="preserve">
     <value>Kill</value>
@@ -163,9 +151,6 @@
     <data name="Dashboard" xml:space="preserve">
         <value>Dashboard</value>
     </data>
-    <data name="LogFilter" xml:space="preserve">
-        <value>Log Filter</value>
-    </data>
     <data name="Mods" xml:space="preserve">
         <value>Mods</value>
     </data>
@@ -186,5 +171,22 @@
     </data>
     <data name="ServerLogFilter" xml:space="preserve">
         <value>Server Log Filters</value>
+    </data>
+    <data name="OnBoardingUpgradeUac" xml:space="preserve">
+        <value>In order to upgrade your installation of Trebuchet, Write permission are needed. 
+With your permission, Trebuchet will restart and request administrative privileges.</value>
+    </data>
+    <data name="OnBoardingUpgrade" xml:space="preserve">
+        <value>A previous installation of Trebuchet has been detected and must be upgraded to function with this version. Once this task is over, previous version of Trebuchet will not work anymore. 
+Do you wish to proceed ?</value>
+    </data>
+    <data name="Upgrade" xml:space="preserve">
+        <value>Upgrade</value>
+    </data>
+    <data name="OnBoardingUpgradeSub" xml:space="preserve">
+        <value>If you do not wish to upgrade now, please close Trebuchet.</value>
+    </data>
+    <data name="OnBoardingUpgradeCopy" xml:space="preserve">
+        <value>Please wait while your files are being copied</value>
     </data>
 </root>

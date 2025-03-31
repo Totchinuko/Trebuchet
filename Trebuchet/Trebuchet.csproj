@@ -29,17 +29,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-        <CopyLocalFilesOutputGroupOutput Include="maps.json" />
+        <None Include="maps.json">
+          <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
         <EmbeddedResource Include="AppSettings.json.sample" />
         <EmbeddedResource Include="AppSettings.json" />
-        <EmbeddedResource Update="Assets\Resources.resx">
-          <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
-        <EmbeddedResource Update="Assets\Resources.resx">
-          <Generator>ResXFileCodeGenerator</Generator>
-          <LastGenOutput>Resources.Designer.cs</LastGenOutput>
-        </EmbeddedResource>
         <EmbeddedResource Include="ViewModels\Panels\ClientProfilePanel.Fields.json" />
         <EmbeddedResource Include="ViewModels\Panels\ServerProfilePanel.Fields.json" />
         <EmbeddedResource Include="ViewModels\Panels\SettingsPanel.Fields.json" />
@@ -76,15 +70,16 @@
       <None Update="Assets\maps.json">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </None>
-      <None Remove="AppIcon.ico" />
     </ItemGroup>
 
     <ItemGroup>
-      <Compile Update="Assets\Resources.Designer.cs">
-        <DesignTime>True</DesignTime>
-        <AutoGen>True</AutoGen>
-        <DependentUpon>Resources.resx</DependentUpon>
-      </Compile>
+        <EmbeddedResource Update="Assets\Resources.resx">
+            <Generator>PublicResXFileCodeGenerator</Generator>
+            <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+        </EmbeddedResource>
+    </ItemGroup>
+    
+    <ItemGroup>
       <Compile Update="Assets\Resources.Designer.cs">
         <DesignTime>True</DesignTime>
         <AutoGen>True</AutoGen>

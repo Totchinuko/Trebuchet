@@ -2,12 +2,18 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
+using System.IO;
 using System.Linq;
+using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using Trebuchet.Assets;
 using Trebuchet.Messages;
+using Trebuchet.Utils;
 using Trebuchet.ViewModels.Panels;
 using Trebuchet.ViewModels.InnerContainer;
+using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
 
@@ -15,6 +21,8 @@ namespace Trebuchet.ViewModels
 {
     public sealed class TrebuchetApp : INotifyPropertyChanged, ITinyRecipient<PanelActivateMessage>
     {
+        private readonly AppSetup _setup;
+        private readonly AppFiles _appFiles;
         private readonly Launcher _launcher;
         private readonly Steam _steam;
         private Panel _activePanel;
@@ -22,12 +30,16 @@ namespace Trebuchet.ViewModels
         private DispatcherTimer _timer;
 
         public TrebuchetApp(
+            AppSetup setup,
+            AppFiles appFiles,
             Launcher launcher, 
             Steam steam, 
             SteamWidget steamWidget,
             InnerContainer.InnerContainer innerContainer,
             IEnumerable<Panel> panels)
         {
+            _setup = setup;
+            _appFiles = appFiles;
             _launcher = launcher;
             _steam = steam;
             _panels = panels.ToList();
@@ -42,6 +54,8 @@ namespace Trebuchet.ViewModels
             
             _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnTimerTick);
             _timer.Start();
+            
+            OnBoardingActions();
         }
 
         private async void OnTimerTick(object? sender, EventArgs e)
@@ -116,38 +130,123 @@ namespace Trebuchet.ViewModels
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
         }
 
-        //todo: improve write access
-        // private bool WriteAccessCheck()
-        // {
-        //     if (Trebuchet.Utils.Utils.ValidateInstallDirectory(_trebuchet.Config.ResolvedInstallPath, out string _) && !Tools.ValidateDirectoryUac(_trebuchet.Config.ResolvedInstallPath))
-        //     {
-        //         Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
-        //         return false;
-        //     }
-        //     if (Trebuchet.Utils.Utils.ValidateGameDirectory(_trebuchet.Config.ClientPath, out string _) && !Tools.ValidateDirectoryUac(_trebuchet.Config.ClientPath))
-        //     {
-        //         Utils.Utils.RestartProcess(_trebuchet.Config.IsTestLive, true);
-        //         return false;
-        //     }
-        //     return true;
-        // }
-        
-        
-        // public async void Receive(UACPromptRequest message)
-        // {
-        //     QuestionModal modal = new(
-        //         App.GetAppText("UACDialog_Title"),
-        //         App.GetAppText("UACDialog", message.Directory)
-        //         );
-        //     await modal.OpenDialogueAsync();
-        //
-        //     if (modal.Result)
-        //     {
-        //         Utils.Utils.RestartProcess(_setup.IsTestLive, true);
-        //         message.Reply(true);
-        //     }
-        //     else
-        //         message.Reply(false);
-        // }
+        private async void OnBoardingActions()
+        {
+            _appFiles.SetupFolders();
+            if (!await OnBoardingCheckTrebuchet()) return;
+        }
+
+#pragma warning disable CS0612 // Type or member is obsolete
+        private async Task<bool> OnBoardingCheckTrebuchet()
+        {
+            // Check old versions of trebuchet for upgrade path
+            string configLive = "Live.Config.json";
+            string configTestlive = "TestLive.Config.json";
+            var trebuchetDir = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory);
+            configLive = Path.Combine(trebuchetDir, configLive);
+            configTestlive = Path.Combine(trebuchetDir, configTestlive);
+
+            if (File.Exists(configLive) || File.Exists(configTestlive))
+            {
+                var upgrade = new OnBoardingBranch(Resources.Upgrade, Resources.OnBoardingUpgrade)
+                    .SetSize<OnBoardingBranch>(650, 250)
+                    .AddChoice(Resources.Upgrade, Resources.OnBoardingUpgradeSub);
+                await InnerContainer.OpenAsync(upgrade);
+                if(upgrade.Result < 0) throw new Exception("OnBoardingUpgrade failed");
+
+                if (!await OnBoardingUacRequest(trebuchetDir, Resources.OnBoardingUpgradeUac)) return false;
+
+                var progress = new OnBoardingProgress(Resources.Upgrade, Resources.OnBoardingUpgradeCopy);
+                InnerContainer.Open(progress);
+
+                var configJson = await File.ReadAllTextAsync(configLive);
+                var configuration = JsonSerializer.Deserialize<Config>(configJson);
+                if (configuration is not null)
+                {
+                    if (!await OnBoardingUpgradeTrebuchet(configuration.InstallPath, false, progress)) return false;
+                    configuration.InstallPath = string.Empty;
+                    configJson = JsonSerializer.Serialize(configuration);
+                    await File.WriteAllTextAsync(AppConstants.GetConfigPath(false), configJson);
+                }
+                File.Delete(configLive);
+                
+                configJson = await File.ReadAllTextAsync(configTestlive);
+                configuration = JsonSerializer.Deserialize<Config>(configJson);
+                if (configuration is not null)
+                {
+                    if(!await OnBoardingUpgradeTrebuchet(configuration.InstallPath, true, progress)) return false;
+                    configuration.InstallPath = string.Empty;
+                    configJson = JsonSerializer.Serialize(configuration);
+                    await File.WriteAllTextAsync(AppConstants.GetConfigPath(true), configJson);
+                }
+                File.Delete(configTestlive);
+                
+                Utils.Utils.RestartProcess(_setup.IsTestLive, false);
+                return false;
+            }
+            
+            return true;
+        }
+#pragma warning restore CS0612 // Type or member is obsolete
+
+        private async Task<bool> OnBoardingUpgradeTrebuchet(string installDir, bool testlive, IProgress<double> progress)
+        {
+            string appDir = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
+            installDir = installDir.Replace("%APP_DIRECTORY%", appDir); 
+            if(string.IsNullOrEmpty(installDir)) return true;
+            if(!Directory.Exists(installDir)) return true;
+            if (!await OnBoardingUacRequest(installDir, Resources.OnBoardingUpgradeUac)) return false;
+            
+            progress.Report(0.0);
+            var versionDir = testlive ? Constants.FolderTestLive : Constants.FolderLive;
+            var workshopDir = Path.Combine(installDir, Constants.FolderWorkshop);
+            if (Directory.Exists(workshopDir))
+            {
+                await Tools.DeepCopyAsync(workshopDir, _appFiles.Mods.GetWorkshopFolder(), CancellationToken.None, progress);
+                Directory.Delete(workshopDir, true);
+            }
+            
+            progress.Report(0.0);
+            var instanceDir = Path.Combine(installDir, versionDir, Constants.FolderServerInstances);
+            if (Directory.Exists(instanceDir))
+            {
+                Tools.RemoveAllJunctions(instanceDir); 
+                await Tools.DeepCopyAsync(instanceDir, _appFiles.Server.GetBaseInstancePath(testlive), CancellationToken.None, progress);
+                Directory.Delete(instanceDir, true);
+            }
+            progress.Report(0.0);
+            
+            var dataDir = Path.Combine(installDir, versionDir);
+            if (Directory.Exists(dataDir))
+            {
+                await Tools.DeepCopyAsync(dataDir, Path.Combine(AppFiles.GetDataFolder(), versionDir), CancellationToken.None, progress);
+                Directory.Delete(dataDir, true);
+            }
+            
+            progress.Report(0.0);
+            var logsDir = Path.Combine(installDir, "Logs");
+            if(Directory.Exists(logsDir))
+                Directory.Delete(logsDir, true);
+            
+            progress.Report(1.0);
+            return true;
+        }
+
+        private async Task<bool> OnBoardingUacRequest(string path, string reason)
+        {
+            var canWriteInTrebuchet = Tools.ValidateDirectoryUac(path);
+            if (!canWriteInTrebuchet)
+            {
+                var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
+                    .SetSize<OnBoardingBranch>(650, 250)
+                    .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
+                await InnerContainer.OpenAsync(uac);
+                if(uac.Result < 0) throw new Exception("Uac failed");
+                Utils.Utils.RestartProcess(_setup.IsTestLive, true);
+                return false;
+            }
+
+            return true;
+        }
     }
 }

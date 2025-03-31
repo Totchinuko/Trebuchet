@@ -6,13 +6,13 @@ public class AppClientFiles(AppSetup appSetup)
 {
     public string GetFolder(string name)
     {
-        return Path.Combine(appSetup.Config.InstallPath, appSetup.VersionFolder, Constants.FolderClientProfiles, name);
+        return Path.Combine(AppFiles.GetDataFolder(), appSetup.VersionFolder, Constants.FolderClientProfiles, name);
     }
 
     public string GetBaseFolder()
     {
         return Path.Combine(
-            appSetup.Config.InstallPath,
+            AppFiles.GetDataFolder(),
             appSetup.VersionFolder,
             Constants.FolderClientProfiles);
     }
@@ -27,7 +27,7 @@ public class AppClientFiles(AppSetup appSetup)
     
     public IEnumerable<string> ListProfiles()
     {
-        string folder = Path.Combine(appSetup.Config.InstallPath, appSetup.VersionFolder, Constants.FolderClientProfiles);
+        string folder = Path.Combine(AppFiles.GetDataFolder(), appSetup.VersionFolder, Constants.FolderClientProfiles);
         if (!Directory.Exists(folder))
             yield break;
 
@@ -45,7 +45,7 @@ public class AppClientFiles(AppSetup appSetup)
                 return profileName;
         }
 
-        profileName = Tools.GetFirstDirectoryName(Path.Combine(appSetup.Config.InstallPath, appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
+        profileName = Tools.GetFirstDirectoryName(Path.Combine(AppFiles.GetDataFolder(), appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
         if (!string.IsNullOrEmpty(profileName)) 
             return profileName;
 

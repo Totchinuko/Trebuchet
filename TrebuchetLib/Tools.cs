@@ -35,13 +35,15 @@ public static class Tools
             Directory.CreateDirectory(dirToCreate);
         }
 
-        foreach (string newPath in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
+        var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
+        foreach (string newPath in files)
         {
             File.Copy(newPath, newPath.Replace(directory, destinationDir), true);
+            
         }
     }
 
-    public static async Task DeepCopyAsync(string directory, string destinationDir, CancellationToken token)
+    public static async Task DeepCopyAsync(string directory, string destinationDir, CancellationToken token, IProgress<double>? progress = null)
     {
         foreach (string dir in Directory.GetDirectories(directory, "*", SearchOption.AllDirectories))
         {
@@ -49,12 +51,24 @@ public static class Tools
             Directory.CreateDirectory(dirToCreate);
         }
 
-        foreach (string newPath in Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories))
+        var files = Directory.GetFiles(directory, "*.*", SearchOption.AllDirectories);
+        int count = 0;
+        foreach (string newPath in files)
         {
             if (token.IsCancellationRequested)
                 return;
-
             await Task.Run(() => File.Copy(newPath, newPath.Replace(directory, destinationDir), true));
+            count++;
+            progress?.Report((double)count / files.Length);
+        }
+    }
+
+    public static void RemoveAllJunctions(string directory)
+    {
+        foreach (string dir in Directory.GetDirectories(directory, "*", SearchOption.AllDirectories))
+        {
+            if (Directory.Exists(dir) && File.GetAttributes(dir).HasFlag(FileAttributes.ReparsePoint))
+                RemoveSymboliclink(dir);
         }
     }
 
@@ -286,6 +300,8 @@ public static class Tools
     {
         try
         {
+            if(!Directory.Exists(dirPath))
+                Directory.CreateDirectory(dirPath);
             using (FileStream fs = File.Create(
                        Path.Combine(
                            dirPath,
@@ -439,7 +455,6 @@ public static class Tools
 
     public static bool ValidateDirectoryUac(string directory)
     {
-        if (!Directory.Exists(directory)) return false;
         return IsDirectoryWritable(directory, false);
     }
 

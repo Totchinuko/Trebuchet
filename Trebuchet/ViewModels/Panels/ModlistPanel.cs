@@ -142,7 +142,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public override bool CanExecute(object? parameter)
         {
-            return _setup.Config.IsInstallPathValid;
+            return true;
         }
 
         public override void Execute(object? parameter)
@@ -602,8 +602,6 @@ namespace Trebuchet.ViewModels.Panels
             }
 
             var path = Path.Combine(_appFiles.Mods.GetWorkshopFolder());
-            if (string.IsNullOrWhiteSpace(_setup.Config.InstallPath) ||
-                !Directory.Exists(_setup.Config.InstallPath)) return;
             if (!Directory.Exists(path))
                 Tools.CreateDir(path);
 
