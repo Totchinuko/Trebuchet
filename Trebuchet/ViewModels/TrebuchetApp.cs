@@ -70,7 +70,7 @@ namespace Trebuchet.ViewModels
             _timer.Stop();
             await _launcher.Tick();
             foreach (var panel in _panels)
-                panel.Tick();
+                await panel.Tick();
             _timer.Start();
         }
 

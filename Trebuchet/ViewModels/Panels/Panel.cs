@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Threading.Tasks;
 using System.Windows.Input;
 using Trebuchet.Messages;
 using TrebuchetUtils;
@@ -59,8 +60,11 @@ namespace Trebuchet.ViewModels.Panels
         public virtual void RefreshPanel()
         {
         }
-        
-        public virtual void Tick() {}
+
+        public virtual Task Tick()
+        {
+            return Task.CompletedTask;
+        }
 
         public virtual void PanelDisplayed()
         {

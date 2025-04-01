@@ -1,4 +1,5 @@
-﻿using TrebuchetLib.Processes;
+﻿using System.Threading.Tasks;
+using TrebuchetLib.Processes;
 
 namespace Trebuchet.ViewModels
 {
@@ -16,7 +17,7 @@ namespace Trebuchet.ViewModels
 
         void StartStats(IConanProcess details);
 
-        void Tick();
+        Task Tick();
 
         void StopStats();
     }

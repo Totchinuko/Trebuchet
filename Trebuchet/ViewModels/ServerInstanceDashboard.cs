@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
@@ -121,7 +122,7 @@ namespace Trebuchet.ViewModels
             set => SetField(ref _updateNeeded, value);
         }
 
-        public void ProcessRefresh(IConanProcess? process)
+        public async Task ProcessRefresh(IConanProcess? process)
         {
             var state = process?.State ?? ProcessState.STOPPED;
             if (_lastState.IsRunning() && !state.IsRunning())
@@ -135,7 +136,7 @@ namespace Trebuchet.ViewModels
                 ProcessStats.SetDetails(process);
 
             _lastState = state;
-            ProcessStats.Tick();
+            await ProcessStats.Tick();
         }
 
         private void OnClose(object? obj)

@@ -243,7 +243,7 @@ public static class Tools
         return ProcessData.Empty;
     }
 
-    public static IEnumerable<ProcessData> GetProcessesWithName(string processName)
+    public static Task<List<ProcessData>> GetProcessesWithName(string processName)
     {
         if(OperatingSystem.IsWindows())
             return GetProcessesWithNameWindows(processName);
@@ -253,20 +253,23 @@ public static class Tools
     }
 
     [SupportedOSPlatform("windows")]
-    private static IEnumerable<ProcessData> GetProcessesWithNameWindows(string processName)
+    private static async Task<List<ProcessData>> GetProcessesWithNameWindows(string processName)
     {
-        var query = $"Select * From Win32_Process Where Name='{processName}'";
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
-        ManagementObjectCollection processList = searcher.Get();
+        return await Task.Run(() =>
+        {
+            var query = $"Select * From Win32_Process Where Name='{processName}'";
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
+            ManagementObjectCollection processList = searcher.Get();
 
-        return processList.EnumerateData();
+            return processList.EnumerateData().ToList();
+        });
     }
 
     [SupportedOSPlatform("linux")]
-    private static IEnumerable<ProcessData> GetProcessesWithNameLinux(string processName)
+    private static Task<List<ProcessData>> GetProcessesWithNameLinux(string processName)
     {
         // TODO: Linux process discovery
-        yield break;
+        throw new NotImplementedException();
     }
         
     [SupportedOSPlatform("linux")]
@@ -331,10 +334,11 @@ public static class Tools
         }
     }
 
-    public static bool IsProcessRunning(string filename)
+    public static async Task<bool> IsProcessRunning(string filename)
     {
         if (!File.Exists(filename)) return false;
-        foreach (var processData in GetProcessesWithName(Path.GetFileName(filename)))
+        var processList = await GetProcessesWithName(Path.GetFileName(filename));
+        foreach (var processData in processList)
         {
             if (processData.filename.Replace("/", "\\").ToLower() == filename.Replace("/", "\\").ToLower())
                 return true;

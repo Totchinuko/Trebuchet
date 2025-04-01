@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
+using System.Threading.Tasks;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
@@ -108,7 +109,7 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
         set => SetField(ref _updateNeeded, value);
     }
 
-    public void ProcessRefresh(IConanProcess? process)
+    public async Task ProcessRefresh(IConanProcess? process)
     {
         var state = process?.State ?? ProcessState.STOPPED;
         if (_lastState.IsRunning() && !state.IsRunning())
@@ -122,7 +123,7 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
             ProcessStats.SetDetails(process);
 
         _lastState = state;
-        ProcessStats.Tick();
+        await ProcessStats.Tick();
     }
 
     private void OnBattleEyeLaunched(object? obj)

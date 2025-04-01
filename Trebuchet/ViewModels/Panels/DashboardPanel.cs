@@ -264,11 +264,11 @@ namespace Trebuchet.ViewModels.Panels
             return Instances[instance];
         }
 
-        public override void Tick()
+        public override async Task Tick()
         {
-            Client.ProcessRefresh(_launcher.GetClientProcess());
+            await Client.ProcessRefresh(_launcher.GetClientProcess());
             foreach (var instance in _launcher.GetServerProcesses())
-                Instances[instance.Instance].ProcessRefresh(instance);
+                await Instances[instance.Instance].ProcessRefresh(instance);
         }
 
         private async void Initialize()

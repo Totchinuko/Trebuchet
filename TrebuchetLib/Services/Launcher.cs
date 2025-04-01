@@ -101,7 +101,7 @@ public class Launcher : IDisposable
         var target = ProcessData.Empty;
         while (target.IsEmpty && !parent.HasExited)
         {
-            target = Tools.GetProcessesWithName(Constants.FileClientBin).FirstOrDefault();
+            target = (await Tools.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
             await Task.Delay(50);
         }
 
@@ -293,7 +293,7 @@ public class Launcher : IDisposable
 
     public async Task Tick()
     {
-        FindExistingClient();
+        await FindExistingClient();
         await FindExistingServers();
 
         if(_conanClientProcess is not null)
@@ -302,9 +302,9 @@ public class Launcher : IDisposable
             await process.RefreshAsync();
     }
 
-    private void FindExistingClient()
+    private async Task FindExistingClient()
     {
-        var data = Tools.GetProcessesWithName(Constants.FileClientBin).FirstOrDefault();
+        var data = (await Tools.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
 
         if (_conanClientProcess != null) return;
         if (data.IsEmpty) return;
@@ -316,7 +316,7 @@ public class Launcher : IDisposable
 
     private async Task FindExistingServers()
     {
-        var processes = Tools.GetProcessesWithName(Constants.FileServerBin);
+        var processes = await Tools.GetProcessesWithName(Constants.FileServerBin);
         foreach (var p in processes)
         {
             if (!_appFiles.Server.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;

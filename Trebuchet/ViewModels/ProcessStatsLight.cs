@@ -65,7 +65,7 @@ namespace Trebuchet.ViewModels
             OnPropertyChanged(nameof(ProcessStatus));
         }
         
-        public async void Tick()
+        public async Task Tick()
         {
             if (!Running) return;
 
