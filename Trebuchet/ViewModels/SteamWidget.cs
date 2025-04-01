@@ -97,11 +97,18 @@ namespace Trebuchet.ViewModels
                 SetDescription(string.Empty);
                 _timer.Stop();
                 _progress = 0;
-                OnPropertyChanged(nameof(Description));
-                OnPropertyChanged(nameof(IsLoading));
-                OnPropertyChanged(nameof(Progress));
-                OnPropertyChanged(nameof(IsIndeterminate));
             }
+            else
+            {
+                SetDescription(message.Type.Label);
+                _timer.Start();
+                _progress = 0;
+            }
+            
+            OnPropertyChanged(nameof(Description));
+            OnPropertyChanged(nameof(IsLoading));
+            OnPropertyChanged(nameof(Progress));
+            OnPropertyChanged(nameof(IsIndeterminate));
         }
 
         public void Report(double value)

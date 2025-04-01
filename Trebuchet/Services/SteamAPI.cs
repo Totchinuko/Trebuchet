@@ -64,7 +64,6 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
     public async Task UpdateMods(List<ulong> list)
     {
         var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateModsLabel));
-        
         await steam.UpdateMods(list, task.Cts);
         task.Release();
     }

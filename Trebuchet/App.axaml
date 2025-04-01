@@ -19,6 +19,7 @@
                 <MergeResourceInclude Source="Templates\OnBoardingNameSelection.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingChoice.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingBranch.axaml" />
+                <MergeResourceInclude Source="Templates\WorkshopSearchResult.axaml" />
                 <MergeResourceInclude Source="Templates\FieldRow.axaml" />
                 <MergeResourceInclude Source="Templates\TitleField.axaml" />
                 <MergeResourceInclude Source="Templates\CPUAffinityField.axaml" />
@@ -76,5 +77,6 @@
         <StaticResource ResourceKey="OnBoardingProgress" />
         <StaticResource ResourceKey="OnBoardingListSelection" />
         <StaticResource ResourceKey="OnBoardingNameSelection" />
+        <StaticResource ResourceKey="WorkshopSearchResult" />
     </Application.DataTemplates>
 </Application>

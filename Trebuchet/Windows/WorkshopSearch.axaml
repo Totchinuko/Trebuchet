@@ -19,24 +19,12 @@
         x:DataType="vm:WorkshopSearchViewModel"
         UseLayoutRounding="True">
     <Border x:Name="MainBorder">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <controls:WindowTitlebar
-                x:Name="TitleBar"
-                Title="Workshop Search"
-            />
+        <Grid RowDefinitions="Auto,*">
+            <controls:WindowTitlebar x:Name="TitleBar" Title="Workshop Search" />
             <Border Grid.Row="1" Padding="12">
                 <Grid x:Name="WindowContent" Margin="0,12,0,0" RowDefinitions="auto,auto,*" ColumnDefinitions="4*,3*">
                     <Border Classes="Panel" CornerRadius="3" HorizontalAlignment="Stretch" Padding="8">
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="auto" />
-                                <ColumnDefinition Width="auto" />
-                            </Grid.ColumnDefinitions>
+                        <Grid ColumnDefinitions="*,Auto,Auto">
                             <TextBox VerticalContentAlignment="Center" Classes="AutoFocus" Name="SearchField" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0" VerticalAlignment="Center" Height="25" KeyDown="TextBox_KeyDown" />
                             <Button Command="{Binding SearchCommand}" Grid.Column="1" Margin="0,0,12,0" Classes="Base Blue">
                                 <i:Icon Value="mdi-magnify" Classes="Normal"/>
@@ -46,60 +34,18 @@
                     </Border>
                     <ProgressBar Grid.Row="1" Grid.Column="0" Margin="0 3" IsVisible="{Binding IsLoading}" IsIndeterminate="True" HorizontalAlignment="Stretch"  />
                     <Border Padding="0,12,0,0" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
-                        <Grid>
+                        <Panel>
                             <ScrollViewer>
                                 <ItemsControl ItemsSource="{Binding SearchResults}" x:Name="ResultList" IsVisible="{Binding SearchResults}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>
-                                            <StackPanel Orientation="Vertical" />
+                                            <VirtualizingStackPanel Orientation="Vertical" />
                                         </ItemsPanelTemplate>
                                     </ItemsControl.ItemsPanel>
-                                    <ItemsControl.ItemTemplate>
-                                        <DataTemplate>
-                                            <Border Classes="Panel" Padding="8" CornerRadius="3" Margin="3">
-                                                <Grid>
-                                                    <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="auto" />
-                                                        <ColumnDefinition Width="*" />
-                                                    </Grid.ColumnDefinitions>
-                                                    <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,12,0">
-                                                        <Image Width="150" Source="{Binding PreviewUrl, Mode=OneWay}" Margin="0,0,0,12" />
-                                                        <Button Classes="Base Green"
-                                                                HorizontalAlignment="Right"
-                                                                Command="{Binding $parent[vm:WorkshopSearchViewModel].AddModCommand}"
-                                                                CommandParameter="{Binding .}"
-                                                                Padding="8">
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <i:Icon Value="mdi-plus-box" Classes="Normal" Margin="0,0,6,0" />
-                                                                <TextBlock Text="Add to Mod List" />
-                                                            </StackPanel>
-                                                        </Button>
-                                                    </StackPanel>
-                                                    <StackPanel Orientation="Vertical" Grid.Column="1">
-                                                        <TextBlock TextWrapping="Wrap" Margin="0,0,3,0" FontSize="16">
-                                                            <Run Text="{Binding Title, Mode=OneWay}" /><Run Text=" By " /><Run Text="{Binding Creator, Mode=OneWay}" />
-                                                        </TextBlock>
-                                                        <TextBlock Classes="SubText">
-                                                            <Run Text="Last Update: " />
-                                                            <Run Text="{Binding LastUpdateReadable, Mode=OneWay}" />
-                                                            <Run Foreground="{DynamicResource TGreenDim}" Text=" +" />
-                                                            <Run Foreground="{DynamicResource TGreenDim}" Text="{Binding VoteUp, Mode=OneWay}" />
-                                                            <Run Foreground="{DynamicResource TRedDim}" Text=" -" />
-                                                            <Run Foreground="{DynamicResource TRedDim}" Text="{Binding VoteDown, Mode=OneWay}" />
-                                                            <Run Foreground="{DynamicResource TRedDim}" Text=" " />
-                                                            <Run Text="{Binding Subs, Mode=OneWay}" />
-                                                            <Run Text=" Subscriptions" />
-                                                        </TextBlock>
-                                                        <TextBlock Classes="SubText" TextWrapping="Wrap" Text="{Binding ShortDescription, Mode=OneWay}" />
-                                                    </StackPanel>
-                                                </Grid>
-                                            </Border>
-                                        </DataTemplate>
-                                    </ItemsControl.ItemTemplate>
                                 </ItemsControl>
                             </ScrollViewer>
                             <TextBlock Text="No results found" FontSize="14" IsVisible="{Binding !#ResultList.IsVisible}"/>
-                        </Grid>
+                        </Panel>
                     </Border>
                 </Grid>
             </Border>

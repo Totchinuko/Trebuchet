@@ -757,15 +757,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to UpToDate.
-        /// </summary>
-        public static string Up_to_Date {
-            get {
-                return ResourceManager.GetString("Up to Date", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Update Available.
         /// </summary>
         public static string UpdateAvailable {
@@ -798,6 +789,15 @@ namespace Trebuchet.Assets {
         public static string Upgrade {
             get {
                 return ResourceManager.GetString("Upgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Up to Date.
+        /// </summary>
+        public static string UpToDate {
+            get {
+                return ResourceManager.GetString("UpToDate", resourceCulture);
             }
         }
         

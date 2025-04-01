@@ -1,0 +1,45 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="WorkshopSearchResult" DataType="vm:WorkshopSearchResult">
+        <Border Classes="Panel" Padding="8" CornerRadius="3" Margin="3">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,12,0">
+                    <Image Width="150" Source="{Binding PreviewUrl, Mode=OneWay}" Margin="0,0,0,12" />
+                    <Button Classes="Base Green"
+                            HorizontalAlignment="Right"
+                            Command="{Binding AddModCommand}"
+                            CommandParameter="{Binding .}"
+                            Padding="8">
+                        <StackPanel Orientation="Horizontal">
+                            <i:Icon Value="mdi-plus-box" Classes="Normal" Margin="0,0,6,0" />
+                            <TextBlock Text="Add to Mod List" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+                <StackPanel Orientation="Vertical" Grid.Column="1">
+                    <TextBlock TextWrapping="Wrap" Margin="0,0,3,0" FontSize="16">
+                        <Run Text="{Binding Title, Mode=OneWay}" /><Run Text=" By " /><Run Text="{Binding Creator, Mode=OneWay}" />
+                    </TextBlock>
+                    <TextBlock Classes="SubText">
+                        <Run Text="Last Update: " />
+                        <Run Text="{Binding LastUpdateReadable, Mode=OneWay}" />
+                        <Run Foreground="{DynamicResource TGreenDim}" Text=" +" />
+                        <Run Foreground="{DynamicResource TGreenDim}" Text="{Binding VoteUp, Mode=OneWay}" />
+                        <Run Foreground="{DynamicResource TRedDim}" Text=" -" />
+                        <Run Foreground="{DynamicResource TRedDim}" Text="{Binding VoteDown, Mode=OneWay}" />
+                        <Run Foreground="{DynamicResource TRedDim}" Text=" " />
+                        <Run Text="{Binding Subs, Mode=OneWay}" />
+                        <Run Text=" Subscriptions" />
+                    </TextBlock>
+                    <TextBlock Classes="SubText" TextWrapping="Wrap" Text="{Binding ShortDescription, Mode=OneWay}" />
+                </StackPanel>
+            </Grid>
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>

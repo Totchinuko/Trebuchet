@@ -11,44 +11,46 @@ namespace Trebuchet.Services.TaskBlocker
     {
         private class BlockedTask(SemaphoreSlim semaphore, CancellationTokenSource cts, IBlockedTaskType type) : IBlockedTask
         {
-            public SemaphoreSlim Semaphore => semaphore;
-            public CancellationTokenSource Cts => cts;
-            public IBlockedTaskType Type => type;
-            public event EventHandler? OperationReleased;
+            public SemaphoreSlim Semaphore { get; } = semaphore;
+            public CancellationTokenSource Cts { get; } = cts;
+            public IBlockedTaskType Type { get; } = type;
+            public event EventHandler<BlockedTask>? OperationReleased;
             public void Release()
             {
-                OperationReleased?.Invoke(this, EventArgs.Empty);
+                OperationReleased?.Invoke(this, this);
             }
         }
         
         private Dictionary<Type, BlockedTask> _tasks = [];
 
-        public async Task<IBlockedTask> EnterAsync<T>(T operation, int cancelAfterSec = 0) where T : IBlockedTaskType
+        public async Task<IBlockedTask> EnterAsync(IBlockedTaskType operation, int cancelAfterSec = 0)
         {
             if (HasCancellableTasks(operation))
                 throw new OperationCanceledException();
             if (!_tasks.TryGetValue(operation.GetType(), out BlockedTask? task))
             {
-                task = new BlockedTask(new SemaphoreSlim(1, 1), new CancellationTokenSource(cancelAfterSec * 1000), operation);
-                task.OperationReleased += (_, _) => Release<T>();
+                task = CreateTask(operation, cancelAfterSec);
+                task.OperationReleased += (_, t) => Release(t);
             }
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _tasks[operation.GetType()] = task;
+            OnTaskSourceChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
             return task;
         }
         
-        public async Task<IBlockedTask> EnterSingleAsync<T>(T operation, int cancelAfterSec = 0) where T : IBlockedTaskType
+        public async Task<IBlockedTask> EnterSingleAsync(IBlockedTaskType operation, int cancelAfterSec = 0)
         {
             if (HasCancellableTasks(operation))
                 throw new OperationCanceledException();
             if(_tasks.ContainsKey(operation.GetType()))
                 throw new OperationCanceledException();
-            
-            var task = new BlockedTask(new SemaphoreSlim(1, 1), new CancellationTokenSource(cancelAfterSec * 1000), operation);
-            task.OperationReleased += (_, _) => Release<T>();
+
+            var task = CreateTask(operation, cancelAfterSec);
+            task.OperationReleased += (_, t) => Release(t);
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _tasks[operation.GetType()] = task;
+            OnTaskSourceChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
             return task;
         }
@@ -65,15 +67,28 @@ namespace Trebuchet.Services.TaskBlocker
         {
             return _tasks.ContainsKey(typeof(T));
         }
-        
-        private void Release<T>() where T : IBlockedTaskType
+
+        private BlockedTask CreateTask(IBlockedTaskType operation, int cancelTimer)
         {
-            if (_tasks.TryGetValue(typeof(T), out var source))
+            if(cancelTimer > 0)
+                return new BlockedTask(
+                    new SemaphoreSlim(1, 1), 
+                    new CancellationTokenSource(cancelTimer * 1000),
+                    operation);
+            return new BlockedTask(
+                new SemaphoreSlim(1, 1), 
+                new CancellationTokenSource(),
+                operation);
+        }
+        
+        private void Release(BlockedTask task)
+        {
+            if (_tasks.TryGetValue(task.Type.GetType(), out var source))
             {
                 source.Cts.Dispose();
                 source.Semaphore.Release();
                 source.Semaphore.Dispose();
-                _tasks.Remove(typeof(T));
+                _tasks.Remove(task.Type.GetType());
                 OnTaskSourceChanged(source.Type, false);
             }
         }

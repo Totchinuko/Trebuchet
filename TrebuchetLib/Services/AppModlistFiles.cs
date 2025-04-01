@@ -71,7 +71,7 @@ public class AppModlistFiles(AppSetup setup)
             );
         }
 
-        public bool ResolveMod(uint appID, ref string mod)
+        private bool ResolveMod(uint appID, ref string mod)
         {
             string file = mod;
             if (long.TryParse(mod, out _))
@@ -97,11 +97,18 @@ public class AppModlistFiles(AppSetup setup)
         
         public bool ResolveMod(ref string mod)
         {
-            if (ResolveMod(Constants.AppIDLiveClient, ref mod))
-                return true;
-            else if (ResolveMod(Constants.AppIDTestLiveClient, ref mod))
-                return true;
-            return false;
+            try
+            {
+                if (ResolveMod(Constants.AppIDLiveClient, ref mod))
+                    return true;
+                if (ResolveMod(Constants.AppIDTestLiveClient, ref mod))
+                    return true;
+                return false;
+            }
+            catch
+            {
+                return false;
+            }
         }
         
         public IEnumerable<string> GetResolvedModlist(IEnumerable<string> modlist)

@@ -133,8 +133,8 @@
     <data name="Found" xml:space="preserve">
         <value>Found</value>
     </data>
-    <data name="Up to Date" xml:space="preserve">
-        <value>UpToDate</value>
+    <data name="UpToDate" xml:space="preserve">
+        <value>Up to Date</value>
     </data>
     <data name="UpdateAvailable" xml:space="preserve">
         <value>Update Available</value>

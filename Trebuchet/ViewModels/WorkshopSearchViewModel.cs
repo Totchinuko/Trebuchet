@@ -1,10 +1,12 @@
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Input;
+using SteamKit2.Internal;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using SteamWorksWebAPI.Response;
@@ -16,7 +18,7 @@ namespace Trebuchet.ViewModels;
 
 public class WorkshopSearchViewModel : INotifyPropertyChanged
 {
-    private List<WorkshopSearchResult> _searchResults = [];
+    private ObservableCollection<WorkshopSearchResult> _searchResults = [];
     private bool _testLiveWorkshop;
     private string _searchTerm = string.Empty;
     private readonly AppSettings _appSettings;
@@ -26,19 +28,16 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
     {
         _appSettings = appSettings;
         SearchCommand = new SimpleCommand((_) => OnSearch());
-        AddModCommand = new SimpleCommand(OnModAdded);
     }
 
     public event EventHandler<WorkshopSearchResult>? ModAdded;
 
-    public List<WorkshopSearchResult> SearchResults
+    public ObservableCollection<WorkshopSearchResult> SearchResults
     {
         get => _searchResults;
         set => SetField(ref _searchResults, value);
     }
     
-    public ICommand AddModCommand { get; }
-
     public ICommand SearchCommand { get; }
 
     public bool TestLiveWorkshop
@@ -86,17 +85,31 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
         };
 
         var files = await PublishedFileService.QueryFiles(query, CancellationToken.None);
-        SearchResults = files.Total == 0
-            ? []
-            : files.PublishedFileDetails.Select(file => new WorkshopSearchResult(file)).ToList();
+        if (files.Total > 0)
+        {
+            SearchResults.Clear();
+            foreach (var file in files.PublishedFileDetails)
+            {
+                var searchResult = new WorkshopSearchResult(file);
+                searchResult.ModAdded += OnModAdded;
+                SearchResults.Add(searchResult);
+            }
+        }
+        else
+            SearchResults.Clear();
 
         var summary = new GetPlayerSummariesResponse();
         if (files.Total != 0)
         {
             var playerQuery = new GetPlayerSummariesQuery(_appSettings.ApiKey, SearchResults.Select(r => r.CreatorId));
             summary = await SteamUser.GetPlayerSummaries(playerQuery, CancellationToken.None);
-        } 
-        if (summary.Players.Length == 0) return;
+        }
+
+        if (summary.Players.Length == 0)
+        {
+            IsLoading = false;
+            return;
+        }
 
         var enumeration =
             from result in SearchResults
@@ -109,10 +122,9 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
     
     public event PropertyChangedEventHandler? PropertyChanged;
     
-    protected virtual void OnModAdded(object? obj)
+    protected virtual void OnModAdded(object? sender, WorkshopSearchResult result)
     {
-        if (obj is WorkshopSearchResult value)
-            ModAdded?.Invoke(this, value);
+        ModAdded?.Invoke(this, result);
     }
 
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)

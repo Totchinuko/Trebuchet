@@ -1,7 +1,9 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Windows.Input;
 using Avalonia.Media;
 using Humanizer;
+using SteamKit2.GC.Dota.Internal;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Response;
 using TrebuchetLib;
@@ -24,9 +26,12 @@ namespace Trebuchet.ViewModels
             VoteDown = result.VoteData.VotesDown;
             VoteUp = result.VoteData.VotesUp;
             DownloadCover(result.PreviewUrl);
+            AddModCommand = new SimpleCommand((_) => ModAdded?.Invoke(this, this));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
+
+        public event EventHandler<WorkshopSearchResult>? ModAdded;
 
         public uint AppId { get; }
 
@@ -55,6 +60,8 @@ namespace Trebuchet.ViewModels
         public uint VoteDown { get; }
 
         public uint VoteUp { get; }
+        
+        public ICommand AddModCommand { get; }
 
         public void SetCreator(PlayerSummary summary)
         {

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -32,7 +33,6 @@ namespace Trebuchet.ViewModels.Panels
     public class ModlistPanel : Panel, ITinyRecipient<ModListMessages>
     {
         private readonly SteamAPI _steamApi;
-        private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private readonly WorkshopSearchViewModel _workshop;
@@ -47,7 +47,6 @@ namespace Trebuchet.ViewModels.Panels
 
         public ModlistPanel(
             SteamAPI steamApi, 
-            AppSetup setup,
             AppFiles appFiles,
             UIConfig uiConfig, 
             WorkshopSearchViewModel workshop,
@@ -55,7 +54,6 @@ namespace Trebuchet.ViewModels.Panels
             base(Resources.Mods, "mdi-toy-brick", false)
         {
             _steamApi = steamApi;
-            _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             _workshop = workshop;
@@ -176,6 +174,7 @@ namespace Trebuchet.ViewModels.Panels
             try
             {
                 await _steamApi.UpdateMods(mods);
+                await LoadManifests();
             }
             catch (TrebException tex)
             {
@@ -184,14 +183,14 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
         
-        public void AddModFromWorkshop(WorkshopSearchResult mod)
+        public async void AddModFromWorkshop(WorkshopSearchResult mod)
         {
             if (_modlist.Any(x => x.IsPublished && x.PublishedFileId == mod.PublishedFileId)) return;
             var path = mod.PublishedFileId.ToString();
             _appFiles.Mods.ResolveMod(ref path);
             var file = new ModFile(mod, path);
             _modlist.Add(file);
-            LoadManifests();
+            await LoadManifests();
         }
 
         private async void FetchJsonList(UriBuilder builder)
@@ -239,7 +238,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private async void LoadManifests()
+        private async Task LoadManifests()
         {
             try
             {
@@ -259,7 +258,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private void LoadModlist()
+        private async void LoadModlist()
         {
             _modlist.CollectionChanged -= OnModlistCollectionChanged;
             _modlist.Clear();
@@ -276,7 +275,7 @@ namespace Trebuchet.ViewModels.Panels
 
             _modlist.CollectionChanged += OnModlistCollectionChanged;
             OnPropertyChanged(nameof(Modlist));
-            LoadManifests();
+            await LoadManifests();
         }
 
         [MemberNotNull("_profile")]
@@ -460,10 +459,10 @@ namespace Trebuchet.ViewModels.Panels
 
         private void OnModFileChanged(object sender, FileSystemEventArgs e)
         {
-            if (!_appFiles.Mods.TryParseDirectory2ModID(e.FullPath, out var id)) return;
-
+            var fullPath = e.FullPath;
             Dispatcher.UIThread.Invoke(() =>
             {
+                if (!_appFiles.Mods.TryParseDirectory2ModID(fullPath, out var id)) return;
                 foreach (var file in _modlist.Where(file => file.PublishedFileId == id))
                 {
                     var path = file.PublishedFileId.ToString();
@@ -575,16 +574,6 @@ namespace Trebuchet.ViewModels.Panels
             _uiConfig.CurrentModlistProfile = _selectedModlist;
             _uiConfig.SaveFile();
             LoadProfile();
-        }
-
-        private void RefreshModFileStatus()
-        {
-            foreach (var file in _modlist)
-            {
-                var path = file.PublishedFileId.ToString();
-                _appFiles.Mods.ResolveMod(ref path);
-                file.RefreshFile(path);
-            }
         }
 
         private void RefreshProfiles()

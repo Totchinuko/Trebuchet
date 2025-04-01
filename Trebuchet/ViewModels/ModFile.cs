@@ -154,7 +154,7 @@ namespace Trebuchet.ViewModels
         {
             if (!_infos.Exists) return Resources.Missing;
             if (PublishedFileId == 0) return Resources.Found;
-            if (!_needUpdate) return Resources.Up_to_Date;
+            if (!_needUpdate) return Resources.UpToDate;
             //if (_lastUpdate < _infos.LastWriteTimeUtc) return "Up to Date";
             //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return "Corrupted";
             return Resources.UpdateAvailable;
