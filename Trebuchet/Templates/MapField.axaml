@@ -1,19 +1,23 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:controls="clr-namespace:Trebuchet.Controls"
+                    xmlns:c="clr-namespace:Trebuchet.Controls"
                     xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
     <DataTemplate x:Key="MapField" x:DataType="settingFields:MapField">
-        <Grid HorizontalAlignment="Left">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" MaxWidth="400" MinWidth="300" />
-                <ColumnDefinition Width="auto" />
-            </Grid.ColumnDefinitions>
-            <TextBox VerticalAlignment="Center"
-                     Height="25"
-                     VerticalContentAlignment="Center"
-                     Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        <c:FieldRowControl>
+            <c:FieldRowControl.FieldContent>
+                <Grid HorizontalAlignment="Left">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" MaxWidth="400" MinWidth="300" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox VerticalAlignment="Center"
+                             Height="25"
+                             VerticalContentAlignment="Center"
+                             Text="{Binding Value, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
     
-            <controls:MapList SelectedMap="{Binding Value, Mode=TwoWay}" Margin="3,0" VerticalAlignment="Center" Grid.Column="1" />
-        </Grid>
+                    <c:MapList SelectedMap="{Binding Value, Mode=TwoWay}" Margin="3,0" VerticalAlignment="Center" Grid.Column="1" />
+                </Grid>
+            </c:FieldRowControl.FieldContent>
+        </c:FieldRowControl>
     </DataTemplate>
 </ResourceDictionary>

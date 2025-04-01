@@ -1,13 +1,17 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:controls="clr-namespace:Trebuchet.Controls"
+                    xmlns:c="clr-namespace:Trebuchet.Controls"
                     xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
     <DataTemplate x:Key="FloatField" x:DataType="settingFields:FloatField">
-        <Border Height="38" Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
-            <controls:FloatBox VerticalAlignment="Center"
-                             MinValue="{Binding Minimum}"
-                             MaxValue="{Binding Maximum}"
-                             Value="{Binding Value, Mode=TwoWay}" />
-        </Border>
+        <c:FieldRowControl>
+            <c:FieldRowControl.FieldContent>
+                <Border Height="38" Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
+                    <c:FloatBox VerticalAlignment="Center"
+                                       MinValue="{Binding Minimum}"
+                                       MaxValue="{Binding Maximum}"
+                                       Value="{Binding Value, Mode=TwoWay}" />
+                </Border>
+            </c:FieldRowControl.FieldContent>
+        </c:FieldRowControl>
     </DataTemplate>
 </ResourceDictionary>

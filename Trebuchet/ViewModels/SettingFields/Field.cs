@@ -40,22 +40,6 @@ namespace Trebuchet.ViewModels.SettingFields
         }
 
         private static readonly JsonSerializerOptions Options = new();
-
-        public IDataTemplate Template
-        {
-            get
-            {
-                if (Application.Current == null) throw new Exception("Application.Current is null");
-
-                if (Application.Current.Resources.TryGetResource(_template, Application.Current.ActualThemeVariant,
-                        out var resource) && resource is IDataTemplate template1)
-                {
-                    return template1;
-                }
-
-                throw new Exception($"Template {_template} not found");
-            }
-        }
         
         public abstract bool IsDefault { get; }
 
@@ -80,8 +64,6 @@ namespace Trebuchet.ViewModels.SettingFields
         public string Property { get; set; } = string.Empty;
 
         public bool RefreshApp { get; set; } = false;
-
-        public virtual bool UseFieldRow => true;
 
         public event PropertyChangedEventHandler? PropertyChanged;
 
