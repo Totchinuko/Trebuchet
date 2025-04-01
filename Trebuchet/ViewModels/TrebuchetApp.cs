@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -57,7 +58,6 @@ namespace Trebuchet.ViewModels
 
             OrderPanels(_panels);
             _activePanel = BottomPanels.First(x => x.CanExecute(null));
-            _activePanel.Active = true;
             
             _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnTimerTick);
             _timer.Start();
@@ -85,7 +85,7 @@ namespace Trebuchet.ViewModels
             {
                 _uiConfig.FoldedMenu = value;
                 _uiConfig.SaveFile();
-                OnPropertyChanged(nameof(FoldedMenu));
+                OnPropertyChanged();
                 OnPropertyChanged(nameof(ColumnWith));
             }
         }
@@ -104,7 +104,7 @@ namespace Trebuchet.ViewModels
                 _activePanel = value;
                 _activePanel.Active = true;
                 _activePanel.PanelDisplayed();
-                OnPropertyChanged(nameof(ActivePanel));
+                OnPropertyChanged();
             }
         }
 
@@ -149,9 +149,17 @@ namespace Trebuchet.ViewModels
             }
         }
 
-        private void OnPropertyChanged(string property)
+        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
         {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(property));
+            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+        }
+
+        private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+        {
+            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+            field = value;
+            OnPropertyChanged(propertyName);
+            return true;
         }
 
         private async void OnBoardingActions()
@@ -159,6 +167,8 @@ namespace Trebuchet.ViewModels
             _appFiles.SetupFolders();
             if (!await OnBoardingCheckTrebuchet()) return;
             if (!await OnBoardingFirstLaunch()) return;
+            _activePanel.Active = true;
+            _activePanel.PanelDisplayed();
         }
 
         private async Task<bool> OnBoardingFirstLaunch()

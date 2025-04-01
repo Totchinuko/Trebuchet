@@ -103,12 +103,25 @@ namespace Trebuchet.ViewModels.Panels
             CreateInstancesIfNeeded();
             RefreshClientSelection();
             RefreshServerSelection();
+            RefreshDashboards();
             await CheckModUpdates();
         }
 
         public override void RefreshPanel()
         {
             OnCanExecuteChanged();
+            RefreshDashboards();
+        }
+
+        public void RefreshDashboards()
+        {
+            Client.CanUseDashboard = Tools.IsClientInstallValid(_setup.Config);
+            int installedCount = _steamApi.GetInstalledServerInstanceCount();
+            foreach (var instance in Instances)
+            {
+                instance.CanUseDashboard = _setup.Config.ServerInstanceCount > instance.Instance &&
+                                           installedCount > instance.Instance;
+            }
         }
 
         /// <summary>
