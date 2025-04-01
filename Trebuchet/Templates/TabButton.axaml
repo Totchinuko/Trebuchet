@@ -4,8 +4,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="TabButtonTemplate" x:DataType="panels:Panel">
-        <Button Margin="0,3,0,3"
-                Classes="Base Blue TabLeft Heavy"
+        <Button Classes="Base Blue TabLeft Heavy"
                 Padding="6 8"
                 HorizontalAlignment="Stretch"
                 Classes.Sneak="{Binding !Active}"

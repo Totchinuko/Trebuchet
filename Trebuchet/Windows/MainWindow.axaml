@@ -54,27 +54,23 @@
                             <RowDefinition Height="*" />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
-                        <Button Classes="Base TabLeft" Classes.Sneak="{Binding !FoldedMenu}" Classes.Colored="{Binding FoldedMenu}" Command="{Binding ToggleFoldedCommand}" Margin="0 0 0 12">
+                        <Button Classes="Base TabLeft" Classes.Sneak="{Binding !FoldedMenu}" Classes.Colored="{Binding FoldedMenu}" Command="{Binding ToggleFoldedCommand}" Margin="0 0 0 6">
                             <i:Icon Value="mdi-view-list" Classes="Normal" />
                         </Button>
-                        <StackPanel Grid.Row="1">
-                            <ItemsControl ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                            </ItemsControl>
-                        </StackPanel>
-                        <StackPanel Grid.Row="2">
-                            <ItemsControl ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
-                                <ItemsControl.ItemsPanel>
-                                    <ItemsPanelTemplate>
-                                        <StackPanel />
-                                    </ItemsPanelTemplate>
-                                </ItemsControl.ItemsPanel>
-                            </ItemsControl>
-                        </StackPanel>
+                        <ItemsControl Grid.Row="1" ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                        <ItemsControl Grid.Row="2" ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
                     </Grid>
                     <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
                         <ContentControl Content="{Binding ActivePanel}" />
