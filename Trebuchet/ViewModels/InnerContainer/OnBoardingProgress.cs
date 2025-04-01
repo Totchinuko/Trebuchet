@@ -11,15 +11,17 @@ public class OnBoardingProgress : InnerPopup, INotifyPropertyChanged, IProgress<
 {
     private double _progress = 0;
 
-    public OnBoardingProgress(string title, string description) : base()
+    public OnBoardingProgress(string title, string description, double maxValue = 1.0) : base()
     {
         Title = title;
         Description = description;
+        MaxValue = maxValue;
         SetSize<OnBoardingProgress>(650, 250);
     }
 
     public string Title { get; }
     public string Description { get; }
+    public double MaxValue { get; }
 
     public double Progress
     {

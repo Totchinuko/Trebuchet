@@ -108,7 +108,7 @@ namespace Trebuchet.ViewModels
         {
             lock (_progressLock)
             {
-                _progress = Math.Clamp(value, 0, 100);
+                _progress = Math.Clamp(value, 0, 1);
             }
         }
 
