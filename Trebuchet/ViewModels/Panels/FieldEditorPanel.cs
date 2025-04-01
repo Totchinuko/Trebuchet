@@ -6,8 +6,8 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public abstract class FieldEditorPanel(string label, string template, string iconPath, bool bottom) : 
-        Panel(label, string.IsNullOrEmpty(template) ? "FieldEditor" : template, iconPath, bottom)
+    public abstract class FieldEditorPanel(string label, string iconPath, bool bottom) : 
+        Panel(label, iconPath, bottom)
     {
         public List<Field> Fields { get; set; } = [];
 

@@ -17,7 +17,7 @@ public class OnBoardingNameSelection : InnerPopup, INotifyPropertyChanged
     private bool _isValid;
     private string _errorMessage;
 
-    public OnBoardingNameSelection(string title, string description, Func<string, Validation> validation) : base("OnBoardingNameSelection")
+    public OnBoardingNameSelection(string title, string description, Func<string, Validation> validation) : base()
     {
         _validation = validation;
         Title = title;

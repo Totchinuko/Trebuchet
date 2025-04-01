@@ -32,7 +32,7 @@ namespace Trebuchet.ViewModels.Panels
             SteamAPI steamApi,
             Launcher launcher, 
             ILogger<DashboardPanel> logger) : 
-            base(Resources.Dashboard, "Dashboard", "mdi-view-dashboard", true)
+            base(Resources.Dashboard, "mdi-view-dashboard", true)
         {
             _setup = setup;
             _uiConfig = uiConfig;

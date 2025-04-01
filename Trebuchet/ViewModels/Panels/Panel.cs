@@ -14,7 +14,7 @@ namespace Trebuchet.ViewModels.Panels
         
         private bool _active;
 
-        public Panel(string label, string template, string iconPath, bool bottom) : base(label, template)
+        public Panel(string label, string iconPath, bool bottom) : base(label)
         {
             IconPath = iconPath;
             BottomPosition = bottom;

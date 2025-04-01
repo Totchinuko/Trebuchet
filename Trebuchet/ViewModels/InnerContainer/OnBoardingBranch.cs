@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingBranch(string title, string description) : InnerPopup("OnBoardingBranch")
+public class OnBoardingBranch(string title, string description) : InnerPopup()
 {
     public ObservableCollection<OnBoardingChoice> Choices { get; } = [];
     public string Title { get; } = title;

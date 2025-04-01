@@ -30,7 +30,7 @@ namespace Trebuchet.ViewModels.Panels
         private int _selectedConsole;
         private List<IConanServerProcess> _servers = [];
 
-        public RconPanel(AppSetup setup, Launcher launcher) : base(Resources.ServerConsoles, "RconPanel", "mdi-console-line", false)
+        public RconPanel(AppSetup setup, Launcher launcher) : base(Resources.ServerConsoles, "mdi-console-line", false)
         {
             _setup = setup;
             _launcher = launcher;

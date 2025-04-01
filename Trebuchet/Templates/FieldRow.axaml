@@ -29,11 +29,7 @@
                             </TextBlock>
                         </StackPanel>
                     </Border>
-                    <ContentControl IsEnabled="{Binding IsEnabled}" Classes.Disabled="{Binding $self.IsEnabled}" Content="{Binding}">
-                        <ContentControl.ContentTemplate>
-                            <settingFields:FieldDataTemplate/>
-                        </ContentControl.ContentTemplate>
-                    </ContentControl>
+                    <ContentControl IsEnabled="{Binding IsEnabled}" Classes.Disabled="{Binding $self.IsEnabled}" Content="{Binding}" />
                 </StackPanel>
                 <Button Grid.Column="2"
                         ToolTip.Tip="Reset to default"

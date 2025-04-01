@@ -42,13 +42,39 @@
                 <MergeResourceInclude Source="Templates\IntField.axaml" />
                 <MergeResourceInclude Source="Templates\FloatField.axaml" />
                 <MergeResourceInclude Source="Templates\ProcessStats.axaml" />
+                <MergeResourceInclude Source="Templates\Dashboard.axaml" />
                 <MergeResourceInclude Source="Templates\ClientDashboard.axaml" />
                 <MergeResourceInclude Source="Templates\ServerDashboard.axaml" />
-                <MergeResourceInclude Source="Templates\Dashboard.axaml" />
                 <MergeResourceInclude Source="Templates\RconPanel.axaml" />
                 <MergeResourceInclude Source="Templates\LogFilterPanel.axaml" />
                 <MergeResourceInclude Source="Templates\SteamWidget.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
+    <Application.DataTemplates>
+        <StaticResource ResourceKey="Dashboard" />
+        <StaticResource ResourceKey="ModlistEditor" />
+        <StaticResource ResourceKey="ClientSettings" />
+        <StaticResource ResourceKey="ServerSettings" />
+        <StaticResource ResourceKey="RconPanel" />
+        <StaticResource ResourceKey="LogFilterPanel" />
+        <StaticResource ResourceKey="FieldEditor" />
+        <StaticResource ResourceKey="ComboBoxField" />
+        <StaticResource ResourceKey="CpuAffinityField" />
+        <StaticResource ResourceKey="DirectoryField" />
+        <StaticResource ResourceKey="FloatField" />
+        <StaticResource ResourceKey="IntField" />
+        <StaticResource ResourceKey="IntSliderField" />
+        <StaticResource ResourceKey="MapField" />
+        <StaticResource ResourceKey="TextboxField" />
+        <StaticResource ResourceKey="StringListFields" />
+        <StaticResource ResourceKey="TitleField" />
+        <StaticResource ResourceKey="ToggleField" />
+        <StaticResource ResourceKey="OnBoardingBranch" />
+        <StaticResource ResourceKey="OnBoardingChoice" />
+        <StaticResource ResourceKey="OnBoardingDirectory" />
+        <StaticResource ResourceKey="OnBoardingProgress" />
+        <StaticResource ResourceKey="OnBoardingListSelection" />
+        <StaticResource ResourceKey="OnBoardingNameSelection" />
+    </Application.DataTemplates>
 </Application>

@@ -14,7 +14,7 @@ namespace Trebuchet.ViewModels.Panels
         private readonly SteamAPI _steamApi;
         private readonly ILogger<SettingsPanel> _logger;
 
-        public SettingsPanel(AppSetup setup, UIConfig uiConfig, SteamAPI steamApi, ILogger<SettingsPanel> logger) : base(Resources.Settings, string.Empty, "mdi-cog", true)
+        public SettingsPanel(AppSetup setup, UIConfig uiConfig, SteamAPI steamApi, ILogger<SettingsPanel> logger) : base(Resources.Settings, "mdi-cog", true)
         {
             _steamApi = steamApi;
             _logger = logger;

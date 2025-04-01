@@ -20,7 +20,7 @@ namespace Trebuchet.ViewModels.Panels
         private ObservableCollection<string> _profiles = [];
         private string _selectedProfile;
 
-        public ClientProfilePanel(AppSetup setup, AppFiles appFiles, UIConfig uiConfig) : base(Resources.GameSaves, "ClientSettings", "mdi-controller", false)
+        public ClientProfilePanel(AppSetup setup, AppFiles appFiles, UIConfig uiConfig) : base(Resources.GameSaves, "mdi-controller", false)
         {
             _setup = setup;
             _appFiles = appFiles;

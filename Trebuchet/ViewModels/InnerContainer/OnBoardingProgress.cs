@@ -11,7 +11,7 @@ public class OnBoardingProgress : InnerPopup, INotifyPropertyChanged, IProgress<
 {
     private double _progress = 0;
 
-    public OnBoardingProgress(string title, string description) : base("OnBoardingProgress")
+    public OnBoardingProgress(string title, string description) : base()
     {
         Title = title;
         Description = description;

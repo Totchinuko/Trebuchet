@@ -22,7 +22,7 @@ public class OnBoardingDirectory : InnerPopup, INotifyPropertyChanged
     private bool _displayError;
     private string _errorMessage;
 
-    public OnBoardingDirectory(string title, string description, Func<string, Validation> validation) : base("OnBoardingDirectory")
+    public OnBoardingDirectory(string title, string description, Func<string, Validation> validation) : base()
     {
         _validation = validation;
         Title = title;

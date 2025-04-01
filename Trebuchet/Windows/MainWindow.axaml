@@ -30,7 +30,7 @@
                 <Border Classes="Overlay" />
                 <Border Classes="Blocker" Background="Transparent" />
                 <Border Classes="Popup" HorizontalAlignment="{Binding InnerContainer.Popup.HorizontalAlignment, FallbackValue=Stretch}" VerticalAlignment="{Binding InnerContainer.Popup.VerticalAlignment, FallbackValue=Stretch}" Height="{Binding InnerContainer.Popup.Height, FallbackValue=-1}" Width="{Binding InnerContainer.Popup.Width, FallbackValue=-1}">
-                    <ContentControl Content="{Binding InnerContainer.Popup}" ContentTemplate="{Binding InnerContainer.Popup.Template, FallbackValue={StaticResource EmptyTemplate}}"  />
+                    <ContentControl Content="{Binding InnerContainer.Popup}"  />
                 </Border>
             </Panel>
             <controls:WindowTitlebar
@@ -77,11 +77,7 @@
                         </StackPanel>
                     </Grid>
                     <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
-                        <ContentControl Content="{Binding ActivePanel}">
-                            <ContentControl.ContentTemplate>
-                                <utils:PanelSelector/>
-                            </ContentControl.ContentTemplate>
-                        </ContentControl>
+                        <ContentControl Content="{Binding ActivePanel}" />
                     </Border>
                 </Grid>
             </Panel>

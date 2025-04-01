@@ -12,7 +12,7 @@ public class OnBoardingListSelection : InnerPopup, INotifyPropertyChanged
 {
     private string _selectedElement;
 
-    public OnBoardingListSelection(string title, string description, List<string> list) : base("OnBoardingListSelection")
+    public OnBoardingListSelection(string title, string description, List<string> list) : base()
     {
         Title = title;
         Description = description;

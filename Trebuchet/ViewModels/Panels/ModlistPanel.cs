@@ -52,7 +52,7 @@ namespace Trebuchet.ViewModels.Panels
             UIConfig uiConfig, 
             WorkshopSearchViewModel workshop,
             ILogger<ModlistPanel> logger) : 
-            base(Resources.Mods, "ModlistEditor", "mdi-toy-brick", false)
+            base(Resources.Mods, "mdi-toy-brick", false)
         {
             _steamApi = steamApi;
             _setup = setup;
