@@ -20,6 +20,7 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
     private bool _testLiveWorkshop;
     private string _searchTerm = string.Empty;
     private readonly AppSettings _appSettings;
+    private bool _isLoading;
 
     public WorkshopSearchViewModel(AppSettings appSettings)
     {
@@ -49,7 +50,13 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
                 Search(_searchTerm, _testLiveWorkshop);
         }
     }
-    
+
+    public bool IsLoading
+    {
+        get => _isLoading;
+        private set => SetField(ref _isLoading, value);
+    }
+
     public string SearchTerm
     {
         get => _searchTerm;
@@ -63,6 +70,7 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
 
     public async void Search(string searchTerm, bool testLive)
     {
+        IsLoading = true;
         var query = new QueryFilesQuery(_appSettings.ApiKey)
         {
             Page = 0,
@@ -96,6 +104,7 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
             select new KeyValuePair<WorkshopSearchResult, PlayerSummary>(result, player);
         foreach (var e in enumeration)
             e.Key.SetCreator(e.Value);
+        IsLoading = false;
     }
     
     public event PropertyChangedEventHandler? PropertyChanged;
