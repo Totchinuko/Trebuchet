@@ -1,5 +1,6 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:t="clr-namespace:Trebuchet.ViewModels"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="TabButtonTemplate" x:DataType="panels:Panel">
@@ -13,7 +14,7 @@
                 HorizontalContentAlignment="Left">
             <StackPanel Orientation="Horizontal">
                 <i:Icon Value="{Binding IconPath}" Classes="Normal" VerticalAlignment="Center" Margin="0 0 12 0" />
-                <TextBlock Text="{Binding Label}" FontSize="14" VerticalAlignment="Center" />
+                <TextBlock Classes="" Text="{Binding Label}" FontSize="14" VerticalAlignment="Center" />
             </StackPanel>
         </Button>
     </DataTemplate>

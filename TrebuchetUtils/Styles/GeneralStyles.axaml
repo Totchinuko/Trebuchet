@@ -340,6 +340,10 @@
         <Setter Property="CornerRadius" Value="0 0 3 3"/>
     </Style>
     
+    <Style Selector=".FoldedTabs Button.Base TextBlock">
+        <Setter Property="IsVisible" Value="False" />
+    </Style>
+    
     <!-- Slider -->
     <Style Selector="Slider">
         <Style Selector="^:horizontal">

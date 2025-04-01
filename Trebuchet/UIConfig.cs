@@ -11,6 +11,8 @@ namespace Trebuchet
         private string[] _dashboardServerProfiles = [];
 
         public bool AutoRefreshModlist { get; set; } = true;
+        
+        public bool FoldedMenu { get; set; } = false;
 
         public string CurrentClientProfile { get; set; } = string.Empty;
 

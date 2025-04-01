@@ -7,15 +7,17 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Windows.Input;
+using Avalonia.Controls;
 using Avalonia.Threading;
 using Trebuchet.Assets;
 using Trebuchet.Messages;
 using Trebuchet.Utils;
-using Trebuchet.ViewModels.Panels;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
+using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet.ViewModels
 {
@@ -24,6 +26,7 @@ namespace Trebuchet.ViewModels
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly Launcher _launcher;
+        private readonly UIConfig _uiConfig;
         private readonly Steam _steam;
         private Panel _activePanel;
         private List<Panel> _panels;
@@ -33,6 +36,7 @@ namespace Trebuchet.ViewModels
             AppSetup setup,
             AppFiles appFiles,
             Launcher launcher, 
+            UIConfig uiConfig,
             Steam steam, 
             SteamWidget steamWidget,
             InnerContainer.InnerContainer innerContainer,
@@ -41,12 +45,15 @@ namespace Trebuchet.ViewModels
             _setup = setup;
             _appFiles = appFiles;
             _launcher = launcher;
+            _uiConfig = uiConfig;
             _steam = steam;
             _panels = panels.ToList();
             SteamWidget = steamWidget;
             InnerContainer = innerContainer;
 
             TinyMessengerHub.Default.Subscribe(this);
+            
+            ToggleFoldedCommand = new SimpleCommand((_) => FoldedMenu = !FoldedMenu); 
 
             OrderPanels(_panels);
             _activePanel = BottomPanels.First(x => x.CanExecute(null));
@@ -70,6 +77,23 @@ namespace Trebuchet.ViewModels
         public event PropertyChangedEventHandler? PropertyChanged;
 
         public static string AppTitle => $"Tot ! Trebuchet {TrebuchetUtils.Utils.GetFileVersion()}";
+
+        public bool FoldedMenu
+        {
+            get => _uiConfig.FoldedMenu;
+            private set
+            {
+                _uiConfig.FoldedMenu = value;
+                _uiConfig.SaveFile();
+                OnPropertyChanged(nameof(FoldedMenu));
+                OnPropertyChanged(nameof(ColumnWith));
+            }
+        }
+
+        public GridLength ColumnWith => FoldedMenu ? GridLength.Parse("40") : GridLength.Parse("240");
+        
+        public ICommand ToggleFoldedCommand { get; }
+        
         public Panel ActivePanel
         {
             get => _activePanel;

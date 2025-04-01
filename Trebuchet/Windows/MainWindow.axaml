@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:treb="clr-namespace:Trebuchet"
         xmlns:utils="clr-namespace:Trebuchet.Utils"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         xmlns:viewModels="clr-namespace:Trebuchet.ViewModels"
         mc:Ignorable="d"
@@ -44,28 +45,32 @@
             <Panel Grid.Row="1">
                 <Grid x:Name="WindowContent" Margin="0,12,0,0">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="240" />
+                        <ColumnDefinition Width="{Binding ColumnWith}" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid x:Name="Navigation" Margin="0,0,5,6">
                         <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
                             <RowDefinition Height="*" />
                             <RowDefinition Height="auto" />
                         </Grid.RowDefinitions>
-                        <StackPanel>
-                            <ItemsControl ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}">
+                        <Button Classes="Base TabLeft" Classes.Sneak="{Binding !FoldedMenu}" Classes.Colored="{Binding FoldedMenu}" Command="{Binding ToggleFoldedCommand}" Margin="0 0 0 12">
+                            <i:Icon Value="mdi-view-list" Classes="Normal" />
+                        </Button>
+                        <StackPanel Grid.Row="1">
+                            <ItemsControl ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <StackPanel/>
+                                        <StackPanel />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                             </ItemsControl>
                         </StackPanel>
-                        <StackPanel Grid.Row="1">
-                            <ItemsControl ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}">
+                        <StackPanel Grid.Row="2">
+                            <ItemsControl ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
                                 <ItemsControl.ItemsPanel>
                                     <ItemsPanelTemplate>
-                                        <StackPanel/>
+                                        <StackPanel />
                                     </ItemsPanelTemplate>
                                 </ItemsControl.ItemsPanel>
                             </ItemsControl>
