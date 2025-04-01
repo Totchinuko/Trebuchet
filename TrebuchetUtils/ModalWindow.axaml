@@ -30,8 +30,7 @@
                 Title="{Binding App.ModalTitle}"
                 DisableMaximize="{Binding App.MaximizeDisabled}"
                 DisableMinimize="{Binding App.MinimizeDisabled}"
-                DisableClose="{Binding App.CloseDisabled}"
-                LogoIcon="{Binding AppIconPath}" />
+                DisableClose="{Binding App.CloseDisabled}" />
             <ContentControl Grid.Row="1" Content="{Binding App}" Name="WindowContent" ContentTemplate="{Binding App.Template}" />
         </Grid>
     </Border> 

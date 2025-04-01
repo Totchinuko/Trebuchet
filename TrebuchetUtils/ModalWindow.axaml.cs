@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Media;
 
 #endregion
 
@@ -22,8 +23,6 @@ namespace TrebuchetUtils
         }
 
         public BaseModal? App { get; private set; }
-
-        public string AppIconPath => Application.Current is IApplication app ? app.AppIconPath : string.Empty;
 
         public bool WasShown { get; private set; }
 

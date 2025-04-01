@@ -6,6 +6,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -37,7 +38,7 @@ public partial class App : Application, IApplication
     private ILogger<App>? _logger;
     
     public bool HasCrashed { get; private set; }
-    public string AppIconPath => "avares://Trebuchet/Assets/Icons/AppIcon.ico";
+    public IImage? AppIconPath => Resources["AppIcon"] as IImage;
 
     public override void Initialize()
     {

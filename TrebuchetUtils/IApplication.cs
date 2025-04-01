@@ -1,8 +1,10 @@
+using Avalonia.Media;
+
 namespace TrebuchetUtils;
 
 public interface IApplication
 {
-    string AppIconPath { get; }
+    IImage? AppIconPath { get; }
     bool HasCrashed { get; }
 
     void Crash();

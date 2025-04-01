@@ -5,6 +5,7 @@
     <Application.Styles>
         <FluentTheme />
         <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"></StyleInclude>
+        <StyleInclude Source="avares://Trebuchet/LocalStyles.axaml"></StyleInclude>
     </Application.Styles>
     <Application.Resources>
         <ResourceDictionary>
