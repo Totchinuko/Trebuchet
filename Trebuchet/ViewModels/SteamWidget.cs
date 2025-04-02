@@ -21,19 +21,23 @@ namespace Trebuchet.ViewModels
         private bool _isConnected;
         private double _progress;
 
-        public SteamWidget(IProgressCallback<double> progress, Steam steam, TaskBlocker taskBlocker)
+        public SteamWidget(
+            ITinyMessengerHub messenger, 
+            IProgressCallback<double> progress, 
+            Steam steam, 
+            TaskBlocker taskBlocker)
         {
             _steam = steam;
             _taskBlocker = taskBlocker;
             progress.ProgressChanged += OnProgressChanged;
-            
-            TinyMessengerHub.Default.Subscribe(this);
+
+            messenger.Subscribe(this);
 
             _progressLock = new object();
             _steam.Connected += OnSteamConnected;
             _steam.Disconnected += OnSteamDisconnected;
-            CancelCommand = new SimpleCommand(OnCancel);
-            ConnectCommand = new SimpleCommand(OnConnect);
+            CancelCommand = new SimpleCommand().Subscribe(OnCancel);
+            ConnectCommand = new SimpleCommand().Subscribe(OnConnect);
 
             _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
         }

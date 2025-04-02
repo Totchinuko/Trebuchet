@@ -10,7 +10,7 @@ namespace TrebuchetUtils.Modals
 
         public ExceptionModal(Exception exception) : base(650,400,"Exception", "ExceptionModal")
         {
-            CloseCommand = new SimpleCommand(OnCloseModal);
+            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
 
             if(Application.Current is not IApplication app) return;
             if (app.HasCrashed) return;
@@ -22,7 +22,7 @@ namespace TrebuchetUtils.Modals
 
         public ExceptionModal(AggregateException exceptions) : base(650,400,"Exception", "ExceptionModal")
         {
-            CloseCommand = new SimpleCommand(OnCloseModal);
+            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
             
             if(Application.Current is not IApplication app) return;
             if (app.HasCrashed) return;

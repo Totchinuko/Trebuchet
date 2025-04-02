@@ -8,7 +8,7 @@ namespace TrebuchetUtils.Modals
     {
         public MessageModal(string title, string message, int height = 200) : base(650, height, "Information", "MessageModal")
         {
-            CloseCommand = new SimpleCommand(OnCloseModal);
+            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
 
             Message = message;
             MessageTitle = title;

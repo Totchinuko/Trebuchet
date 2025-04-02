@@ -34,14 +34,20 @@ namespace Trebuchet.ViewModels
             Instance = instance;
             ProcessStats = stats;
             
-            KillCommand = new SimpleCommand(OnKilled, false);
-            CloseCommand = new SimpleCommand(OnClose, false);
-            LaunchCommand = new TaskBlockedCommand(OnLaunched)
-                .SetBlockingType<SteamDownload>();
-            UpdateModsCommand = new TaskBlockedCommand(OnModUpdate)
+            KillCommand = new SimpleCommand()
+                .Toggle(false)
+                .Subscribe(OnKilled);
+            CloseCommand = new SimpleCommand()
+                .Toggle(false)
+                .Subscribe(OnClose);
+            LaunchCommand = new TaskBlockedCommand()
+                .SetBlockingType<SteamDownload>()
+                .Subscribe(OnLaunched);
+            UpdateModsCommand = new TaskBlockedCommand()
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
-                .SetBlockingType<ServersRunning>();
+                .SetBlockingType<ServersRunning>()
+                .Subscribe(OnModUpdate);
         }
 
         public event EventHandler<int>? LaunchClicked;
@@ -58,15 +64,12 @@ namespace Trebuchet.ViewModels
             set => SetField(ref _canUseDashboard, value);
         }
 
-        public SimpleCommand CloseCommand { get; }
-
         public int Instance { get; }
-
         public bool IsUpdateNeeded => UpdateNeeded.Count > 0;
-
+        public SimpleCommand CloseCommand { get; }
         public SimpleCommand KillCommand { get; }
-
-        public TaskBlockedCommand LaunchCommand { get; }
+        public SimpleCommand LaunchCommand { get; }
+        public SimpleCommand UpdateModsCommand { get; private set; }
 
         public List<string> Modlists
         {
@@ -111,7 +114,7 @@ namespace Trebuchet.ViewModels
             }
         }
 
-        public TaskBlockedCommand UpdateModsCommand { get; private set; }
+        
 
         public List<ulong> UpdateNeeded
         {

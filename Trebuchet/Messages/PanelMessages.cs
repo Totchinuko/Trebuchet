@@ -12,11 +12,6 @@ namespace Trebuchet.Messages
     {
         public object? Sender { get; } = sender;
     }
-    
-    public class PanelActivateMessage(object? sender, Panel panel) : PanelMessage(sender)
-    {
-        public Panel Panel { get; } = panel;
-    }
 
     public class PanelRefreshConfigMessage() : PanelMessage(null)
     {

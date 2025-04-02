@@ -19,10 +19,10 @@ namespace Trebuchet.ViewModels.Panels
         {
             IconPath = iconPath;
             BottomPosition = bottom;
-            TinyMessengerHub.Default.Subscribe(this);
         }
 
         public event EventHandler? CanExecuteChanged;
+        public event EventHandler<Panel>? TabClicked;
         public event PropertyChangedEventHandler? PropertyChanged;
         
         public string IconPath { get; }
@@ -49,7 +49,7 @@ namespace Trebuchet.ViewModels.Panels
         public virtual void Execute(object? parameter)
         {
             if (CanExecute(parameter))
-                TinyMessengerHub.Default.Publish(new PanelActivateMessage(this, this));
+                TabClicked?.Invoke(this, this);
         }
 
         public void Receive(PanelRefreshConfigMessage message)

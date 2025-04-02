@@ -33,7 +33,7 @@ using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet;
 
-public partial class App : Application, IApplication
+public partial class App : Application, IApplication, ISubscriberErrorHandler
 {
     private ILogger<App>? _logger;
     
@@ -58,7 +58,6 @@ public partial class App : Application, IApplication
         }
         
         //todo: move to services (And get rid of the tiny return sub messages)
-        TinyMessengerHub.Default = new TinyMessengerHub();
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection, testlive, catapult);
         var services = serviceCollection.BuildServiceProvider();
@@ -122,6 +121,7 @@ public partial class App : Application, IApplication
             .CreateLogger();
 
         services.AddLogging(builder => builder.AddSerilog(logger, true));
+        services.AddSingleton<ITinyMessengerHub>(new TinyMessengerHub(this));
         
         services.AddSingleton<AppSettings>(GetAppSettings());
         services.AddSingleton<AppClientFiles>();

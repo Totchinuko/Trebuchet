@@ -25,9 +25,9 @@ namespace Trebuchet.ViewModels
         public ModFile(string path)
         {
             _infos = new FileInfo(path);
-            RemoveModCommand = new SimpleCommand(OnRemoveModCommand);
-            OpenModPageCommand = new SimpleCommand(OnOpenModPageCommand);
-            UpdateModCommand = new TaskBlockedCommand(OnUpdateModCommand)
+            RemoveModCommand = new SimpleCommand();
+            OpenModPageCommand = new SimpleCommand();
+            UpdateModCommand = new TaskBlockedCommand()
                 .SetBlockingType<SteamDownload>();
         }
 
@@ -47,7 +47,7 @@ namespace Trebuchet.ViewModels
 
         public SimpleCommand RemoveModCommand { get; }
         public SimpleCommand OpenModPageCommand { get; }
-        public TaskBlockedCommand UpdateModCommand { get; }
+        public SimpleCommand UpdateModCommand { get; }
         
         public event PropertyChangedEventHandler? PropertyChanged;
         public IBrush BorderColor => GetBorderBrush();
@@ -163,21 +163,6 @@ namespace Trebuchet.ViewModels
         protected virtual void OnPropertyChanged(string name)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
-        
-        private void OnUpdateModCommand(object? obj)
-        {
-            TinyMessengerHub.Default.Publish(new ModListUpdateModMessage(this, this));
-        }
-
-        private void OnOpenModPageCommand(object? obj)
-        {
-            TinyMessengerHub.Default.Publish(new ModListOpenModSteamMessage(this, this));
-        }
-
-        private void OnRemoveModCommand(object? obj)
-        {
-            TinyMessengerHub.Default.Publish(new ModListRemoveModMessage(this, this));
         }
     }
 }

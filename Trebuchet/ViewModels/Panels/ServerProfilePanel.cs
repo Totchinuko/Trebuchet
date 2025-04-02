@@ -2,7 +2,6 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Windows.Input;
 using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -17,9 +16,8 @@ namespace Trebuchet.ViewModels.Panels
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private ServerProfile _profile;
-        private ObservableCollection<string> _profiles = new ObservableCollection<string>();
+        private ObservableCollection<string> _profiles = [];
         private string _selectedProfile;
-        private TrulyObservableCollection<ObservableString> _sudoList = new TrulyObservableCollection<ObservableString>();
 
         public ServerProfilePanel(
             AppSetup setup,
@@ -31,20 +29,18 @@ namespace Trebuchet.ViewModels.Panels
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             LoadPanel();
+            CreateProfileCommand = new SimpleCommand().Subscribe(OnProfileCreate);
+            DeleteProfileCommand = new SimpleCommand().Subscribe(OnProfileDelete);
+            DuplicateProfileCommand = new SimpleCommand().Subscribe(OnProfileDuplicate);
+            OpenFolderProfileCommand = new SimpleCommand().Subscribe(OnOpenFolderProfile);
         }
 
-        public ICommand CreateProfileCommand => new SimpleCommand(OnProfileCreate);
-
-        public ICommand DeleteProfileCommand => new SimpleCommand(OnProfileDelete);
-
-        public ICommand DuplicateProfileCommand => new SimpleCommand(OnProfileDuplicate);
-
-        public ICommand OpenFolderProfileCommand => new SimpleCommand(OnOpenFolderProfile);
-
+        public SimpleCommand CreateProfileCommand { get; }
+        public SimpleCommand DeleteProfileCommand { get; }
+        public SimpleCommand DuplicateProfileCommand { get; }
+        public SimpleCommand OpenFolderProfileCommand { get; }
         public ServerProfile Profile => _profile;
-
         public ObservableCollection<string> Profiles { get => _profiles; }
-
         public string ProfileSize => (Tools.DirectorySize(_profile.ProfileFolder) / 1024 / 1024).ToString() + "MB";
 
         public string SelectedProfile

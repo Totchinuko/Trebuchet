@@ -1,6 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using Trebuchet.Messages;
+using Trebuchet.Services.TaskBlocker;
 using Trebuchet.ViewModels.SettingFields;
 using TrebuchetUtils;
 
@@ -11,7 +12,7 @@ namespace Trebuchet.ViewModels.Panels
     {
         public List<Field> Fields { get; set; } = [];
 
-        public ObservableCollection<RequiredCommand> RequiredActions { get; set; } = [];
+        public ObservableCollection<LaunchedCommand> RequiredActions { get; set; } = [];
 
         protected virtual void BuildFields(string path, object target, string property = "")
         {
@@ -40,8 +41,8 @@ namespace Trebuchet.ViewModels.Panels
         {
             OnValueChanged(e.Property);
             Fields.ForEach(f => f.RefreshVisibility());
-            if (e.RefreshApp)
-                TinyMessengerHub.Default.Publish(new PanelRefreshConfigMessage());
+            // if (e.RefreshApp)
+            //     TinyMessengerHub.Default.Publish(new PanelRefreshConfigMessage());
         }
     }
 }

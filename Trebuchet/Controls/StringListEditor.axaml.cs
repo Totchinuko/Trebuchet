@@ -18,7 +18,7 @@ namespace Trebuchet.Controls
 
         public StringListEditor()
         {
-            DeleteCommand = new SimpleCommand(OnInstanceDelete);
+            DeleteCommand = new SimpleCommand().Subscribe(OnInstanceDelete);
             InitializeComponent();
         }
         

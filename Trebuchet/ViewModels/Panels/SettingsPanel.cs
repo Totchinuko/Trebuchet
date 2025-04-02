@@ -47,13 +47,11 @@ namespace Trebuchet.ViewModels.Panels
         {
             AppSetup.Config.SaveFile();
             UiConfig.SaveFile();
-            UpdateRequiredActions();
         }
 
         private void LoadPanel()
         {
             RefreshFields();
-            UpdateRequiredActions();
         }
 
         private async void OnServerInstanceInstall(object? obj)
@@ -67,20 +65,6 @@ namespace Trebuchet.ViewModels.Panels
                 _logger.LogError(tex.Message);
                 await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
-        }
-
-        private void UpdateRequiredActions()
-        {
-            RequiredActions.Clear();
-
-            int installed = _steamApi.GetInstalledServerInstanceCount();
-            if (AppSetup.Config.ServerInstanceCount > installed)
-                RequiredActions.Add(
-                    new RequiredCommand(
-                        Resources.ServerNotInstalled, 
-                        Resources.Install, 
-                        OnServerInstanceInstall)
-                        .SetBlockingType<SteamDownload>());
         }
     }
 }

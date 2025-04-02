@@ -11,8 +11,8 @@ namespace Trebuchet.Modals
         public TestliveModal(App app) : base(400, 400, "Game Build", "TestliveSelection")
         {
             _app = app;
-            LiveCommand = new SimpleCommand(OnLiveClicked);
-            TestLiveCommand = new SimpleCommand(OnTestLiveClicked);
+            LiveCommand = new SimpleCommand().Subscribe(OnLiveClicked);
+            TestLiveCommand = new SimpleCommand().Subscribe(OnTestLiveClicked);
             CloseDisabled = false;
         }
 

@@ -18,7 +18,7 @@ public class OnBoardingListSelection : InnerPopup, INotifyPropertyChanged
         Description = description;
         List = new ObservableCollection<string>(list);
         _selectedElement = list.FirstOrDefault(string.Empty);
-        ConfirmCommand = new SimpleCommand((_) => Close());
+        ConfirmCommand = new SimpleCommand().Subscribe(Close);
     }
     
     public ObservableCollection<string> List { get; }

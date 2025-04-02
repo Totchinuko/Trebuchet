@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:local="clr-namespace:Trebuchet"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ModlistTextImport" x:DataType="local:ModlistTextImport">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:modals="clr-namespace:Trebuchet.Modals">
+    <DataTemplate x:Key="ModlistTextImport" x:DataType="modals:ModlistTextImport">
         <Border Padding="12">
             <Grid>
                 <Grid.RowDefinitions>

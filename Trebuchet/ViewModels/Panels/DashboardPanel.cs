@@ -41,20 +41,24 @@ namespace Trebuchet.ViewModels.Panels
             _steamApi = steamApi;
             _launcher = launcher;
             _logger = logger;
-            CloseAllCommand = new SimpleCommand(OnCloseAll);
-            KillAllCommand = new SimpleCommand(OnKillAll);
-            LaunchAllCommand = new TaskBlockedCommand(OnLaunchAll)
-                .SetBlockingType<SteamDownload>();
-            UpdateServerCommand = new TaskBlockedCommand((_) => UpdateServer())
-                    .SetBlockingType<SteamDownload>();
-            UpdateAllModsCommand = new TaskBlockedCommand((_) => UpdateMods())
+            CloseAllCommand = new SimpleCommand().Subscribe(OnCloseAll);
+            KillAllCommand = new SimpleCommand().Subscribe(OnKillAll);
+            LaunchAllCommand = new TaskBlockedCommand()
+                .SetBlockingType<SteamDownload>()
+                .Subscribe(OnLaunchAll);
+            UpdateServerCommand = new TaskBlockedCommand()
+                    .SetBlockingType<SteamDownload>()
+                    .Subscribe(UpdateServer);
+            UpdateAllModsCommand = new TaskBlockedCommand()
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
-                .SetBlockingType<ServersRunning>();
-            VerifyFilesCommand = new TaskBlockedCommand(OnFileVerification)
+                .SetBlockingType<ServersRunning>()
+                .Subscribe(UpdateMods);
+            VerifyFilesCommand = new TaskBlockedCommand()
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
-                .SetBlockingType<ServersRunning>();
+                .SetBlockingType<ServersRunning>()
+                .Subscribe(OnFileVerification);
 
             Client = new ClientInstanceDashboard(new ProcessStatsLight());
             Initialize();
@@ -63,22 +67,14 @@ namespace Trebuchet.ViewModels.Panels
         }
 
         public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
-
         public ClientInstanceDashboard Client { get; }
-
         public SimpleCommand CloseAllCommand { get; private set; }
-
         public ObservableCollection<ServerInstanceDashboard> Instances { get; } = new();
-
         public SimpleCommand KillAllCommand { get; private set; }
-
-        public TaskBlockedCommand LaunchAllCommand { get; private set; }
-
-        public TaskBlockedCommand UpdateAllModsCommand { get; private set; }
-
-        public TaskBlockedCommand UpdateServerCommand { get; private set; }
-
-        public TaskBlockedCommand VerifyFilesCommand { get; private set; }
+        public SimpleCommand LaunchAllCommand { get; private set; }
+        public SimpleCommand UpdateAllModsCommand { get; private set; }
+        public SimpleCommand UpdateServerCommand { get; private set; }
+        public SimpleCommand VerifyFilesCommand { get; private set; }
 
         public override bool CanExecute(object? parameter)
         {

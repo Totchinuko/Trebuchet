@@ -1,18 +1,15 @@
 ﻿using System;
 using System.IO;
-using System.Threading.Tasks;
-using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
-using SteamKit2;
 using TrebuchetUtils;
 
-namespace Trebuchet
+namespace Trebuchet.Modals
 {
     public class ModlistTextImport : BaseModal
     {
-        private bool _append = false;
+        private bool _append;
         private bool _canceled = true;
         private readonly bool _export;
         private readonly FilePickerFileType _fileType;
@@ -26,21 +23,18 @@ namespace Trebuchet
             CloseDisabled = false;
             MaximizeDisabled = false;
             MinimizeDisabled = false;
+            AppendCommand = new SimpleCommand().Subscribe(OnAppend);
+            ApplyCommand = new SimpleCommand().Subscribe(OnApply);
+            SaveCommand = new SimpleCommand().Subscribe(OnSave);
         }
 
         public bool Append { get => _append; set => _append = value; }
-
-        public ICommand AppendCommand => new SimpleCommand(OnAppend);
-
-        public ICommand ApplyCommand => new SimpleCommand(OnApply);
-
+        public SimpleCommand AppendCommand { get; }
+        public SimpleCommand ApplyCommand { get; }
         public bool Canceled { get => _canceled; set => _canceled = value; }
-
         public bool ImportVisible => !_export;
-
         public bool SaveAsVisible => _export;
-
-        public ICommand SaveCommand => new SimpleCommand(OnSave);
+        public SimpleCommand SaveCommand { get; }
 
         protected override void OnWindowClose(object? sender, EventArgs e)
         {

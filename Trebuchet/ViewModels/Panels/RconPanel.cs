@@ -34,7 +34,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             _setup = setup;
             _launcher = launcher;
-            SendCommand = new SimpleCommand(OnSendCommand, false);
+            SendCommand = new SimpleCommand().Subscribe(OnSendCommand).Toggle(false);
 
             LoadPanel();
         }

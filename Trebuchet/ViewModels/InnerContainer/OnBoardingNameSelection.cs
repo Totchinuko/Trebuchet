@@ -25,7 +25,7 @@ public class OnBoardingNameSelection : InnerPopup, INotifyPropertyChanged
         var result = _validation(string.Empty);
         _isValid = result.isValid;
         _errorMessage = result.errorMessage;
-        ConfirmCommand = new SimpleCommand((_) => Close());
+        ConfirmCommand = new SimpleCommand().Subscribe(Close);
     }
     
     public string Title { get; }

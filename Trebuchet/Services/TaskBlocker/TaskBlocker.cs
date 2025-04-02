@@ -7,7 +7,7 @@ using TrebuchetUtils;
 
 namespace Trebuchet.Services.TaskBlocker
 {
-    public sealed class TaskBlocker
+    public sealed class TaskBlocker(ITinyMessengerHub messenger)
     {
         private class BlockedTask(SemaphoreSlim semaphore, CancellationTokenSource cts, IBlockedTaskType type) : IBlockedTask
         {
@@ -68,6 +68,20 @@ namespace Trebuchet.Services.TaskBlocker
             return _tasks.ContainsKey(typeof(T));
         }
 
+        public LaunchedCommand CreateLaunchedCommand()
+        {
+            var command = new LaunchedCommand();
+            messenger.Subscribe(command);
+            return command;
+        }
+
+        public TaskBlockedCommand CreateTaskBlockedCommand()
+        {
+            var command = new TaskBlockedCommand();
+            messenger.Subscribe(command);
+            return command;
+        }
+
         private BlockedTask CreateTask(IBlockedTaskType operation, int cancelTimer)
         {
             if(cancelTimer > 0)
@@ -107,7 +121,7 @@ namespace Trebuchet.Services.TaskBlocker
 
         private void OnTaskSourceChanged(IBlockedTaskType type, bool active)
         {
-            TinyMessengerHub.Default.Publish(new BlockedTaskStateChanged(type, active));
+            messenger.Publish(new BlockedTaskStateChanged(type, active));
         }
     }
 }

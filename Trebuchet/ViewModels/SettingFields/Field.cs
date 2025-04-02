@@ -35,8 +35,8 @@ namespace Trebuchet.ViewModels.SettingFields
         {
             _template = template;
             DisplayPanel = displayPanel;
-            HyperlinkCommand = new SimpleCommand(OnHyperlinkClicked);
-            ResetCommand = new SimpleCommand(OnReset);
+            HyperlinkCommand = new SimpleCommand().Subscribe(OnHyperlinkClicked);
+            ResetCommand = new SimpleCommand().Subscribe(OnReset);
         }
 
         private static readonly JsonSerializerOptions Options = new();

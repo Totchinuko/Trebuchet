@@ -215,12 +215,6 @@ public static class Utils
                throw new DirectoryNotFoundException("Assembly directory is not found.");
     }
 
-    public static T InstantReturn<T>(this ITinyMessengerHub messenger, ITinyInstantReturn<T> msg)
-    {
-        messenger.Publish(msg);
-        return msg.Value;
-    }
-
     public static bool IsDirectoryWritable(string dirPath, bool throwIfFails = false)
     {
         try

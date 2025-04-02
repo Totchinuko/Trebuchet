@@ -26,15 +26,18 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
     {
         ProcessStats = processStats;
 
-        KillCommand = new SimpleCommand(OnKilled, false);
-        LaunchCommand = new TaskBlockedCommand(OnLaunched)
-            .SetBlockingType<SteamDownload>();
-        LaunchBattleEyeCommand = new TaskBlockedCommand(OnBattleEyeLaunched)
-            .SetBlockingType<SteamDownload>();
-        UpdateModsCommand = new TaskBlockedCommand(OnModUpdate)
+        KillCommand = new SimpleCommand().Subscribe(OnKilled).Toggle(false);
+        LaunchCommand = new TaskBlockedCommand()
+            .SetBlockingType<SteamDownload>()
+            .Subscribe(OnLaunched);
+        LaunchBattleEyeCommand = new TaskBlockedCommand()
+            .SetBlockingType<SteamDownload>()
+            .Subscribe(OnBattleEyeLaunched);
+        UpdateModsCommand = new TaskBlockedCommand()
             .SetBlockingType<SteamDownload>()
             .SetBlockingType<ClientRunning>()
-            .SetBlockingType<ServersRunning>();
+            .SetBlockingType<ServersRunning>()
+            .Subscribe(OnModUpdate);
     }
 
     public event EventHandler? KillClicked;
@@ -52,9 +55,9 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
 
     public SimpleCommand KillCommand { get; }
 
-    public TaskBlockedCommand LaunchBattleEyeCommand { get; }
+    public SimpleCommand LaunchBattleEyeCommand { get; }
 
-    public TaskBlockedCommand LaunchCommand { get; }
+    public SimpleCommand LaunchCommand { get; }
 
     public List<string> Modlists
     {
@@ -96,7 +99,7 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
         }
     }
 
-    public TaskBlockedCommand UpdateModsCommand { get; private set; }
+    public SimpleCommand UpdateModsCommand { get; private set; }
 
     public List<ulong> UpdateNeeded
     {

@@ -22,8 +22,9 @@ using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet.ViewModels
 {
-    public sealed class TrebuchetApp : INotifyPropertyChanged, ITinyRecipient<PanelActivateMessage>
+    public sealed class TrebuchetApp : INotifyPropertyChanged
     {
+        private readonly ITinyMessengerHub _messenger;
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly Launcher _launcher;
@@ -34,6 +35,7 @@ namespace Trebuchet.ViewModels
         private DispatcherTimer _timer;
 
         public TrebuchetApp(
+            ITinyMessengerHub messenger,
             AppSetup setup,
             AppFiles appFiles,
             Launcher launcher, 
@@ -43,6 +45,7 @@ namespace Trebuchet.ViewModels
             InnerContainer.InnerContainer innerContainer,
             IEnumerable<Panel> panels)
         {
+            _messenger = messenger;
             _setup = setup;
             _appFiles = appFiles;
             _launcher = launcher;
@@ -52,9 +55,7 @@ namespace Trebuchet.ViewModels
             SteamWidget = steamWidget;
             InnerContainer = innerContainer;
 
-            TinyMessengerHub.Default.Subscribe(this);
-            
-            ToggleFoldedCommand = new SimpleCommand((_) => FoldedMenu = !FoldedMenu); 
+            ToggleFoldedCommand = new SimpleCommand().Subscribe(() => FoldedMenu = !FoldedMenu); 
 
             OrderPanels(_panels);
             _activePanel = BottomPanels.First(x => x.CanExecute(null));
@@ -120,12 +121,6 @@ namespace Trebuchet.ViewModels
             _panels.ForEach(x => x.OnWindowShow());
             await _steam.Connect();
         }
-
-        public void Receive(PanelActivateMessage message)
-        {
-            ActivePanel = message.Panel;
-        }
-
         
         internal void OnAppClose()
         {
@@ -142,6 +137,7 @@ namespace Trebuchet.ViewModels
         {
             foreach (var panel in panels)
             {
+                panel.TabClicked += (_,p) => ActivePanel = p;
                 if(panel.BottomPosition)
                     BottomPanels.Add(panel);
                 else
@@ -177,7 +173,7 @@ namespace Trebuchet.ViewModels
             if(File.Exists(configPath)) return true;
             if (!await OnBoardingUsageChoice()) return false;
             _setup.Config.SaveFile();
-            TinyMessengerHub.Default.Publish(new PanelRefreshConfigMessage());
+            _messenger.Publish(new PanelRefreshConfigMessage());
             return true;
         }
 

@@ -7,8 +7,8 @@ namespace TrebuchetUtils.Modals
     {
         public QuestionModal(string title, string message) : base(550,220,"Information","QuestionModal")
         {
-            CancelCommand = new SimpleCommand(OnCancelModal);
-            YesCommand = new SimpleCommand(OnYesModal);
+            CancelCommand = new SimpleCommand().Subscribe(OnCancelModal);
+            YesCommand = new SimpleCommand().Subscribe(OnYesModal);
 
             Message = message;
             MessageTitle = title;

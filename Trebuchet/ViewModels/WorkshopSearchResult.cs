@@ -26,7 +26,7 @@ namespace Trebuchet.ViewModels
             VoteDown = result.VoteData.VotesDown;
             VoteUp = result.VoteData.VotesUp;
             DownloadCover(result.PreviewUrl);
-            AddModCommand = new SimpleCommand((_) => ModAdded?.Invoke(this, this));
+            AddModCommand = new SimpleCommand().Subscribe(() => ModAdded?.Invoke(this, this));
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;

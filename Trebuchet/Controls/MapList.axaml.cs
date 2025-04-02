@@ -17,7 +17,7 @@ namespace Trebuchet.Controls
         public MapList()
         {
             MapListData = Tools.GetMapList();
-            MapSelectCommand = new SimpleCommand(OnMapSelect);
+            MapSelectCommand = new SimpleCommand().Subscribe(OnMapSelect);
             InitializeComponent();
         }
         

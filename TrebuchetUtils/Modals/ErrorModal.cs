@@ -9,7 +9,7 @@ namespace TrebuchetUtils.Modals
     {
         public ErrorModal(string title, string message) : base(650, 200, "Error", "ErrorModal")
         {
-            CloseCommand = new SimpleCommand(OnCloseModal);
+            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
 
             ErrorMessage = message;
             ErrorTitle = title;

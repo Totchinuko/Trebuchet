@@ -12,7 +12,7 @@ namespace TrebuchetUtils.Modals
         public InputTextModal(string buttonLabel, string watermark = "", bool acceptReturn = false) : base(650, 200, "Text", "InputTextModal")
         {
             Watermark = watermark;
-            ValidateCommand = new SimpleCommand(OnValidate);
+            ValidateCommand = new SimpleCommand().Subscribe(OnValidate);
             ButtonLabel = buttonLabel;
             AcceptReturn = acceptReturn;
             CloseDisabled = false;

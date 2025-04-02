@@ -12,7 +12,7 @@ namespace TrebuchetUtils.Modals
 
         public WaitModal(string title, string message, Action cancelCallback) : base(650,200, "Please wait...", "WaitModal")
         {
-            CloseCommand = new SimpleCommand(OnCloseModal);
+            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
             _message = message;
             _messageTitle = title;
             _cancelCallback = cancelCallback;

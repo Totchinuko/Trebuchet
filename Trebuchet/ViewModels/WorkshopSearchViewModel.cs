@@ -27,7 +27,7 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
     public WorkshopSearchViewModel(AppSettings appSettings)
     {
         _appSettings = appSettings;
-        SearchCommand = new SimpleCommand((_) => OnSearch());
+        SearchCommand = new SimpleCommand().Subscribe(OnSearch);
     }
 
     public event EventHandler<WorkshopSearchResult>? ModAdded;

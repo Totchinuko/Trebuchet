@@ -11,7 +11,7 @@ public class OnBoardingChoice
         Title = title;
         Description = description;
         Index = index;
-        Command = new SimpleCommand((_) => command(Index));
+        Command = new SimpleCommand().Subscribe(() => command(Index));
     }
 
     public string Title { get; }
