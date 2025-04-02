@@ -110,6 +110,9 @@ public sealed class ConanServerProcess : IConanServerProcess
         if (_process.Responding)
             _lastResponse = DateTime.UtcNow;
 
+        if (State is ProcessState.STOPPING && _process.HasExited)
+            State = ProcessState.STOPPED;
+
         if (State is ProcessState.STOPPING or ProcessState.STOPPED or ProcessState.CRASHED)
             return;
 

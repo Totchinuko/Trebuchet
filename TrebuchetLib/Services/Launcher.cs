@@ -316,7 +316,8 @@ public class Launcher : IDisposable
             for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
                 await CatapultServer(i);
         }
-        
+
+        CleanStoppedProcesses();
         await FindExistingClient();
         await FindExistingServers();
 
@@ -359,6 +360,24 @@ public class Launcher : IDisposable
             var infos = await _iniHandler.GetInfosFromServerAsync(instance).ConfigureAwait(false);
             IConanServerProcess server = new ConanServerProcess(process, infos);
             _serverProcesses.TryAdd(instance, server);
+        }
+    }
+
+    private void CleanStoppedProcesses()
+    {
+        if (_conanClientProcess != null && !_conanClientProcess.State.IsRunning())
+        {
+            _conanClientProcess.Dispose();
+            _conanClientProcess = null;
+        }
+
+        foreach (var server in _serverProcesses.ToList())
+        {
+            if (!server.Value.State.IsRunning())
+            {
+                server.Value.Dispose();
+                _serverProcesses.Remove(server.Key);
+            }
         }
     }
 
