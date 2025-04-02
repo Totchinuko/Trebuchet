@@ -5,6 +5,7 @@ namespace TrebuchetLib
 {
     public abstract class JsonFile<T> where T : JsonFile<T>
     {
+        //todo: Replace json serialization with generated sources
         public static readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions
         {
             WriteIndented = true,
@@ -24,7 +25,7 @@ namespace TrebuchetLib
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="DirectoryNotFoundException"></exception>
         /// <exception cref="Exception"></exception>
-        public void CopyFileTo(string path)
+        internal void CopyFileTo(string path)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException("path is invalid");
@@ -50,7 +51,7 @@ namespace TrebuchetLib
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="DirectoryNotFoundException"></exception>
         /// <exception cref="Exception"></exception>
-        public void CopyFolderTo(string path)
+        internal async Task CopyFolderTo(string path)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException("path is invalid");
@@ -67,14 +68,14 @@ namespace TrebuchetLib
                 throw new DirectoryNotFoundException($"Invalid directory for {FilePath}");
 
             Tools.CreateDir(folder);
-            Tools.DeepCopy(dataFolder, folder);
+            await Tools.DeepCopyAsync(dataFolder, folder, CancellationToken.None);
         }
 
         /// <summary>
         /// Delete the file
         /// </summary>
         /// <exception cref="FileNotFoundException"></exception>
-        public void DeleteFile()
+        internal void DeleteFile()
         {
             if (!File.Exists(FilePath))
                 throw new FileNotFoundException($"{FilePath} not found");
@@ -85,7 +86,7 @@ namespace TrebuchetLib
         /// Delete file and its parent folder
         /// </summary>
         /// <exception cref="DirectoryNotFoundException"></exception>
-        public void DeleteFolder()
+        internal void DeleteFolder()
         {
             string? folder = Path.GetDirectoryName(FilePath);
             if (folder == null || !Directory.Exists(folder))
@@ -101,7 +102,7 @@ namespace TrebuchetLib
         /// <exception cref="ArgumentException"></exception>
         /// <exception cref="DirectoryNotFoundException"></exception>
         /// <exception cref="Exception"></exception>
-        public void MoveFolderTo(string path)
+        internal void MoveFolderTo(string path)
         {
             if (string.IsNullOrEmpty(path))
                 throw new ArgumentException("path is invalid");
@@ -143,7 +144,7 @@ namespace TrebuchetLib
         /// <param name="constructor"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public static T CreateFile(string path, params object[] constructor)
+        internal static T CreateFile(string path, params object[] constructor)
         {
             T? file = (T?)Activator.CreateInstance(typeof(T), constructor);
             if (file == null)

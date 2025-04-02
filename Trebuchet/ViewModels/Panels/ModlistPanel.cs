@@ -294,7 +294,7 @@ namespace Trebuchet.ViewModels.Panels
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            _profile = ModListProfile.LoadProfile(_appFiles.Mods.GetPath(_selectedModlist));
+            _profile = _appFiles.Mods.Get(_selectedModlist);
             _modlistUrl = _profile.SyncURL;
             OnPropertyChanged(nameof(ModlistUrl));
 
@@ -503,8 +503,7 @@ namespace Trebuchet.ViewModels.Panels
                 return;
             }
 
-            _profile = ModListProfile.CreateProfile(_appFiles.Mods.GetPath(name));
-            _profile.SaveFile();
+            _profile = _appFiles.Mods.Create(name);
             RefreshProfiles();
             SelectedModlist = name;
         }
@@ -518,7 +517,7 @@ namespace Trebuchet.ViewModels.Panels
             await question.OpenDialogueAsync();
             if (!question.Result) return;
             
-            _profile.DeleteFile();
+            _appFiles.Mods.Delete(_profile.ProfileName);
 
             var profile = string.Empty;
             profile = _appFiles.Mods.ResolveProfile(profile);
@@ -540,10 +539,7 @@ namespace Trebuchet.ViewModels.Panels
                 return;
             }
 
-            var path = Path.Combine(_appFiles.Mods.GetPath(name));
-            _profile.CopyFileTo(path);
-            _profile = ModListProfile.LoadProfile(path);
-            _profile.SaveFile();
+            _profile = await _appFiles.Mods.Duplicate(_profile.ProfileName, name);
             RefreshProfiles();
             SelectedModlist = name;
         }

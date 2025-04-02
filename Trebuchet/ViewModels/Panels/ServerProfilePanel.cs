@@ -92,7 +92,7 @@ namespace Trebuchet.ViewModels.Panels
         [MemberNotNull("_profile")]
         private void LoadProfile()
         {
-            _profile = ServerProfile.LoadProfile(_appFiles.Server.GetPath(_selectedProfile));
+            _profile = _appFiles.Server.Get(_selectedProfile);
             OnPropertyChanged(nameof(ProfileSize));
             RefreshFields();
         }
@@ -131,7 +131,7 @@ namespace Trebuchet.ViewModels.Panels
                 return;
             }
 
-            _profile = ServerProfile.CreateProfile(_appFiles.Server.GetPath(name));
+            _profile = _appFiles.Server.Create(name);
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
@@ -145,7 +145,7 @@ namespace Trebuchet.ViewModels.Panels
             await question.OpenDialogueAsync();
             if (question.Result)
             {
-                _profile.DeleteFolder();
+                _appFiles.Server.Delete(_profile.ProfileName);
 
                 string profile = string.Empty;
                 profile = _appFiles.Server.ResolveProfile(profile);
@@ -167,10 +167,7 @@ namespace Trebuchet.ViewModels.Panels
                 return;
             }
 
-            string path = Path.Combine(_appFiles.Server.GetPath(name));
-            _profile.CopyFolderTo(path);
-            _profile = ServerProfile.LoadProfile(path);
-            _profile.SaveFile();
+            _profile = await _appFiles.Server.Duplicate(_profile.ProfileName, name);
             LoadProfileList();
             SelectedProfile = name;
         }

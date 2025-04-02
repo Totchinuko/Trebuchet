@@ -7,6 +7,61 @@ namespace TrebuchetLib.Services;
 
 public class AppServerFiles(AppSetup appSetup)
 {
+    
+    private Dictionary<string, ServerProfile> _cache = [];
+    public ServerProfile Create(string name)
+    {
+        if (_cache.TryGetValue(name, out var profile))
+        {
+            profile.SaveFile();
+            return profile;
+        }
+        var file = ServerProfile.CreateProfile(GetPath(name));
+        file.SaveFile();
+        _cache[name] = file;
+        return file;
+    }
+
+    public ServerProfile Get(string name)
+    {
+        if (_cache.TryGetValue(name, out var profile))
+            return profile;
+        var file = ServerProfile.LoadProfile(GetPath(name));
+        _cache[name] = file;
+        return file;
+    }
+
+    public bool Exists(string name)
+    {
+        return File.Exists(GetPath(name));
+    }
+
+    public void Delete(string name)
+    {
+        var profile = Get(name);
+        profile.DeleteFolder();
+    }
+
+    public async Task<ServerProfile> Duplicate(string name, string destination)
+    {
+        if (Exists(destination)) throw new Exception("Destination profile exists");
+        if (!Exists(name)) throw new Exception("Source profile does not exists");
+        var profile = Get(name);
+        await profile.CopyFolderTo(GetPath(destination));
+        var copy = Get(destination);
+        return copy;
+    }
+
+    public ServerProfile Move(string name, string destination)
+    {
+        if (Exists(destination)) throw new Exception("Destination profile exists");
+        if (!Exists(name)) throw new Exception("Source profile does not exists");
+        var profile = Get(name);
+        profile.MoveFolderTo(GetPath(destination));
+        _cache.Remove(name);
+        var moved = Get(destination);
+        return moved;
+    }
 
     /// <summary>
     /// Get the folder of a server profile.
@@ -128,7 +183,7 @@ public class AppServerFiles(AppSetup appSetup)
 
         profileName = "Default";
         if (!File.Exists(GetPath(profileName)))
-            ServerProfile.CreateFile(GetPath(profileName)).SaveFile();
+            ServerProfile.CreateProfile(GetPath(profileName)).SaveFile();
         return profileName;
     }
 
@@ -138,14 +193,13 @@ public class AppServerFiles(AppSetup appSetup)
     /// <param name="name"></param>
     /// <param name="profile"></param>
     /// <returns></returns>
-    public bool TryLoadProfile(string name, [NotNullWhen(true)] out ServerProfile? profile)
+    public bool TryGet(string name, [NotNullWhen(true)] out ServerProfile? profile)
     {
         profile = null;
-        string profilePath = GetPath(name);
-        if (!File.Exists(profilePath)) return false;
+        if (!Exists(name)) return false;
         try
         {
-            profile = ServerProfile.LoadProfile(profilePath);
+            profile = Get(name);
             return true;
         }
         catch { return false; }

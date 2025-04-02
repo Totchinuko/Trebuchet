@@ -4,6 +4,61 @@ namespace TrebuchetLib.Services;
 
 public class AppClientFiles(AppSetup appSetup)
 {
+    private Dictionary<string, ClientProfile> _cache = [];
+    public ClientProfile Create(string name)
+    {
+        if (_cache.TryGetValue(name, out var profile))
+        {
+            profile.SaveFile();
+            return profile;
+        }
+        var file = ClientProfile.CreateProfile(GetPath(name));
+        file.SaveFile();
+        _cache[name] = file;
+        return file;
+    }
+
+    public ClientProfile Get(string name)
+    {
+        if (_cache.TryGetValue(name, out var profile))
+            return profile;
+        var file = ClientProfile.LoadProfile(GetPath(name));
+        _cache[name] = file;
+        return file;
+    }
+
+    public bool Exists(string name)
+    {
+        return File.Exists(GetPath(name));
+    }
+
+    public void Delete(string name)
+    {
+        var profile = Get(name);
+        profile.DeleteFolder();
+    }
+
+    public async Task<ClientProfile> Duplicate(string name, string destination)
+    {
+        if (Exists(destination)) throw new Exception("Destination profile exists");
+        if (!Exists(name)) throw new Exception("Source profile does not exists");
+        var profile = Get(name);
+        await profile.CopyFolderTo(GetPath(destination));
+        var copy = Get(destination);
+        return copy;
+    }
+
+    public ClientProfile Move(string name, string destination)
+    {
+        if (Exists(destination)) throw new Exception("Destination profile exists");
+        if (!Exists(name)) throw new Exception("Source profile does not exists");
+        var profile = Get(name);
+        profile.MoveFolderTo(GetPath(destination));
+        _cache.Remove(name);
+        var moved = Get(destination);
+        return moved;
+    }
+    
     public string GetFolder(string name)
     {
         return Path.Combine(AppFiles.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderClientProfiles, name);
@@ -83,14 +138,13 @@ public class AppClientFiles(AppSetup appSetup)
         return GetPath("_Original_" + i);
     }
     
-    public bool TryLoadProfile(string name, [NotNullWhen(true)] out ClientProfile? profile)
+    public bool TryGet(string name, [NotNullWhen(true)] out ClientProfile? profile)
     {
         profile = null;
-        string profilePath = GetPath(name);
-        if (!File.Exists(profilePath)) return false;
+        if (!Exists(name)) return false;
         try
         {
-            profile = ClientProfile.LoadProfile(profilePath);
+            profile = Get(name);
             return true;
         }
         catch { return false; }

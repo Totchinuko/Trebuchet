@@ -44,9 +44,9 @@ public class Launcher : IDisposable
     {
         if (_conanClientProcess != null) return;
 
-        if (!_appFiles.Client.TryLoadProfile(profileName, out var profile))
+        if (!_appFiles.Client.TryGet(profileName, out var profile))
             throw new TrebException($"{profileName} profile not found.");
-        if (!_appFiles.Mods.TryLoadProfile(modlistName, out var modlist))
+        if (!_appFiles.Mods.TryGet(modlistName, out var modlist))
             throw new TrebException($"{modlistName} modlist not found.");
         if (IsClientProfileLocked(profileName))
             throw new TrebException($"Profile {profileName} folder is currently locked by another process.");
@@ -150,9 +150,9 @@ public class Launcher : IDisposable
     {
         if (_serverProcesses.ContainsKey(instance)) return;
 
-        if (!_appFiles.Server.TryLoadProfile(profileName, out var profile))
+        if (!_appFiles.Server.TryGet(profileName, out var profile))
             throw new FileNotFoundException($"{profileName} profile not found.");
-        if (!_appFiles.Mods.TryLoadProfile(modlistName, out var modlist))
+        if (!_appFiles.Mods.TryGet(modlistName, out var modlist))
             throw new FileNotFoundException($"{modlistName} modlist not found.");
         if (IsServerProfileLocked(profileName))
             throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
