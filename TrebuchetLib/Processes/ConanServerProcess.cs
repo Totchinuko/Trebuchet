@@ -16,11 +16,11 @@ public sealed class ConanServerProcess : IConanServerProcess
     private int _players;
     private ProcessState _state;
 
-    public ConanServerProcess(Process process, ConanServerInfos infos)
+    public ConanServerProcess(Process process, ConanServerInfos infos, DateTime startTime)
     {
         _process = process;
         PId = _process.Id;
-        StartUtc = DateTime.UtcNow;
+        StartUtc = startTime;
         State = ProcessState.RUNNING;
         _infos = infos;
         _lastResponse = DateTime.UtcNow;
@@ -29,6 +29,10 @@ public sealed class ConanServerProcess : IConanServerProcess
         
         RCon = new Rcon(new IPEndPoint(IPAddress.Loopback, _infos.RConPort), _infos.RConPassword);
         Console = new MixedConsole(RCon);
+    }
+
+    public ConanServerProcess(Process process, ConanServerInfos infos) : this(process, infos, DateTime.UtcNow)
+    {
     }
 
     public long MemoryUsage

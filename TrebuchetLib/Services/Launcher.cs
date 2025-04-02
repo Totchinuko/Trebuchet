@@ -344,7 +344,7 @@ public class Launcher : IDisposable
         if (data.IsEmpty) return;
         if (!data.TryGetProcess(out var process)) return;
 
-        IConanProcess client = new ConanClientProcess(process);
+        IConanProcess client = new ConanClientProcess(process, data.start);
         _conanClientProcess = client;
     }
 
@@ -358,7 +358,7 @@ public class Launcher : IDisposable
             if (!p.TryGetProcess(out var process)) continue;
 
             var infos = await _iniHandler.GetInfosFromServerAsync(instance).ConfigureAwait(false);
-            IConanServerProcess server = new ConanServerProcess(process, infos);
+            IConanServerProcess server = new ConanServerProcess(process, infos, p.start);
             _serverProcesses.TryAdd(instance, server);
         }
     }

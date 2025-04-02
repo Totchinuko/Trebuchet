@@ -9,12 +9,16 @@ public sealed class ConanClientProcess : IConanProcess
     private readonly Process _process;
     private ProcessState _state;
 
-    public ConanClientProcess(Process process)
+    public ConanClientProcess(Process process, DateTime startTime)
     {
         _process = process;
         PId = _process.Id;
-        StartUtc = process.StartTime;
+        StartUtc = startTime;
         State = ProcessState.RUNNING;
+    }
+    
+    public ConanClientProcess(Process process) : this(process, DateTime.UtcNow)
+    {
     }
 
     public long MemoryUsage
