@@ -17,6 +17,7 @@
                 <MergeResourceInclude Source="Templates\OnBoardingDirectory.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingListSelection.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingNameSelection.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingConfirmation.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingChoice.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingBranch.axaml" />
                 <MergeResourceInclude Source="Templates\WorkshopSearchResult.axaml" />
@@ -25,7 +26,6 @@
                 <MergeResourceInclude Source="Templates\CPUAffinityField.axaml" />
                 <MergeResourceInclude Source="Templates\DirectoryField.axaml" />
                 <MergeResourceInclude Source="Templates\ComboBoxField.axaml" />
-                <MergeResourceInclude Source="Templates\RequiredAction.axaml" />
                 <MergeResourceInclude Source="Templates\FieldEditor.axaml" />
                 <MergeResourceInclude Source="Templates\ToggleField.axaml" />
                 <MergeResourceInclude Source="Templates\IntSliderField.axaml" />
@@ -77,6 +77,7 @@
         <StaticResource ResourceKey="OnBoardingProgress" />
         <StaticResource ResourceKey="OnBoardingListSelection" />
         <StaticResource ResourceKey="OnBoardingNameSelection" />
+        <StaticResource ResourceKey="OnBoardingNameConfirmation" />
         <StaticResource ResourceKey="WorkshopSearchResult" />
     </Application.DataTemplates>
 </Application>

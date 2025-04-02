@@ -269,13 +269,25 @@ Do you wish to proceed ?</value>
     <data name="OnBoardingNewGameSave" xml:space="preserve">
         <value>Choose a name for the new trebuchet save that will contain your files</value>
     </data>
-    <data name="OnBoardingNewGameSaveError" xml:space="preserve">
+    <data name="ErrorNameAlreadyTaken" xml:space="preserve">
         <value>This name is already taken</value>
     </data>
-    <data name="OnBoardingNewGameSaveEmpty" xml:space="preserve">
+    <data name="ErrorNameEmpty" xml:space="preserve">
         <value>The name cannot be empty</value>
     </data>
-    <data name="OnBoardingNewGameSaveInvalid" xml:space="preserve">
+    <data name="ErrorNameInvalidCharacters" xml:space="preserve">
         <value>This name contain invalid characters</value>
+    </data>
+    <data name="Yes" xml:space="preserve">
+        <value>Yes</value>
+    </data>
+    <data name="No" xml:space="preserve">
+        <value>No</value>
+    </data>
+    <data name="Cancel" xml:space="preserve">
+        <value>Cancel</value>
+    </data>
+    <data name="ErrorValueEmpty" xml:space="preserve">
+        <value>Value cannot be empty</value>
     </data>
 </root>

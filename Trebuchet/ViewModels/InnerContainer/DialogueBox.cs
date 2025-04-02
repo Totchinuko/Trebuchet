@@ -6,11 +6,11 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class InnerContainer : BaseViewModel
+public class DialogueBox : BaseViewModel
 {
-    private InnerPopup? _popup;
+    private DialogueContent? _popup;
 
-    public InnerPopup? Popup
+    public DialogueContent? Popup
     {
         get => _popup;
         private set
@@ -22,7 +22,7 @@ public class InnerContainer : BaseViewModel
 
     public bool Active => Popup != null;
     
-    public void Open(InnerPopup popup)
+    public void Open(DialogueContent popup)
     {
         Popup?.OnClose();
         Popup = popup;
@@ -30,7 +30,7 @@ public class InnerContainer : BaseViewModel
         Popup.OnOpen();
     }
 
-    public async Task OpenAsync(InnerPopup popup)
+    public async Task OpenAsync(DialogueContent popup)
     {
         Open(popup);
         await TrebuchetUtils.Utils.WaitUntil(() => !Active);

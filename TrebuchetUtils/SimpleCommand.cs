@@ -31,7 +31,7 @@ namespace TrebuchetUtils
             Executed += action;
             return this;
         }
-        
+
         public SimpleCommand Subscribe(Action<object?> action)
         {
             Executed += (_,parameter) => action(parameter);
@@ -41,6 +41,18 @@ namespace TrebuchetUtils
         public SimpleCommand Subscribe(Action action)
         {
             Executed += (_,_) => action();
+            return this;
+        }
+        
+        public SimpleCommand Clear()
+        {
+            Executed = null;
+            return this;
+        }
+
+        public SimpleCommand Unsubscribe(EventHandler<object?> action)
+        {
+            Executed -= action;
             return this;
         }
 

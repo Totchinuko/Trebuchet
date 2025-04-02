@@ -138,6 +138,12 @@
         <Setter Property="Opacity" Value="0" />
         <Setter Property="IsHitTestVisible" Value="False"/>
     </Style>
+    <Style Selector="TextBlock.Hidden">
+        <Setter Property="Foreground" Value="Transparent"/>
+    </Style>
+    <Style Selector="TextBlock.Error">
+        <Setter Property="Foreground" Value="{DynamicResource TRed}"/>
+    </Style>
     <Style Selector="Border.Disabled">
         <Setter Property="Opacity" Value="0.5" />
         <Setter Property="IsHitTestVisible" Value="False" />
@@ -678,7 +684,7 @@
     </Style>
     
     <!-- Window Inner Contextual --> 
-    <Style Selector="Panel.InnerContextual">
+    <Style Selector="Panel.DialogueBox">
         <Setter Property="Opacity" Value="0" />
         <Setter Property="ZIndex" Value="1" />
         <Setter Property="IsVisible" Value="False" />
@@ -707,7 +713,7 @@
             <Setter Property="Margin" Value="30" />
             <Setter Property="BoxShadow" Value="2 2 15 0 #FF000000" />
             <Setter Property="BorderThickness" Value="1" />
-            <Setter Property="Padding" Value="12" />
+            <Setter Property="Padding" Value="20" />
             
             <Style Selector="^ TextBlock">
                 <Setter Property="TextWrapping" Value="Wrap" />

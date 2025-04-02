@@ -26,11 +26,11 @@
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
-            <Panel Grid.RowSpan="2" Classes="InnerContextual" Classes.Active="{Binding InnerContainer.Active}">
+            <Panel Grid.RowSpan="2" Classes="DialogueBox" Classes.Active="{Binding DialogueBox.Active}">
                 <Border Classes="Overlay" />
                 <Border Classes="Blocker" Background="Transparent" />
-                <Border Classes="Popup" HorizontalAlignment="{Binding InnerContainer.Popup.HorizontalAlignment, FallbackValue=Stretch}" VerticalAlignment="{Binding InnerContainer.Popup.VerticalAlignment, FallbackValue=Stretch}" Height="{Binding InnerContainer.Popup.Height, FallbackValue=-1}" Width="{Binding InnerContainer.Popup.Width, FallbackValue=-1}">
-                    <ContentControl Content="{Binding InnerContainer.Popup}"  />
+                <Border Classes="Popup" HorizontalAlignment="{Binding DialogueBox.Popup.HorizontalAlignment, FallbackValue=Stretch}" VerticalAlignment="{Binding DialogueBox.Popup.VerticalAlignment, FallbackValue=Stretch}" MinHeight="{Binding DialogueBox.Popup.Height, FallbackValue=-1}" MinWidth="{Binding DialogueBox.Popup.Width, FallbackValue=-1}">
+                    <ContentControl Content="{Binding DialogueBox.Popup}"  />
                 </Border>
             </Panel>
             <controls:WindowTitlebar

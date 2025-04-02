@@ -137,7 +137,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddSingleton<ILanguageManager, LanguageManager>();
 
         services.AddSingleton<SteamWidget>();
-        services.AddSingleton<InnerContainer>();
+        services.AddSingleton<DialogueBox>();
         services.AddTransient<WorkshopSearchViewModel>();
         services.AddTransient<TrebuchetApp>();
 

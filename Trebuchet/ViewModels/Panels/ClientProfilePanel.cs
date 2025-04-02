@@ -2,8 +2,9 @@
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Windows.Input;
+using System.Threading.Tasks;
 using Trebuchet.Assets;
+using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
@@ -13,6 +14,7 @@ namespace Trebuchet.ViewModels.Panels
 {
     public class ClientProfilePanel : FieldEditorPanel
     {
+        private readonly DialogueBox _box;
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
@@ -20,8 +22,14 @@ namespace Trebuchet.ViewModels.Panels
         private ObservableCollection<string> _profiles = [];
         private string _selectedProfile;
 
-        public ClientProfilePanel(AppSetup setup, AppFiles appFiles, UIConfig uiConfig) : base(Resources.GameSaves, "mdi-controller", false)
+        public ClientProfilePanel(
+            DialogueBox box,
+            AppSetup setup, 
+            AppFiles appFiles, 
+            UIConfig uiConfig) : 
+            base(Resources.GameSaves, "mdi-controller", false)
         {
+            _box = box;
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
@@ -130,28 +138,33 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnProfileCreate(object? obj)
         {
-            InputTextModal modal = new(Resources.Create, Resources.ProfileName);
-            await modal.OpenDialogueAsync();
-            if (string.IsNullOrEmpty(modal.Text)) return;
-            string name = modal.Text;
-            if (_profiles.Contains(name))
-            {
-                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
-                return;
-            }
-
+            var name = await GetNewProfileName();
+            if (name is null) return;
             _profile = _appFiles.Client.Create(name);
             LoadProfileList();
             SelectedProfile = name;
+        }
+
+        private Validation ValidateName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return Validation.Invalid(Resources.ErrorNameEmpty);
+            if (_profiles.Contains(name))
+                return Validation.Invalid(Resources.ErrorNameAlreadyTaken);
+            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                return Validation.Invalid(Resources.ErrorNameInvalidCharacters);
+            return Validation.Valid;
         }
 
         private async void OnProfileDelete(object? obj)
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
 
-            QuestionModal question = new(Resources.Deletion, string.Format(Resources.DeletionText, _selectedProfile));
-            await question.OpenDialogueAsync();
-            if (!question.Result) return;
+            OnBoardingConfirmation confirm = new OnBoardingConfirmation(
+                    Resources.Deletion,
+                    string.Format(Resources.DeletionText, _selectedProfile));
+            await _box.OpenAsync(confirm);
+            if (!confirm.Result) return;
             
             _appFiles.Client.Delete(_profile.ProfileName);
 
@@ -163,20 +176,19 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnProfileDuplicate(object? obj)
         {
-            InputTextModal modal = new InputTextModal(Resources.Duplicate, Resources.ProfileName);
-            modal.SetValue(_selectedProfile);
-            await modal.OpenDialogueAsync();
-            if (string.IsNullOrEmpty(modal.Text)) return;
-            string name = modal.Text;
-            if (_profiles.Contains(name))
-            {
-                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
-                return;
-            }
-
+            var name = await GetNewProfileName();
+            if (name is null) return;
             _profile = await _appFiles.Client.Duplicate(_profile.ProfileName, name);
             LoadProfileList();
             SelectedProfile = name;
+        }
+
+        private async Task<string?> GetNewProfileName()
+        {
+            var modal = new OnBoardingNameSelection(Resources.Create, string.Empty)
+                .SetValidation(ValidateName);
+            await _box.OpenAsync(modal);
+            return modal.Value;
         }
     }
 }

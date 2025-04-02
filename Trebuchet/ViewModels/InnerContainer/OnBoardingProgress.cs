@@ -7,7 +7,7 @@ using Avalonia.Threading;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingProgress : InnerPopup, IProgress<double>
+public class OnBoardingProgress : DialogueContent, IProgress<double>
 {
     private double _progress = 0;
 
@@ -16,7 +16,6 @@ public class OnBoardingProgress : InnerPopup, IProgress<double>
         Title = title;
         Description = description;
         MaxValue = maxValue;
-        SetSize<OnBoardingProgress>(650, 250);
     }
 
     public string Title { get; }

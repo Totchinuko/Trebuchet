@@ -5,7 +5,7 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingListSelection : InnerPopup
+public class OnBoardingListSelection : DialogueContent
 {
     private string _selectedElement;
 

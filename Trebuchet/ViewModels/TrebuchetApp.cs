@@ -42,7 +42,7 @@ namespace Trebuchet.ViewModels
             UIConfig uiConfig,
             Steam steam, 
             SteamWidget steamWidget,
-            InnerContainer.InnerContainer innerContainer,
+            InnerContainer.DialogueBox dialogueBox,
             IEnumerable<Panel> panels)
         {
             _messenger = messenger;
@@ -53,7 +53,7 @@ namespace Trebuchet.ViewModels
             _steam = steam;
             _panels = panels.ToList();
             SteamWidget = steamWidget;
-            InnerContainer = innerContainer;
+            DialogueBox = dialogueBox;
 
             ToggleFoldedCommand = new SimpleCommand().Subscribe(() => FoldedMenu = !FoldedMenu); 
 
@@ -112,7 +112,7 @@ namespace Trebuchet.ViewModels
 
         public SteamWidget SteamWidget { get; }
         
-        public InnerContainer.InnerContainer InnerContainer { get; }
+        public DialogueBox DialogueBox { get; }
 
         public async void OnWindowShow()
         {
@@ -169,7 +169,7 @@ namespace Trebuchet.ViewModels
                 .AddChoice(Resources.OnBoardingUsageChoicePlayer, Resources.OnBoardingUsageChoicePlayerSub)
                 .AddChoice(Resources.OnBoardingUsageChoiceServer, Resources.OnBoardingUsageChoiceServerSub)
                 .AddChoice(Resources.OnBoardingUsageChoiceModder, Resources.OnBoardingUsageChoiceModderSub);
-            await InnerContainer.OpenAsync(choice);
+            await DialogueBox.OpenAsync(choice);
             switch (choice.Result)
             {
                 case 0:
@@ -192,8 +192,9 @@ namespace Trebuchet.ViewModels
 
         private async Task<bool> OnBoardingServerDownload()
         {
-            var progress = new OnBoardingProgress(Resources.UpdateServersLabel, string.Empty);
-            InnerContainer.Open(progress);
+            var progress = new OnBoardingProgress(Resources.UpdateServersLabel, string.Empty)
+                .SetSize<OnBoardingProgress>(600, 250);
+            DialogueBox.Open(progress);
             _steam.SetTemporaryProgress(progress);
             if(!SteamWidget.IsConnected)
                 await _steam.Connect();
@@ -210,19 +211,19 @@ namespace Trebuchet.ViewModels
             if (Tools.IsClientInstallValid(_setup.Config.ClientPath))
                 return await OnBoardingApplyConanManagement();
             
-            var finder = new OnBoardingDirectory(
-                Resources.OnBoardingLocateConan,
-                Resources.OnBoardingLocateConanText,
-                ValidateConanExileLocation)
+            var finder = new OnBoardingDirectory(Resources.OnBoardingLocateConan, Resources.OnBoardingLocateConanText)
+                .SetValidation(ValidateConanExileLocation)
                 .SetSize<OnBoardingDirectory>(600, 200);
-            await InnerContainer.OpenAsync(finder);
-            if(finder.Result is null) throw new Exception("OnBoarding Failed");
-            _setup.Config.ClientPath = finder.Result.FullName;
+            await DialogueBox.OpenAsync(finder);
+            if(finder.Value is null) throw new Exception("OnBoarding Failed");
+            _setup.Config.ClientPath = finder.Value;
             return await OnBoardingAllowConanManagement();
         }
 
-        private Validation ValidateConanExileLocation(string path)
+        private Validation ValidateConanExileLocation(string? path)
         {
+            if(string.IsNullOrEmpty(path))
+                return Validation.Invalid(Resources.ErrorValueEmpty);
             if (!Tools.IsClientInstallValid(path))
                 return new Validation(false, Resources.OnBoardingLocateConanError);
             return new Validation(true, string.Empty);
@@ -234,7 +235,7 @@ namespace Trebuchet.ViewModels
                 .SetSize<OnBoardingBranch>(650, 300)
                 .AddChoice(Resources.OnBoardingManageConanNo, Resources.OnBoardingManageConanNoSub)
                 .AddChoice(Resources.OnBoardingManageConanYes, Resources.OnBoardingManageConanYesSub);
-            await InnerContainer.OpenAsync(choice);
+            await DialogueBox.OpenAsync(choice);
             if(choice.Result < 0) throw new Exception("OnBoarding Failed");
             _setup.Config.ManageClient = choice.Result == 1;
             return await OnBoardingApplyConanManagement();
@@ -304,30 +305,28 @@ namespace Trebuchet.ViewModels
                     Resources.OnBoardingChooseGameSaveText, 
                     _appFiles.Client.ListProfiles().ToList())
                 .SetSize<OnBoardingListSelection>(650, 200);
-            await InnerContainer.OpenAsync(choice);
+            await DialogueBox.OpenAsync(choice);
             if(string.IsNullOrEmpty(choice.SelectedElement)) throw new Exception("OnBoarding Failed");
             return choice.SelectedElement;
         }
 
         private async Task<string> OnBoardingChooseClientSaveName()
         {
-            var choice = new OnBoardingNameSelection(
-                Resources.OnBoardingGameSave,
-                Resources.OnBoardingNewGameSave,
-                ValidateClientSaveName)
+            var choice = new OnBoardingNameSelection( Resources.OnBoardingGameSave, Resources.OnBoardingNewGameSave)
+                .SetValidation(ValidateClientSaveName)
                 .SetSize<OnBoardingNameSelection>(650, 200);
-            await InnerContainer.OpenAsync(choice);
-            if(string.IsNullOrEmpty(choice.SelectedName)) throw new Exception("OnBoarding Failed");
-            return choice.SelectedName;
+            await DialogueBox.OpenAsync(choice);
+            if(string.IsNullOrEmpty(choice.Value)) throw new Exception("OnBoarding Failed");
+            return choice.Value;
         }
 
-        private Validation ValidateClientSaveName(string name)
+        private Validation ValidateClientSaveName(string? name)
         {
-            if (string.IsNullOrEmpty(name)) return new Validation(false, Resources.OnBoardingNewGameSaveEmpty);
+            if (string.IsNullOrWhiteSpace(name)) return new Validation(false, Resources.ErrorNameEmpty);
             if(_appFiles.Client.ListProfiles().Any(x => x == name))
-                return new Validation(false, Resources.OnBoardingNewGameSaveError);
+                return new Validation(false, Resources.ErrorNameAlreadyTaken);
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-                return new Validation(false, Resources.OnBoardingNewGameSaveInvalid);
+                return new Validation(false, Resources.ErrorNameInvalidCharacters);
             return new Validation(true, string.Empty);
         }
         
@@ -342,7 +341,7 @@ namespace Trebuchet.ViewModels
                 var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
                     .SetSize<OnBoardingBranch>(650, 250)
                     .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
-                await InnerContainer.OpenAsync(uac);
+                await DialogueBox.OpenAsync(uac);
                 if(uac.Result < 0) throw new Exception("Uac failed");
                 Utils.Utils.RestartProcess(_setup.IsTestLive, true);
                 return false;
@@ -368,13 +367,14 @@ namespace Trebuchet.ViewModels
                 var upgrade = new OnBoardingBranch(Resources.Upgrade, Resources.OnBoardingUpgrade)
                     .SetSize<OnBoardingBranch>(650, 250)
                     .AddChoice(Resources.Upgrade, Resources.OnBoardingUpgradeSub);
-                await InnerContainer.OpenAsync(upgrade);
+                await DialogueBox.OpenAsync(upgrade);
                 if(upgrade.Result < 0) throw new Exception("OnBoardingUpgrade failed");
 
                 if (!await OnBoardingElevationRequest(trebuchetDir, Resources.OnBoardingUpgradeUac)) return false;
 
-                var progress = new OnBoardingProgress(Resources.Upgrade, Resources.OnBoardingUpgradeCopy);
-                InnerContainer.Open(progress);
+                var progress = new OnBoardingProgress(Resources.Upgrade, Resources.OnBoardingUpgradeCopy)
+                    .SetSize<OnBoardingProgress>(600, 250);
+                DialogueBox.Open(progress);
 
                 if (File.Exists(configLive))
                 {

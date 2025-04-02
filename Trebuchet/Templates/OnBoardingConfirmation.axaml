@@ -3,20 +3,15 @@
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="OnBoardingDirectory" DataType="l:OnBoardingDirectory">
-        <DockPanel LastChildFill="True">
+    <DataTemplate x:Key="OnBoardingNameConfirmation" DataType="l:OnBoardingConfirmation">
+        <DockPanel LastChildFill="True" MinWidth="550" MinHeight="150">
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
             <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" />
-            <TextBlock DockPanel.Dock="Top" IsVisible="{Binding !IsValid}" Foreground="{DynamicResource TRed}" Text="{Binding ErrorMessage}" />
-            <StackPanel Spacing="6" Orientation="Horizontal" HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0 12 0 0">
-                <TextBox Text="{Binding Value}" Width="350" VerticalAlignment="Center" />
-                <Button Classes="Base" Command="{Binding SearchDirectoryCommand}">
-                    <i:Icon Value="mdi-folder-search" Classes="Normal" />
-                </Button>
-                <Button Classes="Base Green" HotKey="Enter" Command="{Binding ConfirmCommand}" IsEnabled="{Binding IsValid}">
+            <StackPanel Spacing="6" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0 12 0 0">
+                <Button Classes="Base Green" HotKey="Enter" Command="{Binding ConfirmCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="3">
                         <i:Icon Value="mdi-check" Classes="Normal" />
-                        <TextBlock Text="{x:Static a:Resources.Validate}" />
+                        <TextBlock Text="{x:Static a:Resources.Yes}" />
                     </StackPanel>
                 </Button>
                 <Button Classes="Base" HotKey="Escape" IsVisible="{Binding $self.IsEnabled}" Command="{Binding CancelCommand}">

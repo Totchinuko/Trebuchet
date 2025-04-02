@@ -8,75 +8,15 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingDirectory : InnerPopup
+public class OnBoardingDirectory : ValidatedInputDialogue<string>
 {
-    private readonly Func<string, Validation> _validation;
-    private DirectoryInfo? _result;
-    private bool _isDirectoryValid;
-    private bool _displayError;
-    private string _errorMessage;
 
-    public OnBoardingDirectory(string title, string description, Func<string, Validation> validation) : base()
+    public OnBoardingDirectory(string title, string description) : base(title, description)
     {
-        _validation = validation;
-        Title = title;
-        Description = description;
-        var result = _validation(string.Empty);
-        _isDirectoryValid = result.isValid;
-        _errorMessage = result.errorMessage;
         SearchDirectoryCommand = new SimpleCommand().Subscribe(OnSearchDirectory);
-        ConfirmCommand = new SimpleCommand().Subscribe(Close);
-    }
-
-    public string Title { get; }
-    public string Description { get; }
-
-    public string ErrorMessage
-    {
-        get => _errorMessage;
-        private set => SetField(ref _errorMessage, value);
-    }
-
-    public bool DisplayError
-    {
-        get => _displayError;
-        private set => SetField(ref _displayError, value);
-    }
-
-    public DirectoryInfo? Result
-    {
-        get => _result;
-        private set
-        {
-            if(SetField(ref _result, value))
-                OnPropertyChanged(nameof(ResultPath));
-        }
-    }
-
-    public string ResultPath
-    {
-        get => Result?.FullName ?? string.Empty;
-        set
-        {
-            var result = _validation(value);
-            IsDirectoryValid = result.isValid;
-            ErrorMessage = result.errorMessage;
-            DisplayError = !IsDirectoryValid;
-            if(IsDirectoryValid)
-                Result = new DirectoryInfo(value);
-            else
-                Result = null;
-        }
-    }
-
-    public bool IsDirectoryValid
-    {
-        get => _isDirectoryValid;
-        private set => SetField(ref _isDirectoryValid, value);
     }
 
     public SimpleCommand SearchDirectoryCommand { get; }
-    public SimpleCommand ConfirmCommand { get; }
     
     private async void OnSearchDirectory()
     {
@@ -95,12 +35,7 @@ public class OnBoardingDirectory : InnerPopup
         if (folder.Count == 0) return;
         if (!folder[0].Path.IsFile) return;
         var result = _validation(folder[0].Path.LocalPath);
-        IsDirectoryValid = result.isValid;
-        ErrorMessage = result.errorMessage;
-        DisplayError = !IsDirectoryValid;
-        if(IsDirectoryValid)
-            Result = new DirectoryInfo(folder[0].Path.LocalPath);
-        else
-            Result = null;
+        IsValid = result.IsValid;
+        ErrorMessage = result.ErrorMessage;
     }
 }

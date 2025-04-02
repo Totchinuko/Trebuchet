@@ -4,12 +4,12 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class InnerPopup : BaseViewModel
+public class DialogueContent : BaseViewModel
 {
-    public HorizontalAlignment HorizontalAlignment { get; protected set; } = HorizontalAlignment.Stretch;
-    public VerticalAlignment VerticalAlignment { get; protected set; } =  VerticalAlignment.Stretch;
-    public int Width { get; protected set; } = -1;
-    public int Height { get; protected set; } = -1;
+    public HorizontalAlignment HorizontalAlignment { get; protected set; } = HorizontalAlignment.Center;
+    public VerticalAlignment VerticalAlignment { get; protected set; } =  VerticalAlignment.Center;
+    public int Width { get; protected set; }
+    public int Height { get; protected set; }
 
     public event EventHandler? CloseRequested;
 
@@ -26,7 +26,7 @@ public class InnerPopup : BaseViewModel
         CloseRequested?.Invoke(this, EventArgs.Empty);
     }
 
-    public T SetSize<T>(int width, int height) where T : InnerPopup
+    public T SetSize<T>(int width, int height) where T : DialogueContent
     {
         Width = width;
         Height = height;
@@ -35,7 +35,7 @@ public class InnerPopup : BaseViewModel
         return (T)this;
     }
 
-    public T SetStretch<T>() where T : InnerPopup
+    public T SetStretch<T>() where T : DialogueContent
     {
         HorizontalAlignment = HorizontalAlignment.Stretch;
         VerticalAlignment = VerticalAlignment.Stretch;

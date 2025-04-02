@@ -78,6 +78,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel.
+        /// </summary>
+        public static string Cancel {
+            get {
+                return ResourceManager.GetString("Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create.
         /// </summary>
         public static string Create {
@@ -137,6 +146,42 @@ namespace Trebuchet.Assets {
         public static string Error {
             get {
                 return ResourceManager.GetString("Error", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This name is already taken.
+        /// </summary>
+        public static string ErrorNameAlreadyTaken {
+            get {
+                return ResourceManager.GetString("ErrorNameAlreadyTaken", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The name cannot be empty.
+        /// </summary>
+        public static string ErrorNameEmpty {
+            get {
+                return ResourceManager.GetString("ErrorNameEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This name contain invalid characters.
+        /// </summary>
+        public static string ErrorNameInvalidCharacters {
+            get {
+                return ResourceManager.GetString("ErrorNameInvalidCharacters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Value cannot be empty.
+        /// </summary>
+        public static string ErrorValueEmpty {
+            get {
+                return ResourceManager.GetString("ErrorValueEmpty", resourceCulture);
             }
         }
         
@@ -375,6 +420,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to No.
+        /// </summary>
+        public static string No {
+            get {
+                return ResourceManager.GetString("No", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Choose which game save need to be copied back into the game files.
         /// </summary>
         public static string OnBoardingChooseGameSaveText {
@@ -490,33 +544,6 @@ namespace Trebuchet.Assets {
         public static string OnBoardingNewGameSave {
             get {
                 return ResourceManager.GetString("OnBoardingNewGameSave", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to The name cannot be empty.
-        /// </summary>
-        public static string OnBoardingNewGameSaveEmpty {
-            get {
-                return ResourceManager.GetString("OnBoardingNewGameSaveEmpty", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This name is already taken.
-        /// </summary>
-        public static string OnBoardingNewGameSaveError {
-            get {
-                return ResourceManager.GetString("OnBoardingNewGameSaveError", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This name contain invalid characters.
-        /// </summary>
-        public static string OnBoardingNewGameSaveInvalid {
-            get {
-                return ResourceManager.GetString("OnBoardingNewGameSaveInvalid", resourceCulture);
             }
         }
         
@@ -825,6 +852,15 @@ namespace Trebuchet.Assets {
         public static string VerifyServersLabel {
             get {
                 return ResourceManager.GetString("VerifyServersLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Yes.
+        /// </summary>
+        public static string Yes {
+            get {
+                return ResourceManager.GetString("Yes", resourceCulture);
             }
         }
     }
