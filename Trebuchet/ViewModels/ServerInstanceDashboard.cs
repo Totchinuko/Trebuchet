@@ -44,9 +44,6 @@ namespace Trebuchet.ViewModels
                 .SetBlockingType<ServersRunning>();
         }
 
-        // public bool CanUseDashboard => _setup.Config.IsInstallPathValid &&
-        //         (_setup.Config.ServerInstanceCount > Instance || ProcessRunning);
-
         public event EventHandler<int>? LaunchClicked;
         public event EventHandler<int>? KillClicked;
         public event EventHandler<int>? CloseClicked;
@@ -122,13 +119,13 @@ namespace Trebuchet.ViewModels
             set => SetField(ref _updateNeeded, value);
         }
 
-        public async Task ProcessRefresh(IConanProcess? process, bool refreshStats)
+        public Task ProcessRefresh(IConanProcess? process, bool refreshStats)
         {
             var state = process?.State ?? ProcessState.STOPPED;
             if (_lastState.IsRunning() && !state.IsRunning())
                 OnProcessTerminated();
             else if (!_lastState.IsRunning() && state.IsRunning() && process is not null)
-                OnProcessStarted(process);
+                OnProcessStarted(process, refreshStats);
 
             if (state == ProcessState.FAILED)
                 OnProcessFailed();
@@ -136,7 +133,7 @@ namespace Trebuchet.ViewModels
                 ProcessStats.SetDetails(process);
 
             _lastState = state;
-            await ProcessStats.Tick(refreshStats);
+            return Task.CompletedTask;
         }
 
         private void OnClose(object? obj)
@@ -169,14 +166,15 @@ namespace Trebuchet.ViewModels
             await new ErrorModal(Resources.ServerFailedStart, Resources.ServerFailedStartText).OpenDialogueAsync();
         }
 
-        private void OnProcessStarted(IConanProcess details)
+        private void OnProcessStarted(IConanProcess details, bool refreshProcess)
         {
             LaunchCommand.Toggle(false);
             KillCommand.Toggle(true);
             CloseCommand.Toggle(true);
 
             ProcessRunning = true;
-            ProcessStats.StartStats(details);
+            if(refreshProcess)
+                ProcessStats.StartStats(details);
         }
 
         private void OnProcessTerminated()

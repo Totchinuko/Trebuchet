@@ -44,11 +44,6 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
 
     public event EventHandler? UpdateClicked;
 
-    // public bool CanUseDashboard => _setup.Config.IsInstallPathValid &&
-    //                                !string.IsNullOrEmpty(_setup.Config.ClientPath) &&
-    //                                File.Exists(Path.Combine(_setup.Config.ClientPath, Constants.FolderGameBinaries,
-    //                                    Constants.FileClientBin));
-
     public bool CanUseDashboard
     {
         get => _canUseDashboard;
@@ -109,13 +104,13 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
         set => SetField(ref _updateNeeded, value);
     }
 
-    public async Task ProcessRefresh(IConanProcess? process, bool refreshStats)
+    public Task ProcessRefresh(IConanProcess? process, bool refreshStats)
     {
         var state = process?.State ?? ProcessState.STOPPED;
         if (_lastState.IsRunning() && !state.IsRunning())
             OnProcessTerminated();
         else if (!_lastState.IsRunning() && state.IsRunning() && process is not null)
-            OnProcessStarted(process);
+            OnProcessStarted(process, refreshStats);
 
         if (state == ProcessState.FAILED)
             OnProcessFailed();
@@ -123,7 +118,7 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
             ProcessStats.SetDetails(process);
 
         _lastState = state;
-        await ProcessStats.Tick(refreshStats);
+        return Task.CompletedTask;
     }
 
     private void OnBattleEyeLaunched(object? obj)
@@ -155,7 +150,7 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
         await new ErrorModal("Client failed to start", "See the logs for more information.").OpenDialogueAsync();
     }
 
-    private void OnProcessStarted(IConanProcess details)
+    private void OnProcessStarted(IConanProcess details, bool refreshStats)
     {
         LaunchCommand.Toggle(false);
         LaunchBattleEyeCommand.Toggle(false);
@@ -163,7 +158,8 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
 
         ProcessRunning = true;
 
-        ProcessStats.StartStats(details);
+        if(refreshStats)
+            ProcessStats.StartStats(details);
     }
 
     private void OnProcessTerminated()

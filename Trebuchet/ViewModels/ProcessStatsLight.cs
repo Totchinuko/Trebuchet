@@ -3,6 +3,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
 
@@ -14,11 +15,14 @@ namespace Trebuchet.ViewModels
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
         private IConanProcess? _details;
         private long _peakMemoryConsumption;
+        private DispatcherTimer _timer;
 
         public ProcessStatsLight()
         {
             CpuUsage = string.Empty;
             MemoryConsumption = string.Empty;
+            _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Tick());
+            _timer.Stop();
         }
 
         public event PropertyChangedEventHandler? PropertyChanged;
@@ -45,6 +49,7 @@ namespace Trebuchet.ViewModels
         public void StartStats(IConanProcess details)
         {
             SetDetails(details);
+            _timer.Start();
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(PID));
             OnPropertyChanged(nameof(ProcessStatus));
@@ -54,21 +59,19 @@ namespace Trebuchet.ViewModels
         {
             _details = null;
             _peakMemoryConsumption = 0;
+            _timer.Stop();
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(ProcessStatus));
         }
         
-        public async Task Tick(bool refreshStats)
+        private async void Tick()
         {
             if (!Running) return;
 
-            if (refreshStats)
-            {
-                long memoryConsumption = _details?.MemoryUsage ?? 0;
-                CpuUsage = string.Format(CpuFormat, (await GetCpuUsageForProcess()).ToString("N2"));
-                _peakMemoryConsumption = Math.Max(memoryConsumption, _peakMemoryConsumption);
-                MemoryConsumption = string.Format(MemoryFormat, (memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
-            }
+            long memoryConsumption = _details?.MemoryUsage ?? 0;
+            CpuUsage = string.Format(CpuFormat, (await GetCpuUsageForProcess()).ToString("N2"));
+            _peakMemoryConsumption = Math.Max(memoryConsumption, _peakMemoryConsumption);
+            MemoryConsumption = string.Format(MemoryFormat, (memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
 
             if (_details is IConanServerProcess serverDetails)
             {
@@ -80,7 +83,7 @@ namespace Trebuchet.ViewModels
             OnPropertyChanged(nameof(CpuUsage));
             OnPropertyChanged(nameof(Uptime));
         }
-
+        
         protected void OnPropertyChanged(string propertyName)
         {
             PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
