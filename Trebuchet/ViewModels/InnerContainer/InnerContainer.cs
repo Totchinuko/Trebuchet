@@ -2,10 +2,11 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
+using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class InnerContainer : INotifyPropertyChanged
+public class InnerContainer : BaseViewModel
 {
     private InnerPopup? _popup;
 
@@ -21,8 +22,6 @@ public class InnerContainer : INotifyPropertyChanged
 
     public bool Active => Popup != null;
     
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public void Open(InnerPopup popup)
     {
         Popup?.OnClose();
@@ -42,18 +41,5 @@ public class InnerContainer : INotifyPropertyChanged
     {
         Popup?.OnClose();
         Popup = null;
-    }
-    
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

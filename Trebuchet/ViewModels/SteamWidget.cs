@@ -10,7 +10,7 @@ using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels
 {
-    public class SteamWidget : INotifyPropertyChanged, ITinyRecipient<BlockedTaskStateChanged>
+    public class SteamWidget : BaseViewModel, ITinyRecipient<BlockedTaskStateChanged>
     {
         private readonly Steam _steam;
         private readonly TaskBlocker _taskBlocker;
@@ -189,21 +189,6 @@ namespace Trebuchet.ViewModels
                 OnPropertyChanged(nameof(IsConnected));
                 ConnectCommand.Toggle(true);
             });
-        }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
-        protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
         }
     }
 }

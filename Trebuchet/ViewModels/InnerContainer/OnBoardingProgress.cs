@@ -7,7 +7,7 @@ using Avalonia.Threading;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingProgress : InnerPopup, INotifyPropertyChanged, IProgress<double>
+public class OnBoardingProgress : InnerPopup, IProgress<double>
 {
     private double _progress = 0;
 
@@ -38,22 +38,7 @@ public class OnBoardingProgress : InnerPopup, INotifyPropertyChanged, IProgress<
         get => Progress == 0.0;
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
-    }
-
-    public void Report(double value)
+  public void Report(double value)
     {
         Dispatcher.UIThread.Invoke(() =>
         {

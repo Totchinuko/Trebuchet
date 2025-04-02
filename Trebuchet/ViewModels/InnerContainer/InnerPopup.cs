@@ -1,9 +1,10 @@
 using System;
 using Avalonia.Layout;
+using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class InnerPopup()
+public class InnerPopup : BaseViewModel
 {
     public HorizontalAlignment HorizontalAlignment { get; protected set; } = HorizontalAlignment.Stretch;
     public VerticalAlignment VerticalAlignment { get; protected set; } =  VerticalAlignment.Stretch;

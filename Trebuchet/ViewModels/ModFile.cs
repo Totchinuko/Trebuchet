@@ -1,19 +1,17 @@
 ﻿using System;
-using System.ComponentModel;
 using System.IO;
 using Avalonia;
 using Avalonia.Media;
 using Humanizer;
 using SteamWorksWebAPI;
 using Trebuchet.Assets;
-using Trebuchet.Messages;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {
-    public class ModFile : INotifyPropertyChanged
+    public class ModFile : BaseViewModel
     {
         private uint _appId;
         private FileInfo _infos;
@@ -49,7 +47,6 @@ namespace Trebuchet.ViewModels
         public SimpleCommand OpenModPageCommand { get; }
         public SimpleCommand UpdateModCommand { get; }
         
-        public event PropertyChangedEventHandler? PropertyChanged;
         public IBrush BorderColor => GetBorderBrush();
         public bool IsPublished => PublishedFileId > 0;
         public bool IsTestLive => _appId == Constants.AppIDTestLiveClient;
@@ -158,11 +155,6 @@ namespace Trebuchet.ViewModels
             //if (_lastUpdate < _infos.LastWriteTimeUtc) return "Up to Date";
             //if (_lastUpdate < _infos.LastWriteTimeUtc && _size != _infos.Length) return "Corrupted";
             return Resources.UpdateAvailable;
-        }
-
-        protected virtual void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

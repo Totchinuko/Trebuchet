@@ -11,7 +11,7 @@ using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels;
 
-public class ClientInstanceDashboard : INotifyPropertyChanged
+public class ClientInstanceDashboard : BaseViewModel
 {
     private ProcessState _lastState;
     private string _selectedModlist = string.Empty;
@@ -173,20 +173,5 @@ public class ClientInstanceDashboard : INotifyPropertyChanged
         LaunchBattleEyeCommand.Toggle(true);
 
         ProcessRunning = false;
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

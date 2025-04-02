@@ -9,7 +9,6 @@ namespace Trebuchet.ViewModels.Panels
 {
     public abstract class Panel : MenuElement,
         ICommand,
-        INotifyPropertyChanged,
         ITinyRecipient<PanelRefreshConfigMessage>
     {
         
@@ -23,8 +22,6 @@ namespace Trebuchet.ViewModels.Panels
 
         public event EventHandler? CanExecuteChanged;
         public event EventHandler<Panel>? TabClicked;
-        public event PropertyChangedEventHandler? PropertyChanged;
-        
         public string IconPath { get; }
         public bool BottomPosition { get; }
 
@@ -33,9 +30,8 @@ namespace Trebuchet.ViewModels.Panels
             get => _active;
             set
             {
-                _active = value;
-                OnPropertyChanged(nameof(Active));
-                OnPropertyChanged(nameof(TabClass));
+                if (SetField(ref _active, value))
+                    OnPropertyChanged(nameof(TabClass));
             }
         }
 
@@ -73,11 +69,6 @@ namespace Trebuchet.ViewModels.Panels
         protected void OnCanExecuteChanged()
         {
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
-
-        protected void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
     }
 }

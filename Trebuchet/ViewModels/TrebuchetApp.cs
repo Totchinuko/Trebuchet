@@ -22,7 +22,7 @@ using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet.ViewModels
 {
-    public sealed class TrebuchetApp : INotifyPropertyChanged
+    public sealed class TrebuchetApp : BaseViewModel
     {
         private readonly ITinyMessengerHub _messenger;
         private readonly AppSetup _setup;
@@ -74,8 +74,6 @@ namespace Trebuchet.ViewModels
                 await panel.Tick();
             _timer.Start();
         }
-
-        public event PropertyChangedEventHandler? PropertyChanged;
 
         public static string AppTitle => $"Tot ! Trebuchet {TrebuchetUtils.Utils.GetFileVersion()}";
 
@@ -143,19 +141,6 @@ namespace Trebuchet.ViewModels
                 else
                     TopPanels.Add(panel);
             }
-        }
-
-        private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
-        private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-        {
-            if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-            field = value;
-            OnPropertyChanged(propertyName);
-            return true;
         }
 
         private async void OnBoardingActions()

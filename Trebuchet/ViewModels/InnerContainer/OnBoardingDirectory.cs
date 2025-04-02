@@ -1,20 +1,14 @@
 using System;
-using System.Collections.Generic;
-using System.ComponentModel;
 using System.IO;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
-using SteamKit2.GC.Dota.Internal;
-using TrebuchetLib;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingDirectory : InnerPopup, INotifyPropertyChanged
+public class OnBoardingDirectory : InnerPopup
 {
     private readonly Func<string, Validation> _validation;
     private DirectoryInfo? _result;
@@ -81,8 +75,8 @@ public class OnBoardingDirectory : InnerPopup, INotifyPropertyChanged
         private set => SetField(ref _isDirectoryValid, value);
     }
 
-    public ICommand SearchDirectoryCommand { get; }
-    public ICommand ConfirmCommand { get; }
+    public SimpleCommand SearchDirectoryCommand { get; }
+    public SimpleCommand ConfirmCommand { get; }
     
     private async void OnSearchDirectory()
     {
@@ -108,20 +102,5 @@ public class OnBoardingDirectory : InnerPopup, INotifyPropertyChanged
             Result = new DirectoryInfo(folder[0].Path.LocalPath);
         else
             Result = null;
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

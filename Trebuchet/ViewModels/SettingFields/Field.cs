@@ -26,7 +26,7 @@ namespace Trebuchet.ViewModels.SettingFields
     [JsonDerivedType(typeof(TitleField), "Title")]
     [JsonDerivedType(typeof(RawUdpField), "RawUDPPort")]
     [JsonDerivedType(typeof(FloatField), "FloatField")]
-    public abstract class Field : INotifyPropertyChanged
+    public abstract class Field : BaseViewModel
     {
         private readonly string _template;
         public bool DisplayPanel { get; }
@@ -64,9 +64,6 @@ namespace Trebuchet.ViewModels.SettingFields
         public string Property { get; set; } = string.Empty;
 
         public bool RefreshApp { get; set; } = false;
-
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         public event EventHandler<Field>? ValueChanged;
 
         public static List<Field> BuildFieldList(string json, object target, PropertyInfo? property = null)
@@ -87,11 +84,6 @@ namespace Trebuchet.ViewModels.SettingFields
         public abstract void ResetToDefault();
 
         public abstract void SetTarget(object target, PropertyInfo? property = null);
-
-        protected virtual void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
-        }
 
         protected virtual void OnValueChanged()
         {
@@ -216,8 +208,6 @@ namespace Trebuchet.ViewModels.SettingFields
             OnPropertyChanged(nameof(Value));
             OnPropertyChanged(nameof(IsDefault));
         }
-
-
 
         private void RemoveCollectionEvent()
         {

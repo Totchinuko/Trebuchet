@@ -11,8 +11,12 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {
-    public class WorkshopSearchResult : INotifyPropertyChanged
+    public class WorkshopSearchResult : BaseViewModel
     {
+        private string _creatorAvatar = string.Empty;
+        private string _creator = string.Empty;
+        private IImage? _previewUrl;
+
         public WorkshopSearchResult(QueriedPublishedFile result)
         {
             AppId = result.ConsumerAppID;
@@ -29,15 +33,21 @@ namespace Trebuchet.ViewModels
             AddModCommand = new SimpleCommand().Subscribe(() => ModAdded?.Invoke(this, this));
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
-
         public event EventHandler<WorkshopSearchResult>? ModAdded;
 
         public uint AppId { get; }
 
-        public string Creator { get; private set; } = string.Empty;
+        public string Creator
+        {
+            get => _creator;
+            private set => SetField(ref _creator, value);
+        }
 
-        public string CreatorAvatar { get; private set; } = string.Empty;
+        public string CreatorAvatar
+        {
+            get => _creatorAvatar;
+            private set => SetField(ref _creatorAvatar, value);
+        }
 
         public string CreatorId { get; }
 
@@ -45,7 +55,11 @@ namespace Trebuchet.ViewModels
 
         public string LastUpdateReadable => $"{LastUpdate.Humanize()}";
 
-        public IImage? PreviewUrl { get; private set; }
+        public IImage? PreviewUrl
+        {
+            get => _previewUrl;
+            private set => SetField(ref _previewUrl, value);
+        }
 
         public ulong PublishedFileId { get; }
 
@@ -67,20 +81,12 @@ namespace Trebuchet.ViewModels
         {
             Creator = summary.PersonaName;
             CreatorAvatar = summary.Avatar;
-            OnPropertyChanged(nameof(CreatorAvatar));
-            OnPropertyChanged(nameof(Creator));
-        }
-
-        private void OnPropertyChanged(string name)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
         }
 
         private async void DownloadCover(string url)
         {
             var cover = await GuiExtensions.DownloadImage(new Uri(url));
             PreviewUrl = cover;
-            OnPropertyChanged(nameof(PreviewUrl));
         }
     }
 }

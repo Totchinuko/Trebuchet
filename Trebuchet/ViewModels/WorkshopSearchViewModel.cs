@@ -1,12 +1,9 @@
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Windows.Input;
-using SteamKit2.Internal;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using SteamWorksWebAPI.Response;
@@ -16,7 +13,7 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels;
 
-public class WorkshopSearchViewModel : INotifyPropertyChanged
+public class WorkshopSearchViewModel : BaseViewModel
 {
     private ObservableCollection<WorkshopSearchResult> _searchResults = [];
     private bool _testLiveWorkshop;
@@ -120,23 +117,8 @@ public class WorkshopSearchViewModel : INotifyPropertyChanged
         IsLoading = false;
     }
     
-    public event PropertyChangedEventHandler? PropertyChanged;
-    
     protected virtual void OnModAdded(object? sender, WorkshopSearchResult result)
     {
         ModAdded?.Invoke(this, result);
-    }
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }

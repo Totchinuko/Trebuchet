@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace TrebuchetLib.Processes;
 
-public interface IConanProcess : IDisposable, INotifyPropertyChanged
+public interface IConanProcess : IDisposable
 {
     int PId { get; }
     

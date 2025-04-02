@@ -6,39 +6,57 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
+using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {
-    public class ProcessStatsLight : INotifyPropertyChanged, IProcessStats
+    public class ProcessStatsLight : BaseViewModel, IProcessStats
     {
         protected const string CpuFormat = "{0}%";
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
         private IConanProcess? _details;
         private long _peakMemoryConsumption;
         private DispatcherTimer _timer;
+        private string _playerCount = string.Empty;
+        private string _memoryConsumption = string.Empty;
+        private string _cpuUsage = string.Empty;
+        private string _uptime = string.Empty;
 
         public ProcessStatsLight()
         {
-            CpuUsage = string.Empty;
-            MemoryConsumption = string.Empty;
             _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Tick());
             _timer.Stop();
         }
 
-        public event PropertyChangedEventHandler? PropertyChanged;
+        public string CpuUsage
+        {
+            get => _cpuUsage;
+            private set => SetField(ref _cpuUsage, value);
+        }
 
-        public string CpuUsage { get; private set; }
-        public string MemoryConsumption { get; private set; }
+        public string MemoryConsumption
+        {
+            get => _memoryConsumption;
+            private set => SetField(ref _memoryConsumption, value);
+        }
 
         public int PID => (_details?.PId ?? 0);
 
-        public string PlayerCount { get; private set; } = string.Empty;
+        public string PlayerCount
+        {
+            get => _playerCount;
+            private set => SetField(ref _playerCount, value);
+        }
 
         public string ProcessStatus => _details?.State.ToString() ?? string.Empty;
 
         public bool Running => _details?.State.IsRunning() ?? false;
 
-        public string Uptime => _details == null ? string.Empty : (DateTime.UtcNow - _details.StartUtc).ToString("d'd.'h'h:'m'm:'s's'");
+        public string Uptime
+        {
+            get => _uptime;
+            private set => SetField(ref _uptime, value);
+        }
 
         public void SetDetails(IConanProcess details)
         {
@@ -72,23 +90,12 @@ namespace Trebuchet.ViewModels
             CpuUsage = string.Format(CpuFormat, (await GetCpuUsageForProcess()).ToString("N2"));
             _peakMemoryConsumption = Math.Max(memoryConsumption, _peakMemoryConsumption);
             MemoryConsumption = string.Format(MemoryFormat, (memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
+            Uptime = _details == null ? string.Empty : (DateTime.UtcNow - _details.StartUtc).ToString("d'd.'h'h:'m'm:'s's'");;
 
             if (_details is IConanServerProcess serverDetails)
-            {
                 PlayerCount = $"{serverDetails.Players}/{serverDetails.MaxPlayers}";
-                OnPropertyChanged(nameof(PlayerCount));
-            }
-
-            OnPropertyChanged(nameof(MemoryConsumption));
-            OnPropertyChanged(nameof(CpuUsage));
-            OnPropertyChanged(nameof(Uptime));
         }
         
-        protected void OnPropertyChanged(string propertyName)
-        {
-            PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-        }
-
         private async Task<double> GetCpuUsageForProcess()
         {
             if (_details == null) return 0;

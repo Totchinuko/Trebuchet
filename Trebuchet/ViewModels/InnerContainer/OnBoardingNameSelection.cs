@@ -1,16 +1,9 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Windows.Input;
-using ProtoBuf;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingNameSelection : InnerPopup, INotifyPropertyChanged
+public class OnBoardingNameSelection : InnerPopup
 {
     private readonly Func<string, Validation> _validation;
     private string _selectedName = string.Empty;
@@ -37,7 +30,7 @@ public class OnBoardingNameSelection : InnerPopup, INotifyPropertyChanged
         private set => SetField(ref _errorMessage, value);
     }
 
-    public ICommand ConfirmCommand { get; }
+    public SimpleCommand ConfirmCommand { get; }
 
     public bool IsValid
     {
@@ -57,20 +50,5 @@ public class OnBoardingNameSelection : InnerPopup, INotifyPropertyChanged
                 ErrorMessage = result.errorMessage;
             }
         }
-    }
-
-    public event PropertyChangedEventHandler? PropertyChanged;
-
-    protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    protected bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
     }
 }
