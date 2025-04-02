@@ -23,6 +23,10 @@ public interface IConanServerProcess : IConanProcess
     public IConsole Console { get; }
     
     public IRcon RCon { get; }
+    
+    public bool KillZombies { get; set; }
+    
+    public int ZombieCheckSeconds { get; set; }
 
     Task StopAsync();
 }

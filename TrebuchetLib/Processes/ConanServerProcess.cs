@@ -31,9 +31,9 @@ public sealed class ConanServerProcess : IConanServerProcess
         Console = new MixedConsole(RCon);
     }
 
-    public bool ZombieKill { get; set; }
+    public bool KillZombies { get; set; }
 
-    public int ZombieCheckSpan { get; set; }
+    public int ZombieCheckSeconds { get; set; }
 
     public int PId { get; }
     public DateTime StartUtc { get; }
@@ -95,10 +95,10 @@ public sealed class ConanServerProcess : IConanServerProcess
         if (State is ProcessState.STOPPING or ProcessState.STOPPED or ProcessState.CRASHED)
             return;
 
-        if (_lastResponse + TimeSpan.FromSeconds(ZombieCheckSpan) < DateTime.UtcNow)
+        if (_lastResponse + TimeSpan.FromSeconds(ZombieCheckSeconds) < DateTime.UtcNow)
         {
             State = ProcessState.CRASHED;
-            if (ZombieKill)
+            if (KillZombies)
                 await KillAsync().ConfigureAwait(false);
         }
     }

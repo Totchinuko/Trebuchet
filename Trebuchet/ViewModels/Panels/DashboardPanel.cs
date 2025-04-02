@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
+using SteamKit2.GC.Dota.Internal;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
@@ -55,7 +56,7 @@ namespace Trebuchet.ViewModels.Panels
                 .SetBlockingType<ClientRunning>()
                 .SetBlockingType<ServersRunning>();
 
-            Client = new ClientInstanceDashboard(new ProcessStatsLight(_uiConfig));
+            Client = new ClientInstanceDashboard(new ProcessStatsLight());
             Initialize();
 
             _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, OnCheckModUpdate);
@@ -198,8 +199,10 @@ namespace Trebuchet.ViewModels.Panels
                 var modlist = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
                 await _steamApi.UpdateMods(modlist);
             }
-        
-            await _launcher.CatapultClient(Client.SelectedProfile, Client.SelectedModlist, isBattleEye);
+
+            _setup.Config.SelectedClientProfile = Client.SelectedProfile;
+            _setup.Config.SelectedClientModlist = Client.SelectedModlist;
+            await _launcher.CatapultClient(isBattleEye);
         }
         
         public async void CloseServer(int instance)
@@ -244,7 +247,9 @@ namespace Trebuchet.ViewModels.Panels
                     await _steamApi.UpdateMods(modlist);
                 }
 
-                await _launcher.CatapultServer(dashboard.SelectedProfile, dashboard.SelectedModlist, instance);
+                _setup.Config.SetInstanceParameters(dashboard.Instance, dashboard.SelectedModlist,
+                    dashboard.SelectedProfile);
+                await _launcher.CatapultServer(dashboard.Instance);
             }
             catch (TrebException tex)
             {
@@ -266,26 +271,28 @@ namespace Trebuchet.ViewModels.Panels
 
         public override async Task Tick()
         {
-            await Client.ProcessRefresh(_launcher.GetClientProcess());
+            await Client.ProcessRefresh(_launcher.GetClientProcess(), _uiConfig.DisplayProcessPerformance);
             foreach (var instance in _launcher.GetServerProcesses())
-                await Instances[instance.Instance].ProcessRefresh(instance);
+                await Instances[instance.Instance].ProcessRefresh(instance, _uiConfig.DisplayProcessPerformance);
         }
 
         private async void Initialize()
         {
             Client.ModlistSelected += (_, modlist) =>
             {
-                _uiConfig.DashboardClientModlist = modlist;
-                _uiConfig.SaveFile();
+                _setup.Config.SelectedClientModlist = modlist;
+                _setup.Config.SaveFile();
             };
             Client.ProfileSelected += (_, profile) =>
             {
-                _uiConfig.DashboardClientProfile = profile;
-                _uiConfig.SaveFile();
+                _setup.Config.SelectedClientProfile = profile;
+                _setup.Config.SaveFile();
             };
             Client.KillClicked += (_, _)  => KillClient();
             Client.LaunchClicked += (_, battleEye) => LaunchClient(battleEye);
             Client.UpdateClicked += (_, _) => UpdateMods();
+            Client.SelectedModlist = _setup.Config.SelectedClientModlist;
+            Client.SelectedProfile = _setup.Config.SelectedClientProfile;
             CreateInstancesIfNeeded();
             RefreshClientSelection();
             RefreshServerSelection();
@@ -370,7 +377,9 @@ namespace Trebuchet.ViewModels.Panels
 
             for (var i = Instances.Count; i < _setup.Config.ServerInstanceCount; i++)
             {
-                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(_uiConfig));
+                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight());
+                instance.SelectedModlist = _setup.Config.GetInstanceModlist(i);
+                instance.SelectedProfile = _setup.Config.GetInstanceProfile(i);
                 RegisterServerInstanceEvents(instance);
                 Instances.Add(instance);
             }
@@ -381,13 +390,13 @@ namespace Trebuchet.ViewModels.Panels
         {
             instance.ModlistSelected += (_, arg) =>
             {
-                _uiConfig.SetInstanceModlist(arg.Instance, arg.Selection);
-                _uiConfig.SaveFile();
+                _setup.Config.SetInstanceModlist(arg.Instance, arg.Selection);
+                _setup.Config.SaveFile();
             };
             instance.ProfileSelected += (_, arg) =>
             {
-                _uiConfig.SetInstanceProfile(arg.Instance, arg.Selection);
-                _uiConfig.SaveFile();
+                _setup.Config.SetInstanceProfile(arg.Instance, arg.Selection);
+                _setup.Config.SaveFile();
             };
             instance.KillClicked += (_, arg) => KillServer(arg);
             instance.LaunchClicked += (_, arg) => LaunchServer(arg);

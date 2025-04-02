@@ -17,7 +17,7 @@ namespace Trebuchet.ViewModels
 
         void StartStats(IConanProcess details);
 
-        Task Tick();
+        Task Tick(bool refreshStats);
 
         void StopStats();
     }

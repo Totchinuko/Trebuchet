@@ -8,14 +8,16 @@ namespace TrebuchetLib.Services;
 public class Launcher : IDisposable
 {
     private readonly AppFiles _appFiles;
+    private readonly AppSetup _setup;
     private readonly IIniGenerator _iniHandler;
     private readonly ILogger<Launcher> _logger;
     private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
     private IConanProcess? _conanClientProcess;
 
-    public Launcher(AppFiles appFiles, IIniGenerator iniHandler, ILogger<Launcher> logger)
+    public Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandler, ILogger<Launcher> logger)
     {
         _appFiles = appFiles;
+        _setup = setup;
         _iniHandler = iniHandler;
         _logger = logger;
     }
@@ -26,6 +28,13 @@ public class Launcher : IDisposable
         foreach (var item in _serverProcesses)
             item.Value.Dispose();
         _serverProcesses.Clear();
+    }
+
+    public async Task CatapultClient(bool isBattleEye)
+    {
+        var profile = _setup.Config.SelectedClientProfile;
+        var modlist = _setup.Config.SelectedClientModlist;
+        await CatapultClient(profile, modlist, isBattleEye);
     }
 
     /// <summary>
@@ -40,7 +49,7 @@ public class Launcher : IDisposable
     ///     Profiles can only be used by one process at a times, since they contain the db of
     ///     the game.
     /// </exception>
-    public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye)
+    internal async Task CatapultClient(string profileName, string modlistName, bool isBattleEye)
     {
         if (_conanClientProcess != null) return;
 
@@ -134,6 +143,13 @@ public class Launcher : IDisposable
         }
     }
 
+    public async Task CatapultServer(int instance)
+    {
+        var profile = _setup.Config.GetInstanceProfile(instance);
+        var modlist = _setup.Config.GetInstanceModlist(instance);
+        await CatapultServer(profile, modlist, instance);
+    }
+    
     /// <summary>
     ///     Launch a server process while taking care of everything. Generate the modlist, generate the ini settings, etc.
     ///     Process is created on a separate thread, and fire the event ServerProcessStarted when the process is running.
@@ -146,7 +162,7 @@ public class Launcher : IDisposable
     ///     Profiles can only be used by one process at a times, since they contain the db of
     ///     the game.
     /// </exception>
-    public async Task CatapultServer(string profileName, string modlistName, int instance)
+    internal async Task CatapultServer(string profileName, string modlistName, int instance)
     {
         if (_serverProcesses.ContainsKey(instance)) return;
 
@@ -299,7 +315,16 @@ public class Launcher : IDisposable
         if(_conanClientProcess is not null)
             await _conanClientProcess.RefreshAsync();
         foreach (var process in _serverProcesses.Values)
+        {
+            var name = _setup.Config.GetInstanceProfile(process.Instance);
+            if (_appFiles.Server.Exists(name))
+            {
+                var profile = _appFiles.Server.Get(name);
+                process.KillZombies = profile.KillZombies;
+                process.ZombieCheckSeconds = profile.ZombieCheckSeconds;
+            }
             await process.RefreshAsync();
+        }
     }
 
     private async Task FindExistingClient()

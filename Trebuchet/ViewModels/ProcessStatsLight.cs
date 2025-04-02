@@ -10,16 +10,14 @@ namespace Trebuchet.ViewModels
 {
     public class ProcessStatsLight : INotifyPropertyChanged, IProcessStats
     {
-        private readonly UIConfig _uiConfig;
         protected const string CpuFormat = "{0}%";
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
         private IConanProcess? _details;
         private long _peakMemoryConsumption;
         private Process? _process;
 
-        public ProcessStatsLight(UIConfig uiConfig)
+        public ProcessStatsLight()
         {
-            _uiConfig = uiConfig;
             CpuUsage = string.Empty;
             MemoryConsumption = string.Empty;
         }
@@ -65,11 +63,11 @@ namespace Trebuchet.ViewModels
             OnPropertyChanged(nameof(ProcessStatus));
         }
         
-        public async Task Tick()
+        public async Task Tick(bool refreshStats)
         {
             if (!Running) return;
 
-            if (_uiConfig.DisplayProcessPerformance)
+            if (refreshStats)
             {
                 long memoryConsumption = GetMemoryUsageForProcess();
                 CpuUsage = string.Format(CpuFormat, (await GetCpuUsageForProcess()).ToString("N2"));

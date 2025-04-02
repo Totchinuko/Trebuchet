@@ -122,7 +122,7 @@ namespace Trebuchet.ViewModels
             set => SetField(ref _updateNeeded, value);
         }
 
-        public async Task ProcessRefresh(IConanProcess? process)
+        public async Task ProcessRefresh(IConanProcess? process, bool refreshStats)
         {
             var state = process?.State ?? ProcessState.STOPPED;
             if (_lastState.IsRunning() && !state.IsRunning())
@@ -136,7 +136,7 @@ namespace Trebuchet.ViewModels
                 ProcessStats.SetDetails(process);
 
             _lastState = state;
-            await ProcessStats.Tick();
+            await ProcessStats.Tick(refreshStats);
         }
 
         private void OnClose(object? obj)
