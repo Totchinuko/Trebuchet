@@ -72,7 +72,7 @@ namespace TrebuchetLib
         public string GetInstanceProfile(int instance)
         {
             if (SelectedServerProfiles.Length <= instance) return string.Empty;
-            return SelectedServerModlists[instance];
+            return SelectedServerProfiles[instance];
         }
     }
 }

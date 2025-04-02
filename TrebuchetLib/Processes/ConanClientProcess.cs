@@ -17,6 +17,26 @@ public sealed class ConanClientProcess : IConanProcess
         State = ProcessState.RUNNING;
     }
 
+    public long MemoryUsage
+    {
+        get
+        {
+            if (_process.HasExited)
+                return 0;
+            return _process.WorkingSet64;
+        }
+    }
+
+    public TimeSpan CpuTime
+    {
+        get
+        {
+            if(_process.HasExited)
+                return TimeSpan.Zero;
+            return _process.TotalProcessorTime;
+        }
+    }
+    
     public int PId { get; }
     public DateTime StartUtc { get; }
 

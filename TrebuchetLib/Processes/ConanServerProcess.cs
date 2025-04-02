@@ -31,10 +31,28 @@ public sealed class ConanServerProcess : IConanServerProcess
         Console = new MixedConsole(RCon);
     }
 
+    public long MemoryUsage
+    {
+        get
+        {
+            if (_process.HasExited)
+                return 0;
+            return _process.WorkingSet64;
+        }
+    }
+
+    public TimeSpan CpuTime
+    {
+        get
+        {
+            if(_process.HasExited)
+                return TimeSpan.Zero;
+            return _process.TotalProcessorTime;
+        }
+    }
+    
     public bool KillZombies { get; set; }
-
     public int ZombieCheckSeconds { get; set; }
-
     public int PId { get; }
     public DateTime StartUtc { get; }
 

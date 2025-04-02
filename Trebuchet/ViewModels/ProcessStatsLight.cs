@@ -14,7 +14,6 @@ namespace Trebuchet.ViewModels
         protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
         private IConanProcess? _details;
         private long _peakMemoryConsumption;
-        private Process? _process;
 
         public ProcessStatsLight()
         {
@@ -45,9 +44,6 @@ namespace Trebuchet.ViewModels
 
         public void StartStats(IConanProcess details)
         {
-            if (!TryGetProcess(details.PId, out Process? process)) return;
-            _process = process;
-
             SetDetails(details);
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(PID));
@@ -57,7 +53,6 @@ namespace Trebuchet.ViewModels
         public void StopStats()
         {
             _details = null;
-            _process = null;
             _peakMemoryConsumption = 0;
             OnPropertyChanged(nameof(Running));
             OnPropertyChanged(nameof(ProcessStatus));
@@ -69,7 +64,7 @@ namespace Trebuchet.ViewModels
 
             if (refreshStats)
             {
-                long memoryConsumption = GetMemoryUsageForProcess();
+                long memoryConsumption = _details?.MemoryUsage ?? 0;
                 CpuUsage = string.Format(CpuFormat, (await GetCpuUsageForProcess()).ToString("N2"));
                 _peakMemoryConsumption = Math.Max(memoryConsumption, _peakMemoryConsumption);
                 MemoryConsumption = string.Format(MemoryFormat, (memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
@@ -93,30 +88,21 @@ namespace Trebuchet.ViewModels
 
         private async Task<double> GetCpuUsageForProcess()
         {
-            if (_process == null) return 0;
+            if (_details == null) return 0;
             
             var startTime = DateTime.UtcNow;
-            var startUsage = _process.TotalProcessorTime;
+            var startUsage = _details.CpuTime;
 
             await Task.Delay(500);
             
             var endTime = DateTime.UtcNow;
-            var endUsage = _process.TotalProcessorTime;
+            var endUsage = _details.CpuTime;
 
             var cpuUsedMs = (endUsage - startUsage).TotalMilliseconds;
             var totalMsPassed = (endTime - startTime).TotalMilliseconds;
             var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
 
             return cpuUsageTotal * 100.0;
-        }
-
-        private long GetMemoryUsageForProcess()
-        {
-            if (_details == null) return 0;
-            if (!TryGetProcess(_details.PId, out Process? process)) return 0;
-            var workingSet64 = process.WorkingSet64;
-
-            return workingSet64;
         }
 
         private bool TryGetProcess(int pid, [NotNullWhen(true)] out Process? process)
