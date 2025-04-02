@@ -125,6 +125,17 @@ public class AppServerFiles(AppSetup appSetup)
             Constants.FileServerProxyBin);
     }
 
+    public string GetInstanceInternalBinary(int instance)
+    {
+        return Path.Combine(
+            AppFiles.GetCommonAppDataDirectory().FullName, 
+            appSetup.VersionFolder, 
+            Constants.FolderServerInstances,
+            string.Format(Constants.FolderInstancePattern, instance), 
+            Constants.FolderGameBinaries,
+            Constants.FileServerBin);
+    }
+
     public string GetBaseFolder()
     {
         return Path.Combine(
@@ -210,7 +221,7 @@ public class AppServerFiles(AppSetup appSetup)
         instance = -1;
         for (int i = 0; i < appSetup.Config.ServerInstanceCount; i++)
         {
-            var instancePath = Path.GetFullPath(GetIntanceBinary(i));
+            var instancePath = Path.GetFullPath(GetInstanceInternalBinary(i));
             if (string.Equals(instancePath, path, StringComparison.Ordinal))
             {
                 instance = i;
