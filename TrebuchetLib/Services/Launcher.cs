@@ -13,6 +13,7 @@ public class Launcher : IDisposable
     private readonly ILogger<Launcher> _logger;
     private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
     private IConanProcess? _conanClientProcess;
+    private bool _hasCatapulted;
 
     public Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandler, ILogger<Launcher> logger)
     {
@@ -309,6 +310,13 @@ public class Launcher : IDisposable
 
     public async Task Tick()
     {
+        if (!_hasCatapulted && _setup.Catapult)
+        {
+            _hasCatapulted = true;
+            for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
+                await CatapultServer(i);
+        }
+        
         await FindExistingClient();
         await FindExistingServers();
 
