@@ -36,8 +36,8 @@ namespace Trebuchet.ViewModels
             _progressLock = new object();
             _steam.Connected += OnSteamConnected;
             _steam.Disconnected += OnSteamDisconnected;
-            CancelCommand = new SimpleCommand().Subscribe(OnCancel);
-            ConnectCommand = new SimpleCommand().Subscribe(OnConnect);
+            CancelCommand.Subscribe(OnCancel);
+            ConnectCommand.Subscribe(OnConnect);
 
             _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
         }
@@ -51,9 +51,8 @@ namespace Trebuchet.ViewModels
         }
 
 
-        public SimpleCommand CancelCommand { get; }
-
-        public SimpleCommand ConnectCommand { get; }
+        public SimpleCommand CancelCommand { get; } = new();
+        public SimpleCommand ConnectCommand { get; } = new();
 
         public string Description
         {
@@ -143,7 +142,7 @@ namespace Trebuchet.ViewModels
             _timer.Start();
         }
 
-        private void OnCancel(object? obj)
+        private void OnCancel()
         {
             _taskBlocker.Cancel<SteamDownload>();
             SetDescription("Canceling...");
@@ -152,7 +151,7 @@ namespace Trebuchet.ViewModels
             OnPropertyChanged(nameof(IsIndeterminate));
         }
 
-        private async void OnConnect(object? obj)
+        private async void OnConnect()
         {
             if (!IsConnected)
             {

@@ -29,16 +29,16 @@ namespace Trebuchet.ViewModels.Panels
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             LoadPanel();
-            CreateProfileCommand = new SimpleCommand().Subscribe(OnProfileCreate);
-            DeleteProfileCommand = new SimpleCommand().Subscribe(OnProfileDelete);
-            DuplicateProfileCommand = new SimpleCommand().Subscribe(OnProfileDuplicate);
-            OpenFolderProfileCommand = new SimpleCommand().Subscribe(OnOpenFolderProfile);
+            CreateProfileCommand.Subscribe(OnProfileCreate);
+            DeleteProfileCommand.Subscribe(OnProfileDelete);
+            DuplicateProfileCommand.Subscribe(OnProfileDuplicate);
+            OpenFolderProfileCommand.Subscribe(OnOpenFolderProfile);
         }
 
-        public SimpleCommand CreateProfileCommand { get; }
-        public SimpleCommand DeleteProfileCommand { get; }
-        public SimpleCommand DuplicateProfileCommand { get; }
-        public SimpleCommand OpenFolderProfileCommand { get; }
+        public SimpleCommand CreateProfileCommand { get; } = new();
+        public SimpleCommand DeleteProfileCommand { get; } = new();
+        public SimpleCommand DuplicateProfileCommand { get; } = new();
+        public SimpleCommand OpenFolderProfileCommand { get; } = new();
         public ServerProfile Profile => _profile;
         public ObservableCollection<string> Profiles { get => _profiles; }
         public string ProfileSize => (Tools.DirectorySize(_profile.ProfileFolder) / 1024 / 1024).ToString() + "MB";
@@ -115,7 +115,7 @@ namespace Trebuchet.ViewModels.Panels
             LoadProfile();
         }
 
-        private async void OnProfileCreate(object? obj)
+        private async void OnProfileCreate()
         {
             InputTextModal modal = new InputTextModal(Resources.Create, Resources.ProfileName);
             await modal.OpenDialogueAsync();
@@ -133,7 +133,7 @@ namespace Trebuchet.ViewModels.Panels
             SelectedProfile = name;
         }
 
-        private async void OnProfileDelete(object? obj)
+        private async void OnProfileDelete()
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
 
@@ -150,7 +150,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private async void OnProfileDuplicate(object? obj)
+        private async void OnProfileDuplicate()
         {
             InputTextModal modal = new InputTextModal(Resources.Duplicate, Resources.ProfileName);
             modal.SetValue(_selectedProfile);

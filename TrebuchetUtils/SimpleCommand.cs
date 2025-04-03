@@ -1,69 +1,96 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows;
 using System.Windows.Input;
-using Avalonia.Utilities;
 
 namespace TrebuchetUtils
 {
-    public class SimpleCommand() : ICommand
+    public class SimpleCommand : SimpleCommand<object?>
     {
-        private bool _enabled = true;
-        private event EventHandler<object?>? Executed;
+    }
+    
+    public class SimpleCommand<P> : ICommand
+    {
+        private Func<P?, bool> _canExecute;
+        private event EventHandler<P?>? Executed;
         public event EventHandler? CanExecuteChanged;
+        
+        public SimpleCommand()
+        {
+            _canExecute = (_) => true;
+        }
+        
+        public SimpleCommand(Func<P?,bool> canExecute)
+        {
+            _canExecute = canExecute;
+        }
+        
+        public SimpleCommand(EventHandler<P?> execute, Func<P?,bool> canExecute) : this(canExecute)
+        {
+            Executed += execute;
+        }
 
         public virtual bool CanExecute(object? parameter)
         {
-            return _enabled;
+            if (parameter is P canExecuteParam)
+                return _canExecute(canExecuteParam);
+            if (parameter is null)
+                return _canExecute((P?)parameter);
+            return false;
         }
 
         public void Execute(object? parameter)
         {
-            if(CanExecute(parameter))
-                OnExecuted(parameter);
+            
+            if(parameter is P executeParameter)
+                OnExecuted(executeParameter);
+            if(parameter is null)
+                OnExecuted((P?)parameter);
         }
 
-        public SimpleCommand Subscribe(EventHandler<object?> action)
+        public SimpleCommand<P> Subscribe(EventHandler<P?> action)
         {
             Executed += action;
             return this;
         }
 
-        public SimpleCommand Subscribe(Action<object?> action)
+        public SimpleCommand<P> Subscribe(Action<P?> action)
         {
             Executed += (_,parameter) => action(parameter);
             return this;
         }
         
-        public SimpleCommand Subscribe(Action action)
+        public SimpleCommand<P> Subscribe(Action action)
         {
             Executed += (_,_) => action();
             return this;
         }
         
-        public SimpleCommand Clear()
+        public SimpleCommand<P> Clear()
         {
             Executed = null;
             return this;
         }
 
-        public SimpleCommand Unsubscribe(EventHandler<object?> action)
+        public SimpleCommand<P> Unsubscribe(EventHandler<P?> action)
         {
             Executed -= action;
             return this;
         }
 
-        public SimpleCommand Toggle(bool enabled)
+        public SimpleCommand<P> SetCanExecute(Func<P?, bool> canExecute)
         {
-            _enabled = enabled;
+            _canExecute = canExecute;
             CanExecuteChanged?.Invoke(this, EventArgs.Empty);
             return this;
         }
 
-        protected virtual void OnExecuted(object? parameter)
+        public SimpleCommand<P> Toggle(bool enabled)
+        {
+            if (enabled)
+                return SetCanExecute((_) => true);
+            return SetCanExecute((_) => false);
+        }
+
+        protected virtual void OnExecuted(P? parameter)
         {
             Executed?.Invoke(this, parameter);
         }

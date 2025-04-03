@@ -1,7 +1,10 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using Trebuchet.Assets;
 using Trebuchet.ViewModels.InnerContainer;
@@ -35,16 +38,16 @@ namespace Trebuchet.ViewModels.Panels
             _uiConfig = uiConfig;
             LoadPanel();
 
-            CreateProfileCommand = new SimpleCommand().Subscribe(OnProfileCreate);
-            DeleteProfileCommand = new SimpleCommand().Subscribe(OnProfileDelete);
-            DuplicateProfileCommand = new SimpleCommand().Subscribe(OnProfileDuplicate);
-            OpenFolderProfileCommand = new SimpleCommand().Subscribe(OnOpenFolderProfile);
+            CreateProfileCommand.Subscribe(OnProfileCreate);
+            DeleteProfileCommand.Subscribe(OnProfileDelete);
+            DuplicateProfileCommand.Subscribe(OnProfileDuplicate);
+            OpenFolderProfileCommand.Subscribe(OnOpenFolderProfile);
         }
 
-        public SimpleCommand CreateProfileCommand { get; }
-        public SimpleCommand DeleteProfileCommand { get; }
-        public SimpleCommand DuplicateProfileCommand { get; }
-        public SimpleCommand OpenFolderProfileCommand { get; }
+        public SimpleCommand CreateProfileCommand { get; } = new();
+        public SimpleCommand DeleteProfileCommand { get; } = new();
+        public SimpleCommand DuplicateProfileCommand { get; } = new();
+        public SimpleCommand OpenFolderProfileCommand { get; } = new();
         public ClientProfile Profile => _profile;
         public ObservableCollection<string> Profiles { get => _profiles; }
         public string ProfileSize => (Tools.DirectorySize(_profile.ProfileFolder) / 1024 / 1024).ToString() + "MB";
@@ -136,7 +139,7 @@ namespace Trebuchet.ViewModels.Panels
             LoadProfile();
         }
 
-        private async void OnProfileCreate(object? obj)
+        private async void OnProfileCreate()
         {
             var name = await GetNewProfileName();
             if (name is null) return;
@@ -156,7 +159,7 @@ namespace Trebuchet.ViewModels.Panels
             return Validation.Valid;
         }
 
-        private async void OnProfileDelete(object? obj)
+        private async void OnProfileDelete()
         {
             if (string.IsNullOrEmpty(_selectedProfile)) return;
 
@@ -174,7 +177,7 @@ namespace Trebuchet.ViewModels.Panels
             SelectedProfile = profile;
         }
 
-        private async void OnProfileDuplicate(object? obj)
+        private async void OnProfileDuplicate()
         {
             var name = await GetNewProfileName();
             if (name is null) return;

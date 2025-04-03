@@ -62,49 +62,40 @@ namespace Trebuchet.ViewModels.Panels
             _workshop.ModAdded += (_,mod) => AddModFromWorkshop(mod);
             LoadPanel();
 
-            CreateModlistCommand = new SimpleCommand().Subscribe(OnModlistCreate);
-            DeleteModlistCommand = new SimpleCommand().Subscribe(OnModlistDelete);
-            DuplicateModlistCommand = new SimpleCommand().Subscribe(OnModlistDuplicate);
-            ExploreLocalCommand = new SimpleCommand().Subscribe(OnExploreLocal);
-            ExploreWorkshopCommand = new SimpleCommand().Subscribe(OnExploreWorkshop);
-            ExportToJsonCommand = new SimpleCommand().Subscribe(OnExportToJson);
-            ExportToTxtCommand = new SimpleCommand().Subscribe(OnExportToTxt);
-            FetchCommand = new TaskBlockedCommand()
+            CreateModlistCommand.Subscribe(OnModlistCreate);
+            DeleteModlistCommand.Subscribe(OnModlistDelete);
+            DuplicateModlistCommand.Subscribe(OnModlistDuplicate);
+            ExploreLocalCommand.Subscribe(OnExploreLocal);
+            ExploreWorkshopCommand.Subscribe(OnExploreWorkshop);
+            ExportToJsonCommand.Subscribe(OnExportToJson);
+            ExportToTxtCommand.Subscribe(OnExportToTxt);
+            FetchCommand
                 .SetBlockingType<DownloadModlist>()
                 .Subscribe(OnFetchClicked);
-            ImportFromFileCommand = new SimpleCommand().Subscribe(OnImportFromFile);
-            ImportFromTextCommand = new SimpleCommand().Subscribe(OnImportFromText);
-            ModFilesDownloadCommand = new TaskBlockedCommand()
+            ImportFromFileCommand.Subscribe(OnImportFromFile);
+            ImportFromTextCommand.Subscribe(OnImportFromText);
+            ModFilesDownloadCommand
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
                 .SetBlockingType<ServersRunning>()
                 .Subscribe(OnModFilesDownload);
-            RefreshModlistCommand = new TaskBlockedCommand()
+            RefreshModlistCommand
                 .SetBlockingType<DownloadModlist>()
                 .Subscribe(OnModlistRefresh);
         }
 
-        public SimpleCommand CreateModlistCommand { get; }
-
-        public SimpleCommand DeleteModlistCommand { get; }
-
-        public SimpleCommand DuplicateModlistCommand { get; }
-
-        public SimpleCommand ExploreLocalCommand { get; }
-
-        public SimpleCommand ExploreWorkshopCommand { get; }
-
-        public SimpleCommand ExportToJsonCommand { get; }
-
-        public SimpleCommand ExportToTxtCommand { get; }
-
-        public SimpleCommand FetchCommand { get; }
-
-        public SimpleCommand ImportFromFileCommand { get; }
-
-        public SimpleCommand ImportFromTextCommand { get; }
-
-        public SimpleCommand ModFilesDownloadCommand { get; }
+        public SimpleCommand CreateModlistCommand { get; } = new();
+        public SimpleCommand DeleteModlistCommand { get; } = new();
+        public SimpleCommand DuplicateModlistCommand { get; } = new();
+        public SimpleCommand ExploreLocalCommand { get; } = new();
+        public SimpleCommand ExploreWorkshopCommand { get; } = new();
+        public SimpleCommand ExportToJsonCommand { get; } = new();
+        public SimpleCommand ExportToTxtCommand { get; } = new();
+        public TaskBlockedCommand FetchCommand { get; } = new();
+        public SimpleCommand ImportFromFileCommand { get; } = new();
+        public SimpleCommand ImportFromTextCommand { get; } = new();
+        public TaskBlockedCommand ModFilesDownloadCommand { get; } = new();
+        public TaskBlockedCommand RefreshModlistCommand { get; } = new();
 
         public TrulyObservableCollection<ModFile> Modlist
         {
@@ -128,7 +119,6 @@ namespace Trebuchet.ViewModels.Panels
 
         public ObservableCollection<string> Profiles { get; set; } = new();
 
-        public SimpleCommand RefreshModlistCommand { get; }
 
         public string SelectedModlist
         {
@@ -319,7 +309,7 @@ namespace Trebuchet.ViewModels.Panels
             LoadModlist();
         }
 
-        private async void OnExploreLocal(object? obj)
+        private async void OnExploreLocal()
         {
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
             if (desktop.MainWindow == null) return;
@@ -343,7 +333,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private void OnExploreWorkshop(object? obj)
+        private void OnExploreWorkshop()
         {
             if (_searchWindow != null) return;
             _searchWindow = new WorkshopSearch();
@@ -353,13 +343,13 @@ namespace Trebuchet.ViewModels.Panels
             _searchWindow.Show();
         }
 
-        private async void OnExportToJson(object? obj)
+        private async void OnExportToJson()
         {
             var json = JsonSerializer.Serialize(new ModlistExport { Modlist = _profile.Modlist });
             await new ModlistTextImport(json, true, FileType.Json).OpenDialogueAsync();
         }
 
-        private async void OnExportToTxt(object? obj)
+        private async void OnExportToTxt()
         {
             try
             {
@@ -375,7 +365,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private async void OnFetchClicked(object? obj)
+        private async void OnFetchClicked()
         {
             if (string.IsNullOrEmpty(_modlistUrl)) return;
 
@@ -401,7 +391,7 @@ namespace Trebuchet.ViewModels.Panels
                 FetchJsonList(builder);
         }
 
-        private async void OnImportFromFile(object? obj)
+        private async void OnImportFromFile()
         {
             if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
             if (desktop.MainWindow == null) return;
@@ -441,7 +431,7 @@ namespace Trebuchet.ViewModels.Panels
             LoadModlist();
         }
 
-        private async void OnImportFromText(object? obj)
+        private async void OnImportFromText()
         {
             var import = new ModlistTextImport(string.Empty, false, FileType.Json);
             await import.OpenDialogueAsync();
@@ -494,7 +484,7 @@ namespace Trebuchet.ViewModels.Panels
             });
         }
 
-        private void OnModFilesDownload(object? obj)
+        private void OnModFilesDownload()
         {
             UpdateMods(_profile.GetWorkshopMods().ToList());
         }
@@ -513,7 +503,7 @@ namespace Trebuchet.ViewModels.Panels
             OnModlistChanged();
         }
 
-        private async void OnModlistCreate(object? obj)
+        private async void OnModlistCreate()
         {
             var modal = new InputTextModal(Resources.Create, Resources.ModlistName);
             await modal.OpenDialogueAsync();
@@ -530,7 +520,7 @@ namespace Trebuchet.ViewModels.Panels
             SelectedModlist = name;
         }
 
-        private async void OnModlistDelete(object? obj)
+        private async void OnModlistDelete()
         {
             if (string.IsNullOrEmpty(_selectedModlist)) return;
 
@@ -548,7 +538,7 @@ namespace Trebuchet.ViewModels.Panels
             OnPropertyChanged(nameof(SelectedModlist));
         }
 
-        private async void OnModlistDuplicate(object? obj)
+        private async void OnModlistDuplicate()
         {
             var modal = new InputTextModal(Resources.Duplicate, Resources.ModlistName);
             modal.SetValue(_selectedModlist);
@@ -566,7 +556,7 @@ namespace Trebuchet.ViewModels.Panels
             SelectedModlist = name;
         }
 
-        private void OnModlistRefresh(object? obj)
+        private void OnModlistRefresh()
         {
             LoadModlist();
         }

@@ -13,15 +13,15 @@ public class ValidatedInputDialogue<T> : TitledDialogue
     public ValidatedInputDialogue(string title, string description) : base(title, description)
     {
         _validation = (_) => Validation.Valid;
-        ConfirmCommand = new SimpleCommand().Subscribe(Close);
+        ConfirmCommand.Subscribe(Close);
         CancelCommand.Clear().Subscribe(() =>
         {
             _value = default(T);
             Close();
         });
     }
-    
-    public SimpleCommand ConfirmCommand { get; }
+
+    public SimpleCommand ConfirmCommand { get; } = new();
     
     public T? Value
     {

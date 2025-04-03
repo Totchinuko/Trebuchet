@@ -32,16 +32,16 @@ namespace Trebuchet.ViewModels
             Instance = instance;
             ProcessStats = stats;
             
-            KillCommand = new SimpleCommand()
+            KillCommand
                 .Toggle(false)
                 .Subscribe(OnKilled);
-            CloseCommand = new SimpleCommand()
+            CloseCommand
                 .Toggle(false)
                 .Subscribe(OnClose);
-            LaunchCommand = new TaskBlockedCommand()
+            LaunchCommand
                 .SetBlockingType<SteamDownload>()
                 .Subscribe(OnLaunched);
-            UpdateModsCommand = new TaskBlockedCommand()
+            UpdateModsCommand
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
                 .SetBlockingType<ServersRunning>()
@@ -64,10 +64,10 @@ namespace Trebuchet.ViewModels
 
         public int Instance { get; }
         public bool IsUpdateNeeded => UpdateNeeded.Count > 0;
-        public SimpleCommand CloseCommand { get; }
-        public SimpleCommand KillCommand { get; }
-        public SimpleCommand LaunchCommand { get; }
-        public SimpleCommand UpdateModsCommand { get; private set; }
+        public SimpleCommand CloseCommand { get; } = new();
+        public SimpleCommand KillCommand { get; } = new();
+        public TaskBlockedCommand LaunchCommand { get; } = new();
+        public TaskBlockedCommand UpdateModsCommand { get; private set; } = new();
 
         public List<string> Modlists
         {
@@ -137,23 +137,23 @@ namespace Trebuchet.ViewModels
             return Task.CompletedTask;
         }
 
-        private void OnClose(object? obj)
+        private void OnClose()
         {
             CloseClicked?.Invoke(this, Instance);
         }
 
-        private void OnKilled(object? obj)
+        private void OnKilled()
         {
             KillClicked?.Invoke(this, Instance);
         }
 
-        private void OnLaunched(object? obj)
+        private void OnLaunched()
         {
             if (!CanUseDashboard) return;
             LaunchClicked?.Invoke(this, Instance);
         }
 
-        private void OnModUpdate(object? obj)
+        private void OnModUpdate()
         {
             if (string.IsNullOrEmpty(SelectedModlist)) return;
             UpdateClicked?.Invoke(this, Instance);

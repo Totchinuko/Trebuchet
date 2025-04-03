@@ -17,13 +17,13 @@ namespace Trebuchet.Controls
         public MapList()
         {
             MapListData = Tools.GetMapList();
-            MapSelectCommand = new SimpleCommand().Subscribe(OnMapSelect);
+            MapSelectCommand.Subscribe(OnMapSelect);
             InitializeComponent();
         }
         
         public Dictionary<string, string> MapListData { get; set; }
-        
-        public SimpleCommand MapSelectCommand { get; private set; }
+
+        public SimpleCommand<string> MapSelectCommand { get; private set; } = new();
         
         public string SelectedMap
         {
@@ -36,9 +36,9 @@ namespace Trebuchet.Controls
             MapListPopup.IsOpen = !MapListPopup.IsOpen;
         }
         
-        private void OnMapSelect(object? obj)
+        private void OnMapSelect(string? mapPath)
         {
-            if (obj is not string mapPath) return;
+            if (mapPath is null) return;
             SelectedMap = mapPath;
             MapListPopup.IsOpen = false;
         }

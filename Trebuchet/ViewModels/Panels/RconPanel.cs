@@ -34,14 +34,14 @@ namespace Trebuchet.ViewModels.Panels
         {
             _setup = setup;
             _launcher = launcher;
-            SendCommand = new SimpleCommand().Subscribe(OnSendCommand).Toggle(false);
+            SendCommand.Subscribe(OnSendCommand).Toggle(false);
 
             LoadPanel();
         }
 
         public List<string> AvailableConsoles { get; } = [];
 
-        public ObservableCollection<ObservableConsoleLog> ConsoleLogs { get; private set; } = new ObservableCollection<ObservableConsoleLog>();
+        public ObservableCollection<ObservableConsoleLog> ConsoleLogs { get; private set; } = [];
 
         public int SelectedConsole
         {
@@ -54,7 +54,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        public SimpleCommand SendCommand { get; }
+        public SimpleCommand<string> SendCommand { get; } = new();
 
         public override bool CanExecute(object? parameter)
         {

@@ -41,20 +41,20 @@ namespace Trebuchet.ViewModels.Panels
             _steamApi = steamApi;
             _launcher = launcher;
             _logger = logger;
-            CloseAllCommand = new SimpleCommand().Subscribe(OnCloseAll);
-            KillAllCommand = new SimpleCommand().Subscribe(OnKillAll);
-            LaunchAllCommand = new TaskBlockedCommand()
+            CloseAllCommand.Subscribe(OnCloseAll);
+            KillAllCommand.Subscribe(OnKillAll);
+            LaunchAllCommand
                 .SetBlockingType<SteamDownload>()
                 .Subscribe(OnLaunchAll);
-            UpdateServerCommand = new TaskBlockedCommand()
+            UpdateServerCommand
                     .SetBlockingType<SteamDownload>()
                     .Subscribe(UpdateServer);
-            UpdateAllModsCommand = new TaskBlockedCommand()
+            UpdateAllModsCommand
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
                 .SetBlockingType<ServersRunning>()
                 .Subscribe(UpdateMods);
-            VerifyFilesCommand = new TaskBlockedCommand()
+            VerifyFilesCommand
                 .SetBlockingType<SteamDownload>()
                 .SetBlockingType<ClientRunning>()
                 .SetBlockingType<ServersRunning>()
@@ -63,18 +63,18 @@ namespace Trebuchet.ViewModels.Panels
             Client = new ClientInstanceDashboard(new ProcessStatsLight());
             Initialize();
 
-            _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, OnCheckModUpdate);
+            _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, (_,_) => OnCheckModUpdate());
         }
 
         public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
         public ClientInstanceDashboard Client { get; }
-        public SimpleCommand CloseAllCommand { get; private set; }
         public ObservableCollection<ServerInstanceDashboard> Instances { get; } = new();
-        public SimpleCommand KillAllCommand { get; private set; }
-        public SimpleCommand LaunchAllCommand { get; private set; }
-        public SimpleCommand UpdateAllModsCommand { get; private set; }
-        public SimpleCommand UpdateServerCommand { get; private set; }
-        public SimpleCommand VerifyFilesCommand { get; private set; }
+        public SimpleCommand CloseAllCommand { get; private set; } = new();
+        public SimpleCommand KillAllCommand { get; private set; } = new();
+        public TaskBlockedCommand LaunchAllCommand { get; private set; } = new();
+        public TaskBlockedCommand UpdateAllModsCommand { get; private set; } = new();
+        public TaskBlockedCommand UpdateServerCommand { get; private set; } = new();
+        public TaskBlockedCommand VerifyFilesCommand { get; private set; } = new();
 
         public override bool CanExecute(object? parameter)
         {
@@ -399,19 +399,19 @@ namespace Trebuchet.ViewModels.Panels
             instance.CloseClicked += (_, arg) => CloseServer(arg);
         }
 
-        private async void OnCheckModUpdate(object? sender, EventArgs e)
+        private async void OnCheckModUpdate()
         {
             if (!_uiConfig.AutoRefreshModlist) return;
             await CheckModUpdates();
         }
 
-        private void OnCloseAll(object? obj)
+        private void OnCloseAll()
         {
             foreach (var i in Instances)
                 CloseServer(i.Instance);
         }
 
-        private async void OnFileVerification(object? obj)
+        private async void OnFileVerification()
         {
             var question = new QuestionModal("Verify files",
                 "This will verify all server and mod files. This may take a while. Do you want to continue?");
@@ -431,13 +431,13 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private void OnKillAll(object? obj)
+        private void OnKillAll()
         {
             foreach (var i in Instances)
                 KillServer(i.Instance);
         }
 
-        private void OnLaunchAll(object? obj)
+        private void OnLaunchAll()
         {
             foreach(var i in Instances)
                 LaunchServer(i.Instance);

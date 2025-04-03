@@ -8,10 +8,10 @@ public class TitledDialogue : DialogueContent
     {
         Title = title;
         Description = description;
-        CancelCommand = new SimpleCommand().Subscribe(Close);
+        CancelCommand.Subscribe(Close);
     }
-    
-    public SimpleCommand CancelCommand { get; }
+
+    public SimpleCommand CancelCommand { get; } = new();
     public string Title { get; }
     public string Description { get; }
 

@@ -26,14 +26,14 @@ public class ClientInstanceDashboard : BaseViewModel
     {
         ProcessStats = processStats;
 
-        KillCommand = new SimpleCommand().Subscribe(OnKilled).Toggle(false);
-        LaunchCommand = new TaskBlockedCommand()
+        KillCommand.Subscribe(OnKilled).Toggle(false);
+        LaunchCommand
             .SetBlockingType<SteamDownload>()
             .Subscribe(OnLaunched);
-        LaunchBattleEyeCommand = new TaskBlockedCommand()
+        LaunchBattleEyeCommand
             .SetBlockingType<SteamDownload>()
             .Subscribe(OnBattleEyeLaunched);
-        UpdateModsCommand = new TaskBlockedCommand()
+        UpdateModsCommand
             .SetBlockingType<SteamDownload>()
             .SetBlockingType<ClientRunning>()
             .SetBlockingType<ServersRunning>()
@@ -53,11 +53,10 @@ public class ClientInstanceDashboard : BaseViewModel
         set => SetField(ref _canUseDashboard, value);
     }
 
-    public SimpleCommand KillCommand { get; }
-
-    public SimpleCommand LaunchBattleEyeCommand { get; }
-
-    public SimpleCommand LaunchCommand { get; }
+    public SimpleCommand KillCommand { get; } = new();
+    public TaskBlockedCommand LaunchBattleEyeCommand { get; } = new();
+    public TaskBlockedCommand LaunchCommand { get; } = new();
+    public TaskBlockedCommand UpdateModsCommand { get; private set; } = new();
 
     public List<string> Modlists
     {
@@ -99,7 +98,6 @@ public class ClientInstanceDashboard : BaseViewModel
         }
     }
 
-    public SimpleCommand UpdateModsCommand { get; private set; }
 
     public List<ulong> UpdateNeeded
     {
@@ -124,22 +122,22 @@ public class ClientInstanceDashboard : BaseViewModel
         return Task.CompletedTask;
     }
 
-    private void OnBattleEyeLaunched(object? obj)
+    private void OnBattleEyeLaunched()
     {
         LaunchClicked?.Invoke(this, true);
     }
 
-    private void OnKilled(object? obj)
+    private void OnKilled()
     {
         KillClicked?.Invoke(this, EventArgs.Empty);
     }
 
-    private void OnLaunched(object? obj)
+    private void OnLaunched()
     {
         LaunchClicked?.Invoke(this, false);
     }
 
-    private void OnModUpdate(object? obj)
+    private void OnModUpdate()
     {
         if (string.IsNullOrEmpty(SelectedModlist)) return;
         UpdateClicked?.Invoke(this, EventArgs.Empty);

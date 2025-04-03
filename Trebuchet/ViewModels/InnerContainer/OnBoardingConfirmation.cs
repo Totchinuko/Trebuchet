@@ -9,7 +9,7 @@ public class OnBoardingConfirmation : TitledDialogue
 
     public OnBoardingConfirmation(string title, string description) : base(title, description)
     {
-        ConfirmCommand = new SimpleCommand().Subscribe(() =>
+        ConfirmCommand.Subscribe(() =>
         {
             Result = true;
             Close();
@@ -18,6 +18,6 @@ public class OnBoardingConfirmation : TitledDialogue
     
     public bool Result { get; private set; }
 
-    public SimpleCommand ConfirmCommand { get; }
+    public SimpleCommand ConfirmCommand { get; } = new();
 
 }

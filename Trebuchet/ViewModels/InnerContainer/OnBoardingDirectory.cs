@@ -13,10 +13,10 @@ public class OnBoardingDirectory : ValidatedInputDialogue<string>
 
     public OnBoardingDirectory(string title, string description) : base(title, description)
     {
-        SearchDirectoryCommand = new SimpleCommand().Subscribe(OnSearchDirectory);
+        SearchDirectoryCommand.Subscribe(OnSearchDirectory);
     }
 
-    public SimpleCommand SearchDirectoryCommand { get; }
+    public SimpleCommand SearchDirectoryCommand { get; } = new();
     
     private async void OnSearchDirectory()
     {

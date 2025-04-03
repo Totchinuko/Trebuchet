@@ -15,13 +15,13 @@ public class OnBoardingListSelection : DialogueContent
         Description = description;
         List = new ObservableCollection<string>(list);
         _selectedElement = list.FirstOrDefault(string.Empty);
-        ConfirmCommand = new SimpleCommand().Subscribe(Close);
+        ConfirmCommand.Subscribe(Close);
     }
     
     public ObservableCollection<string> List { get; }
     public string Title { get; }
     public string Description { get; }
-    public SimpleCommand ConfirmCommand { get; }
+    public SimpleCommand ConfirmCommand { get; } = new();
     public string SelectedElement
     {
         get => _selectedElement;
