@@ -116,14 +116,19 @@ public class AppClientFiles(AppSetup appSetup)
                 return profileName;
         }
 
-        profileName = Tools.GetFirstDirectoryName(Path.Combine(AppFiles.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
-        if (!string.IsNullOrEmpty(profileName)) 
-            return profileName;
+        return GetDefaultProfile();
+    }
 
-        profileName = "Default";
-        if (!File.Exists(GetPath(profileName)))
-            ClientProfile.CreateProfile(GetPath(profileName)).SaveFile();
-        return profileName;
+    public string GetDefaultProfile()
+    {
+        var name = Tools.GetFirstDirectoryName(Path.Combine(AppFiles.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
+        if (!string.IsNullOrEmpty(name)) 
+            return name;
+
+        name = "Default";
+        if (!File.Exists(GetPath(name)))
+            ClientProfile.CreateProfile(GetPath(name)).SaveFile();
+        return name;
     }
     
     public bool ProfileExists(string name)

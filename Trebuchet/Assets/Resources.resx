@@ -189,10 +189,10 @@ Do you wish to proceed ?</value>
     <data name="OnBoardingUpgradeCopy" xml:space="preserve">
         <value>Please wait while your files are being copied</value>
     </data>
-    <data name="ManageClient" xml:space="preserve">
+    <data name="SettingManageClient" xml:space="preserve">
         <value>Manage Client Files</value>
     </data>
-    <data name="ManageClientText" xml:space="preserve">
+    <data name="SettingManageClientText" xml:space="preserve">
         <value>Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer.</value>
     </data>
     <data name="SteamConnected" xml:space="preserve">
@@ -289,5 +289,401 @@ Do you wish to proceed ?</value>
     </data>
     <data name="ErrorValueEmpty" xml:space="preserve">
         <value>Value cannot be empty</value>
+    </data>
+    <data name="CatGeneral" xml:space="preserve">
+        <value>General</value>
+    </data>
+    <data name="SettingBackgroundSound" xml:space="preserve">
+        <value>Background Sound</value>
+    </data>
+    <data name="SettingBackgroundSoundText" xml:space="preserve">
+        <value>Keep the sound of the game up when tabbing out to another window</value>
+    </data>
+    <data name="SettingIntroVid" xml:space="preserve">
+        <value>Remove Intro Videos</value>
+    </data>
+    <data name="SettingIntroVidText" xml:space="preserve">
+        <value>Instead of displaying the intro video, you will have black screen that will swap to the main menu once the game is loaded</value>
+    </data>
+    <data name="CatProcessPerformance" xml:space="preserve">
+        <value>Process Performance</value>
+    </data>
+    <data name="SettingUseAllCore" xml:space="preserve">
+        <value>Use All Cores</value>
+    </data>
+    <data name="SettingUseAllCoreText" xml:space="preserve">
+        <value>Supposed to improve performance on machines with lots of cores, unverified. Probably black magic</value>
+    </data>
+    <data name="SettingProcessPrio" xml:space="preserve">
+        <value>Process Priority</value>
+    </data>
+    <data name="SettingProcessPrioText" xml:space="preserve">
+        <value>Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness</value>
+    </data>
+    <data name="SettingProcessPrioNormal" xml:space="preserve">
+        <value>Normal</value>
+    </data>
+    <data name="SettingProcessPrioAboveNormal" xml:space="preserve">
+        <value>Above Normal</value>
+    </data>
+    <data name="SettingProcessPrioHigh" xml:space="preserve">
+        <value>High</value>
+    </data>
+    <data name="SettingProcessPrioRealtime" xml:space="preserve">
+        <value>Realtime (Not Recommanded)</value>
+    </data>
+    <data name="SettingCpuAffinity" xml:space="preserve">
+        <value>CPU Thread Affinity</value>
+    </data>
+    <data name="SettingCpuAffinityText" xml:space="preserve">
+        <value>CPU Thread Affinity help to assign specific cores to the server process</value>
+    </data>
+    <data name="CatGraphics" xml:space="preserve">
+        <value>Graphics</value>
+    </data>
+    <data name="SettingUltraAniso" xml:space="preserve">
+        <value>Better Textures on Ultra</value>
+    </data>
+    <data name="SettingUltraAnisoText" xml:space="preserve">
+        <value>Increase the sharpness of angled textures on Ultra settings. This can have a performance hit depending on your hardware</value>
+    </data>
+    <data name="SettingTexPool" xml:space="preserve">
+        <value>Extra Texture Streaming Pool on Ultra (MB)</value>
+    </data>
+    <data name="SettingTexPoolText" xml:space="preserve">
+        <value>In order to not saturate your GPU memory with textures, the game constantly swap textures it does not need for the ones it needs. For that it reserve a portion of your memory to swap things out. By default on Ultra, that pool is 1500 MB in size. It's fine for the vanilla game, but with modded games it can be short when you are in an intensive area with lots of decorations, showing blurry textures more often. You can increase the base 1500 with this slider. Keep in mind that adding too much could have performance impact on your game</value>
+    </data>
+    <data name="SettingAsyncScene" xml:space="preserve">
+        <value>Enable Async Scene</value>
+    </data>
+    <data name="SettingAsyncSceneText" xml:space="preserve">
+        <value>Can improve performance, specially around heavy building areas</value>
+    </data>
+    <data name="SettingMaxMoveDelta" xml:space="preserve">
+        <value>Max Move Delta Time</value>
+    </data>
+    <data name="SettingMaxMoveDeltaText" xml:space="preserve">
+        <value>TODO</value>
+    </data>
+    <data name="SettingInternetSpeed" xml:space="preserve">
+        <value>Configured Internet Speed</value>
+    </data>
+    <data name="SettingInternetSpeedText" xml:space="preserve">
+        <value>TODO</value>
+    </data>
+    <data name="SettingLog" xml:space="preserve">
+        <value>Display Log Console</value>
+    </data>
+    <data name="SettingLogText" xml:space="preserve">
+        <value>Display live game logs as the game is running</value>
+    </data>
+    <data name="SettingAdminServerList" xml:space="preserve">
+        <value>[Tot ! Admin] Do not load server list</value>
+    </data>
+    <data name="SettingAdminServerListText" xml:space="preserve">
+        <value>Prevent the sever list from auto refreshing from the main menu</value>
+    </data>
+    <data name="SettingLogFilter" xml:space="preserve">
+        <value>Log Filters</value>
+    </data>
+    <data name="SettingLogFilterText" xml:space="preserve">
+        <value>Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+    </data>
+    <data name="CatServerSettings" xml:space="preserve">
+        <value>Server Settings</value>
+    </data>
+    <data name="SettingServerName" xml:space="preserve">
+        <value>Server Name</value>
+    </data>
+    <data name="SettingServerNameText" xml:space="preserve">
+        <value>Name of your server instance in the game server list</value>
+    </data>
+    <data name="SettingServerPass" xml:space="preserve">
+        <value>Server Password</value>
+    </data>
+    <data name="SettingServerPassText" xml:space="preserve">
+        <value>Password of your server instance</value>
+    </data>
+    <data name="SettingServerAdminPass" xml:space="preserve">
+        <value>Admin Password</value>
+    </data>
+    <data name="SettingServerAdminPassText" xml:space="preserve">
+        <value>Admin password of your server instance</value>
+    </data>
+    <data name="SettingServerMaxPlayer" xml:space="preserve">
+        <value>Max Player Count</value>
+    </data>
+    <data name="SettingServerMaxPlayerText" xml:space="preserve">
+        <value>Maximum authorized amount of playes on your server instance</value>
+    </data>
+    <data name="SettingServerRegion" xml:space="preserve">
+        <value>Server Region</value>
+    </data>
+    <data name="SettingServerRegionText" xml:space="preserve">
+        <value>Server region to be displayed in the server browser</value>
+    </data>
+    <data name="SettingServerRegionEurope" xml:space="preserve">
+        <value>Europe</value>
+    </data>
+    <data name="SettingServerRegionNorthAmerica" xml:space="preserve">
+        <value>North America</value>
+    </data>
+    <data name="SettingServerRegionAsia" xml:space="preserve">
+        <value>Asia</value>
+    </data>
+    <data name="SettingServerRegionAustralia" xml:space="preserve">
+        <value>Australia</value>
+    </data>
+    <data name="SettingServerRegionSouthAmerica" xml:space="preserve">
+        <value>South America</value>
+    </data>
+    <data name="SettingServerRegionJapan" xml:space="preserve">
+        <value>Japan</value>
+    </data>
+    <data name="SettingServerMap" xml:space="preserve">
+        <value>Game Map</value>
+    </data>
+    <data name="SettingServerMapText" xml:space="preserve">
+        <value>Starting path of the map you want to load on your server intance. The button contain a few known map path for easier setup</value>
+    </data>
+    <data name="SettingSudoAdminList" xml:space="preserve">
+        <value>Sudo Super Admin List</value>
+    </data>
+    <data name="SettingSudoAdminListText" xml:space="preserve">
+        <value>List of steam ID to be Sudo super admins on your servers. Leave it empty if you do not use Sudo</value>
+    </data>
+    <data name="SettingTotAdminPrecision" xml:space="preserve">
+        <value>Disable Tot!Admin High Precision Move Tool</value>
+    </data>
+    <data name="SettingTotAdminPrecisionText" xml:space="preserve">
+        <value>For better compatibility with other move tools, disable two decimal scaling of Tot!Admin Move Tool</value>
+    </data>
+    <data name="CatRestartSettings" xml:space="preserve">
+        <value>Restart Settings</value>
+    </data>
+    <data name="SettingServerKillZombies" xml:space="preserve">
+        <value>Kill Zombie Servers</value>
+    </data>
+    <data name="SettingServerKillZombiesText" xml:space="preserve">
+        <value>Kill server instances that have stopped responding (frozen) for a period of time</value>
+    </data>
+    <data name="SettingServerZombieDuration" xml:space="preserve">
+        <value>Zombie Check Duration (Seconds)</value>
+    </data>
+    <data name="SettingServerZombieDurationText" xml:space="preserve">
+        <value>Amount of time given to a server instance to respond before getting killed by trebuchet</value>
+    </data>
+    <data name="SettingServerCrashRestart" xml:space="preserve">
+        <value>Restart Servers When Down</value>
+    </data>
+    <data name="SettingServerCrashRestartText" xml:space="preserve">
+        <value>Automatically restart a server instance that have stopped unexpectedly</value>
+    </data>
+    <data name="CatPerformance" xml:space="preserve">
+        <value>Performance</value>
+    </data>
+    <data name="SettingServerMaximumTickRate" xml:space="preserve">
+        <value>Maximum Tick Rate</value>
+    </data>
+    <data name="SettingServerMaximumTickRateText" xml:space="preserve">
+        <value>Maximum tick rate of your server instance</value>
+    </data>
+    <data name="SettingServerUseAllCores" xml:space="preserve">
+        <value>Use All Cores</value>
+    </data>
+    <data name="SettingServerUseAllCoresText" xml:space="preserve">
+        <value>Supposed to improve performance on machines with lots of cores, unverified. Probably black magic</value>
+    </data>
+    <data name="SettingServerProcessPriority" xml:space="preserve">
+        <value>Process Priority</value>
+    </data>
+    <data name="SettingServerProcessPriorityText" xml:space="preserve">
+        <value>Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness</value>
+    </data>
+    <data name="SettingServerCPUThreadAffinity" xml:space="preserve">
+        <value>CPU Thread Affinity</value>
+    </data>
+    <data name="SettingServerCPUThreadAffinityText" xml:space="preserve">
+        <value>CPU Thread Affinity help to assign specific cores to the server process</value>
+    </data>
+    <data name="CatPorts" xml:space="preserve">
+        <value>Ports</value>
+    </data>
+    <data name="SettingServerGameClientPort" xml:space="preserve">
+        <value>Game Client Port</value>
+    </data>
+    <data name="SettingServerGameClientPortText" xml:space="preserve">
+        <value>Port used by the game client to connect to your server instance</value>
+    </data>
+    <data name="SettingServerRawUDPPort" xml:space="preserve">
+        <value>Raw UDP Port</value>
+    </data>
+    <data name="SettingServerRawUDPPortText" xml:space="preserve">
+        <value>TODO</value>
+    </data>
+    <data name="SettingServerSourceQueryPort" xml:space="preserve">
+        <value>Source Query Port</value>
+    </data>
+    <data name="SettingServerSourceQueryPortText" xml:space="preserve">
+        <value>Port used by the server browser to query your server instance</value>
+    </data>
+    <data name="SettingServerEnableMultiHome" xml:space="preserve">
+        <value>Enable Multi Home</value>
+    </data>
+    <data name="SettingServerEnableMultiHomeText" xml:space="preserve">
+        <value>Enable Multi Home to allow multiple IP to connect to your server instance</value>
+    </data>
+    <data name="SettingServerMultiHomeAddress" xml:space="preserve">
+        <value>Multi Home Address</value>
+    </data>
+    <data name="SettingServerMultiHomeAddressText" xml:space="preserve">
+        <value>IP address to be used by Multi Home. Usually your local IP</value>
+    </data>
+    <data name="CatRCon" xml:space="preserve">
+        <value>RCon</value>
+    </data>
+    <data name="SettingServerEnableRCon" xml:space="preserve">
+        <value>Enable RCon</value>
+    </data>
+    <data name="SettingServerEnableRConText" xml:space="preserve">
+        <value>Enable RCON on your server instance</value>
+    </data>
+    <data name="SettingServerRConPort" xml:space="preserve">
+        <value>RCon Port</value>
+    </data>
+    <data name="SettingServerRConPortText" xml:space="preserve">
+        <value>Port used by RCon</value>
+    </data>
+    <data name="SettingServerRConPassword" xml:space="preserve">
+        <value>RCon Password</value>
+    </data>
+    <data name="SettingServerRConPasswordText" xml:space="preserve">
+        <value>Password used by RCon</value>
+    </data>
+    <data name="SettingServerRConMaxKarma" xml:space="preserve">
+        <value>RCon Max Karma</value>
+    </data>
+    <data name="SettingServerRConMaxKarmaText" xml:space="preserve">
+        <value>Maximum karma value for RCon</value>
+    </data>
+    <data name="CatAntiCheat" xml:space="preserve">
+        <value>Anti-Cheat</value>
+    </data>
+    <data name="SettingServerEnableVAC" xml:space="preserve">
+        <value>Enable Valve Anti Cheat</value>
+    </data>
+    <data name="SettingServerEnableVACText" xml:space="preserve">
+        <value>Enable Valve Anti Cheat on your server instance</value>
+    </data>
+    <data name="SettingServerEnableBattleEye" xml:space="preserve">
+        <value>Enable Battle Eye</value>
+    </data>
+    <data name="SettingServerEnableBattleEyeText" xml:space="preserve">
+        <value>Enable Battle Eye on your server instance</value>
+    </data>
+    <data name="CatMiscellaneous" xml:space="preserve">
+        <value>Miscellaneous</value>
+    </data>
+    <data name="SettingServerLog" xml:space="preserve">
+        <value>Display Log Console</value>
+    </data>
+    <data name="SettingServerLogText" xml:space="preserve">
+        <value>Display server live logs instead of a blank window. WARNING: This might render the zombie process detection ineffective. I don't advise using this on a production server</value>
+    </data>
+    <data name="SettingServerNoAISpawn" xml:space="preserve">
+        <value>No AI Spawn</value>
+    </data>
+    <data name="SettingServerNoAISpawnText" xml:space="preserve">
+        <value>Prevent the spawn of common map NPC. Some categories of NPC are not affected by this, like the Siptha vaults</value>
+    </data>
+    <data name="SettingServerLogFilters" xml:space="preserve">
+        <value>Log Filters</value>
+    </data>
+    <data name="SettingServerLogFiltersText" xml:space="preserve">
+        <value>Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+    </data>
+    <data name="CatTrebSettings" xml:space="preserve">
+        <value>Trebuchet Settings</value>
+    </data>
+    <data name="SettingClientPath" xml:space="preserve">
+        <value>Conan Exile Installation Directory</value>
+    </data>
+    <data name="SettingClientPathText" xml:space="preserve">
+        <value>This is the path to your game. Leave it empty if you do not wish trebuchet to handle game launch</value>
+    </data>
+    <data name="SettingServerInstanceCount" xml:space="preserve">
+        <value>Server Instance Amount</value>
+    </data>
+    <data name="SettingServerInstanceCountText" xml:space="preserve">
+        <value>The amount of server instance to be handle by this trebuchet. Leave it at 0 if you do not wish trebuchet to handle server launch</value>
+    </data>
+    <data name="SettingAutoUpdateStatus" xml:space="preserve">
+        <value>Update Server Instances</value>
+    </data>
+    <data name="SettingAutoUpdateStatusText" xml:space="preserve">
+        <value>Choose when to update your servers. This does not apply to client game</value>
+    </data>
+    <data name="SettingAutoUpdateStatusNever" xml:space="preserve">
+        <value>Never</value>
+    </data>
+    <data name="SettingAutoUpdateStatusLaunchOnly" xml:space="preserve">
+        <value>Only on launch</value>
+    </data>
+    <data name="SettingAutoUpdateStatusCheck" xml:space="preserve">
+        <value>Check for updates</value>
+    </data>
+    <data name="SettingUpdateCheckInterval" xml:space="preserve">
+        <value>Update Check Interval</value>
+    </data>
+    <data name="SettingUpdateCheckIntervalText" xml:space="preserve">
+        <value>"The interval in seconds between each update check</value>
+    </data>
+    <data name="SettingVerifyAll" xml:space="preserve">
+        <value>Always Verify Files</value>
+    </data>
+    <data name="SettingVerifyAllText" xml:space="preserve">
+        <value>When checking for updated files, the system will check its cached data to quickly check if they need to be redownloaded again. By checking this option, you force the system to inspect the files every time. This will make the process of checking for updates much more slow but is usefull to detect corruption. If you suspect corruption, I advise to use the button on the dashboard instead of turning on this setting</value>
+    </data>
+    <data name="SettingMaxDownloads" xml:space="preserve">
+        <value>Max Simultaneous Downloads</value>
+    </data>
+    <data name="SettingMaxDownloadsText" xml:space="preserve">
+        <value>Max amount of files downloaded at the same time on the steam network. This can increase the load on your CPU/Drive/Network but make the download potentially faster if your network allow it</value>
+    </data>
+    <data name="SettingMaxServers" xml:space="preserve">
+        <value>Max Download Servers</value>
+    </data>
+    <data name="SettingMaxServersText" xml:space="preserve">
+        <value>Max amount of content server used at the same time on the steam network</value>
+    </data>
+    <data name="CatMods" xml:space="preserve">
+        <value>Mods</value>
+    </data>
+    <data name="SettingAutoRefreshModlist" xml:space="preserve">
+        <value>Auto Refresh Mod List</value>
+    </data>
+    <data name="SettingAutoRefreshModlistText" xml:space="preserve">
+        <value>TODO</value>
+    </data>
+    <data name="SettingDisplayWarningOnKill" xml:space="preserve">
+        <value>Display Warning On Kill</value>
+    </data>
+    <data name="SettingDisplayWarningOnKillText" xml:space="preserve">
+        <value>Click on a Kill button will display first a warning about data loss and corruption</value>
+    </data>
+    <data name="CatTrebUI" xml:space="preserve">
+        <value>Trebuchet UI</value>
+    </data>
+    <data name="OpenWorkshopPage" xml:space="preserve">
+        <value>Open Workshop Page</value>
+    </data>
+    <data name="RemoveFromList" xml:space="preserve">
+        <value>Remove from list</value>
+    </data>
+    <data name="Update" xml:space="preserve">
+        <value>Update</value>
+    </data>
+    <data name="CatUpdates" xml:space="preserve">
+        <value>Updates</value>
     </data>
 </root>

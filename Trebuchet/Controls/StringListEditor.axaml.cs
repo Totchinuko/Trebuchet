@@ -1,8 +1,8 @@
-﻿using System.ComponentModel;
-using System.Windows.Input;
+﻿using System.Reactive;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ReactiveUI;
 using Trebuchet.ViewModels;
 using TrebuchetUtils;
 
@@ -18,11 +18,11 @@ namespace Trebuchet.Controls
 
         public StringListEditor()
         {
-            DeleteCommand = new SimpleCommand().Subscribe(OnInstanceDelete);
+            DeleteCommand = ReactiveCommand.Create<ObservableString>(OnInstanceDelete);
             InitializeComponent();
         }
-        
-        public ICommand DeleteCommand { get; private set; }
+
+        public ReactiveCommand<ObservableString, Unit> DeleteCommand { get; }
         
         public TrulyObservableCollection<ObservableString> Values
         {
@@ -35,11 +35,10 @@ namespace Trebuchet.Controls
             Values.Add(new ObservableString());
         }
         
-        private void OnInstanceDelete(object? obj)
+        private void OnInstanceDelete(ObservableString value)
         {
             if (Values.Count == 0) return;
-            if (obj is ObservableString value)
-                Values.Remove(value);
+            Values.Remove(value);
             InstanceList.ItemsSource = Values;
         }
         

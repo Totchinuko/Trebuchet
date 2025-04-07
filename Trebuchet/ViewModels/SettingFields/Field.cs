@@ -1,218 +1,246 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.Specialized;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Windows.Input;
-using Avalonia;
-using Avalonia.Controls.Templates;
-using Trebuchet.Assets;
-using TrebuchetUtils;
+using System.Reactive;
+using DynamicData.Binding;
+using ReactiveUI;
 
 namespace Trebuchet.ViewModels.SettingFields
 {
-    [JsonDerivedType(typeof(IntField), "Int")]
-    [JsonDerivedType(typeof(ToggleField), "Toggle")]
-    [JsonDerivedType(typeof(IntSliderField), "IntSlider")]
-    [JsonDerivedType(typeof(TextField), "Text")]
-    [JsonDerivedType(typeof(TextListField), "TextList")]
-    [JsonDerivedType(typeof(DirectoryField), "Directory")]
-    [JsonDerivedType(typeof(MapField), "Map")]
-    [JsonDerivedType(typeof(CpuAffinityField), "CPUAffinity")]
-    [JsonDerivedType(typeof(ComboBoxField), "ComboBox")]
-    [JsonDerivedType(typeof(TitleField), "Title")]
-    [JsonDerivedType(typeof(RawUdpField), "RawUDPPort")]
-    [JsonDerivedType(typeof(FloatField), "FloatField")]
-    public abstract class Field : BaseViewModel
+    public interface IValueField
     {
-        private readonly string _template;
-        public bool DisplayPanel { get; }
-
-        protected Field(string template, bool displayPanel)
-        {
-            _template = template;
-            DisplayPanel = displayPanel;
-            HyperlinkCommand = new SimpleCommand().Subscribe(OnHyperlinkClicked);
-            ResetCommand = new SimpleCommand().Subscribe(OnReset);
-        }
-
-        private static readonly JsonSerializerOptions Options = new();
+        ReactiveCommand<Unit, Unit> Update { get; }
+        ReactiveCommand<Unit, Unit> Reset { get; }
+        ReactiveCommand<Unit, Unit> HyperlinkClick { get; }
+        bool IsDefault { get; }
+        bool HasDefault { get; }
+        bool IsVisible { get; }
+        string Title { get; }
+        string Description { get; }
+        bool DisplayGenericDescription { get; }
+        bool DisplayDescription { get; }
+        bool IsEnabled { get; }
+        string Hyperlink { get; }
         
-        public abstract bool IsDefault { get; }
+    }
+    
+    public abstract class FieldElement : ReactiveObject
+    {
+    }
 
-        public virtual bool IsVisible => true;
+    public abstract class FieldElement<F> : FieldElement where F : FieldElement<F>
+    {
+        private string _title = string.Empty;
 
-        public string Description { get; set; } = string.Empty;
-        
-        public bool DisplayDescription => !string.IsNullOrEmpty(Description) && DisplayGenericDescription;
-
-        public virtual bool DisplayGenericDescription => true;
-
-        public string Hyperlink { get; set; } = string.Empty;
-
-        public ICommand HyperlinkCommand { get; private set; }
-        
-        public ICommand ResetCommand { get; private set; }
-
-        public bool IsEnabled { get; set; } = true;
-
-        public string Name { get; set; } = string.Empty;
-
-        public string Property { get; set; } = string.Empty;
-
-        public bool RefreshApp { get; set; } = false;
-        public event EventHandler<Field>? ValueChanged;
-
-        public static List<Field> BuildFieldList(string json, object target, PropertyInfo? property = null)
+        public string Title
         {
-            List<Field>? fields = JsonSerializer.Deserialize<List<Field>>(json, Options);
-            if (fields == null) throw new Exception("Could not deserialize json fields definition.");
-
-            ApplyTranslation(fields);
-            foreach (var field in fields)
-                field.SetTarget(target, property);
-            return fields;
+            get => _title;
+            protected set => this.RaiseAndSetIfChanged(ref _title, value);
         }
 
-        public abstract void RefreshValue();
-
-        public abstract void RefreshVisibility();
-
-        public abstract void ResetToDefault();
-
-        public abstract void SetTarget(object target, PropertyInfo? property = null);
-
-        protected virtual void OnValueChanged()
+        public F SetTitle(string title)
         {
-            ValueChanged?.Invoke(this, this);
-        }
-        
-        private void OnHyperlinkClicked(object? obj)
-        {
-            using var process = new Process();
-            process.StartInfo.UseShellExecute = true;
-            process.StartInfo.FileName = Hyperlink;
-            process.Start();
-        }
-        
-        private void OnReset(object? obj)
-        {
-            ResetToDefault();
-        }
-
-        private static void ApplyTranslation(List<Field> fields)
-        {
-            foreach (var field in fields)
-            {
-                field.Name = ApplyTranslation(field.Name);
-                field.Description = ApplyTranslation(field.Description);
-            }
-        }
-
-        private static string ApplyTranslation(string content)
-        {
-            if(!content.StartsWith("resx:")) return content;
-            content = content.Substring(5);
-            var property = typeof(Resources).GetProperty(content, BindingFlags.Static | BindingFlags.Public);
-            if (property == null) return $"Invalid Property {content}";
-            if (property.PropertyType != typeof(string)) return $"Invalid Property {content}";
-            return property.GetValue(null, null) as string ?? $"Invalid Property {content}";
+            Title = title;
+            return (F)this;
         }
     }
 
-    public abstract class Field<T, TD> : Field
+    public abstract class DescriptiveElement<F> : FieldElement<F> where F : DescriptiveElement<F>
     {
-        private PropertyInfo? _propertyInfos;
-        private object? _target;
-        private PropertyInfo? _targetProperty;
+        private string _description = string.Empty;
+        private bool _displayDescription;
+        private bool _displayGenericDescription = true;
 
-        protected Field(string template, bool displayPanel) : base(template, displayPanel)
+        public string Description
         {
-        }
-        
-        protected Field(string template) : base(template, true)
-        {
+            get => _description;
+            protected set => this.RaiseAndSetIfChanged(ref _description, value);
         }
 
-        public FieldCondition? Condition { get; set; } = null;
-
-        public virtual TD? Default { get; set; }
-
-
-        public override bool IsVisible => Condition == null || Condition.IsVisible(GetTarget());
-
-
-        public virtual T? Value
+        public bool DisplayDescription
         {
-            get
+            get => _displayDescription;
+            protected set => this.RaiseAndSetIfChanged(ref _displayDescription, value);
+        }
+
+        public bool DisplayGenericDescription
+        {
+            get => _displayGenericDescription;
+            protected set => this.RaiseAndSetIfChanged(ref _displayGenericDescription, value);
+        }
+
+        public F SetDescription(string description)
+        {
+            Description = description;
+            DisplayDescription = !string.IsNullOrEmpty(Description) && DisplayGenericDescription;
+            return (F)this;
+        }
+    
+        public F ToggleGenericDescription(bool toggle)
+        {
+            DisplayGenericDescription = toggle;
+            DisplayDescription = !string.IsNullOrEmpty(Description) && DisplayGenericDescription;
+            return (F)this;
+        }
+    }
+    
+    public abstract class Field<F> : DescriptiveElement<F> where F : Field<F>
+    {
+        private bool _isDefault;
+        private bool _hasDefault;
+        private bool _isVisible = true;
+        private string _hyperlink = string.Empty;
+        private bool _isEnabled = true;
+
+        public Field()
+        {
+            HyperlinkClick = ReactiveCommand.Create(() => TrebuchetUtils.Utils.OpenWeb(Hyperlink));
+        }
+
+        public bool IsDefault
+        {
+            get => _isDefault;
+            protected set => this.RaiseAndSetIfChanged(ref _isDefault, value);
+        }
+
+        public bool HasDefault
+        {
+            get => _hasDefault;
+            protected set => this.RaiseAndSetIfChanged(ref _hasDefault, value);
+        }
+
+        public bool IsVisible
+        {
+            get => _isVisible;
+            protected set => this.RaiseAndSetIfChanged(ref _isVisible, value);
+        }
+
+        public string Hyperlink
+        {
+            get => _hyperlink;
+            protected set => this.RaiseAndSetIfChanged(ref _hyperlink, value);
+        }
+
+        public bool IsEnabled
+        {
+            get => _isEnabled;
+            protected set => this.RaiseAndSetIfChanged(ref _isEnabled, value);
+        }
+
+        public ReactiveCommand<Unit, Unit> HyperlinkClick { get; }
+        public abstract ReactiveCommand<Unit, Unit> Reset { get; }
+    }
+    
+    public abstract class Field<F,T> : Field<F>, IValueField where F : Field<F,T>
+    {
+        private Func<T>? _getter;
+        private Action<T>? _setter;
+        private Func<T>? _defaultBuilder;
+        private T _value;
+
+        protected Field(T initialValue)
+        {
+            _value = initialValue;
+            var canReset = this.WhenAnyValue<Field<F,T>,bool,bool>(x => x.HasDefault, (hasDef) => hasDef);
+            
+            Reset = ReactiveCommand.Create(
+                canExecute: canReset,
+                execute: () =>
+                {
+                    if (DefaultBuilder is not null)
+                        Value = DefaultBuilder.Invoke();
+                });
+
+            Update = ReactiveCommand.Create(() =>
             {
-                if (_propertyInfos == null) throw new Exception($"Missing property information for {Property}.");
-                return GetConvert(_propertyInfos.GetValue(GetTarget()));
-            }
-            set => SetValue(value);
+                if (Getter is not null)
+                    Value = Getter.Invoke();
+            });
+            
+            ValueChanged = ReactiveCommand.Create<T>((v) =>
+            {
+                if (DefaultBuilder != null)
+                    IsDefault = IsValueDefault(v, DefaultBuilder());
+                else
+                    IsDefault = true;
+                Setter?.Invoke(v);
+            });
+
+            this.WhenAnyValue(x => x.Value)
+                .InvokeCommand(ValueChanged);
         }
 
-        public override void RefreshValue()
+        public Func<T>? Getter
         {
-            OnPropertyChanged(nameof(Value));
-            OnPropertyChanged(nameof(IsDefault));
+            get => _getter;
+            protected set => this.RaiseAndSetIfChanged(ref _getter, value);
         }
 
-        public override void RefreshVisibility()
+        public Action<T>? Setter
         {
-            OnPropertyChanged(nameof(IsVisible));
+            get => _setter;
+            protected set => this.RaiseAndSetIfChanged(ref _setter, value);
         }
 
-        public override void SetTarget(object target, PropertyInfo? property = null)
+        public Func<T>? DefaultBuilder
         {
-            _targetProperty = property;
-            _target = target;
-            _propertyInfos = GetTarget().GetType().GetProperty(Property);
-            AddCollectionEvent();
+            get => _defaultBuilder;
+            protected set => this.RaiseAndSetIfChanged(ref _defaultBuilder, value);
         }
 
-        protected abstract T? GetConvert(object? value);
-
-        protected abstract object? SetConvert(T? value);
-
-        private void AddCollectionEvent()
+        public T Value
         {
-            if (Value is INotifyCollectionChanged collection)
-                collection.CollectionChanged += OnCollectionChanged;
+            get => _value;
+            set => this.RaiseAndSetIfChanged(ref _value, value);
         }
 
-        private void SetValue(T? value)
+        public override ReactiveCommand<Unit, Unit> Reset { get; }
+        public ReactiveCommand<T, Unit> ValueChanged { get; }
+        public ReactiveCommand<Unit,Unit> Update { get; }
+
+        public F SetDefault(Func<T> defGenerator)
         {
-            if (_propertyInfos == null) throw new Exception($"Missing property information for {Property}.");
-            RemoveCollectionEvent();
-            _propertyInfos.SetValue(GetTarget(), SetConvert(value));
-            AddCollectionEvent();
-            OnValueChanged();
-            OnPropertyChanged(nameof(Value));
-            OnPropertyChanged(nameof(IsDefault));
+            DefaultBuilder = defGenerator;
+            IsDefault = IsValueDefault(_value, DefaultBuilder());
+            HasDefault = true;
+            return (F)this;
         }
 
-        private object GetTarget()
+        public F SetSetter(Action<T> setter)
         {
-            if (_targetProperty == null)
-                return _target ?? throw new NullReferenceException("Target is not set to a value.");
-            return _targetProperty.GetValue(_target) ??
-                   throw new NullReferenceException("Target is not set to a value.");
+            Setter = setter;
+            return (F)this;
         }
 
-        private void OnCollectionChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        public F SetEnabled(bool enabled)
         {
-            OnPropertyChanged(nameof(Value));
-            OnPropertyChanged(nameof(IsDefault));
+            IsEnabled = enabled;
+            return (F)this;
+        } 
+
+        public F SetGetter(Func<T> getter)
+        {
+            Getter = getter;
+            _value = Getter.Invoke();
+            if(DefaultBuilder is not null)
+                IsDefault = IsValueDefault(_value, DefaultBuilder());
+            return (F)this;
         }
 
-        private void RemoveCollectionEvent()
+        public F WhenFieldChanged<P,R>(ReactiveCommand<P,R> command)
         {
-            if (Value is INotifyCollectionChanged collection)
-                collection.CollectionChanged -= OnCollectionChanged;
+            ValueChanged.InvokeCommand(command);
+            return (F)this;
+        }
+
+        public F UpdateWith<OF, OT>(Field<OF, OT> field) where OF : Field<OF,OT>
+        {
+            field.ValueChanged.Subscribe((_) => Update.Execute());
+            return (F)this;
+        }
+
+        protected virtual bool IsValueDefault(T value, T defValue)
+        {
+            return EqualityComparer<T>.Default.Equals(value, defValue);
         }
     }
 }

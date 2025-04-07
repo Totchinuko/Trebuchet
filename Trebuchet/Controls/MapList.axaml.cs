@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Reactive;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
+using ReactiveUI;
 using TrebuchetLib;
-using TrebuchetUtils;
 
 namespace Trebuchet.Controls
 {
@@ -17,17 +18,17 @@ namespace Trebuchet.Controls
         public MapList()
         {
             MapListData = Tools.GetMapList();
-            MapSelectCommand.Subscribe(OnMapSelect);
+            MapSelectCommand = ReactiveCommand.Create<string>(OnMapSelect);
             InitializeComponent();
         }
         
         public Dictionary<string, string> MapListData { get; set; }
 
-        public SimpleCommand<string> MapSelectCommand { get; private set; } = new();
+        public ReactiveCommand<string, Unit> MapSelectCommand { get; private set; }
         
         public string SelectedMap
         {
-            get => (string)GetValue(SelectedMapProperty);
+            get => GetValue(SelectedMapProperty);
             set => SetValue(SelectedMapProperty, value);
         }
         

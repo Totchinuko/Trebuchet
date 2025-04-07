@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Reactive;
 using System.Windows.Input;
 using Avalonia;
+using ReactiveUI;
 
 namespace TrebuchetUtils.Modals
 {
@@ -10,7 +12,7 @@ namespace TrebuchetUtils.Modals
 
         public ExceptionModal(Exception exception) : base(650,400,"Exception", "ExceptionModal")
         {
-            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
+            CloseCommand = ReactiveCommand.Create(OnCloseModal);
 
             if(Application.Current is not IApplication app) return;
             if (app.HasCrashed) return;
@@ -22,7 +24,7 @@ namespace TrebuchetUtils.Modals
 
         public ExceptionModal(AggregateException exceptions) : base(650,400,"Exception", "ExceptionModal")
         {
-            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
+            CloseCommand = ReactiveCommand.Create(OnCloseModal);
             
             if(Application.Current is not IApplication app) return;
             if (app.HasCrashed) return;
@@ -32,25 +34,15 @@ namespace TrebuchetUtils.Modals
             Window.Clipboard?.SetTextAsync(_errorMessage);
         }
 
-        public ICommand CloseCommand { get; private set; }
+        public ReactiveCommand<Unit,Unit> CloseCommand { get; private set; }
         public string ErrorMessage { get => _errorMessage; set => _errorMessage = value; }
         public string ErrorTitle { get; set; } = string.Empty;
-
-        public override void Cancel()
-        {
-            CloseCommand.Execute(this);
-        }
 
         protected override void OnWindowClose(object? sender, EventArgs e)
         {
         }
 
-        public override void Submit()
-        {
-            CloseCommand.Execute(this);
-        }
-
-        private void OnCloseModal(object? obj)
+        private void OnCloseModal()
         {
             Window.Close();
         }

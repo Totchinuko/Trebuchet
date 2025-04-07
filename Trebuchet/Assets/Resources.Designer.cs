@@ -87,6 +87,132 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Anti-Cheat.
+        /// </summary>
+        public static string CatAntiCheat {
+            get {
+                return ResourceManager.GetString("CatAntiCheat", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to General.
+        /// </summary>
+        public static string CatGeneral {
+            get {
+                return ResourceManager.GetString("CatGeneral", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Graphics.
+        /// </summary>
+        public static string CatGraphics {
+            get {
+                return ResourceManager.GetString("CatGraphics", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Miscellaneous.
+        /// </summary>
+        public static string CatMiscellaneous {
+            get {
+                return ResourceManager.GetString("CatMiscellaneous", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mods.
+        /// </summary>
+        public static string CatMods {
+            get {
+                return ResourceManager.GetString("CatMods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Performance.
+        /// </summary>
+        public static string CatPerformance {
+            get {
+                return ResourceManager.GetString("CatPerformance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Ports.
+        /// </summary>
+        public static string CatPorts {
+            get {
+                return ResourceManager.GetString("CatPorts", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process Performance.
+        /// </summary>
+        public static string CatProcessPerformance {
+            get {
+                return ResourceManager.GetString("CatProcessPerformance", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RCon.
+        /// </summary>
+        public static string CatRCon {
+            get {
+                return ResourceManager.GetString("CatRCon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restart Settings.
+        /// </summary>
+        public static string CatRestartSettings {
+            get {
+                return ResourceManager.GetString("CatRestartSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Settings.
+        /// </summary>
+        public static string CatServerSettings {
+            get {
+                return ResourceManager.GetString("CatServerSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trebuchet Settings.
+        /// </summary>
+        public static string CatTrebSettings {
+            get {
+                return ResourceManager.GetString("CatTrebSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trebuchet UI.
+        /// </summary>
+        public static string CatTrebUI {
+            get {
+                return ResourceManager.GetString("CatTrebUI", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Updates.
+        /// </summary>
+        public static string CatUpdates {
+            get {
+                return ResourceManager.GetString("CatUpdates", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create.
         /// </summary>
         public static string Create {
@@ -375,24 +501,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Manage Client Files.
-        /// </summary>
-        public static string ManageClient {
-            get {
-                return ResourceManager.GetString("ManageClient", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer..
-        /// </summary>
-        public static string ManageClientText {
-            get {
-                return ResourceManager.GetString("ManageClientText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Missing.
         /// </summary>
         public static string Missing {
@@ -658,11 +766,29 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open Workshop Page.
+        /// </summary>
+        public static string OpenWorkshopPage {
+            get {
+                return ResourceManager.GetString("OpenWorkshopPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Profile Name.
         /// </summary>
         public static string ProfileName {
             get {
                 return ResourceManager.GetString("ProfileName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove from list.
+        /// </summary>
+        public static string RemoveFromList {
+            get {
+                return ResourceManager.GetString("RemoveFromList", resourceCulture);
             }
         }
         
@@ -721,11 +847,1064 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to [Tot ! Admin] Do not load server list.
+        /// </summary>
+        public static string SettingAdminServerList {
+            get {
+                return ResourceManager.GetString("SettingAdminServerList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Prevent the sever list from auto refreshing from the main menu.
+        /// </summary>
+        public static string SettingAdminServerListText {
+            get {
+                return ResourceManager.GetString("SettingAdminServerListText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Async Scene.
+        /// </summary>
+        public static string SettingAsyncScene {
+            get {
+                return ResourceManager.GetString("SettingAsyncScene", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Can improve performance, specially around heavy building areas.
+        /// </summary>
+        public static string SettingAsyncSceneText {
+            get {
+                return ResourceManager.GetString("SettingAsyncSceneText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto Refresh Mod List.
+        /// </summary>
+        public static string SettingAutoRefreshModlist {
+            get {
+                return ResourceManager.GetString("SettingAutoRefreshModlist", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TODO.
+        /// </summary>
+        public static string SettingAutoRefreshModlistText {
+            get {
+                return ResourceManager.GetString("SettingAutoRefreshModlistText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Server Instances.
+        /// </summary>
+        public static string SettingAutoUpdateStatus {
+            get {
+                return ResourceManager.GetString("SettingAutoUpdateStatus", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Check for updates.
+        /// </summary>
+        public static string SettingAutoUpdateStatusCheck {
+            get {
+                return ResourceManager.GetString("SettingAutoUpdateStatusCheck", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Only on launch.
+        /// </summary>
+        public static string SettingAutoUpdateStatusLaunchOnly {
+            get {
+                return ResourceManager.GetString("SettingAutoUpdateStatusLaunchOnly", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Never.
+        /// </summary>
+        public static string SettingAutoUpdateStatusNever {
+            get {
+                return ResourceManager.GetString("SettingAutoUpdateStatusNever", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose when to update your servers. This does not apply to client game.
+        /// </summary>
+        public static string SettingAutoUpdateStatusText {
+            get {
+                return ResourceManager.GetString("SettingAutoUpdateStatusText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Background Sound.
+        /// </summary>
+        public static string SettingBackgroundSound {
+            get {
+                return ResourceManager.GetString("SettingBackgroundSound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Keep the sound of the game up when tabbing out to another window.
+        /// </summary>
+        public static string SettingBackgroundSoundText {
+            get {
+                return ResourceManager.GetString("SettingBackgroundSoundText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Conan Exile Installation Directory.
+        /// </summary>
+        public static string SettingClientPath {
+            get {
+                return ResourceManager.GetString("SettingClientPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This is the path to your game. Leave it empty if you do not wish trebuchet to handle game launch.
+        /// </summary>
+        public static string SettingClientPathText {
+            get {
+                return ResourceManager.GetString("SettingClientPathText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU Thread Affinity.
+        /// </summary>
+        public static string SettingCpuAffinity {
+            get {
+                return ResourceManager.GetString("SettingCpuAffinity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU Thread Affinity help to assign specific cores to the server process.
+        /// </summary>
+        public static string SettingCpuAffinityText {
+            get {
+                return ResourceManager.GetString("SettingCpuAffinityText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display Warning On Kill.
+        /// </summary>
+        public static string SettingDisplayWarningOnKill {
+            get {
+                return ResourceManager.GetString("SettingDisplayWarningOnKill", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Click on a Kill button will display first a warning about data loss and corruption.
+        /// </summary>
+        public static string SettingDisplayWarningOnKillText {
+            get {
+                return ResourceManager.GetString("SettingDisplayWarningOnKillText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Configured Internet Speed.
+        /// </summary>
+        public static string SettingInternetSpeed {
+            get {
+                return ResourceManager.GetString("SettingInternetSpeed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TODO.
+        /// </summary>
+        public static string SettingInternetSpeedText {
+            get {
+                return ResourceManager.GetString("SettingInternetSpeedText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Remove Intro Videos.
+        /// </summary>
+        public static string SettingIntroVid {
+            get {
+                return ResourceManager.GetString("SettingIntroVid", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Instead of displaying the intro video, you will have black screen that will swap to the main menu once the game is loaded.
+        /// </summary>
+        public static string SettingIntroVidText {
+            get {
+                return ResourceManager.GetString("SettingIntroVidText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display Log Console.
+        /// </summary>
+        public static string SettingLog {
+            get {
+                return ResourceManager.GetString("SettingLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Log Filters.
+        /// </summary>
+        public static string SettingLogFilter {
+            get {
+                return ResourceManager.GetString("SettingLogFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).
+        /// </summary>
+        public static string SettingLogFilterText {
+            get {
+                return ResourceManager.GetString("SettingLogFilterText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display live game logs as the game is running.
+        /// </summary>
+        public static string SettingLogText {
+            get {
+                return ResourceManager.GetString("SettingLogText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Manage Client Files.
+        /// </summary>
+        public static string SettingManageClient {
+            get {
+                return ResourceManager.GetString("SettingManageClient", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer..
+        /// </summary>
+        public static string SettingManageClientText {
+            get {
+                return ResourceManager.GetString("SettingManageClientText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max Simultaneous Downloads.
+        /// </summary>
+        public static string SettingMaxDownloads {
+            get {
+                return ResourceManager.GetString("SettingMaxDownloads", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max amount of files downloaded at the same time on the steam network. This can increase the load on your CPU/Drive/Network but make the download potentially faster if your network allow it.
+        /// </summary>
+        public static string SettingMaxDownloadsText {
+            get {
+                return ResourceManager.GetString("SettingMaxDownloadsText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max Move Delta Time.
+        /// </summary>
+        public static string SettingMaxMoveDelta {
+            get {
+                return ResourceManager.GetString("SettingMaxMoveDelta", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TODO.
+        /// </summary>
+        public static string SettingMaxMoveDeltaText {
+            get {
+                return ResourceManager.GetString("SettingMaxMoveDeltaText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max Download Servers.
+        /// </summary>
+        public static string SettingMaxServers {
+            get {
+                return ResourceManager.GetString("SettingMaxServers", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max amount of content server used at the same time on the steam network.
+        /// </summary>
+        public static string SettingMaxServersText {
+            get {
+                return ResourceManager.GetString("SettingMaxServersText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process Priority.
+        /// </summary>
+        public static string SettingProcessPrio {
+            get {
+                return ResourceManager.GetString("SettingProcessPrio", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Above Normal.
+        /// </summary>
+        public static string SettingProcessPrioAboveNormal {
+            get {
+                return ResourceManager.GetString("SettingProcessPrioAboveNormal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to High.
+        /// </summary>
+        public static string SettingProcessPrioHigh {
+            get {
+                return ResourceManager.GetString("SettingProcessPrioHigh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Normal.
+        /// </summary>
+        public static string SettingProcessPrioNormal {
+            get {
+                return ResourceManager.GetString("SettingProcessPrioNormal", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Realtime (Not Recommanded).
+        /// </summary>
+        public static string SettingProcessPrioRealtime {
+            get {
+                return ResourceManager.GetString("SettingProcessPrioRealtime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness.
+        /// </summary>
+        public static string SettingProcessPrioText {
+            get {
+                return ResourceManager.GetString("SettingProcessPrioText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Settings.
         /// </summary>
         public static string Settings {
             get {
                 return ResourceManager.GetString("Settings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admin Password.
+        /// </summary>
+        public static string SettingServerAdminPass {
+            get {
+                return ResourceManager.GetString("SettingServerAdminPass", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Admin password of your server instance.
+        /// </summary>
+        public static string SettingServerAdminPassText {
+            get {
+                return ResourceManager.GetString("SettingServerAdminPassText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU Thread Affinity.
+        /// </summary>
+        public static string SettingServerCPUThreadAffinity {
+            get {
+                return ResourceManager.GetString("SettingServerCPUThreadAffinity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to CPU Thread Affinity help to assign specific cores to the server process.
+        /// </summary>
+        public static string SettingServerCPUThreadAffinityText {
+            get {
+                return ResourceManager.GetString("SettingServerCPUThreadAffinityText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restart Servers When Down.
+        /// </summary>
+        public static string SettingServerCrashRestart {
+            get {
+                return ResourceManager.GetString("SettingServerCrashRestart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automatically restart a server instance that have stopped unexpectedly.
+        /// </summary>
+        public static string SettingServerCrashRestartText {
+            get {
+                return ResourceManager.GetString("SettingServerCrashRestartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Battle Eye.
+        /// </summary>
+        public static string SettingServerEnableBattleEye {
+            get {
+                return ResourceManager.GetString("SettingServerEnableBattleEye", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Battle Eye on your server instance.
+        /// </summary>
+        public static string SettingServerEnableBattleEyeText {
+            get {
+                return ResourceManager.GetString("SettingServerEnableBattleEyeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Multi Home.
+        /// </summary>
+        public static string SettingServerEnableMultiHome {
+            get {
+                return ResourceManager.GetString("SettingServerEnableMultiHome", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Multi Home to allow multiple IP to connect to your server instance.
+        /// </summary>
+        public static string SettingServerEnableMultiHomeText {
+            get {
+                return ResourceManager.GetString("SettingServerEnableMultiHomeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable RCon.
+        /// </summary>
+        public static string SettingServerEnableRCon {
+            get {
+                return ResourceManager.GetString("SettingServerEnableRCon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable RCON on your server instance.
+        /// </summary>
+        public static string SettingServerEnableRConText {
+            get {
+                return ResourceManager.GetString("SettingServerEnableRConText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Valve Anti Cheat.
+        /// </summary>
+        public static string SettingServerEnableVAC {
+            get {
+                return ResourceManager.GetString("SettingServerEnableVAC", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Enable Valve Anti Cheat on your server instance.
+        /// </summary>
+        public static string SettingServerEnableVACText {
+            get {
+                return ResourceManager.GetString("SettingServerEnableVACText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game Client Port.
+        /// </summary>
+        public static string SettingServerGameClientPort {
+            get {
+                return ResourceManager.GetString("SettingServerGameClientPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port used by the game client to connect to your server instance.
+        /// </summary>
+        public static string SettingServerGameClientPortText {
+            get {
+                return ResourceManager.GetString("SettingServerGameClientPortText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Instance Amount.
+        /// </summary>
+        public static string SettingServerInstanceCount {
+            get {
+                return ResourceManager.GetString("SettingServerInstanceCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The amount of server instance to be handle by this trebuchet. Leave it at 0 if you do not wish trebuchet to handle server launch.
+        /// </summary>
+        public static string SettingServerInstanceCountText {
+            get {
+                return ResourceManager.GetString("SettingServerInstanceCountText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kill Zombie Servers.
+        /// </summary>
+        public static string SettingServerKillZombies {
+            get {
+                return ResourceManager.GetString("SettingServerKillZombies", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Kill server instances that have stopped responding (frozen) for a period of time.
+        /// </summary>
+        public static string SettingServerKillZombiesText {
+            get {
+                return ResourceManager.GetString("SettingServerKillZombiesText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display Log Console.
+        /// </summary>
+        public static string SettingServerLog {
+            get {
+                return ResourceManager.GetString("SettingServerLog", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Log Filters.
+        /// </summary>
+        public static string SettingServerLogFilters {
+            get {
+                return ResourceManager.GetString("SettingServerLogFilters", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).
+        /// </summary>
+        public static string SettingServerLogFiltersText {
+            get {
+                return ResourceManager.GetString("SettingServerLogFiltersText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Display server live logs instead of a blank window. WARNING: This might render the zombie process detection ineffective. I don&apos;t advise using this on a production server.
+        /// </summary>
+        public static string SettingServerLogText {
+            get {
+                return ResourceManager.GetString("SettingServerLogText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game Map.
+        /// </summary>
+        public static string SettingServerMap {
+            get {
+                return ResourceManager.GetString("SettingServerMap", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starting path of the map you want to load on your server intance. The button contain a few known map path for easier setup.
+        /// </summary>
+        public static string SettingServerMapText {
+            get {
+                return ResourceManager.GetString("SettingServerMapText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum Tick Rate.
+        /// </summary>
+        public static string SettingServerMaximumTickRate {
+            get {
+                return ResourceManager.GetString("SettingServerMaximumTickRate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum tick rate of your server instance.
+        /// </summary>
+        public static string SettingServerMaximumTickRateText {
+            get {
+                return ResourceManager.GetString("SettingServerMaximumTickRateText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Max Player Count.
+        /// </summary>
+        public static string SettingServerMaxPlayer {
+            get {
+                return ResourceManager.GetString("SettingServerMaxPlayer", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum authorized amount of playes on your server instance.
+        /// </summary>
+        public static string SettingServerMaxPlayerText {
+            get {
+                return ResourceManager.GetString("SettingServerMaxPlayerText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Multi Home Address.
+        /// </summary>
+        public static string SettingServerMultiHomeAddress {
+            get {
+                return ResourceManager.GetString("SettingServerMultiHomeAddress", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IP address to be used by Multi Home. Usually your local IP.
+        /// </summary>
+        public static string SettingServerMultiHomeAddressText {
+            get {
+                return ResourceManager.GetString("SettingServerMultiHomeAddressText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Name.
+        /// </summary>
+        public static string SettingServerName {
+            get {
+                return ResourceManager.GetString("SettingServerName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name of your server instance in the game server list.
+        /// </summary>
+        public static string SettingServerNameText {
+            get {
+                return ResourceManager.GetString("SettingServerNameText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No AI Spawn.
+        /// </summary>
+        public static string SettingServerNoAISpawn {
+            get {
+                return ResourceManager.GetString("SettingServerNoAISpawn", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Prevent the spawn of common map NPC. Some categories of NPC are not affected by this, like the Siptha vaults.
+        /// </summary>
+        public static string SettingServerNoAISpawnText {
+            get {
+                return ResourceManager.GetString("SettingServerNoAISpawnText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Password.
+        /// </summary>
+        public static string SettingServerPass {
+            get {
+                return ResourceManager.GetString("SettingServerPass", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password of your server instance.
+        /// </summary>
+        public static string SettingServerPassText {
+            get {
+                return ResourceManager.GetString("SettingServerPassText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process Priority.
+        /// </summary>
+        public static string SettingServerProcessPriority {
+            get {
+                return ResourceManager.GetString("SettingServerProcessPriority", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness.
+        /// </summary>
+        public static string SettingServerProcessPriorityText {
+            get {
+                return ResourceManager.GetString("SettingServerProcessPriorityText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Raw UDP Port.
+        /// </summary>
+        public static string SettingServerRawUDPPort {
+            get {
+                return ResourceManager.GetString("SettingServerRawUDPPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to TODO.
+        /// </summary>
+        public static string SettingServerRawUDPPortText {
+            get {
+                return ResourceManager.GetString("SettingServerRawUDPPortText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RCon Max Karma.
+        /// </summary>
+        public static string SettingServerRConMaxKarma {
+            get {
+                return ResourceManager.GetString("SettingServerRConMaxKarma", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Maximum karma value for RCon.
+        /// </summary>
+        public static string SettingServerRConMaxKarmaText {
+            get {
+                return ResourceManager.GetString("SettingServerRConMaxKarmaText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RCon Password.
+        /// </summary>
+        public static string SettingServerRConPassword {
+            get {
+                return ResourceManager.GetString("SettingServerRConPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password used by RCon.
+        /// </summary>
+        public static string SettingServerRConPasswordText {
+            get {
+                return ResourceManager.GetString("SettingServerRConPasswordText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RCon Port.
+        /// </summary>
+        public static string SettingServerRConPort {
+            get {
+                return ResourceManager.GetString("SettingServerRConPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port used by RCon.
+        /// </summary>
+        public static string SettingServerRConPortText {
+            get {
+                return ResourceManager.GetString("SettingServerRConPortText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Region.
+        /// </summary>
+        public static string SettingServerRegion {
+            get {
+                return ResourceManager.GetString("SettingServerRegion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Asia.
+        /// </summary>
+        public static string SettingServerRegionAsia {
+            get {
+                return ResourceManager.GetString("SettingServerRegionAsia", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Australia.
+        /// </summary>
+        public static string SettingServerRegionAustralia {
+            get {
+                return ResourceManager.GetString("SettingServerRegionAustralia", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Europe.
+        /// </summary>
+        public static string SettingServerRegionEurope {
+            get {
+                return ResourceManager.GetString("SettingServerRegionEurope", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Japan.
+        /// </summary>
+        public static string SettingServerRegionJapan {
+            get {
+                return ResourceManager.GetString("SettingServerRegionJapan", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to North America.
+        /// </summary>
+        public static string SettingServerRegionNorthAmerica {
+            get {
+                return ResourceManager.GetString("SettingServerRegionNorthAmerica", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to South America.
+        /// </summary>
+        public static string SettingServerRegionSouthAmerica {
+            get {
+                return ResourceManager.GetString("SettingServerRegionSouthAmerica", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server region to be displayed in the server browser.
+        /// </summary>
+        public static string SettingServerRegionText {
+            get {
+                return ResourceManager.GetString("SettingServerRegionText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Source Query Port.
+        /// </summary>
+        public static string SettingServerSourceQueryPort {
+            get {
+                return ResourceManager.GetString("SettingServerSourceQueryPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port used by the server browser to query your server instance.
+        /// </summary>
+        public static string SettingServerSourceQueryPortText {
+            get {
+                return ResourceManager.GetString("SettingServerSourceQueryPortText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use All Cores.
+        /// </summary>
+        public static string SettingServerUseAllCores {
+            get {
+                return ResourceManager.GetString("SettingServerUseAllCores", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supposed to improve performance on machines with lots of cores, unverified. Probably black magic.
+        /// </summary>
+        public static string SettingServerUseAllCoresText {
+            get {
+                return ResourceManager.GetString("SettingServerUseAllCoresText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Zombie Check Duration (Seconds).
+        /// </summary>
+        public static string SettingServerZombieDuration {
+            get {
+                return ResourceManager.GetString("SettingServerZombieDuration", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Amount of time given to a server instance to respond before getting killed by trebuchet.
+        /// </summary>
+        public static string SettingServerZombieDurationText {
+            get {
+                return ResourceManager.GetString("SettingServerZombieDurationText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sudo Super Admin List.
+        /// </summary>
+        public static string SettingSudoAdminList {
+            get {
+                return ResourceManager.GetString("SettingSudoAdminList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to List of steam ID to be Sudo super admins on your servers. Leave it empty if you do not use Sudo.
+        /// </summary>
+        public static string SettingSudoAdminListText {
+            get {
+                return ResourceManager.GetString("SettingSudoAdminListText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Extra Texture Streaming Pool on Ultra (MB).
+        /// </summary>
+        public static string SettingTexPool {
+            get {
+                return ResourceManager.GetString("SettingTexPool", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to In order to not saturate your GPU memory with textures, the game constantly swap textures it does not need for the ones it needs. For that it reserve a portion of your memory to swap things out. By default on Ultra, that pool is 1500 MB in size. It&apos;s fine for the vanilla game, but with modded games it can be short when you are in an intensive area with lots of decorations, showing blurry textures more often. You can increase the base 1500 with this slider. Keep in mind that adding too much could have perfor [rest of string was truncated]&quot;;.
+        /// </summary>
+        public static string SettingTexPoolText {
+            get {
+                return ResourceManager.GetString("SettingTexPoolText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Disable Tot!Admin High Precision Move Tool.
+        /// </summary>
+        public static string SettingTotAdminPrecision {
+            get {
+                return ResourceManager.GetString("SettingTotAdminPrecision", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to For better compatibility with other move tools, disable two decimal scaling of Tot!Admin Move Tool.
+        /// </summary>
+        public static string SettingTotAdminPrecisionText {
+            get {
+                return ResourceManager.GetString("SettingTotAdminPrecisionText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Better Textures on Ultra.
+        /// </summary>
+        public static string SettingUltraAniso {
+            get {
+                return ResourceManager.GetString("SettingUltraAniso", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Increase the sharpness of angled textures on Ultra settings. This can have a performance hit depending on your hardware.
+        /// </summary>
+        public static string SettingUltraAnisoText {
+            get {
+                return ResourceManager.GetString("SettingUltraAnisoText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update Check Interval.
+        /// </summary>
+        public static string SettingUpdateCheckInterval {
+            get {
+                return ResourceManager.GetString("SettingUpdateCheckInterval", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to &quot;The interval in seconds between each update check.
+        /// </summary>
+        public static string SettingUpdateCheckIntervalText {
+            get {
+                return ResourceManager.GetString("SettingUpdateCheckIntervalText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Use All Cores.
+        /// </summary>
+        public static string SettingUseAllCore {
+            get {
+                return ResourceManager.GetString("SettingUseAllCore", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Supposed to improve performance on machines with lots of cores, unverified. Probably black magic.
+        /// </summary>
+        public static string SettingUseAllCoreText {
+            get {
+                return ResourceManager.GetString("SettingUseAllCoreText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Always Verify Files.
+        /// </summary>
+        public static string SettingVerifyAll {
+            get {
+                return ResourceManager.GetString("SettingVerifyAll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to When checking for updated files, the system will check its cached data to quickly check if they need to be redownloaded again. By checking this option, you force the system to inspect the files every time. This will make the process of checking for updates much more slow but is usefull to detect corruption. If you suspect corruption, I advise to use the button on the dashboard instead of turning on this setting.
+        /// </summary>
+        public static string SettingVerifyAllText {
+            get {
+                return ResourceManager.GetString("SettingVerifyAllText", resourceCulture);
             }
         }
         
@@ -780,6 +1959,15 @@ namespace Trebuchet.Assets {
         public static string UACDialogText {
             get {
                 return ResourceManager.GetString("UACDialogText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Update.
+        /// </summary>
+        public static string Update {
+            get {
+                return ResourceManager.GetString("Update", resourceCulture);
             }
         }
         

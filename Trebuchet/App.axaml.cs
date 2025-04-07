@@ -134,20 +134,21 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddSingleton<Launcher>();
         services.AddSingleton<TaskBlocker>();
         services.AddSingleton<SteamAPI>();
+        services.AddSingleton<ModFileFactory>();
         services.AddSingleton<ILanguageManager, LanguageManager>();
 
         services.AddSingleton<SteamWidget>();
         services.AddSingleton<DialogueBox>();
+        services.AddSingleton<TrebuchetApp>();
         services.AddTransient<WorkshopSearchViewModel>();
-        services.AddTransient<TrebuchetApp>();
 
-        services.AddTransient<Panel, ModlistPanel>();
-        services.AddTransient<Panel, ClientProfilePanel>();
-        services.AddTransient<Panel, ServerProfilePanel>();
-        services.AddTransient<Panel, RconPanel>();
-        services.AddTransient<Panel, LogFilterPanel>();
-        services.AddTransient<Panel, DashboardPanel>();
-        services.AddTransient<Panel, SettingsPanel>();
+        services.AddSingleton<Panel, ModlistPanel>();
+        services.AddSingleton<Panel, ClientProfilePanel>();
+        services.AddSingleton<Panel, ServerProfilePanel>();
+        services.AddSingleton<Panel, RconPanel>();
+        services.AddSingleton<Panel, LogFilterPanel>();
+        services.AddSingleton<Panel, DashboardPanel>();
+        services.AddSingleton<Panel, SettingsPanel>();
     }
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)

@@ -1,74 +1,57 @@
 ﻿using System;
-using System.ComponentModel;
+using System.Reactive;
 using System.Threading.Tasks;
-using System.Windows.Input;
-using Trebuchet.Messages;
-using TrebuchetUtils;
+using DynamicData.Binding;
+using ReactiveUI;
 
-namespace Trebuchet.ViewModels.Panels
+namespace Trebuchet.ViewModels.Panels;
+
+public abstract class Panel : MenuElement
 {
-    public abstract class Panel : MenuElement,
-        ICommand,
-        ITinyRecipient<PanelRefreshConfigMessage>
+    private bool _canTabBeClicked = true;
+    private bool _active;
+    private string _tabClass = "AppTabNeutral";
+
+    public Panel(string label, string iconPath, bool bottom) : base(label)
     {
-        
-        private bool _active;
+        IconPath = iconPath;
+        BottomPosition = bottom;
+        DisplayPanel = ReactiveCommand.Create(() => {});
+        RequestAppRefresh = ReactiveCommand.Create(() => {});
+        RefreshPanel = ReactiveCommand.Create(() => { });
+        TabClick = ReactiveCommand.Create<Panel,Panel>((p) => p, this.WhenAnyValue(x => x.CanTabBeClicked));
 
-        public Panel(string label, string iconPath, bool bottom) : base(label)
-        {
-            IconPath = iconPath;
-            BottomPosition = bottom;
-        }
+        this.WhenValueChanged(x => x.Active)
+            .Subscribe((v) => TabClass = v ? "AppTabBlue" : "AppTabNeutral");
+    }
 
-        public event EventHandler? CanExecuteChanged;
-        public event EventHandler<Panel>? TabClicked;
-        public string IconPath { get; }
-        public bool BottomPosition { get; }
+    public string IconPath { get; }
+    public bool BottomPosition { get; }
+    public ReactiveCommand<Unit, Unit> RequestAppRefresh { get; }
+    public ReactiveCommand<Unit, Unit> RefreshPanel { get; }
+    public ReactiveCommand<Unit, Unit> DisplayPanel { get; }
+    public ReactiveCommand<Panel,Panel> TabClick { get; }
 
-        public bool Active
-        {
-            get => _active;
-            set
-            {
-                if (SetField(ref _active, value))
-                    OnPropertyChanged(nameof(TabClass));
-            }
-        }
+    public bool CanTabBeClicked
+    {
+        get => _canTabBeClicked;
+        protected set => this.RaiseAndSetIfChanged(ref _canTabBeClicked, value);
+    }
 
-        public string TabClass => Active ? "AppTabBlue" : "AppTabNeutral";
+    public bool Active
+    {
+        get => _active;
+        set => this.RaiseAndSetIfChanged(ref _active, value);
+    }
 
-        public virtual bool CanExecute(object? parameter)
-        {
-            return true;
-        }
+    public string TabClass
+    {
+        get => _tabClass;
+        protected set => this.RaiseAndSetIfChanged(ref _tabClass, value);
+    }
 
-        public virtual void Execute(object? parameter)
-        {
-            if (CanExecute(parameter))
-                TabClicked?.Invoke(this, this);
-        }
-
-        public void Receive(PanelRefreshConfigMessage message)
-        {
-            RefreshPanel();
-        }
-
-        public virtual void RefreshPanel()
-        {
-        }
-
-        public virtual Task Tick()
-        {
-            return Task.CompletedTask;
-        }
-
-        public virtual void PanelDisplayed()
-        {
-        }
-
-        protected void OnCanExecuteChanged()
-        {
-            CanExecuteChanged?.Invoke(this, EventArgs.Empty);
-        }
+    public virtual Task Tick()
+    {
+        return Task.CompletedTask;
     }
 }

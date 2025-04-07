@@ -1,4 +1,7 @@
-﻿using Trebuchet.Assets;
+﻿using System;
+using System.Reactive.Linq;
+using ReactiveUI;
+using Trebuchet.Assets;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels
@@ -10,17 +13,14 @@ namespace Trebuchet.ViewModels.Panels
         public LogFilterPanel(AppSetup setup) : base(Resources.ServerLogFilter, "mdi-filter", false)
         {
             _setup = setup;
-            LoadPanel();
-        }
-
-        public override bool CanExecute(object? parameter)
-        {
-            return _setup.Config is { ServerInstanceCount: > 0 };
-        }
-
-        public override void RefreshPanel()
-        {
-            OnCanExecuteChanged();
+            RefreshPanel.IsExecuting
+                .Where(x => x)
+                .Select(_ => _setup.Config is { ServerInstanceCount: > 0 })
+                .ToProperty(this, x => x.CanTabBeClicked);
+            RefreshPanel.Subscribe((_) =>
+            {
+                LoadPanel();
+            });
             LoadPanel();
         }
 

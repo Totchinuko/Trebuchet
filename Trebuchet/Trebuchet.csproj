@@ -35,15 +35,12 @@
         <AvaloniaResource Include="app.red.ico" />
         <EmbeddedResource Include="AppSettings.json.sample" />
         <EmbeddedResource Include="AppSettings.json" />
-        <EmbeddedResource Include="ViewModels\Panels\ClientProfilePanel.Fields.json" />
-        <EmbeddedResource Include="ViewModels\Panels\ServerProfilePanel.Fields.json" />
-        <EmbeddedResource Include="ViewModels\Panels\SettingsPanel.Fields.json" />
-        <EmbeddedResource Include="ViewModels\Panels\SettingsPanel.UI.Fields.json" />
     </ItemGroup>
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.2.5" />
         <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
+        <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.5" />
         <PackageReference Include="Avalonia.Themes.Fluent" Version="11.2.5" />
         <PackageReference Include="Avalonia.Fonts.Inter" Version="11.2.5" />
         <!--Condition below is needed to remove Avalonia.Diagnostics package from build output in Release configuration.-->

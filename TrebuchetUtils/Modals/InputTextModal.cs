@@ -1,6 +1,8 @@
 ﻿using System;
+using System.Reactive;
 using System.Windows.Input;
 using Avalonia.Layout;
+using ReactiveUI;
 
 namespace TrebuchetUtils.Modals
 {
@@ -12,7 +14,7 @@ namespace TrebuchetUtils.Modals
         public InputTextModal(string buttonLabel, string watermark = "", bool acceptReturn = false) : base(650, 200, "Text", "InputTextModal")
         {
             Watermark = watermark;
-            ValidateCommand = new SimpleCommand().Subscribe(OnValidate);
+            ValidateCommand = ReactiveCommand.Create(OnValidate);
             ButtonLabel = buttonLabel;
             AcceptReturn = acceptReturn;
             CloseDisabled = false;
@@ -42,7 +44,7 @@ namespace TrebuchetUtils.Modals
         public int MaxLength { get; private set; } = -1;
         public string? Text { get => _text; set => _text = value; }
 
-        public ICommand ValidateCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> ValidateCommand { get; private set; }
 
 
         protected override void OnWindowClose(object? sender, EventArgs e)
@@ -53,10 +55,10 @@ namespace TrebuchetUtils.Modals
 
         public override void Submit()
         {
-            OnValidate(this);
+            OnValidate();
         }
 
-        private void OnValidate(object? obj)
+        private void OnValidate()
         {
             if (string.IsNullOrEmpty(_text))
                 return;

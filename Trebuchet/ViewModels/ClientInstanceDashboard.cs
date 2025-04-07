@@ -1,43 +1,51 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Reactive;
 using System.Threading.Tasks;
+using ReactiveUI;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
-using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels;
 
-public class ClientInstanceDashboard : BaseViewModel
+public class ClientInstanceDashboard : ReactiveObject
 {
+    private readonly TaskBlocker _blocker;
     private ProcessState _lastState;
+    private bool _canKill;
+    private bool _canLaunch;
+    private List<string> _modlists = [];
+    private bool _processRunning;
+    private List<string> _profiles = [];
     private string _selectedModlist = string.Empty;
     private string _selectedProfile = string.Empty;
-    private bool _processRunning;
-    private List<string> _modlists = new();
-    private List<string> _profiles = new();
-    private List<ulong> _updateNeeded = new();
+    private List<ulong> _updateNeeded = [];
     private bool _canUseDashboard;
 
-    public ClientInstanceDashboard(IProcessStats processStats)
+    public ClientInstanceDashboard(IProcessStats processStats, TaskBlocker blocker)
     {
+        _blocker = blocker;
         ProcessStats = processStats;
 
-        KillCommand.Subscribe(OnKilled).Toggle(false);
-        LaunchCommand
-            .SetBlockingType<SteamDownload>()
-            .Subscribe(OnLaunched);
-        LaunchBattleEyeCommand
-            .SetBlockingType<SteamDownload>()
-            .Subscribe(OnBattleEyeLaunched);
-        UpdateModsCommand
-            .SetBlockingType<SteamDownload>()
-            .SetBlockingType<ClientRunning>()
-            .SetBlockingType<ServersRunning>()
-            .Subscribe(OnModUpdate);
+        KillCommand = ReactiveCommand.Create(OnKilled, this.WhenAnyValue(x => x.CanKill));
+        CanKill = false;
+
+        var canLaunch = this.WhenAnyValue(x => x.CanLaunch, x => x._blocker.BlockingTypes,
+            (x, b) => x && !b.Contains(typeof(SteamDownload)));
+        LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch);
+        LaunchBattleEyeCommand = ReactiveCommand.Create(OnBattleEyeLaunched, canLaunch);
+
+        var canUpdate = this.WhenAnyValue(x => x._blocker.BlockingTypes,
+            (x) => !x.Intersect([typeof(SteamDownload), typeof(ClientRunning), typeof(ServersRunning)]).Any());
+        UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, canUpdate);
+
+        this.WhenAnyValue(x => x.SelectedModlist)
+            .Subscribe((x) => ModlistSelected?.Invoke(this, x));
+        this.WhenAnyValue(x => x.SelectedProfile)
+            .Subscribe((x) => ProfileSelected?.Invoke(this, x));
     }
 
     public event EventHandler? KillClicked;
@@ -47,63 +55,66 @@ public class ClientInstanceDashboard : BaseViewModel
 
     public event EventHandler? UpdateClicked;
 
-    public bool CanUseDashboard
+    public ReactiveCommand<Unit,Unit> KillCommand { get; }
+    public ReactiveCommand<Unit,Unit> LaunchBattleEyeCommand { get; }
+    public ReactiveCommand<Unit,Unit> LaunchCommand { get; }
+    public ReactiveCommand<Unit,Unit> UpdateModsCommand { get; }
+
+    public bool CanKill
     {
-        get => _canUseDashboard;
-        set => SetField(ref _canUseDashboard, value);
+        get => _canKill;
+        set => this.RaiseAndSetIfChanged(ref _canKill, value);
     }
 
-    public SimpleCommand KillCommand { get; } = new();
-    public TaskBlockedCommand LaunchBattleEyeCommand { get; } = new();
-    public TaskBlockedCommand LaunchCommand { get; } = new();
-    public TaskBlockedCommand UpdateModsCommand { get; private set; } = new();
+    public bool CanLaunch
+    {
+        get => _canLaunch;
+        set => this.RaiseAndSetIfChanged(ref _canLaunch, value);
+    }
 
     public List<string> Modlists
     {
         get => _modlists;
-        set => SetField(ref _modlists, value);
+        set => this.RaiseAndSetIfChanged(ref _modlists, value);
     }
 
     public bool ProcessRunning
     {
         get => _processRunning;
-        set => SetField(ref _processRunning, value);
+        set => this.RaiseAndSetIfChanged(ref _processRunning, value);
     }
-
-    public IProcessStats ProcessStats { get; }
 
     public List<string> Profiles
     {
         get => _profiles;
-        set => SetField(ref _profiles, value);
+        set => this.RaiseAndSetIfChanged(ref _profiles, value);
     }
 
     public string SelectedModlist
     {
         get => _selectedModlist;
-        set
-        {
-            if(SetField(ref _selectedModlist, value))
-                ModlistSelected?.Invoke(this, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _selectedModlist, value);
     }
 
     public string SelectedProfile
     {
         get => _selectedProfile;
-        set
-        {
-            if(SetField(ref _selectedProfile, value))
-                ProfileSelected?.Invoke(this, value);
-        }
+        set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
     }
-
 
     public List<ulong> UpdateNeeded
     {
         get => _updateNeeded;
-        set => SetField(ref _updateNeeded, value);
+        set => this.RaiseAndSetIfChanged(ref _updateNeeded, value);
     }
+
+    public bool CanUseDashboard
+    {
+        get => _canUseDashboard;
+        set => this.RaiseAndSetIfChanged(ref _canUseDashboard, value);
+    }
+
+    public IProcessStats ProcessStats { get; }
 
     public Task ProcessRefresh(IConanProcess? process, bool refreshStats)
     {
@@ -124,16 +135,19 @@ public class ClientInstanceDashboard : BaseViewModel
 
     private void OnBattleEyeLaunched()
     {
+        CanLaunch = false;
         LaunchClicked?.Invoke(this, true);
     }
 
     private void OnKilled()
     {
+        CanKill = false;
         KillClicked?.Invoke(this, EventArgs.Empty);
     }
 
     private void OnLaunched()
     {
+        CanLaunch = false;
         LaunchClicked?.Invoke(this, false);
     }
 
@@ -145,18 +159,15 @@ public class ClientInstanceDashboard : BaseViewModel
 
     private async void OnProcessFailed()
     {
-        KillCommand.Toggle(false);
-        LaunchCommand.Toggle(true);
-        LaunchBattleEyeCommand.Toggle(true);
+        CanKill = false;
+        CanLaunch = true;
         await new ErrorModal("Client failed to start", "See the logs for more information.").OpenDialogueAsync();
     }
 
     private void OnProcessStarted(IConanProcess details, bool refreshStats)
     {
-        LaunchCommand.Toggle(false);
-        LaunchBattleEyeCommand.Toggle(false);
-        KillCommand.Toggle(true);
-
+        CanLaunch = false;
+        CanKill = true;
         ProcessRunning = true;
 
         if(refreshStats)
@@ -165,10 +176,8 @@ public class ClientInstanceDashboard : BaseViewModel
 
     private void OnProcessTerminated()
     {
-        ProcessStats.StopStats();
-        KillCommand.Toggle(false);
-        LaunchCommand.Toggle(true);
-        LaunchBattleEyeCommand.Toggle(true);
+        CanKill = false;
+        CanLaunch = true;
 
         ProcessRunning = false;
     }

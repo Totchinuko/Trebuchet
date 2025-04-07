@@ -15,22 +15,23 @@ namespace TrebuchetLib
         private string[] _selectedServerModlists = [];
         private string[] _selectedServerProfiles = [];
         
-        public int AutoUpdateStatus { get; set; } = 1;
-        public string ClientPath { get; set; } = string.Empty;
-        public bool ManageClient { get; set; }
-        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
-        [Obsolete]
-        public string InstallPath { get; set; } = string.Empty;
-        public int MaxDownloads { get; set; } = 8;
-        public int MaxServers { get; set; } = 20;
-        public int ServerInstanceCount { get; set; }
-        public int UpdateCheckInterval { get; set; } = 300;
-        public bool VerifyAll { get; set; }
-        
+        public int AutoUpdateStatus { get; set; } = AutoUpdateStatusDefault;
+        public string ClientPath { get; set; } = ClientPathDefault;
+        public bool ManageClient { get; set; } = ManageClientDefault;
+        public int MaxDownloads { get; set; } = MaxDownloadsDefault;
+        public int MaxServers { get; set; } = MaxServersDefault;
+        public int ServerInstanceCount { get; set; } = ServerInstanceCountDefault;
+        public int UpdateCheckInterval { get; set; } = UpdateCheckIntervalDefault;
+        public bool VerifyAll { get; set; } = VerifyAllDefault;
         public string SelectedClientModlist { get; set; } = string.Empty;
         public string SelectedClientProfile { get; set; } = string.Empty;
         public string[] SelectedServerModlists { get => _selectedServerModlists; set => _selectedServerModlists = value; }
         public string[] SelectedServerProfiles { get => _selectedServerProfiles; set => _selectedServerProfiles = value; }
+        
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Obsolete]
+        public string InstallPath { get; set; } = string.Empty;
+        
 
         public static string GetDefaultInstallPath()
         {
@@ -74,5 +75,14 @@ namespace TrebuchetLib
             if (SelectedServerProfiles.Length <= instance) return string.Empty;
             return SelectedServerProfiles[instance];
         }
+        
+        public static readonly int AutoUpdateStatusDefault = 1;
+        public static readonly string ClientPathDefault = string.Empty;
+        public static readonly bool ManageClientDefault = false;
+        public static readonly int MaxDownloadsDefault = 8;
+        public static readonly int MaxServersDefault = 20;
+        public static readonly int ServerInstanceCountDefault = 0;
+        public static readonly int UpdateCheckIntervalDefault = 300;
+        public static readonly bool VerifyAllDefault = false;
     }
 }

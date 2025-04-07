@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Reactive;
 using System.Threading.Tasks;
+using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
@@ -16,36 +19,45 @@ namespace Trebuchet.ViewModels
         public string Selection { get; } = selection;
     }
     
-    public sealed class ServerInstanceDashboard : BaseViewModel
+    public sealed class ServerInstanceDashboard : ReactiveObject
     {
+        private readonly TaskBlocker _blocker;
         private ProcessState _lastState;
+        private bool _canClose;
+        private bool _canKill;
+        private bool _canLaunch;
+        private bool _canUseDashboard;
+        private List<string> _modlists = [];
+        private bool _processRunning;
+        private List<string> _profiles = [];
         private string _selectedModlist = string.Empty;
         private string _selectedProfile = string.Empty;
-        private bool _processRunning;
         private List<ulong> _updateNeeded = [];
-        private List<string> _modlists = [];
-        private List<string> _profiles = [];
-        private bool _canUseDashboard;
 
-        public ServerInstanceDashboard(int instance, IProcessStats stats)
+        public ServerInstanceDashboard(int instance, IProcessStats stats, TaskBlocker blocker)
         {
+            _blocker = blocker;
             Instance = instance;
             ProcessStats = stats;
             
-            KillCommand
-                .Toggle(false)
-                .Subscribe(OnKilled);
-            CloseCommand
-                .Toggle(false)
-                .Subscribe(OnClose);
-            LaunchCommand
-                .SetBlockingType<SteamDownload>()
-                .Subscribe(OnLaunched);
-            UpdateModsCommand
-                .SetBlockingType<SteamDownload>()
-                .SetBlockingType<ClientRunning>()
-                .SetBlockingType<ServersRunning>()
-                .Subscribe(OnModUpdate);
+            KillCommand = ReactiveCommand.Create(OnKilled, this.WhenAnyValue(x => x.CanKill));
+            CanKill = false;
+            
+            CloseCommand = ReactiveCommand.Create(OnClose, this.WhenAnyValue(x => x.CanClose));
+            CanClose = false;
+            
+            var canLaunch = this.WhenAnyValue(x => x.CanLaunch, x => x._blocker.BlockingTypes,
+                (x, b) => x && !b.Contains(typeof(SteamDownload)));
+            LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch);
+            
+            var canUpdate = this.WhenAnyValue(x => x._blocker.BlockingTypes,
+                (x) => !x.Intersect([typeof(SteamDownload), typeof(ClientRunning), typeof(ServersRunning)]).Any());
+            UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, canUpdate);
+            
+            this.WhenAnyValue(x => x.SelectedModlist)
+                .Subscribe((x) => ModlistSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, x)));
+            this.WhenAnyValue(x => x.SelectedProfile)
+                .Subscribe((x) => ProfileSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, x)));
         }
 
         public event EventHandler<int>? LaunchClicked;
@@ -56,69 +68,73 @@ namespace Trebuchet.ViewModels
 
         public event EventHandler<int>? UpdateClicked;
 
+        public bool CanClose
+        {
+            get => _canClose;
+            set => this.RaiseAndSetIfChanged(ref _canClose, value);
+        }
+
+        public bool CanKill
+        {
+            get => _canKill;
+            set => this.RaiseAndSetIfChanged(ref _canKill, value);
+        }
+
+        public bool CanLaunch
+        {
+            get => _canLaunch;
+            set => this.RaiseAndSetIfChanged(ref _canLaunch, value);
+        }
+
         public bool CanUseDashboard
         {
             get => _canUseDashboard;
-            set => SetField(ref _canUseDashboard, value);
+            set => this.RaiseAndSetIfChanged(ref _canUseDashboard, value);
         }
-
-        public int Instance { get; }
-        public bool IsUpdateNeeded => UpdateNeeded.Count > 0;
-        public SimpleCommand CloseCommand { get; } = new();
-        public SimpleCommand KillCommand { get; } = new();
-        public TaskBlockedCommand LaunchCommand { get; } = new();
-        public TaskBlockedCommand UpdateModsCommand { get; private set; } = new();
 
         public List<string> Modlists
         {
             get => _modlists;
-            set => SetField(ref _modlists, value);
+            set => this.RaiseAndSetIfChanged(ref _modlists, value);
         }
 
         public bool ProcessRunning
         {
             get => _processRunning;
-            set
-            {
-                if (SetField(ref _processRunning, value)) OnPropertyChanged(nameof(CanUseDashboard));
-            }
+            set => this.RaiseAndSetIfChanged(ref _processRunning, value);
         }
-
-        public IProcessStats ProcessStats { get; }
 
         public List<string> Profiles
         {
             get => _profiles;
-            set => SetField(ref _profiles, value);
+            set => this.RaiseAndSetIfChanged(ref _profiles, value);
         }
 
         public string SelectedModlist
         {
             get => _selectedModlist;
-            set
-            {
-                if(SetField(ref _selectedModlist, value))
-                    ModlistSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, value));
-            }
+            set => this.RaiseAndSetIfChanged(ref _selectedModlist, value);
         }
 
         public string SelectedProfile
         {
             get => _selectedProfile;
-            set
-            {
-                if(SetField(ref _selectedProfile, value))
-                    ProfileSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, value));
-            }
+            set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
         }
-
-        
 
         public List<ulong> UpdateNeeded
         {
             get => _updateNeeded;
-            set => SetField(ref _updateNeeded, value);
+            set => this.RaiseAndSetIfChanged(ref _updateNeeded, value);
         }
+
+        public IProcessStats ProcessStats { get; }
+
+        public int Instance { get; }
+        public ReactiveCommand<Unit,Unit> CloseCommand { get; }
+        public ReactiveCommand<Unit,Unit> KillCommand { get; }
+        public ReactiveCommand<Unit,Unit> LaunchCommand { get; }
+        public ReactiveCommand<Unit,Unit> UpdateModsCommand { get; private set; }
 
         public Task ProcessRefresh(IConanProcess? process, bool refreshStats)
         {
@@ -139,17 +155,20 @@ namespace Trebuchet.ViewModels
 
         private void OnClose()
         {
+            CanClose = false;
             CloseClicked?.Invoke(this, Instance);
         }
 
         private void OnKilled()
         {
+            CanKill = false;
             KillClicked?.Invoke(this, Instance);
         }
 
         private void OnLaunched()
         {
             if (!CanUseDashboard) return;
+            CanLaunch = false;
             LaunchClicked?.Invoke(this, Instance);
         }
 
@@ -161,17 +180,17 @@ namespace Trebuchet.ViewModels
 
         private async void OnProcessFailed()
         {
-            KillCommand.Toggle(false);
-            CloseCommand.Toggle(false);
-            LaunchCommand.Toggle(true);
+            CanKill = false;
+            CanClose = false;
+            CanLaunch = true;
             await new ErrorModal(Resources.ServerFailedStart, Resources.ServerFailedStartText).OpenDialogueAsync();
         }
 
         private void OnProcessStarted(IConanProcess details, bool refreshProcess)
         {
-            LaunchCommand.Toggle(false);
-            KillCommand.Toggle(true);
-            CloseCommand.Toggle(true);
+            CanLaunch = false;
+            CanKill = true;
+            CanClose = true;
 
             ProcessRunning = true;
             if(refreshProcess)
@@ -181,9 +200,9 @@ namespace Trebuchet.ViewModels
         private void OnProcessTerminated()
         {
             ProcessStats.StopStats();
-            KillCommand.Toggle(false);
-            CloseCommand.Toggle(false);
-            LaunchCommand.Toggle(true);
+            CanKill = false;
+            CanClose = false;
+            CanLaunch = true;
             ProcessRunning = false;
         }
     }

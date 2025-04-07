@@ -1,29 +1,32 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Runtime.CompilerServices;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Humanizer;
+using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.ViewModels.InnerContainer;
+using Trebuchet.ViewModels.SettingFields;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
-using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public class ClientProfilePanel : FieldEditorPanel
+    public class ClientProfilePanel : Panel
     {
         private readonly DialogueBox _box;
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private ClientProfile _profile;
-        private ObservableCollection<string> _profiles = [];
-        private string _selectedProfile;
+        private string _profileSize = new(string.Empty);
+        private string _selectedProfile = new(string.Empty);
 
         public ClientProfilePanel(
             DialogueBox box,
@@ -36,114 +39,100 @@ namespace Trebuchet.ViewModels.Panels
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
-            LoadPanel();
+            LoadProfile(
+                _appFiles.Client.ResolveProfile(
+                    _uiConfig.CurrentClientProfile));
+            LoadProfileList();
 
-            CreateProfileCommand.Subscribe(OnProfileCreate);
-            DeleteProfileCommand.Subscribe(OnProfileDelete);
-            DuplicateProfileCommand.Subscribe(OnProfileDuplicate);
-            OpenFolderProfileCommand.Subscribe(OnOpenFolderProfile);
+            this.WhenAnyValue(x => x.SelectedProfile)
+                .Subscribe(OnProfileChanged);
+
+            CreateProfileCommand = ReactiveCommand.Create(OnProfileCreate);
+            DeleteProfileCommand = ReactiveCommand.Create(OnProfileDelete);
+            DuplicateProfileCommand = ReactiveCommand.Create(OnProfileDuplicate);
+            OpenFolderProfileCommand = ReactiveCommand.Create(OnOpenFolderProfile);
+            SaveProfile = ReactiveCommand.Create(() => _profile.SaveFile());
+            RefreshPanel.IsExecuting
+                .Where(x => x)
+                .Select(_ => Tools.IsClientInstallValid(_setup.Config))
+                .ToProperty(this, x => x.CanTabBeClicked);
+            
+            RefreshPanel.Subscribe((_) =>
+            {
+                LoadProfile(SelectedProfile);
+                LoadProfileList();
+            });
+            
+            BuildFields();
         }
 
-        public SimpleCommand CreateProfileCommand { get; } = new();
-        public SimpleCommand DeleteProfileCommand { get; } = new();
-        public SimpleCommand DuplicateProfileCommand { get; } = new();
-        public SimpleCommand OpenFolderProfileCommand { get; } = new();
-        public ClientProfile Profile => _profile;
-        public ObservableCollection<string> Profiles { get => _profiles; }
-        public string ProfileSize => (Tools.DirectorySize(_profile.ProfileFolder) / 1024 / 1024).ToString() + "MB";
+        public ObservableCollection<FieldElement> Fields { get; } = [];
+       
+        public ReactiveCommand<Unit, Unit> CreateProfileCommand { get; }
+        public ReactiveCommand<Unit, Unit> DeleteProfileCommand { get; }
+        public ReactiveCommand<Unit, Unit> DuplicateProfileCommand { get; }
+        public ReactiveCommand<Unit, Unit> OpenFolderProfileCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveProfile { get; }
+        public ObservableCollection<string> Profiles { get; } = [];
+
+        public string ProfileSize
+        {
+            get => _profileSize;
+            protected set => this.RaiseAndSetIfChanged(ref _profileSize, value);
+        }
 
         public string SelectedProfile
         {
             get => _selectedProfile;
-            set
-            {
-                _selectedProfile = value;
-                OnProfileChanged();
-            }
-        }
-
-        public override bool CanExecute(object? parameter)
-        {
-            return Tools.IsClientInstallValid(_setup.Config);
-        }
-
-        public override void RefreshPanel()
-        {
-            OnCanExecuteChanged();
-            LoadPanel();
-        }
-
-        protected override void BuildFields()
-        {
-            BuildFields("Trebuchet.ViewModels.Panels.ClientProfilePanel.Fields.json", this, nameof(Profile));
-        }
-
-        protected override void OnValueChanged(string property)
-        {
-            _profile.SaveFile();
-        }
-
-        [MemberNotNull("_profile", "_selectedProfile")]
-        private void LoadPanel()
-        {
-            MoveOriginalSavedFolder();
-            _selectedProfile = _uiConfig.CurrentClientProfile;
-            _selectedProfile = _appFiles.Client.ResolveProfile(_selectedProfile);
-
-            OnPropertyChanged(nameof(SelectedProfile));
-            LoadProfileList();
-            LoadProfile();
+            set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
         }
 
         [MemberNotNull("_profile")]
-        private void LoadProfile()
+        private void LoadProfile(string profile)
         {
-            _profile = _appFiles.Client.Get(_selectedProfile);
-            OnPropertyChanged(nameof(ProfileSize));
-            RefreshFields();
+            _profile = _appFiles.Client.Get(profile);
+            RefreshProfileSize(profile);
+        }
+
+        private async void RefreshProfileSize(string profile)
+        {
+            var path = _appFiles.Client.GetFolder(profile);
+            var size = await Task.Run(() => Tools.DirectorySize(path));
+            ProfileSize = size.Bytes().Humanize();
         }
 
         private void LoadProfileList()
         {
-            _profiles = new ObservableCollection<string>(_appFiles.Client.ListProfiles());
-            OnPropertyChanged(nameof(Profiles));
+            Profiles.Clear();
+            Profiles.AddRange(_appFiles.Client.ListProfiles());
         }
 
-        private async void MoveOriginalSavedFolder()
-        {
-            if (string.IsNullOrEmpty(_setup.Config.ClientPath)) return;
-            string savedFolder = Path.Combine(_setup.Config.ClientPath, Constants.FolderGameSave);
-            if (!Directory.Exists(savedFolder)) return;
-            if (Tools.IsSymbolicLink(savedFolder)) return;
-
-            ErrorModal question = new(Resources.GameFolderReset, Resources.GameFolderResetText);
-            await question.OpenDialogueAsync();
-
-            _setup.Config.ClientPath = string.Empty;
-            _setup.Config.SaveFile();
-        }
-
-        private void OnOpenFolderProfile(object? obj)
+        private void OnOpenFolderProfile()
         {
             string? folder = Path.GetDirectoryName(_profile.FilePath);
             if (string.IsNullOrEmpty(folder)) return;
             Process.Start("explorer.exe", folder);
         }
 
-        private void OnProfileChanged()
+        private void OnProfileChanged(string newProfile)
         {
-            _selectedProfile = _appFiles.Client.ResolveProfile(_selectedProfile);
-            _uiConfig.CurrentClientProfile = _selectedProfile;
+            var resolved = _appFiles.Client.ResolveProfile(newProfile);
+            if (resolved != newProfile)
+            {
+                SelectedProfile = resolved;
+                return;
+            }
+
+            _uiConfig.CurrentClientProfile = SelectedProfile;
             _uiConfig.SaveFile();
-            OnPropertyChanged(nameof(SelectedProfile));
-            LoadProfile();
+            LoadProfile(newProfile);
         }
 
         private async void OnProfileCreate()
         {
             var name = await GetNewProfileName();
             if (name is null) return;
-            _profile = _appFiles.Client.Create(name);
+            _appFiles.Client.Create(name);
             LoadProfileList();
             SelectedProfile = name;
         }
@@ -152,7 +141,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             if (string.IsNullOrWhiteSpace(name))
                 return Validation.Invalid(Resources.ErrorNameEmpty);
-            if (_profiles.Contains(name))
+            if (Profiles.Contains(name))
                 return Validation.Invalid(Resources.ErrorNameAlreadyTaken);
             if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
                 return Validation.Invalid(Resources.ErrorNameInvalidCharacters);
@@ -161,11 +150,11 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnProfileDelete()
         {
-            if (string.IsNullOrEmpty(_selectedProfile)) return;
+            if (string.IsNullOrEmpty(SelectedProfile)) return;
 
             OnBoardingConfirmation confirm = new OnBoardingConfirmation(
                     Resources.Deletion,
-                    string.Format(Resources.DeletionText, _selectedProfile));
+                    string.Format(Resources.DeletionText, SelectedProfile));
             await _box.OpenAsync(confirm);
             if (!confirm.Result) return;
             
@@ -181,7 +170,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             var name = await GetNewProfileName();
             if (name is null) return;
-            _profile = await _appFiles.Client.Duplicate(_profile.ProfileName, name);
+            await _appFiles.Client.Duplicate(_profile.ProfileName, name);
             LoadProfileList();
             SelectedProfile = name;
         }
@@ -192,6 +181,121 @@ namespace Trebuchet.ViewModels.Panels
                 .SetValidation(ValidateName);
             await _box.OpenAsync(modal);
             return modal.Value;
+        }
+
+        private void BuildFields()
+        {
+            Fields.Add(new TitleField().SetTitle(Resources.CatGeneral));
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingBackgroundSound)
+                .SetDescription(Resources.SettingBackgroundSoundText)
+                .SetSetter((v) => _profile.BackgroundSound = v)
+                .SetGetter(() => _profile.BackgroundSound)
+                .SetDefault(() => ClientProfile.BackgroundSoundDefault)
+            );
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingIntroVid)
+                .SetDescription(Resources.SettingIntroVidText)
+                .SetGetter(() => _profile.RemoveIntroVideo)
+                .SetSetter((v) => _profile.RemoveIntroVideo = v)
+                .SetDefault(() => ClientProfile.RemoveIntroVideoDefault)
+            );
+            Fields.Add(new TitleField().SetTitle(Resources.CatProcessPerformance));
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingUseAllCore)
+                .SetDescription(Resources.SettingUseAllCoreText)
+                .SetGetter(() => _profile.UseAllCores)
+                .SetSetter((v) => _profile.UseAllCores = v)
+                .SetDefault(() => ClientProfile.UseAllCoresDefault)
+            );
+            Fields.Add(new ComboBoxField()
+                .WhenFieldChanged(SaveProfile)
+                .SetDescription(Resources.SettingProcessPrioText)
+                .SetTitle(Resources.SettingProcessPrio)
+                .AddOption(Resources.SettingProcessPrioNormal)
+                .AddOption(Resources.SettingProcessPrioAboveNormal)
+                .AddOption(Resources.SettingProcessPrioHigh)
+                .AddOption(Resources.SettingProcessPrioRealtime)
+                .SetGetter(() => _profile.ProcessPriority)
+                .SetSetter((v) => _profile.ProcessPriority = v)
+                .SetDefault(() => ClientProfile.ProcessPriorityDefault)
+            );
+            Fields.Add(new CpuAffinityField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingCpuAffinity)
+                .SetDescription(Resources.SettingCpuAffinityText)
+                .SetSetter((v) => _profile.CPUThreadAffinity = v)
+                .SetGetter(() => _profile.CPUThreadAffinity)
+                .SetDefault(() => CpuAffinityField.DefaultValue())
+            );
+            Fields.Add(new TitleField().SetTitle(Resources.CatGraphics));
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingUltraAniso)
+                .SetDescription(Resources.SettingUltraAnisoText)
+                .SetGetter(() => _profile.UltraAnisotropy)
+                .SetSetter((v) => _profile.UltraAnisotropy = v)
+                .SetDefault(() => ClientProfile.UltraAnisotropyDefault));
+            Fields.Add(new IntSliderField(0, 4000, 100)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingTexPool)
+                .SetDescription(Resources.SettingTexPoolText)
+                .SetGetter(() => _profile.AddedTexturePool)
+                .SetSetter((v) => _profile.AddedTexturePool = v)
+                .SetDefault(() => ClientProfile.AddedTexturePoolDefault)
+            );
+            Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingAsyncScene)
+                .SetDescription(Resources.SettingAsyncSceneText)
+                .SetGetter(() => _profile.EnableAsyncScene)
+                .SetSetter((v) => _profile.EnableAsyncScene = v)
+                .SetDefault(() => ClientProfile.EnableAsyncSceneDefault)
+            );
+            Fields.Add(new FloatField(float.MinValue, float.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingMaxMoveDelta)
+                .SetDescription(Resources.SettingMaxMoveDeltaText)
+                .SetGetter(() => _profile.MaxMoveDeltaTime)
+                .SetSetter((v) => _profile.MaxMoveDeltaTime = v)
+                .SetDefault(() => ClientProfile.MaxMoveDeltaTimeDefault)
+            );
+            Fields.Add(new IntSliderField(50000, 100000, 10000)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingInternetSpeed)
+                .SetDescription(Resources.SettingInternetSpeedText)
+                .SetGetter(() => _profile.ConfiguredInternetSpeed)
+                .SetSetter((v) => _profile.ConfiguredInternetSpeed = v)
+                .SetDefault(() => ClientProfile.ConfiguredInternetSpeedDefault)
+            );
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingLog)
+                .SetDescription(Resources.SettingLogText)
+                .SetGetter(() => _profile.Log)
+                .SetSetter((v) => _profile.Log = v)
+                .SetDefault(() => ClientProfile.LogDefault)
+            );
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingAdminServerList)
+                .SetDescription(Resources.SettingAdminServerListText)
+                .SetGetter(() => _profile.TotAdminDoNotLoadServerList)
+                .SetSetter((v) => _profile.TotAdminDoNotLoadServerList = v)
+                .SetDefault(() => ClientProfile.TotAdminDoNotLoadServerListDefault)
+            );
+            Fields.Add(new TextListField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingLogFilter)
+                .SetDescription(Resources.SettingLogFilterText)
+                .SetGetter(() => _profile.LogFilters.ToObservableCollection())
+                .SetSetter((v) => _profile.LogFilters = v.ToList())
+                .SetDefault(() => ClientProfile.LogFiltersDefault.ToObservableCollection())
+            );
         }
     }
 }

@@ -1,5 +1,7 @@
 using System;
+using System.Reactive;
 using System.Windows.Input;
+using ReactiveUI;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
@@ -11,11 +13,11 @@ public class OnBoardingChoice
         Title = title;
         Description = description;
         Index = index;
-        Command = new SimpleCommand().Subscribe(() => command(Index));
+        Command = ReactiveCommand.Create(() => command(Index));
     }
 
     public string Title { get; }
     public string Description { get; }
     public int Index { get; }
-    public ICommand Command { get; }
+    public ReactiveCommand<Unit, Unit> Command { get; }
 }

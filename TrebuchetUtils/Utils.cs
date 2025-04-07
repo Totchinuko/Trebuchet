@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Compression;
@@ -596,5 +597,11 @@ public static class Utils
         if (waitTask != await Task.WhenAny(waitTask, 
                 Task.Delay(timeout))) 
             throw new TimeoutException();
+    }
+
+    public static void AddRange<T>(this ObservableCollection<T> ocollection, IEnumerable<T> collection)
+    {
+        foreach (var x1 in collection)
+            ocollection.Add(x1);
     }
 }

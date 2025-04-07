@@ -2,26 +2,11 @@
 
 namespace Trebuchet.ViewModels.SettingFields
 {
-    public class ToggleField() : Field<bool, bool>("ToggleField")
+    public class ToggleField : Field<ToggleField, bool>
     {
-        public override bool DisplayGenericDescription => false;
-
-        public override bool IsDefault => Default == Value;
-
-        public override void ResetToDefault()
+        public ToggleField() : base(false)
         {
-            Value = Default;
-        }
-
-        protected override bool GetConvert(object? value)
-        {
-            if (value is not bool n) throw new Exception("Value was expected to be a boolean.");
-            return n;
-        }
-
-        protected override object SetConvert(bool value)
-        {
-            return value;
+            DisplayGenericDescription = false;
         }
     }
 }

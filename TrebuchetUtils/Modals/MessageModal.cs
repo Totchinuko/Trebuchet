@@ -1,6 +1,6 @@
 ﻿using System;
-using System.Windows;
-using System.Windows.Input;
+using System.Reactive;
+using ReactiveUI;
 
 namespace TrebuchetUtils.Modals
 {
@@ -8,31 +8,21 @@ namespace TrebuchetUtils.Modals
     {
         public MessageModal(string title, string message, int height = 200) : base(650, height, "Information", "MessageModal")
         {
-            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
+            CloseCommand = ReactiveCommand.Create(OnCloseModal);
 
             Message = message;
             MessageTitle = title;
         }
 
-        public ICommand CloseCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> CloseCommand { get; private set; }
 
         public string Message {get;}
 
         public string MessageTitle {get;}
 
-        private void OnCloseModal(object? obj)
+        private void OnCloseModal()
         {
             Window?.Close();
-        }
-
-        public override void Submit()
-        {
-            CloseCommand.Execute(this);
-        }
-
-        public override void Cancel()
-        {
-            CloseCommand.Execute(this);
         }
 
         protected override void OnWindowClose(object? sender, EventArgs e)

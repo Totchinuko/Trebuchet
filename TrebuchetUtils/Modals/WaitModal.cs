@@ -1,6 +1,6 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Windows.Input;
+using System.Reactive;
+using ReactiveUI;
 
 namespace TrebuchetUtils.Modals
 {
@@ -12,14 +12,14 @@ namespace TrebuchetUtils.Modals
 
         public WaitModal(string title, string message, Action cancelCallback) : base(650,200, "Please wait...", "WaitModal")
         {
-            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
+            CloseCommand = ReactiveCommand.Create(OnCloseModal);
             _message = message;
             _messageTitle = title;
             _cancelCallback = cancelCallback;
         }
 
 
-        public ICommand CloseCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> CloseCommand { get; private set; }
 
         public string Message 
         { 
@@ -33,7 +33,7 @@ namespace TrebuchetUtils.Modals
             set => SetField(ref _messageTitle, value);
         }
 
-        private void OnCloseModal(object? obj)
+        private void OnCloseModal()
         {
             _cancelCallback.Invoke();
             _message = "Canceling...";

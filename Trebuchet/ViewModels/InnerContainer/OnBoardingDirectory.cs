@@ -1,10 +1,11 @@
 using System;
 using System.IO;
+using System.Reactive;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
-using TrebuchetUtils;
+using ReactiveUI;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
@@ -13,10 +14,10 @@ public class OnBoardingDirectory : ValidatedInputDialogue<string>
 
     public OnBoardingDirectory(string title, string description) : base(title, description)
     {
-        SearchDirectoryCommand.Subscribe(OnSearchDirectory);
+        SearchDirectoryCommand = ReactiveCommand.Create(OnSearchDirectory);
     }
 
-    public SimpleCommand SearchDirectoryCommand { get; } = new();
+    public ReactiveCommand<Unit, Unit> SearchDirectoryCommand { get; }
     
     private async void OnSearchDirectory()
     {

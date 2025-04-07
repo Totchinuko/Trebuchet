@@ -1,25 +1,11 @@
-﻿using System.Reflection;
+﻿using System.Reactive;
+using System.Reflection;
+using ReactiveUI;
+using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.SettingFields
 {
-    public class TitleField() : Field("TitleField", false)
+    public class TitleField : FieldElement<TitleField>
     {
-        public override bool IsDefault { get; } = true;
-
-        public override void RefreshValue()
-        {
-        }
-
-        public override void RefreshVisibility()
-        {
-        }
-
-        public override void ResetToDefault()
-        {
-        }
-
-        public override void SetTarget(object target, PropertyInfo? property = null)
-        {
-        }
     }
 }

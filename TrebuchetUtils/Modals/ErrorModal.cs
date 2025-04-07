@@ -1,7 +1,9 @@
 ﻿using System;
+using System.Reactive;
 using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Threading;
+using ReactiveUI;
 
 namespace TrebuchetUtils.Modals
 {
@@ -9,13 +11,13 @@ namespace TrebuchetUtils.Modals
     {
         public ErrorModal(string title, string message) : base(650, 200, "Error", "ErrorModal")
         {
-            CloseCommand = new SimpleCommand().Subscribe(OnCloseModal);
+            CloseCommand = ReactiveCommand.Create(OnCloseModal);
 
             ErrorMessage = message;
             ErrorTitle = title;
         }
 
-        public ICommand CloseCommand { get; private set; }
+        public ReactiveCommand<Unit,Unit> CloseCommand { get; }
         public string ErrorMessage { get; }
         public string ErrorTitle { get; }
 
@@ -29,19 +31,19 @@ namespace TrebuchetUtils.Modals
                 await Dispatcher.UIThread.InvokeAsync(() => ShowError(error, title));
         }
 
-        private void OnCloseModal(object? obj)
+        private void OnCloseModal()
         {
             Window.Close();
         }
 
         public override void Submit()
         {
-            CloseCommand.Execute(this);
+            CloseCommand.Execute();
         }
 
         public override void Cancel()
         {
-            CloseCommand.Execute(this);
+            CloseCommand.Execute();
         }
 
         protected override void OnWindowClose(object? sender, EventArgs e)

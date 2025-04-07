@@ -1,13 +1,17 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Net;
+using System.Reactive;
+using System.Reactive.Linq;
 using Avalonia.Threading;
+using DynamicData;
+using ReactiveUI;
 using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.Panels
 {
@@ -27,51 +31,46 @@ namespace Trebuchet.ViewModels.Panels
         private readonly AppSetup _setup;
         private readonly Launcher _launcher;
         private IConsole? _console;
-        private int _selectedConsole;
         private List<IConanServerProcess> _servers = [];
+        private int _selectedConsole;
+        private bool _canSendCommand;
 
         public RconPanel(AppSetup setup, Launcher launcher) : base(Resources.ServerConsoles, "mdi-console-line", false)
         {
             _setup = setup;
             _launcher = launcher;
-            SendCommand.Subscribe(OnSendCommand).Toggle(false);
+            SendCommand = ReactiveCommand.Create<string>(OnSendCommand, this.WhenAnyValue(x => x.CanSendCommand));
+            RefreshPanel.IsExecuting.Select(_ => _setup.Config is { ServerInstanceCount: > 0 })
+                .ToProperty(this, x => x.CanTabBeClicked);
+            RefreshPanel.Subscribe((_) => LoadPanel());
 
+            this.WhenAnyValue(x => x.SelectedConsole)
+                .Subscribe((_) => OnConsoleSelectionChanged());
+            
             LoadPanel();
         }
 
         public List<string> AvailableConsoles { get; } = [];
-
         public ObservableCollection<ObservableConsoleLog> ConsoleLogs { get; private set; } = [];
 
         public int SelectedConsole
         {
             get => _selectedConsole;
-            set
-            {
-                _selectedConsole = value;
-                OnConsoleSelectionChanged();
-                OnPropertyChanged(nameof(SelectedConsole));
-            }
+            set => this.RaiseAndSetIfChanged(ref _selectedConsole, value);
         }
 
-        public SimpleCommand<string> SendCommand { get; } = new();
-
-        public override bool CanExecute(object? parameter)
+        public bool CanSendCommand
         {
-            return _setup.Config is { ServerInstanceCount: > 0 };
+            get => _canSendCommand;
+            set => this.RaiseAndSetIfChanged(ref _canSendCommand, value);
         }
+
+        public ReactiveCommand<string, Unit> SendCommand { get; }
 
         public void RefreshConsoleList(List<IConanServerProcess> servers)
         {
             _servers = servers;
             RefreshConsoleList();
-        }
-
-
-        public override void RefreshPanel()
-        {
-            OnCanExecuteChanged();
-            LoadPanel();
         }
 
         private void LoadConsole(IConsole console)
@@ -82,8 +81,8 @@ namespace Trebuchet.ViewModels.Panels
             if (_console != null)
             {
                 _console.LogReceived += OnConsoleLogReceived;
-                ConsoleLogs = new ObservableCollection<ObservableConsoleLog>(_console.Historic.Select(x => new ObservableConsoleLog(x)));
-                OnPropertyChanged(nameof(ConsoleLogs));
+                ConsoleLogs.Clear();
+                ConsoleLogs.AddRange(_console.Historic.Select(x => new ObservableConsoleLog(x)));
             }
         }
 
@@ -125,16 +124,15 @@ namespace Trebuchet.ViewModels.Panels
                     ? $"RCON - {server.Title} ({server.Instance}) - {IPAddress.Loopback}:{server.RConPort}"
                     : $"Unavailable - Instance {i}");
             }
-            OnPropertyChanged(nameof(AvailableConsoles));
             RefreshValidity();
         }
 
         private void RefreshValidity()
         {
-            var valid = _servers.Any(server => server.Instance == _selectedConsole && server is { RConPort: > 0, State: ProcessState.ONLINE });
-            SendCommand.Toggle(valid);
+            var valid = _servers.Any(server => server.Instance == SelectedConsole && server is { RConPort: > 0, State: ProcessState.ONLINE });
+            CanSendCommand = valid;
             if (valid)
-                LoadConsole(_launcher.GetServerConsole(_selectedConsole));
+                LoadConsole(_launcher.GetServerConsole(SelectedConsole));
         }
     }
 }

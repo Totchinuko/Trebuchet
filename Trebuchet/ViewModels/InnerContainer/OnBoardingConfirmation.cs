@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using System.Reactive;
+using ReactiveUI;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
@@ -9,7 +11,7 @@ public class OnBoardingConfirmation : TitledDialogue
 
     public OnBoardingConfirmation(string title, string description) : base(title, description)
     {
-        ConfirmCommand.Subscribe(() =>
+        ConfirmCommand = ReactiveCommand.Create(() =>
         {
             Result = true;
             Close();
@@ -18,6 +20,6 @@ public class OnBoardingConfirmation : TitledDialogue
     
     public bool Result { get; private set; }
 
-    public SimpleCommand ConfirmCommand { get; } = new();
+    public ReactiveCommand<Unit, Unit> ConfirmCommand { get; }
 
 }

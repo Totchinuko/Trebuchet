@@ -1,5 +1,6 @@
 ﻿using System;
-using System.Windows.Input;
+using System.Reactive;
+using ReactiveUI;
 using TrebuchetUtils;
 
 namespace Trebuchet.Modals
@@ -11,21 +12,21 @@ namespace Trebuchet.Modals
         public TestliveModal(App app) : base(400, 400, "Game Build", "TestliveSelection")
         {
             _app = app;
-            LiveCommand = new SimpleCommand().Subscribe(OnLiveClicked);
-            TestLiveCommand = new SimpleCommand().Subscribe(OnTestLiveClicked);
+            LiveCommand = ReactiveCommand.Create(OnLiveClicked);
+            TestLiveCommand = ReactiveCommand.Create(OnTestLiveClicked);
             CloseDisabled = false;
         }
 
-        public ICommand LiveCommand { get; private set; }
-        public ICommand TestLiveCommand { get; private set; }
+        public ReactiveCommand<Unit, Unit> LiveCommand { get; }
+        public ReactiveCommand<Unit, Unit> TestLiveCommand { get; }
         
-        private void OnLiveClicked(object? obj)
+        private void OnLiveClicked()
         {
             _app.OpenApp(false);
             Window.Close();
         }
 
-        private void OnTestLiveClicked(object? obj)
+        private void OnTestLiveClicked()
         {
             _app.OpenApp(true);
             Window.Close();

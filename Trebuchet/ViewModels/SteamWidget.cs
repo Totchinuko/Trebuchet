@@ -1,25 +1,28 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
+using System.Reactive;
+using System.Reactive.Linq;
 using Avalonia.Threading;
+using ReactiveUI;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
-using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels
 {
-    public class SteamWidget : BaseViewModel, ITinyRecipient<BlockedTaskStateChanged>
+    public class SteamWidget : ReactiveObject, ITinyRecipient<BlockedTaskStateChanged>
     {
         private readonly Steam _steam;
         private readonly TaskBlocker _taskBlocker;
         private readonly object _descriptionLock = new();
         private readonly object _progressLock;
-        private string _description = string.Empty;
         private readonly DispatcherTimer _timer;
-        private bool _isConnected;
         private double _progress;
+        private string _description = string.Empty;
+        private bool _isConnected;
+        private bool _isIndeterminate;
+        private double _progressBar;
+        private bool _canConnect;
+        private bool _isLoading;
 
         public SteamWidget(
             ITinyMessengerHub messenger, 
@@ -36,8 +39,11 @@ namespace Trebuchet.ViewModels
             _progressLock = new object();
             _steam.Connected += OnSteamConnected;
             _steam.Disconnected += OnSteamDisconnected;
-            CancelCommand.Subscribe(OnCancel);
-            ConnectCommand.Subscribe(OnConnect);
+
+            CancelCommand = ReactiveCommand.Create(OnCancel);
+            ConnectCommand = ReactiveCommand.Create(OnConnect, this.WhenAnyValue(x => x.CanConnect));
+
+            this.WhenAnyValue(x => x.Progress).Select(x => x == 0.0).ToProperty(this, x => x.IsIndeterminate);
 
             _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
         }
@@ -51,44 +57,43 @@ namespace Trebuchet.ViewModels
         }
 
 
-        public SimpleCommand CancelCommand { get; } = new();
-        public SimpleCommand ConnectCommand { get; } = new();
+        public ReactiveCommand<Unit,Unit> CancelCommand { get; }
+        public ReactiveCommand<Unit,Unit> ConnectCommand { get; }
 
         public string Description
         {
             get => _description;
-            set => SetField(ref _description, value);
+            set => this.RaiseAndSetIfChanged(ref _description, value);
+        }
+
+        public bool IsLoading
+        {
+            get => _isLoading;
+            set => this.RaiseAndSetIfChanged(ref _isLoading, value);
         }
 
         public bool IsConnected
         {
             get => _isConnected;
-            private set => SetField(ref _isConnected, value);
+            set => this.RaiseAndSetIfChanged(ref _isConnected, value);
         }
 
-        public bool IsLoading => !string.IsNullOrEmpty(Description);
+        public bool IsIndeterminate
+        {
+            get => _isIndeterminate;
+            set => this.RaiseAndSetIfChanged(ref _isIndeterminate, value);
+        }
 
         public double Progress
         {
-            get => _progress;
-            set
-            {
-                if (SetField(ref _progress, value)) 
-                    OnPropertyChanged(nameof(IsIndeterminate));
-            }
+            get => _progressBar;
+            set => this.RaiseAndSetIfChanged(ref _progressBar, value);
         }
 
-        public bool IsIndeterminate => Progress == 0;
-
-        public bool CanExecute(bool displayError = true)
+        public bool CanConnect
         {
-            if (!IsConnected)
-            {
-                if (displayError)
-                    new ErrorModal("Steam Error", "You must be connected to Steam for this operation.").OpenDialogue();
-                return false;
-            }
-            return true;
+            get => _canConnect;
+            set => this.RaiseAndSetIfChanged(ref _canConnect, value);
         }
 
         public void Receive(BlockedTaskStateChanged message)
@@ -99,19 +104,14 @@ namespace Trebuchet.ViewModels
             {
                 SetDescription(string.Empty);
                 _timer.Stop();
-                _progress = 0;
+                Progress = 0;
             }
             else
             {
                 SetDescription(message.Type.Label);
                 _timer.Start();
-                _progress = 0;
+                Progress = 0;
             }
-            
-            OnPropertyChanged(nameof(Description));
-            OnPropertyChanged(nameof(IsLoading));
-            OnPropertyChanged(nameof(Progress));
-            OnPropertyChanged(nameof(IsIndeterminate));
         }
 
         public void Report(double value)
@@ -126,19 +126,14 @@ namespace Trebuchet.ViewModels
         {
             lock (_descriptionLock)
             {
-                _description = description;
-                OnPropertyChanged(nameof(Description));
-                OnPropertyChanged(nameof(IsLoading));
-                OnPropertyChanged(nameof(IsIndeterminate));
+                Description = description;
+                IsLoading = !string.IsNullOrEmpty(description);
             }
         }
 
         public void Start(string description)
         {
             SetDescription(description);
-            OnPropertyChanged(nameof(Description));
-            OnPropertyChanged(nameof(IsLoading));
-            OnPropertyChanged(nameof(IsIndeterminate));
             _timer.Start();
         }
 
@@ -146,16 +141,13 @@ namespace Trebuchet.ViewModels
         {
             _taskBlocker.Cancel<SteamDownload>();
             SetDescription("Canceling...");
-            OnPropertyChanged(nameof(Description));
-            OnPropertyChanged(nameof(IsLoading));
-            OnPropertyChanged(nameof(IsIndeterminate));
         }
 
         private async void OnConnect()
         {
             if (!IsConnected)
             {
-                ConnectCommand.Toggle(false);
+                CanConnect = false;
                 await _steam.Connect();
             }
         }
@@ -165,8 +157,6 @@ namespace Trebuchet.ViewModels
             lock (_progressLock)
             {
                 Progress = _progress;
-                OnPropertyChanged(nameof(Progress));
-                OnPropertyChanged(nameof(IsIndeterminate));
             }
         }
         
@@ -175,8 +165,7 @@ namespace Trebuchet.ViewModels
             Dispatcher.UIThread.Invoke(() =>
             {
                 IsConnected = false;
-                OnPropertyChanged(nameof(IsConnected));
-                ConnectCommand.Toggle(true);
+                CanConnect = true;
             });
         }
 
@@ -185,8 +174,7 @@ namespace Trebuchet.ViewModels
             Dispatcher.UIThread.Invoke(() =>
             {
                 IsConnected = true;
-                OnPropertyChanged(nameof(IsConnected));
-                ConnectCommand.Toggle(true);
+                CanConnect = true;
             });
         }
     }

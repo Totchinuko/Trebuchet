@@ -1,30 +1,32 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using TrebuchetUtils;
+using System.Reactive;
+using ReactiveUI;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
 public class OnBoardingListSelection : DialogueContent
 {
-    private string _selectedElement;
+    private string _selectedElement = string.Empty;
 
     public OnBoardingListSelection(string title, string description, List<string> list) : base()
     {
         Title = title;
         Description = description;
         List = new ObservableCollection<string>(list);
-        _selectedElement = list.FirstOrDefault(string.Empty);
-        ConfirmCommand.Subscribe(Close);
+        SelectedElement = list.FirstOrDefault(string.Empty);
+        ConfirmCommand = ReactiveCommand.Create(Close);
     }
     
     public ObservableCollection<string> List { get; }
     public string Title { get; }
     public string Description { get; }
-    public SimpleCommand ConfirmCommand { get; } = new();
+    public ReactiveCommand<Unit, Unit> ConfirmCommand { get; }
+
     public string SelectedElement
     {
         get => _selectedElement;
-        set => SetField(ref _selectedElement, value);
+        set => this.RaiseAndSetIfChanged(ref _selectedElement, value);
     }
 }

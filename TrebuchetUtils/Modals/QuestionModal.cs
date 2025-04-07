@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Reactive;
 using System.Windows.Input;
+using ReactiveUI;
 
 namespace TrebuchetUtils.Modals
 {
@@ -7,15 +9,15 @@ namespace TrebuchetUtils.Modals
     {
         public QuestionModal(string title, string message) : base(550,220,"Information","QuestionModal")
         {
-            CancelCommand = new SimpleCommand().Subscribe(OnCancelModal);
-            YesCommand = new SimpleCommand().Subscribe(OnYesModal);
+            CancelCommand = ReactiveCommand.Create(OnCancelModal);
+            YesCommand = ReactiveCommand.Create(OnYesModal);
 
             Message = message;
             MessageTitle = title;
             CloseDisabled = false;
         }
 
-        public ICommand CancelCommand { get; private set; }
+        public ReactiveCommand<Unit,Unit> CancelCommand { get; private set; }
 
         public string Message { get; }
 
@@ -24,27 +26,17 @@ namespace TrebuchetUtils.Modals
         public bool Result { get; private set; }
 
 
-        public ICommand YesCommand { get; private set; }
+        public ReactiveCommand<Unit,Unit> YesCommand { get; private set; }
 
-        private void OnCancelModal(object? obj)
+        private void OnCancelModal()
         {
             Window.Close();
         }
 
-        private void OnYesModal(object? obj)
+        private void OnYesModal()
         {
             Result = true;
             Window.Close();
-        }
-
-        public override void Submit()
-        {
-            YesCommand.Execute(this);
-        }
-
-        public override void Cancel()
-        {
-            CancelCommand.Execute(this);
         }
 
         protected override void OnWindowClose(object? sender, EventArgs e)

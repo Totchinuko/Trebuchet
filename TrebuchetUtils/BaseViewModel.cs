@@ -10,6 +10,34 @@ public class BaseViewModel : INotifyPropertyChanged
 {
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public void WhenPropertyChanged(Action<string> action, params INotifyPropertyChanged[] properties)
+    {
+        foreach (var prop in properties)
+        {
+            prop.PropertyChanged += (_, arg) =>
+            {
+                if (arg.PropertyName is null) return;
+                action.Invoke(arg.PropertyName);
+            };
+        }
+    }
+    
+    public void WhenAnyPropertyChanged(Action<string> action)
+    {
+        var properties = this.GetType().GetProperties(BindingFlags.GetField | BindingFlags.Public);
+        foreach (var prop in properties)
+        {
+            if (!prop.PropertyType.IsAssignableFrom(typeof(INotifyPropertyChanged))) continue;
+            var value = prop.GetValue(this);
+            if(value is null) continue;
+            ((INotifyPropertyChanged)value).PropertyChanged += (_, arg) =>
+            {
+                if (arg.PropertyName is null) return;
+                action.Invoke(arg.PropertyName);
+            };
+        }
+    } 
+    
     protected virtual void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));

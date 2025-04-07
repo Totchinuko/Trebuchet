@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Runtime.CompilerServices;
 using System.Text.Json;
 using System.Threading;
@@ -11,8 +12,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using Avalonia.Controls;
 using Avalonia.Threading;
+using ReactiveUI;
 using Trebuchet.Assets;
-using Trebuchet.Messages;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
@@ -24,7 +25,6 @@ namespace Trebuchet.ViewModels
 {
     public sealed class TrebuchetApp : BaseViewModel
     {
-        private readonly ITinyMessengerHub _messenger;
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly Launcher _launcher;
@@ -35,7 +35,6 @@ namespace Trebuchet.ViewModels
         private DispatcherTimer _timer;
 
         public TrebuchetApp(
-            ITinyMessengerHub messenger,
             AppSetup setup,
             AppFiles appFiles,
             Launcher launcher, 
@@ -45,7 +44,6 @@ namespace Trebuchet.ViewModels
             InnerContainer.DialogueBox dialogueBox,
             IEnumerable<Panel> panels)
         {
-            _messenger = messenger;
             _setup = setup;
             _appFiles = appFiles;
             _launcher = launcher;
@@ -55,10 +53,13 @@ namespace Trebuchet.ViewModels
             SteamWidget = steamWidget;
             DialogueBox = dialogueBox;
 
-            ToggleFoldedCommand = new SimpleCommand().Subscribe(() => FoldedMenu = !FoldedMenu); 
+            ToggleFoldedCommand = ReactiveCommand.Create(() =>
+            {
+                FoldedMenu = !FoldedMenu;
+            });
 
-            OrderPanels(_panels);
-            _activePanel = BottomPanels.First(x => x.CanExecute(null));
+            InitializePanels(_panels);
+            _activePanel = BottomPanels.First(x => x.CanTabBeClicked);
             
             _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnTimerTick);
             _timer.Start();
@@ -91,7 +92,7 @@ namespace Trebuchet.ViewModels
 
         public GridLength ColumnWith => FoldedMenu ? GridLength.Parse("40") : GridLength.Parse("240");
         
-        public ICommand ToggleFoldedCommand { get; }
+        public ReactiveCommand<Unit, Unit> ToggleFoldedCommand { get; }
         
         public Panel ActivePanel
         {
@@ -102,7 +103,7 @@ namespace Trebuchet.ViewModels
                 _activePanel.Active = false;
                 _activePanel = value;
                 _activePanel.Active = true;
-                _activePanel.PanelDisplayed();
+                _activePanel.DisplayPanel.Execute();
                 OnPropertyChanged();
             }
         }
@@ -131,16 +132,27 @@ namespace Trebuchet.ViewModels
             }).Wait();
         }
 
-        private void OrderPanels(List<Panel> panels)
+        private void InitializePanels(List<Panel> panels)
         {
             foreach (var panel in panels)
             {
-                panel.TabClicked += (_,p) => ActivePanel = p;
+                panel.TabClick.Subscribe((p) =>
+                {
+                    ActivePanel = p;
+                });
+                panel.RequestAppRefresh.Subscribe((_) => RefreshPanels());
+                
                 if(panel.BottomPosition)
                     BottomPanels.Add(panel);
                 else
                     TopPanels.Add(panel);
             }
+        }
+
+        private void RefreshPanels()
+        {
+            foreach (var panel in _panels)
+                panel.RefreshPanel.Execute();
         }
 
         private async void OnBoardingActions()
@@ -149,7 +161,7 @@ namespace Trebuchet.ViewModels
             if (!await OnBoardingCheckTrebuchet()) return;
             if (!await OnBoardingFirstLaunch()) return;
             _activePanel.Active = true;
-            _activePanel.PanelDisplayed();
+            _activePanel.DisplayPanel.Execute();
         }
 
         private async Task<bool> OnBoardingFirstLaunch()
@@ -158,7 +170,7 @@ namespace Trebuchet.ViewModels
             if(File.Exists(configPath)) return true;
             if (!await OnBoardingUsageChoice()) return false;
             _setup.Config.SaveFile();
-            _messenger.Publish(new PanelRefreshConfigMessage());
+            RefreshPanels();
             return true;
         }
 

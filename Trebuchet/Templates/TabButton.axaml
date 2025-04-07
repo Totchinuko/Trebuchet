@@ -9,7 +9,8 @@
                 HorizontalAlignment="Stretch"
                 Classes.Sneak="{Binding !Active}"
                 Classes.Colored="{Binding Active}"
-                Command="{Binding .}"
+                Command="{Binding TabClick}"
+                CommandParameter="{Binding .}"
                 HorizontalContentAlignment="Left">
             <StackPanel Orientation="Horizontal">
                 <i:Icon Value="{Binding IconPath}" Classes="Normal" VerticalAlignment="Center" Margin="0 0 12 0" />

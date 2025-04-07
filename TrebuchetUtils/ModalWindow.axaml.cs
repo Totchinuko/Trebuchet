@@ -1,14 +1,7 @@
-﻿#region
-
-using System;
+﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
-using Avalonia.Media;
-
-#endregion
 
 namespace TrebuchetUtils
 {
@@ -71,34 +64,6 @@ namespace TrebuchetUtils
                     return value == "Submit";
                 return false;
             }).ToList();
-
-            if (children.Count > 0)
-                children.ForEach(x => x.KeyDown += OnPreviewKeyDown);
-            else
-                KeyDown += OnPreviewKeyDown;
-        }
-
-        private void OnSubmit(object? _)
-        {
-            App?.Submit();
-        }
-
-        private void OnCancel(object? _)
-        {
-            App?.Cancel();
-        }
-
-        private void OnPreviewKeyDown(object? sender, KeyEventArgs e)
-        {
-            switch (e.Key)
-            {
-                case Key.Enter:
-                    OnSubmit(sender);
-                    break;
-                case Key.Escape:
-                    OnCancel(sender);
-                    break;
-            }
         }
     }
 }

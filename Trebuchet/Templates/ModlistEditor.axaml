@@ -84,7 +84,7 @@
                 </Border>
             </WrapPanel>
             <Border Grid.Row="1" Padding="0,12,0,0">
-                <ListBox Classes="draggableVirtualizing NoSelection" ItemsSource="{Binding Modlist}" ItemTemplate="{StaticResource ModlistItems}"/>
+                <ListBox ScrollViewer.AllowAutoHide="False" Classes="draggableVirtualizing NoSelection" ItemsSource="{Binding Modlist}" ItemTemplate="{StaticResource ModlistItems}"/>
             </Border>
         </Grid>
     </DataTemplate>

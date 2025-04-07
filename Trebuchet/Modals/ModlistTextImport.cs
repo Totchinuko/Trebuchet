@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Reactive;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
+using ReactiveUI;
 using TrebuchetUtils;
 
 namespace Trebuchet.Modals
@@ -23,15 +25,15 @@ namespace Trebuchet.Modals
             CloseDisabled = false;
             MaximizeDisabled = false;
             MinimizeDisabled = false;
-            AppendCommand.Subscribe(OnAppend);
-            ApplyCommand.Subscribe(OnApply);
-            SaveCommand.Subscribe(OnSave);
+            AppendCommand = ReactiveCommand.Create(OnAppend);
+            ApplyCommand = ReactiveCommand.Create(OnApply);
+            SaveCommand = ReactiveCommand.Create(OnSave);
         }
 
         public bool Append { get => _append; set => _append = value; }
-        public SimpleCommand AppendCommand { get; } = new();
-        public SimpleCommand ApplyCommand { get; } = new();
-        public SimpleCommand SaveCommand { get; } = new();
+        public ReactiveCommand<Unit, Unit> AppendCommand { get; }
+        public ReactiveCommand<Unit, Unit> ApplyCommand { get; }
+        public ReactiveCommand<Unit, Unit> SaveCommand { get; }
         public bool Canceled { get => _canceled; set => _canceled = value; }
         public bool ImportVisible => !_export;
         public bool SaveAsVisible => _export;

@@ -2,9 +2,13 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
+using ReactiveUI;
+using SteamKit2.Discovery;
 using SteamKit2.GC.Dota.Internal;
 using Trebuchet.Assets;
 using Trebuchet.Services;
@@ -23,6 +27,7 @@ namespace Trebuchet.ViewModels.Panels
         private readonly AppFiles _appFiles;
         private readonly SteamAPI _steamApi;
         private readonly Launcher _launcher;
+        private readonly TaskBlocker _blocker;
         private readonly ILogger<DashboardPanel> _logger;
         private DispatcherTimer _timer;
 
@@ -32,6 +37,7 @@ namespace Trebuchet.ViewModels.Panels
             AppFiles appFiles, 
             SteamAPI steamApi,
             Launcher launcher, 
+            TaskBlocker blocker,
             ILogger<DashboardPanel> logger) : 
             base(Resources.Dashboard, "mdi-view-dashboard", true)
         {
@@ -40,27 +46,34 @@ namespace Trebuchet.ViewModels.Panels
             _appFiles = appFiles;
             _steamApi = steamApi;
             _launcher = launcher;
+            _blocker = blocker;
             _logger = logger;
-            CloseAllCommand.Subscribe(OnCloseAll);
-            KillAllCommand.Subscribe(OnKillAll);
-            LaunchAllCommand
-                .SetBlockingType<SteamDownload>()
-                .Subscribe(OnLaunchAll);
-            UpdateServerCommand
-                    .SetBlockingType<SteamDownload>()
-                    .Subscribe(UpdateServer);
-            UpdateAllModsCommand
-                .SetBlockingType<SteamDownload>()
-                .SetBlockingType<ClientRunning>()
-                .SetBlockingType<ServersRunning>()
-                .Subscribe(UpdateMods);
-            VerifyFilesCommand
-                .SetBlockingType<SteamDownload>()
-                .SetBlockingType<ClientRunning>()
-                .SetBlockingType<ServersRunning>()
-                .Subscribe(OnFileVerification);
 
-            Client = new ClientInstanceDashboard(new ProcessStatsLight());
+            var canUpdateServers =
+                blocker.WhenAnyValue(x => x.BlockingTypes)
+                    .Select(x => x.Contains(typeof(SteamDownload)));
+            var canDownloadMods = blocker.WhenAnyValue(x => x.BlockingTypes)
+                .Select(x => x.Intersect([typeof(SteamDownload),typeof(ClientRunning),typeof(ServersRunning)]).Any());
+            
+            CloseAllCommand = ReactiveCommand.Create(OnCloseAll);
+            KillAllCommand = ReactiveCommand.Create(OnKillAll);
+            LaunchAllCommand = ReactiveCommand.Create(
+                canExecute: canUpdateServers, execute: OnLaunchAll);
+            UpdateServerCommand = ReactiveCommand.Create(
+                canExecute: canUpdateServers, execute: UpdateServer);
+            UpdateAllModsCommand = ReactiveCommand.Create(
+                canExecute: canDownloadMods, execute:UpdateMods);
+            VerifyFilesCommand = ReactiveCommand.Create(
+                canExecute: canDownloadMods, execute:OnFileVerification);
+
+            RefreshPanel.IsExecuting
+                .Where(x => x)
+                .Select(_ => Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config))
+                .ToProperty(this, x => x.CanTabBeClicked);
+            RefreshPanel.Subscribe((_) => RefreshDashboards());
+            DisplayPanel.Subscribe((_) => PanelDisplayed());
+
+            Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker);
             Initialize();
 
             _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, (_,_) => OnCheckModUpdate());
@@ -68,18 +81,14 @@ namespace Trebuchet.ViewModels.Panels
 
         public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
         public ClientInstanceDashboard Client { get; }
-        public ObservableCollection<ServerInstanceDashboard> Instances { get; } = new();
-        public SimpleCommand CloseAllCommand { get; private set; } = new();
-        public SimpleCommand KillAllCommand { get; private set; } = new();
-        public TaskBlockedCommand LaunchAllCommand { get; private set; } = new();
-        public TaskBlockedCommand UpdateAllModsCommand { get; private set; } = new();
-        public TaskBlockedCommand UpdateServerCommand { get; private set; } = new();
-        public TaskBlockedCommand VerifyFilesCommand { get; private set; } = new();
+        public ObservableCollection<ServerInstanceDashboard> Instances { get; } = [];
+        public ReactiveCommand<Unit,Unit> CloseAllCommand { get; }
+        public ReactiveCommand<Unit,Unit> KillAllCommand { get; }
+        public ReactiveCommand<Unit,Unit> LaunchAllCommand { get; }
+        public ReactiveCommand<Unit,Unit> UpdateAllModsCommand { get; }
+        public ReactiveCommand<Unit,Unit> UpdateServerCommand { get; }
+        public ReactiveCommand<Unit,Unit> VerifyFilesCommand { get; }
 
-        public override bool CanExecute(object? parameter)
-        {
-            return (Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config));
-        }
 
         /// <summary>
         ///     Collect all used modlists of all the client and server instances. Can have duplicates.
@@ -95,19 +104,13 @@ namespace Trebuchet.ViewModels.Panels
                     yield return i.SelectedModlist;
         }
 
-        public override async void PanelDisplayed()
+        private async void PanelDisplayed()
         {
             CreateInstancesIfNeeded();
             RefreshClientSelection();
             RefreshServerSelection();
             RefreshDashboards();
             await CheckModUpdates();
-        }
-
-        public override void RefreshPanel()
-        {
-            OnCanExecuteChanged();
-            RefreshDashboards();
         }
 
         public void RefreshDashboards()
@@ -170,8 +173,8 @@ namespace Trebuchet.ViewModels.Panels
                 await question.OpenDialogueAsync();
                 if (!question.Result) return;
             }
-            
-            Client.KillCommand.Toggle(false);
+
+            Client.CanKill = false;
             try
             {
                 await _launcher.KillClient();
@@ -187,9 +190,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             if (Client.ProcessRunning) return;
 
-            Client.LaunchCommand.Toggle(false);
-            Client.LaunchBattleEyeCommand.Toggle(false);
-
+            Client.CanLaunch = false;
             if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
             {
                 var modlist = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
@@ -206,7 +207,7 @@ namespace Trebuchet.ViewModels.Panels
             var dashboard = GetServerInstance(instance);
             if (!dashboard.ProcessRunning) return;
 
-            dashboard.CloseCommand.Toggle(false);
+            dashboard.CanClose = false;
             await _launcher.CloseServer(instance);
         }
         
@@ -222,8 +223,8 @@ namespace Trebuchet.ViewModels.Panels
                 if (!question.Result) return;
             }
 
-            dashboard.KillCommand.Toggle(false);
-            dashboard.CloseCommand.Toggle(false);
+            dashboard.CanKill = false;
+            dashboard.CanClose = false;
             await _launcher.KillServer(dashboard.Instance);
         }
         
@@ -231,7 +232,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             var dashboard = GetServerInstance(instance);
             if(dashboard.ProcessRunning) return;
-            dashboard.LaunchCommand.Toggle(false);
+            dashboard.CanLaunch = false;
 
             try
             {
@@ -254,7 +255,7 @@ namespace Trebuchet.ViewModels.Panels
             }
             finally
             {
-                dashboard.LaunchCommand.Toggle(true);
+                dashboard.CanLaunch = true;
             }
         }
 
@@ -366,20 +367,16 @@ namespace Trebuchet.ViewModels.Panels
         private void CreateInstancesIfNeeded()
         {
             if (Instances.Count >= _setup.Config.ServerInstanceCount)
-            {
-                OnPropertyChanged(nameof(Instances));
                 return;
-            }
 
             for (var i = Instances.Count; i < _setup.Config.ServerInstanceCount; i++)
             {
-                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight());
+                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(), _blocker);
                 instance.SelectedModlist = _setup.Config.GetInstanceModlist(i);
                 instance.SelectedProfile = _setup.Config.GetInstanceProfile(i);
                 RegisterServerInstanceEvents(instance);
                 Instances.Add(instance);
             }
-            OnPropertyChanged(nameof(Instances));
         }
 
         private void RegisterServerInstanceEvents(ServerInstanceDashboard instance)

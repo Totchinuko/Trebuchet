@@ -2,29 +2,10 @@
 
 namespace Trebuchet.ViewModels.SettingFields
 {
-    public class CpuAffinityField() : Field<long, long>("CpuAffinityField")
+    public class CpuAffinityField() : Field<CpuAffinityField,long>(0)
     {
-        public override bool IsDefault => Value == GetDefaultValue();
-
-        public override void ResetToDefault()
-        {
-            Value = GetDefaultValue();
-        }
-
-        protected override long GetConvert(object? value)
-        {
-            if (value is not long longValue)
-                throw new ArgumentException("value is not long", nameof(value));
-            return longValue;
-        }
-
-        protected override object? SetConvert(long value)
-        {
-            return value;
-        }
-
         // flip the first x bit of the long value
-        private long GetDefaultValue()
+        public static long DefaultValue()
         {
             int maxCpu = Environment.ProcessorCount;
             long mask = 0L;

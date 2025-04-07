@@ -38,9 +38,15 @@
                     </StackPanel>
                 </Border>
             </WrapPanel>
-            <Border Grid.Row="1">
-                <ContentPresenter ContentTemplate="{StaticResource FieldEditor}" Content="{Binding .}" />
-            </Border>
+            <ScrollViewer Grid.Row="1">
+                <ItemsControl ItemsSource="{Binding Fields}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </ScrollViewer>
         </Grid>
     </DataTemplate>
 </ResourceDictionary>

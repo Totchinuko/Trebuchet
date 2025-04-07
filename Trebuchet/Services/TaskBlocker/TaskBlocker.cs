@@ -1,13 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using ReactiveUI;
 using TrebuchetUtils;
 
 namespace Trebuchet.Services.TaskBlocker
 {
-    public sealed class TaskBlocker(ITinyMessengerHub messenger)
+    public sealed class TaskBlocker(ITinyMessengerHub messenger) : ReactiveObject
     {
         private class BlockedTask(SemaphoreSlim semaphore, CancellationTokenSource cts, IBlockedTaskType type) : IBlockedTask
         {
@@ -23,6 +25,8 @@ namespace Trebuchet.Services.TaskBlocker
         
         private Dictionary<Type, BlockedTask> _tasks = [];
 
+        public ObservableCollection<Type> BlockingTypes { get; } = [];
+
         public async Task<IBlockedTask> EnterAsync(IBlockedTaskType operation, int cancelAfterSec = 0)
         {
             if (HasCancellableTasks(operation))
@@ -34,6 +38,7 @@ namespace Trebuchet.Services.TaskBlocker
             }
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _tasks[operation.GetType()] = task;
+            BlockingTypes.Add(operation.GetType());
             OnTaskSourceChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
             return task;
@@ -50,6 +55,7 @@ namespace Trebuchet.Services.TaskBlocker
             task.OperationReleased += (_, t) => Release(t);
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _tasks[operation.GetType()] = task;
+            BlockingTypes.Add(operation.GetType());
             OnTaskSourceChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
             return task;
@@ -66,20 +72,6 @@ namespace Trebuchet.Services.TaskBlocker
         public bool IsSet<T>() where T : IBlockedTaskType
         {
             return _tasks.ContainsKey(typeof(T));
-        }
-
-        public LaunchedCommand CreateLaunchedCommand()
-        {
-            var command = new LaunchedCommand();
-            messenger.Subscribe(command);
-            return command;
-        }
-
-        public TaskBlockedCommand CreateTaskBlockedCommand()
-        {
-            var command = new TaskBlockedCommand();
-            messenger.Subscribe(command);
-            return command;
         }
 
         private BlockedTask CreateTask(IBlockedTaskType operation, int cancelTimer)
@@ -103,6 +95,7 @@ namespace Trebuchet.Services.TaskBlocker
                 source.Semaphore.Release();
                 source.Semaphore.Dispose();
                 _tasks.Remove(task.Type.GetType());
+                BlockingTypes.Remove(task.Type.GetType());
                 OnTaskSourceChanged(source.Type, false);
             }
         }

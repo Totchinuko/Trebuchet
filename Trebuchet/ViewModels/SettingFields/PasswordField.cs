@@ -2,7 +2,7 @@
 
 namespace Trebuchet.ViewModels.SettingFields
 {
-    public class TextField() : Field<TextField, string>(string.Empty)
+    public class PasswordField() : Field<PasswordField, string>(string.Empty)
     {
     }
 }

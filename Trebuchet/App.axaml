@@ -20,13 +20,12 @@
                 <MergeResourceInclude Source="Templates\OnBoardingConfirmation.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingChoice.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingBranch.axaml" />
+                <MergeResourceInclude Source="Templates\AppSettings.axaml" />
                 <MergeResourceInclude Source="Templates\WorkshopSearchResult.axaml" />
-                <MergeResourceInclude Source="Templates\FieldRow.axaml" />
                 <MergeResourceInclude Source="Templates\TitleField.axaml" />
                 <MergeResourceInclude Source="Templates\CPUAffinityField.axaml" />
                 <MergeResourceInclude Source="Templates\DirectoryField.axaml" />
                 <MergeResourceInclude Source="Templates\ComboBoxField.axaml" />
-                <MergeResourceInclude Source="Templates\FieldEditor.axaml" />
                 <MergeResourceInclude Source="Templates\ToggleField.axaml" />
                 <MergeResourceInclude Source="Templates\IntSliderField.axaml" />
                 <MergeResourceInclude Source="Templates\TestliveSelection.axaml" />
@@ -59,7 +58,6 @@
         <StaticResource ResourceKey="ServerSettings" />
         <StaticResource ResourceKey="RconPanel" />
         <StaticResource ResourceKey="LogFilterPanel" />
-        <StaticResource ResourceKey="FieldEditor" />
         <StaticResource ResourceKey="ComboBoxField" />
         <StaticResource ResourceKey="CpuAffinityField" />
         <StaticResource ResourceKey="DirectoryField" />
@@ -79,5 +77,6 @@
         <StaticResource ResourceKey="OnBoardingNameSelection" />
         <StaticResource ResourceKey="OnBoardingNameConfirmation" />
         <StaticResource ResourceKey="WorkshopSearchResult" />
+        <StaticResource ResourceKey="AppSettings" />
     </Application.DataTemplates>
 </Application>

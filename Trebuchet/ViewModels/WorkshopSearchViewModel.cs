@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
 using System.Threading;
 using System.Windows.Input;
+using ReactiveUI;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using SteamWorksWebAPI.Response;
@@ -24,7 +26,7 @@ public class WorkshopSearchViewModel : BaseViewModel
     public WorkshopSearchViewModel(AppSettings appSettings)
     {
         _appSettings = appSettings;
-        SearchCommand = new SimpleCommand().Subscribe(OnSearch);
+        SearchCommand = ReactiveCommand.Create(OnSearch);
     }
 
     public event EventHandler<WorkshopSearchResult>? ModAdded;
@@ -35,7 +37,7 @@ public class WorkshopSearchViewModel : BaseViewModel
         set => SetField(ref _searchResults, value);
     }
     
-    public ICommand SearchCommand { get; }
+    public ReactiveCommand<Unit,Unit> SearchCommand { get; }
 
     public bool TestLiveWorkshop
     {

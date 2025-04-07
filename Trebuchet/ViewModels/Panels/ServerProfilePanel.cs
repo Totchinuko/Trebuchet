@@ -1,133 +1,139 @@
-﻿using System.Collections.ObjectModel;
+﻿using System;
+using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
+using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
+using DynamicData.Binding;
+using Humanizer;
+using ReactiveUI;
 using Trebuchet.Assets;
+using Trebuchet.ViewModels.InnerContainer;
+using Trebuchet.ViewModels.SettingFields;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
-using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public class ServerProfilePanel : FieldEditorPanel
+    public class ServerProfilePanel : Panel
     {
+        private readonly DialogueBox _box;
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private ServerProfile _profile;
-        private ObservableCollection<string> _profiles = [];
-        private string _selectedProfile;
+        private string _selectedProfile = string.Empty;
+        private string _profileSize = string.Empty;
 
         public ServerProfilePanel(
+            DialogueBox box,
             AppSetup setup,
             AppFiles appFiles,
             UIConfig uiConfig
             ) : base(Resources.ServerSaves, "mdi-server-network", false)
         {
+            _box = box;
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
-            LoadPanel();
-            CreateProfileCommand.Subscribe(OnProfileCreate);
-            DeleteProfileCommand.Subscribe(OnProfileDelete);
-            DuplicateProfileCommand.Subscribe(OnProfileDuplicate);
-            OpenFolderProfileCommand.Subscribe(OnOpenFolderProfile);
+            
+            LoadProfile(
+                _appFiles.Client.ResolveProfile(
+                    _uiConfig.CurrentClientProfile));
+            LoadProfileList();
+            
+            this.WhenAnyValue(x => x.SelectedProfile)
+                .Subscribe(OnProfileChanged);
+            
+            CreateProfileCommand = ReactiveCommand.Create(OnProfileCreate);
+            DeleteProfileCommand = ReactiveCommand.Create(OnProfileDelete);
+            DuplicateProfileCommand = ReactiveCommand.Create(OnProfileDuplicate);
+            OpenFolderProfileCommand = ReactiveCommand.Create(OnOpenFolderProfile);
+            SaveProfile = ReactiveCommand.Create(_profile.SaveFile);
+            RefreshPanel.IsExecuting.Select((_) => Tools.IsServerInstallValid(_setup.Config))
+                .ToProperty(this, x => x.CanTabBeClicked);
+            RefreshPanel.Subscribe((_) =>
+            {
+                LoadProfile(SelectedProfile);
+                LoadProfileList();
+            });
+            
+            BuildFields();
         }
 
-        public SimpleCommand CreateProfileCommand { get; } = new();
-        public SimpleCommand DeleteProfileCommand { get; } = new();
-        public SimpleCommand DuplicateProfileCommand { get; } = new();
-        public SimpleCommand OpenFolderProfileCommand { get; } = new();
-        public ServerProfile Profile => _profile;
-        public ObservableCollection<string> Profiles { get => _profiles; }
-        public string ProfileSize => (Tools.DirectorySize(_profile.ProfileFolder) / 1024 / 1024).ToString() + "MB";
+        public ObservableCollection<FieldElement> Fields { get; } = [];
+
+        public ReactiveCommand<Unit,Unit> CreateProfileCommand { get; }
+        public ReactiveCommand<Unit,Unit> DeleteProfileCommand { get; }
+        public ReactiveCommand<Unit,Unit> DuplicateProfileCommand { get; }
+        public ReactiveCommand<Unit,Unit> OpenFolderProfileCommand { get; }
+        public ReactiveCommand<Unit,Unit> SaveProfile { get; }
 
         public string SelectedProfile
         {
             get => _selectedProfile;
-            set
-            {
-                _selectedProfile = value;
-                OnProfileChanged();
-            }
+            set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
         }
 
-        public override bool CanExecute(object? parameter)
+        public string ProfileSize
         {
-            return Tools.IsServerInstallValid(_setup.Config);
+            get => _profileSize;
+            set => this.RaiseAndSetIfChanged(ref _profileSize, value);
         }
 
-        public override void RefreshPanel()
-        {
-            OnCanExecuteChanged();
-            LoadPanel();
-        }
-
-        protected override void BuildFields()
-        {
-            BuildFields("Trebuchet.ViewModels.Panels.ServerProfilePanel.Fields.json", this, nameof(Profile));
-        }
-
-        protected override void OnValueChanged(string property)
-        {
-            _profile.SaveFile();
-        }
-
-        [MemberNotNull("_selectedProfile", "_profile")]
-        private void LoadPanel()
-        {
-            _selectedProfile = _uiConfig.CurrentServerProfile;
-            _selectedProfile = _appFiles.Server.ResolveProfile(_selectedProfile);
-
-            OnPropertyChanged(nameof(SelectedProfile));
-            LoadProfileList();
-            LoadProfile();
-        }
+        public ObservableCollection<string> Profiles { get; } = [];
+        
 
         [MemberNotNull("_profile")]
-        private void LoadProfile()
+        private void LoadProfile(string profile)
         {
-            _profile = _appFiles.Server.Get(_selectedProfile);
-            OnPropertyChanged(nameof(ProfileSize));
-            RefreshFields();
+            _profile = _appFiles.Server.Get(profile);
+            RefreshProfileSize(profile);
+        }
+        
+        private async void RefreshProfileSize(string profile)
+        {
+            var path = _appFiles.Client.GetFolder(profile);
+            var size = await Task.Run(() => Tools.DirectorySize(path));
+            ProfileSize = size.Bytes().Humanize();
         }
 
         private void LoadProfileList()
         {
-            _profiles = new ObservableCollection<string>(_appFiles.Server.ListProfiles());
-            OnPropertyChanged(nameof(Profiles));
+            Profiles.Clear();
+            Profiles.AddRange(_appFiles.Server.ListProfiles());
         }
 
-        private void OnOpenFolderProfile(object? obj)
+        private void OnOpenFolderProfile()
         {
             string? folder = Path.GetDirectoryName(_profile.FilePath);
             if (string.IsNullOrEmpty(folder)) return;
             Process.Start("explorer.exe", folder);
         }
 
-        private void OnProfileChanged()
+        private void OnProfileChanged(string newProfile)
         {
-            _selectedProfile = _appFiles.Server.ResolveProfile(_selectedProfile);
-            _uiConfig.CurrentServerProfile = _selectedProfile;
+            var resolved = _appFiles.Server.ResolveProfile(newProfile);
+            if (resolved != newProfile)
+            {
+                SelectedProfile = resolved;
+                return;
+            }
+
+            _uiConfig.CurrentServerProfile = SelectedProfile;
             _uiConfig.SaveFile();
-            OnPropertyChanged(nameof(SelectedProfile));
-            LoadProfile();
+            LoadProfile(newProfile);
         }
 
         private async void OnProfileCreate()
         {
-            InputTextModal modal = new InputTextModal(Resources.Create, Resources.ProfileName);
-            await modal.OpenDialogueAsync();
-            if (string.IsNullOrEmpty(modal.Text)) return;
-            string name = modal.Text;
-            if (_profiles.Contains(name))
-            {
-                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
-                return;
-            }
-
-            _profile = _appFiles.Server.Create(name);
+            var name = await GetNewProfileName();
+            if (name is null) return;
+            _appFiles.Server.Create(name);
             _profile.SaveFile();
             LoadProfileList();
             SelectedProfile = name;
@@ -135,37 +141,303 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnProfileDelete()
         {
-            if (string.IsNullOrEmpty(_selectedProfile)) return;
+            if (string.IsNullOrEmpty(SelectedProfile)) return;
 
-            QuestionModal question = new(Resources.Deletion, string.Format(Resources.DeletionText, _selectedProfile));
-            await question.OpenDialogueAsync();
-            if (question.Result)
-            {
-                _appFiles.Server.Delete(_profile.ProfileName);
+            OnBoardingConfirmation confirm = new OnBoardingConfirmation(
+                Resources.Deletion,
+                string.Format(Resources.DeletionText, SelectedProfile));
+            await _box.OpenAsync(confirm);
+            if (!confirm.Result) return;
+            
+            _appFiles.Server.Delete(_profile.ProfileName);
 
-                string profile = string.Empty;
-                profile = _appFiles.Server.ResolveProfile(profile);
-                LoadProfileList();
-                SelectedProfile = profile;
-            }
+            string profile = string.Empty;
+            profile = _appFiles.Server.ResolveProfile(profile);
+            LoadProfileList();
+            SelectedProfile = profile;
         }
 
         private async void OnProfileDuplicate()
         {
-            InputTextModal modal = new InputTextModal(Resources.Duplicate, Resources.ProfileName);
-            modal.SetValue(_selectedProfile);
-            await modal.OpenDialogueAsync();
-            if (string.IsNullOrEmpty(modal.Text)) return;
-            string name = modal.Text;
-            if (_profiles.Contains(name))
-            {
-                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
-                return;
-            }
-
-            _profile = await _appFiles.Server.Duplicate(_profile.ProfileName, name);
+            var name = await GetNewProfileName();
+            if (name is null) return;
+            await _appFiles.Server.Duplicate(_profile.ProfileName, name);
             LoadProfileList();
             SelectedProfile = name;
+        }
+        
+        private async Task<string?> GetNewProfileName()
+        {
+            var modal = new OnBoardingNameSelection(Resources.Create, string.Empty)
+                .SetValidation(ValidateName);
+            await _box.OpenAsync(modal);
+            return modal.Value;
+        }
+        
+        private Validation ValidateName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return Validation.Invalid(Resources.ErrorNameEmpty);
+            if (Profiles.Contains(name))
+                return Validation.Invalid(Resources.ErrorNameAlreadyTaken);
+            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                return Validation.Invalid(Resources.ErrorNameInvalidCharacters);
+            return Validation.Valid;
+        }
+
+        private void BuildFields()
+        {
+            Fields.Add(new TitleField().SetTitle(Resources.CatServerSettings));
+            Fields.Add(new TextField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerName)
+                .SetDescription(Resources.SettingServerNameText)
+                .SetGetter(() => _profile.ServerName)
+                .SetSetter((v) => _profile.ServerName = v)
+                .SetDefault(() => ServerProfile.ServerNameDefault)
+            );
+            Fields.Add(new PasswordField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerPass)
+                .SetDescription(Resources.SettingServerPassText)
+                .SetGetter(() => _profile.ServerPassword)
+                .SetSetter((v) => _profile.ServerPassword = v)
+                .SetDefault(() => ServerProfile.ServerPasswordDefault)
+            );
+            Fields.Add(new IntField(0,int.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerMaxPlayer)
+                .SetDescription(Resources.SettingServerMaxPlayerText)
+                .SetGetter(() => _profile.MaxPlayers)
+                .SetSetter((v) => _profile.MaxPlayers = v)
+                .SetDefault(() => ServerProfile.MaxPlayersDefault)
+            );
+            Fields.Add(new ComboBoxField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerRegion)
+                .SetDescription(Resources.SettingServerRegionText)
+                .AddOption(Resources.SettingServerRegionEurope)
+                .AddOption(Resources.SettingServerRegionNorthAmerica)
+                .AddOption(Resources.SettingServerRegionAsia)
+                .AddOption(Resources.SettingServerRegionAustralia)
+                .AddOption(Resources.SettingServerRegionSouthAmerica)
+                .AddOption(Resources.SettingServerRegionJapan)
+                .SetGetter(() => _profile.ServerRegion)
+                .SetSetter((v) => _profile.ServerRegion = v)
+                .SetDefault(() => ServerProfile.ServerRegionDefault)
+            );
+            Fields.Add(new MapField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerMap)
+                .SetDescription(Resources.SettingServerMapText)
+                .SetGetter(() => _profile.Map)
+                .SetSetter((v) => _profile.Map = v)
+                .SetDefault(() => ServerProfile.MapDefault)
+            );
+            Fields.Add(new TextListField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingSudoAdminList)
+                .SetDescription(Resources.SettingSudoAdminListText)
+                .SetGetter(() => _profile.SudoSuperAdmins.ToObservableCollection())
+                .SetSetter((v) => _profile.SudoSuperAdmins = v.ToList())
+                .SetDefault(() => ServerProfile.SudoSuperAdminsDefault.ToObservableCollection())
+            );
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingTotAdminPrecision)
+                .SetDescription(Resources.SettingTotAdminPrecisionText)
+                .SetGetter(() => _profile.DisableHighPrecisionMoveTool)
+                .SetSetter((v) => _profile.DisableHighPrecisionMoveTool = v)
+                .SetDefault(() => ServerProfile.DisableHighPrecisionMoveToolDefault)
+            );
+            Fields.Add(new TitleField().SetTitle(Resources.CatRestartSettings));
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerKillZombies)
+                .SetDescription(Resources.SettingServerKillZombiesText)
+                .SetGetter(() => _profile.KillZombies)
+                .SetSetter((v) => _profile.KillZombies = v)
+                .SetDefault(() => ServerProfile.KillZombiesDefault)
+            );
+            Fields.Add(new IntField(30, int.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerZombieDuration)
+                .SetDescription(Resources.SettingServerZombieDurationText)
+                .SetGetter(() => _profile.ZombieCheckSeconds)
+                .SetSetter((v) => _profile.ZombieCheckSeconds = v)
+                .SetDefault(() => ServerProfile.ZombieCheckSecondsDefault)
+            );
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerCrashRestart)
+                .SetDescription(Resources.SettingServerCrashRestartText)
+                .SetGetter(() => _profile.RestartWhenDown)
+                .SetSetter((v) => _profile.RestartWhenDown = v)
+                .SetDefault(() => ServerProfile.RestartWhenDownDefault)
+            );
+            Fields.Add(new TitleField().SetTitle(Resources.CatPerformance));
+            Fields.Add(new IntField(1, int.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerMaximumTickRate)
+                .SetDescription(Resources.SettingServerMaximumTickRateText)
+                .SetGetter(() => _profile.MaximumTickRate)
+                .SetSetter((v) => _profile.MaximumTickRate = v)
+                .SetDefault(() => ServerProfile.MaximumTickRateDefault)
+            );
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerUseAllCores)
+                .SetDescription(Resources.SettingServerUseAllCoresText)
+                .SetGetter(() => _profile.UseAllCores)
+                .SetSetter((v) => _profile.UseAllCores = v)
+                .SetDefault(() => ServerProfile.UseAllCoresDefault)
+            );
+            Fields.Add(new ComboBoxField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerProcessPriority)
+                .SetDescription(Resources.SettingServerProcessPriorityText)
+                .AddOption(Resources.SettingProcessPrioNormal)
+                .AddOption(Resources.SettingProcessPrioAboveNormal)
+                .AddOption(Resources.SettingProcessPrioHigh)
+                .AddOption(Resources.SettingProcessPrioRealtime)
+                .SetGetter(() => _profile.ProcessPriority)
+                .SetSetter((v) => _profile.ProcessPriority = v)
+                .SetDefault(() => ServerProfile.ProcessPriorityDefault)
+            );
+            Fields.Add(new CpuAffinityField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerCPUThreadAffinity)
+                .SetDescription(Resources.SettingServerCPUThreadAffinityText)
+                .SetGetter(() => _profile.CPUThreadAffinity)
+                .SetSetter((v) => _profile.CPUThreadAffinity = v)
+                .SetDefault(() => ServerProfile.CPUThreadAffinityDefault)
+            );
+            Fields.Add(new TitleField().SetTitle(Resources.CatPorts));
+            var gameClientPort = new IntField(int.MinValue, int.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerGameClientPort)
+                .SetDescription(Resources.SettingServerGameClientPortText)
+                .SetGetter(() => _profile.GameClientPort)
+                .SetSetter((v) => _profile.GameClientPort = v)
+                .SetDefault(() => ServerProfile.GameClientPortDefault);
+            Fields.Add(gameClientPort);
+            Fields.Add(new IntField(int.MinValue, int.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerRawUDPPort)
+                .SetDescription(Resources.SettingServerRawUDPPortText)
+                .SetGetter(() => _profile.GameClientPort+1)
+                .SetDefault(() => ServerProfile.GameClientPortDefault+1)
+                .SetEnabled(false)
+                .UpdateWith(gameClientPort)
+            );
+            Fields.Add(new IntField(int.MinValue, int.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerSourceQueryPort)
+                .SetDescription(Resources.SettingServerSourceQueryPortText)
+                .SetGetter(() => _profile.SourceQueryPort)
+                .SetSetter((v) => _profile.SourceQueryPort = v)
+                .SetDefault(() => ServerProfile.SourceQueryPortDefault)
+            );
+            var multiHome = new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerEnableMultiHome)
+                .SetDescription(Resources.SettingServerEnableMultiHomeText)
+                .SetGetter(() => _profile.EnableMultiHome)
+                .SetSetter((v) => _profile.EnableMultiHome = v)
+                .SetDefault(() => ServerProfile.EnableMultiHomeDefault);
+            Fields.Add(multiHome);
+            var multiHomeAdress = new TextField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerMultiHomeAddress)
+                .SetDescription(Resources.SettingServerMultiHomeAddressText)
+                .SetGetter(() => _profile.MultiHomeAddress)
+                .SetSetter((v) => _profile.MultiHomeAddress = v)
+                .SetDefault(() => ServerProfile.MultiHomeAddressDefault);
+            Fields.Add(multiHomeAdress);
+            multiHome.WhenAnyValue(x => x.Value).ToProperty(multiHomeAdress, x => x.IsVisible);
+            
+            Fields.Add(new TitleField().SetTitle(Resources.CatRCon));
+            var rcon = new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerEnableRCon)
+                .SetDescription(Resources.SettingServerEnableRConText)
+                .SetGetter(() => _profile.EnableRCon)
+                .SetSetter((v) => _profile.EnableRCon = v)
+                .SetDefault(() => ServerProfile.EnableRConDefault);
+            Fields.Add(rcon);
+            var rconPort = new IntField(0, 65535)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerRConPort)
+                .SetDescription(Resources.SettingServerRConPortText)
+                .SetGetter(() => _profile.RConPort)
+                .SetSetter((v) => _profile.RConPort = v)
+                .SetDefault(() => ServerProfile.RConPortDefault);
+            var rconPass = new PasswordField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerRConPassword)
+                .SetDescription(Resources.SettingServerRConPasswordText)
+                .SetGetter(() => _profile.RConPassword)
+                .SetSetter((v) => _profile.RConPassword = v)
+                .SetDefault(() => ServerProfile.RConPasswordDefault);
+            var rconKarma = new IntField(0, int.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerRConMaxKarma)
+                .SetDescription(Resources.SettingServerRConMaxKarmaText)
+                .SetGetter(() => _profile.RConMaxKarma)
+                .SetSetter((v) => _profile.RConMaxKarma = v)
+                .SetDefault(() => ServerProfile.RConMaxKarmaDefault);
+            Fields.Add(rconPort);
+            Fields.Add(rconPass);
+            Fields.Add(rconKarma);
+            rcon.WhenAnyValue(x => x.Value)
+                .ToProperty(rconPort, x => x.IsVisible);
+            rcon.WhenAnyValue(x => x.Value)
+                .ToProperty(rconPass, x => x.IsVisible);
+            rcon.WhenAnyValue(x => x.Value)
+                .ToProperty(rconKarma, x => x.IsVisible);
+                
+            Fields.Add(new TitleField().SetTitle(Resources.CatAntiCheat));
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerEnableVAC)
+                .SetDescription(Resources.SettingServerEnableVACText)
+                .SetGetter(() => _profile.EnableVAC)
+                .SetSetter((v) => _profile.EnableVAC = v)
+                .SetDefault(() => ServerProfile.EnableVACDefault)
+            );
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerEnableBattleEye)
+                .SetDescription(Resources.SettingServerEnableBattleEyeText)
+                .SetGetter(() => _profile.EnableBattleEye)
+                .SetSetter((v) => _profile.EnableBattleEye = v)
+                .SetDefault(() => ServerProfile.EnableBattleEyeDefault)
+            );
+            Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerLog)
+                .SetDescription(Resources.SettingServerLogText)
+                .SetGetter(() => _profile.Log)
+                .SetSetter((v) => _profile.Log = v)
+                .SetDefault(() => ServerProfile.LogDefault)
+            );
+            Fields.Add(new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerNoAISpawn)
+                .SetDescription(Resources.SettingServerNoAISpawnText)
+                .SetGetter(() => _profile.NoAISpawn)
+                .SetSetter((v) => _profile.NoAISpawn = v)
+                .SetDefault(() => ServerProfile.NoAISpawnDefault)
+            );
+            Fields.Add(new TextListField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerLogFilters)
+                .SetDescription(Resources.SettingServerLogFiltersText)
+                .SetGetter(() => _profile.LogFilters.ToObservableCollection())
+                .SetSetter((v) => _profile.LogFilters = v.ToList())
+                .SetDefault(() => ServerProfile.LogFiltersDefault.ToObservableCollection())
+            );
         }
     }
 }

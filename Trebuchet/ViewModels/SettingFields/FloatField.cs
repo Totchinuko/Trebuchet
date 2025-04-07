@@ -2,28 +2,17 @@
 
 namespace Trebuchet.ViewModels.SettingFields
 {
-    public class FloatField() : Field<float, float>("FloatField")
+    public class FloatField(float minimum, float maximum, float tolerance = 0.001f) : 
+        Field<FloatField, float>(0f)
     {
-        public override bool IsDefault => Math.Abs(Value - Default) < Tolerance;
-        public float Maximum { get; set; } = float.MaxValue;
-        public float Minimum { get; set; } = float.MinValue;
+        public float Maximum { get; set; } = maximum;
+        public float Minimum { get; set; } = minimum;
         
-        public float Tolerance { get; set; } =  0.001f;
+        public float Tolerance { get; set; } = tolerance;
 
-        public override void ResetToDefault()
+        protected override bool IsValueDefault(float value, float defValue)
         {
-            Value = Default;
-        }
-
-        protected override float GetConvert(object? value)
-        {
-            if (value is not float f) throw new Exception("Value is not a float");
-            return MathF.Min(Maximum, MathF.Max(Minimum, f));
-        }
-
-        protected override object SetConvert(float value)
-        {
-            return value;
+            return Math.Abs(value - defValue) < Tolerance;
         }
     }
 }

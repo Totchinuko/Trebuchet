@@ -1,58 +1,59 @@
 using System;
-using TrebuchetUtils;
+using System.Reactive;
+using ReactiveUI;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
 public class ValidatedInputDialogue<T> : TitledDialogue
 {
     protected Func<T?, Validation> _validation;
-    protected T? _value;
-    protected bool _isValid = true;
-    protected string _errorMessage = string.Empty;
-    
+    private T? _value;
+    private string _errorMessage = string.Empty;
+    private bool _isValid;
+
     public ValidatedInputDialogue(string title, string description) : base(title, description)
     {
         _validation = (_) => Validation.Valid;
-        ConfirmCommand.Subscribe(Close);
-        CancelCommand.Clear().Subscribe(() =>
+        ConfirmCommand = ReactiveCommand.Create(Close);
+        CancelCommand = ReactiveCommand.Create(() =>
         {
-            _value = default(T);
+            Value = default;
             Close();
         });
+
+        this.WhenAnyValue(x => x.Value)
+            .Subscribe((v) =>
+            {
+                var result = _validation.Invoke(v);
+                IsValid = result.IsValid;
+                ErrorMessage = result.ErrorMessage;
+            });
     }
 
-    public SimpleCommand ConfirmCommand { get; } = new();
-    
+    public ReactiveCommand<Unit, Unit> ConfirmCommand { get; }
+
     public T? Value
     {
         get => _value;
-        set
-        {
-            if (SetField(ref _value, ProcessValue(value)))
-            {
-                var result = _validation.Invoke(value);
-                IsValid = result.IsValid;
-                ErrorMessage = result.ErrorMessage;
-            }
-        }
+        set => this.RaiseAndSetIfChanged(ref _value, value);
     }
-    
+
     public string ErrorMessage
     {
         get => _errorMessage;
-        protected set => SetField(ref _errorMessage, value);
+        protected set => this.RaiseAndSetIfChanged(ref _errorMessage, value);
     }
 
     public bool IsValid
     {
         get => _isValid;
-        protected set => SetField(ref _isValid, value);
-    } 
-    
+        protected set => this.RaiseAndSetIfChanged(ref _isValid, value);
+    }
+
     public ValidatedInputDialogue<T> SetValidation(Func<T?, Validation> validation)
     {
         _validation = validation;
-        var result = _validation.Invoke(_value);
+        var result = _validation.Invoke(Value);
         IsValid = result.IsValid;
         ErrorMessage = result.ErrorMessage;
         return this;

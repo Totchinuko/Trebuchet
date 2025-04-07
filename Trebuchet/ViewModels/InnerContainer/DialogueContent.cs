@@ -1,10 +1,11 @@
 using System;
 using Avalonia.Layout;
+using ReactiveUI;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class DialogueContent : BaseViewModel
+public class DialogueContent : ReactiveObject
 {
     public HorizontalAlignment HorizontalAlignment { get; protected set; } = HorizontalAlignment.Center;
     public VerticalAlignment VerticalAlignment { get; protected set; } =  VerticalAlignment.Center;

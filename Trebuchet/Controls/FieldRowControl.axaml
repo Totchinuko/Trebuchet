@@ -7,7 +7,7 @@
              xmlns:c="using:Trebuchet.Controls"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
-             x:DataType="s:Field"
+             x:DataType="s:IValueField"
              x:Class="Trebuchet.Controls.FieldRowControl">
     <Border Classes="Panel" Padding="0,12" Margin="0,0,0,12" Classes.Blue="{Binding !IsDefault}" IsVisible="{Binding IsVisible}">
             <Grid>
@@ -17,7 +17,7 @@
                     <ColumnDefinition Width="auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                    <TextBlock Text="{Binding Name}" FontWeight="Bold" Margin="0,0,0,6" />
+                    <TextBlock Text="{Binding Title}" FontWeight="Bold" Margin="0,0,0,6" />
                     <Border  Margin="0,0,0,6" MinHeight="0">
                         <Border.IsVisible>
                             <MultiBinding Converter="{x:Static BoolConverters.Or}">
@@ -30,7 +30,7 @@
                         <StackPanel IsVisible="{Binding DisplayDescription}">
                             <TextBlock Text="{Binding Description}" Classes="SubText" TextWrapping="Wrap" FontWeight="Normal" />
                             <TextBlock IsVisible="{Binding Hyperlink}">
-                                <hyper:Hyperlink Url="{Binding Hyperlink}" Command="{Binding HyperlinkCommand}"><Run Text="{Binding Hyperlink}" /></hyper:Hyperlink>
+                                <hyper:Hyperlink Url="{Binding Hyperlink}" Command="{Binding HyperlinkClick}"><Run Text="{Binding Hyperlink}" /></hyper:Hyperlink>
                             </TextBlock>
                         </StackPanel>
                     </Border>
@@ -44,7 +44,7 @@
                         VerticalAlignment="Top"
                         Margin="12,0,3,0"
                         IsVisible="{Binding !IsDefault}"
-                        Command="{Binding ResetCommand}">
+                        Command="{Binding Reset}">
                     <i:Icon Value="mdi-undo" Classes="Normal"/>
                 </Button>
             </Grid>
