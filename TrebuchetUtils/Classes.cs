@@ -7,14 +7,14 @@ using Avalonia.Xaml.Interactivity;
 
 namespace TrebuchetUtils;
 
-public class TClasses : AvaloniaObject
+public class Classes : AvaloniaObject
 {
-    public static readonly AttachedProperty<ObservableCollection<string>> ClassesProperty =
-        AvaloniaProperty.RegisterAttached<TClasses, Interactive, ObservableCollection<string>>("DynClasses");
+    public static readonly AttachedProperty<ObservableCollection<string>> ListProperty =
+        AvaloniaProperty.RegisterAttached<Classes, Interactive, ObservableCollection<string>>("List");
 
-    static TClasses()
+    static Classes()
     {
-        ClassesProperty.Changed.AddClassHandler<Interactive>(OnClassesChanged);
+        ListProperty.Changed.AddClassHandler<Interactive>(OnClassesChanged);
     }
 
     private static void OnClassesChanged(Interactive sender, AvaloniaPropertyChangedEventArgs args)
@@ -34,16 +34,16 @@ public class TClasses : AvaloniaObject
     {
         if (sender is not Interactive interactive) return;
         interactive.Classes.Clear();
-        interactive.Classes.AddRange(GetClasses(interactive));
+        interactive.Classes.AddRange(GetList(interactive));
     }
 
-    public static void SetClasses(AvaloniaObject element, ObservableCollection<string> value)
+    public static void SetList(AvaloniaObject element, ObservableCollection<string> value)
     {
-        element.SetValue(ClassesProperty, value);
+        element.SetValue(ListProperty, value);
     }
 
-    public static ObservableCollection<string> GetClasses(AvaloniaObject element)
+    public static ObservableCollection<string> GetList(AvaloniaObject element)
     {
-        return element.GetValue(ClassesProperty);
+        return element.GetValue(ListProperty);
     }
 }
