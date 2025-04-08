@@ -92,6 +92,8 @@ namespace Trebuchet.ViewModels.Panels
         {
             _profile = _appFiles.Client.Get(profile);
             RefreshProfileSize(profile);
+            foreach (var f in Fields.OfType<IValueField>())
+                f.Update.Execute().Subscribe();
         }
 
         private async void RefreshProfileSize(string profile)
@@ -160,10 +162,8 @@ namespace Trebuchet.ViewModels.Panels
             
             _appFiles.Client.Delete(_profile.ProfileName);
 
-            string profile = string.Empty;
-            profile = _appFiles.Client.ResolveProfile(profile);
             LoadProfileList();
-            SelectedProfile = profile;
+            SelectedProfile = string.Empty;
         }
 
         private async void OnProfileDuplicate()

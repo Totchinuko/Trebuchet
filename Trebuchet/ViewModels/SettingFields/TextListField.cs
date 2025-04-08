@@ -8,9 +8,9 @@ namespace Trebuchet.ViewModels.SettingFields
 {
     internal class TextListField() : Field<TextListField, ObservableCollection<string>>([])
     {
-        protected override bool IsValueDefault(ObservableCollection<string> value, ObservableCollection<string> defValue)
+        protected override bool AreValuesEqual(ObservableCollection<string> valueA, ObservableCollection<string> valueB)
         {
-            return defValue.SequenceEqual(value);
+            return valueB.SequenceEqual(valueA);
         }
     }
 }

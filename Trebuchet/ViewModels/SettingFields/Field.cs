@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Reactive;
+using System.Reactive.Linq;
 using DynamicData.Binding;
 using ReactiveUI;
 
@@ -12,7 +13,6 @@ namespace Trebuchet.ViewModels.SettingFields
         ReactiveCommand<Unit, Unit> Reset { get; }
         ReactiveCommand<Unit, Unit> HyperlinkClick { get; }
         bool IsDefault { get; }
-        bool HasDefault { get; }
         bool IsVisible { get; }
         string Title { get; }
         string Description { get; }
@@ -85,8 +85,7 @@ namespace Trebuchet.ViewModels.SettingFields
     
     public abstract class Field<F> : DescriptiveElement<F> where F : Field<F>
     {
-        private bool _isDefault;
-        private bool _hasDefault;
+
         private bool _isVisible = true;
         private string _hyperlink = string.Empty;
         private bool _isEnabled = true;
@@ -94,18 +93,6 @@ namespace Trebuchet.ViewModels.SettingFields
         public Field()
         {
             HyperlinkClick = ReactiveCommand.Create(() => TrebuchetUtils.Utils.OpenWeb(Hyperlink));
-        }
-
-        public bool IsDefault
-        {
-            get => _isDefault;
-            protected set => this.RaiseAndSetIfChanged(ref _isDefault, value);
-        }
-
-        public bool HasDefault
-        {
-            get => _hasDefault;
-            protected set => this.RaiseAndSetIfChanged(ref _hasDefault, value);
         }
 
         public bool IsVisible
@@ -136,14 +123,20 @@ namespace Trebuchet.ViewModels.SettingFields
         private Action<T>? _setter;
         private Func<T>? _defaultBuilder;
         private T _value;
+        private ObservableAsPropertyHelper<bool> _isDefault;
 
         protected Field(T initialValue)
         {
             _value = initialValue;
-            var canReset = this.WhenAnyValue<Field<F,T>,bool,bool>(x => x.HasDefault, (hasDef) => hasDef);
+
+            _isDefault = this.WhenAnyValue(x => x.Value, x => x.DefaultBuilder, (v, d) =>
+            {
+                if (d is null) return true;
+                return AreValuesEqual(v, d.Invoke());
+            }).ToProperty(this, x => x.IsDefault);
             
             Reset = ReactiveCommand.Create(
-                canExecute: canReset,
+                canExecute: this.WhenAnyValue(x => x.IsDefault, x => !x),
                 execute: () =>
                 {
                     if (DefaultBuilder is not null)
@@ -156,13 +149,13 @@ namespace Trebuchet.ViewModels.SettingFields
                     Value = Getter.Invoke();
             });
             
-            ValueChanged = ReactiveCommand.Create<T>((v) =>
+            ValueChanged = ReactiveCommand.Create<T, bool>((v) =>
             {
-                if (DefaultBuilder != null)
-                    IsDefault = IsValueDefault(v, DefaultBuilder());
-                else
-                    IsDefault = true;
+                if (Getter is null || Setter is null) return false;
+                var value = Getter.Invoke();
+                if (AreValuesEqual(value, v)) return false;
                 Setter?.Invoke(v);
+                return true;
             });
 
             this.WhenAnyValue(x => x.Value)
@@ -192,16 +185,19 @@ namespace Trebuchet.ViewModels.SettingFields
             get => _value;
             set => this.RaiseAndSetIfChanged(ref _value, value);
         }
+        
+        public bool IsDefault
+        {
+            get => _isDefault.Value;
+        }
 
         public override ReactiveCommand<Unit, Unit> Reset { get; }
-        public ReactiveCommand<T, Unit> ValueChanged { get; }
+        public ReactiveCommand<T, bool> ValueChanged { get; }
         public ReactiveCommand<Unit,Unit> Update { get; }
 
         public F SetDefault(Func<T> defGenerator)
         {
             DefaultBuilder = defGenerator;
-            IsDefault = IsValueDefault(_value, DefaultBuilder());
-            HasDefault = true;
             return (F)this;
         }
 
@@ -220,27 +216,25 @@ namespace Trebuchet.ViewModels.SettingFields
         public F SetGetter(Func<T> getter)
         {
             Getter = getter;
-            _value = Getter.Invoke();
-            if(DefaultBuilder is not null)
-                IsDefault = IsValueDefault(_value, DefaultBuilder());
+            Value = Getter.Invoke();
             return (F)this;
         }
 
-        public F WhenFieldChanged<P,R>(ReactiveCommand<P,R> command)
+        public F WhenFieldChanged(ReactiveCommand<Unit,Unit> command)
         {
-            ValueChanged.InvokeCommand(command);
+            ValueChanged.Where(x => x).Select(_ => Unit.Default).InvokeCommand(command);
             return (F)this;
         }
 
         public F UpdateWith<OF, OT>(Field<OF, OT> field) where OF : Field<OF,OT>
         {
-            field.ValueChanged.Subscribe((_) => Update.Execute());
+            field.ValueChanged.Where(x => x).Subscribe((_) => Update.Execute().Subscribe());
             return (F)this;
         }
 
-        protected virtual bool IsValueDefault(T value, T defValue)
+        protected virtual bool AreValuesEqual(T valueA, T valueB)
         {
-            return EqualityComparer<T>.Default.Equals(value, defValue);
+            return EqualityComparer<T>.Default.Equals(valueA, valueB);
         }
     }
 }

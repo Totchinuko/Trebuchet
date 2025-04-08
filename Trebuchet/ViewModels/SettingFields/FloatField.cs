@@ -10,9 +10,9 @@ namespace Trebuchet.ViewModels.SettingFields
         
         public float Tolerance { get; set; } = tolerance;
 
-        protected override bool IsValueDefault(float value, float defValue)
+        protected override bool AreValuesEqual(float valueA, float valueB)
         {
-            return Math.Abs(value - defValue) < Tolerance;
+            return Math.Abs(valueA - valueB) < Tolerance;
         }
     }
 }
