@@ -42,7 +42,7 @@ namespace Trebuchet.ViewModels.Panels
             _uiConfig = uiConfig;
             
             LoadProfile(
-                _appFiles.Client.ResolveProfile(
+                _appFiles.Server.ResolveProfile(
                     _uiConfig.CurrentClientProfile));
             LoadProfileList();
             
@@ -100,7 +100,7 @@ namespace Trebuchet.ViewModels.Panels
         
         private async void RefreshProfileSize(string profile)
         {
-            var path = _appFiles.Client.GetFolder(profile);
+            var path = _appFiles.Server.GetFolder(profile);
             var size = await Task.Run(() => Tools.DirectorySize(path));
             ProfileSize = size.Bytes().Humanize();
         }
