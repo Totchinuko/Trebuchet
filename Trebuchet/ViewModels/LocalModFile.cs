@@ -12,26 +12,28 @@ public class LocalModFile : ReactiveObject, IModFile
 {
     public LocalModFile(string path)
     {
+        IconClasses.Add("ModIcon");
+        StatusClasses.Add("ModStatus");
         FilePath = path;
         Title = Path.GetFileName(path);
-        IconClasses = "ModIcon Local";
+        IconClasses.Add("Local");
         
         var fileInfo = new FileInfo(path);
         if (fileInfo.Exists)
         {
-            StatusClasses = "ModStatus Found";
+            StatusClasses.Add("Found");
             LastUpdate = $"{Resources.LastModified}: {fileInfo.LastWriteTime.Humanize()}";
         }
         else
         {
-            StatusClasses = "ModStatus Missing";
+            StatusClasses.Add("Missing");
             LastUpdate = string.Empty;
         }
     }
     
     public string Title { get; }
-    public string StatusClasses { get; }
-    public string IconClasses { get; }
+    public ObservableCollection<string> StatusClasses { get; } = [];
+    public ObservableCollection<string> IconClasses { get; } = [];
     public string LastUpdate { get; }
     public string FilePath { get; }
     public ObservableCollection<ModFileAction> Actions { get; } = [];

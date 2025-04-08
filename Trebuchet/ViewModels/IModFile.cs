@@ -10,8 +10,8 @@ public delegate void IModFileArgs(IModFile file);
 public interface IModFile
 {
     string Title { get; }
-    string StatusClasses { get; }
-    string IconClasses { get; }
+    ObservableCollection<string> StatusClasses { get; }
+    ObservableCollection<string> IconClasses { get; }
     string LastUpdate { get; }
     string FilePath { get; }
     ObservableCollection<ModFileAction> Actions { get; }

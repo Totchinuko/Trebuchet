@@ -9,21 +9,23 @@ public class PublishedModFile : ReactiveObject, IModFile, IPublishedModFile
 {
     public PublishedModFile(string path, ulong publishedId)
     {
+        IconClasses.Add("ModIcon");
+        StatusClasses.Add("ModStatus");
         PublishedId = publishedId;
         FilePath = path;
         Title = Path.GetFileName(path);
         LastUpdate = string.Empty;
-        IconClasses = "ModIcon Live";
+        IconClasses.Add("Live");
         if (File.Exists(path))
-            StatusClasses = "ModStatus Loading";
+            StatusClasses.Add("Loading");
         else
-            StatusClasses = "ModStatus Missing";
+            StatusClasses.Add("Missing");
     }
     
     public ulong PublishedId { get; }
     public string Title { get; }
-    public string StatusClasses { get; }
-    public string IconClasses { get; }
+    public ObservableCollection<string> StatusClasses { get; } = [];
+    public ObservableCollection<string> IconClasses { get; } = [];
     public string LastUpdate { get; }
     public string FilePath { get; }
     public ObservableCollection<ModFileAction> Actions { get; } = [];
