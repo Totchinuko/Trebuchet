@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive;
 using System.Text.Json;
 using System.Threading;
+using System.Threading.Tasks;
 using System.Web;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -144,6 +145,7 @@ namespace Trebuchet.ViewModels.Panels
                 await _steamApi.UpdateMods(mods);
                 await _modFileFactory.QueryFromWorkshop(Modlist);
             }
+            catch(TaskCanceledException) {}
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
