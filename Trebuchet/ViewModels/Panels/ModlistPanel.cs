@@ -96,11 +96,7 @@ namespace Trebuchet.ViewModels.Panels
                     _profile.SyncURL = url;
                     _profile.SaveFile();
                 });
-            Modlist.CollectionChanged += (_,_) =>
-            {
-                _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
-                _profile.SaveFile();
-            };
+            
             this.WhenAnyValue(x => x.SelectedModlist)
                 .Subscribe((list) =>
                 {
@@ -146,8 +142,7 @@ namespace Trebuchet.ViewModels.Panels
             try
             {
                 await _steamApi.UpdateMods(mods);
-                using (Modlist.SuspendNotifications())
-                    await _modFileFactory.QueryFromWorkshop(Modlist);
+                await _modFileFactory.QueryFromWorkshop(Modlist);
             }
             catch (TrebException tex)
             {
@@ -161,11 +156,15 @@ namespace Trebuchet.ViewModels.Panels
             if (Modlist.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
             var file = await _modFileFactory.Create(mod);
             Modlist.Add(file);
+            _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
+            _profile.SaveFile();
         }
 
         public void RemoveModFile(IModFile mod)
         {
             Modlist.Remove(mod);
+            _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
+            _profile.SaveFile();
         }
 
         public void UpdateModFile(IPublishedModFile mod)
@@ -220,13 +219,10 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void LoadModlist()
         {
-            using (Modlist.SuspendNotifications())
-            {
-                Modlist.Clear();
-                foreach (var mod in _profile.Modlist)
-                    Modlist.Add(_modFileFactory.Create(mod));
-                await _modFileFactory.QueryFromWorkshop(Modlist);
-            }
+            Modlist.Clear();
+            foreach (var mod in _profile.Modlist)
+                Modlist.Add(_modFileFactory.Create(mod));
+            await _modFileFactory.QueryFromWorkshop(Modlist);
         }
 
         [MemberNotNull("_profile")]
@@ -263,6 +259,8 @@ namespace Trebuchet.ViewModels.Panels
                     .Select(f => Path.GetFullPath(f.Path.LocalPath))
                     .Select(f => _modFileFactory.Create(f))
                 );
+            _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
+            _profile.SaveFile();
         }
 
         private void OnExploreWorkshop()
@@ -413,8 +411,7 @@ namespace Trebuchet.ViewModels.Panels
                     if (modFile is not IPublishedModFile published || published.PublishedId != id) continue;
                     var path = published.PublishedId.ToString();
                     _appFiles.Mods.ResolveMod(ref path);
-                    using(Modlist.SuspendNotifications())
-                        Modlist[i] = _modFileFactory.Create(modFile, path);
+                    Modlist[i] = _modFileFactory.Create(modFile, path);
                 }
             });
         }
