@@ -24,6 +24,7 @@ using Trebuchet.Modals;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
+using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -36,6 +37,7 @@ namespace Trebuchet.ViewModels.Panels
         private readonly SteamAPI _steamApi;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
+        private readonly DialogueBox _box;
         private readonly WorkshopSearchViewModel _workshop;
         private readonly ModFileFactory _modFileFactory;
         private readonly ILogger<ModlistPanel> _logger;
@@ -51,6 +53,7 @@ namespace Trebuchet.ViewModels.Panels
             AppFiles appFiles,
             UIConfig uiConfig, 
             TaskBlocker blocker,
+            DialogueBox box,
             WorkshopSearchViewModel workshop,
             ModFileFactory modFileFactory,
             ILogger<ModlistPanel> logger) : 
@@ -59,6 +62,7 @@ namespace Trebuchet.ViewModels.Panels
             _steamApi = steamApi;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
+            _box = box;
             _workshop = workshop;
             _modFileFactory = modFileFactory;
             _logger = logger;
@@ -303,10 +307,11 @@ namespace Trebuchet.ViewModels.Panels
         {
             if (string.IsNullOrEmpty(ModlistUrl)) return;
 
-            var question = new QuestionModal("Replacement",
-                "This action will replace your modlist, do you wish to continue ?");
-            await question.OpenDialogueAsync();
-            if (!question.Result) return;
+            OnBoardingConfirmation confirm = new OnBoardingConfirmation(
+                Resources.ModlistReplace,
+                string.Format(Resources.ModlistReplaceText, SelectedModlist));
+            await _box.OpenAsync(confirm);
+            if (!confirm.Result) return;
 
             UriBuilder builder;
             try
@@ -427,16 +432,8 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnModlistCreate()
         {
-            var modal = new InputTextModal(Resources.Create, Resources.ModlistName);
-            await modal.OpenDialogueAsync();
-            if (string.IsNullOrEmpty(modal.Text)) return;
-            var name = modal.Text;
-            if (Profiles.Contains(name))
-            {
-                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
-                return;
-            }
-
+            var name = await GetNewProfileName();
+            if (name is null) return;
             _appFiles.Mods.Create(name);
             RefreshProfiles();
             SelectedModlist = name;
@@ -446,31 +443,43 @@ namespace Trebuchet.ViewModels.Panels
         {
             if (string.IsNullOrEmpty(SelectedModlist)) return;
 
-            var question = new QuestionModal("Deletion",
-                $"Do you wish to delete the selected modlist {SelectedModlist} ?");
-            await question.OpenDialogueAsync();
-            if (!question.Result) return;
+            OnBoardingConfirmation confirm = new OnBoardingConfirmation(
+                Resources.Deletion,
+                string.Format(Resources.DeletionText, SelectedModlist));
+            await _box.OpenAsync(confirm);
+            if (!confirm.Result) return;
             
             _appFiles.Mods.Delete(_profile.ProfileName);
 
             RefreshProfiles();
             SelectedModlist = string.Empty;
         }
+        
+        private Validation ValidateName(string? name)
+        {
+            if (string.IsNullOrWhiteSpace(name))
+                return Validation.Invalid(Resources.ErrorNameEmpty);
+            if (Profiles.Contains(name))
+                return Validation.Invalid(Resources.ErrorNameAlreadyTaken);
+            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
+                return Validation.Invalid(Resources.ErrorNameInvalidCharacters);
+            return Validation.Valid;
+        }
+        
+        private async Task<string?> GetNewProfileName()
+        {
+            var modal = new OnBoardingNameSelection(Resources.Create, string.Empty)
+                .SetValidation(ValidateName)
+                .ToggleCancellable(true);
+            await _box.OpenAsync(modal);
+            return modal.Value;
+        }
 
         private async void OnModlistDuplicate()
         {
-            var modal = new InputTextModal(Resources.Duplicate, Resources.ModlistName);
-            modal.SetValue(SelectedModlist);
-            await modal.OpenDialogueAsync();
-            if (string.IsNullOrEmpty(modal.Text)) return;
-            var name = modal.Text;
-            if (Profiles.Contains(name))
-            {
-                await new ErrorModal(Resources.AlreadyExists, Resources.AlreadyExistsText).OpenDialogueAsync();
-                return;
-            }
-
-            _profile = await _appFiles.Mods.Duplicate(_profile.ProfileName, name);
+            var name = await GetNewProfileName();
+            if (name is null) return;
+            _profile = _appFiles.Mods.Duplicate(_profile.ProfileName, name);
             RefreshProfiles();
             SelectedModlist = name;
         }

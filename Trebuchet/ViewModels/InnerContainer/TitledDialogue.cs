@@ -3,7 +3,7 @@ using ReactiveUI;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class TitledDialogue : DialogueContent
+public class TitledDialogue<T> : DialogueContent where T : TitledDialogue<T>
 {
     private bool _canCancel;
 
@@ -24,9 +24,9 @@ public class TitledDialogue : DialogueContent
         protected set => this.RaiseAndSetIfChanged(ref _canCancel, value);
     }
 
-    public TitledDialogue ToggleCancellable(bool toggle)
+    public T ToggleCancellable(bool toggle)
     {
         CanCancel = toggle;
-        return this;
+        return (T)this;
     }
 }

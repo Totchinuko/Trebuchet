@@ -9,7 +9,7 @@ using ReactiveUI;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingDirectory : ValidatedInputDialogue<string>
+public class OnBoardingDirectory : ValidatedInputDialogue<string, OnBoardingDirectory>
 {
 
     public OnBoardingDirectory(string title, string description) : base(title, description)

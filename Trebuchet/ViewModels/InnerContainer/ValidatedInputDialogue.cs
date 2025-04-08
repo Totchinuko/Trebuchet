@@ -4,7 +4,7 @@ using ReactiveUI;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class ValidatedInputDialogue<T> : TitledDialogue
+public class ValidatedInputDialogue<T, TD> : TitledDialogue<TD> where TD : ValidatedInputDialogue<T, TD>
 {
     protected Func<T?, Validation> _validation;
     private T? _value;
@@ -50,7 +50,7 @@ public class ValidatedInputDialogue<T> : TitledDialogue
         protected set => this.RaiseAndSetIfChanged(ref _isValid, value);
     }
 
-    public ValidatedInputDialogue<T> SetValidation(Func<T?, Validation> validation)
+    public ValidatedInputDialogue<T, TD> SetValidation(Func<T?, Validation> validation)
     {
         _validation = validation;
         var result = _validation.Invoke(Value);

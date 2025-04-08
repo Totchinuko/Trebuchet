@@ -528,6 +528,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Override.
+        /// </summary>
+        public static string ModlistReplace {
+            get {
+                return ResourceManager.GetString("ModlistReplace", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This action will replace your mod list, do you wish to continue ?.
+        /// </summary>
+        public static string ModlistReplaceText {
+            get {
+                return ResourceManager.GetString("ModlistReplaceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Mods.
         /// </summary>
         public static string Mods {

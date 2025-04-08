@@ -692,4 +692,10 @@ Do you wish to proceed ?</value>
     <data name="WatermarkModlistURL" xml:space="preserve">
         <value>Steam Collection/.json URL</value>
     </data>
+    <data name="ModlistReplace" xml:space="preserve">
+        <value>Override</value>
+    </data>
+    <data name="ModlistReplaceText" xml:space="preserve">
+        <value>This action will replace your mod list, do you wish to continue ?</value>
+    </data>
 </root>

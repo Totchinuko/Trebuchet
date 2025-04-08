@@ -4,7 +4,7 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingNameSelection : ValidatedInputDialogue<string>
+public class OnBoardingNameSelection : ValidatedInputDialogue<string, OnBoardingNameSelection>
 {
     public OnBoardingNameSelection(string title, string description) : base(title, description)
     {
