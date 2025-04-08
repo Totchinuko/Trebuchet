@@ -11,11 +11,12 @@
         <Border Padding="0 8 8 8">
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="1.7*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition MinWidth="220" Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Border Margin="0 0 6 0" ToolTip.Tip="Drag to reorder" Background="Transparent" Cursor="SizeNorthSouth">
                     <i:Icon Value="mdi-drag-vertical" Foreground="{DynamicResource TPanelAccent}" FontSize="30"  />
@@ -23,22 +24,12 @@
                 <Border Grid.Column="1" Margin="0,0,12,0" u:Classes.List="{Binding IconClasses}">
                     <i:Icon Classes="Normal"  />
                 </Border>
-                <Grid Grid.Column="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center">
-                        <Run Text="{Binding Title, Mode=OneWay}" />
-                    </TextBlock>
-                    <Border Grid.Column="1" u:Classes.List="{Binding StatusClasses}" Margin="0,0,12,0">
-                        <TextBlock />
-                    </Border>
-                </Grid>
-                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
-                    <TextBlock Text="{Binding LastUpdate}" />
-                </StackPanel>
-                <ItemsControl Grid.Column="4" ItemsSource="{Binding Actions}">
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Title, Mode=OneWay}" />
+                <Border Grid.Column="3" u:Classes.List="{Binding StatusClasses}" Margin="0,0,12,0">
+                    <TextBlock />
+                </Border>
+                <TextBlock Grid.Column="4" Text="{Binding LastUpdate}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <ItemsControl Grid.Column="5" ItemsSource="{Binding Actions}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <StackPanel Orientation="Horizontal" Spacing="3" />

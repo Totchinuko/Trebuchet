@@ -39,12 +39,11 @@
         </Style>
     </Style>
 
-
     <Style Selector="Border.ModStatus" >
         <Setter Property="BorderThickness" Value="0 0 0 0"/>
         <Setter Property="CornerRadius" Value="3" />
         <Setter Property="Padding" Value="8" />
-        <Style Selector="^.Local">
+        <Style Selector="^.Found2">
             <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
             <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
             <Style Selector="^ > TextBlock">

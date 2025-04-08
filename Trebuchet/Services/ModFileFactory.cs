@@ -108,6 +108,8 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
     private IModFile CreateLocal(string path)
     {
         var file = new LocalModFile(path);
+        AddOpenWorkshopDisabledAction(file);
+        AddUpdateDisabledAction(file);
         AddRemoveAction(file);
         return file;
     }
@@ -142,5 +144,25 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
             "mdi-update",
             ReactiveCommand.Create(() => Updated?.Invoke(file), canExecute)
             ));
+    }
+    
+    private void AddOpenWorkshopDisabledAction(IModFile file)
+    {
+        var canExecute = taskBlocker.WhenAnyValue(x => x.BlockingTypes).Select(x => false);
+        file.Actions.Add(new ModFileAction(
+            Resources.Update,
+            "mdi-steam",
+            ReactiveCommand.Create(() => {}, canExecute)
+        ));
+    }
+    
+    private void AddUpdateDisabledAction(IModFile file)
+    {
+        var canExecute = taskBlocker.WhenAnyValue(x => x.BlockingTypes).Select(x => false);
+        file.Actions.Add(new ModFileAction(
+            Resources.Update,
+            "mdi-update",
+            ReactiveCommand.Create(() => {}, canExecute)
+        ));
     }
 }
