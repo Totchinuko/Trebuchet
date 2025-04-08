@@ -288,13 +288,13 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.TotAdminDoNotLoadServerList = v)
                 .SetDefault(() => ClientProfile.TotAdminDoNotLoadServerListDefault)
             );
-            Fields.Add(new TextListField()
+            Fields.Add(new MultiLineTextField()
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingLogFilter)
                 .SetDescription(Resources.SettingLogFilterText)
-                .SetGetter(() => _profile.LogFilters.ToObservableCollection())
-                .SetSetter((v) => _profile.LogFilters = v.ToList())
-                .SetDefault(() => ClientProfile.LogFiltersDefault.ToObservableCollection())
+                .SetGetter(() => string.Join(Environment.NewLine, _profile.LogFilters))
+                .SetSetter((v) => _profile.LogFilters = v.Split(Environment.NewLine).ToList())
+                .SetDefault(() => string.Join(Environment.NewLine, ClientProfile.LogFiltersDefault))
             );
         }
     }

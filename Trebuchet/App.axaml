@@ -29,7 +29,6 @@
                 <MergeResourceInclude Source="Templates\ToggleField.axaml" />
                 <MergeResourceInclude Source="Templates\IntSliderField.axaml" />
                 <MergeResourceInclude Source="Templates\TestliveSelection.axaml" />
-                <MergeResourceInclude Source="Templates\StringListFields.axaml" />
                 <MergeResourceInclude Source="Templates\TextboxField.axaml" />
                 <MergeResourceInclude Source="Templates\ModlistEditor.axaml" />
                 <MergeResourceInclude Source="Templates\ModlistItems.axaml" />
@@ -49,6 +48,7 @@
                 <MergeResourceInclude Source="Templates\LogFilterPanel.axaml" />
                 <MergeResourceInclude Source="Templates\SteamWidget.axaml" />
                 <MergeResourceInclude Source="Templates\PasswordField.axaml" />
+                <MergeResourceInclude Source="Templates\MultiLineTextboxField.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -67,7 +67,6 @@
         <StaticResource ResourceKey="IntSliderField" />
         <StaticResource ResourceKey="MapField" />
         <StaticResource ResourceKey="TextboxField" />
-        <StaticResource ResourceKey="StringListFields" />
         <StaticResource ResourceKey="TitleField" />
         <StaticResource ResourceKey="ToggleField" />
         <StaticResource ResourceKey="OnBoardingBranch" />
@@ -80,5 +79,6 @@
         <StaticResource ResourceKey="WorkshopSearchResult" />
         <StaticResource ResourceKey="AppSettings" />
         <StaticResource ResourceKey="PasswordField" />
+        <StaticResource ResourceKey="MultiLineTextboxField" />
     </Application.DataTemplates>
 </Application>

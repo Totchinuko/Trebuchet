@@ -1,0 +1,19 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="using:Trebuchet.Controls"
+                    xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
+    <DataTemplate x:Key="MultiLineTextboxField" DataType="settingFields:MultiLineTextField">
+        <c:FieldRowControl>
+            <c:FieldRowControl.FieldContent>
+                <Border Margin="0 3 50 3" MinWidth="300" HorizontalAlignment="Stretch">
+                    <TextBox
+                        VerticalAlignment="Stretch"
+                        HorizontalAlignment="Stretch"
+                        AcceptsReturn="True"
+                        TextWrapping="Wrap"
+                        Text="{Binding Value, Mode=TwoWay}" />
+                </Border>
+            </c:FieldRowControl.FieldContent>
+        </c:FieldRowControl>
+    </DataTemplate>
+</ResourceDictionary>

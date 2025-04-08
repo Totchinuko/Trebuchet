@@ -387,7 +387,7 @@ Do you wish to proceed ?</value>
         <value>Log Filters</value>
     </data>
     <data name="SettingLogFilterText" xml:space="preserve">
-        <value>Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+        <value>Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
     </data>
     <data name="CatServerSettings" xml:space="preserve">
         <value>Server Settings</value>
@@ -450,7 +450,7 @@ Do you wish to proceed ?</value>
         <value>Sudo Super Admin List</value>
     </data>
     <data name="SettingSudoAdminListText" xml:space="preserve">
-        <value>List of steam ID to be Sudo super admins on your servers. Leave it empty if you do not use Sudo</value>
+        <value>List of steam ID to be Sudo super admins on your servers, one per line. Leave it empty if you do not use Sudo.</value>
     </data>
     <data name="SettingTotAdminPrecision" xml:space="preserve">
         <value>Disable Tot!Admin High Precision Move Tool</value>
@@ -600,7 +600,7 @@ Do you wish to proceed ?</value>
         <value>Log Filters</value>
     </data>
     <data name="SettingServerLogFiltersText" xml:space="preserve">
-        <value>Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+        <value>Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
     </data>
     <data name="CatTrebSettings" xml:space="preserve">
         <value>Trebuchet Settings</value>

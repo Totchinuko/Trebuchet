@@ -235,13 +235,13 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.Map = v)
                 .SetDefault(() => ServerProfile.MapDefault)
             );
-            Fields.Add(new TextListField()
+            Fields.Add(new MultiLineTextField()
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingSudoAdminList)
                 .SetDescription(Resources.SettingSudoAdminListText)
-                .SetGetter(() => _profile.SudoSuperAdmins.ToObservableCollection())
-                .SetSetter((v) => _profile.SudoSuperAdmins = v.ToList())
-                .SetDefault(() => ServerProfile.SudoSuperAdminsDefault.ToObservableCollection())
+                .SetGetter(() => string.Join(Environment.NewLine, _profile.SudoSuperAdmins))
+                .SetSetter((v) => _profile.SudoSuperAdmins = v.Split(Environment.NewLine).ToList())
+                .SetDefault(() => string.Join(Environment.NewLine, ServerProfile.SudoSuperAdminsDefault))
             );
             Fields.Add(new ToggleField()
                 .WhenFieldChanged(SaveProfile)
@@ -432,13 +432,13 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.NoAISpawn = v)
                 .SetDefault(() => ServerProfile.NoAISpawnDefault)
             );
-            Fields.Add(new TextListField()
+            Fields.Add(new MultiLineTextField()
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingServerLogFilters)
                 .SetDescription(Resources.SettingServerLogFiltersText)
-                .SetGetter(() => _profile.LogFilters.ToObservableCollection())
-                .SetSetter((v) => _profile.LogFilters = v.ToList())
-                .SetDefault(() => ServerProfile.LogFiltersDefault.ToObservableCollection())
+                .SetGetter(() => string.Join(Environment.NewLine, _profile.LogFilters))
+                .SetSetter((v) => _profile.LogFilters = v.Split(Environment.NewLine).ToList())
+                .SetDefault(() => string.Join(Environment.NewLine, ServerProfile.LogFiltersDefault))
             );
         }
     }

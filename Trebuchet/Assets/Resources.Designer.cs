@@ -1081,7 +1081,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).
+        ///   Looks up a localized string similar to Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).
         /// </summary>
         public static string SettingLogFilterText {
             get {
@@ -1432,7 +1432,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter the log console to only display specific types of logs. This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).
+        ///   Looks up a localized string similar to Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).
         /// </summary>
         public static string SettingServerLogFiltersText {
             get {
@@ -1801,7 +1801,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to List of steam ID to be Sudo super admins on your servers. Leave it empty if you do not use Sudo.
+        ///   Looks up a localized string similar to List of steam ID to be Sudo super admins on your servers, one per line. Leave it empty if you do not use Sudo..
         /// </summary>
         public static string SettingSudoAdminListText {
             get {
