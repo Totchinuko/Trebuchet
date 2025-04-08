@@ -79,10 +79,12 @@ namespace Trebuchet.ViewModels.Panels
             ImportFromTextCommand = ReactiveCommand.Create(OnImportFromText);
             FetchCommand = ReactiveCommand.Create(OnFetchClicked);
             RefreshModlistCommand = ReactiveCommand.Create(LoadModlist);
+
+            var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
             UpdateModsCommand = ReactiveCommand.Create(() =>
             {
                 UpdateMods(Modlist.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList());
-            }, blocker.CanDownloadMods);
+            }, canDownloadMods);
 
             TabClick.Subscribe((_) =>
             {

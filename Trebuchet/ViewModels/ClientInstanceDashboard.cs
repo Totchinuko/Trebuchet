@@ -34,10 +34,12 @@ public class ClientInstanceDashboard : ReactiveObject
         KillCommand = ReactiveCommand.Create(OnKilled, this.WhenAnyValue(x => x.CanKill));
         CanKill = false;
 
-        var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(blocker.CanLaunch, (f,s) => f && s);
+        var canBlockerLaunch = blocker.WhenAnyValue(x => x.CanLaunch);
+        var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
+        var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(canBlockerLaunch, (f,s) => f && s);
         LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch.StartWith(true));
         LaunchBattleEyeCommand = ReactiveCommand.Create(OnBattleEyeLaunched, canLaunch.StartWith(true));
-        UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, blocker.CanDownloadMods);
+        UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, canDownloadMods);
 
         this.WhenAnyValue(x => x.SelectedModlist)
             .Subscribe((x) => ModlistSelected?.Invoke(this, x));

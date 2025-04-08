@@ -49,16 +49,18 @@ namespace Trebuchet.ViewModels.Panels
             _blocker = blocker;
             _logger = logger;
 
+            var canDownloadServer = blocker.WhenAnyValue(x => x.CanDownloadServer);
+            var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
             CloseAllCommand = ReactiveCommand.Create(OnCloseAll);
             KillAllCommand = ReactiveCommand.Create(OnKillAll);
             LaunchAllCommand = ReactiveCommand.Create(
-                canExecute: blocker.CanDownloadServer, execute: OnLaunchAll);
+                canExecute: canDownloadServer, execute: OnLaunchAll);
             UpdateServerCommand = ReactiveCommand.Create(
-                canExecute: blocker.CanDownloadServer, execute: UpdateServer);
+                canExecute: canDownloadServer, execute: UpdateServer);
             UpdateAllModsCommand = ReactiveCommand.Create(
-                canExecute: blocker.CanDownloadMods, execute:UpdateMods);
+                canExecute: canDownloadMods, execute:UpdateMods);
             VerifyFilesCommand = ReactiveCommand.Create(
-                canExecute: blocker.CanDownloadMods, execute:OnFileVerification);
+                canExecute: canDownloadMods, execute:OnFileVerification);
 
             RefreshPanel.IsExecuting
                 .Where(x => x)

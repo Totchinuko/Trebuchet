@@ -149,10 +149,11 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
 
     private void AddUpdateAction(IPublishedModFile file)
     {
+        var canExecute = taskBlocker.WhenAnyValue(x => x.CanDownloadMods);
         file.Actions.Add(new ModFileAction(
             Resources.Update,
             "mdi-update",
-            ReactiveCommand.Create(() => Updated?.Invoke(file), taskBlocker.CanDownloadMods)
+            ReactiveCommand.Create(() => Updated?.Invoke(file), canExecute)
             ));
     }
     

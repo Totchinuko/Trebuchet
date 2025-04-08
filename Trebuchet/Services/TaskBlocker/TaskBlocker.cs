@@ -35,6 +35,9 @@ namespace Trebuchet.Services.TaskBlocker
         private Dictionary<Type, BlockedTask> _tasks = [];
         private readonly ITinyMessengerHub _messenger;
         private event EventHandler<TaskChangedEventArgs>? TaskChanged;
+        private ObservableAsPropertyHelper<bool> _canDownloadMods;
+        private ObservableAsPropertyHelper<bool> _canDownloadServers;
+        private ObservableAsPropertyHelper<bool> _canLaunch;
 
         public TaskBlocker(ITinyMessengerHub messenger)
         {
@@ -45,16 +48,22 @@ namespace Trebuchet.Services.TaskBlocker
 
             Type[] downloadMods = [typeof(SteamDownload), typeof(ServersRunning), typeof(ClientRunning)];
             Type[] downloadServers = [typeof(SteamDownload), typeof(ServersRunning)];
-            CanDownloadMods = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Intersect(downloadMods).Any()).StartWith(true);
-            CanDownloadServer = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Intersect(downloadServers).Any()).StartWith(true);
-            CanLaunch = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Contains(typeof(SteamDownload))).StartWith(true);
+            _canDownloadMods = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Intersect(downloadMods).Any())
+                .StartWith(true)
+                .ToProperty(this, x => x.CanDownloadMods);
+            _canDownloadServers = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Intersect(downloadServers).Any())
+                .StartWith(true)
+                .ToProperty(this, x => x.CanDownloadServer);
+            _canLaunch = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Contains(typeof(SteamDownload)))
+                .StartWith(true)
+                .ToProperty(this, x => x.CanLaunch);
         }
 
         public IObservable<EventPattern<TaskChangedEventArgs>> TaskChanges { get; }
 
-        public IObservable<bool> CanDownloadMods { get; }
-        public IObservable<bool> CanDownloadServer { get; }
-        public IObservable<bool> CanLaunch { get; }
+        public bool CanDownloadMods => _canDownloadMods.Value;
+        public bool CanDownloadServer => _canDownloadServers.Value;
+        public bool CanLaunch => _canLaunch.Value;
 
         public async Task<IBlockedTask> EnterAsync(IBlockedTaskType operation, int cancelAfterSec = 0)
         {

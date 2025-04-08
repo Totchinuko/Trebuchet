@@ -46,10 +46,12 @@ namespace Trebuchet.ViewModels
             
             CloseCommand = ReactiveCommand.Create(OnClose, this.WhenAnyValue(x => x.CanClose));
             CanClose = false;
-            
-            var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(blocker.CanLaunch, (f,s) => f && s);
+
+            var canBlockLaunch = blocker.WhenAnyValue(x => x.CanLaunch);
+            var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
+            var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(canBlockLaunch, (f,s) => f && s);
             LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch.StartWith(true));
-            UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, blocker.CanDownloadMods);
+            UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, canDownloadMods);
             
             this.WhenAnyValue(x => x.SelectedModlist)
                 .Subscribe((x) => ModlistSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, x)));
