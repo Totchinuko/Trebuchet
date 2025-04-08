@@ -19,14 +19,21 @@ public class SettingsPanel : Panel
     private readonly AppSetup _setup;
     private readonly UIConfig _uiConfig;
     private readonly SteamAPI _steamApi;
+    private readonly OnBoarding _onBoarding;
     private readonly ILogger<SettingsPanel> _logger;
 
-    public SettingsPanel(AppSetup setup, UIConfig uiConfig, SteamAPI steamApi, ILogger<SettingsPanel> logger) : 
+    public SettingsPanel(
+        AppSetup setup, 
+        UIConfig uiConfig, 
+        SteamAPI steamApi, 
+        OnBoarding onBoarding,
+        ILogger<SettingsPanel> logger) : 
         base(Resources.Settings, "mdi-cog", true)
     {
         _setup = setup;
         _uiConfig = uiConfig;
         _steamApi = steamApi;
+        _onBoarding = onBoarding;
         _logger = logger;
 
         SaveConfig = ReactiveCommand.Create(() => _setup.Config.SaveFile());
@@ -54,22 +61,10 @@ public class SettingsPanel : Panel
 
     private void BuildFields()
     {
-        Fields.Add(new TitleField().SetTitle(Resources.CatTrebSettings));
-        Fields.Add(new DirectoryField()
-            .WhenFieldChanged(SaveConfig)
-            .SetTitle(Resources.SettingClientPath)
-            .SetDescription(Resources.SettingClientPathText)
-            .SetGetter(() => _setup.Config.ClientPath)
-            .SetSetter((v) => _setup.Config.ClientPath = v)
-            .SetDefault(() => Config.ClientPathDefault)
-        );
-        Fields.Add(new ToggleField()
-            .WhenFieldChanged(SaveConfig)
-            .SetTitle(Resources.SettingManageClient)
-            .SetDescription(Resources.SettingManageClientText)
-            .SetGetter(() => _setup.Config.ManageClient)
-            .SetSetter((v) => _setup.Config.ManageClient = v)
-            .SetDefault(() => Config.ManageClientDefault)
+        Fields.Add(new TitleField().SetTitle(Resources.OnBoardingUsageChoice));
+        Fields.Add(new ClientInstallationField(_onBoarding, _setup)
+            .SetTitle(Resources.SettingClientInstallation)
+            .SetDescription(Resources.SettingClientInstallationText)
         );
         Fields.Add(new IntSliderField(0, 6, 1)
             .WhenFieldChanged(SaveConfig)
@@ -79,6 +74,7 @@ public class SettingsPanel : Panel
             .SetSetter((v) => _setup.Config.ServerInstanceCount = v)
             .SetDefault(() => Config.ServerInstanceCountDefault)
         );
+        Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
         Fields.Add(new ToggleField()
             .WhenFieldChanged(SaveUiConfig)
             .SetTitle(Resources.SettingDisplayWarningOnKill)

@@ -21,7 +21,6 @@ namespace Trebuchet.ViewModels.Panels
     public class ClientProfilePanel : Panel
     {
         private readonly DialogueBox _box;
-        private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private ClientProfile _profile;
@@ -36,7 +35,6 @@ namespace Trebuchet.ViewModels.Panels
             base(Resources.GameSaves, "mdi-controller", false)
         {
             _box = box;
-            _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             LoadProfile(
@@ -54,7 +52,7 @@ namespace Trebuchet.ViewModels.Panels
             SaveProfile = ReactiveCommand.Create(() => _profile.SaveFile());
             RefreshPanel.IsExecuting
                 .Where(x => x)
-                .Select(_ => Tools.IsClientInstallValid(_setup.Config))
+                .Select(_ => Tools.IsClientInstallValid(setup.Config))
                 .Subscribe(x => CanTabBeClicked = x);
             
             RefreshPanel.Subscribe((_) =>

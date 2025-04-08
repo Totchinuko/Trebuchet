@@ -222,11 +222,29 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Change.
+        /// </summary>
+        public static string Change {
+            get {
+                return ResourceManager.GetString("Change", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Create.
         /// </summary>
         public static string Create {
             get {
                 return ResourceManager.GetString("Create", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Current location.
+        /// </summary>
+        public static string CurrentLocation {
+            get {
+                return ResourceManager.GetString("CurrentLocation", resourceCulture);
             }
         }
         
@@ -317,6 +335,15 @@ namespace Trebuchet.Assets {
         public static string ErrorValueEmpty {
             get {
                 return ResourceManager.GetString("ErrorValueEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Find.
+        /// </summary>
+        public static string Find {
+            get {
+                return ResourceManager.GetString("Find", resourceCulture);
             }
         }
         
@@ -811,6 +838,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Remove.
+        /// </summary>
+        public static string Remove {
+            get {
+                return ResourceManager.GetString("Remove", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Remove from list.
         /// </summary>
         public static string RemoveFromList {
@@ -991,20 +1027,20 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Conan Exile Installation Directory.
+        ///   Looks up a localized string similar to Conan Exile Installation Folder.
         /// </summary>
-        public static string SettingClientPath {
+        public static string SettingClientInstallation {
             get {
-                return ResourceManager.GetString("SettingClientPath", resourceCulture);
+                return ResourceManager.GetString("SettingClientInstallation", resourceCulture);
             }
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to This is the path to your game. Leave it empty if you do not wish trebuchet to handle game launch.
+        ///   Looks up a localized string similar to Indicate to Trebuchet where to find your Conan Exile game installation folder. You&apos;ll also be choosing if Trebuchet should handle your game files or not..
         /// </summary>
-        public static string SettingClientPathText {
+        public static string SettingClientInstallationText {
             get {
-                return ResourceManager.GetString("SettingClientPathText", resourceCulture);
+                return ResourceManager.GetString("SettingClientInstallationText", resourceCulture);
             }
         }
         
@@ -1117,7 +1153,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Manage Client Files.
+        ///   Looks up a localized string similar to Manage Game Files.
         /// </summary>
         public static string SettingManageClient {
             get {

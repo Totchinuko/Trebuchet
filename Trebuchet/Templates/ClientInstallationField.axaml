@@ -1,0 +1,52 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:f="clr-namespace:Trebuchet.ViewModels.SettingFields"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="ClientInstallationField" DataType="f:ClientInstallationField">
+        <Border Classes="Panel" Padding="12,12" Margin="0,0,0,12" Classes.Blue="{Binding Installed}">
+            <StackPanel>
+                <TextBlock Text="{Binding Title}" FontWeight="Bold" Margin="0,0,0,6" />
+                <Border  Margin="0,0,0,6" MinHeight="0">
+                    <Border.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                            <MultiBinding.Bindings>
+                                <Binding Path="Description" />
+                                <Binding Path="DisplayGenericDescription" />
+                            </MultiBinding.Bindings>
+                        </MultiBinding>
+                    </Border.IsVisible>
+                    <TextBlock IsVisible="{Binding DisplayDescription}" Text="{Binding Description}" Classes="SubText" TextWrapping="Wrap" FontWeight="Normal" />
+                </Border>
+                <Border Classes="Panel" Padding="12" Margin="0 0 0 12">
+                    <StackPanel>
+                        <TextBlock Margin="0 0 0 12">
+                            <Run Text="{x:Static a:Resources.CurrentLocation}" FontWeight="Bold" />
+                            <Run Text=": " />
+                            <Run Text="{Binding InstallPath}" />
+                        </TextBlock>
+                        <TextBlock>
+                            <Run Text="{x:Static a:Resources.SettingManageClient}" FontWeight="Bold" />
+                            <Run Text=": " />
+                            <Run Text="{Binding ManageFileLabel}" />
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="12">
+                    <Button Classes="Base Yellow" Command="{Binding Remove}">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                            <i:Icon Value="mdi-folder-remove" Classes="Normal" />
+                            <TextBlock Text="{x:Static a:Resources.Remove}"/>
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="Base Green" Command="{Binding Install}">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                            <i:Icon Value="mdi-folder-search" Classes="Normal" />
+                            <TextBlock Text="{Binding InstallLabel}"/>
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>

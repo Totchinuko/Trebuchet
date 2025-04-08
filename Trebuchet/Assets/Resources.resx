@@ -190,7 +190,7 @@ Do you wish to proceed ?</value>
         <value>Please wait while your files are being copied</value>
     </data>
     <data name="SettingManageClient" xml:space="preserve">
-        <value>Manage Client Files</value>
+        <value>Manage Game Files</value>
     </data>
     <data name="SettingManageClientText" xml:space="preserve">
         <value>Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer.</value>
@@ -605,11 +605,11 @@ Do you wish to proceed ?</value>
     <data name="CatTrebSettings" xml:space="preserve">
         <value>Trebuchet Settings</value>
     </data>
-    <data name="SettingClientPath" xml:space="preserve">
-        <value>Conan Exile Installation Directory</value>
+    <data name="SettingClientInstallation" xml:space="preserve">
+        <value>Conan Exile Installation Folder</value>
     </data>
-    <data name="SettingClientPathText" xml:space="preserve">
-        <value>This is the path to your game. Leave it empty if you do not wish trebuchet to handle game launch</value>
+    <data name="SettingClientInstallationText" xml:space="preserve">
+        <value>Indicate to Trebuchet where to find your Conan Exile game installation folder. You'll also be choosing if Trebuchet should handle your game files or not.</value>
     </data>
     <data name="SettingServerInstanceCount" xml:space="preserve">
         <value>Server Instance Amount</value>
@@ -697,5 +697,17 @@ Do you wish to proceed ?</value>
     </data>
     <data name="ModlistReplaceText" xml:space="preserve">
         <value>This action will replace your mod list, do you wish to continue ?</value>
+    </data>
+    <data name="Find" xml:space="preserve">
+        <value>Find</value>
+    </data>
+    <data name="Remove" xml:space="preserve">
+        <value>Remove</value>
+    </data>
+    <data name="Change" xml:space="preserve">
+        <value>Change</value>
+    </data>
+    <data name="CurrentLocation" xml:space="preserve">
+        <value>Current location</value>
     </data>
 </root>

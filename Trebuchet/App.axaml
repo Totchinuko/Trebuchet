@@ -49,6 +49,7 @@
                 <MergeResourceInclude Source="Templates\SteamWidget.axaml" />
                 <MergeResourceInclude Source="Templates\PasswordField.axaml" />
                 <MergeResourceInclude Source="Templates\MultiLineTextboxField.axaml" />
+                <MergeResourceInclude Source="Templates\ClientInstallationField.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -80,5 +81,6 @@
         <StaticResource ResourceKey="AppSettings" />
         <StaticResource ResourceKey="PasswordField" />
         <StaticResource ResourceKey="MultiLineTextboxField" />
+        <StaticResource ResourceKey="ClientInstallationField" />
     </Application.DataTemplates>
 </Application>

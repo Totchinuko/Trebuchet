@@ -10,43 +10,43 @@
              x:DataType="s:IValueField"
              x:Class="Trebuchet.Controls.FieldRowControl">
     <Border Classes="Panel" Padding="0,12" Margin="0,0,0,12" Classes.Blue="{Binding !IsDefault}" IsVisible="{Binding IsVisible}">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="auto" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                    <TextBlock Text="{Binding Title}" FontWeight="Bold" Margin="0,0,0,6" />
-                    <Border  Margin="0,0,0,6" MinHeight="0">
-                        <Border.IsVisible>
-                            <MultiBinding Converter="{x:Static BoolConverters.Or}">
-                                <MultiBinding.Bindings>
-                                    <Binding Path="Description" />
-                                    <Binding Path="DisplayGenericDescription" />
-                                </MultiBinding.Bindings>
-                            </MultiBinding>
-                        </Border.IsVisible>
-                        <StackPanel IsVisible="{Binding DisplayDescription}">
-                            <TextBlock Text="{Binding Description}" Classes="SubText" TextWrapping="Wrap" FontWeight="Normal" />
-                            <TextBlock IsVisible="{Binding Hyperlink}">
-                                <hyper:Hyperlink Url="{Binding Hyperlink}" Command="{Binding HyperlinkClick}"><Run Text="{Binding Hyperlink}" /></hyper:Hyperlink>
-                            </TextBlock>
-                        </StackPanel>
-                    </Border>
-                    <ContentControl IsEnabled="{Binding IsEnabled}" Classes.Disabled="{Binding $self.IsEnabled}" Content="{Binding $parent[c:FieldRowControl].FieldContent}" />
-                </StackPanel>
-                <Button Grid.Column="2"
-                        ToolTip.Tip="Reset to default"
-                        ToolTip.ShowDelay="0"
-                        Classes="Base"
-                        x:Name="Reset"
-                        VerticalAlignment="Top"
-                        Margin="12,0,3,0"
-                        IsVisible="{Binding !IsDefault}"
-                        Command="{Binding Reset}">
-                    <i:Icon Value="mdi-undo" Classes="Normal"/>
-                </Button>
-            </Grid>
-        </Border>
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="auto" />
+            </Grid.ColumnDefinitions>
+            <StackPanel Grid.Column="1" Margin="12,0,0,0">
+                <TextBlock Text="{Binding Title}" FontWeight="Bold" Margin="0,0,0,6" />
+                <Border  Margin="0,0,0,6" MinHeight="0">
+                    <Border.IsVisible>
+                        <MultiBinding Converter="{x:Static BoolConverters.Or}">
+                            <MultiBinding.Bindings>
+                                <Binding Path="Description" />
+                                <Binding Path="DisplayGenericDescription" />
+                            </MultiBinding.Bindings>
+                        </MultiBinding>
+                    </Border.IsVisible>
+                    <StackPanel IsVisible="{Binding DisplayDescription}">
+                        <TextBlock Text="{Binding Description}" Classes="SubText" TextWrapping="Wrap" FontWeight="Normal" />
+                        <TextBlock IsVisible="{Binding Hyperlink}">
+                            <hyper:Hyperlink Url="{Binding Hyperlink}" Command="{Binding HyperlinkClick}"><Run Text="{Binding Hyperlink}" /></hyper:Hyperlink>
+                        </TextBlock>
+                    </StackPanel>
+                </Border>
+                <ContentControl IsEnabled="{Binding IsEnabled}" Classes.Disabled="{Binding $self.IsEnabled}" Content="{Binding $parent[c:FieldRowControl].FieldContent}" />
+            </StackPanel>
+            <Button Grid.Column="2"
+                    ToolTip.Tip="Reset to default"
+                    ToolTip.ShowDelay="0"
+                    Classes="Base"
+                    x:Name="Reset"
+                    VerticalAlignment="Top"
+                    Margin="12,0,3,0"
+                    IsVisible="{Binding !IsDefault}"
+                    Command="{Binding Reset}">
+                <i:Icon Value="mdi-undo" Classes="Normal"/>
+            </Button>
+        </Grid>
+    </Border>
 </UserControl>

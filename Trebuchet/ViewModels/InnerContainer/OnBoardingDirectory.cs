@@ -12,9 +12,10 @@ namespace Trebuchet.ViewModels.InnerContainer;
 public class OnBoardingDirectory : ValidatedInputDialogue<string, OnBoardingDirectory>
 {
 
-    public OnBoardingDirectory(string title, string description) : base(title, description)
+    public OnBoardingDirectory(string title, string description, string defaultPath = "") : base(title, description)
     {
         SearchDirectoryCommand = ReactiveCommand.Create(OnSearchDirectory);
+        Value = defaultPath;
     }
 
     public ReactiveCommand<Unit, Unit> SearchDirectoryCommand { get; }

@@ -128,6 +128,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddSingleton<AppServerFiles>();
         services.AddSingleton<AppModlistFiles>();
         services.AddSingleton<AppFiles>();
+        services.AddSingleton<OnBoarding>();
         services.AddSingleton<IIniGenerator, YuuIniGenerator>();
         services.AddSingleton<IProgressCallback<double>, Progress>();
         services.AddSingleton<Steam>();
