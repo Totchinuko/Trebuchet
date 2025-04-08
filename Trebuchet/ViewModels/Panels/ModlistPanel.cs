@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
@@ -403,8 +404,11 @@ namespace Trebuchet.ViewModels.Panels
         private void OnModFileChanged(object sender, FileSystemEventArgs e)
         {
             var fullPath = e.FullPath;
+            Debug.WriteLine($"OnModFileChanged.fullPath={fullPath}");
             Dispatcher.UIThread.Invoke(() =>
             {
+                var watch = new Stopwatch();
+                watch.Start();
                 if (!_appFiles.Mods.TryParseDirectory2ModID(fullPath, out var id)) return;
                 for (var i = 0; i < Modlist.Count; i++)
                 {
@@ -414,6 +418,8 @@ namespace Trebuchet.ViewModels.Panels
                     _appFiles.Mods.ResolveMod(ref path);
                     Modlist[i] = _modFileFactory.Create(modFile, path);
                 }
+                watch.Stop();
+                Debug.WriteLine($"OnModFileChanged={watch.ElapsedMilliseconds}ms");
             });
         }
 
