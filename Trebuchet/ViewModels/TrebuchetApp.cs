@@ -23,7 +23,7 @@ using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet.ViewModels
 {
-    public sealed class TrebuchetApp : BaseViewModel
+    public sealed class TrebuchetApp : ReactiveObject
     {
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
@@ -33,6 +33,7 @@ namespace Trebuchet.ViewModels
         private Panel _activePanel;
         private List<Panel> _panels;
         private DispatcherTimer _timer;
+        private bool _foldedMenu;
 
         public TrebuchetApp(
             AppSetup setup,
@@ -41,7 +42,7 @@ namespace Trebuchet.ViewModels
             UIConfig uiConfig,
             Steam steam, 
             SteamWidget steamWidget,
-            InnerContainer.DialogueBox dialogueBox,
+            DialogueBox dialogueBox,
             IEnumerable<Panel> panels)
         {
             _setup = setup;
@@ -80,17 +81,9 @@ namespace Trebuchet.ViewModels
 
         public bool FoldedMenu
         {
-            get => _uiConfig.FoldedMenu;
-            private set
-            {
-                _uiConfig.FoldedMenu = value;
-                _uiConfig.SaveFile();
-                OnPropertyChanged();
-                OnPropertyChanged(nameof(ColumnWith));
-            }
+            get => _foldedMenu;
+            set => this.RaiseAndSetIfChanged(ref _foldedMenu, value);
         }
-
-        public GridLength ColumnWith => FoldedMenu ? GridLength.Parse("40") : GridLength.Parse("240");
         
         public ReactiveCommand<Unit, Unit> ToggleFoldedCommand { get; }
         
@@ -101,10 +94,9 @@ namespace Trebuchet.ViewModels
             {
                 if(_activePanel == value) return;
                 _activePanel.Active = false;
-                _activePanel = value;
+                this.RaiseAndSetIfChanged(ref _activePanel, value);
                 _activePanel.Active = true;
                 _activePanel.DisplayPanel.Execute();
-                OnPropertyChanged();
             }
         }
 
