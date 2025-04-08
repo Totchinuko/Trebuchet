@@ -1,8 +1,8 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
-    <DataTemplate x:Key="ServerSettings" x:DataType="panels:ServerProfilePanel">
+                    xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
+    <DataTemplate x:Key="ServerSettings" x:DataType="p:ServerProfilePanel">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
@@ -15,7 +15,13 @@
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
                         <Border VerticalAlignment="Top" Height="32">
-                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center">
+                                <ComboBox.SelectionBoxItemTemplate>
+                                    <DataTemplate>
+                                        <Label Content="{Binding $parent[ComboBox].((p:ServerProfilePanel)DataContext).SelectedProfile}" />
+                                    </DataTemplate>
+                                </ComboBox.SelectionBoxItemTemplate>
+                            </ComboBox>
                         </Border>
                         <Button Command="{Binding DeleteProfileCommand}" Classes="Base Red" ToolTip.Tip="Delete" Margin="0,0,3,6" VerticalAlignment="Top">
                             <i:Icon Value="mdi-delete" Classes="Normal"/>

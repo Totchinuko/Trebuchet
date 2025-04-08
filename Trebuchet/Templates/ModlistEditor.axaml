@@ -2,8 +2,8 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
-                    xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
-    <DataTemplate x:Key="ModlistEditor" x:DataType="panels:ModlistPanel">
+                    xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
+    <DataTemplate x:Key="ModlistEditor" x:DataType="p:ModlistPanel">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
@@ -16,7 +16,13 @@
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
                         <Border VerticalAlignment="Center" Height="32">
-                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center" />
+                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center">
+                                <ComboBox.SelectionBoxItemTemplate>
+                                    <DataTemplate>
+                                        <Label Content="{Binding $parent[ComboBox].((p:ModlistPanel)DataContext).SelectedModlist}" />
+                                    </DataTemplate>
+                                </ComboBox.SelectionBoxItemTemplate>
+                            </ComboBox>
                         </Border>
                         <Button Command="{Binding DeleteModlistCommand}" Classes="Base Red" ToolTip.Tip="Delete" Margin="0,0,3,0" VerticalAlignment="Center">
                             <i:Icon Value="mdi-delete" Classes="Normal"/>
