@@ -134,7 +134,6 @@ namespace Trebuchet.ViewModels.Panels
                     .Distinct().ToList();
                 await _steamApi.UpdateMods(mods);
             }
-            catch(TaskCanceledException) {}
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
@@ -151,7 +150,6 @@ namespace Trebuchet.ViewModels.Panels
             {
                 await _steamApi.UpdateServers();
             }
-            catch(TaskCanceledException) {}
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);

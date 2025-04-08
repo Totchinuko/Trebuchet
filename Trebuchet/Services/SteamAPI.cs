@@ -64,26 +64,55 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
     public async Task UpdateMods(List<ulong> list)
     {
         var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateModsLabel));
-        await steam.UpdateMods(list, task.Cts);
-        task.Release();
+        try
+        {
+            await steam.UpdateMods(list, task.Cts);
+        }
+        catch (OperationCanceledException){}
+        finally
+        {
+            task.Release();
+        }
     }
 
     public async Task UpdateServers()
     {
         var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateServersLabel));
-        await steam.UpdateServerInstances(task.Cts);
-        task.Release();
+        try
+        {
+            await steam.UpdateServerInstances(task.Cts);
+        }
+        catch (OperationCanceledException){}
+        finally
+        {
+            task.Release();
+        }
     }
 
     public async Task VerifyFiles(IEnumerable<ulong> modlist)
     {
         var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyServersLabel));
         steam.ClearCache();
-        await steam.UpdateServerInstances(task.Cts);
-        task.Release();
+        try
+        {
+            await steam.UpdateServerInstances(task.Cts);
+        }
+        catch (OperationCanceledException){}
+        finally
+        {
+            task.Release();
+        }
+        
         task = await taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyModsLabel));
-        await steam.UpdateMods(modlist, task.Cts);
-        task.Release();
+        try
+        {
+            await steam.UpdateMods(modlist, task.Cts);
+        }
+        catch (OperationCanceledException) {}
+        finally
+        {
+            task.Release();
+        }
     }
 
     public int GetInstalledServerInstanceCount()
