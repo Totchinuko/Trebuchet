@@ -25,8 +25,8 @@ namespace Trebuchet.Controls
         public CpuSelector()
         {
             int maxCPU = Environment.ProcessorCount;
-            CpuList = new List<int>(64);
-            for (int i = 0; i < 64; i++)
+            CpuList = new List<int>(maxCPU);
+            for (int i = 0; i < maxCPU; i++)
                 CpuList.Add(i);
             CpuAffinityProperty.Changed.AddClassHandler<CpuSelector>(OnCPUAffinityChanged);
             InitializeComponent();
@@ -61,14 +61,12 @@ namespace Trebuchet.Controls
         
         private void CheckBox_Loaded(object sender, RoutedEventArgs e)
         {
-            if (sender is StackPanel dobject)
+            if (sender is CheckBox checkBox)
             {
-                if(dobject.Tag is null) throw new Exception("CPUSelector.Tags Are not setup properly.");
-                int index = (int)dobject.Tag;
-                dobject.IsEnabled = index < Environment.ProcessorCount;
-                var checkbox = TrebuchetUtils.GuiExtensions.FindVisualChildren<CheckBox>(dobject).FirstOrDefault();
-                if (checkbox is not null)
-                    checkbox.IsChecked = (CpuAffinity & (1L << index)) != 0;
+                if(checkBox.Tag is null) throw new Exception("CPUSelector.Tags Are not setup properly.");
+                int index = (int)checkBox.Tag;
+                checkBox.IsVisible = index < Environment.ProcessorCount;
+                checkBox.IsChecked = (CpuAffinity & (1L << index)) != 0;
             }
         }
 

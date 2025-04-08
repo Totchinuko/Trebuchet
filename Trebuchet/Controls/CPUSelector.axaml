@@ -20,10 +20,7 @@
             </ItemsControl.ItemsPanel>
             <ItemsControl.ItemTemplate>
                 <DataTemplate>
-                    <StackPanel Orientation="Horizontal" Classes.CpuPanel="{Binding !$self.IsEnabled}" HorizontalAlignment="Right" Margin="0,0,0,4" Loaded="CheckBox_Loaded" Tag="{Binding .}">
-                        <TextBlock Text="{Binding .}" Margin="0,0,4,0" />
-                        <CheckBox Tag="{Binding .}" IsCheckedChanged="ToggleButton_OnIsCheckedChanged" />
-                    </StackPanel>
+                    <CheckBox Tag="{Binding .}" Content="{Binding .}" Classes.CpuPanel="{Binding !$self.IsEnabled}" Loaded="CheckBox_Loaded" IsCheckedChanged="ToggleButton_OnIsCheckedChanged" />
                 </DataTemplate>
             </ItemsControl.ItemTemplate>
         </ItemsControl>
