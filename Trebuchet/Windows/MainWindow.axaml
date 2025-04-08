@@ -41,7 +41,7 @@
                 </controls:WindowTitlebar.Header>
             </controls:WindowTitlebar>
             <Panel Grid.Row="1">
-                <Grid x:Name="WindowContent" Margin="0,12,0,0" ColumnDefinitions="Auto,*" RowDefinitions="Auto,*,Auto">
+                <Grid x:Name="WindowContent" Margin="0 12 0 0" ColumnDefinitions="Auto,*" RowDefinitions="Auto,*,Auto">
                     <Button Classes="Base TabLeft" Classes.Sneak="{Binding !FoldedMenu}" Classes.Colored="{Binding FoldedMenu}" Command="{Binding ToggleFoldedCommand}" Margin="0 0 0 6">
                         <i:Icon Value="mdi-view-list" Classes="Normal" />
                     </Button>
@@ -52,7 +52,7 @@
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
-                    <ItemsControl Grid.Column="0" Grid.Row="2" ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                    <ItemsControl Grid.Column="0" Grid.Row="2" Padding="0 0 0 12" ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Spacing="6" />
