@@ -54,6 +54,7 @@ namespace Trebuchet.ViewModels
             SteamWidget = steamWidget;
             DialogueBox = dialogueBox;
 
+            FoldedMenu = _uiConfig.FoldedMenu;
             ToggleFoldedCommand = ReactiveCommand.Create(() =>
             {
                 FoldedMenu = !FoldedMenu;
