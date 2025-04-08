@@ -3,8 +3,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:treb="clr-namespace:Trebuchet"
-        xmlns:utils="clr-namespace:Trebuchet.Utils"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         xmlns:viewModels="clr-namespace:Trebuchet.ViewModels"
@@ -43,36 +41,25 @@
                 </controls:WindowTitlebar.Header>
             </controls:WindowTitlebar>
             <Panel Grid.Row="1">
-                <Grid x:Name="WindowContent" Margin="0,12,0,0">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="Auto" />
-                        <ColumnDefinition Width="*" />
-                    </Grid.ColumnDefinitions>
-                    <Grid x:Name="Navigation" Margin="0,0,5,6">
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto" />
-                            <RowDefinition Height="*" />
-                            <RowDefinition Height="auto" />
-                        </Grid.RowDefinitions>
-                        <Button Classes="Base TabLeft" Classes.Sneak="{Binding !FoldedMenu}" Classes.Colored="{Binding FoldedMenu}" Command="{Binding ToggleFoldedCommand}" Margin="0 0 0 6">
-                            <i:Icon Value="mdi-view-list" Classes="Normal" />
-                        </Button>
-                        <ItemsControl Grid.Row="1" ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Spacing="6" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                        <ItemsControl Grid.Row="2" ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel Spacing="6" />
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                        </ItemsControl>
-                    </Grid>
-                    <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
+                <Grid x:Name="WindowContent" Margin="0,12,0,0" ColumnDefinitions="Auto,*" RowDefinitions="Auto,*,Auto">
+                    <Button Classes="Base TabLeft" Classes.Sneak="{Binding !FoldedMenu}" Classes.Colored="{Binding FoldedMenu}" Command="{Binding ToggleFoldedCommand}" Margin="0 0 0 6">
+                        <i:Icon Value="mdi-view-list" Classes="Normal" />
+                    </Button>
+                    <ItemsControl Grid.Column="0" Grid.Row="1" ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <ItemsControl Grid.Column="0" Grid.Row="2" ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" CornerRadius="10,0,0,0" Padding="12,12,2,12">
                         <ContentControl Content="{Binding ActivePanel}" />
                     </Border>
                 </Grid>
