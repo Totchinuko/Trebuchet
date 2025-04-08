@@ -46,7 +46,7 @@
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>
                         <DataTemplate DataType="vm:ModFileAction">
-                            <Button u:Classes.List="{Binding Classes}" ToolTip.Tip="{Binding Name, Mode=OneWay}" Command="{Binding Action}" CommandParameter="{Binding .}">
+                            <Button u:Classes.List="{Binding Classes}" ToolTip.Tip="{Binding Name, Mode=OneWay}" Command="{Binding Action}">
                                 <i:Icon Value="{Binding Icon, Mode=OneWay}" Classes="Normal"/>
                             </Button>
                         </DataTemplate>

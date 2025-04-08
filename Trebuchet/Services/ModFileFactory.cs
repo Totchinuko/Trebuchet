@@ -117,7 +117,7 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
         file.Actions.Add(new ModFileAction(
             Resources.RemoveFromList, 
             "mdi-delete", 
-            ReactiveCommand.Create<IModFile>((mod) => Removed?.Invoke(mod)), 
+            ReactiveCommand.Create(() => Removed?.Invoke(file)), 
             "Base Red"));
     }
 
@@ -126,10 +126,9 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
         file.Actions.Add(new ModFileAction(
             Resources.OpenWorkshopPage,
             "mdi-steam",
-            ReactiveCommand.Create<IModFile>((mod) =>
+            ReactiveCommand.Create(() =>
             {
-                if (mod is IPublishedModFile published)
-                    TrebuchetUtils.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, published.PublishedId));
+                TrebuchetUtils.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, file.PublishedId));
             }))
         );
     }
@@ -141,11 +140,7 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
         file.Actions.Add(new ModFileAction(
             Resources.Update,
             "mdi-update",
-            ReactiveCommand.Create<IModFile>((mod) =>
-            {
-                if(mod is IPublishedModFile pub)
-                    Updated?.Invoke(pub);
-            }, canExecute)
+            ReactiveCommand.Create(() => Updated?.Invoke(file), canExecute)
             ));
     }
 }
