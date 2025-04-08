@@ -57,6 +57,8 @@ namespace Trebuchet.ViewModels
             ToggleFoldedCommand = ReactiveCommand.Create(() =>
             {
                 FoldedMenu = !FoldedMenu;
+                _uiConfig.FoldedMenu = FoldedMenu;
+                _uiConfig.SaveFile();
             });
 
             InitializePanels(_panels);
