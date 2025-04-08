@@ -38,12 +38,12 @@ public class AppModlistFiles(AppSetup setup)
         profile.DeleteFile();
     }
 
-    public async Task<ModListProfile> Duplicate(string name, string destination)
+    public ModListProfile Duplicate(string name, string destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
         var profile = Get(name);
-        await profile.CopyFolderTo(GetPath(destination));
+        profile.CopyFileTo(GetPath(destination));
         var copy = Get(destination);
         return copy;
     }
