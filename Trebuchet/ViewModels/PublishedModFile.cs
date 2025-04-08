@@ -1,9 +1,8 @@
 using System.Collections.ObjectModel;
 using System.IO;
-using System.Runtime.InteropServices.ComTypes;
 using ReactiveUI;
 
-namespace Trebuchet.ViewModels.Panels;
+namespace Trebuchet.ViewModels;
 
 public class PublishedModFile : ReactiveObject, IModFile, IPublishedModFile
 {
