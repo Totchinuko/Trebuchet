@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
 using Trebuchet.Assets;
@@ -46,13 +47,9 @@ namespace Trebuchet.ViewModels
             CloseCommand = ReactiveCommand.Create(OnClose, this.WhenAnyValue(x => x.CanClose));
             CanClose = false;
             
-            var canLaunch = this.WhenAnyValue(x => x.CanLaunch, x => x._blocker.BlockingTypes,
-                (x, b) => x && !b.Contains(typeof(SteamDownload)));
-            LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch);
-            
-            var canUpdate = this.WhenAnyValue(x => x._blocker.BlockingTypes,
-                (x) => !x.Intersect([typeof(SteamDownload), typeof(ClientRunning), typeof(ServersRunning)]).Any());
-            UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, canUpdate);
+            var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(blocker.CanLaunch, (f,s) => f && s);
+            LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch.StartWith(true));
+            UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, blocker.CanDownloadMods);
             
             this.WhenAnyValue(x => x.SelectedModlist)
                 .Subscribe((x) => ModlistSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, x)));

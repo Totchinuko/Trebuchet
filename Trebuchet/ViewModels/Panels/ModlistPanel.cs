@@ -1,13 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Web;
@@ -28,7 +25,6 @@ using Trebuchet.Utils;
 using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
 using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels.Panels
@@ -69,12 +65,6 @@ namespace Trebuchet.ViewModels.Panels
 
             _modFileFactory.Removed += RemoveModFile;
             _modFileFactory.Updated += UpdateModFile;
-            
-            var canDownloadModlist =
-                blocker.WhenAnyValue(x => x.BlockingTypes)
-                    .Select(x => !x.Contains(typeof(DownloadModlist)));
-            var canDownloadMods = blocker.WhenAnyValue(x => x.BlockingTypes)
-                .Select(x => !x.Intersect([typeof(SteamDownload),typeof(ClientRunning),typeof(ServersRunning)]).Any());
 
             CreateModlistCommand = ReactiveCommand.Create(OnModlistCreate);
             DeleteModlistCommand = ReactiveCommand.Create(OnModlistDelete);
@@ -85,9 +75,12 @@ namespace Trebuchet.ViewModels.Panels
             ExportToTxtCommand = ReactiveCommand.Create(OnExportToTxt);
             ImportFromFileCommand = ReactiveCommand.Create(OnImportFromFile);
             ImportFromTextCommand = ReactiveCommand.Create(OnImportFromText);
-            FetchCommand = ReactiveCommand.Create(OnFetchClicked, canDownloadModlist);
-            ModFilesDownloadCommand = ReactiveCommand.Create(LoadModlist, canDownloadMods);
-            RefreshModlistCommand = ReactiveCommand.Create(OnFetchClicked, canDownloadModlist);
+            FetchCommand = ReactiveCommand.Create(OnFetchClicked);
+            RefreshModlistCommand = ReactiveCommand.Create(LoadModlist);
+            UpdateModsCommand = ReactiveCommand.Create(() =>
+            {
+                UpdateMods(Modlist.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList());
+            }, blocker.CanDownloadMods);
 
             TabClick.Subscribe((_) =>
             {
@@ -128,7 +121,7 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit, Unit> FetchCommand { get; }
         public ReactiveCommand<Unit, Unit> ImportFromFileCommand { get; }
         public ReactiveCommand<Unit, Unit> ImportFromTextCommand { get; }
-        public ReactiveCommand<Unit, Unit> ModFilesDownloadCommand { get; }
+        public ReactiveCommand<Unit, Unit> UpdateModsCommand { get; }
         public ReactiveCommand<Unit, Unit> RefreshModlistCommand { get; }
 
         public ObservableCollectionExtended<IModFile> Modlist { get; } = [];

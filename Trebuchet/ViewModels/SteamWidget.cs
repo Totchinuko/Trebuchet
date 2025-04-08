@@ -3,49 +3,55 @@ using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Threading;
 using ReactiveUI;
+using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {
-    public class SteamWidget : ReactiveObject, ITinyRecipient<BlockedTaskStateChanged>
+    public class SteamWidget : ReactiveObject
     {
         private readonly Steam _steam;
-        private readonly TaskBlocker _taskBlocker;
-        private readonly object _descriptionLock = new();
-        private readonly object _progressLock;
-        private readonly DispatcherTimer _timer;
-        private double _progress;
         private string _description = string.Empty;
         private bool _isConnected;
-        private bool _isIndeterminate;
+        private readonly ObservableAsPropertyHelper<bool> _isIndeterminate;
         private double _progressBar;
-        private bool _canConnect;
+        private bool _canConnect = true;
         private bool _isLoading;
 
         public SteamWidget(
-            ITinyMessengerHub messenger, 
             IProgressCallback<double> progress, 
             Steam steam, 
             TaskBlocker taskBlocker)
         {
             _steam = steam;
-            _taskBlocker = taskBlocker;
             progress.ProgressChanged += OnProgressChanged;
 
-            messenger.Subscribe(this);
-
-            _progressLock = new object();
             _steam.Connected += OnSteamConnected;
             _steam.Disconnected += OnSteamDisconnected;
 
-            CancelCommand = ReactiveCommand.Create(OnCancel);
-            ConnectCommand = ReactiveCommand.Create(OnConnect, this.WhenAnyValue(x => x.CanConnect));
+            CancelCommand = ReactiveCommand.Create(() =>
+            {
+                taskBlocker.Cancel<SteamDownload>();
+                Description = $"{Resources.Cancelling}...";
+            });
 
-            this.WhenAnyValue(x => x.Progress).Select(x => x == 0.0).ToProperty(this, x => x.IsIndeterminate);
+            var canConnect = this.WhenAnyValue(x => x.CanConnect, x => x.IsConnected, (can, isc) => can && !isc);
+            ConnectCommand = ReactiveCommand.CreateFromTask(_steam.Connect, canConnect);
 
-            _timer = new DispatcherTimer(TimeSpan.FromMilliseconds(100), DispatcherPriority.Background, Tick);
+            taskBlocker.TaskChanges
+                .Where(x => x.EventArgs.Type.GetType() == typeof(SteamDownload))
+                .Subscribe((pattern) =>
+                {   
+                    Progress = 0;
+                    Description = pattern.EventArgs.Toggle ? pattern.EventArgs.Type.Label : string.Empty;
+                    IsLoading = pattern.EventArgs.Toggle;
+                });
+                
+            _isIndeterminate = this.WhenAnyValue(x => x.Progress)
+                .Select(x => x == 0.0)
+                .ToProperty(this, x => x.IsIndeterminate);
         }
 
         private void OnProgressChanged(object? sender, double e)
@@ -55,7 +61,6 @@ namespace Trebuchet.ViewModels
                 Progress = e;
             });
         }
-
 
         public ReactiveCommand<Unit,Unit> CancelCommand { get; }
         public ReactiveCommand<Unit,Unit> ConnectCommand { get; }
@@ -80,8 +85,7 @@ namespace Trebuchet.ViewModels
 
         public bool IsIndeterminate
         {
-            get => _isIndeterminate;
-            set => this.RaiseAndSetIfChanged(ref _isIndeterminate, value);
+            get => _isIndeterminate.Value;
         }
 
         public double Progress
@@ -96,70 +100,6 @@ namespace Trebuchet.ViewModels
             set => this.RaiseAndSetIfChanged(ref _canConnect, value);
         }
 
-        public void Receive(BlockedTaskStateChanged message)
-        {
-            if (message.Type.GetType() != typeof(SteamDownload)) return;
-
-            if (!message.Value)
-            {
-                SetDescription(string.Empty);
-                _timer.Stop();
-                Progress = 0;
-            }
-            else
-            {
-                SetDescription(message.Type.Label);
-                _timer.Start();
-                Progress = 0;
-            }
-        }
-
-        public void Report(double value)
-        {
-            lock (_progressLock)
-            {
-                _progress = Math.Clamp(value, 0, 1);
-            }
-        }
-
-        public void SetDescription(string description)
-        {
-            lock (_descriptionLock)
-            {
-                Description = description;
-                IsLoading = !string.IsNullOrEmpty(description);
-            }
-        }
-
-        public void Start(string description)
-        {
-            SetDescription(description);
-            _timer.Start();
-        }
-
-        private void OnCancel()
-        {
-            _taskBlocker.Cancel<SteamDownload>();
-            SetDescription("Canceling...");
-        }
-
-        private async void OnConnect()
-        {
-            if (!IsConnected)
-            {
-                CanConnect = false;
-                await _steam.Connect();
-            }
-        }
-
-        private void Tick(object? sender, EventArgs e)
-        {
-            lock (_progressLock)
-            {
-                Progress = _progress;
-            }
-        }
-        
         private void OnSteamDisconnected(object? sender, EventArgs e)
         {
             Dispatcher.UIThread.Invoke(() =>

@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="ModlistEditor" x:DataType="panels:ModlistPanel">
         <Grid>
@@ -26,7 +27,7 @@
                         <Button Command="{Binding RefreshModlistCommand}" Classes="Base" ToolTip.Tip="Refresh mod infos" Margin="0 0 3 0" VerticalAlignment="Center">
                             <i:Icon Value="mdi-refresh" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding ModFilesDownloadCommand}" Classes="Base Blue" ToolTip.Tip="Update Mods" Margin="0 0 3 0" VerticalAlignment="Center">
+                        <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue" ToolTip.Tip="Update Mods" Margin="0 0 3 0" VerticalAlignment="Center">
                             <i:Icon Value="mdi-update" Classes="Normal"/>
                         </Button>
                     </StackPanel>
@@ -73,8 +74,7 @@
                 <Border Classes="Panel" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
                     <WrapPanel>
                         <Grid Margin="0,0,12,0" VerticalAlignment="Center">
-                            <TextBox Name="ModlistUrl" Text="{Binding ModlistUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="400" FontSize="16" VerticalContentAlignment="Center" ToolTip.Tip="Valid URL are either pointing to a steam collection or a json response/file" />
-                            <TextBlock Text="Steam Collection/.json URL" Classes.Hidden="{Binding !#ModlistUrl.Text}" Opacity="0.5" IsHitTestVisible="False" VerticalAlignment="Center" Margin="9 0 0 0" />
+                            <TextBox Name="ModlistUrl" Watermark="{x:Static a:Resources.WatermarkModlistURL}" Text="{Binding ModlistUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="400" FontSize="16" VerticalContentAlignment="Center" ToolTip.Tip="Valid URL are either pointing to a steam collection or a json response/file" />
                         </Grid>
                         <Button Classes="Base Yellow"
                                 VerticalAlignment="Center"

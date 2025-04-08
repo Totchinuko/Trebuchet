@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ReactiveUI;
@@ -9,7 +11,14 @@ using TrebuchetUtils;
 
 namespace Trebuchet.Services.TaskBlocker
 {
-    public sealed class TaskBlocker(ITinyMessengerHub messenger) : ReactiveObject
+    public sealed class TaskChangedEventArgs(IBlockedTaskType type, bool toggle, IEnumerable<Type> actives) : EventArgs
+    {
+        public IBlockedTaskType Type { get; } = type;
+        public bool Toggle { get; } = toggle;
+        public IEnumerable<Type> ActiveTypes { get; } = actives;
+    }
+    
+    public sealed class TaskBlocker : ReactiveObject
     {
         private class BlockedTask(SemaphoreSlim semaphore, CancellationTokenSource cts, IBlockedTaskType type) : IBlockedTask
         {
@@ -24,8 +33,28 @@ namespace Trebuchet.Services.TaskBlocker
         }
         
         private Dictionary<Type, BlockedTask> _tasks = [];
+        private readonly ITinyMessengerHub _messenger;
+        private event EventHandler<TaskChangedEventArgs>? TaskChanged;
 
-        public ObservableCollection<Type> BlockingTypes { get; } = [];
+        public TaskBlocker(ITinyMessengerHub messenger)
+        {
+            _messenger = messenger;
+            TaskChanges = Observable.FromEventPattern<TaskChangedEventArgs>(
+                handler => TaskChanged += handler,
+                hander => TaskChanged -= hander);
+
+            Type[] downloadMods = [typeof(SteamDownload), typeof(ServersRunning), typeof(ClientRunning)];
+            Type[] downloadServers = [typeof(SteamDownload), typeof(ServersRunning)];
+            CanDownloadMods = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Intersect(downloadMods).Any()).StartWith(true);
+            CanDownloadServer = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Intersect(downloadServers).Any()).StartWith(true);
+            CanLaunch = TaskChanges.Select(x => !x.EventArgs.ActiveTypes.Contains(typeof(SteamDownload))).StartWith(true);
+        }
+
+        public IObservable<EventPattern<TaskChangedEventArgs>> TaskChanges { get; }
+
+        public IObservable<bool> CanDownloadMods { get; }
+        public IObservable<bool> CanDownloadServer { get; }
+        public IObservable<bool> CanLaunch { get; }
 
         public async Task<IBlockedTask> EnterAsync(IBlockedTaskType operation, int cancelAfterSec = 0)
         {
@@ -38,7 +67,7 @@ namespace Trebuchet.Services.TaskBlocker
             }
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _tasks[operation.GetType()] = task;
-            BlockingTypes.Add(operation.GetType());
+            OnTaskChanged(operation, true);
             OnTaskSourceChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
             return task;
@@ -55,7 +84,7 @@ namespace Trebuchet.Services.TaskBlocker
             task.OperationReleased += (_, t) => Release(t);
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _tasks[operation.GetType()] = task;
-            BlockingTypes.Add(operation.GetType());
+            OnTaskChanged(operation, true);
             OnTaskSourceChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
             return task;
@@ -72,6 +101,11 @@ namespace Trebuchet.Services.TaskBlocker
         public bool IsSet<T>() where T : IBlockedTaskType
         {
             return _tasks.ContainsKey(typeof(T));
+        }
+
+        public bool IsSet(params Type[] types)
+        {
+            return types.Any(type => _tasks.ContainsKey(type));
         }
 
         private BlockedTask CreateTask(IBlockedTaskType operation, int cancelTimer)
@@ -95,7 +129,7 @@ namespace Trebuchet.Services.TaskBlocker
                 source.Semaphore.Release();
                 source.Semaphore.Dispose();
                 _tasks.Remove(task.Type.GetType());
-                BlockingTypes.Remove(task.Type.GetType());
+                OnTaskChanged(task.Type, false);
                 OnTaskSourceChanged(source.Type, false);
             }
         }
@@ -114,7 +148,12 @@ namespace Trebuchet.Services.TaskBlocker
 
         private void OnTaskSourceChanged(IBlockedTaskType type, bool active)
         {
-            messenger.Publish(new BlockedTaskStateChanged(type, active));
+            _messenger.Publish(new BlockedTaskStateChanged(type, active));
+        }
+
+        private void OnTaskChanged(IBlockedTaskType t, bool toggled)
+        {
+            TaskChanged?.Invoke(this, new TaskChangedEventArgs(t, toggled, _tasks.Keys));
         }
     }
 }

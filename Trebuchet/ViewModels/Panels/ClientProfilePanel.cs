@@ -55,7 +55,7 @@ namespace Trebuchet.ViewModels.Panels
             RefreshPanel.IsExecuting
                 .Where(x => x)
                 .Select(_ => Tools.IsClientInstallValid(_setup.Config))
-                .ToProperty(this, x => x.CanTabBeClicked);
+                .Subscribe(x => CanTabBeClicked = x);
             
             RefreshPanel.Subscribe((_) =>
             {

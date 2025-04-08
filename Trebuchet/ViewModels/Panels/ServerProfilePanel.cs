@@ -54,8 +54,9 @@ namespace Trebuchet.ViewModels.Panels
             DuplicateProfileCommand = ReactiveCommand.Create(OnProfileDuplicate);
             OpenFolderProfileCommand = ReactiveCommand.Create(OnOpenFolderProfile);
             SaveProfile = ReactiveCommand.Create(_profile.SaveFile);
-            RefreshPanel.IsExecuting.Select((_) => Tools.IsServerInstallValid(_setup.Config))
-                .ToProperty(this, x => x.CanTabBeClicked);
+            RefreshPanel.IsExecuting
+                .Select((_) => Tools.IsServerInstallValid(_setup.Config))
+                .Subscribe((b) => CanTabBeClicked = b);
             RefreshPanel.Subscribe((_) =>
             {
                 LoadProfile(SelectedProfile);
@@ -354,7 +355,7 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.MultiHomeAddress = v)
                 .SetDefault(() => ServerProfile.MultiHomeAddressDefault);
             Fields.Add(multiHomeAdress);
-            multiHome.WhenAnyValue(x => x.Value).ToProperty(multiHomeAdress, x => x.IsVisible);
+            multiHome.WhenAnyValue(x => x.Value).Subscribe(x => multiHomeAdress.IsVisible = x);
             
             Fields.Add(new TitleField().SetTitle(Resources.CatRCon));
             var rcon = new ToggleField()
@@ -390,11 +391,12 @@ namespace Trebuchet.ViewModels.Panels
             Fields.Add(rconPass);
             Fields.Add(rconKarma);
             rcon.WhenAnyValue(x => x.Value)
-                .ToProperty(rconPort, x => x.IsVisible);
-            rcon.WhenAnyValue(x => x.Value)
-                .ToProperty(rconPass, x => x.IsVisible);
-            rcon.WhenAnyValue(x => x.Value)
-                .ToProperty(rconKarma, x => x.IsVisible);
+                .Subscribe(x =>
+                {
+                    rconPass.IsVisible = x;
+                    rconPort.IsVisible = x;
+                    rconKarma.IsVisible = x;
+                });
                 
             Fields.Add(new TitleField().SetTitle(Resources.CatAntiCheat));
             Fields.Add(new ToggleField()

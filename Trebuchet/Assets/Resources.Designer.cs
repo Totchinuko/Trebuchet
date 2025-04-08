@@ -87,6 +87,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancelling.
+        /// </summary>
+        public static string Cancelling {
+            get {
+                return ResourceManager.GetString("Cancelling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Anti-Cheat.
         /// </summary>
         public static string CatAntiCheat {
@@ -2040,6 +2049,15 @@ namespace Trebuchet.Assets {
         public static string VerifyServersLabel {
             get {
                 return ResourceManager.GetString("VerifyServersLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Steam Collection/.json URL.
+        /// </summary>
+        public static string WatermarkModlistURL {
+            get {
+                return ResourceManager.GetString("WatermarkModlistURL", resourceCulture);
             }
         }
         

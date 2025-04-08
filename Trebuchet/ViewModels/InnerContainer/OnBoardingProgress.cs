@@ -8,7 +8,7 @@ namespace Trebuchet.ViewModels.InnerContainer;
 public class OnBoardingProgress : DialogueContent, IProgress<double>
 {
     private double _progress;
-    private bool _isIndeterminate;
+    private readonly ObservableAsPropertyHelper<bool> _isIndeterminate;
 
     public OnBoardingProgress(string title, string description, double maxValue = 1.0) : base()
     {
@@ -16,7 +16,9 @@ public class OnBoardingProgress : DialogueContent, IProgress<double>
         Description = description;
         MaxValue = maxValue;
 
-        this.WhenAnyValue(x => x.Progress).Select(x => x == 0.0).ToProperty(this, x => x.IsIndeterminate);
+        _isIndeterminate = this.WhenAnyValue(x => x.Progress)
+            .Select(x => x == 0.0)
+            .ToProperty(this, x => x.IsIndeterminate);
     }
 
     public string Title { get; }
@@ -31,8 +33,7 @@ public class OnBoardingProgress : DialogueContent, IProgress<double>
 
     public bool IsIndeterminate
     {
-        get => _isIndeterminate;
-        protected set => this.RaiseAndSetIfChanged(ref _isIndeterminate, value);
+        get => _isIndeterminate.Value;
     }
 
     public void Report(double value)

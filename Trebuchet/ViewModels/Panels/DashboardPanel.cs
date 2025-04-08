@@ -49,27 +49,21 @@ namespace Trebuchet.ViewModels.Panels
             _blocker = blocker;
             _logger = logger;
 
-            var canUpdateServers =
-                blocker.WhenAnyValue(x => x.BlockingTypes)
-                    .Select(x => !x.Contains(typeof(SteamDownload)));
-            var canDownloadMods = blocker.WhenAnyValue(x => x.BlockingTypes)
-                .Select(x => !x.Intersect([typeof(SteamDownload),typeof(ClientRunning),typeof(ServersRunning)]).Any());
-            
             CloseAllCommand = ReactiveCommand.Create(OnCloseAll);
             KillAllCommand = ReactiveCommand.Create(OnKillAll);
             LaunchAllCommand = ReactiveCommand.Create(
-                canExecute: canUpdateServers, execute: OnLaunchAll);
+                canExecute: blocker.CanDownloadServer, execute: OnLaunchAll);
             UpdateServerCommand = ReactiveCommand.Create(
-                canExecute: canUpdateServers, execute: UpdateServer);
+                canExecute: blocker.CanDownloadServer, execute: UpdateServer);
             UpdateAllModsCommand = ReactiveCommand.Create(
-                canExecute: canDownloadMods, execute:UpdateMods);
+                canExecute: blocker.CanDownloadMods, execute:UpdateMods);
             VerifyFilesCommand = ReactiveCommand.Create(
-                canExecute: canDownloadMods, execute:OnFileVerification);
+                canExecute: blocker.CanDownloadMods, execute:OnFileVerification);
 
             RefreshPanel.IsExecuting
                 .Where(x => x)
                 .Select(_ => Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config))
-                .ToProperty(this, x => x.CanTabBeClicked);
+                .Subscribe(x => CanTabBeClicked = x);
             RefreshPanel.Subscribe((_) => RefreshDashboards());
             DisplayPanel.Subscribe((_) => PanelDisplayed());
 

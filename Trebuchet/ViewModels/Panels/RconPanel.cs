@@ -41,7 +41,7 @@ namespace Trebuchet.ViewModels.Panels
             _launcher = launcher;
             SendCommand = ReactiveCommand.Create<string>(OnSendCommand, this.WhenAnyValue(x => x.CanSendCommand));
             RefreshPanel.IsExecuting.Select(_ => _setup.Config is { ServerInstanceCount: > 0 })
-                .ToProperty(this, x => x.CanTabBeClicked);
+                .Subscribe(x => CanTabBeClicked = x);
             RefreshPanel.Subscribe((_) => LoadPanel());
 
             this.WhenAnyValue(x => x.SelectedConsole)

@@ -34,11 +34,23 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
         switch (modfile)
         {
             case LocalModFile:
-                return new LocalModFile(path);
+                var file = new LocalModFile(path);
+                AddOpenWorkshopDisabledAction(file);
+                AddUpdateDisabledAction(file);
+                AddRemoveAction(file);
+                return file;
             case PublishedModFile pub:
-                return new PublishedModFile(path, pub.PublishedId);
+                var pfile =  new PublishedModFile(path, pub.PublishedId);
+                AddOpenWorkshopAction(pfile);
+                AddUpdateAction(pfile);
+                AddRemoveAction(pfile);
+                return pfile;
             case WorkshopModFile w:
-                return new WorkshopModFile(path, w);
+                var wfile =  new WorkshopModFile(path, w);
+                AddOpenWorkshopAction(wfile);
+                AddUpdateAction(wfile);
+                AddRemoveAction(wfile);
+                return wfile;
             default:
                 throw new NotImplementedException();
         }
@@ -137,32 +149,28 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
 
     private void AddUpdateAction(IPublishedModFile file)
     {
-        var canExecute = taskBlocker.WhenAnyValue(x => x.BlockingTypes)
-            .Select(x => !x.Intersect([typeof(SteamDownload), typeof(ServersRunning), typeof(ClientRunning)]).Any());
         file.Actions.Add(new ModFileAction(
             Resources.Update,
             "mdi-update",
-            ReactiveCommand.Create(() => Updated?.Invoke(file), canExecute)
+            ReactiveCommand.Create(() => Updated?.Invoke(file), taskBlocker.CanDownloadMods)
             ));
     }
     
     private void AddOpenWorkshopDisabledAction(IModFile file)
     {
-        var canExecute = taskBlocker.WhenAnyValue(x => x.BlockingTypes).Select(x => false);
         file.Actions.Add(new ModFileAction(
             Resources.Update,
             "mdi-steam",
-            ReactiveCommand.Create(() => {}, canExecute)
+            ReactiveCommand.Create(() => {}, Observable.Empty<bool>().StartWith(false))
         ));
     }
     
     private void AddUpdateDisabledAction(IModFile file)
     {
-        var canExecute = taskBlocker.WhenAnyValue(x => x.BlockingTypes).Select(x => false);
         file.Actions.Add(new ModFileAction(
             Resources.Update,
             "mdi-update",
-            ReactiveCommand.Create(() => {}, canExecute)
+            ReactiveCommand.Create(() => {}, Observable.Empty<bool>().StartWith(false))
         ));
     }
 }

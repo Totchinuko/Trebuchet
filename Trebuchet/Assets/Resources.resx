@@ -686,4 +686,10 @@ Do you wish to proceed ?</value>
     <data name="CatUpdates" xml:space="preserve">
         <value>Updates</value>
     </data>
+    <data name="Cancelling" xml:space="preserve">
+        <value>Cancelling</value>
+    </data>
+    <data name="WatermarkModlistURL" xml:space="preserve">
+        <value>Steam Collection/.json URL</value>
+    </data>
 </root>

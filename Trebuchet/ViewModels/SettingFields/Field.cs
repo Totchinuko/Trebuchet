@@ -111,7 +111,7 @@ namespace Trebuchet.ViewModels.SettingFields
         public bool IsVisible
         {
             get => _isVisible;
-            protected set => this.RaiseAndSetIfChanged(ref _isVisible, value);
+            set => this.RaiseAndSetIfChanged(ref _isVisible, value);
         }
 
         public string Hyperlink
