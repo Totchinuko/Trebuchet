@@ -35,7 +35,7 @@ public class AppModlistFiles(AppSetup setup)
     public void Delete(string name)
     {
         var profile = Get(name);
-        profile.DeleteFolder();
+        profile.DeleteFile();
     }
 
     public async Task<ModListProfile> Duplicate(string name, string destination)

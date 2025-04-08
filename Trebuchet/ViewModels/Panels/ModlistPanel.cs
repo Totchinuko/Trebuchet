@@ -86,7 +86,7 @@ namespace Trebuchet.ViewModels.Panels
             ImportFromFileCommand = ReactiveCommand.Create(OnImportFromFile);
             ImportFromTextCommand = ReactiveCommand.Create(OnImportFromText);
             FetchCommand = ReactiveCommand.Create(OnFetchClicked, canDownloadModlist);
-            ModFilesDownloadCommand = ReactiveCommand.Create(OnModlistRefresh, canDownloadMods);
+            ModFilesDownloadCommand = ReactiveCommand.Create(LoadModlist, canDownloadMods);
             RefreshModlistCommand = ReactiveCommand.Create(OnFetchClicked, canDownloadModlist);
 
             TabClick.Subscribe((_) =>
@@ -109,7 +109,13 @@ namespace Trebuchet.ViewModels.Panels
                 _profile.SaveFile();
             };
             this.WhenAnyValue(x => x.SelectedModlist)
-                .Subscribe(OnSelectionChanged);
+                .Subscribe((list) =>
+                {
+                    SelectedModlist = _appFiles.Mods.ResolveProfile(list);
+                    _uiConfig.CurrentModlistProfile = SelectedModlist;
+                    _uiConfig.SaveFile();
+                    LoadProfile();
+                });
         }
 
         public ReactiveCommand<Unit, Unit> CreateModlistCommand { get; }
@@ -139,7 +145,7 @@ namespace Trebuchet.ViewModels.Panels
             set => this.RaiseAndSetIfChanged(ref _selectedModlist, value);
         }
 
-        public ObservableCollection<string> Profiles { get; set; } = [];
+        public ObservableCollectionExtended<string> Profiles { get; } = [];
 
        
         public async void UpdateMods(List<ulong> mods)
@@ -432,7 +438,7 @@ namespace Trebuchet.ViewModels.Panels
                 return;
             }
 
-            _profile = _appFiles.Mods.Create(name);
+            _appFiles.Mods.Create(name);
             RefreshProfiles();
             SelectedModlist = name;
         }
@@ -448,10 +454,8 @@ namespace Trebuchet.ViewModels.Panels
             
             _appFiles.Mods.Delete(_profile.ProfileName);
 
-            var profile = string.Empty;
-            profile = _appFiles.Mods.ResolveProfile(profile);
             RefreshProfiles();
-            SelectedModlist = profile;
+            SelectedModlist = string.Empty;
         }
 
         private async void OnModlistDuplicate()
@@ -472,11 +476,6 @@ namespace Trebuchet.ViewModels.Panels
             SelectedModlist = name;
         }
 
-        private void OnModlistRefresh()
-        {
-            LoadModlist();
-        }
-
         private void OnSearchClosing(object? sender, CancelEventArgs e)
         {
             if (_searchWindow == null) return;
@@ -484,17 +483,10 @@ namespace Trebuchet.ViewModels.Panels
             _searchWindow = null;
         }
 
-        private void OnSelectionChanged(string modlist)
-        {
-            SelectedModlist = _appFiles.Mods.ResolveProfile(modlist);
-            _uiConfig.CurrentModlistProfile = SelectedModlist;
-            _uiConfig.SaveFile();
-            LoadProfile();
-        }
-
         private void RefreshProfiles()
         {
-            Profiles = new ObservableCollection<string>(_appFiles.Mods.ListProfiles());
+            Profiles.Clear();
+            Profiles.AddRange(_appFiles.Mods.ListProfiles());
         }
 
         private void SetupFileWatcher()
