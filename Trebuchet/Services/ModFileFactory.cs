@@ -44,29 +44,19 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
         }
     }
 
-    public async Task<List<IModFile>> QueryFromWorkshop(ICollection<IModFile> files)
+    public async Task QueryFromWorkshop(IList<IModFile> files)
     {
         var published = files.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList();
         var details = await steam.RequestModDetails(published);
         var needUpdate = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList());
-        List<IModFile> result = files.ToList();
-        for (var i = 0; i < result.Count; i++)
+        for (var i = 0; i < files.Count; i++)
         {
-            var current = result[i];
-            if (current is not PublishedModFile pub || pub.PublishedId != details[0].PublishedFileID) continue;
-            
-            var update = false;
-            if (needUpdate.FirstOrDefault() == pub.PublishedId)
-            {
-                update = true;
-                needUpdate.RemoveAt(0);
-            }
-
-            result[i] = Create(details[0], update);
-            details.RemoveAt(0);
+            var current = files[i];
+            if (current is not PublishedModFile pub) continue;
+            var workshop = details.FirstOrDefault(d => d.PublishedFileID == pub.PublishedId);
+            if (workshop is null) continue;
+            files[i] = Create(workshop, needUpdate.Contains(workshop.PublishedFileID));
         }
-
-        return result;
     }
 
     public async Task<IModFile> Create(WorkshopSearchResult workshopFile)
