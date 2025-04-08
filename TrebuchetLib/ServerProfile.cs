@@ -129,7 +129,7 @@ namespace TrebuchetLib
         public static readonly string RConPasswordDefault = string.Empty;
         public static readonly int RConPortDefault = 25575;
         public static readonly bool RestartWhenDownDefault = false;
-        public static readonly string ServerNameDefault = string.Empty;
+        public static readonly string ServerNameDefault = "Conan Exiles Dedicated Server";
         public static readonly string ServerPasswordDefault = string.Empty;
         public static readonly int ServerRegionDefault = 0;
         public static readonly int SourceQueryPortDefault = 27015;
