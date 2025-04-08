@@ -145,8 +145,11 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddSingleton<Panel, ModlistPanel>();
         services.AddSingleton<Panel, ClientProfilePanel>();
         services.AddSingleton<Panel, ServerProfilePanel>();
+        #if DEBUG
         services.AddSingleton<Panel, RconPanel>();
         services.AddSingleton<Panel, LogFilterPanel>();
+        #endif
+        
         services.AddSingleton<Panel, DashboardPanel>();
         services.AddSingleton<Panel, SettingsPanel>();
     }
