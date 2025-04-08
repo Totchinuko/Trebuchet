@@ -51,9 +51,9 @@ namespace Trebuchet.ViewModels.Panels
 
             var canUpdateServers =
                 blocker.WhenAnyValue(x => x.BlockingTypes)
-                    .Select(x => x.Contains(typeof(SteamDownload)));
+                    .Select(x => !x.Contains(typeof(SteamDownload)));
             var canDownloadMods = blocker.WhenAnyValue(x => x.BlockingTypes)
-                .Select(x => x.Intersect([typeof(SteamDownload),typeof(ClientRunning),typeof(ServersRunning)]).Any());
+                .Select(x => !x.Intersect([typeof(SteamDownload),typeof(ClientRunning),typeof(ServersRunning)]).Any());
             
             CloseAllCommand = ReactiveCommand.Create(OnCloseAll);
             KillAllCommand = ReactiveCommand.Create(OnKillAll);

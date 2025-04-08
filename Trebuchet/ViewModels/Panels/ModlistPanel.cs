@@ -70,9 +70,9 @@ namespace Trebuchet.ViewModels.Panels
             
             var canDownloadModlist =
                 blocker.WhenAnyValue(x => x.BlockingTypes)
-                    .Select(x => x.Contains(typeof(DownloadModlist)));
+                    .Select(x => !x.Contains(typeof(DownloadModlist)));
             var canDownloadMods = blocker.WhenAnyValue(x => x.BlockingTypes)
-                .Select(x => x.Intersect([typeof(SteamDownload),typeof(ClientRunning),typeof(ServersRunning)]).Any());
+                .Select(x => !x.Intersect([typeof(SteamDownload),typeof(ClientRunning),typeof(ServersRunning)]).Any());
 
             CreateModlistCommand = ReactiveCommand.Create(OnModlistCreate);
             DeleteModlistCommand = ReactiveCommand.Create(OnModlistDelete);

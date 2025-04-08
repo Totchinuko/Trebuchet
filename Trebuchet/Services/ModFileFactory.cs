@@ -147,7 +147,7 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
     private void AddUpdateAction(IPublishedModFile file)
     {
         var canExecute = taskBlocker.WhenAnyValue(x => x.BlockingTypes)
-            .Select(x => x.Intersect([typeof(SteamDownload), typeof(ServersRunning), typeof(ClientRunning)]).Any());
+            .Select(x => !x.Intersect([typeof(SteamDownload), typeof(ServersRunning), typeof(ClientRunning)]).Any());
         file.Actions.Add(new ModFileAction(
             Resources.Update,
             "mdi-update",
