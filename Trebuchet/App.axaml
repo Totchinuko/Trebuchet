@@ -48,6 +48,7 @@
                 <MergeResourceInclude Source="Templates\RconPanel.axaml" />
                 <MergeResourceInclude Source="Templates\LogFilterPanel.axaml" />
                 <MergeResourceInclude Source="Templates\SteamWidget.axaml" />
+                <MergeResourceInclude Source="Templates\PasswordField.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -78,5 +79,6 @@
         <StaticResource ResourceKey="OnBoardingNameConfirmation" />
         <StaticResource ResourceKey="WorkshopSearchResult" />
         <StaticResource ResourceKey="AppSettings" />
+        <StaticResource ResourceKey="PasswordField" />
     </Application.DataTemplates>
 </Application>
