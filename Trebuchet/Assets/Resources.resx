@@ -863,4 +863,10 @@ Do you wish to proceed ?</value>
     <data name="OnBoardingServerInstanceCountSub" xml:space="preserve">
         <value>Choose how many server instance Trebuchet should manage. Unless you want to handle a cluster, one should be enough.</value>
     </data>
+    <data name="TranslatorsIdentity" xml:space="preserve">
+        <value>Totchinuko</value>
+    </data>
+    <data name="TranslationAuthors" xml:space="preserve">
+        <value>Translation Authors</value>
+    </data>
 </root>

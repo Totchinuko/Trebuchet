@@ -2377,6 +2377,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Translation Authors.
+        /// </summary>
+        public static string TranslationAuthors {
+            get {
+                return ResourceManager.GetString("TranslationAuthors", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Totchinuko.
+        /// </summary>
+        public static string TranslatorsIdentity {
+            get {
+                return ResourceManager.GetString("TranslatorsIdentity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Trebuchet is busy..
         /// </summary>
         public static string TrebuchetBusy {

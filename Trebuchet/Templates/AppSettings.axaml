@@ -1,15 +1,25 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="AppSettings" x:DataType="p:SettingsPanel">
         <ScrollViewer Grid.Row="1" AllowAutoHide="False" Padding="0 0 12 0">
-            <ItemsControl ItemsSource="{Binding Fields}">
-                <ItemsControl.ItemsPanel>
-                    <ItemsPanelTemplate>
-                        <VirtualizingStackPanel />
-                    </ItemsPanelTemplate>
-                </ItemsControl.ItemsPanel>
-            </ItemsControl>
+            <StackPanel>
+                <Border Padding="12" Classes="Panel" Margin="0 0 0 12">
+                    <TextBlock>
+                        <Run Text="{x:Static a:Resources.TranslationAuthors}" />
+                        <Run Text=": " />
+                        <Run Text="{x:Static a:Resources.TranslatorsIdentity}" />
+                    </TextBlock>
+                </Border>
+                <ItemsControl ItemsSource="{Binding Fields}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <VirtualizingStackPanel />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                </ItemsControl>
+            </StackPanel>
         </ScrollViewer>
     </DataTemplate>
 </ResourceDictionary>
