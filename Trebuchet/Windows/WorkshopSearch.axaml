@@ -4,6 +4,7 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+        xmlns:a="clr-namespace:Trebuchet.Assets"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         mc:Ignorable="d"
@@ -29,7 +30,7 @@
                             <Button Command="{Binding SearchCommand}" Grid.Column="1" Margin="0,0,12,0" Classes="Base Blue">
                                 <i:Icon Value="mdi-magnify" Classes="Normal"/>
                             </Button>
-                            <CheckBox Grid.Column="2" IsChecked="{Binding TestLiveWorkshop, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Content="Test Live Workshop" VerticalAlignment="Center" />
+                            <CheckBox Grid.Column="2" IsChecked="{Binding TestLiveWorkshop, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Content="{x:Static a:Resources.TestLive}" VerticalAlignment="Center" />
                         </Grid>
                     </Border>
                     <ProgressBar Grid.Row="1" Grid.Column="0" Margin="0 3" IsVisible="{Binding IsLoading}" IsIndeterminate="True" HorizontalAlignment="Stretch"  />
@@ -44,7 +45,7 @@
                                     </ItemsControl.ItemsPanel>
                                 </ItemsControl>
                             </ScrollViewer>
-                            <TextBlock Text="No results found" FontSize="14" IsVisible="{Binding !#ResultList.IsVisible}"/>
+                            <TextBlock Text="{x:Static a:Resources.NoResultFound}" FontSize="14" IsVisible="{Binding !#ResultList.IsVisible}"/>
                         </Panel>
                     </Border>
                 </Grid>

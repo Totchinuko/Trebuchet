@@ -5,6 +5,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
+using Trebuchet.Assets;
 using TrebuchetUtils;
 
 namespace Trebuchet.Modals
@@ -17,7 +18,7 @@ namespace Trebuchet.Modals
         private readonly FilePickerFileType _fileType;
         private string _text;
 
-        public ModlistTextImport(string text, bool export, FilePickerFileType fileType) : base(650,600,"Mod List", "ModlistTextImport")
+        public ModlistTextImport(string text, bool export, FilePickerFileType fileType) : base(650,600,Resources.ModList, "ModlistTextImport")
         {
             _text = text;
             _export = export;
@@ -68,8 +69,8 @@ namespace Trebuchet.Modals
 
             var file = await desktop.MainWindow.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
             {
-                Title = "Save File",
-                SuggestedFileName = "Untitled",
+                Title = Resources.SaveFile,
+                SuggestedFileName = Resources.Untitled,
                 FileTypeChoices = [_fileType]
             });
 

@@ -1,8 +1,4 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:local="clr-namespace:Trebuchet"
-                    xmlns:a="clr-namespace:Trebuchet.Assets"
-                    xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels"
-                    xmlns:c="clr-namespace:Trebuchet.Controls"
                     xmlns:u="clr-namespace:TrebuchetUtils;assembly=TrebuchetUtils"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"

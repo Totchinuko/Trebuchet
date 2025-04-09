@@ -38,7 +38,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     private ILogger<App>? _logger;
     
     public bool HasCrashed { get; private set; }
-    public IImage? AppIconPath => Resources["AppIcon"] as IImage;
+    public IImage? AppIconPath => Resources[@"AppIcon"] as IImage;
 
     public override void Initialize()
     {
@@ -48,12 +48,12 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     public void OpenApp(bool testlive)
     {
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-            throw new Exception("Not supported");
+            throw new Exception(@"Not supported");
 
         bool catapult = false;
         if (desktop.Args?.Length > 0)
         {
-            if(desktop.Args.Contains("-catapult"))
+            if(desktop.Args.Contains(@"-catapult"))
                 catapult = true;
         }
         
@@ -63,8 +63,8 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         var services = serviceCollection.BuildServiceProvider();
         _logger = services.GetRequiredService<ILogger<App>>();
         
-        _logger.LogInformation("Starting Taskmaster");
-        _logger.LogInformation($"Selecting {(testlive ? "testlive" : "live")}");
+        _logger.LogInformation(@"Starting Taskmaster");
+        _logger.LogInformation(@$"Selecting {(testlive ? @"testlive" : @"live")}");
 
         MainWindow mainWindow = new ();
         desktop.MainWindow = mainWindow;
@@ -85,12 +85,12 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
 
             if (desktop.Args?.Length > 0)
             {
-                if (desktop.Args.Contains("-testlive"))
+                if (desktop.Args.Contains(@"-testlive"))
                 {
                     OpenApp(true);
                     return;
                 }
-                else if (desktop.Args.Contains("-live"))
+                else if (desktop.Args.Contains(@"-live"))
                 {
                     OpenApp(false);
                     return;
@@ -157,13 +157,13 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
     {
-        _logger?.LogInformation("Trebuchet off");
-        _logger?.LogInformation("----------------------------------------");
+        _logger?.LogInformation(@"Trebuchet off");
+        _logger?.LogInformation(@"----------------------------------------");
     }
 
     private async void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        _logger?.LogError(e.Exception, "DispatcherUnhandledException");
+        _logger?.LogError(e.Exception, @"DispatcherUnhandledException");
         e.Handled = true;
         await new ExceptionModal(e.Exception).OpenDialogueAsync();
         ShutdownOnError();
@@ -171,7 +171,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     
     private async void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        await Dispatcher.UIThread.InvokeAsync(() => _logger?.LogError((Exception)e.ExceptionObject, "UnhandledException"));
+        await Dispatcher.UIThread.InvokeAsync(() => _logger?.LogError((Exception)e.ExceptionObject, @"UnhandledException"));
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             new ExceptionModal(((Exception)e.ExceptionObject)).Open();
@@ -181,7 +181,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
 
     private async void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        await Dispatcher.UIThread.InvokeAsync(() => _logger?.LogError(e.Exception, "UnobservedTaskException"));
+        await Dispatcher.UIThread.InvokeAsync(() => _logger?.LogError(e.Exception, @"UnobservedTaskException"));
         await Dispatcher.UIThread.InvokeAsync(() =>
         {
             DisplayExceptionAndExit(e.Exception);
@@ -197,8 +197,8 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     private static AppSettings GetAppSettings()
     {
         var settings = JsonSerializer.Deserialize<AppSettings>(
-            TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.AppSettings.json"));
-        if(settings == null) throw new JsonException("AppSettings could not be loaded");
+            TrebuchetUtils.Utils.GetEmbeddedTextFile(@"Trebuchet.AppSettings.json"));
+        if(settings == null) throw new JsonException(@"AppSettings could not be loaded");
         return settings;
     }
     

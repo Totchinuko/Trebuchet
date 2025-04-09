@@ -76,7 +76,7 @@ public sealed class TrebuchetApp : ReactiveObject
         _timer.Start();
     }
 
-    public static string AppTitle => $"Tot ! Trebuchet {TrebuchetUtils.Utils.GetFileVersion()}";
+    public static string AppTitle => @$"Tot ! Trebuchet {TrebuchetUtils.Utils.GetFileVersion()}";
 
     public bool FoldedMenu
     {

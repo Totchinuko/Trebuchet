@@ -52,7 +52,7 @@ namespace Trebuchet.ViewModels
 
         public DateTime LastUpdate { get; }
 
-        public string LastUpdateReadable => $"{LastUpdate.Humanize()}";
+        public string LastUpdateReadable => LastUpdate.Humanize();
 
         public IImage? PreviewUrl
         {

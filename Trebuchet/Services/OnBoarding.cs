@@ -1,4 +1,5 @@
 using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -39,7 +40,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
                 if(!await OnBoardingFindConanExile()) return false;
                 return await OnBoardingServerDownload();
             default:
-                throw new OperationCanceledException("OnBoarding was cancelled");
+                throw new OperationCanceledException(@"OnBoarding was cancelled");
         }
     }
 
@@ -68,7 +69,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
             .SetValidation(ValidateConanExileLocation)
             .SetSize<OnBoardingDirectory>(600, 200);
         await dialogueBox.OpenAsync(finder);
-        if(finder.Value is null) throw new OperationCanceledException("OnBoarding was cancelled");
+        if(finder.Value is null) throw new OperationCanceledException(@"OnBoarding was cancelled");
         setup.Config.ClientPath = finder.Value;
         return await OnBoardingAllowConanManagement();
     }
@@ -89,7 +90,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
             .AddChoice(Resources.OnBoardingManageConanNo, Resources.OnBoardingManageConanNoSub)
             .AddChoice(Resources.OnBoardingManageConanYes, Resources.OnBoardingManageConanYesSub);
         await dialogueBox.OpenAsync(choice);
-        if(choice.Result < 0) throw new OperationCanceledException("OnBoarding was cancelled");
+        if(choice.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
         setup.Config.ManageClient = choice.Result == 1;
         return await OnBoardingApplyConanManagement();
     }
@@ -159,7 +160,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
                 appFiles.Client.ListProfiles().ToList())
             .SetSize<OnBoardingListSelection>(650, 200);
         await dialogueBox.OpenAsync(choice);
-        if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException("OnBoarding was cancelled");
+        if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException(@"OnBoarding was cancelled");
         return choice.Value;
     }
 
@@ -169,7 +170,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
             .SetValidation(ValidateClientSaveName)
             .SetSize<OnBoardingNameSelection>(650, 200);
         await dialogueBox.OpenAsync(choice);
-        if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException("OnBoarding was cancelled");
+        if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException(@"OnBoarding was cancelled");
         return choice.Value;
     }
 
@@ -190,12 +191,12 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
         if (!canWriteInTrebuchet)
         {
             if(isRoot) 
-                throw new IOException($"Can't write in {path}, permission denied");
+                throw new IOException(@$"Can't write in {path}, permission denied");
             var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
                 .SetSize<OnBoardingBranch>(650, 250)
                 .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
             await dialogueBox.OpenAsync(uac);
-            if(uac.Result < 0) throw new OperationCanceledException("OnBoarding was cancelled");
+            if(uac.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
             Utils.Utils.RestartProcess(setup.IsTestLive, true);
             return false;
         }
@@ -209,8 +210,8 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
     public async Task<bool> OnBoardingCheckTrebuchet()
     {
         // Check old versions of trebuchet for upgrade path
-        string configLive = "Live.Config.json";
-        string configTestlive = "TestLive.Config.json";
+        string configLive = @"Live.Config.json";
+        string configTestlive = @"TestLive.Config.json";
         var trebuchetDir = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory);
         configLive = Path.Combine(trebuchetDir, configLive);
         configTestlive = Path.Combine(trebuchetDir, configTestlive);
@@ -221,7 +222,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
                 .SetSize<OnBoardingBranch>(650, 250)
                 .AddChoice(Resources.Upgrade, Resources.OnBoardingUpgradeSub);
             await dialogueBox.OpenAsync(upgrade);
-            if(upgrade.Result < 0) throw new Exception("OnBoardingUpgrade failed");
+            if(upgrade.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
 
             if (!await OnBoardingElevationRequest(trebuchetDir, Resources.OnBoardingUpgradeUac)) return false;
 
@@ -268,8 +269,8 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
     public async Task<bool> OnBoardingUpgradeTrebuchet(string installDir, bool testlive, IProgress<double> progress)
     {
         bool isElevated = Tools.IsProcessElevated();
-        string appDir = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
-        installDir = installDir.Replace("%APP_DIRECTORY%", appDir); 
+        string appDir = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception(@"App is installed in an invalid directory");
+        installDir = installDir.Replace(@"%APP_DIRECTORY%", appDir); 
         if(string.IsNullOrEmpty(installDir)) return true;
         if(!Directory.Exists(installDir)) return true;
         if (!await OnBoardingElevationRequest(installDir, Resources.OnBoardingUpgradeUac)) return false;
@@ -307,7 +308,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
         }
         
         progress.Report(0.0);
-        var logsDir = Path.Combine(installDir, "Logs");
+        var logsDir = Path.Combine(installDir, @"Logs");
         if(Directory.Exists(logsDir))
             Directory.Delete(logsDir, true);
         

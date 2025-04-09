@@ -18,7 +18,7 @@ namespace TrebuchetUtils
         private bool _maximizeDisabled = true;
         private bool _minimizeDisabled = true;
 
-        protected BaseModal(int width, int height, string title, string template)
+        protected BaseModal(int width, int height, string title, [Localizable(false)] string template)
         {
             ModalTitle = title;
             _template = template;

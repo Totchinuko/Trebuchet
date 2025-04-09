@@ -34,7 +34,7 @@ namespace Trebuchet.ViewModels
             CancelCommand = ReactiveCommand.Create(() =>
             {
                 taskBlocker.Cancel<SteamDownload>();
-                Description = $"{Resources.Cancelling}...";
+                Description = @$"{Resources.Cancelling}...";
             });
 
             var canConnect = this.WhenAnyValue(x => x.CanConnect, x => x.IsConnected, (can, isc) => can && !isc);

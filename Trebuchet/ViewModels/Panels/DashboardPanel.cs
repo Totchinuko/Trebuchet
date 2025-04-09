@@ -139,7 +139,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
 
@@ -155,7 +155,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
         
@@ -178,7 +178,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
         
@@ -247,7 +247,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
             finally
             {
@@ -258,7 +258,7 @@ namespace Trebuchet.ViewModels.Panels
         public ServerInstanceDashboard GetServerInstance(int instance)
         {
             if(instance < 0 || instance >= Instances.Count)
-                throw new Exception("Instance out of range");
+                throw new Exception(@"Instance out of range");
             return Instances[instance];
         }
 
@@ -356,7 +356,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
 
@@ -406,8 +406,8 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnFileVerification()
         {
-            var question = new QuestionModal("Verify files",
-                "This will verify all server and mod files. This may take a while. Do you want to continue?");
+            var question = new QuestionModal(Resources.VerifyFiles,
+                Resources.VerifyFilesText);
             await question.OpenDialogueAsync();
             if (!question.Result) return;
 
@@ -420,7 +420,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal("Error", tex.Message).OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
             }
         }
 

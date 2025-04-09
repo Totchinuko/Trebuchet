@@ -146,7 +146,7 @@
         <value>Settings</value>
     </data>
     <data name="GameSaves" xml:space="preserve">
-        <value>GameSaves</value>
+        <value>Game Saves</value>
     </data>
     <data name="Dashboard" xml:space="preserve">
         <value>Dashboard</value>
@@ -709,5 +709,140 @@ Do you wish to proceed ?</value>
     </data>
     <data name="CurrentLocation" xml:space="preserve">
         <value>Current location</value>
+    </data>
+    <data name="Untitled" xml:space="preserve">
+        <value>Untitled</value>
+    </data>
+    <data name="SaveFile" xml:space="preserve">
+        <value>Save File</value>
+    </data>
+    <data name="ModList" xml:space="preserve">
+        <value>Mod List</value>
+    </data>
+    <data name="GameBuild" xml:space="preserve">
+        <value>Game Build</value>
+    </data>
+    <data name="Append" xml:space="preserve">
+        <value>Append</value>
+    </data>
+    <data name="SaveAs" xml:space="preserve">
+        <value>Save As</value>
+    </data>
+    <data name="PID_ProcessID" xml:space="preserve">
+        <value>PID</value>
+    </data>
+    <data name="Uptime" xml:space="preserve">
+        <value>Uptime</value>
+    </data>
+    <data name="CPU_CentralProcessorUnit" xml:space="preserve">
+        <value>CPU</value>
+    </data>
+    <data name="Memory" xml:space="preserve">
+        <value>Memory</value>
+    </data>
+    <data name="Status" xml:space="preserve">
+        <value>Status</value>
+    </data>
+    <data name="Players" xml:space="preserve">
+        <value>Players</value>
+    </data>
+    <data name="UpdateMods" xml:space="preserve">
+        <value>Update Mods</value>
+    </data>
+    <data name="Stop" xml:space="preserve">
+        <value>Stop</value>
+    </data>
+    <data name="Launch" xml:space="preserve">
+        <value>Launch</value>
+    </data>
+    <data name="Instance" xml:space="preserve">
+        <value>Instance</value>
+    </data>
+    <data name="ServerSave" xml:space="preserve">
+        <value>Server Save</value>
+    </data>
+    <data name="SaveSize" xml:space="preserve">
+        <value>Save Size</value>
+    </data>
+    <data name="SaveSizeTip" xml:space="preserve">
+        <value>Total size of your save on disk. Profiles not only store your settings, but also your server saves and logs</value>
+    </data>
+    <data name="Delete" xml:space="preserve">
+        <value>Delete</value>
+    </data>
+    <data name="OpenSaveFolder" xml:space="preserve">
+        <value>Open save folder</value>
+    </data>
+    <data name="TestLive" xml:space="preserve">
+        <value>Test Live</value>
+    </data>
+    <data name="Live" xml:space="preserve">
+        <value>Live</value>
+    </data>
+    <data name="AddToList" xml:space="preserve">
+        <value>Add to list</value>
+    </data>
+    <data name="Subscriptions" xml:space="preserve">
+        <value>Subscriptions</value>
+    </data>
+    <data name="AddLocalMod" xml:space="preserve">
+        <value>Add local mods</value>
+    </data>
+    <data name="ExportErrorModNotFound" xml:space="preserve">
+        <value>Some of the mods path cannot be resolved because the mod file was not found. In order to export your modlist, please unsure that all of the mods are not marked as missing.</value>
+    </data>
+    <data name="ImportModList" xml:space="preserve">
+        <value>Import mod list</value>
+    </data>
+    <data name="WrongType" xml:space="preserve">
+        <value>Wrong Type</value>
+    </data>
+    <data name="WrongTypeText" xml:space="preserve">
+        <value>The type of file provided is unsupported.</value>
+    </data>
+    <data name="VerifyFiles" xml:space="preserve">
+        <value>Verify files</value>
+    </data>
+    <data name="VerifyFilesText" xml:space="preserve">
+        <value>This will verify all server and mod files. This may take a while. Do you want to continue?</value>
+    </data>
+    <data name="ClientFailedToStart" xml:space="preserve">
+        <value>Client failed to start</value>
+    </data>
+    <data name="ClientFailedToStartText" xml:space="preserve">
+        <value>See the logs for more information</value>
+    </data>
+    <data name="CpuFormat" xml:space="preserve">
+        <value>{0}%</value>
+    </data>
+    <data name="MemoryFormat" xml:space="preserve">
+        <value>{0}MB (Peak {1}MB)</value>
+    </data>
+    <data name="NoResultFound" xml:space="preserve">
+        <value>No results found</value>
+    </data>
+    <data name="Game" xml:space="preserve">
+        <value>Game</value>
+    </data>
+    <data name="GameSave" xml:space="preserve">
+        <value>Game Save</value>
+    </data>
+    <data name="BattleEye" xml:space="preserve">
+        <value>Battle Eye</value>
+    </data>
+    <data name="UpdateServers" xml:space="preserve">
+        <value>Update servers</value>
+    </data>
+    <data name="UpdateAllMods" xml:space="preserve">
+        <value>Update all mods</value>
+    </data>
+    <data name="LaunchAll" xml:space="preserve">
+        <value>Launch all</value>
+    </data>
+    <data name="KillAll" xml:space="preserve">
+        <value>Kill all</value>
+    </data>
+    <data name="StopAll" xml:space="preserve">
+        <value>Stop all</value>
     </data>
 </root>

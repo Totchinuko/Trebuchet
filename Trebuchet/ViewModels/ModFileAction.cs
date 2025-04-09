@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Reactive;
 using System.Windows.Input;
 using Avalonia.Controls;
@@ -8,7 +9,7 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels;
 
-public class ModFileAction(string name, string icon, ICommand action, string classes = "Base") : 
+public class ModFileAction(string name, [Localizable(false)] string icon, ICommand action, [Localizable(false)] string classes = "Base") : 
     ReactiveObject
 {
     public ICommand Action { get; } = action;

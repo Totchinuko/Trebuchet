@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="Dashboard" DataType="{x:Type panels:DashboardPanel}">
         <ScrollViewer>
@@ -16,19 +17,19 @@
                         <Button Command="{Binding UpdateServerCommand}" Classes="Base Blue" Margin="0,0,6,0">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-server-network" Classes="Normal" Margin="0,0,6,0" />
-                                <TextBlock Text="Update Servers" />
+                                <TextBlock Text="{x:Static a:Resources.UpdateServers}" />
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding UpdateAllModsCommand}" Classes="Base Blue" Margin="0,0,6,0">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-update" Classes="Normal" Margin="0,0,6,0" />
-                                <TextBlock Text="Update All Mods" />
+                                <TextBlock Text="{x:Static a:Resources.UpdateAllMods}" />
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding VerifyFilesCommand}" Classes="Base Blue" Margin="0,0,6,0">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-wrench" Classes="Normal" Margin="0,0,6,0" />
-                                <TextBlock Text="Verify Files" />
+                                <TextBlock Text="{x:Static a:Resources.VerifyFiles}" />
                             </StackPanel>
                         </Button>
                     </WrapPanel>
@@ -38,22 +39,22 @@
                     <Grid Margin="12">
                         <TextBlock Text="Servers" Margin="-10,-16,0,20" FontSize="30" Opacity="0.3" FontWeight="Bold" />
                         <WrapPanel Orientation="Horizontal" Margin="0,20,0,0">
-                            <Button Command="{Binding LaunchAllCommand}" Classes="Base Green" ToolTip.Tip="Launch All Server Intances" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <Button Command="{Binding LaunchAllCommand}" Classes="Base Green" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
                                     <i:Icon Value="mdi-play" Classes="Normal" Margin="0,0,6,0" />
-                                    <TextBlock Text="Launch All" />
+                                    <TextBlock Text="{x:Static a:Resources.LaunchAll}" />
                                 </StackPanel>
                             </Button>
-                            <Button Command="{Binding CloseAllCommand}" Classes="Base Yellow" ToolTip.Tip="Stop All Server Instances" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <Button Command="{Binding CloseAllCommand}" Classes="Base Yellow" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
                                     <i:Icon Value="mdi-stop" Classes="Normal" Margin="0,0,6,0" />
-                                    <TextBlock Text="Stop All" />
+                                    <TextBlock Text="{x:Static a:Resources.StopAll}" />
                                 </StackPanel>
                             </Button>
-                            <Button Command="{Binding KillAllCommand}" Classes="Base Red" ToolTip.Tip="Kill All Server Instances" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                            <Button Command="{Binding KillAllCommand}" Classes="Base Red" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
                                     <i:Icon Value="mdi-skull" Classes="Normal" Margin="0,0,6,0" />
-                                    <TextBlock Text="Kill All" />
+                                    <TextBlock Text="{x:Static a:Resources.KillAll}" />
                                 </StackPanel>
                             </Button>
                         </WrapPanel>

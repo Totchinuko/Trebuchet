@@ -4,6 +4,8 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using Humanizer;
+using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
 using TrebuchetUtils;
@@ -12,8 +14,6 @@ namespace Trebuchet.ViewModels
 {
     public class ProcessStatsLight : BaseViewModel, IProcessStats
     {
-        protected const string CpuFormat = "{0}%";
-        protected const string MemoryFormat = "{0}MB (Peak {1}MB)";
         private IConanProcess? _details;
         private long _peakMemoryConsumption;
         private DispatcherTimer _timer;
@@ -87,13 +87,13 @@ namespace Trebuchet.ViewModels
             if (!Running) return;
 
             long memoryConsumption = _details?.MemoryUsage ?? 0;
-            CpuUsage = string.Format(CpuFormat, (await GetCpuUsageForProcess()).ToString("N2"));
+            CpuUsage = string.Format(Resources.CpuFormat, (await GetCpuUsageForProcess()).ToString(@"N2"));
             _peakMemoryConsumption = Math.Max(memoryConsumption, _peakMemoryConsumption);
-            MemoryConsumption = string.Format(MemoryFormat, (memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
-            Uptime = _details == null ? string.Empty : (DateTime.UtcNow - _details.StartUtc).ToString("d'd.'h'h:'m'm:'s's'");;
+            MemoryConsumption = string.Format(Resources.MemoryFormat, (memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
+            Uptime = _details == null ? string.Empty : (DateTime.UtcNow - _details.StartUtc).Humanize();
 
             if (_details is IConanServerProcess serverDetails)
-                PlayerCount = $"{serverDetails.Players}/{serverDetails.MaxPlayers}";
+                PlayerCount = @$"{serverDetails.Players}/{serverDetails.MaxPlayers}";
         }
         
         private async Task<double> GetCpuUsageForProcess()

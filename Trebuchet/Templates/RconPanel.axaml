@@ -19,7 +19,7 @@
                 </Border>
             </Border>
             <Border Grid.Row="2" Padding="8" CornerRadius="3" Margin="0,0,0,0">
-                <controls:ConsoleField Foreground="White" Height="25" Command="{Binding SendCommand}" MaxLength="4000" Placeholder="Console Command" />
+                <controls:ConsoleField Foreground="White" Height="25" Command="{Binding SendCommand}" MaxLength="4000" />
             </Border>
         </Grid>
     </DataTemplate>

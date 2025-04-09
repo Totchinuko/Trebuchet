@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Reactive;
@@ -21,11 +22,12 @@ namespace Trebuchet.ViewModels.Panels
 
         public ConsoleLog ConsoleLog { get; } = consoleLog;
 
-        public string Header => ConsoleLog.IsReceived ? $"[{ConsoleLog.UtcTime.ToLocalTime():HH:mm:ss}]" : "> ";
+        public string Header => ConsoleLog.IsReceived ? @$"[{ConsoleLog.UtcTime.ToLocalTime():HH:mm:ss}]" : @"> ";
 
         public bool IsError => ConsoleLog.IsError;
     }
 
+    [Localizable(false)]
     public class RconPanel : Panel
     {
         private readonly AppSetup _setup;

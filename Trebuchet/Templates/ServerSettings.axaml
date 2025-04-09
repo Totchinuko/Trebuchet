@@ -1,7 +1,8 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
+                    xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels"
+                    xmlns:a="clr-namespace:Trebuchet.Assets">
     <DataTemplate x:Key="ServerSettings" x:DataType="p:ServerProfilePanel">
         <Grid>
             <Grid.RowDefinitions>
@@ -23,23 +24,23 @@
                                 </ComboBox.SelectionBoxItemTemplate>
                             </ComboBox>
                         </Border>
-                        <Button Command="{Binding DeleteProfileCommand}" Classes="Base Red" ToolTip.Tip="Delete" Margin="0,0,3,6" VerticalAlignment="Top">
+                        <Button Command="{Binding DeleteProfileCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Deletion}" Margin="0,0,3,6" VerticalAlignment="Top">
                             <i:Icon Value="mdi-delete" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding DuplicateProfileCommand}" Classes="Base Green" ToolTip.Tip="Duplicate" Margin="0 0 3 0" VerticalAlignment="Top">
+                        <Button Command="{Binding DuplicateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Duplicate}" Margin="0 0 3 0" VerticalAlignment="Top">
                             <i:Icon Value="mdi-content-copy" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding OpenFolderProfileCommand}" Classes="Base" ToolTip.Tip="Open Profile Folder" Margin="0 0 3 0" VerticalAlignment="Top">
+                        <Button Command="{Binding OpenFolderProfileCommand}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.OpenSaveFolder}" Margin="0 0 3 0" VerticalAlignment="Top">
                             <i:Icon Value="mdi-folder-open" Classes="Normal" />
                         </Button>
                     </WrapPanel>
                 </Border>
                 <Border Classes="Panel" HorizontalAlignment="Left" Padding="8,8,8,0">
                     <ToolTip.Tip>
-                        <TextBlock TextWrapping="Wrap" Text="Total size of your profile on disk. Profiles not only store your settings, but also your server saves and logs" />
+                        <TextBlock TextWrapping="Wrap" Text="{x:Static a:Resources.SaveSizeTip}" />
                     </ToolTip.Tip>
                     <StackPanel Orientation="Vertical">
-                        <TextBlock Text="Profile Size" FontWeight="Bold" />
+                        <TextBlock Text="{x:Static a:Resources.SaveSize}" FontWeight="Bold" />
                         <TextBlock Text="{Binding ProfileSize}" />
                     </StackPanel>
                 </Border>

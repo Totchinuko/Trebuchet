@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
+using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
@@ -160,7 +161,7 @@ public class ClientInstanceDashboard : ReactiveObject
     {
         CanKill = false;
         CanLaunch = true;
-        await new ErrorModal("Client failed to start", "See the logs for more information.").OpenDialogueAsync();
+        await new ErrorModal(Resources.ClientFailedToStart, Resources.ClientFailedToStartText).OpenDialogueAsync();
     }
 
     private void OnProcessStarted(IConanProcess details, bool refreshStats)

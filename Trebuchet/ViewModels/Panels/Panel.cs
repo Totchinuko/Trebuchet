@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.Reactive;
 using System.Threading.Tasks;
 using DynamicData.Binding;
@@ -10,9 +11,9 @@ public abstract class Panel : MenuElement
 {
     private bool _canTabBeClicked = true;
     private bool _active;
-    private string _tabClass = "AppTabNeutral";
+    private string _tabClass = @"AppTabNeutral";
 
-    public Panel(string label, string iconPath, bool bottom) : base(label)
+    public Panel(string label, [Localizable(false)] string iconPath, bool bottom) : base(label)
     {
         IconPath = iconPath;
         BottomPosition = bottom;
@@ -22,7 +23,7 @@ public abstract class Panel : MenuElement
         TabClick = ReactiveCommand.Create<Panel,Panel>((p) => p, this.WhenAnyValue(x => x.CanTabBeClicked));
 
         this.WhenValueChanged(x => x.Active)
-            .Subscribe((v) => TabClass = v ? "AppTabBlue" : "AppTabNeutral");
+            .Subscribe((v) => TabClass = v ? @"AppTabBlue" : @"AppTabNeutral");
     }
 
     public string IconPath { get; }

@@ -8,17 +8,17 @@ public class PublishedModFile : ReactiveObject, IModFile, IPublishedModFile
 {
     public PublishedModFile(string path, ulong publishedId)
     {
-        IconClasses.Add("ModIcon");
-        StatusClasses.Add("ModStatus");
+        IconClasses.Add(@"ModIcon");
+        StatusClasses.Add(@"ModStatus");
         PublishedId = publishedId;
         FilePath = path;
         Title = Path.GetFileName(path);
         LastUpdate = string.Empty;
-        IconClasses.Add("Live");
+        IconClasses.Add(@"Live");
         if (File.Exists(path))
-            StatusClasses.Add("Loading");
+            StatusClasses.Add(@"Loading");
         else
-            StatusClasses.Add("Missing");
+            StatusClasses.Add(@"Missing");
     }
     
     public ulong PublishedId { get; }

@@ -41,7 +41,7 @@
                             Classes="Base Sneak Yellow"
                             Margin="0"
                             Padding="8,0"
-                            Content="Cancel"
+                            Content="{x:Static a:Resources.Cancel}"
                             Command="{Binding CancelCommand}" />
                 </Grid>
             </Border>

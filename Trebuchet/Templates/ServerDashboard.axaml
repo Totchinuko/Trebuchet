@@ -1,5 +1,5 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:local="clr-namespace:Trebuchet"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
@@ -26,43 +26,44 @@
                         <RowDefinition Height="auto" />
                     </Grid.RowDefinitions>
                     <TextBlock Classes="ProcessName" Classes.Active="{Binding ProcessRunning}" Margin="-10,-16,0,20" FontSize="30" FontWeight="Bold">
-                        <Run Text="Instance " />
+                        <Run Text="{x:Static a:Resources.Instance}" />
+                        <Run Text=" " />
                         <Run Text="{Binding Instance, Mode=OneWay}" />
                     </TextBlock>
                     <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,20,0,12">
                         <Grid Margin="0,20,0,0" IsEnabled="{Binding !ProcessRunning}">
-                            <TextBlock Margin="0,-18,0,0" Text="Server Profile" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                            <TextBlock Margin="0,-18,0,0" Text="{x:Static a:Resources.ServerSave}" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                             <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="200" Margin="0,0,12,0" />
                         </Grid>
                         <Grid Margin="0,20,0,0" IsEnabled="{Binding !ProcessRunning}">
-                            <TextBlock Margin="0,-18,0,0" Text="Mod List" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                            <TextBlock Margin="0,-18,0,0" Text="{x:Static a:Resources.ModList}" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
                             <ComboBox ItemsSource="{Binding Modlists, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Margin="0,0,12,0" />
                         </Grid>
                     </WrapPanel>
                     <WrapPanel Grid.Row="1" Orientation="Horizontal">
-                        <Button Command="{Binding LaunchCommand}" Classes="Base Green" ToolTip.Tip="Launch Server Instance" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <Button Command="{Binding LaunchCommand}" Classes="Base Green" Margin="0,0,6,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-play" Classes="Normal" Margin="0,0,6,0"/>
-                                <TextBlock Text="Launch" />
+                                <TextBlock Text="{x:Static a:Resources.Launch}" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding CloseCommand}" Classes="Base Yellow" ToolTip.Tip="Stop Server Instance" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <Button Command="{Binding CloseCommand}" Classes="Base Yellow" Margin="0,0,6,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-stop" Classes="Normal" Margin="0,0,6,0"/>
-                                <TextBlock Text="Stop" />
+                                <TextBlock Text="{x:Static a:Resources.Stop}" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding KillCommand}" Classes="Base Red" ToolTip.Tip="Kill Server Instance" ToolTip.ShowDelay="0" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <Button Command="{Binding KillCommand}" Classes="Base Red" Margin="0,0,6,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
                                 <i:Icon Value="mdi-skull" Classes="Normal" Margin="0,0,6,0"/>
-                                <TextBlock Text="Kill" />
+                                <TextBlock Text="{x:Static a:Resources.Kill}" />
                             </StackPanel>
                         </Button>
                         <Border Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{Binding UpdateNeeded.Count}">
-                            <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue" ToolTip.Tip="Mod update available !" ToolTip.ShowDelay="0">
+                            <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue">
                                 <StackPanel Orientation="Horizontal">
                                     <i:Icon Value="mdi-update" Classes="Normal" Margin="0,0,6,0"/>
-                                    <TextBlock Text="Update Mods" />
+                                    <TextBlock Text="{x:Static a:Resources.UpdateMods}" />
                                 </StackPanel>
                             </Button>
                         </Border>

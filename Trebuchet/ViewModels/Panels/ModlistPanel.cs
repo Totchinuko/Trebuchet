@@ -200,7 +200,7 @@ namespace Trebuchet.ViewModels.Panels
         private async void FetchSteamCollection(UriBuilder builder)
         {
             var query = HttpUtility.ParseQueryString(builder.Query);
-            var id = query.Get("id");
+            var id = query.Get(@"id");
             if (id == null || !ulong.TryParse(id, out var collectionId))
             {
                 await new ErrorModal(Resources.InvalidURL, Resources.InvalidURLText).OpenDialogueAsync();
@@ -257,7 +257,7 @@ namespace Trebuchet.ViewModels.Panels
 
             var files = await desktop.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
-                Title = "Add local mods",
+                Title = Resources.AddLocalMod,
                 FileTypeFilter = [FileType.Pak],
                 AllowMultiple = true
             });
@@ -291,14 +291,12 @@ namespace Trebuchet.ViewModels.Panels
         {
             try
             {
-                var content = string.Join("\r\n", _appFiles.Mods.GetResolvedModlist(_profile.Modlist));
+                var content = string.Join(Environment.NewLine, _appFiles.Mods.GetResolvedModlist(_profile.Modlist));
                 await new ModlistTextImport(content, true, FileType.Txt).OpenDialogueAsync();
             }
             catch
             {
-                await new ErrorModal("Error",
-                        "Some of the mods path cannot be resolved because the mod file was not found. " +
-                        "In order to export your modlist, please unsure that all of the mods are not marked as missing.")
+                await new ErrorModal(Resources.Error, Resources.ExportErrorModNotFound)
                     .OpenDialogueAsync();
             }
         }
@@ -320,7 +318,7 @@ namespace Trebuchet.ViewModels.Panels
             }
             catch
             {
-                await new ErrorModal("Error", "Invalid URL.").OpenDialogueAsync();
+                await new ErrorModal(Resources.Error, Resources.InvalidURL).OpenDialogueAsync();
                 return;
             }
 
@@ -338,9 +336,9 @@ namespace Trebuchet.ViewModels.Panels
             var files = await desktop.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
             {
                 AllowMultiple = false,
-                Title = "Import ModList",
+                Title = Resources.ImportModList,
                 FileTypeFilter = [FileType.Json, FileType.Txt],
-                SuggestedFileName = "modlist.txt"
+                SuggestedFileName = @"modlist.txt"
             });
 
             if (files.Count <= 0) return;
@@ -353,7 +351,7 @@ namespace Trebuchet.ViewModels.Panels
             else if (ext == FileType.TxtExt)
                 OnImportFromTxtFile(await File.ReadAllTextAsync(path));
             else
-                await new ErrorModal("Wrong Type", "The type of file provided is unsupported.").OpenDialogueAsync();
+                await new ErrorModal(Resources.WrongType, Resources.WrongTypeText).OpenDialogueAsync();
         }
 
         private async void OnImportFromJsonFile(string json)
@@ -383,12 +381,12 @@ namespace Trebuchet.ViewModels.Panels
             {
                 var export = JsonSerializer.Deserialize<ModlistExport>(text);
                 if (export == null)
-                    throw new Exception("This is not Json.");
+                    throw new Exception(@"This is not Json.");
                 modlist = export.Modlist;
             }
             catch
             {
-                var split = text.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+                var split = text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
                 modlist = _appFiles.Mods.ParseModList(split).ToList();
             }
 
@@ -402,7 +400,7 @@ namespace Trebuchet.ViewModels.Panels
 
         private void OnImportFromTxtFile(string text)
         {
-            var split = text.Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
+            var split = text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
             _profile.Modlist = _appFiles.Mods.ParseModList(split).ToList();
             _profile.SaveFile();
             LoadModlist();
@@ -411,7 +409,7 @@ namespace Trebuchet.ViewModels.Panels
         private void OnModFileChanged(object sender, FileSystemEventArgs e)
         {
             var fullPath = e.FullPath;
-            Debug.WriteLine($"OnModFileChanged.fullPath={fullPath}");
+            Debug.WriteLine(@$"OnModFileChanged.fullPath={fullPath}");
             Dispatcher.UIThread.Invoke(() =>
             {
                 var watch = new Stopwatch();
@@ -426,7 +424,7 @@ namespace Trebuchet.ViewModels.Panels
                     Modlist[i] = _modFileFactory.Create(modFile, path);
                 }
                 watch.Stop();
-                Debug.WriteLine($"OnModFileChanged={watch.ElapsedMilliseconds}ms");
+                Debug.WriteLine(@$"OnModFileChanged={watch.ElapsedMilliseconds}ms");
             });
         }
 
