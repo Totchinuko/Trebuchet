@@ -68,7 +68,7 @@ namespace Trebuchet.Controls
             else
             {
                 Value = 0;
-                TextField.Text = "0";
+                TextField.Text = @"0";
             }
         }
 

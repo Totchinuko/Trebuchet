@@ -42,17 +42,12 @@ namespace Trebuchet.Controls
         
         private async void FindButton_MouseDown(object sender, RoutedEventArgs e)
         {
-            string appDir = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
-            string defaultFolder = string.Empty;
-            if (!string.IsNullOrEmpty(DefaultFolder))
-            {
-                defaultFolder = DefaultFolder.Replace("%APP_DIRECTORY%", appDir);
-                if (CreateDefaultFolder && !Directory.Exists(defaultFolder))
-                    Tools.CreateDir(defaultFolder);
-            }
+            string appDir = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception(@"App is installed in an invalid directory");
+            if (CreateDefaultFolder && !Directory.Exists(DefaultFolder))
+                Tools.CreateDir(DefaultFolder);
         
-            if (string.IsNullOrEmpty(defaultFolder) || !Directory.Exists(defaultFolder))
-                defaultFolder = appDir;
+            if (string.IsNullOrEmpty(DefaultFolder) || !Directory.Exists(DefaultFolder))
+                DefaultFolder = appDir;
 
             var toplevel = TopLevel.GetTopLevel(this);
             if (toplevel == null) return;
@@ -60,7 +55,7 @@ namespace Trebuchet.Controls
             var folder = await toplevel.StorageProvider.OpenFolderPickerAsync(new FolderPickerOpenOptions()
             {
                 AllowMultiple = false,
-                SuggestedStartLocation = await toplevel.StorageProvider.TryGetFolderFromPathAsync(defaultFolder)
+                SuggestedStartLocation = await toplevel.StorageProvider.TryGetFolderFromPathAsync(DefaultFolder)
             });
 
             if (folder.Count == 0) return;
