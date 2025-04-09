@@ -26,15 +26,7 @@ public class ClientInstallationField : DescriptiveElement<ClientInstallationFiel
             .Select(x => x ? Resources.Yes : Resources.No)
             .ToProperty(this, x => x.ManageFileLabel);
         
-        Remove = ReactiveCommand.Create(() =>
-        {
-            setup.Config.ClientPath = string.Empty;
-            setup.Config.ManageClient = false;
-            setup.Config.SaveFile();
-            InstallPath = string.Empty;
-            ManageFiles = false;
-            Installed = false;
-        }, isInstalled);
+        Remove = ReactiveCommand.CreateFromTask(UninstallClientPath, isInstalled);
         
         Install = ReactiveCommand.CreateFromTask(InstallClientPath);
 
@@ -94,6 +86,24 @@ public class ClientInstallationField : DescriptiveElement<ClientInstallationFiel
                 Installed = true;
                 InstallPath = _setup.Config.ClientPath;
                 ManageFiles = _setup.Config.ManageClient;
+            }
+        }
+        catch(OperationCanceledException) {}
+    }
+
+    private async Task UninstallClientPath()
+    {
+        try
+        {
+            _setup.Config.ManageClient = false;
+            var success = await _onBoarding.OnBoardingApplyConanManagement();
+            if (success)
+            {
+                _setup.Config.ClientPath = string.Empty;
+                _setup.Config.SaveFile();;
+                InstallPath = string.Empty;
+                ManageFiles = false;
+                Installed = false;
             }
         }
         catch(OperationCanceledException) {}

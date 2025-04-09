@@ -133,11 +133,11 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
         if (JunctionPoint.Exists(savedDir) && !setup.Config.ManageClient)
         {
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
-            JunctionPoint.Delete(savedDir);
-            Directory.CreateDirectory(savedDir);
             if (!appFiles.Client.ListProfiles().Any())
                 return true;
             var saveName = await OnBoardingChooseClientSave();
+            JunctionPoint.Delete(savedDir);
+            Directory.CreateDirectory(savedDir);
             await Tools.DeepCopyAsync(appFiles.Client.GetFolder(saveName), savedDir, CancellationToken.None);
             return true;
         }
