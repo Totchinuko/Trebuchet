@@ -285,6 +285,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Close.
+        /// </summary>
+        public static string Close {
+            get {
+                return ResourceManager.GetString("Close", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CPU.
         /// </summary>
         public static string CPU_CentralProcessorUnit {
@@ -416,6 +425,15 @@ namespace Trebuchet.Assets {
         public static string ErrorValueEmpty {
             get {
                 return ResourceManager.GetString("ErrorValueEmpty", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Exit.
+        /// </summary>
+        public static string Exit {
+            get {
+                return ResourceManager.GetString("Exit", resourceCulture);
             }
         }
         

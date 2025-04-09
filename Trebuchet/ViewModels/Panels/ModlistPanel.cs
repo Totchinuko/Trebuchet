@@ -155,7 +155,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
         }
         
@@ -192,7 +192,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
 
         }
@@ -203,7 +203,7 @@ namespace Trebuchet.ViewModels.Panels
             var id = query.Get(@"id");
             if (id == null || !ulong.TryParse(id, out var collectionId))
             {
-                await new ErrorModal(Resources.InvalidURL, Resources.InvalidURLText).OpenDialogueAsync();
+                await _box.OpenErrorAsync(Resources.InvalidURL, Resources.InvalidURLText);
                 return;
             }
 
@@ -221,7 +221,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
         }
 
@@ -296,8 +296,7 @@ namespace Trebuchet.ViewModels.Panels
             }
             catch
             {
-                await new ErrorModal(Resources.Error, Resources.ExportErrorModNotFound)
-                    .OpenDialogueAsync();
+                await _box.OpenErrorAsync(Resources.ExportErrorModNotFound);
             }
         }
 
@@ -318,7 +317,7 @@ namespace Trebuchet.ViewModels.Panels
             }
             catch
             {
-                await new ErrorModal(Resources.Error, Resources.InvalidURL).OpenDialogueAsync();
+                await _box.OpenErrorAsync(Resources.InvalidURL);
                 return;
             }
 
@@ -351,7 +350,7 @@ namespace Trebuchet.ViewModels.Panels
             else if (ext == FileType.TxtExt)
                 OnImportFromTxtFile(await File.ReadAllTextAsync(path));
             else
-                await new ErrorModal(Resources.WrongType, Resources.WrongTypeText).OpenDialogueAsync();
+                await _box.OpenErrorAsync(Resources.WrongType, Resources.WrongTypeText);
         }
 
         private async void OnImportFromJsonFile(string json)
@@ -359,7 +358,7 @@ namespace Trebuchet.ViewModels.Panels
             var modlist = JsonSerializer.Deserialize<ModlistExport>(json);
             if (modlist == null)
             {
-                await new ErrorModal(Resources.InvalidJson, Resources.InvalidJsonText).OpenDialogueAsync();
+                await _box.OpenErrorAsync(Resources.InvalidJson, Resources.InvalidJsonText);
                 return;
             }
 

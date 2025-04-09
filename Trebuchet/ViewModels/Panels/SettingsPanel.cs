@@ -6,6 +6,7 @@ using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
+using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.ViewModels.SettingFields;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -20,6 +21,7 @@ public class SettingsPanel : Panel
     private readonly UIConfig _uiConfig;
     private readonly SteamAPI _steamApi;
     private readonly OnBoarding _onBoarding;
+    private readonly DialogueBox _box;
     private readonly ILogger<SettingsPanel> _logger;
 
     public SettingsPanel(
@@ -27,6 +29,7 @@ public class SettingsPanel : Panel
         UIConfig uiConfig, 
         SteamAPI steamApi, 
         OnBoarding onBoarding,
+        DialogueBox box,
         ILogger<SettingsPanel> logger) : 
         base(Resources.Settings, "mdi-cog", true)
     {
@@ -34,6 +37,7 @@ public class SettingsPanel : Panel
         _uiConfig = uiConfig;
         _steamApi = steamApi;
         _onBoarding = onBoarding;
+        _box = box;
         _logger = logger;
 
         SaveConfig = ReactiveCommand.Create(() => _setup.Config.SaveFile());
@@ -55,7 +59,7 @@ public class SettingsPanel : Panel
         catch (TrebException tex)
         {
             _logger.LogError(tex.Message);
-            await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+            await _box.OpenErrorAsync(tex.Message);
         }
     }
 

@@ -73,7 +73,7 @@ namespace Trebuchet.ViewModels.Panels
             RefreshPanel.Subscribe((_) => RefreshDashboards());
             DisplayPanel.Subscribe((_) => PanelDisplayed());
 
-            Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker);
+            Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker, _box);
             Initialize();
 
             _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, (_,_) => OnCheckModUpdate());
@@ -143,7 +143,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
         }
 
@@ -159,7 +159,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
         }
         
@@ -182,7 +182,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
         }
         
@@ -251,7 +251,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
             finally
             {
@@ -360,7 +360,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
         }
 
@@ -371,7 +371,7 @@ namespace Trebuchet.ViewModels.Panels
 
             for (var i = Instances.Count; i < _setup.Config.ServerInstanceCount; i++)
             {
-                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(), _blocker);
+                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(), _blocker, _box);
                 instance.SelectedModlist = _setup.Config.GetInstanceModlist(i);
                 instance.SelectedProfile = _setup.Config.GetInstanceProfile(i);
                 RegisterServerInstanceEvents(instance);
@@ -423,7 +423,7 @@ namespace Trebuchet.ViewModels.Panels
             catch (TrebException tex)
             {
                 _logger.LogError(tex.Message);
-                await new ErrorModal(Resources.Error, tex.Message).OpenDialogueAsync();
+                await _box.OpenErrorAsync(tex.Message);
             }
         }
 

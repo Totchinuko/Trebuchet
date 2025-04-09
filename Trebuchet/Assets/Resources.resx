@@ -845,4 +845,10 @@ Do you wish to proceed ?</value>
     <data name="StopAll" xml:space="preserve">
         <value>Stop all</value>
     </data>
+    <data name="Close" xml:space="preserve">
+        <value>Close</value>
+    </data>
+    <data name="Exit" xml:space="preserve">
+        <value>Exit</value>
+    </data>
 </root>

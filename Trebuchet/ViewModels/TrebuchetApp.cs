@@ -24,6 +24,7 @@ public sealed class TrebuchetApp : ReactiveObject
     private readonly AppFiles _appFiles;
     private readonly Launcher _launcher;
     private readonly Steam _steam;
+    private readonly DialogueBox _box;
     private readonly OnBoarding _onBoarding;
     private Panel _activePanel;
     private List<Panel> _panels;
@@ -36,6 +37,7 @@ public sealed class TrebuchetApp : ReactiveObject
         Launcher launcher, 
         UIConfig uiConfig,
         Steam steam, 
+        DialogueBox box,
         SteamWidget steamWidget,
         DialogueBox dialogueBox,
         OnBoarding onBoarding,
@@ -45,6 +47,7 @@ public sealed class TrebuchetApp : ReactiveObject
         _appFiles = appFiles;
         _launcher = launcher;
         _steam = steam;
+        _box = box;
         _onBoarding = onBoarding;
         _panels = panels.ToList();
         SteamWidget = steamWidget;
@@ -154,8 +157,7 @@ public sealed class TrebuchetApp : ReactiveObject
         }
         catch (Exception ex)
         {
-            await new ErrorModal(Resources.Error, ex.Message).OpenDialogueAsync();
-            Utils.Utils.ShutdownDesktopProcess();
+            await _box.OpenErrorAndExitAsync(ex.Message);
             return;
         }
         

@@ -20,11 +20,6 @@ namespace TrebuchetUtils
         private static readonly Dictionary<Uri, Bitmap> Cache = [];
         private static readonly HttpClient HttpClient = new();
 
-        public static async void DisplayError(string message)
-        {
-            await new ErrorModal("Error", message).OpenDialogueAsync();
-        }
-        
         public static IEnumerable<T> FindVisualChildren<T>(Visual depObj) where T : Visual
         {
             foreach (var child in VisualExtensions.GetVisualChildren(depObj))

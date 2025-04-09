@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
+using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
 using TrebuchetUtils;
@@ -22,7 +23,7 @@ namespace Trebuchet.ViewModels
     
     public sealed class ServerInstanceDashboard : ReactiveObject
     {
-        private readonly TaskBlocker _blocker;
+        private readonly DialogueBox _box;
         private ProcessState _lastState;
         private bool _canClose;
         private bool _canKill;
@@ -35,9 +36,9 @@ namespace Trebuchet.ViewModels
         private string _selectedProfile = string.Empty;
         private List<ulong> _updateNeeded = [];
 
-        public ServerInstanceDashboard(int instance, IProcessStats stats, TaskBlocker blocker)
+        public ServerInstanceDashboard(int instance, IProcessStats stats, TaskBlocker blocker, DialogueBox box)
         {
-            _blocker = blocker;
+            _box = box;
             Instance = instance;
             ProcessStats = stats;
             
@@ -182,7 +183,7 @@ namespace Trebuchet.ViewModels
             CanKill = false;
             CanClose = false;
             CanLaunch = true;
-            await new ErrorModal(Resources.ServerFailedStart, Resources.ServerFailedStartText).OpenDialogueAsync();
+            await _box.OpenErrorAsync(Resources.ServerFailedStart, Resources.ServerFailedStartText);
         }
 
         private void OnProcessStarted(IConanProcess details, bool refreshProcess)
