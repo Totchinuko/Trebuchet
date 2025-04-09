@@ -24,7 +24,7 @@ namespace Trebuchet.ViewModels
         private ProcessState _lastState;
         private bool _canClose;
         private bool _canKill;
-        private bool _canLaunch;
+        private bool _canLaunch = true;
         private bool _canUseDashboard;
         private List<string> _modlists = [];
         private bool _processRunning;

@@ -17,7 +17,7 @@ public class ClientInstanceDashboard : ReactiveObject
     private readonly DialogueBox _box;
     private ProcessState _lastState;
     private bool _canKill;
-    private bool _canLaunch;
+    private bool _canLaunch = true;
     private List<string> _modlists = [];
     private bool _processRunning;
     private List<string> _profiles = [];
@@ -37,8 +37,8 @@ public class ClientInstanceDashboard : ReactiveObject
         var canBlockerLaunch = blocker.WhenAnyValue(x => x.CanLaunch);
         var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
         var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(canBlockerLaunch, (f,s) => f && s);
-        LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch.StartWith(true));
-        LaunchBattleEyeCommand = ReactiveCommand.Create(OnBattleEyeLaunched, canLaunch.StartWith(true));
+        LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch);
+        LaunchBattleEyeCommand = ReactiveCommand.Create(OnBattleEyeLaunched, canLaunch);
         UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, canDownloadMods);
 
         this.WhenAnyValue(x => x.SelectedModlist)
