@@ -52,7 +52,7 @@ namespace Trebuchet.ViewModels.Panels
             SaveProfile = ReactiveCommand.Create(() => _profile.SaveFile());
             RefreshPanel.IsExecuting
                 .Where(x => x)
-                .Select(_ => Tools.IsClientInstallValid(setup.Config))
+                .Select(_ => Tools.IsClientInstallValid(setup.Config) && setup.Config.ManageClient)
                 .Subscribe(x => CanTabBeClicked = x);
             
             RefreshPanel.Subscribe((_) =>

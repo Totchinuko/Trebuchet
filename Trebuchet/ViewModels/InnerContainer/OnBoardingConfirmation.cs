@@ -11,7 +11,6 @@ public class OnBoardingConfirmation : TitledDialogue<OnBoardingConfirmation>
 
     public OnBoardingConfirmation(string title, string description) : base(title, description)
     {
-        CanCancel = true;
         ConfirmCommand = ReactiveCommand.Create(() =>
         {
             Result = true;

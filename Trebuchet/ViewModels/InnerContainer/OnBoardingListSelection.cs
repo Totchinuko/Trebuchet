@@ -6,27 +6,15 @@ using ReactiveUI;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingListSelection : DialogueContent
+public class OnBoardingListSelection : ValidatedInputDialogue<string, OnBoardingListSelection>
 {
     private string _selectedElement = string.Empty;
 
-    public OnBoardingListSelection(string title, string description, List<string> list) : base()
+    public OnBoardingListSelection(string title, string description, List<string> list) : base(title, description)
     {
-        Title = title;
-        Description = description;
         List = new ObservableCollection<string>(list);
-        SelectedElement = list.FirstOrDefault(string.Empty);
-        ConfirmCommand = ReactiveCommand.Create(Close);
+        Value = list.FirstOrDefault(string.Empty);
     }
     
     public ObservableCollection<string> List { get; }
-    public string Title { get; }
-    public string Description { get; }
-    public ReactiveCommand<Unit, Unit> ConfirmCommand { get; }
-
-    public string SelectedElement
-    {
-        get => _selectedElement;
-        set => this.RaiseAndSetIfChanged(ref _selectedElement, value);
-    }
 }

@@ -63,6 +63,7 @@ public class SettingsPanel : Panel
     {
         Fields.Add(new TitleField().SetTitle(Resources.OnBoardingUsageChoice));
         Fields.Add(new ClientInstallationField(_onBoarding, _setup)
+            .WhenFieldChanged(RequestAppRefresh)
             .SetTitle(Resources.SettingClientInstallation)
             .SetDescription(Resources.SettingClientInstallationText)
         );

@@ -8,8 +8,9 @@
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
             <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
-                <ComboBox ItemsSource="{Binding List}" VerticalAlignment="Center" Margin="0 0 12 0" SelectedItem="{Binding SelectedElement}" Width="250" />
+                <ComboBox ItemsSource="{Binding List}" VerticalAlignment="Center" Margin="0 0 12 0" SelectedItem="{Binding Value}" Width="250" />
                 <Button Classes="Base Green" Content="{x:Static a:Resources.Validate}" Command="{Binding ConfirmCommand}" />
+                <Button Classes="Base" Content="{x:Static a:Resources.Cancel}" Command="{Binding CancelCommand}" />
             </StackPanel>
         </DockPanel>
     </DataTemplate>

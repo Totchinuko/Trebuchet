@@ -7,10 +7,13 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using ReactiveUI;
+using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
+using TrebuchetLib;
 using TrebuchetLib.Services;
+using TrebuchetUtils.Modals;
 using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet.ViewModels;
@@ -124,12 +127,10 @@ public sealed class TrebuchetApp : ReactiveObject
     {
         foreach (var panel in panels)
         {
-            panel.TabClick.Subscribe((p) =>
-            {
-                ActivePanel = p;
-            });
+            panel.TabClick.Subscribe((p) => ActivePanel = p);
             panel.RequestAppRefresh.Subscribe((_) => RefreshPanels());
-                
+            panel.RefreshPanel.Execute().Subscribe();
+            
             if(panel.BottomPosition)
                 BottomPanels.Add(panel);
             else
@@ -140,14 +141,24 @@ public sealed class TrebuchetApp : ReactiveObject
     private void RefreshPanels()
     {
         foreach (var panel in _panels)
-            panel.RefreshPanel.Execute();
+            panel.RefreshPanel.Execute().Subscribe();
     }
 
     private async void OnBoardingActions()
     {
-        _appFiles.SetupFolders();
-        if (!await _onBoarding.OnBoardingCheckTrebuchet()) return;
-        if (!await OnBoardingFirstLaunch()) return;
+        try
+        {
+            _appFiles.SetupFolders();
+            if (!await _onBoarding.OnBoardingCheckTrebuchet()) return;
+            if (!await OnBoardingFirstLaunch()) return;
+        }
+        catch (Exception ex)
+        {
+            await new ErrorModal(Resources.Error, ex.Message).OpenDialogueAsync();
+            Utils.Utils.ShutdownDesktopProcess();
+            return;
+        }
+        
         _activePanel.Active = true;
         _activePanel.DisplayPanel.Execute();
     }

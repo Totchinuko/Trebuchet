@@ -1,3 +1,4 @@
+using System;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -6,6 +7,7 @@ using Trebuchet.Assets;
 using Trebuchet.Services;
 using TrebuchetLib;
 using TrebuchetLib.Services;
+using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels.SettingFields;
 
@@ -74,14 +76,32 @@ public class ClientInstallationField : DescriptiveElement<ClientInstallationFiel
     public string InstallLabel => _installLabel.Value;
     public string ManageFileLabel => _manageFileLabel.Value;
 
+    public ClientInstallationField WhenFieldChanged(ReactiveCommand<Unit, Unit> command)
+    {
+        this.WhenAnyValue(x => x.InstallPath, x => x.ManageFiles)
+            .Select((_,_) => Unit.Default)
+            .InvokeCommand(command);
+        return this;
+    }
+
     private async Task InstallClientPath()
     {
-        var success = await _onBoarding.OnBoardingFindConanExile();
-        if (success)
+        try
         {
-            Installed = true;
-            InstallPath = _setup.Config.ClientPath;
-            ManageFiles = _setup.Config.ManageClient;
+            var success = await _onBoarding.OnBoardingFindConanExile(force:true);
+            if (success)
+            {
+                _setup.Config.SaveFile();
+                Installed = true;
+                InstallPath = _setup.Config.ClientPath;
+                ManageFiles = _setup.Config.ManageClient;
+            }
+        }
+        catch(OperationCanceledException) {}
+        catch (Exception ex)
+        {
+            await new ExceptionModal(ex).OpenDialogueAsync();
+            Utils.Utils.ShutdownDesktopProcess();
         }
     }
 }

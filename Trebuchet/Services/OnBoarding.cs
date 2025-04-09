@@ -39,7 +39,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
                 if(!await OnBoardingFindConanExile()) return false;
                 return await OnBoardingServerDownload();
             default:
-                throw new Exception("OnBoarding Failed");
+                throw new OperationCanceledException("OnBoarding was cancelled");
         }
     }
 
@@ -59,16 +59,16 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
         return true;
     }
 
-    public async Task<bool> OnBoardingFindConanExile()
+    public async Task<bool> OnBoardingFindConanExile(bool force = false)
     {
-        if (Tools.IsClientInstallValid(setup.Config.ClientPath))
+        if (Tools.IsClientInstallValid(setup.Config.ClientPath) && !force)
             return await OnBoardingApplyConanManagement();
         
         var finder = new OnBoardingDirectory(Resources.OnBoardingLocateConan, Resources.OnBoardingLocateConanText, setup.Config.ClientPath)
             .SetValidation(ValidateConanExileLocation)
             .SetSize<OnBoardingDirectory>(600, 200);
         await dialogueBox.OpenAsync(finder);
-        if(finder.Value is null) throw new Exception("OnBoarding Failed");
+        if(finder.Value is null) throw new OperationCanceledException("OnBoarding was cancelled");
         setup.Config.ClientPath = finder.Value;
         return await OnBoardingAllowConanManagement();
     }
@@ -89,7 +89,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
             .AddChoice(Resources.OnBoardingManageConanNo, Resources.OnBoardingManageConanNoSub)
             .AddChoice(Resources.OnBoardingManageConanYes, Resources.OnBoardingManageConanYesSub);
         await dialogueBox.OpenAsync(choice);
-        if(choice.Result < 0) throw new Exception("OnBoarding Failed");
+        if(choice.Result < 0) throw new OperationCanceledException("OnBoarding was cancelled");
         setup.Config.ManageClient = choice.Result == 1;
         return await OnBoardingApplyConanManagement();
     }
@@ -107,10 +107,10 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
                 Tools.SetupSymboliclink(savedDir, appFiles.Client.GetPrimaryJunction());
             else
             {
-                Directory.CreateDirectory(savedDir);
                 if (!appFiles.Client.ListProfiles().Any())
                     return true;
                 var saveName = await OnBoardingChooseClientSave();
+                Directory.CreateDirectory(savedDir);
                 await Tools.DeepCopyAsync(appFiles.Client.GetFolder(saveName), savedDir, CancellationToken.None);
             }
             return true;
@@ -159,8 +159,8 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
                 appFiles.Client.ListProfiles().ToList())
             .SetSize<OnBoardingListSelection>(650, 200);
         await dialogueBox.OpenAsync(choice);
-        if(string.IsNullOrEmpty(choice.SelectedElement)) throw new Exception("OnBoarding Failed");
-        return choice.SelectedElement;
+        if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException("OnBoarding was cancelled");
+        return choice.Value;
     }
 
     public async Task<string> OnBoardingChooseClientSaveName()
@@ -169,7 +169,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
             .SetValidation(ValidateClientSaveName)
             .SetSize<OnBoardingNameSelection>(650, 200);
         await dialogueBox.OpenAsync(choice);
-        if(string.IsNullOrEmpty(choice.Value)) throw new Exception("OnBoarding Failed");
+        if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException("OnBoarding was cancelled");
         return choice.Value;
     }
 
@@ -190,12 +190,12 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
         if (!canWriteInTrebuchet)
         {
             if(isRoot) 
-                throw new Exception($"Can't write in {path}, permission denied");
+                throw new IOException($"Can't write in {path}, permission denied");
             var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
                 .SetSize<OnBoardingBranch>(650, 250)
                 .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
             await dialogueBox.OpenAsync(uac);
-            if(uac.Result < 0) throw new Exception("Uac failed");
+            if(uac.Result < 0) throw new OperationCanceledException("OnBoarding was cancelled");
             Utils.Utils.RestartProcess(setup.IsTestLive, true);
             return false;
         }

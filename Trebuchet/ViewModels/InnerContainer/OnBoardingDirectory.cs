@@ -36,8 +36,6 @@ public class OnBoardingDirectory : ValidatedInputDialogue<string, OnBoardingDire
 
         if (folder.Count == 0) return;
         if (!folder[0].Path.IsFile) return;
-        var result = _validation(folder[0].Path.LocalPath);
-        IsValid = result.IsValid;
-        ErrorMessage = result.ErrorMessage;
+        Value = folder[0].Path.LocalPath;
     }
 }

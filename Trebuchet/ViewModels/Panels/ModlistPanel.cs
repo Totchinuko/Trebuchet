@@ -469,8 +469,7 @@ namespace Trebuchet.ViewModels.Panels
         private async Task<string?> GetNewProfileName()
         {
             var modal = new OnBoardingNameSelection(Resources.Create, string.Empty)
-                .SetValidation(ValidateName)
-                .ToggleCancellable(true);
+                .SetValidation(ValidateName);
             await _box.OpenAsync(modal);
             return modal.Value;
         }
