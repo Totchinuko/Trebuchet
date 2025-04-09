@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services;
+using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils.Modals;
@@ -98,10 +99,5 @@ public class ClientInstallationField : DescriptiveElement<ClientInstallationFiel
             }
         }
         catch(OperationCanceledException) {}
-        catch (Exception ex)
-        {
-            await new ExceptionModal(ex).OpenDialogueAsync();
-            Utils.Utils.ShutdownDesktopProcess();
-        }
     }
 }
