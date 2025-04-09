@@ -1,4 +1,7 @@
-﻿namespace TrebuchetLib
+﻿using System.Text.Json.Serialization;
+using TrebuchetUtils;
+
+namespace TrebuchetLib
 {
     public static class AutoUpdateStatus
     {
@@ -9,91 +12,77 @@
 
     public sealed class Config : ConfigFile<Config>
     {
-        #region constants
+        private string[] _selectedServerModlists = [];
+        private string[] _selectedServerProfiles = [];
+        
+        public int AutoUpdateStatus { get; set; } = AutoUpdateStatusDefault;
+        public string ClientPath { get; set; } = ClientPathDefault;
+        public bool ManageClient { get; set; } = ManageClientDefault;
+        public int MaxDownloads { get; set; } = MaxDownloadsDefault;
+        public int MaxServers { get; set; } = MaxServersDefault;
+        public int ServerInstanceCount { get; set; } = ServerInstanceCountDefault;
+        public int UpdateCheckInterval { get; set; } = UpdateCheckIntervalDefault;
+        public bool VerifyAll { get; set; } = VerifyAllDefault;
+        public string SelectedClientModlist { get; set; } = string.Empty;
+        public string SelectedClientProfile { get; set; } = string.Empty;
+        public string[] SelectedServerModlists { get => _selectedServerModlists; set => _selectedServerModlists = value; }
+        public string[] SelectedServerProfiles { get => _selectedServerProfiles; set => _selectedServerProfiles = value; }
+        
+        [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
+        [Obsolete]
+        public string InstallPath { get; set; } = string.Empty;
+        
 
-        public const uint AppIDLiveClient = 440900;
-        public const uint AppIDLiveServer = 443030;
-        public const uint AppIDTestLiveClient = 931180;
-        public const uint AppIDTestLiveServer = 931580;
-        public const string CmdArgAppUpdate = "+app_update {0}";
-        public const string CmdArgForceInstallDir = "+force_install_dir \"{0}\"";
-        public const string CmdArgLogin = "+login \"{0}\" \"{1}\"";
-        public const string CmdArgLoginAnonymous = "+login anonymous";
-        public const string CmdArgQuit = "+quit";
-        public const string CmdArgWorkshopUpdate = "+workshop_download_item {0} {1}";
-        public const string FileBuildID = "buildid";
-        public const string FileClientBEBin = "ConanSandbox_BE.exe";
-        public const string FileClientBin = "ConanSandbox.exe";
-        public const string FileConfig = "Config.json";
-        public const string FileGeneratedModlist = "modlist.txt";
-        public const string FileIniBase = "Engine\\Config\\Base{0}.ini";
-        public const string FileIniDefault = "ConanSandbox\\Config\\Default{0}.ini";
-        public const string FileIniServer = "ConanSandbox\\Saved\\Config\\WindowsServer\\{0}.ini";
-        public const string FileIniUser = "ConanSandbox\\Saved\\Config\\WindowsNoEditor\\{0}.ini";
-        public const string FileMapJson = "Json\\Maps.json";
-        public const string FileProfileConfig = "profile.json";
-        public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
-        public const string FileServerProxyBin = "ConanSandboxServer.exe";
-        public const string FileTrebuchetLaunch = "trebuchet.json";
-        public const string FolderClientProfiles = "ClientProfiles";
-        public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
-        public const string FolderGameSave = "ConanSandbox\\Saved";
-        public const string FolderInstancePattern = "Instance_{0}";
-        public const string FolderLive = "Live";
-        public const string FolderModlistProfiles = "Modlists";
-        public const string FolderServerInstances = "ServerInstances";
-        public const string FolderServerProfiles = "ServerProfiles";
-        public const string FolderTestLive = "TestLive";
-        public const string FolderWorkshop = "Workshop";
-        public const string GameArgsLog = "-log";
-        public const string GameArgsModList = "-modlist=\"{0}\"";
-        public const string GameArgsUseAllCore = "-useallavailablecores";
-        public const string RegexSavedFolder = @"ConanSandbox([\\/]+)Saved";
-        public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
-        public const string ServerArgsMultiHome = "-MULTIHOME={0}";
-        public const string SteamWorkshopURL = "https://steamcommunity.com/sharedfiles/filedetails/?id={0}";
-
-        #endregion constants
-
-        public int AutoUpdateStatus { get; set; } = 1;
-
-        public string ClientPath { get; set; } = string.Empty;
-
-        public string InstallPath { get; set; } = "%APP_DIRECTORY%\\TrebuchetData";
-
-        public bool IsInstallPathValid => !string.IsNullOrEmpty(InstallPath) && Directory.Exists(ResolvedInstallPath);
-
-        public bool IsTestLive => Path.GetFileName(FilePath) == $"{FolderTestLive}.{FileConfig}";
-
-        public int MaxDownloads { get; set; } = 8;
-
-        public int MaxServers { get; set; } = 20;
-
-        public string ResolvedInstallPath => ResolveInstallPath(InstallPath);
-
-        public uint ServerAppID => IsTestLive ? AppIDTestLiveServer : AppIDLiveServer;
-
-        public int ServerInstanceCount { get; set; } = 0;
-
-        public int UpdateCheckInterval { get; set; } = 300;
-
-        public bool VerifyAll { get; set; } = false;
-
-        public string VersionFolder => IsTestLive ? FolderTestLive : FolderLive;
-
-        public static string GetPath(bool testlive)
+        public static string GetDefaultInstallPath()
         {
-            string? ConfigPath = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-            if (string.IsNullOrEmpty(ConfigPath))
-                throw new Exception("Path to assembly is invalid.");
-            ConfigPath = Path.Combine(ConfigPath, $"{(testlive ? FolderTestLive : FolderLive)}.{FileConfig}");
-            return ConfigPath;
+            return typeof(Config).GetStandardFolder(Environment.SpecialFolder.MyDocuments).FullName;
+        }
+        
+        public void SetInstanceParameters(int instance, string modlist, string profile)
+        {
+            SetInstanceModlist(instance, modlist);
+            SetInstanceProfile(instance, profile);
+        }
+        
+        public void SetInstanceModlist(int instance, string modlist)
+        {
+            if (SelectedServerModlists.Length <= instance)
+                Array.Resize(ref _selectedServerModlists, instance + 1);
+            SelectedServerModlists[instance] = modlist;
         }
 
-        public static string ResolveInstallPath(string path)
+        public void SetInstanceProfile(int instance, string profile)
         {
-            string appDir = System.IO.Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
-            return path.Replace("%APP_DIRECTORY%", appDir);
+            if (SelectedServerProfiles.Length <= instance)
+                Array.Resize(ref _selectedServerProfiles, instance + 1);
+            SelectedServerProfiles[instance] = profile;
         }
+        
+        public void GetInstanceParameters(int instance, out string modlist, out string profile)
+        {
+            modlist = GetInstanceModlist(instance);
+            profile = GetInstanceProfile(instance);
+        }
+
+        public string GetInstanceModlist(int instance)
+        {
+            if (SelectedServerModlists.Length <= instance) return string.Empty;
+            return SelectedServerModlists[instance];
+        }
+
+        public string GetInstanceProfile(int instance)
+        {
+            if (SelectedServerProfiles.Length <= instance) return string.Empty;
+            return SelectedServerProfiles[instance];
+        }
+        
+        public static readonly int AutoUpdateStatusDefault = 1;
+        public static readonly string ClientPathDefault = string.Empty;
+        public static readonly bool ManageClientDefault = false;
+        public static readonly int MaxDownloadsDefault = 8;
+        public static readonly int MaxServersDefault = 20;
+        public static readonly int ServerInstanceCountDefault = 0;
+        public static readonly int UpdateCheckIntervalDefault = 300;
+        public static readonly bool VerifyAllDefault = false;
     }
 }

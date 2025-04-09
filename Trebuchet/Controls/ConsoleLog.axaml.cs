@@ -2,7 +2,7 @@
 using System.Collections.Specialized;
 using Avalonia;
 using Avalonia.Controls;
-using Trebuchet.Panels;
+using Trebuchet.ViewModels.Panels;
 
 namespace Trebuchet.Controls
 {

@@ -1,0 +1,866 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<root>
+    <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+        <xsd:element name="root" msdata:IsDataSet="true">
+            
+        </xsd:element>
+    </xsd:schema>
+    <resheader name="resmimetype">
+        <value>text/microsoft-resx</value>
+    </resheader>
+    <resheader name="version">
+        <value>1.3</value>
+    </resheader>
+    <resheader name="reader">
+        <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+    <resheader name="writer">
+        <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    </resheader>
+
+    <data name="HandleOriginalSavedDirectoryText" xml:space="preserve">
+        <value>Your game directory contain saved data from your previous use of the game. In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original.\nDo you wish to continue ?</value>
+    </data>
+    <data name="HandleOriginalSavedDirectory" xml:space="preserve">
+    <value>Saved Data</value>
+    </data>
+    <data name="InvalidDirectory" xml:space="preserve">
+    <value>Directory is invalid</value>
+    </data>
+    <data name="DirectoryNotFound" xml:space="preserve">
+    <value>Directory does not exists</value>
+    </data>
+    <data name="InstallPathInGameError" xml:space="preserve">
+    <value>Install path cannot be in the game Saved folder</value>
+    </data>
+    <data name="GameDirectoryInvalidError" xml:space="preserve">
+    <value>Game could not be found in this Directory</value>
+    </data>
+    <data name="UACDialogText" xml:space="preserve">
+        <value>Trebuchet require administrative rights in order to handle protected files for the following reason(s):</value>
+    </data>
+    <data name="UACDialog" xml:space="preserve">
+        <value>Write Permission</value>
+    </data>
+    <data name="Kill" xml:space="preserve">
+    <value>Kill</value>
+    </data>
+    <data name="KillText" xml:space="preserve">
+    <value>Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. Do you wish to continue ?</value>
+    </data>
+    <data name="GameFolderReset" xml:space="preserve">
+    <value>Game Folder Reset</value>
+    </data>
+    <data name="GameFolderResetText" xml:space="preserve">
+    <value>Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.</value>
+    </data>
+    <data name="Create" xml:space="preserve">
+    <value>Create</value>
+    </data>
+    <data name="ProfileName" xml:space="preserve">
+    <value>Profile Name</value>
+    </data>
+    <data name="Deletion" xml:space="preserve">
+    <value>Deletion</value>
+    </data>
+    <data name="DeletionText" xml:space="preserve">
+    <value>Do you wish to delete the selected profile {0} ?</value>
+    </data>
+    <data name="Duplicate" xml:space="preserve">
+    <value>Duplicate</value>
+    </data>
+    <data name="InvalidURL" xml:space="preserve">
+    <value>Invalid URL</value>
+    </data>
+    <data name="InvalidURLText" xml:space="preserve">
+    <value>The steam URL seems to be missing its ID to be valid.</value>
+    </data>
+    <data name="TrebuchetBusy" xml:space="preserve">
+    <value>Trebuchet is busy.</value>
+    </data>
+    <data name="ModlistName" xml:space="preserve">
+    <value>Modlist Name</value>
+    </data>
+    <data name="InvalidJson" xml:space="preserve">
+    <value>Invalid Json</value>
+    </data>
+    <data name="InvalidJsonText" xml:space="preserve">
+    <value>Loaded json could not be parsed.</value>
+    </data>
+    <data name="ServerFailedStart" xml:space="preserve">
+    <value>Server failed to start</value>
+    </data>
+    <data name="ServerFailedStartText" xml:space="preserve">
+    <value>Server failed to start properly. See the logs for more information.</value>
+    </data>
+    <data name="ServerNotInstalled" xml:space="preserve">
+    <value>Some server instances are not yet installed.</value>
+    </data>
+    <data name="Install" xml:space="preserve">
+    <value>Install</value>
+    </data>
+    <data name="TestLiveMod" xml:space="preserve">
+    <value>Steam Workshop (TestLive)</value>
+    </data>
+    <data name="LiveMod" xml:space="preserve">
+    <value>Steam Workshop (Live)</value>
+    </data>
+    <data name="LocalMod" xml:space="preserve">
+    <value>Local File</value>
+    </data>
+    <data name="UpdateModsLabel" xml:space="preserve">
+        <value>Updating mods</value>
+    </data>
+    <data name="UpdateServersLabel" xml:space="preserve">
+        <value>Updating servers</value>
+    </data>
+    <data name="VerifyServersLabel" xml:space="preserve">
+        <value>Verifying server files</value>
+    </data>
+    <data name="VerifyModsLabel" xml:space="preserve">
+        <value>Verifying mod files</value>
+    </data>
+    <data name="Missing" xml:space="preserve">
+        <value>Missing</value>
+    </data>
+    <data name="Found" xml:space="preserve">
+        <value>Found</value>
+    </data>
+    <data name="UpToDate" xml:space="preserve">
+        <value>Up to Date</value>
+    </data>
+    <data name="UpdateAvailable" xml:space="preserve">
+        <value>Update Available</value>
+    </data>
+    <data name="Error" xml:space="preserve">
+        <value>Error</value>
+    </data>
+    <data name="Settings" xml:space="preserve">
+        <value>Settings</value>
+    </data>
+    <data name="GameSaves" xml:space="preserve">
+        <value>Game Saves</value>
+    </data>
+    <data name="Dashboard" xml:space="preserve">
+        <value>Dashboard</value>
+    </data>
+    <data name="Mods" xml:space="preserve">
+        <value>Mods</value>
+    </data>
+    <data name="ServerConsoles" xml:space="preserve">
+        <value>Server Consoles</value>
+    </data>
+    <data name="ServerSaves" xml:space="preserve">
+        <value>Server Saves</value>
+    </data>
+    <data name="LastModified" xml:space="preserve">
+        <value>Last Modified</value>
+    </data>
+    <data name="Loading" xml:space="preserve">
+        <value>Loading</value>
+    </data>
+    <data name="LastUpdate" xml:space="preserve">
+        <value>Last Update</value>
+    </data>
+    <data name="ServerLogFilter" xml:space="preserve">
+        <value>Server Log Filters</value>
+    </data>
+    <data name="OnBoardingUpgradeUac" xml:space="preserve">
+        <value>In order to upgrade your installation of Trebuchet, Write permission are needed. 
+With your permission, Trebuchet will restart and request administrative privileges.</value>
+    </data>
+    <data name="OnBoardingUpgrade" xml:space="preserve">
+        <value>A previous installation of Trebuchet has been detected and must be upgraded to function with this version. Once this task is over, previous version of Trebuchet will not work anymore. 
+Do you wish to proceed ?</value>
+    </data>
+    <data name="Upgrade" xml:space="preserve">
+        <value>Upgrade</value>
+    </data>
+    <data name="OnBoardingUpgradeSub" xml:space="preserve">
+        <value>If you do not wish to upgrade now, please close Trebuchet.</value>
+    </data>
+    <data name="OnBoardingUpgradeCopy" xml:space="preserve">
+        <value>Please wait while your files are being copied</value>
+    </data>
+    <data name="SettingManageClient" xml:space="preserve">
+        <value>Manage Game Files</value>
+    </data>
+    <data name="SettingManageClientText" xml:space="preserve">
+        <value>Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer.</value>
+    </data>
+    <data name="SteamConnected" xml:space="preserve">
+        <value>Connected to Steam</value>
+    </data>
+    <data name="SteamDisconnected" xml:space="preserve">
+        <value>Steam is unavailable</value>
+    </data>
+    <data name="OnBoardingUsageChoice" xml:space="preserve">
+        <value>Trebuchet's Features</value>
+    </data>
+    <data name="OnBoardingUsageChoiceText" xml:space="preserve">
+        <value>Please select what usage to intend to make of Trebuchet. This will preconfigure the app with base settings that you can change later if you change your mind.</value>
+    </data>
+    <data name="OnBoardingUsageChoicePlayer" xml:space="preserve">
+        <value>Play Conan Exiles</value>
+    </data>
+    <data name="OnBoardingUsageChoicePlayerSub" xml:space="preserve">
+        <value>This will disable Trebuchet's server features</value>
+    </data>
+    <data name="OnBoardingUsageChoiceServer" xml:space="preserve">
+        <value>Manage Servers</value>
+    </data>
+    <data name="OnBoardingUsageChoiceServerSub" xml:space="preserve">
+        <value>This will disable Trebuchet's game features</value>
+    </data>
+    <data name="OnBoardingUsageChoiceModder" xml:space="preserve">
+        <value>Modding</value>
+    </data>
+    <data name="OnBoardingUsageChoiceModderSub" xml:space="preserve">
+        <value>This will enable both server and game features for mod testing</value>
+    </data>
+    <data name="Validate" xml:space="preserve">
+        <value>Validate</value>
+    </data>
+    <data name="OnBoardingLocateConan" xml:space="preserve">
+        <value>Locate Conan Exiles</value>
+    </data>
+    <data name="OnBoardingLocateConanText" xml:space="preserve">
+        <value>Indicate to Trebuchet where to find your Conan Exile game</value>
+    </data>
+    <data name="OnBoardingLocateConanError" xml:space="preserve">
+        <value>The folder selected does not contain Conan Exiles</value>
+    </data>
+    <data name="OnBoardingManageConan" xml:space="preserve">
+        <value>Game Files Management</value>
+    </data>
+    <data name="OnBoardingManageConanText" xml:space="preserve">
+        <value>Allow Trebuchet to handle your game files? If so, Trebuchet will move your game files located in the Saved folder, into your MyDocuments directory. This will allow two things:
+ (a) To be able to create as many saves as you wish, and start the game using any of them
+ (b) To offer extra settings for the game through Trebuchet</value>
+    </data>
+    <data name="OnBoardingManageConanYes" xml:space="preserve">
+        <value>Allow Game Management</value>
+    </data>
+    <data name="OnBoardingManageConanYesSub" xml:space="preserve">
+        <value>Files will be moved to MyDocuments</value>
+    </data>
+    <data name="OnBoardingManageConanNo" xml:space="preserve">
+        <value>Leave Game Untouched</value>
+    </data>
+    <data name="OnBoardingManageConanNoSub" xml:space="preserve">
+        <value>Your files will remain in the Saved directory</value>
+    </data>
+    <data name="OnBoardingManageConanUac" xml:space="preserve">
+        <value>To apply your choice, Trebuchet need permission to write into your game directory</value>
+    </data>
+    <data name="OnBoardingGameSave" xml:space="preserve">
+        <value>Game Save</value>
+    </data>
+    <data name="OnBoardingChooseGameSaveText" xml:space="preserve">
+        <value>Choose which game save need to be copied back into the game files</value>
+    </data>
+    <data name="OnBoardingNewGameSave" xml:space="preserve">
+        <value>Choose a name for the new trebuchet save that will contain your files</value>
+    </data>
+    <data name="ErrorNameAlreadyTaken" xml:space="preserve">
+        <value>This name is already taken</value>
+    </data>
+    <data name="ErrorNameEmpty" xml:space="preserve">
+        <value>The name cannot be empty</value>
+    </data>
+    <data name="ErrorNameInvalidCharacters" xml:space="preserve">
+        <value>This name contain invalid characters</value>
+    </data>
+    <data name="Yes" xml:space="preserve">
+        <value>Yes</value>
+    </data>
+    <data name="No" xml:space="preserve">
+        <value>No</value>
+    </data>
+    <data name="Cancel" xml:space="preserve">
+        <value>Cancel</value>
+    </data>
+    <data name="ErrorValueEmpty" xml:space="preserve">
+        <value>Value cannot be empty</value>
+    </data>
+    <data name="CatGeneral" xml:space="preserve">
+        <value>General</value>
+    </data>
+    <data name="SettingBackgroundSound" xml:space="preserve">
+        <value>Background Sound</value>
+    </data>
+    <data name="SettingBackgroundSoundText" xml:space="preserve">
+        <value>Keep the sound of the game up when tabbing out to another window</value>
+    </data>
+    <data name="SettingIntroVid" xml:space="preserve">
+        <value>Remove Intro Videos</value>
+    </data>
+    <data name="SettingIntroVidText" xml:space="preserve">
+        <value>Instead of displaying the intro video, you will have black screen that will swap to the main menu once the game is loaded</value>
+    </data>
+    <data name="CatProcessPerformance" xml:space="preserve">
+        <value>Process Performance</value>
+    </data>
+    <data name="SettingUseAllCore" xml:space="preserve">
+        <value>Use All Cores</value>
+    </data>
+    <data name="SettingUseAllCoreText" xml:space="preserve">
+        <value>Supposed to improve performance on machines with lots of cores, unverified. Probably black magic</value>
+    </data>
+    <data name="SettingProcessPrio" xml:space="preserve">
+        <value>Process Priority</value>
+    </data>
+    <data name="SettingProcessPrioText" xml:space="preserve">
+        <value>Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness</value>
+    </data>
+    <data name="SettingProcessPrioNormal" xml:space="preserve">
+        <value>Normal</value>
+    </data>
+    <data name="SettingProcessPrioAboveNormal" xml:space="preserve">
+        <value>Above Normal</value>
+    </data>
+    <data name="SettingProcessPrioHigh" xml:space="preserve">
+        <value>High</value>
+    </data>
+    <data name="SettingProcessPrioRealtime" xml:space="preserve">
+        <value>Realtime (Not Recommanded)</value>
+    </data>
+    <data name="SettingCpuAffinity" xml:space="preserve">
+        <value>CPU Thread Affinity</value>
+    </data>
+    <data name="SettingCpuAffinityText" xml:space="preserve">
+        <value>CPU Thread Affinity help to assign specific cores to the server process</value>
+    </data>
+    <data name="CatGraphics" xml:space="preserve">
+        <value>Graphics</value>
+    </data>
+    <data name="SettingUltraAniso" xml:space="preserve">
+        <value>Better Textures on Ultra</value>
+    </data>
+    <data name="SettingUltraAnisoText" xml:space="preserve">
+        <value>Increase the sharpness of angled textures on Ultra settings. This can have a performance hit depending on your hardware</value>
+    </data>
+    <data name="SettingTexPool" xml:space="preserve">
+        <value>Extra Texture Streaming Pool on Ultra (MB)</value>
+    </data>
+    <data name="SettingTexPoolText" xml:space="preserve">
+        <value>In order to not saturate your GPU memory with textures, the game constantly swap textures it does not need for the ones it needs. For that it reserve a portion of your memory to swap things out. By default on Ultra, that pool is 1500 MB in size. It's fine for the vanilla game, but with modded games it can be short when you are in an intensive area with lots of decorations, showing blurry textures more often. You can increase the base 1500 with this slider. Keep in mind that adding too much could have performance impact on your game</value>
+    </data>
+    <data name="SettingAsyncScene" xml:space="preserve">
+        <value>Enable Async Scene</value>
+    </data>
+    <data name="SettingAsyncSceneText" xml:space="preserve">
+        <value>Can improve performance, specially around heavy building areas</value>
+    </data>
+    <data name="SettingMaxMoveDelta" xml:space="preserve">
+        <value>Max Move Delta Time</value>
+    </data>
+    <data name="SettingMaxMoveDeltaText" xml:space="preserve">
+        <value>TODO</value>
+    </data>
+    <data name="SettingInternetSpeed" xml:space="preserve">
+        <value>Configured Internet Speed</value>
+    </data>
+    <data name="SettingInternetSpeedText" xml:space="preserve">
+        <value>TODO</value>
+    </data>
+    <data name="SettingLog" xml:space="preserve">
+        <value>Display Log Console</value>
+    </data>
+    <data name="SettingLogText" xml:space="preserve">
+        <value>Display live game logs as the game is running</value>
+    </data>
+    <data name="SettingAdminServerList" xml:space="preserve">
+        <value>[Tot ! Admin] Do not load server list</value>
+    </data>
+    <data name="SettingAdminServerListText" xml:space="preserve">
+        <value>Prevent the sever list from auto refreshing from the main menu</value>
+    </data>
+    <data name="SettingLogFilter" xml:space="preserve">
+        <value>Log Filters</value>
+    </data>
+    <data name="SettingLogFilterText" xml:space="preserve">
+        <value>Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+    </data>
+    <data name="CatServerSettings" xml:space="preserve">
+        <value>Server Settings</value>
+    </data>
+    <data name="SettingServerName" xml:space="preserve">
+        <value>Server Name</value>
+    </data>
+    <data name="SettingServerNameText" xml:space="preserve">
+        <value>Name of your server instance in the game server list</value>
+    </data>
+    <data name="SettingServerPass" xml:space="preserve">
+        <value>Server Password</value>
+    </data>
+    <data name="SettingServerPassText" xml:space="preserve">
+        <value>Password of your server instance</value>
+    </data>
+    <data name="SettingServerAdminPass" xml:space="preserve">
+        <value>Admin Password</value>
+    </data>
+    <data name="SettingServerAdminPassText" xml:space="preserve">
+        <value>Admin password of your server instance</value>
+    </data>
+    <data name="SettingServerMaxPlayer" xml:space="preserve">
+        <value>Max Player Count</value>
+    </data>
+    <data name="SettingServerMaxPlayerText" xml:space="preserve">
+        <value>Maximum authorized amount of playes on your server instance</value>
+    </data>
+    <data name="SettingServerRegion" xml:space="preserve">
+        <value>Server Region</value>
+    </data>
+    <data name="SettingServerRegionText" xml:space="preserve">
+        <value>Server region to be displayed in the server browser</value>
+    </data>
+    <data name="SettingServerRegionEurope" xml:space="preserve">
+        <value>Europe</value>
+    </data>
+    <data name="SettingServerRegionNorthAmerica" xml:space="preserve">
+        <value>North America</value>
+    </data>
+    <data name="SettingServerRegionAsia" xml:space="preserve">
+        <value>Asia</value>
+    </data>
+    <data name="SettingServerRegionAustralia" xml:space="preserve">
+        <value>Australia</value>
+    </data>
+    <data name="SettingServerRegionSouthAmerica" xml:space="preserve">
+        <value>South America</value>
+    </data>
+    <data name="SettingServerRegionJapan" xml:space="preserve">
+        <value>Japan</value>
+    </data>
+    <data name="SettingServerMap" xml:space="preserve">
+        <value>Game Map</value>
+    </data>
+    <data name="SettingServerMapText" xml:space="preserve">
+        <value>Starting path of the map you want to load on your server intance. The button contain a few known map path for easier setup</value>
+    </data>
+    <data name="SettingSudoAdminList" xml:space="preserve">
+        <value>Sudo Super Admin List</value>
+    </data>
+    <data name="SettingSudoAdminListText" xml:space="preserve">
+        <value>List of steam ID to be Sudo super admins on your servers, one per line. Leave it empty if you do not use Sudo.</value>
+    </data>
+    <data name="SettingTotAdminPrecision" xml:space="preserve">
+        <value>Disable Tot!Admin High Precision Move Tool</value>
+    </data>
+    <data name="SettingTotAdminPrecisionText" xml:space="preserve">
+        <value>For better compatibility with other move tools, disable two decimal scaling of Tot!Admin Move Tool</value>
+    </data>
+    <data name="CatRestartSettings" xml:space="preserve">
+        <value>Restart Settings</value>
+    </data>
+    <data name="SettingServerKillZombies" xml:space="preserve">
+        <value>Kill Zombie Servers</value>
+    </data>
+    <data name="SettingServerKillZombiesText" xml:space="preserve">
+        <value>Kill server instances that have stopped responding (frozen) for a period of time</value>
+    </data>
+    <data name="SettingServerZombieDuration" xml:space="preserve">
+        <value>Zombie Check Duration (Seconds)</value>
+    </data>
+    <data name="SettingServerZombieDurationText" xml:space="preserve">
+        <value>Amount of time given to a server instance to respond before getting killed by trebuchet</value>
+    </data>
+    <data name="SettingServerCrashRestart" xml:space="preserve">
+        <value>Restart Servers When Down</value>
+    </data>
+    <data name="SettingServerCrashRestartText" xml:space="preserve">
+        <value>Automatically restart a server instance that have stopped unexpectedly</value>
+    </data>
+    <data name="CatPerformance" xml:space="preserve">
+        <value>Performance</value>
+    </data>
+    <data name="SettingServerMaximumTickRate" xml:space="preserve">
+        <value>Maximum Tick Rate</value>
+    </data>
+    <data name="SettingServerMaximumTickRateText" xml:space="preserve">
+        <value>Maximum tick rate of your server instance</value>
+    </data>
+    <data name="SettingServerUseAllCores" xml:space="preserve">
+        <value>Use All Cores</value>
+    </data>
+    <data name="SettingServerUseAllCoresText" xml:space="preserve">
+        <value>Supposed to improve performance on machines with lots of cores, unverified. Probably black magic</value>
+    </data>
+    <data name="SettingServerProcessPriority" xml:space="preserve">
+        <value>Process Priority</value>
+    </data>
+    <data name="SettingServerProcessPriorityText" xml:space="preserve">
+        <value>Process priority of your server instance. Higher might make your server more responsive but at the cost of other OS processes responsiveness</value>
+    </data>
+    <data name="SettingServerCPUThreadAffinity" xml:space="preserve">
+        <value>CPU Thread Affinity</value>
+    </data>
+    <data name="SettingServerCPUThreadAffinityText" xml:space="preserve">
+        <value>CPU Thread Affinity help to assign specific cores to the server process</value>
+    </data>
+    <data name="CatPorts" xml:space="preserve">
+        <value>Ports</value>
+    </data>
+    <data name="SettingServerGameClientPort" xml:space="preserve">
+        <value>Game Client Port</value>
+    </data>
+    <data name="SettingServerGameClientPortText" xml:space="preserve">
+        <value>Port used by the game client to connect to your server instance</value>
+    </data>
+    <data name="SettingServerRawUDPPort" xml:space="preserve">
+        <value>Raw UDP Port</value>
+    </data>
+    <data name="SettingServerRawUDPPortText" xml:space="preserve">
+        <value>TODO</value>
+    </data>
+    <data name="SettingServerSourceQueryPort" xml:space="preserve">
+        <value>Source Query Port</value>
+    </data>
+    <data name="SettingServerSourceQueryPortText" xml:space="preserve">
+        <value>Port used by the server browser to query your server instance</value>
+    </data>
+    <data name="SettingServerEnableMultiHome" xml:space="preserve">
+        <value>Enable Multi Home</value>
+    </data>
+    <data name="SettingServerEnableMultiHomeText" xml:space="preserve">
+        <value>Enable Multi Home to allow multiple IP to connect to your server instance</value>
+    </data>
+    <data name="SettingServerMultiHomeAddress" xml:space="preserve">
+        <value>Multi Home Address</value>
+    </data>
+    <data name="SettingServerMultiHomeAddressText" xml:space="preserve">
+        <value>IP address to be used by Multi Home. Usually your local IP</value>
+    </data>
+    <data name="CatRCon" xml:space="preserve">
+        <value>RCon</value>
+    </data>
+    <data name="SettingServerEnableRCon" xml:space="preserve">
+        <value>Enable RCon</value>
+    </data>
+    <data name="SettingServerEnableRConText" xml:space="preserve">
+        <value>Enable RCON on your server instance</value>
+    </data>
+    <data name="SettingServerRConPort" xml:space="preserve">
+        <value>RCon Port</value>
+    </data>
+    <data name="SettingServerRConPortText" xml:space="preserve">
+        <value>Port used by RCon</value>
+    </data>
+    <data name="SettingServerRConPassword" xml:space="preserve">
+        <value>RCon Password</value>
+    </data>
+    <data name="SettingServerRConPasswordText" xml:space="preserve">
+        <value>Password used by RCon</value>
+    </data>
+    <data name="SettingServerRConMaxKarma" xml:space="preserve">
+        <value>RCon Max Karma</value>
+    </data>
+    <data name="SettingServerRConMaxKarmaText" xml:space="preserve">
+        <value>Maximum karma value for RCon</value>
+    </data>
+    <data name="CatAntiCheat" xml:space="preserve">
+        <value>Anti-Cheat</value>
+    </data>
+    <data name="SettingServerEnableVAC" xml:space="preserve">
+        <value>Enable Valve Anti Cheat</value>
+    </data>
+    <data name="SettingServerEnableVACText" xml:space="preserve">
+        <value>Enable Valve Anti Cheat on your server instance</value>
+    </data>
+    <data name="SettingServerEnableBattleEye" xml:space="preserve">
+        <value>Enable Battle Eye</value>
+    </data>
+    <data name="SettingServerEnableBattleEyeText" xml:space="preserve">
+        <value>Enable Battle Eye on your server instance</value>
+    </data>
+    <data name="CatMiscellaneous" xml:space="preserve">
+        <value>Miscellaneous</value>
+    </data>
+    <data name="SettingServerLog" xml:space="preserve">
+        <value>Display Log Console</value>
+    </data>
+    <data name="SettingServerLogText" xml:space="preserve">
+        <value>Display server live logs instead of a blank window. WARNING: This might render the zombie process detection ineffective. I don't advise using this on a production server</value>
+    </data>
+    <data name="SettingServerNoAISpawn" xml:space="preserve">
+        <value>No AI Spawn</value>
+    </data>
+    <data name="SettingServerNoAISpawnText" xml:space="preserve">
+        <value>Prevent the spawn of common map NPC. Some categories of NPC are not affected by this, like the Siptha vaults</value>
+    </data>
+    <data name="SettingServerLogFilters" xml:space="preserve">
+        <value>Log Filters</value>
+    </data>
+    <data name="SettingServerLogFiltersText" xml:space="preserve">
+        <value>Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+    </data>
+    <data name="SettingClientInstallation" xml:space="preserve">
+        <value>Conan Exile Installation Folder</value>
+    </data>
+    <data name="SettingClientInstallationText" xml:space="preserve">
+        <value>Indicate to Trebuchet where to find your Conan Exile game installation folder. You'll also be choosing if Trebuchet should handle your game files or not.</value>
+    </data>
+    <data name="SettingServerInstanceCount" xml:space="preserve">
+        <value>Server Instance Amount</value>
+    </data>
+    <data name="SettingServerInstanceCountText" xml:space="preserve">
+        <value>The amount of server instance to be handled by this trebuchet. Leave it at 0 if you do not wish trebuchet to handle server launch</value>
+    </data>
+    <data name="SettingAutoUpdateStatus" xml:space="preserve">
+        <value>Update Server Instances</value>
+    </data>
+    <data name="SettingAutoUpdateStatusText" xml:space="preserve">
+        <value>Choose when to update your servers. This does not apply to client game</value>
+    </data>
+    <data name="SettingAutoUpdateStatusNever" xml:space="preserve">
+        <value>Never</value>
+    </data>
+    <data name="SettingAutoUpdateStatusLaunchOnly" xml:space="preserve">
+        <value>Only on launch</value>
+    </data>
+    <data name="SettingAutoUpdateStatusCheck" xml:space="preserve">
+        <value>Check for updates</value>
+    </data>
+    <data name="SettingUpdateCheckInterval" xml:space="preserve">
+        <value>Update Check Interval</value>
+    </data>
+    <data name="SettingUpdateCheckIntervalText" xml:space="preserve">
+        <value>"The interval in seconds between each update check</value>
+    </data>
+    <data name="SettingVerifyAll" xml:space="preserve">
+        <value>Always Verify Files</value>
+    </data>
+    <data name="SettingVerifyAllText" xml:space="preserve">
+        <value>When checking for updated files, the system will check its cached data to quickly check if they need to be redownloaded again. By checking this option, you force the system to inspect the files every time. This will make the process of checking for updates much more slow but is usefull to detect corruption. If you suspect corruption, I advise to use the button on the dashboard instead of turning on this setting</value>
+    </data>
+    <data name="SettingMaxDownloads" xml:space="preserve">
+        <value>Max Simultaneous Downloads</value>
+    </data>
+    <data name="SettingMaxDownloadsText" xml:space="preserve">
+        <value>Max amount of files downloaded at the same time on the steam network. This can increase the load on your CPU/Drive/Network but make the download potentially faster if your network allow it</value>
+    </data>
+    <data name="SettingMaxServers" xml:space="preserve">
+        <value>Max Download Servers</value>
+    </data>
+    <data name="SettingMaxServersText" xml:space="preserve">
+        <value>Max amount of content server used at the same time on the steam network</value>
+    </data>
+    <data name="SettingAutoRefreshModlist" xml:space="preserve">
+        <value>Auto Refresh Mod List</value>
+    </data>
+    <data name="SettingAutoRefreshModlistText" xml:space="preserve">
+        <value>TODO</value>
+    </data>
+    <data name="SettingDisplayWarningOnKill" xml:space="preserve">
+        <value>Display Warning On Kill</value>
+    </data>
+    <data name="SettingDisplayWarningOnKillText" xml:space="preserve">
+        <value>Click on a Kill button will display first a warning about data loss and corruption</value>
+    </data>
+    <data name="OpenWorkshopPage" xml:space="preserve">
+        <value>Open Workshop Page</value>
+    </data>
+    <data name="RemoveFromList" xml:space="preserve">
+        <value>Remove from list</value>
+    </data>
+    <data name="Update" xml:space="preserve">
+        <value>Update</value>
+    </data>
+    <data name="CatUpdates" xml:space="preserve">
+        <value>Updates</value>
+    </data>
+    <data name="Cancelling" xml:space="preserve">
+        <value>Cancelling</value>
+    </data>
+    <data name="WatermarkModlistURL" xml:space="preserve">
+        <value>Steam Collection/.json URL</value>
+    </data>
+    <data name="ModlistReplace" xml:space="preserve">
+        <value>Override</value>
+    </data>
+    <data name="ModlistReplaceText" xml:space="preserve">
+        <value>This action will replace your mod list, do you wish to continue ?</value>
+    </data>
+    <data name="Find" xml:space="preserve">
+        <value>Find</value>
+    </data>
+    <data name="Remove" xml:space="preserve">
+        <value>Remove</value>
+    </data>
+    <data name="Change" xml:space="preserve">
+        <value>Change</value>
+    </data>
+    <data name="CurrentLocation" xml:space="preserve">
+        <value>Current location</value>
+    </data>
+    <data name="Untitled" xml:space="preserve">
+        <value>Untitled</value>
+    </data>
+    <data name="SaveFile" xml:space="preserve">
+        <value>Save File</value>
+    </data>
+    <data name="ModList" xml:space="preserve">
+        <value>Mod List</value>
+    </data>
+    <data name="GameBuild" xml:space="preserve">
+        <value>Game Build</value>
+    </data>
+    <data name="Append" xml:space="preserve">
+        <value>Append</value>
+    </data>
+    <data name="SaveAs" xml:space="preserve">
+        <value>Save As</value>
+    </data>
+    <data name="PID_ProcessID" xml:space="preserve">
+        <value>PID</value>
+    </data>
+    <data name="Uptime" xml:space="preserve">
+        <value>Uptime</value>
+    </data>
+    <data name="CPU_CentralProcessorUnit" xml:space="preserve">
+        <value>CPU</value>
+    </data>
+    <data name="Memory" xml:space="preserve">
+        <value>Memory</value>
+    </data>
+    <data name="Status" xml:space="preserve">
+        <value>Status</value>
+    </data>
+    <data name="Players" xml:space="preserve">
+        <value>Players</value>
+    </data>
+    <data name="UpdateMods" xml:space="preserve">
+        <value>Update Mods</value>
+    </data>
+    <data name="Stop" xml:space="preserve">
+        <value>Stop</value>
+    </data>
+    <data name="Launch" xml:space="preserve">
+        <value>Launch</value>
+    </data>
+    <data name="Instance" xml:space="preserve">
+        <value>Instance</value>
+    </data>
+    <data name="ServerSave" xml:space="preserve">
+        <value>Server Save</value>
+    </data>
+    <data name="SaveSize" xml:space="preserve">
+        <value>Save Size</value>
+    </data>
+    <data name="SaveSizeTip" xml:space="preserve">
+        <value>Total size of your save on disk. Profiles not only store your settings, but also your server saves and logs</value>
+    </data>
+    <data name="Delete" xml:space="preserve">
+        <value>Delete</value>
+    </data>
+    <data name="OpenSaveFolder" xml:space="preserve">
+        <value>Open save folder</value>
+    </data>
+    <data name="TestLive" xml:space="preserve">
+        <value>Test Live</value>
+    </data>
+    <data name="Live" xml:space="preserve">
+        <value>Live</value>
+    </data>
+    <data name="AddToList" xml:space="preserve">
+        <value>Add to list</value>
+    </data>
+    <data name="Subscriptions" xml:space="preserve">
+        <value>Subscriptions</value>
+    </data>
+    <data name="AddLocalMod" xml:space="preserve">
+        <value>Add local mods</value>
+    </data>
+    <data name="ExportErrorModNotFound" xml:space="preserve">
+        <value>Some of the mods path cannot be resolved because the mod file was not found. In order to export your modlist, please unsure that all of the mods are not marked as missing.</value>
+    </data>
+    <data name="ImportModList" xml:space="preserve">
+        <value>Import mod list</value>
+    </data>
+    <data name="WrongType" xml:space="preserve">
+        <value>Wrong Type</value>
+    </data>
+    <data name="WrongTypeText" xml:space="preserve">
+        <value>The type of file provided is unsupported.</value>
+    </data>
+    <data name="VerifyFiles" xml:space="preserve">
+        <value>Verify files</value>
+    </data>
+    <data name="VerifyFilesText" xml:space="preserve">
+        <value>This will verify all server and mod files. This may take a while. Do you want to continue?</value>
+    </data>
+    <data name="ClientFailedToStart" xml:space="preserve">
+        <value>Client failed to start</value>
+    </data>
+    <data name="ClientFailedToStartText" xml:space="preserve">
+        <value>See the logs for more information</value>
+    </data>
+    <data name="CpuFormat" xml:space="preserve">
+        <value>{0}%</value>
+    </data>
+    <data name="NoResultFound" xml:space="preserve">
+        <value>No results found</value>
+    </data>
+    <data name="Game" xml:space="preserve">
+        <value>Game</value>
+    </data>
+    <data name="GameSave" xml:space="preserve">
+        <value>Game Save</value>
+    </data>
+    <data name="BattleEye" xml:space="preserve">
+        <value>Battle Eye</value>
+    </data>
+    <data name="UpdateServers" xml:space="preserve">
+        <value>Update servers</value>
+    </data>
+    <data name="UpdateAllMods" xml:space="preserve">
+        <value>Update all mods</value>
+    </data>
+    <data name="LaunchAll" xml:space="preserve">
+        <value>Launch all</value>
+    </data>
+    <data name="KillAll" xml:space="preserve">
+        <value>Kill all</value>
+    </data>
+    <data name="StopAll" xml:space="preserve">
+        <value>Stop all</value>
+    </data>
+    <data name="Close" xml:space="preserve">
+        <value>Close</value>
+    </data>
+    <data name="Exit" xml:space="preserve">
+        <value>Exit</value>
+    </data>
+    <data name="StatusNew" xml:space="preserve">
+        <value>Starting</value>
+    </data>
+    <data name="StatusStopped" xml:space="preserve">
+        <value>Stopped</value>
+    </data>
+    <data name="StatusFailed" xml:space="preserve">
+        <value>Failed</value>
+    </data>
+    <data name="StatusStopping" xml:space="preserve">
+        <value>Stopping</value>
+    </data>
+    <data name="StatusRunning" xml:space="preserve">
+        <value>Running</value>
+    </data>
+    <data name="StatusOnline" xml:space="preserve">
+        <value>Online</value>
+    </data>
+    <data name="StatusCrashed" xml:space="preserve">
+        <value>Crashed</value>
+    </data>
+    <data name="Peak" xml:space="preserve">
+        <value>Peak</value>
+    </data>
+    <data name="OnBoardingServerInstanceCount" xml:space="preserve">
+        <value>Server Instances</value>
+    </data>
+    <data name="OnBoardingServerInstanceCountSub" xml:space="preserve">
+        <value>Choose how many server instance Trebuchet should manage. Unless you want to handle a cluster, one should be enough.</value>
+    </data>
+</root>

@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
-using System.Linq;
-using System.Reflection;
 using System.Text.RegularExpressions;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
-using SteamWorksWebAPI;
+using Trebuchet.Assets;
 using TrebuchetLib;
-using TrebuchetUtils.Modals;
 
 namespace Trebuchet.Utils
 {
@@ -21,17 +15,17 @@ namespace Trebuchet.Utils
         {
             if (string.IsNullOrEmpty(gameDirectory))
             {
-                errorMessage = App.GetAppText("InvalidDirectory");
+                errorMessage = Resources.InvalidDirectory;
                 return false;
             }
             if (!Directory.Exists(gameDirectory))
             {
-                errorMessage = App.GetAppText("DirectoryNotFound");
+                errorMessage = Resources.DirectoryNotFound;
                 return false;
             }
-            if (!File.Exists(Path.Join(gameDirectory, Config.FolderGameBinaries, Config.FileClientBin)))
+            if (!File.Exists(Path.Join(gameDirectory, Constants.FolderGameBinaries, Constants.FileClientBin)))
             {
-                errorMessage = App.GetAppText("GameDirectoryInvalidError");
+                errorMessage = Resources.GameDirectoryInvalidError;
                 return false;
             }
             errorMessage = string.Empty;
@@ -48,6 +42,11 @@ namespace Trebuchet.Utils
             if (asAdmin)
                 process.StartInfo.Verb = "runas";
             process.Start();
+            ShutdownDesktopProcess();
+        }
+
+        public static void ShutdownDesktopProcess()
+        {
             if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
                 desktop.Shutdown();
         }
@@ -57,17 +56,17 @@ namespace Trebuchet.Utils
             errorMessage = string.Empty;
             if (string.IsNullOrEmpty(installPath))
             {
-                errorMessage = App.GetAppText("InvalidDirectory");
+                errorMessage = Resources.InvalidDirectory;
                 return false;
             }
             if (!Directory.Exists(installPath))
             {
-                errorMessage = App.GetAppText("DirectoryNotFound");
+                errorMessage = Resources.DirectoryNotFound;
                 return false;
             }
-            if (Regex.IsMatch(installPath, Config.RegexSavedFolder))
+            if (Regex.IsMatch(installPath, Constants.RegexSavedFolder))
             {
-                errorMessage = App.GetAppText("InstallPathInGameError");
+                errorMessage = Resources.InstallPathInGameError;
                 return false;
             }
             return true;

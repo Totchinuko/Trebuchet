@@ -8,9 +8,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
-using TrebuchetUtils.Modals;
 using VisualExtensions = Avalonia.VisualTree.VisualExtensions;
 
 namespace TrebuchetUtils
@@ -19,28 +17,7 @@ namespace TrebuchetUtils
     {
         private static readonly Dictionary<Uri, Bitmap> Cache = [];
         private static readonly HttpClient HttpClient = new();
-        
-        /// <summary>
-        /// Asserts that the given assertion is true, and if not, shows an error modal with the given message.
-        /// </summary>
-        /// <param name="assertion"></param>
-        /// <param name="message"></param>
-        /// <returns>Return false if the assertion failled</returns>
-        public static bool Assert(bool assertion, string message)
-        {
-            if (!assertion)
-            {
-                DisplayError(message);
-                return false;
-            }
-            return true;
-        }
 
-        public static async void DisplayError(string message)
-        {
-            await new ErrorModal("Error", message).OpenDialogueAsync();
-        }
-        
         public static IEnumerable<T> FindVisualChildren<T>(Visual depObj) where T : Visual
         {
             foreach (var child in VisualExtensions.GetVisualChildren(depObj))

@@ -1,180 +1,207 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.Json;
-using System.Text.Json.Nodes;
 using System.Threading.Tasks;
 using Avalonia;
+using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
+using Avalonia.Media;
 using Avalonia.Threading;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using Serilog;
-using Trebuchet.Modals;
+using SteamKit2;
+using Trebuchet.Services;
+using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Utils;
+using Trebuchet.ViewModels;
+using Trebuchet.ViewModels.InnerContainer;
+using Trebuchet.ViewModels.Panels;
 using Trebuchet.Windows;
 using TrebuchetLib;
+using TrebuchetLib.Services;
+using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
-using TrebuchetUtils.Modals;
+using TrebuchetUtils.Services.Language;
+using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 // GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
-// Copyright (C) 2023 Totchinuko https://github.com/Totchinuko
+// Copyright (C) 2025 Totchinuko https://github.com/Totchinuko
 // Full license text: LICENSE.txt at the project root
 
 namespace Trebuchet;
 
-public partial class App : Application, IApplication
+public partial class App : Application, IApplication, ISubscriberErrorHandler
 {
-    public bool HasCrashed { get; private set; }
-    public bool IsShuttingDown { get; private set; }
-    public static string ApiKey { get; private set; } = string.Empty;
-
-    public static Dictionary<string, string> AppText { get; set; } = [];
-
-    public static UIConfig Config { get; private set; } = null!;
+    private ILogger<App>? _logger;
     
-    public string AppIconPath => "avares://Trebuchet/Assets/Icons/AppIcon.ico";
-    public bool IsShutingDown { get; } = false;
+    public bool HasCrashed { get; private set; }
+    public IImage? AppIconPath => Resources[@"AppIcon"] as IImage;
 
-    public static string GetAppText(string key, params object[] args)
-    {
-        return AppText.TryGetValue(key, out var text) ? string.Format(text, args) : $"<INVALID_{key}>";
-    }
-        
     public override void Initialize()
     {
         AvaloniaXamlLoader.Load(this);
     }
 
-
-    public static void OpenApp(bool testlive, bool catapult)
+    public void OpenApp(bool testlive)
     {
-        Log.Information($"Selecting {(testlive ? "testlive" : "live")}");
-        Config = UIConfig.LoadConfig(UIConfig.GetPath(testlive));
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            throw new Exception(@"Not supported");
+        
+        bool catapult = false;
+        if (desktop.Args?.Length > 0)
+        {
+            if(desktop.Args.Contains(@"-catapult"))
+                catapult = true;
+        }
+        
+        //todo: move to services (And get rid of the tiny return sub messages)
+        var serviceCollection = new ServiceCollection();
+        ConfigureServices(serviceCollection, testlive, catapult);
+        var services = serviceCollection.BuildServiceProvider();
+        _logger = services.GetRequiredService<ILogger<App>>();
+        
+        _logger.LogInformation(@"Starting Taskmaster");
+        _logger.LogInformation(@$"Selecting {(testlive ? @"testlive" : @"live")}");
 
         MainWindow mainWindow = new ();
-        mainWindow.SetApp(new (testlive, catapult));
-        if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
-            desktop.MainWindow = mainWindow;
-        else throw new Exception("Application not initialized");
+        var currentWindow = desktop.MainWindow;
+        desktop.MainWindow = mainWindow;
+        mainWindow.SetApp(services.GetRequiredService<TrebuchetApp>());
         mainWindow.Show();
+        currentWindow?.Close();
+    }
+
+    private async void TestError()
+    {
+        await Task.Delay(500);
+        await CrashHandler.Handle(new Exception(@"Test Error"));
     }
         
     public void Crash() => HasCrashed = true;
-        
-        
-    private async void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
-    {
-        Log.Error(e.Exception, "DispatcherUnhandledException");
-        e.Handled = true;
-        await new ExceptionModal(e.Exception).OpenDialogueAsync();
-        ShutdownOnError();
-    }
     
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
-            // todo di:this will need to be service
-            TinyMessengerHub.Default = new TinyMessengerHub();
-            Log.Logger = new LoggerConfiguration()
-#if !DEBUG
-                    .MinimumLevel.Information()
-#endif
-                .WriteTo.File(
-                    Path.Combine(Tools.GetRootPath(), "Logs/app.log"),
-                    retainedFileTimeLimit: TimeSpan.FromDays(7),
-                    rollingInterval: RollingInterval.Day)
-                .CreateLogger();
-            Log.Information("Starting Taskmaster");
-            
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
             Dispatcher.UIThread.UnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
             desktop.ShutdownRequested += OnShutdownRequested;
-
-
-            ReadAppText();
-            ReadSettings();
-
+            
+            //CrashHandler.SetReportUri(@"");
+            
             if (desktop.Args?.Length > 0)
             {
-                if (desktop.Args.Contains("-testlive"))
+                if (desktop.Args.Contains(@"-testlive"))
                 {
-                    OpenApp(true, desktop.Args.Contains("-catapult"));
+                    OpenApp(true);
                     return;
                 }
-                else if (desktop.Args.Contains("-live"))
+                else if (desktop.Args.Contains(@"-live"))
                 {
-                    OpenApp(false, desktop.Args.Contains("-catapult"));
+                    OpenApp(false);
                     return;
                 }
             }
-            TestliveModal modal = new (desktop.Args?.Contains("-catapult") ?? false);
-            desktop.MainWindow = modal.Window;
-            modal.Open();
+            
+            GameBuildViewModel modal = new (this);
+            GameBuildWindow window = new GameBuildWindow();
+            window.DataContext = modal;
+            desktop.MainWindow = window;
+            window.Show();
         }
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
+    private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult)
     {
-        IsShuttingDown = true;
-        Log.Information("Trebuchet off");
-        Log.Information("----------------------------------------");
+        services.AddSingleton<AppSetup>(
+            new AppSetup(Config.LoadConfig(AppConstants.GetConfigPath(testlive)), testlive, catapult));
+        services.AddSingleton<UIConfig>(UIConfig.LoadConfig(AppConstants.GetUIConfigPath()));
+        
+        var logger = new LoggerConfiguration()
+#if !DEBUG
+            .MinimumLevel.Information()
+#endif
+            .WriteTo.File(
+                AppConstants.GetLoggingPath(),
+                retainedFileTimeLimit: TimeSpan.FromDays(7),
+                rollingInterval: RollingInterval.Day)
+            .CreateLogger();
+
+        services.AddLogging(builder => builder.AddSerilog(logger, true));
+        services.AddSingleton<ITinyMessengerHub>(new TinyMessengerHub(this));
+        
+        services.AddSingleton<AppSettings>(GetAppSettings());
+        services.AddSingleton<AppClientFiles>();
+        services.AddSingleton<AppServerFiles>();
+        services.AddSingleton<AppModlistFiles>();
+        services.AddSingleton<AppFiles>();
+        services.AddSingleton<OnBoarding>();
+        services.AddSingleton<IIniGenerator, YuuIniGenerator>();
+        services.AddSingleton<IProgressCallback<double>, Progress>();
+        services.AddSingleton<Steam>();
+        services.AddSingleton<Launcher>();
+        services.AddSingleton<TaskBlocker>();
+        services.AddSingleton<SteamAPI>();
+        services.AddSingleton<ModFileFactory>();
+        services.AddSingleton<ILanguageManager, LanguageManager>();
+
+        services.AddSingleton<SteamWidget>();
+        services.AddSingleton<DialogueBox>();
+        services.AddSingleton<TrebuchetApp>();
+        services.AddTransient<WorkshopSearchViewModel>();
+
+        services.AddSingleton<Panel, ModlistPanel>();
+        services.AddSingleton<Panel, ClientProfilePanel>();
+        services.AddSingleton<Panel, ServerProfilePanel>();
+        #if DEBUG
+        services.AddSingleton<Panel, RconPanel>();
+        services.AddSingleton<Panel, LogFilterPanel>();
+        #endif
+        
+        services.AddSingleton<Panel, DashboardPanel>();
+        services.AddSingleton<Panel, SettingsPanel>();
     }
 
+    private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
+    {
+        _logger?.LogInformation(@"Trebuchet off");
+        _logger?.LogInformation(@"----------------------------------------");
+    }
+
+    private async void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+    {
+        _logger?.LogError(e.Exception, @"DispatcherUnhandledException");
+        e.Handled = true;
+        await CrashHandler.Handle(e.Exception);
+    }
+    
     private async void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        await Dispatcher.UIThread.InvokeAsync(() => Log.Error((Exception)e.ExceptionObject, "UnhandledException"));
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            new ExceptionModal(((Exception)e.ExceptionObject)).Open();
-            ShutdownOnError();
-        });
+        _logger?.LogError((Exception)e.ExceptionObject, @"UnhandledException");
+        await CrashHandler.Handle((Exception)e.ExceptionObject);
     }
 
     private async void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        await Dispatcher.UIThread.InvokeAsync(() => Log.Error(e.Exception, "UnobservedTaskException"));
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            DisplayExceptionAndExit(e.Exception);
-        });
+        _logger?.LogError(e.Exception, @"UnobservedTaskException");
+        await CrashHandler.Handle(e.Exception);
     }
 
-    private async void DisplayExceptionAndExit(Exception ex)
+    private static AppSettings GetAppSettings()
     {
-        await new ExceptionModal(ex).OpenDialogueAsync();
-        ShutdownOnError();
+        var settings = JsonSerializer.Deserialize<AppSettings>(
+            TrebuchetUtils.Utils.GetEmbeddedTextFile(@"Trebuchet.AppSettings.json"));
+        if(settings == null) throw new JsonException(@"AppSettings could not be loaded");
+        return settings;
     }
-
-    private void ReadAppText()
+    
+    public async void Handle(ITinyMessage message, Exception exception)
     {
-        var node = JsonSerializer.Deserialize<JsonNode>(TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.Data.AppText.json"));
-        if (node == null) return;
-
-        AppText.Clear();
-        foreach (var n in node.AsObject())
-            AppText.Add(n.Key, n.Value?.GetValue<string>() ?? $"<INVALID_{n.Key}>");
-    }
-
-    private static void ReadSettings()
-    {
-        var node = JsonSerializer.Deserialize<JsonNode>(TrebuchetUtils.Utils.GetEmbeddedTextFile("Trebuchet.AppSettings.json"));
-        if (node == null) return;
-
-        ApiKey = node["apikey"]?.GetValue<string>() ?? string.Empty;
-    }
-        
-    public void Handle(ITinyMessage message, Exception exception)
-    {
-        DisplayExceptionAndExit(exception);
-    }
-
-    private void ShutdownOnError()
-    {
-        IsShuttingDown = true;
-        if(Current?.ApplicationLifetime is  IControlledApplicationLifetime app)
-            app.Shutdown();
+        _logger?.LogError(exception, @"UnobservedTaskException");
+        await CrashHandler.Handle(exception);
     }
 }

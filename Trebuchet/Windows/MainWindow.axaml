@@ -3,13 +3,11 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:local="clr-namespace:Trebuchet.Windows"
-        xmlns:treb="clr-namespace:Trebuchet"
-        xmlns:utils="clr-namespace:Trebuchet.Utils"
-        xmlns:panels="clr-namespace:Trebuchet.Panels"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+        xmlns:viewModels="clr-namespace:Trebuchet.ViewModels"
         mc:Ignorable="d"
-        Title="{x:Static treb:TrebuchetApp.AppTitle}"
+        Title="{x:Static viewModels:TrebuchetApp.AppTitle}"
         Height="650" Width="1010"
         MinHeight="550" MinWidth="800"
         WindowStartupLocation="CenterScreen"
@@ -19,64 +17,53 @@
         ExtendClientAreaTitleBarHeightHint="40"
         UseLayoutRounding="True"
         Classes="Trebuchet"
-        x:DataType="treb:TrebuchetApp">
+        x:DataType="viewModels:TrebuchetApp">
     <Border x:Name="MainBorder">
         <Grid>
             <Grid.RowDefinitions>
                 <RowDefinition Height="auto" />
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
+            <Panel Grid.RowSpan="2" Classes="DialogueBox" Classes.Active="{Binding DialogueBox.Active}">
+                <Border Classes="Overlay" />
+                <Border Classes="Blocker" Background="Transparent" />
+                <Border Classes="Popup" HorizontalAlignment="{Binding DialogueBox.Popup.HorizontalAlignment, FallbackValue=Stretch}" VerticalAlignment="{Binding DialogueBox.Popup.VerticalAlignment, FallbackValue=Stretch}" MinHeight="{Binding DialogueBox.Popup.Height, FallbackValue=-1}" MinWidth="{Binding DialogueBox.Popup.Width, FallbackValue=-1}">
+                    <ContentControl Content="{Binding DialogueBox.Popup}"  />
+                </Border>
+            </Panel>
             <controls:WindowTitlebar
                 x:Name="TitleBar"
-                Title="{x:Static treb:TrebuchetApp.AppTitle}"
-                >
+                ZIndex="2"
+                Grid.Row="0"
+                Title="{x:Static viewModels:TrebuchetApp.AppTitle}">
                 <controls:WindowTitlebar.Header>
                     <ContentControl ContentTemplate="{StaticResource SteamWidget}" Content="{Binding SteamWidget}" />
                 </controls:WindowTitlebar.Header>
             </controls:WindowTitlebar>
-            <Grid x:Name="WindowContent" Grid.Row="1" Margin="0,12,0,0">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="240" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <Grid x:Name="Navigation" Margin="0,0,5,6">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="*" />
-                        <RowDefinition Height="auto" />
-                    </Grid.RowDefinitions>
-                    <StackPanel>
-                        <ItemsControl ItemsSource="{Binding Menu.Top}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <utils:MenuElementSelector/>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
-                    <StackPanel Grid.Row="1">
-                        <ItemsControl ItemsSource="{Binding Menu.Bottom}">
-                            <ItemsControl.ItemsPanel>
-                                <ItemsPanelTemplate>
-                                    <StackPanel/>
-                                </ItemsPanelTemplate>
-                            </ItemsControl.ItemsPanel>
-                            <ItemsControl.ItemTemplate>
-                                <utils:MenuElementSelector/>
-                            </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                    </StackPanel>
+            <Panel Grid.Row="1">
+                <Grid x:Name="WindowContent" Margin="0 12 0 0" ColumnDefinitions="Auto,*" RowDefinitions="Auto,*,Auto">
+                    <Button Classes="Base TabLeft" Classes.Sneak="{Binding !FoldedMenu}" Classes.Colored="{Binding FoldedMenu}" Command="{Binding ToggleFoldedCommand}" Margin="0 0 0 6">
+                        <i:Icon Value="mdi-view-list" Classes="Normal" />
+                    </Button>
+                    <ItemsControl Grid.Column="0" Grid.Row="1" ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <ItemsControl Grid.Column="0" Grid.Row="2" Padding="0 0 0 12" ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Spacing="6" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                    <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" CornerRadius="10,0,0,0" Padding="12,12,2,12">
+                        <ContentControl Content="{Binding ActivePanel}" />
+                    </Border>
                 </Grid>
-                <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" CornerRadius="10,0,0,0" Padding="12,12,2,12">
-                    <ContentControl Content="{Binding ActivePanel}">
-                        <ContentControl.ContentTemplate>
-                            <utils:PanelSelector/>
-                        </ContentControl.ContentTemplate>
-                    </ContentControl>
-                </Border>
-            </Grid>
+            </Panel>
         </Grid>
     </Border>
 </Window>

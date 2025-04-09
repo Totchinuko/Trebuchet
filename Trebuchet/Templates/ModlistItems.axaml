@@ -1,69 +1,44 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
-                    xmlns:local="clr-namespace:Trebuchet"
-                    xmlns:panel="clr-namespace:Trebuchet.Panels"
+                    xmlns:u="clr-namespace:TrebuchetUtils;assembly=TrebuchetUtils"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="ModlistItems" x:DataType="local:ModFile">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels">
+    <DataTemplate x:Key="ModlistItems" x:DataType="vm:IModFile">
         <Border Padding="0 8 8 8">
-            <Border.Styles>
-                <Style Selector=":is(Border).ModIcon">
-                    <Style Selector="^ i|Icon">
-                        <Setter Property="Value" Value="mdi-steam" />
-                    </Style>
-                </Style>
-                <Style Selector=":is(Border).ModIcon.Bug">
-                    <Style Selector="^ i|Icon">
-                        <Setter Property="Value" Value="mdi-test-tube" />
-                    </Style>
-                </Style>
-                <Style Selector=":is(Border).ModIcon.File">
-                    <Style Selector="^ i|Icon">
-                        <Setter Property="Value" Value="mdi-file" />
-                    </Style>
-                </Style>
-            </Border.Styles>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="1.7*" />
-                    <ColumnDefinition Width="1*" />
-                    <ColumnDefinition Width="auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition MinWidth="220" Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Border Margin="0 0 6 0" ToolTip.Tip="Drag to reorder" Background="Transparent" Cursor="SizeNorthSouth">
                     <i:Icon Value="mdi-drag-vertical" Foreground="{DynamicResource TPanelAccent}" FontSize="30"  />
                 </Border>
-                <Border Grid.Column="1" Margin="0,0,12,0" ToolTip.Tip="{Binding TypeTooltip}" Classes="ModIcon" Classes.Bug="{Binding IsTestLive}" Classes.File="{Binding !IsPublished}">
+                <Border Grid.Column="1" Margin="0,0,12,0" u:Classes.List="{Binding IconClasses}">
                     <i:Icon Classes="Normal"  />
                 </Border>
-                <Grid Grid.Column="2">
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="auto" />
-                    </Grid.ColumnDefinitions>
-                    <TextBlock VerticalAlignment="Center">
-                        <Run Text="{Binding Title, Mode=OneWay}" />
-                    </TextBlock>
-                    <Border Grid.Column="1" Background="{Binding StatusColor}" BorderBrush="{Binding BorderColor}" BorderThickness="0 1 0 0" Margin="0,0,12,0" CornerRadius="3" Padding="8">
-                        <TextBlock Text="{Binding StatusTooltip}" />
-                    </Border>
-                </Grid>
-                <StackPanel Grid.Column="3" Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,12,0">
-                    <TextBlock>
-                        <Run Text="{Binding LastUpdate, Mode=OneWay}" />
-                    </TextBlock>
-                </StackPanel>
-                <StackPanel Grid.Column="4" Orientation="Horizontal" VerticalAlignment="Center">
-                    <Button IsVisible="{Binding IsPublished}" Classes="Base" Margin="0,0,3,0" ToolTip.Tip="Open Workshop Page" Command="{Binding OpenModPageCommand}" CommandParameter="{Binding .}">
-                        <i:Icon Value="mdi-steam" Classes="Normal"/>
-                    </Button>
-                    <Button Margin="0,0,3,0" Classes="Base Blue" ToolTip.Tip="Update Mod" Command="{Binding UpdateModCommand}" CommandParameter="{Binding .}">
-                        <i:Icon Value="mdi-update" Classes="Normal"/>
-                    </Button>
-                    <Button ToolTip.Tip="Remove from list" Classes="Base Red" Command="{Binding RemoveModCommand}" CommandParameter="{Binding .}">
-                        <i:Icon Value="mdi-delete" Classes="Normal"/>
-                    </Button>
-                </StackPanel>
+                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Title, Mode=OneWay}" />
+                <Border Grid.Column="3" u:Classes.List="{Binding StatusClasses}" Margin="0,0,12,0">
+                    <TextBlock />
+                </Border>
+                <TextBlock Grid.Column="4" Text="{Binding LastUpdate}" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <ItemsControl Grid.Column="5" ItemsSource="{Binding Actions}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="3" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:ModFileAction">
+                            <Button u:Classes.List="{Binding Classes}" ToolTip.Tip="{Binding Name, Mode=OneWay}" Command="{Binding Action}">
+                                <i:Icon Value="{Binding Icon, Mode=OneWay}" Classes="Normal"/>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
             </Grid>
         </Border>
     </DataTemplate>

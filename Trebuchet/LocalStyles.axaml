@@ -1,0 +1,82 @@
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:a="clr-namespace:Trebuchet.Assets"
+        xmlns:i="https://github.com/projektanker/icons.avalonia"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <Design.PreviewWith>
+        <Border Padding="20">
+            <!-- Add Controls for Previewer Here -->
+        </Border>
+    </Design.PreviewWith>
+
+    <Style Selector="Image.AppLogo">
+        <Setter Property="Source" Value="app.red.ico" />
+    </Style>
+    
+    <Style Selector=":is(Border).ModIcon">
+        <Style Selector="^.Live">
+            <Style Selector="^ i|Icon">
+                <Setter Property="Value" Value="mdi-steam" />
+            </Style>
+            <Style Selector="^ ToolTip">
+                <Setter Property="Tip" Value="{x:Static a:Resources.LiveMod}" />
+            </Style>
+        </Style>
+        <Style Selector="^.TestLive">
+            <Style Selector="^ i|Icon">
+                <Setter Property="Value" Value="mdi-test-tube" />
+            </Style>
+            <Style Selector="^ ToolTip">
+                <Setter Property="Tip" Value="{x:Static a:Resources.TestLiveMod}" />
+            </Style>
+        </Style>
+        <Style Selector="^.Local">
+            <Style Selector="^ i|Icon">
+                <Setter Property="Value" Value="mdi-file" />
+            </Style>
+            <Style Selector="^ ToolTip">
+                <Setter Property="Tip" Value="{x:Static a:Resources.LocalMod}" />
+            </Style>
+        </Style>
+    </Style>
+
+    <Style Selector="Border.ModStatus" >
+        <Setter Property="BorderThickness" Value="0 0 0 0"/>
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Padding" Value="8" />
+        <Style Selector="^.Found2">
+            <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
+            <Style Selector="^ > TextBlock">
+                <Setter Property="Text" Value="{x:Static a:Resources.Found}" />
+            </Style>
+        </Style>
+        <Style Selector="^.Loading">
+            <Setter Property="Background" Value="{DynamicResource TPanel}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+            <Style Selector="^ > TextBlock">
+                <Setter Property="Text" Value="{x:Static a:Resources.Loading}" />
+            </Style>
+        </Style>
+        <Style Selector="^.Up2Date">
+            <Setter Property="Background" Value="{DynamicResource TGreenDim}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TGreenDim}" />
+            <Style Selector="^ > TextBlock">
+                <Setter Property="Text" Value="{x:Static a:Resources.UpToDate}" />
+            </Style>
+        </Style>
+        <Style Selector="^.Missing">
+            <Setter Property="Background" Value="{DynamicResource TRedDim}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TRedDim}" />
+            <Style Selector="^ > TextBlock">
+                <Setter Property="Text" Value="{x:Static a:Resources.Missing}" />
+            </Style>
+        </Style>
+        <Style Selector="^.UpdateAvailable">
+            <Setter Property="Background" Value="{DynamicResource TYellowDim}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TYellowDim}" />
+            <Style Selector="^ > TextBlock">
+                <Setter Property="Text" Value="{x:Static a:Resources.UpdateAvailable}" />
+            </Style>
+        </Style>
+    </Style>
+</Styles>

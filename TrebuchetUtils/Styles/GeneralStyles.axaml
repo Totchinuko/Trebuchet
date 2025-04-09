@@ -22,6 +22,7 @@
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
                     <SolidColorBrush x:Key="SeparatorDark" Color="#55000000"/>
                     <SolidColorBrush x:Key="SeparatorLight" Color="#60FFFFFF"/>
+                    <SolidColorBrush x:Key="PopupOverlay" Color="#000000" Opacity="0.6"/>
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TRedFaded" Color="{DynamicResource TRedBase}" Opacity="0.4" />
                     <SolidColorBrush x:Key="TRedDim" Color="{DynamicResource TRedBase}" Opacity="0.65" />
@@ -42,6 +43,7 @@
                     <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.4" />
                     <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
+                    <x:Double x:Key="TScrollbarSize">14</x:Double>
                 </ResourceDictionary>
                 <ResourceDictionary x:Key="Dark">
                     <Color x:Key="TRedBase">#c42b1c</Color>
@@ -60,6 +62,7 @@
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
                     <SolidColorBrush x:Key="SeparatorDark" Color="#55000000"/>
                     <SolidColorBrush x:Key="SeparatorLight" Color="#15FFFFFF"/>
+                    <SolidColorBrush x:Key="PopupOverlay" Color="#000000" Opacity="0.6"/>
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TRedFaded" Color="{DynamicResource TRedBase}" Opacity="0.1" />
                     <SolidColorBrush x:Key="TRedDim" Color="{DynamicResource TRedBase}" Opacity="0.65" />
@@ -80,6 +83,7 @@
                     <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.1" />
                     <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
+                    <x:Double x:Key="TScrollbarSize">14</x:Double>
                 </ResourceDictionary>
             </ResourceDictionary.ThemeDictionaries>
         </ResourceDictionary>
@@ -87,41 +91,45 @@
     
     <Design.PreviewWith>
         <ThemeVariantScope RequestedThemeVariant="Dark">
-            <Border Padding="20" Background="{DynamicResource TBackground}">
-                <StackPanel>
-                    <Slider Value="0.5" Maximum="1" Name="Slider" Width="200" />
-                    <TextBox Watermark="Watermark"  />
-                    <ComboBox Width="200">
-                        <ComboBoxItem>Text Item 1</ComboBoxItem>
-                        <ComboBoxItem>Text Item 2</ComboBoxItem>
-                        <ComboBoxItem>Text Item 3</ComboBoxItem>
-                        <ComboBoxItem>Text Item 4</ComboBoxItem>
-                        <ComboBoxItem>Text Item 5</ComboBoxItem>
-                        <ComboBoxItem>Text Item 6</ComboBoxItem>
-                        <ComboBoxItem>Text Item 7</ComboBoxItem>
-                        <ComboBoxItem>Text Item 8</ComboBoxItem>
-                        <ComboBoxItem>Text Item 9</ComboBoxItem>
-                    </ComboBox>
-                    <CheckBox>Test</CheckBox>
-                    <ProgressBar Classes="large" Value="{Binding #Slider.Value}" Minimum="0.0" Maximum="1.0" Margin="0 0 0 12" />
-                    <ProgressBar Value="0.5" Minimum="0.0" Maximum="1.0" />
-                    <Slider Value="5" Maximum="10" Width="200"  IsEnabled="false" />
-                    <TextBox Watermark="Watermark"  IsEnabled="false"  />
-                    <ComboBox Width="200" IsEnabled="false">
-                        <ComboBoxItem>Text Item 1</ComboBoxItem>
-                        <ComboBoxItem>Text Item 2</ComboBoxItem>
-                        <ComboBoxItem>Text Item 3</ComboBoxItem>
-                        <ComboBoxItem>Text Item 4</ComboBoxItem>
-                        <ComboBoxItem>Text Item 5</ComboBoxItem>
-                        <ComboBoxItem>Text Item 6</ComboBoxItem>
-                        <ComboBoxItem>Text Item 7</ComboBoxItem>
-                        <ComboBoxItem>Text Item 8</ComboBoxItem>
-                        <ComboBoxItem>Text Item 9</ComboBoxItem>
-                    </ComboBox>
-                    <CheckBox IsEnabled="False">Test</CheckBox>
-                    <ProgressBar IsEnabled="false" Classes="large" Value="0.5" Minimum="0.0" Maximum="1.0" Margin="0 0 0 12" />
-                    <ProgressBar IsEnabled="false" Value="0.5" Minimum="0.0" Maximum="1.0" />
-                </StackPanel>
+            <Border Background="{DynamicResource TBackground}">
+                <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
+                <Border Padding="20" Background="{DynamicResource TBackground}">
+                    <StackPanel>
+                        <Slider Value="0.5" Maximum="1" Name="Slider" Width="200" />
+                        <TextBox Watermark="Watermark"  />
+                        <ComboBox Width="200">
+                            <ComboBoxItem>Text Item 1</ComboBoxItem>
+                            <ComboBoxItem>Text Item 2</ComboBoxItem>
+                            <ComboBoxItem>Text Item 3</ComboBoxItem>
+                            <ComboBoxItem>Text Item 4</ComboBoxItem>
+                            <ComboBoxItem>Text Item 5</ComboBoxItem>
+                            <ComboBoxItem>Text Item 6</ComboBoxItem>
+                            <ComboBoxItem>Text Item 7</ComboBoxItem>
+                            <ComboBoxItem>Text Item 8</ComboBoxItem>
+                            <ComboBoxItem>Text Item 9</ComboBoxItem>
+                        </ComboBox>
+                        <CheckBox>Test</CheckBox>
+                        <ProgressBar Classes="large" Value="{Binding #Slider.Value}" Minimum="0.0" Maximum="1.0" Margin="0 0 0 12" />
+                        <ProgressBar Value="0.5" Minimum="0.0" Maximum="1.0" />
+                        <Slider Value="5" Maximum="10" Width="200"  IsEnabled="false" />
+                        <TextBox Watermark="Watermark"  IsEnabled="false"  />
+                        <ComboBox Width="200" IsEnabled="false">
+                            <ComboBoxItem>Text Item 1</ComboBoxItem>
+                            <ComboBoxItem>Text Item 2</ComboBoxItem>
+                            <ComboBoxItem>Text Item 3</ComboBoxItem>
+                            <ComboBoxItem>Text Item 4</ComboBoxItem>
+                            <ComboBoxItem>Text Item 5</ComboBoxItem>
+                            <ComboBoxItem>Text Item 6</ComboBoxItem>
+                            <ComboBoxItem>Text Item 7</ComboBoxItem>
+                            <ComboBoxItem>Text Item 8</ComboBoxItem>
+                            <ComboBoxItem>Text Item 9</ComboBoxItem>
+                        </ComboBox>
+                        <CheckBox IsEnabled="False">Test</CheckBox>
+                        <ProgressBar IsEnabled="false" Classes="large" Value="0.5" Minimum="0.0" Maximum="1.0" Margin="0 0 0 12" />
+                        <ProgressBar IsEnabled="false" Value="0.5" Minimum="0.0" Maximum="1.0" />
+                    </StackPanel>
+                </Border>
+            </ScrollViewer>
             </Border>
         </ThemeVariantScope>
         
@@ -135,6 +143,12 @@
     <Style Selector="Border.Hidden">
         <Setter Property="Opacity" Value="0" />
         <Setter Property="IsHitTestVisible" Value="False"/>
+    </Style>
+    <Style Selector="TextBlock.Hidden">
+        <Setter Property="Foreground" Value="Transparent"/>
+    </Style>
+    <Style Selector="TextBlock.Error">
+        <Setter Property="Foreground" Value="{DynamicResource TRed}"/>
     </Style>
     <Style Selector="Border.Disabled">
         <Setter Property="Opacity" Value="0.5" />
@@ -160,6 +174,11 @@
         <Setter Property="FontWeight" Value="Bold" />
         <Setter Property="FontSize" Value="22" />
     </Style>
+    <Style Selector="TextBlock.SmallTitle">
+        <Setter Property="Foreground" Value="{DynamicResource TBlue}"/>
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="FontSize" Value="16" />
+    </Style>
     <Style Selector="TextBlock.SubText">
         <Setter Property="Foreground" Value="{DynamicResource TSubText}"/>
         <Setter Property="FontWeight" Value="Light"/>
@@ -177,6 +196,10 @@
         <Setter Property="BorderThickness" Value="0,0,1,0" />
         <Setter Property="Width" Value="2" />
         <Setter Property="Margin" Value="12,6" />
+    </Style>
+    <Style Selector="Image.AppLogo">
+        <Setter Property="Height" Value="16" />
+        <Setter Property="Width" Value="16" />
     </Style>
 
     <!-- Panels -->
@@ -327,6 +350,10 @@
     <Style Selector="Button.TabBottom /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="BorderThickness" Value="1 0 1 1" />
         <Setter Property="CornerRadius" Value="0 0 3 3"/>
+    </Style>
+    
+    <Style Selector=".FoldedTabs Button.Base TextBlock">
+        <Setter Property="IsVisible" Value="False" />
     </Style>
     
     <!-- Slider -->
@@ -660,5 +687,109 @@
                 </BehaviorCollection>
             </BehaviorCollectionTemplate>
         </Setter>
+    </Style>
+    
+    <!-- Window Inner Contextual --> 
+    <Style Selector="Panel.DialogueBox">
+        <Setter Property="Opacity" Value="0" />
+        <Setter Property="ZIndex" Value="1" />
+        <Setter Property="IsVisible" Value="False" />
+        <Setter Property="HorizontalAlignment" Value="Stretch" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
+        <Setter Property="Transitions">
+            <Transitions>
+                <DoubleTransition Property="Opacity" Duration="0:0:0.2"/>
+            </Transitions>
+        </Setter>
+        
+        <Style Selector="^ Border.Overlay">
+            <Setter Property="Background" Value="{DynamicResource PopupOverlay}" />
+            <Setter Property="IsHitTestVisible" Value="False" />
+        </Style>
+        
+        <Style Selector="^ Border.Blocker">
+            <Setter Property="IsHitTestVisible" Value="True" />
+            <Setter Property="Margin" Value="0 40 0 0" />
+        </Style>
+        
+        <Style Selector="^ Border.Popup">
+            <Setter Property="Background" Value="{DynamicResource TBackground}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Margin" Value="30" />
+            <Setter Property="BoxShadow" Value="2 2 15 0 #FF000000" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Padding" Value="20" />
+            
+            <Style Selector="^ TextBlock">
+                <Setter Property="TextWrapping" Value="Wrap" />
+            </Style>
+            
+            <Style Selector="^ Button">
+                <Setter Property="Padding" Value="12" />
+            </Style>
+        </Style>
+        
+        <Style Selector="^.Active">
+            <Setter Property="Opacity" Value="1.0"/>
+            <Setter Property="IsVisible" Value="True" />
+        </Style>
+    </Style>
+    
+    <!-- Scrollviewer and bars -->
+    <Style Selector="ScrollViewer">
+        <Setter Property="AllowAutoHide" Value="False" />
+        <Style Selector="^[IsExpanded=true] /template/ Panel#PART_ScrollBarsSeparator">
+            <Setter Property="Opacity" Value="1" />
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+    </Style>
+    
+    <Style Selector="ScrollBar">
+        <Setter Property="MinWidth" Value="{DynamicResource TScrollbarSize}" />
+        <Setter Property="MinHeight" Value="{DynamicResource TScrollbarSize}" />
+        <Setter Property="Background" Value="Transparent" />
+        <Style Selector="^:horizontal/template/Rectangle#TrackRect">
+            <Setter Property="Fill" Value="Transparent" />
+        </Style>
+        <Style Selector="^:horizontal/template/Border#HorizontalRoot">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="^:vertical/template/Rectangle#TrackRect">
+            <Setter Property="Fill" Value="Transparent" />
+        </Style>
+        <Style Selector="^:vertical/template/Border#VerticalRoot">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="^ /template/ Thumb">
+            <Setter Property="CornerRadius" Value="3" />
+            <Setter Property="Background" Value="{DynamicResource TPanel}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
+            <Setter Property="BorderThickness" Value="1" />
+        </Style>
+        <Style Selector="^:vertical /template/ :is(Thumb)">
+            <Setter Property="Width" Value="{DynamicResource TScrollbarSize}" />
+            <Setter Property="MinHeight" Value="{DynamicResource TScrollbarSize}" />
+        </Style>
+        <Style Selector="^:horizontal /template/ :is(Thumb)">
+            <Setter Property="Height" Value="{DynamicResource TScrollbarSize}" />
+            <Setter Property="MinWidth" Value="{DynamicResource TScrollbarSize}" />
+        </Style>
+        <Style Selector="^:vertical /template/ :is(RepeatButton)#PART_LineUpButton">
+            <Setter Property="Height" Value="{DynamicResource TScrollbarSize}" />
+            <Setter Property="MinWidth" Value="{DynamicResource TScrollbarSize}" />
+        </Style>
+        <Style Selector="^:vertical /template/ :is(RepeatButton)#PART_LineDownButton">
+            <Setter Property="Height" Value="{DynamicResource TScrollbarSize}" />
+            <Setter Property="MinWidth" Value="{DynamicResource TScrollbarSize}" />
+        </Style>
+        <Style Selector="^:horizontal /template/ :is(RepeatButton)#PART_LineUpButton">
+            <Setter Property="Width" Value="{DynamicResource TScrollbarSize}" />
+            <Setter Property="MinHeight" Value="{DynamicResource TScrollbarSize}" />
+        </Style>
+        <Style Selector="^:horizontal /template/ :is(RepeatButton)#PART_LineDownButton">
+            <Setter Property="Width" Value="{DynamicResource TScrollbarSize}" />
+            <Setter Property="MinHeight" Value="{DynamicResource TScrollbarSize}" />
+        </Style>
     </Style>
 </Styles>

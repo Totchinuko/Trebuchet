@@ -423,13 +423,7 @@ namespace TrebuchetUtils
     /// </summary>
     public sealed class TinyMessengerHub : ITinyMessengerHub
     {
-        private static TinyMessengerHub? _default;
         private readonly ISubscriberErrorHandler _SubscriberErrorHandler;
-        public static TinyMessengerHub Default
-        {
-            get => _default ?? throw new Exception("Default was not initialized");
-            set => _default = value;
-        }
 
         #region ctor methods
 

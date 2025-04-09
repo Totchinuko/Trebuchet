@@ -21,8 +21,6 @@ namespace TrebuchetUtils.Controls
 
         public static readonly StyledProperty<object?> HeaderProperty = AvaloniaProperty.Register<WindowTitlebar, object?>(nameof(Header));
 
-        public static readonly StyledProperty<IImage?> LogoIconProperty = AvaloniaProperty.Register<WindowTitlebar, IImage?>(nameof(LogoIcon));
-
         public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(Title));
         
         public static readonly StyledProperty<bool> IsMaximizedProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(IsMaximized));
@@ -32,7 +30,6 @@ namespace TrebuchetUtils.Controls
             DisableCloseProperty.Changed.AddClassHandler<WindowTitlebar>(OnDisableChanged);
             DisableMaximizeProperty.Changed.AddClassHandler<WindowTitlebar>(OnDisableChanged);
             DisableMinimizeProperty.Changed.AddClassHandler<WindowTitlebar>(OnDisableChanged);
-            LogoIconProperty.Changed.AddClassHandler<WindowTitlebar>(OnLogoIconChanged);
             TitleProperty.Changed.AddClassHandler<WindowTitlebar>(OnTitleChanged);
             InitializeComponent();
 
@@ -81,12 +78,6 @@ namespace TrebuchetUtils.Controls
             set => SetValue(HeaderProperty, value);
         }
 
-        public IImage? LogoIcon
-        {
-            get => GetValue(LogoIconProperty);
-            set => SetValue(LogoIconProperty, value);
-        }
-
         public string Title
         {
             get => GetValue(TitleProperty);
@@ -106,11 +97,6 @@ namespace TrebuchetUtils.Controls
             sender.CloseBtn.IsEnabled = !sender.GetValue(DisableCloseProperty);
             sender.MaximizeBtn.IsEnabled = !sender.GetValue(DisableMaximizeProperty);
             sender.MinimizeBtn.IsEnabled = !sender.GetValue(DisableMinimizeProperty);
-        }
-
-        private static void OnLogoIconChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
-        {
-            sender.AppLogo.Source = sender.LogoIcon;
         }
 
         private static void OnTitleChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
