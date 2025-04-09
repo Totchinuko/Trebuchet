@@ -144,7 +144,7 @@ namespace Trebuchet.ViewModels
             if (state == ProcessState.FAILED)
                 OnProcessFailed();
             else if (ProcessRunning && process is not null)
-                ProcessStats.SetDetails(process);
+                ProcessStats.Details = process;
 
             _lastState = state;
             return Task.CompletedTask;
@@ -191,12 +191,12 @@ namespace Trebuchet.ViewModels
 
             ProcessRunning = true;
             if(refreshProcess)
-                ProcessStats.StartStats(details);
+                ProcessStats.Details = details;
         }
 
         private void OnProcessTerminated()
         {
-            ProcessStats.StopStats();
+            ProcessStats.Details = ConanProcess.Empty;
             CanKill = false;
             CanClose = false;
             CanLaunch = true;

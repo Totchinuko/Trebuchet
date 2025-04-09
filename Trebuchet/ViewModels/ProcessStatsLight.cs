@@ -2,9 +2,13 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
+using DynamicData;
+using DynamicData.Binding;
 using Humanizer;
+using ReactiveUI;
 using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
@@ -12,76 +16,119 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {
-    public class ProcessStatsLight : BaseViewModel, IProcessStats
+    public class ProcessStatsLight : ReactiveObject, IProcessStats
     {
-        private IConanProcess? _details;
+        public ProcessStatsLight()
+        {
+            _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Tick());
+            _timer.Stop();
+            _details = ConanProcess.Empty;
+
+            this.WhenAnyValue(x => x.Details)
+                .Subscribe((d) =>
+                {
+                    if (d.State.IsRunning())
+                    {
+                        State = d.State;
+                        _timer.Start();
+                    }
+                    else
+                    {
+                        State = ProcessState.STOPPED;
+                        _peakMemoryConsumption = 0;
+                        _timer.Stop();
+                    }
+                });
+
+            _pid = this.WhenAnyValue(x => x.Details)
+                .OfType<IConanProcess>()
+                .Select(x => x.PId)
+                .ToProperty(this, x => x.PID);
+            _processStatus = this.WhenAnyValue(x => x.State)
+                .Select(x => TranslateState(x))
+                .ToProperty(this, x => x.ProcessStatus);
+            _running = this.WhenAnyValue(x => x.State)
+                .Select(x => x.IsRunning())
+                .ToProperty(this, x => x.Running);
+        }
+        
+        private IConanProcess _details;
         private long _peakMemoryConsumption;
         private DispatcherTimer _timer;
         private string _playerCount = string.Empty;
         private string _memoryConsumption = string.Empty;
         private string _cpuUsage = string.Empty;
         private string _uptime = string.Empty;
-
-        public ProcessStatsLight()
-        {
-            _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Tick());
-            _timer.Stop();
-        }
+        private ProcessState _state;
+        private ObservableAsPropertyHelper<int> _pid;
+        private ObservableAsPropertyHelper<string> _processStatus;
+        private ObservableAsPropertyHelper<bool> _running;
 
         public string CpuUsage
         {
             get => _cpuUsage;
-            private set => SetField(ref _cpuUsage, value);
+            private set => this.RaiseAndSetIfChanged(ref _cpuUsage, value);
         }
 
         public string MemoryConsumption
         {
             get => _memoryConsumption;
-            private set => SetField(ref _memoryConsumption, value);
+            private set => this.RaiseAndSetIfChanged(ref _memoryConsumption, value);
         }
 
-        public int PID => (_details?.PId ?? 0);
+        public ProcessState State
+        {
+            get => _state;
+            set => this.RaiseAndSetIfChanged(ref _state, value);
+        }
+
+        public IConanProcess Details
+        {
+            get => _details;
+            set => this.RaiseAndSetIfChanged(ref _details, value);
+        }
+
+        public int PID => _pid.Value;
 
         public string PlayerCount
         {
             get => _playerCount;
-            private set => SetField(ref _playerCount, value);
+            private set => this.RaiseAndSetIfChanged(ref _playerCount, value);
         }
 
-        public string ProcessStatus => _details?.State.ToString() ?? string.Empty;
+        public string ProcessStatus => _processStatus.Value;
 
-        public bool Running => _details?.State.IsRunning() ?? false;
+        public bool Running => _running.Value;
 
         public string Uptime
         {
             get => _uptime;
-            private set => SetField(ref _uptime, value);
+            private set => this.RaiseAndSetIfChanged(ref _uptime, value);
         }
 
-        public void SetDetails(IConanProcess details)
+        private string TranslateState(ProcessState state)
         {
-            _details = details;
-            OnPropertyChanged(nameof(ProcessStatus));
+            switch (state)
+            {
+                case ProcessState.NEW:
+                    return String.Empty;
+                case ProcessState.STOPPED:
+                    return String.Empty;
+                case ProcessState.FAILED:
+                    return String.Empty;
+                case ProcessState.STOPPING:
+                    return String.Empty;
+                case ProcessState.RUNNING:
+                    return String.Empty;
+                case ProcessState.ONLINE:
+                    return String.Empty;
+                case ProcessState.CRASHED:
+                    return String.Empty;
+                default:
+                    return String.Empty;
+            }
         }
 
-        public void StartStats(IConanProcess details)
-        {
-            SetDetails(details);
-            _timer.Start();
-            OnPropertyChanged(nameof(Running));
-            OnPropertyChanged(nameof(PID));
-            OnPropertyChanged(nameof(ProcessStatus));
-        }
-
-        public void StopStats()
-        {
-            _details = null;
-            _peakMemoryConsumption = 0;
-            _timer.Stop();
-            OnPropertyChanged(nameof(Running));
-            OnPropertyChanged(nameof(ProcessStatus));
-        }
-        
         private async void Tick()
         {
             if (!Running) return;

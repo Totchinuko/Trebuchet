@@ -12,11 +12,7 @@ namespace Trebuchet.ViewModels
         string ProcessStatus { get; }
         bool Running { get; }
         string Uptime { get; }
+        IConanProcess Details { get; set; }
 
-        void SetDetails(IConanProcess details);
-
-        void StartStats(IConanProcess details);
-
-        void StopStats();
     }
 }

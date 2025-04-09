@@ -126,7 +126,7 @@ public class ClientInstanceDashboard : ReactiveObject
         if (state == ProcessState.FAILED)
             OnProcessFailed();
         else if (ProcessRunning && process is not null)
-            ProcessStats.SetDetails(process);
+            ProcessStats.Details = process;
 
         _lastState = state;
         return Task.CompletedTask;
@@ -170,11 +170,12 @@ public class ClientInstanceDashboard : ReactiveObject
         ProcessRunning = true;
 
         if(refreshStats)
-            ProcessStats.StartStats(details);
+            ProcessStats.Details = details;
     }
 
     private void OnProcessTerminated()
     {
+        ProcessStats.Details = ConanProcess.Empty;
         CanKill = false;
         CanLaunch = true;
 
