@@ -14,6 +14,19 @@ namespace TrebuchetLib;
 
 public static class Tools
 {
+    [System.Runtime.InteropServices.DllImport("user32.dll")]
+    private static extern int SetForegroundWindow(IntPtr hwnd);
+
+    public static void FocusWindow(IntPtr hwnd)
+    {
+        if (OperatingSystem.IsWindows())
+            SetForegroundWindow(hwnd);
+        else if (OperatingSystem.IsLinux())
+            throw new NotImplementedException();
+    }
+    
+    
+    
     public static long Clamp2CPUThreads(long value)
     {
         int maxCPU = Environment.ProcessorCount;

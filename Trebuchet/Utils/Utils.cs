@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Trebuchet.Assets;
@@ -71,5 +73,29 @@ namespace Trebuchet.Utils
             }
             return true;
         }
+
+        public static async Task<bool> SingleAppInstanceLock()
+        {
+            var process = Process.GetCurrentProcess();
+            var module = process.MainModule;
+            if (module is null) throw new Exception(@"MainModule is invalid");
+            var filename = module.FileName;
+            if (!File.Exists(filename)) throw new FileNotFoundException(@"App file not found");
+            var processDetails = await Tools.GetProcessesWithName(Path.GetFileName(filename));
+            
+            foreach (var details in processDetails)
+            {
+                if(!string.Equals(Path.GetFullPath(details.filename), Path.GetFullPath(filename))) continue;
+                if(details.pid == process.Id) continue;
+                if (details.TryGetProcess(out var otherProcess))
+                {
+                    Tools.FocusWindow(otherProcess.MainWindowHandle);
+                    ShutdownDesktopProcess();
+                    return false;
+                }
+            }
+
+            return true;
+        }    
     }
 }
