@@ -37,7 +37,7 @@ namespace Trebuchet.Utils
             var data = Tools.GetProcess(Environment.ProcessId);
             Process process = new Process();
             process.StartInfo.FileName = data.filename;
-            process.StartInfo.Arguments = data.args + (testlive ? " -testlive" : " -live");
+            process.StartInfo.Arguments = data.args + (testlive ? @" -testlive" : @" -live");
             process.StartInfo.UseShellExecute = true;
             if (asAdmin)
                 process.StartInfo.Verb = "runas";

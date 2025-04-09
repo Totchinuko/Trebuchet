@@ -22,9 +22,9 @@ public class OnBoardingDirectory : ValidatedInputDialogue<string, OnBoardingDire
     
     private async void OnSearchDirectory()
     {
-        var defaultFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception("App is installed in an invalid directory");
+        var defaultFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception(@"App is installed in an invalid directory");
         if(Application.Current is null || Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
-            throw new Exception("The current application is not a desktop application.");
+            throw new Exception(@"The current application is not a desktop application.");
         
         var toplevel = TopLevel.GetTopLevel(desktop.MainWindow);
         if (toplevel == null) return;
