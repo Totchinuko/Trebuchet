@@ -2,11 +2,12 @@
                     xmlns:vm="clr-namespace:Trebuchet.ViewModels"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:ail="clr-namespace:AsyncImageLoader;assembly=AsyncImageLoader.Avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="WorkshopSearchResult" DataType="vm:WorkshopSearchResult">
         <Border Classes="Panel" Padding="8" CornerRadius="3" Margin="3">
             <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
-                <Image Width="150" Source="{Binding PreviewUrl, Mode=OneWay}" Margin="0,0,0,12" />
+                <Image Width="150" Height="150" ail:ImageLoader.Source="{Binding PreviewUrl}" Margin="0,0,0,12" />
                 <StackPanel Grid.Row="0" Orientation="Vertical" Grid.Column="1" Margin="6 0">
                     <TextBlock TextWrapping="Wrap" Margin="0,0,3,0" FontSize="16">
                         <Run Text="{Binding Title, Mode=OneWay}" />

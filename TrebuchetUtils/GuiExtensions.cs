@@ -15,9 +15,6 @@ namespace TrebuchetUtils
 {
     public static class GuiExtensions
     {
-        private static readonly Dictionary<Uri, Bitmap> Cache = [];
-        private static readonly HttpClient HttpClient = new();
-
         public static IEnumerable<T> FindVisualChildren<T>(Visual depObj) where T : Visual
         {
             foreach (var child in VisualExtensions.GetVisualChildren(depObj))
@@ -56,21 +53,6 @@ namespace TrebuchetUtils
         {
             if(child.Parent is TParent)
                 child.Parent.SetValue(property, value);
-        }
-        
-        public static async Task<Bitmap> DownloadImage(Uri uri)
-        {
-            if (Cache.TryGetValue(uri, out var image))
-            {
-                return image;
-            }
-            else
-            {
-                var data = await HttpClient.GetByteArrayAsync(uri);
-                var bitmap = new Bitmap(new MemoryStream(data));
-                Cache.Add(uri, bitmap);
-                return bitmap;
-            }
         }
 
         // See if Avalonia still need a shitty hack like that for links

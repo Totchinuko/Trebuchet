@@ -23,6 +23,7 @@ using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
+using TrebuchetUtils.Services;
 using TrebuchetUtils.Services.Language;
 using Panel = Trebuchet.ViewModels.Panels.Panel;
 
@@ -35,7 +36,6 @@ namespace Trebuchet;
 public partial class App : Application, IApplication, ISubscriberErrorHandler
 {
     private ILogger<App>? _logger;
-    
     public bool HasCrashed { get; private set; }
     public IImage? AppIconPath => Resources[@"AppIcon"] as IImage;
 

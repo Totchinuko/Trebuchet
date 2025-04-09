@@ -23,20 +23,33 @@
         <Grid RowDefinitions="Auto,*">
             <controls:WindowTitlebar x:Name="TitleBar" Title="Workshop Search" />
             <Border Grid.Row="1" Padding="12">
-                <Grid x:Name="WindowContent" Margin="0,12,0,0" RowDefinitions="auto,auto,*" ColumnDefinitions="4*,3*">
+                <Grid x:Name="WindowContent" Margin="0,12,0,0" RowDefinitions="auto,auto,*" ColumnDefinitions="5*,3*">
                     <Border Classes="Panel" CornerRadius="3" HorizontalAlignment="Stretch" Padding="8">
-                        <Grid ColumnDefinitions="*,Auto,Auto">
-                            <TextBox VerticalContentAlignment="Center" Classes="AutoFocus" Name="SearchField" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0" VerticalAlignment="Center" Height="25" KeyDown="TextBox_KeyDown" />
-                            <Button Command="{Binding SearchCommand}" Grid.Column="1" Margin="0,0,12,0" Classes="Base Blue">
-                                <i:Icon Value="mdi-magnify" Classes="Normal"/>
-                            </Button>
-                            <CheckBox Grid.Column="2" IsChecked="{Binding TestLiveWorkshop, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Content="{x:Static a:Resources.TestLive}" VerticalAlignment="Center" />
+                        <Grid ColumnDefinitions="*,Auto">
+                            <TextBox VerticalContentAlignment="Center" Classes="AutoFocus" Name="SearchField" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0" VerticalAlignment="Center" Height="25" />
+                            <StackPanel Orientation="Horizontal" Grid.Column="1" Spacing="6">
+                                <Button Command="{Binding SearchCommand}" HotKey="Enter" Margin="0,0,12,0" Classes="Base Blue">
+                                    <i:Icon Value="mdi-magnify" Classes="Normal"/>
+                                </Button>
+                                <Button Classes="Base" Command="{Binding PreviousPage}">
+                                    <i:Icon Value="mdi-chevron-left" Classes="Normal" />
+                                </Button>
+                                <TextBlock VerticalAlignment="Center">
+                                    <Run Text="{Binding Page}" />
+                                    <Run Text="/" />
+                                    <Run Text="{Binding MaxPage}" />
+                                </TextBlock>
+                                <Button Classes="Base" Command="{Binding NextPage}">
+                                    <i:Icon Value="mdi-chevron-right" Classes="Normal" />
+                                </Button>
+                                <CheckBox IsChecked="{Binding TestLiveWorkshop, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Content="{x:Static a:Resources.TestLive}" VerticalAlignment="Center" />    
+                            </StackPanel>
                         </Grid>
                     </Border>
                     <ProgressBar Grid.Row="1" Grid.Column="0" Margin="0 3" IsVisible="{Binding IsLoading}" IsIndeterminate="True" HorizontalAlignment="Stretch"  />
                     <Border Padding="0,12,0,0" Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2">
                         <Panel>
-                            <ScrollViewer>
+                            <ScrollViewer Name="PageScrollViewer">
                                 <ItemsControl ItemsSource="{Binding SearchResults}" x:Name="ResultList" IsVisible="{Binding SearchResults}">
                                     <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

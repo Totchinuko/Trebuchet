@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Reactive;
-using Avalonia.Media;
 using Humanizer;
 using ReactiveUI;
 using SteamWorksWebAPI;
@@ -14,7 +13,6 @@ namespace Trebuchet.ViewModels
     {
         private string _creatorAvatar = string.Empty;
         private string _creator = string.Empty;
-        private IImage? _previewUrl;
 
         public WorkshopSearchResult(QueriedPublishedFile result)
         {
@@ -28,7 +26,7 @@ namespace Trebuchet.ViewModels
             Title = result.Title;
             VoteDown = result.VoteData.VotesDown;
             VoteUp = result.VoteData.VotesUp;
-            DownloadCover(result.PreviewUrl);
+            PreviewUrl = result.PreviewUrl;
             AddModCommand = ReactiveCommand.Create(() => ModAdded?.Invoke(this, this));
             OpenWeb = ReactiveCommand.Create(() =>
             {
@@ -58,15 +56,11 @@ namespace Trebuchet.ViewModels
 
         public string LastUpdateReadable => LastUpdate.Humanize();
 
-        public IImage? PreviewUrl
-        {
-            get => _previewUrl;
-            private set => SetField(ref _previewUrl, value);
-        }
-
         public ulong PublishedFileId { get; }
 
         public string ShortDescription { get; }
+        
+        public string PreviewUrl { get; }
 
         public long Size { get; }
 
@@ -85,12 +79,6 @@ namespace Trebuchet.ViewModels
         {
             Creator = summary.PersonaName;
             CreatorAvatar = summary.Avatar;
-        }
-
-        private async void DownloadCover(string url)
-        {
-            var cover = await GuiExtensions.DownloadImage(new Uri(url));
-            PreviewUrl = cover;
         }
     }
 }

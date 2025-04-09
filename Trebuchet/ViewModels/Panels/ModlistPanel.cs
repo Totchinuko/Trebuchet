@@ -273,7 +273,6 @@ namespace Trebuchet.ViewModels.Panels
         {
             if (_searchWindow != null) return;
             _searchWindow = new WorkshopSearch();
-            _searchWindow.SearchViewModel = _workshop;
             _searchWindow.DataContext = _workshop;
             _searchWindow.Closing += OnSearchClosing;
             _searchWindow.Show();

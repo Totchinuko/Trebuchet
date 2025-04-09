@@ -1,4 +1,7 @@
-﻿using Avalonia.Input;
+﻿using System;
+using Avalonia;
+using Avalonia.Controls;
+using Avalonia.Input;
 using Trebuchet.ViewModels;
 using TrebuchetUtils;
 
@@ -12,14 +15,21 @@ namespace Trebuchet.Windows
         public WorkshopSearch()
         {
             InitializeComponent();
+            DataContextProperty.Changed.AddClassHandler<WorkshopSearch>(WorkshopSearchContextChanged);
         }
-        
-        public WorkshopSearchViewModel? SearchViewModel { get; set; }
 
-        private void TextBox_KeyDown(object sender, KeyEventArgs e)
+        private void WorkshopSearchContextChanged(WorkshopSearch sender, AvaloniaPropertyChangedEventArgs args)
         {
-            if (e.Key != Key.Enter) return;
-            SearchViewModel?.OnSearch();
+            if (args.OldValue is WorkshopSearchViewModel vm)
+                vm.PageLoaded -= OnPageLoaded;
+            if (args.NewValue is WorkshopSearchViewModel nvm)
+                nvm.PageLoaded += OnPageLoaded;
+        }
+
+        private void OnPageLoaded(object? sender, EventArgs e)
+        {
+            var scrollViewer = this.FindControl<ScrollViewer>(@"PageScrollViewer");
+            scrollViewer?.ScrollToHome();
         }
     }
 }
