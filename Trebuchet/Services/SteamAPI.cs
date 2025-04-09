@@ -19,14 +19,21 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
     public async Task<List<PublishedFile>> RequestModDetails(List<ulong> list)
     {
         var results = GetCache(list);
-        var response = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), CancellationToken.None);
-        foreach (var r in response.PublishedFileDetails)
+        if (list.Count <= 0) return results;
+        try
         {
-            results.Add(r);
-            _publishedFiles[r.PublishedFileID] = r;
+            var response = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), CancellationToken.None);
+            foreach (var r in response.PublishedFileDetails)
+            {
+                results.Add(r);
+                _publishedFiles[r.PublishedFileID] = r;
+            }
+
+            return results;
         }
-        
-        return results;
+        catch(OperationCanceledException) {}
+
+        return [];
     }
 
     public void InvalidateCache()

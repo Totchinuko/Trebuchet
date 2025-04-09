@@ -18,11 +18,16 @@ namespace SteamWorksWebAPI
             return $"https://{host}/{steamInterface}/{method}/v{version}/";
         }
 
-        public static async Task<T?> PostAsync<T>(string url, Query query, CancellationToken token) where T : class
+        public static Task<T?> PostAsync<T>(string url, Query query, CancellationToken token) where T : class
+        {
+            return PostAsync<T>(url, query, token, TimeSpan.FromSeconds(60));
+        }
+        
+        public static async Task<T?> PostAsync<T>(string url, Query query, CancellationToken token, TimeSpan timeout) where T : class
         {
             using (var client = new HttpClient())
             {
-                client.Timeout = TimeSpan.FromSeconds(15);
+                client.Timeout = timeout;
                 HttpContent content = new FormUrlEncodedContent(query.GetQueryArguments());
                 content.Headers.ContentType = new MediaTypeHeaderValue("application/x-www-form-urlencoded");
 
