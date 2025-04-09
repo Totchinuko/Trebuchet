@@ -13,6 +13,7 @@ using SteamKit2.GC.Dota.Internal;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
+using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
@@ -27,6 +28,7 @@ namespace Trebuchet.ViewModels.Panels
         private readonly AppFiles _appFiles;
         private readonly SteamAPI _steamApi;
         private readonly Launcher _launcher;
+        private readonly DialogueBox _box;
         private readonly TaskBlocker _blocker;
         private readonly ILogger<DashboardPanel> _logger;
         private DispatcherTimer _timer;
@@ -37,6 +39,7 @@ namespace Trebuchet.ViewModels.Panels
             AppFiles appFiles, 
             SteamAPI steamApi,
             Launcher launcher, 
+            DialogueBox box,
             TaskBlocker blocker,
             ILogger<DashboardPanel> logger) : 
             base(Resources.Dashboard, "mdi-view-dashboard", true)
@@ -46,6 +49,7 @@ namespace Trebuchet.ViewModels.Panels
             _appFiles = appFiles;
             _steamApi = steamApi;
             _launcher = launcher;
+            _box = box;
             _blocker = blocker;
             _logger = logger;
 
@@ -165,9 +169,9 @@ namespace Trebuchet.ViewModels.Panels
 
             if (_uiConfig.DisplayWarningOnKill)
             {
-                var question = new QuestionModal(Resources.Kill, Resources.KillText);
-                await question.OpenDialogueAsync();
-                if (!question.Result) return;
+                var confirm = new OnBoardingConfirmation(Resources.Kill, Resources.KillText);
+                await _box.OpenAsync(confirm);
+                if (!confirm.Result) return;
             }
 
             Client.CanKill = false;
@@ -214,9 +218,9 @@ namespace Trebuchet.ViewModels.Panels
 
             if (_uiConfig.DisplayWarningOnKill)
             {
-                QuestionModal question = new QuestionModal(Resources.Kill, Resources.KillText);
-                await question.OpenDialogueAsync();
-                if (!question.Result) return;
+                var confirm = new OnBoardingConfirmation(Resources.Kill, Resources.KillText);
+                await _box.OpenAsync(confirm);
+                if (!confirm.Result) return;
             }
 
             dashboard.CanKill = false;
@@ -406,10 +410,9 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnFileVerification()
         {
-            var question = new QuestionModal(Resources.VerifyFiles,
-                Resources.VerifyFilesText);
-            await question.OpenDialogueAsync();
-            if (!question.Result) return;
+            var confirm = new OnBoardingConfirmation(Resources.VerifyFiles, Resources.VerifyFilesText);
+            await _box.OpenAsync(confirm);
+            if (!confirm.Result) return;
 
             try
             {
