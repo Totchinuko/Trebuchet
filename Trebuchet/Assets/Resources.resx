@@ -606,7 +606,7 @@ Do you wish to proceed ?</value>
         <value>Server Instance Amount</value>
     </data>
     <data name="SettingServerInstanceCountText" xml:space="preserve">
-        <value>The amount of server instance to be handle by this trebuchet. Leave it at 0 if you do not wish trebuchet to handle server launch</value>
+        <value>The amount of server instance to be handled by this trebuchet. Leave it at 0 if you do not wish trebuchet to handle server launch</value>
     </data>
     <data name="SettingAutoUpdateStatus" xml:space="preserve">
         <value>Update Server Instances</value>
@@ -856,5 +856,11 @@ Do you wish to proceed ?</value>
     </data>
     <data name="Peak" xml:space="preserve">
         <value>Peak</value>
+    </data>
+    <data name="OnBoardingServerInstanceCount" xml:space="preserve">
+        <value>Server Instances</value>
+    </data>
+    <data name="OnBoardingServerInstanceCountSub" xml:space="preserve">
+        <value>Choose how many server instance Trebuchet should manage. Unless you want to handle a cluster, one should be enough.</value>
     </data>
 </root>

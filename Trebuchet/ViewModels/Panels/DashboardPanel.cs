@@ -63,11 +63,11 @@ namespace Trebuchet.ViewModels.Panels
             VerifyFilesCommand = ReactiveCommand.Create(
                 canExecute: canDownloadMods, execute:OnFileVerification);
 
-            RefreshPanel.IsExecuting
-                .Where(x => x)
-                .Select(_ => Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config))
-                .Subscribe(x => CanTabBeClicked = x);
-            RefreshPanel.Subscribe((_) => RefreshDashboards());
+            RefreshPanel.Subscribe((_) =>
+                {
+                    CanTabBeClicked = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
+                    RefreshDashboards();
+                });
             DisplayPanel.Subscribe((_) => PanelDisplayed());
 
             Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker, _box);

@@ -67,13 +67,10 @@ public class SettingsPanel : Panel
             .SetTitle(Resources.SettingClientInstallation)
             .SetDescription(Resources.SettingClientInstallationText)
         );
-        Fields.Add(new IntSliderField(0, 6, 1)
-            .WhenFieldChanged(SaveConfig)
+        Fields.Add(new ServerInstallationField(_onBoarding, _setup)
+            .WhenFieldChanged(RequestAppRefresh)
             .SetTitle(Resources.SettingServerInstanceCount)
             .SetDescription(Resources.SettingServerInstanceCountText)
-            .SetGetter(() => _setup.Config.ServerInstanceCount)
-            .SetSetter((v) => _setup.Config.ServerInstanceCount = v)
-            .SetDefault(() => Config.ServerInstanceCountDefault)
         );
         Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
         Fields.Add(new ToggleField()

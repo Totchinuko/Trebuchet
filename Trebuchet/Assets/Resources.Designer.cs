@@ -881,6 +881,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Server Instances.
+        /// </summary>
+        public static string OnBoardingServerInstanceCount {
+            get {
+                return ResourceManager.GetString("OnBoardingServerInstanceCount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose how many server instance Trebuchet should manage. Unless you want to handle a cluster, one should be enough..
+        /// </summary>
+        public static string OnBoardingServerInstanceCountSub {
+            get {
+                return ResourceManager.GetString("OnBoardingServerInstanceCountSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A previous installation of Trebuchet has been detected and must be upgraded to function with this version. Once this task is over, previous version of Trebuchet will not work anymore. 
         ///Do you wish to proceed ?.
         /// </summary>
@@ -1693,7 +1711,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The amount of server instance to be handle by this trebuchet. Leave it at 0 if you do not wish trebuchet to handle server launch.
+        ///   Looks up a localized string similar to The amount of server instance to be handled by this trebuchet. Leave it at 0 if you do not wish trebuchet to handle server launch.
         /// </summary>
         public static string SettingServerInstanceCountText {
             get {

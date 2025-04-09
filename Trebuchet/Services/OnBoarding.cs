@@ -26,15 +26,15 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
         await dialogueBox.OpenAsync(choice);
         switch (choice.Result)
         {
-            case 0:
+            case 0: // Play Conan
                 setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
                 setup.Config.ServerInstanceCount = 0;
                 return await OnBoardingFindConanExile();
-            case 1:
+            case 1: //Server Admin
                 setup.Config.AutoUpdateStatus = AutoUpdateStatus.CheckForUpdates;
                 setup.Config.ServerInstanceCount = 1;
-                return await OnBoardingServerDownload();
-            case 2:
+                return await OnBoardingServerInstanceSelection();
+            case 2: // Modding
                 setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
                 setup.Config.ServerInstanceCount = 1;
                 if(!await OnBoardingFindConanExile()) return false;
@@ -42,6 +42,19 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
             default:
                 throw new OperationCanceledException(@"OnBoarding was cancelled");
         }
+    }
+
+    public async Task<bool> OnBoardingServerInstanceSelection()
+    {
+        var choice = new OnBoardingIntSlider(
+            Resources.OnBoardingServerInstanceCount, 
+            Resources.OnBoardingServerInstanceCountSub,
+            1, 6);
+        choice.Value = setup.Config.ServerInstanceCount;
+        await dialogueBox.OpenAsync(choice);
+        if(choice.Value == 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
+        setup.Config.ServerInstanceCount = choice.Value;
+        return await OnBoardingServerDownload();
     }
 
     public async Task<bool> OnBoardingServerDownload()

@@ -49,6 +49,8 @@
                 <MergeResourceInclude Source="Templates\ClientInstallationField.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingModlistImport.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingError.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingIntSlider.axaml" />
+                <MergeResourceInclude Source="Templates\ServerInstallationField.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -83,5 +85,7 @@
         <StaticResource ResourceKey="ClientInstallationField" />
         <StaticResource ResourceKey="OnBoardingModlistImport" />
         <StaticResource ResourceKey="OnBoardingError" />
+        <StaticResource ResourceKey="OnBoardingIntSlider" />
+        <StaticResource ResourceKey="ServerInstallationField" />
     </Application.DataTemplates>
 </Application>
