@@ -1,6 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="AppSettings" x:DataType="p:SettingsPanel">
         <ScrollViewer Grid.Row="1" AllowAutoHide="False" Padding="0 0 12 0">
@@ -11,6 +12,16 @@
                         <Run Text=": " />
                         <Run Text="{x:Static a:Resources.TranslatorsIdentity}" />
                     </TextBlock>
+                </Border>
+                <Border Padding="12" Classes="Panel" Margin="0 0 0 12">
+                    <StackPanel Orientation="Horizontal" Spacing="6" >
+                        <Button Classes="Base Red" Command="{Binding RemoveUnusedMods}">
+                            <StackPanel Spacing="3" Orientation="Horizontal">
+                                <i:Icon Value="mdi-delete" Classes="Normal" />
+                                <TextBlock Text="{x:Static a:Resources.TrimUnusedMods}" />
+                            </StackPanel>
+                        </Button>
+                    </StackPanel>
                 </Border>
                 <ItemsControl ItemsSource="{Binding Fields}">
                     <ItemsControl.ItemsPanel>

@@ -869,4 +869,22 @@ Do you wish to proceed ?</value>
     <data name="TranslationAuthors" xml:space="preserve">
         <value>Translation Authors</value>
     </data>
+    <data name="TrimUnusedMods" xml:space="preserve">
+        <value>Trim unused mods</value>
+    </data>
+    <data name="OnBoardingNoUnusedMods" xml:space="preserve">
+        <value>No unused mods</value>
+    </data>
+    <data name="OnBoardingNoUnusedModsSub" xml:space="preserve">
+        <value>There are no unused mods to trim</value>
+    </data>
+    <data name="OnBoardingModTrimConfirm" xml:space="preserve">
+        <value>Mod Trimming</value>
+    </data>
+    <data name="OnBoardingModTrimConfirmSub" xml:space="preserve">
+        <value>{0} usued mods have been found, continue ?</value>
+    </data>
+    <data name="TrimmingUnusedMods" xml:space="preserve">
+        <value>Trimming unused mods</value>
+    </data>
 </root>

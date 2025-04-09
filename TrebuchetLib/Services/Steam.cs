@@ -167,6 +167,31 @@ namespace TrebuchetLib.Services
             }
         }
 
+        public void ClearUGCFileIdsFromStorage(IEnumerable<ulong> idList)
+        {
+            UpdateDownloaderConfig();
+            DepotConfigStore.LoadFromFile(
+                Path.Combine(
+                    _appFiles.Mods.GetWorkshopFolder(), 
+                    ContentDownloader.CONFIG_DIR, 
+                    ContentDownloader.DEPOT_CONFIG));
+            
+            foreach (var id in idList)
+                DepotConfigStore.Instance.InstalledUGCManifestIDs.Remove(id);
+            DepotConfigStore.Save();
+        }
+
+        public ICollection<ulong> GetUGCFileIdsFromStorage()
+        {
+            UpdateDownloaderConfig();
+            DepotConfigStore.LoadFromFile(
+                Path.Combine(
+                    _appFiles.Mods.GetWorkshopFolder(), 
+                    ContentDownloader.CONFIG_DIR, 
+                    ContentDownloader.DEPOT_CONFIG));
+            return DepotConfigStore.Instance.InstalledUGCManifestIDs.Keys.ToList();
+        }
+
         /// <summary>
         /// Remove all junctions present in any server instance folder. Used before update to avoid crash du to copy error on junction folders.
         /// </summary>

@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -109,6 +110,42 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
             await steam.UpdateMods(modlist, task.Cts);
         }
         catch (OperationCanceledException) {}
+        finally
+        {
+            task.Release();
+        }
+    }
+
+    public int CountUnusedMods()
+    {
+        int count = 0;
+        var installedMods = steam.GetUGCFileIdsFromStorage();
+        var usedMods = appFiles.Mods.ListProfiles()
+            .SelectMany(x => appFiles.Mods.Get(x).GetWorkshopMods());
+        count = installedMods.Except(usedMods).Count();
+        return count;
+    }
+
+    public async Task RemoveUnusedMods()
+    {
+        var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.TrimmingUnusedMods));
+        try
+        {
+            var installedMods = steam.GetUGCFileIdsFromStorage();
+            var usedMods = appFiles.Mods.ListProfiles()
+                .SelectMany(x => appFiles.Mods.Get(x).GetWorkshopMods());
+            var toRemove = installedMods.Except(usedMods).ToList();
+            steam.ClearUGCFileIdsFromStorage(toRemove);
+            
+            foreach (var mod in toRemove)
+            {
+                var path = mod.ToString();
+                if(!appFiles.Mods.ResolveMod(ref path)) continue;
+                if(!File.Exists(path)) continue;
+                File.Delete(path);
+            }
+        }
+        catch (OperationCanceledException){}
         finally
         {
             task.Release();

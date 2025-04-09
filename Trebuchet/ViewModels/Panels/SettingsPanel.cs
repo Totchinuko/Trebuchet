@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Reactive;
+using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using Trebuchet.Assets;
@@ -38,13 +40,24 @@ public class SettingsPanel : Panel
 
         SaveConfig = ReactiveCommand.Create(() => _setup.Config.SaveFile());
         SaveUiConfig = ReactiveCommand.Create(() => _uiConfig.SaveFile());
+        RemoveUnusedMods = ReactiveCommand.CreateFromTask(OnRemoveUnusedMods);
             
         BuildFields();
     }
 
     public ReactiveCommand<Unit,Unit> SaveConfig { get; }
     public ReactiveCommand<Unit,Unit> SaveUiConfig { get; }
+    public ReactiveCommand<Unit,Unit> RemoveUnusedMods { get; }
     public List<FieldElement> Fields { get; } = [];
+
+    private async Task OnRemoveUnusedMods()
+    {
+        try
+        {
+            await _onBoarding.OnBoardingRemoveUnusedMods();
+        }
+        catch(OperationCanceledException) {}
+    }
 
     private async void OnServerInstanceInstall(object? obj)
     {

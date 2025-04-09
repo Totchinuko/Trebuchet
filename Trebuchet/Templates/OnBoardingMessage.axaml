@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:l="clr-namespace:Trebuchet.ViewModels.InnerContainer"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="OnBoardingMessage" DataType="l:OnBoardingMessage">
+        <DockPanel LastChildFill="True" MinWidth="550" MinHeight="150">
+            <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
+            <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" />
+            <StackPanel Spacing="6" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Top" Margin="0 12 0 0">
+                <Button Classes="Base" HotKey="Escape" IsVisible="{Binding $self.IsEnabled}" Command="{Binding CancelCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <i:Icon Value="mdi-cancel" Classes="Normal" />
+                        <TextBlock Text="{x:Static a:Resources.Close}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

@@ -872,11 +872,47 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Mod Trimming.
+        /// </summary>
+        public static string OnBoardingModTrimConfirm {
+            get {
+                return ResourceManager.GetString("OnBoardingModTrimConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to {0} usued mods have been found, continue ?.
+        /// </summary>
+        public static string OnBoardingModTrimConfirmSub {
+            get {
+                return ResourceManager.GetString("OnBoardingModTrimConfirmSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Choose a name for the new trebuchet save that will contain your files.
         /// </summary>
         public static string OnBoardingNewGameSave {
             get {
                 return ResourceManager.GetString("OnBoardingNewGameSave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to No unused mods.
+        /// </summary>
+        public static string OnBoardingNoUnusedMods {
+            get {
+                return ResourceManager.GetString("OnBoardingNoUnusedMods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to There are no unused mods to trim.
+        /// </summary>
+        public static string OnBoardingNoUnusedModsSub {
+            get {
+                return ResourceManager.GetString("OnBoardingNoUnusedModsSub", resourceCulture);
             }
         }
         
@@ -2400,6 +2436,24 @@ namespace Trebuchet.Assets {
         public static string TrebuchetBusy {
             get {
                 return ResourceManager.GetString("TrebuchetBusy", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trimming unused mods.
+        /// </summary>
+        public static string TrimmingUnusedMods {
+            get {
+                return ResourceManager.GetString("TrimmingUnusedMods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trim unused mods.
+        /// </summary>
+        public static string TrimUnusedMods {
+            get {
+                return ResourceManager.GetString("TrimUnusedMods", resourceCulture);
             }
         }
         

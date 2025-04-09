@@ -14,8 +14,30 @@ using TrebuchetUtils;
 
 namespace Trebuchet.Services;
 
-public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueBox, Steam steam)
+public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueBox, Steam steam, SteamAPI steamApi)
 {
+    public async Task<bool> OnBoardingRemoveUnusedMods()
+    {
+        var count = steamApi.CountUnusedMods();
+        if (count <= 0)
+        {
+            var message = new OnBoardingMessage(Resources.OnBoardingNoUnusedMods, Resources.OnBoardingNoUnusedModsSub);
+            await dialogueBox.OpenAsync(message);
+            return true;
+        }
+
+        var confirm = new OnBoardingConfirmation(Resources.OnBoardingModTrimConfirm,
+            string.Format(Resources.OnBoardingModTrimConfirmSub, count));
+        await dialogueBox.OpenAsync(confirm);
+        if (!confirm.Result) throw new OperationCanceledException(@"OnBoarding was cancelled");
+        var progress = new OnBoardingProgress(Resources.OnBoardingModTrimConfirm, string.Empty);
+        progress.Report(0);
+        dialogueBox.Open(progress);
+        await steamApi.RemoveUnusedMods();
+        dialogueBox.Close();
+        return true;
+    }
+    
     public async Task<bool> OnBoardingUsageChoice()
     {
         var choice = new OnBoardingBranch(Resources.OnBoardingUsageChoice, Resources.OnBoardingUsageChoiceText)
