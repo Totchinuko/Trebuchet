@@ -44,6 +44,16 @@
                     <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding MemoryConsumption, Mode=OneWay}" VerticalAlignment="Center" />
                 </Grid>
             </Border>
+            <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25" IsVisible="{Binding MemoryConsumption}">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock Grid.Column="0" Margin="5,0,0,0" Text="{x:Static a:Resources.Peak}" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Margin="0,0,5,0" Text="{Binding MemoryPeakConsumption, Mode=OneWay}" VerticalAlignment="Center" />
+                </Grid>
+            </Border>
             <Border Classes="DarkPanel" BorderThickness="0" CornerRadius="0" Margin="0,0,0,3" Height="25" IsVisible="{Binding ProcessStatus}">
                 <Grid>
                     <Grid.ColumnDefinitions>

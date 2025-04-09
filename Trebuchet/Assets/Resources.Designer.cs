@@ -735,15 +735,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0}MB (Peak {1}MB).
-        /// </summary>
-        public static string MemoryFormat {
-            get {
-                return ResourceManager.GetString("MemoryFormat", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Missing.
         /// </summary>
         public static string Missing {
@@ -1059,6 +1050,15 @@ namespace Trebuchet.Assets {
         public static string OpenWorkshopPage {
             get {
                 return ResourceManager.GetString("OpenWorkshopPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Peak.
+        /// </summary>
+        public static string Peak {
+            get {
+                return ResourceManager.GetString("Peak", resourceCulture);
             }
         }
         
@@ -2274,6 +2274,69 @@ namespace Trebuchet.Assets {
         public static string Status {
             get {
                 return ResourceManager.GetString("Status", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Crashed.
+        /// </summary>
+        public static string StatusCrashed {
+            get {
+                return ResourceManager.GetString("StatusCrashed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Failed.
+        /// </summary>
+        public static string StatusFailed {
+            get {
+                return ResourceManager.GetString("StatusFailed", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starting.
+        /// </summary>
+        public static string StatusNew {
+            get {
+                return ResourceManager.GetString("StatusNew", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Online.
+        /// </summary>
+        public static string StatusOnline {
+            get {
+                return ResourceManager.GetString("StatusOnline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Running.
+        /// </summary>
+        public static string StatusRunning {
+            get {
+                return ResourceManager.GetString("StatusRunning", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stopped.
+        /// </summary>
+        public static string StatusStopped {
+            get {
+                return ResourceManager.GetString("StatusStopped", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stopping.
+        /// </summary>
+        public static string StatusStopping {
+            get {
+                return ResourceManager.GetString("StatusStopping", resourceCulture);
             }
         }
         

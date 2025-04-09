@@ -7,6 +7,7 @@ namespace Trebuchet.ViewModels
     {
         string CpuUsage { get; }
         string MemoryConsumption { get; }
+        string MemoryPeakConsumption { get; }
         int PID { get; }
         string PlayerCount { get; }
         string ProcessStatus { get; }

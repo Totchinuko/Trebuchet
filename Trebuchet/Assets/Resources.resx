@@ -815,9 +815,6 @@ Do you wish to proceed ?</value>
     <data name="CpuFormat" xml:space="preserve">
         <value>{0}%</value>
     </data>
-    <data name="MemoryFormat" xml:space="preserve">
-        <value>{0}MB (Peak {1}MB)</value>
-    </data>
     <data name="NoResultFound" xml:space="preserve">
         <value>No results found</value>
     </data>
@@ -850,5 +847,29 @@ Do you wish to proceed ?</value>
     </data>
     <data name="Exit" xml:space="preserve">
         <value>Exit</value>
+    </data>
+    <data name="StatusNew" xml:space="preserve">
+        <value>Starting</value>
+    </data>
+    <data name="StatusStopped" xml:space="preserve">
+        <value>Stopped</value>
+    </data>
+    <data name="StatusFailed" xml:space="preserve">
+        <value>Failed</value>
+    </data>
+    <data name="StatusStopping" xml:space="preserve">
+        <value>Stopping</value>
+    </data>
+    <data name="StatusRunning" xml:space="preserve">
+        <value>Running</value>
+    </data>
+    <data name="StatusOnline" xml:space="preserve">
+        <value>Online</value>
+    </data>
+    <data name="StatusCrashed" xml:space="preserve">
+        <value>Crashed</value>
+    </data>
+    <data name="Peak" xml:space="preserve">
+        <value>Peak</value>
     </data>
 </root>

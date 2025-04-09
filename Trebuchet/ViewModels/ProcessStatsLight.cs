@@ -5,14 +5,11 @@ using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using DynamicData;
-using DynamicData.Binding;
 using Humanizer;
 using ReactiveUI;
 using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
-using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {
@@ -56,6 +53,7 @@ namespace Trebuchet.ViewModels
         private long _peakMemoryConsumption;
         private DispatcherTimer _timer;
         private string _playerCount = string.Empty;
+        private string _memoryPeakConsumption = string.Empty;
         private string _memoryConsumption = string.Empty;
         private string _cpuUsage = string.Empty;
         private string _uptime = string.Empty;
@@ -74,6 +72,12 @@ namespace Trebuchet.ViewModels
         {
             get => _memoryConsumption;
             private set => this.RaiseAndSetIfChanged(ref _memoryConsumption, value);
+        }
+
+        public string MemoryPeakConsumption
+        {
+            get => _memoryPeakConsumption;
+            set => this.RaiseAndSetIfChanged(ref _memoryPeakConsumption, value);
         }
 
         public ProcessState State
@@ -111,19 +115,19 @@ namespace Trebuchet.ViewModels
             switch (state)
             {
                 case ProcessState.NEW:
-                    return String.Empty;
+                    return Resources.StatusNew;
                 case ProcessState.STOPPED:
-                    return String.Empty;
+                    return Resources.StatusStopped;
                 case ProcessState.FAILED:
-                    return String.Empty;
+                    return Resources.StatusFailed;
                 case ProcessState.STOPPING:
-                    return String.Empty;
+                    return Resources.StatusStopping;
                 case ProcessState.RUNNING:
-                    return String.Empty;
+                    return Resources.StatusRunning;
                 case ProcessState.ONLINE:
-                    return String.Empty;
+                    return Resources.StatusOnline;
                 case ProcessState.CRASHED:
-                    return String.Empty;
+                    return Resources.StatusCrashed;
                 default:
                     return String.Empty;
             }
@@ -133,11 +137,13 @@ namespace Trebuchet.ViewModels
         {
             if (!Running) return;
 
-            long memoryConsumption = _details?.MemoryUsage ?? 0;
+            State = _details.State;
+            long memoryConsumption = _details.MemoryUsage;
             CpuUsage = string.Format(Resources.CpuFormat, (await GetCpuUsageForProcess()).ToString(@"N2"));
             _peakMemoryConsumption = Math.Max(memoryConsumption, _peakMemoryConsumption);
-            MemoryConsumption = string.Format(Resources.MemoryFormat, (memoryConsumption / 1024 / 1024), (_peakMemoryConsumption / 1024 / 1024));
-            Uptime = _details == null ? string.Empty : (DateTime.UtcNow - _details.StartUtc).Humanize();
+            MemoryConsumption = memoryConsumption.Bytes().Humanize();
+            MemoryPeakConsumption = _peakMemoryConsumption.Bytes().Humanize();
+            Uptime = (DateTime.UtcNow - _details.StartUtc).Humanize();
 
             if (_details is IConanServerProcess serverDetails)
                 PlayerCount = @$"{serverDetails.Players}/{serverDetails.MaxPlayers}";
@@ -145,8 +151,6 @@ namespace Trebuchet.ViewModels
         
         private async Task<double> GetCpuUsageForProcess()
         {
-            if (_details == null) return 0;
-            
             var startTime = DateTime.UtcNow;
             var startUsage = _details.CpuTime;
 
