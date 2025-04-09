@@ -15,7 +15,6 @@
                     <Button Classes="Base Green"
                             HorizontalAlignment="Right"
                             Command="{Binding AddModCommand}"
-                            CommandParameter="{Binding .}"
                             Padding="8">
                         <StackPanel Orientation="Horizontal">
                             <i:Icon Value="mdi-plus-box" Classes="Normal" Margin="0,0,6,0" />
