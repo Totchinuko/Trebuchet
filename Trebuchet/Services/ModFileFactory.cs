@@ -64,7 +64,7 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
         for (var i = 0; i < files.Count; i++)
         {
             var current = files[i];
-            if (current is not PublishedModFile pub) continue;
+            if (current is not IPublishedModFile pub) continue;
             var workshop = details.FirstOrDefault(d => d.PublishedFileID == pub.PublishedId);
             if (workshop is null) continue;
             files[i] = Create(workshop, needUpdate.Contains(workshop.PublishedFileID));

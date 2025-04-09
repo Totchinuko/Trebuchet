@@ -28,7 +28,10 @@ public class WorkshopModFile : ReactiveObject, IModFile, IPublishedModFile
         if(File.Exists(path))
             StatusClasses.Add(needUpdate ? @"UpdateAvailable" : @"Up2Date");
         else
+        {
             StatusClasses.Add(@"Missing");
+            NeedUpdate = true;
+        }
     }
     
     public WorkshopModFile(string path, WorkshopSearchResult file, bool needUpdate = false)
@@ -45,7 +48,10 @@ public class WorkshopModFile : ReactiveObject, IModFile, IPublishedModFile
         if(File.Exists(path))
             StatusClasses.Add(needUpdate ? @"UpdateAvailable" : @"Up2Date");
         else
+        {
             StatusClasses.Add(@"Missing");
+            NeedUpdate = true;
+        }
     }
     
     public WorkshopModFile(string path, WorkshopModFile file)
