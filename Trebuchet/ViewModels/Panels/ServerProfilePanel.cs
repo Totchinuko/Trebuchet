@@ -205,6 +205,14 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.ServerPassword = v)
                 .SetDefault(() => ServerProfile.ServerPasswordDefault)
             );
+            Fields.Add(new PasswordField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerAdminPass)
+                .SetDescription(Resources.SettingServerAdminPassText)
+                .SetGetter(() => _profile.AdminPassword)
+                .SetSetter((v) => _profile.AdminPassword = v)
+                .SetDefault(() => ServerProfile.AdminPasswordDefault)
+            );
             Fields.Add(new IntField(0,int.MaxValue)
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingServerMaxPlayer)
