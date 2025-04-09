@@ -30,6 +30,10 @@ namespace Trebuchet.ViewModels
             VoteUp = result.VoteData.VotesUp;
             DownloadCover(result.PreviewUrl);
             AddModCommand = ReactiveCommand.Create(() => ModAdded?.Invoke(this, this));
+            OpenWeb = ReactiveCommand.Create(() =>
+            {
+                TrebuchetUtils.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, PublishedFileId));
+            });
         }
 
         public event EventHandler<WorkshopSearchResult>? ModAdded;
@@ -75,6 +79,7 @@ namespace Trebuchet.ViewModels
         public uint VoteUp { get; }
         
         public ReactiveCommand<Unit,Unit> AddModCommand { get; }
+        public ReactiveCommand<Unit,Unit> OpenWeb { get; }
 
         public void SetCreator(PlayerSummary summary)
         {

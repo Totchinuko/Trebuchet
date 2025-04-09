@@ -5,24 +5,9 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="WorkshopSearchResult" DataType="vm:WorkshopSearchResult">
         <Border Classes="Panel" Padding="8" CornerRadius="3" Margin="3">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="auto" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-                <StackPanel Orientation="Vertical" Grid.Column="0" Margin="0,0,12,0">
-                    <Image Width="150" Source="{Binding PreviewUrl, Mode=OneWay}" Margin="0,0,0,12" />
-                    <Button Classes="Base Green"
-                            HorizontalAlignment="Right"
-                            Command="{Binding AddModCommand}"
-                            Padding="8">
-                        <StackPanel Orientation="Horizontal">
-                            <i:Icon Value="mdi-plus-box" Classes="Normal" Margin="0,0,6,0" />
-                            <TextBlock Text="{x:Static a:Resources.AddToList}" />
-                        </StackPanel>
-                    </Button>
-                </StackPanel>
-                <StackPanel Orientation="Vertical" Grid.Column="1">
+            <Grid RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
+                <Image Width="150" Source="{Binding PreviewUrl, Mode=OneWay}" Margin="0,0,0,12" />
+                <StackPanel Grid.Row="0" Orientation="Vertical" Grid.Column="1" Margin="6 0">
                     <TextBlock TextWrapping="Wrap" Margin="0,0,3,0" FontSize="16">
                         <Run Text="{Binding Title, Mode=OneWay}" />
                         <Run Text=" (" />
@@ -42,6 +27,22 @@
                         <Run Text="{x:Static a:Resources.Subscriptions}" />
                     </TextBlock>
                     <TextBlock Classes="SubText" TextWrapping="Wrap" Text="{Binding ShortDescription, Mode=OneWay}" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Spacing="6">
+                    <Button Classes="Base Green"
+                            HorizontalAlignment="Right"
+                            Command="{Binding AddModCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                            <i:Icon Value="mdi-plus-box" Classes="Normal" />
+                            <TextBlock Text="{x:Static a:Resources.AddToList}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="Base"
+                            HorizontalAlignment="Right"
+                            ToolTip.Tip="{x:Static a:Resources.OpenWorkshopPage}"
+                            Command="{Binding OpenWeb}">
+                        <i:Icon Value="mdi-steam" Classes="Normal" />
+                    </Button>
                 </StackPanel>
             </Grid>
         </Border>
