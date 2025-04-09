@@ -61,12 +61,6 @@
     <data name="ProfileName" xml:space="preserve">
     <value>Profile Name</value>
     </data>
-    <data name="AlreadyExists" xml:space="preserve">
-    <value>Already Exists</value>
-    </data>
-    <data name="AlreadyExistsText" xml:space="preserve">
-    <value>This name is already used</value>
-    </data>
     <data name="Deletion" xml:space="preserve">
     <value>Deletion</value>
     </data>
@@ -602,9 +596,6 @@ Do you wish to proceed ?</value>
     <data name="SettingServerLogFiltersText" xml:space="preserve">
         <value>Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
     </data>
-    <data name="CatTrebSettings" xml:space="preserve">
-        <value>Trebuchet Settings</value>
-    </data>
     <data name="SettingClientInstallation" xml:space="preserve">
         <value>Conan Exile Installation Folder</value>
     </data>
@@ -656,9 +647,6 @@ Do you wish to proceed ?</value>
     <data name="SettingMaxServersText" xml:space="preserve">
         <value>Max amount of content server used at the same time on the steam network</value>
     </data>
-    <data name="CatMods" xml:space="preserve">
-        <value>Mods</value>
-    </data>
     <data name="SettingAutoRefreshModlist" xml:space="preserve">
         <value>Auto Refresh Mod List</value>
     </data>
@@ -670,9 +658,6 @@ Do you wish to proceed ?</value>
     </data>
     <data name="SettingDisplayWarningOnKillText" xml:space="preserve">
         <value>Click on a Kill button will display first a warning about data loss and corruption</value>
-    </data>
-    <data name="CatTrebUI" xml:space="preserve">
-        <value>Trebuchet UI</value>
     </data>
     <data name="OpenWorkshopPage" xml:space="preserve">
         <value>Open Workshop Page</value>

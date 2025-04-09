@@ -78,24 +78,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Already Exists.
-        /// </summary>
-        public static string AlreadyExists {
-            get {
-                return ResourceManager.GetString("AlreadyExists", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to This name is already used.
-        /// </summary>
-        public static string AlreadyExistsText {
-            get {
-                return ResourceManager.GetString("AlreadyExistsText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Append.
         /// </summary>
         public static string Append {
@@ -168,15 +150,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Mods.
-        /// </summary>
-        public static string CatMods {
-            get {
-                return ResourceManager.GetString("CatMods", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Performance.
         /// </summary>
         public static string CatPerformance {
@@ -227,24 +200,6 @@ namespace Trebuchet.Assets {
         public static string CatServerSettings {
             get {
                 return ResourceManager.GetString("CatServerSettings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Trebuchet Settings.
-        /// </summary>
-        public static string CatTrebSettings {
-            get {
-                return ResourceManager.GetString("CatTrebSettings", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Trebuchet UI.
-        /// </summary>
-        public static string CatTrebUI {
-            get {
-                return ResourceManager.GetString("CatTrebUI", resourceCulture);
             }
         }
         
