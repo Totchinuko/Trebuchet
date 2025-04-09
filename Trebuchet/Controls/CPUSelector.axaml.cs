@@ -54,7 +54,7 @@ namespace Trebuchet.Controls
             IEnumerable<CheckBox> children = TrebuchetUtils.GuiExtensions.FindVisualChildren<CheckBox>(sender.CheckboxPanel);
             foreach (CheckBox child in children)
             {
-                if(child.Tag is null) throw new Exception("CpuAffinityTags Are not setup properly.");
+                if(child.Tag is null) throw new Exception(@"CpuAffinityTags Are not setup properly.");
                 child.IsChecked = (sender.CpuAffinity & (1L << (int)child.Tag)) != 0;
             }
         }
@@ -63,7 +63,7 @@ namespace Trebuchet.Controls
         {
             if (sender is CheckBox checkBox)
             {
-                if(checkBox.Tag is null) throw new Exception("CPUSelector.Tags Are not setup properly.");
+                if(checkBox.Tag is null) throw new Exception(@"CPUSelector.Tags Are not setup properly.");
                 int index = (int)checkBox.Tag;
                 checkBox.IsVisible = index < Environment.ProcessorCount;
                 checkBox.IsChecked = (CpuAffinity & (1L << index)) != 0;

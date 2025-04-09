@@ -1,0 +1,37 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:l="clr-namespace:Trebuchet.ViewModels.InnerContainer"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="OnBoardingModlistImport" DataType="l:OnBoardingModlistImport">
+        <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
+            <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" />
+            <TextBlock DockPanel.Dock="Top" Classes="Error" Classes.Hidden="{Binding !IsValid}" Text="{Binding ErrorMessage}" />
+            <WrapPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"  Margin="0 12 0 0">
+                <Button Classes="Base"
+                        Content="{x:Static a:Resources.SaveAs}"
+                        IsVisible="{Binding SaveAsVisible}"
+                        Command="{Binding SaveCommand}"
+                        HotKey="Ctrl+S"
+                        Margin="6" />
+                <Button Classes="Base Green"
+                        Content="{x:Static a:Resources.Append}"
+                        IsVisible="{Binding ImportVisible}"
+                        Command="{Binding AppendCommand}"
+                        Margin="6" />
+                <Button Classes="Base Yellow"
+                        Content="{x:Static a:Resources.ModlistReplace}"
+                        IsVisible="{Binding ImportVisible}"
+                        Command="{Binding ApplyCommand}"
+                        Margin="6" />
+                <Button Classes="Base"
+                        HotKey="Escape"
+                        Content="{x:Static a:Resources.Close}"
+                        Command="{Binding CancelCommand}"
+                        Margin="6" />
+            </WrapPanel>
+            <TextBox DockPanel.Dock="Top" AcceptsReturn="True" Text="{Binding Value}" TextWrapping="Wrap"  />
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

@@ -8,9 +8,7 @@ using System.Net.Http;
 using System.Reflection;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Media.Imaging;
-using TrebuchetUtils.Modals;
 using VisualExtensions = Avalonia.VisualTree.VisualExtensions;
 
 namespace TrebuchetUtils

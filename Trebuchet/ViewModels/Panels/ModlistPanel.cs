@@ -20,7 +20,6 @@ using ReactiveUI;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Assets;
-using Trebuchet.Modals;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
@@ -28,7 +27,6 @@ using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels.Panels
 {
@@ -284,7 +282,9 @@ namespace Trebuchet.ViewModels.Panels
         private async void OnExportToJson()
         {
             var json = JsonSerializer.Serialize(new ModlistExport { Modlist = _profile.Modlist });
-            await new ModlistTextImport(json, true, FileType.Json).OpenDialogueAsync();
+            var editor = new OnBoardingModlistImport(json, true, FileType.Json);
+            await _box.OpenAsync(editor);
+            
         }
 
         private async void OnExportToTxt()
@@ -292,7 +292,8 @@ namespace Trebuchet.ViewModels.Panels
             try
             {
                 var content = string.Join(Environment.NewLine, _appFiles.Mods.GetResolvedModlist(_profile.Modlist));
-                await new ModlistTextImport(content, true, FileType.Txt).OpenDialogueAsync();
+                var editor = new OnBoardingModlistImport(content, true, FileType.Txt);
+                await _box.OpenAsync(editor);
             }
             catch
             {
@@ -369,12 +370,11 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnImportFromText()
         {
-            var import = new ModlistTextImport(string.Empty, false, FileType.Json);
-            await import.OpenDialogueAsync();
+            var editor = new OnBoardingModlistImport(string.Empty, false, FileType.Json);
+            await _box.OpenAsync(editor);
+            if (editor.Canceled || editor.Value == null) return;
 
-            if (import.Canceled) return;
-
-            var text = import.Text;
+            var text = editor.Value;
             List<string>? modlist;
             try
             {
@@ -389,7 +389,7 @@ namespace Trebuchet.ViewModels.Panels
                 modlist = _appFiles.Mods.ParseModList(split).ToList();
             }
 
-            if (import.Append)
+            if (editor.Append)
                 _profile.Modlist.AddRange(modlist);
             else
                 _profile.Modlist = modlist;

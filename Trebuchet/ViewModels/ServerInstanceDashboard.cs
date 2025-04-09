@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -10,8 +9,6 @@ using Trebuchet.Services.TaskBlocker;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
-using TrebuchetUtils;
-using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels
 {

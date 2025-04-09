@@ -11,7 +11,7 @@ using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using Trebuchet.Modals;
+using SteamKit2;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
@@ -23,7 +23,6 @@ using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
-using TrebuchetUtils.Modals;
 using TrebuchetUtils.Services.Language;
 using Panel = Trebuchet.ViewModels.Panels.Panel;
 
@@ -49,7 +48,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     {
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
             throw new Exception(@"Not supported");
-
+        
         bool catapult = false;
         if (desktop.Args?.Length > 0)
         {
@@ -67,9 +66,17 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         _logger.LogInformation(@$"Selecting {(testlive ? @"testlive" : @"live")}");
 
         MainWindow mainWindow = new ();
+        var currentWindow = desktop.MainWindow;
         desktop.MainWindow = mainWindow;
         mainWindow.SetApp(services.GetRequiredService<TrebuchetApp>());
         mainWindow.Show();
+        currentWindow?.Close();
+    }
+
+    private async void TestError()
+    {
+        await Task.Delay(500);
+        await CrashHandler.Handle(new Exception(@"Test Error"));
     }
         
     public void Crash() => HasCrashed = true;
@@ -82,7 +89,9 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
             Dispatcher.UIThread.UnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
             desktop.ShutdownRequested += OnShutdownRequested;
-
+            
+            //CrashHandler.SetReportUri(@"");
+            
             if (desktop.Args?.Length > 0)
             {
                 if (desktop.Args.Contains(@"-testlive"))
@@ -97,9 +106,11 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
                 }
             }
             
-            TestliveModal modal = new (this);
-            desktop.MainWindow = modal.Window;
-            modal.Open();
+            GameBuildViewModel modal = new (this);
+            GameBuildWindow window = new GameBuildWindow();
+            window.DataContext = modal;
+            desktop.MainWindow = window;
+            window.Show();
         }
         base.OnFrameworkInitializationCompleted();
     }
@@ -165,33 +176,19 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     {
         _logger?.LogError(e.Exception, @"DispatcherUnhandledException");
         e.Handled = true;
-        await new ExceptionModal(e.Exception).OpenDialogueAsync();
-        ShutdownOnError();
+        await CrashHandler.Handle(e.Exception);
     }
     
     private async void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        await Dispatcher.UIThread.InvokeAsync(() => _logger?.LogError((Exception)e.ExceptionObject, @"UnhandledException"));
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            new ExceptionModal(((Exception)e.ExceptionObject)).Open();
-            ShutdownOnError();
-        });
+        _logger?.LogError((Exception)e.ExceptionObject, @"UnhandledException");
+        await CrashHandler.Handle((Exception)e.ExceptionObject);
     }
 
     private async void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        await Dispatcher.UIThread.InvokeAsync(() => _logger?.LogError(e.Exception, @"UnobservedTaskException"));
-        await Dispatcher.UIThread.InvokeAsync(() =>
-        {
-            DisplayExceptionAndExit(e.Exception);
-        });
-    }
-
-    private async void DisplayExceptionAndExit(Exception ex)
-    {
-        await new ExceptionModal(ex).OpenDialogueAsync();
-        ShutdownOnError();
+        _logger?.LogError(e.Exception, @"UnobservedTaskException");
+        await CrashHandler.Handle(e.Exception);
     }
 
     private static AppSettings GetAppSettings()
@@ -202,14 +199,9 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         return settings;
     }
     
-    public void Handle(ITinyMessage message, Exception exception)
+    public async void Handle(ITinyMessage message, Exception exception)
     {
-        DisplayExceptionAndExit(exception);
-    }
-
-    private void ShutdownOnError()
-    {
-        if(Current?.ApplicationLifetime is  IControlledApplicationLifetime app)
-            app.Shutdown();
+        _logger?.LogError(exception, @"UnobservedTaskException");
+        await CrashHandler.Handle(exception);
     }
 }

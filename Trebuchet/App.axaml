@@ -11,7 +11,6 @@
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <ResourceInclude Source="avares://TrebuchetUtils/Converters/Converters.axaml" />
-                <ResourceInclude Source="avares://TrebuchetUtils/Modals/Modals.axaml" />
                 <MergeResourceInclude Source="Templates\EmptyTemplate.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingProgress.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingDirectory.axaml" />
@@ -28,11 +27,9 @@
                 <MergeResourceInclude Source="Templates\ComboBoxField.axaml" />
                 <MergeResourceInclude Source="Templates\ToggleField.axaml" />
                 <MergeResourceInclude Source="Templates\IntSliderField.axaml" />
-                <MergeResourceInclude Source="Templates\TestliveSelection.axaml" />
                 <MergeResourceInclude Source="Templates\TextboxField.axaml" />
                 <MergeResourceInclude Source="Templates\ModlistEditor.axaml" />
                 <MergeResourceInclude Source="Templates\ModlistItems.axaml" />
-                <MergeResourceInclude Source="Templates\ModlistTextImport.axaml" />
                 <MergeResourceInclude Source="Templates\ClientSettings.axaml" />
                 <MergeResourceInclude Source="Templates\ServerSettings.axaml" />
                 <MergeResourceInclude Source="Templates\TabButton.axaml" />
@@ -50,6 +47,8 @@
                 <MergeResourceInclude Source="Templates\PasswordField.axaml" />
                 <MergeResourceInclude Source="Templates\MultiLineTextboxField.axaml" />
                 <MergeResourceInclude Source="Templates\ClientInstallationField.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingModlistImport.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingError.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -82,5 +81,7 @@
         <StaticResource ResourceKey="PasswordField" />
         <StaticResource ResourceKey="MultiLineTextboxField" />
         <StaticResource ResourceKey="ClientInstallationField" />
+        <StaticResource ResourceKey="OnBoardingModlistImport" />
+        <StaticResource ResourceKey="OnBoardingError" />
     </Application.DataTemplates>
 </Application>

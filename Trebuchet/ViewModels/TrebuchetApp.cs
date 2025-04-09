@@ -7,13 +7,10 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using ReactiveUI;
-using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
-using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils.Modals;
 using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet.ViewModels;

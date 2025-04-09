@@ -8,8 +8,6 @@ using System.Threading.Tasks;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using SteamKit2.Discovery;
-using SteamKit2.GC.Dota.Internal;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
@@ -17,7 +15,6 @@ using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
-using TrebuchetUtils.Modals;
 
 namespace Trebuchet.ViewModels.Panels
 {

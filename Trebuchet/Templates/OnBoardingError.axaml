@@ -4,7 +4,7 @@
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="OnBoardingError" DataType="l:OnBoardingError">
-        <DockPanel LastChildFill="True" MinWidth="550" MinHeight="150">
+        <DockPanel LastChildFill="True" MinWidth="550" MaxWidth="600" MinHeight="150">
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
             <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" />
             <Button Classes="Base" HotKey="Escape" DockPanel.Dock="Top" IsVisible="{Binding $self.IsEnabled}" Command="{Binding CancelCommand}" HorizontalAlignment="Right" Margin="0 12 0 0">
