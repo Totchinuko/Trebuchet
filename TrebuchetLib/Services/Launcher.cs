@@ -61,7 +61,7 @@ public class Launcher : IDisposable
         if (IsClientProfileLocked(profileName))
             throw new TrebException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(_appFiles.Client.GetClientFolder(), profile.ProfileFolder);
+        SetupJunction(_appFiles.Client.GetPrimaryJunction(), profile.ProfileFolder);
 
         _logger.LogDebug($"Locking folder {profile.ProfileName}");
         _logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
