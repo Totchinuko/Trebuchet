@@ -254,14 +254,6 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.EnableAsyncScene = v)
                 .SetDefault(() => ClientProfile.EnableAsyncSceneDefault)
             );
-            Fields.Add(new FloatField(float.MinValue, float.MaxValue)
-                .WhenFieldChanged(SaveProfile)
-                .SetTitle(Resources.SettingMaxMoveDelta)
-                .SetDescription(Resources.SettingMaxMoveDeltaText)
-                .SetGetter(() => _profile.MaxMoveDeltaTime)
-                .SetSetter((v) => _profile.MaxMoveDeltaTime = v)
-                .SetDefault(() => ClientProfile.MaxMoveDeltaTimeDefault)
-            );
             Fields.Add(new IntSliderField(10000, 100000, 1000)
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingInternetSpeed)

@@ -91,8 +91,6 @@ public class YuuIniClientFiles(AppFiles appFiles)
     [IniSetting(Constants.FileIniUser, "Game")]
     public void UserGameSetting(ClientProfile profile, IniDocument document)
     {
-        document.GetSection("/script/engine.gamenetworkmanager")
-            .SetParameter("MaxMoveDeltaTime", profile.MaxMoveDeltaTime.ToString(CultureInfo.InvariantCulture));
         document.GetSection("/script/engine.player")
             .SetParameter("ConfiguredInternetSpeed", profile.ConfiguredInternetSpeed.ToString());
     }

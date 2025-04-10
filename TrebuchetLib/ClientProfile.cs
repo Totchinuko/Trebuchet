@@ -14,7 +14,6 @@ namespace TrebuchetLib
         public bool EnableAsyncScene { get; set; } = EnableAsyncSceneDefault;
         public bool Log { get; set; } = LogDefault;
         public List<string> LogFilters { get; set; } = LogFiltersDefault;
-        public float MaxMoveDeltaTime { get; set; } = MaxMoveDeltaTimeDefault;
         public int ProcessPriority { get; set; } = ProcessPriorityDefault;
         public bool RemoveIntroVideo { get; set; } = RemoveIntroVideoDefault;
         public bool TotAdminDoNotLoadServerList { get; set; } = TotAdminDoNotLoadServerListDefault;
@@ -27,7 +26,6 @@ namespace TrebuchetLib
         public static readonly int AddedTexturePoolDefault = 0;
         public static readonly bool EnableAsyncSceneDefault = false;
         public static readonly bool LogDefault = false;
-        public static readonly float MaxMoveDeltaTimeDefault = 0.033f;
         public static readonly int ProcessPriorityDefault = 0;
         public static readonly bool RemoveIntroVideoDefault = false;
         public static readonly bool TotAdminDoNotLoadServerListDefault = false;
