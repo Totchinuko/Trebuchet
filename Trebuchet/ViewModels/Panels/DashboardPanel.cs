@@ -272,6 +272,10 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void Initialize()
         {
+            CreateInstancesIfNeeded();
+            RefreshClientSelection();
+            RefreshServerSelection();
+            
             Client.ModlistSelected += (_, modlist) =>
             {
                 _setup.Config.SelectedClientModlist = modlist;
@@ -285,11 +289,6 @@ namespace Trebuchet.ViewModels.Panels
             Client.KillClicked += (_, _)  => KillClient();
             Client.LaunchClicked += (_, battleEye) => LaunchClient(battleEye);
             Client.UpdateClicked += (_, _) => UpdateMods();
-            Client.SelectedModlist = _setup.Config.SelectedClientModlist;
-            Client.SelectedProfile = _setup.Config.SelectedClientProfile;
-            CreateInstancesIfNeeded();
-            RefreshClientSelection();
-            RefreshServerSelection();
             await CheckModUpdates();
         }
 

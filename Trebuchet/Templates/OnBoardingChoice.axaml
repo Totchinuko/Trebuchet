@@ -3,7 +3,7 @@
                     xmlns:asset="clr-namespace:Trebuchet.Assets"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="OnBoardingChoice" DataType="l:OnBoardingChoice">
-        <Button Classes="Base Blue Heavy" MaxWidth="300" Margin="3 0 3 0" HorizontalAlignment="Center" Command="{Binding Command}">
+        <Button Classes="Base Blue Heavy" MaxWidth="300" MinHeight="100" Margin="3 0 3 0" HorizontalAlignment="Center" Command="{Binding Command}">
             <StackPanel>
                 <TextBlock Classes="SmallTitle" Text="{Binding Title}" />
                 <TextBlock Classes="SubText" Text="{Binding Description}"/>
