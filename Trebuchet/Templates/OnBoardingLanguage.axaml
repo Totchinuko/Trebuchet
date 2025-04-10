@@ -1,0 +1,24 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:l="clr-namespace:Trebuchet.ViewModels.InnerContainer"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:la="clr-namespace:Trebuchet.Services.Language"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="OnBoardingLanguage" DataType="l:OnBoardingLanguage">
+        <DockPanel LastChildFill="True">
+            <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" />
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
+                <ComboBox ItemsSource="{Binding List}" VerticalAlignment="Center" SelectedItem="{Binding Value}" Width="250">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate DataType="la:LanguageModel">
+                            <Label Content="{Binding NativeName}" />
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <Button Classes="Base Green" Content="{x:Static a:Resources.Validate}" Command="{Binding ConfirmCommand}" />
+                <Button Classes="Base" Content="{x:Static a:Resources.Cancel}" Command="{Binding CancelCommand}" />
+            </StackPanel>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

@@ -6,6 +6,7 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Trebuchet.Assets;
+using Trebuchet.Services.Language;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
@@ -14,7 +15,14 @@ using TrebuchetUtils;
 
 namespace Trebuchet.Services;
 
-public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueBox, Steam steam, SteamAPI steamApi)
+public class OnBoarding(
+    AppFiles appFiles, 
+    AppSetup setup, 
+    DialogueBox dialogueBox,
+    UIConfig uiConfig,
+    ILanguageManager langManager,
+    Steam steam, 
+    SteamAPI steamApi)
 {
     public async Task<bool> OnBoardingRemoveUnusedMods()
     {
@@ -36,6 +44,19 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
         await steamApi.RemoveUnusedMods();
         dialogueBox.Close();
         return true;
+    }
+
+    public async Task<bool> OnBoardingLanguageChoice()
+    {
+        if (!string.IsNullOrEmpty(uiConfig.UICulture)) return true;
+        var choice = new OnBoardingLanguage(Resources.OnBoardingLanguageChange, string.Empty, 
+            langManager.AllLanguages.ToList(), langManager.DefaultLanguage);
+        await dialogueBox.OpenAsync(choice);
+        if(choice.Value is null) throw new OperationCanceledException(@"OnBoarding was cancelled");
+        uiConfig.UICulture = choice.Value.Code;
+        uiConfig.SaveFile();
+        Utils.Utils.RestartProcess(setup);
+        return false;
     }
     
     public async Task<bool> OnBoardingUsageChoice()
