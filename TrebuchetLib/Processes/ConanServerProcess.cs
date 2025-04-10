@@ -2,6 +2,7 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
+using SteamKit2.GC.Dota.Internal;
 
 namespace TrebuchetLib.Processes;
 
@@ -26,6 +27,7 @@ public sealed class ConanServerProcess : IConanServerProcess
         _lastResponse = DateTime.UtcNow;
         _sourceQueryReader
             = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, _infos.QueryPort), 4 * 1000, 5 * 1000);
+        _sourceQueryReader.StartQueryThread();
         
         RCon = new Rcon(new IPEndPoint(IPAddress.Loopback, _infos.RConPort), _infos.RConPassword);
         Console = new MixedConsole(RCon);
@@ -98,18 +100,20 @@ public sealed class ConanServerProcess : IConanServerProcess
     public void Dispose()
     {
         _process.Dispose();
+        _sourceQueryReader.Dispose();
     }
 
-    public async Task RefreshAsync()
+    public Task RefreshAsync()
     {
         _process.Refresh();
-        await _sourceQueryReader.Refresh().ConfigureAwait(false);
+        if (_process.Responding)
+            _lastResponse = DateTime.UtcNow;
+        
+        _sourceQueryReader.Refresh();
         Online = _sourceQueryReader.Online;
         MaxPlayers = _sourceQueryReader.MaxPlayers;
         Players = _sourceQueryReader.Players;
-
-        if (_process.Responding)
-            _lastResponse = DateTime.UtcNow;
+        
         
         switch (State)
         {
@@ -119,11 +123,15 @@ public sealed class ConanServerProcess : IConanServerProcess
             case ProcessState.RUNNING:
                 if (Online) State = ProcessState.ONLINE;
                 if (_process.HasExited) State = ProcessState.CRASHED;
-                else await ZombieCheck();
+                else if (!_process.Responding) State = ProcessState.FROZEN;
                 break;
             case ProcessState.ONLINE:
                 if (_process.HasExited) State = ProcessState.CRASHED;
-                else await ZombieCheck();
+                else if (!_process.Responding) State = ProcessState.FROZEN;
+                break;
+            case ProcessState.FROZEN:
+                if (_process.Responding) State = ProcessState.RUNNING;
+                else ZombieCheck();
                 break;
             case ProcessState.STOPPING:
                 if (_process.HasExited) State = ProcessState.STOPPED;
@@ -132,15 +140,17 @@ public sealed class ConanServerProcess : IConanServerProcess
                 State = ProcessState.CRASHED;
                 break;
         }
+
+        return Task.CompletedTask;
     }
 
-    public async Task ZombieCheck()
+    public void ZombieCheck()
     {
         if (_lastResponse + TimeSpan.FromSeconds(ZombieCheckSeconds) < DateTime.UtcNow)
         {
             State = ProcessState.CRASHED;
             if (KillZombies)
-                await KillAsync().ConfigureAwait(false);
+                _process.Kill();
         }
     }
 

@@ -4,7 +4,7 @@ using System.Text;
 
 namespace TrebuchetLib
 {
-    public class SourceQueryReader
+    public class SourceQueryReader : IDisposable
     {
         // \xFF\xFF\xFF\xFFTSource Engine Query\x00 because UTF-8 doesn't like to encode 0xFF
         public static readonly byte[] REQUEST = new byte[] { 0xFF, 0xFF, 0xFF, 0xFF, 0x54, 0x53, 0x6F, 0x75, 0x72, 0x63, 0x65, 0x20, 0x45, 0x6E, 0x67, 0x69, 0x6E, 0x65, 0x20, 0x51, 0x75, 0x65, 0x72, 0x79, 0x00 };
@@ -13,6 +13,8 @@ namespace TrebuchetLib
         private DateTime _lastUpdate = DateTime.MinValue;
         private int _refreshRate;
         private int _timeout;
+        private byte[] _buffer = [];
+        private CancellationTokenSource? _cts;
 
         public SourceQueryReader(IPEndPoint ep, int timeout, int refreshRate = 30 * 1000)
         {
@@ -108,16 +110,16 @@ namespace TrebuchetLib
         public string Version { get; private set; } = string.Empty;
 
         public VisibilityFlags Visibility { get; private set; }
-
-        public async Task Refresh()
+        
+        public void Refresh()
         {
             if ((DateTime.Now - _lastUpdate).TotalMilliseconds < _refreshRate)
                 return;
             _lastUpdate = DateTime.Now;
 
             try
-            {
-                await ProcessQuery().ConfigureAwait(false);
+            { 
+                ProcessQuery();
             }
             catch
             {
@@ -125,20 +127,36 @@ namespace TrebuchetLib
             }
         }
 
-        private async Task ProcessQuery()
+        public void StartQueryThread()
         {
-            using UdpClient udp = new UdpClient();
-            udp.Client.ReceiveTimeout = _timeout;
-            udp.Connect(_endpoint);
-            await udp.SendAsync(REQUEST, REQUEST.Length).ConfigureAwait(false);
-            var result = await udp.ReceiveAsync().ConfigureAwait(false);
+            if (_cts != null) return;
+            _cts = new CancellationTokenSource();
+            Task.Run(() => ThreadLoop(_endpoint, _timeout, _refreshRate, _cts.Token), _cts.Token);
+        }
 
-            using MemoryStream ms = new MemoryStream(result.Buffer);
+        public void StopQueryThread()
+        {
+            if (_cts is null) return;
+            _cts.Cancel();
+            _cts.Dispose();
+            _cts = null;
+        }
+
+        public void Dispose()
+        {
+            StopQueryThread();
+        }
+
+        private void ProcessQuery()
+        {
+            byte[] result;
+            lock (this)
+                result = _buffer;
+            using MemoryStream ms = new MemoryStream(result);
             using BinaryReader br = new BinaryReader(ms, Encoding.UTF8);
             ReadResponse(ms, br);
             br.Close();
             ms.Close();
-            udp.Close();
         }
 
         private void ReadResponse(MemoryStream ms, BinaryReader br)
@@ -160,6 +178,49 @@ namespace TrebuchetLib
             VAC = (VACFlags)br.ReadByte();
             Version = br.ReadNullTerminatedString() ?? string.Empty;
             Online = true;
+        }
+        
+        private void ResetResponse()
+        {
+            Header = 0;
+            Protocol = 0;
+            Name = string.Empty;
+            Map = string.Empty;
+            Folder = string.Empty;
+            Game = string.Empty;
+            ID = 0;
+            Players = 0;
+            MaxPlayers = 0;
+            Bots = 0;
+            ServerType = ServerTypeFlags.Dedicated;
+            Environment = EnvironmentFlags.Windows;
+            Visibility = VisibilityFlags.Public;
+            VAC = VACFlags.Unsecured;
+            Version = string.Empty;
+            Online = false;
+        }
+
+        private void ThreadLoop(IPEndPoint endPoint, int timeout, int rate, CancellationToken token)
+        {
+            using var udp = new UdpClient();
+            udp.Client.ReceiveTimeout = timeout;
+
+            while (!token.IsCancellationRequested)
+            {
+                try
+                {
+                    udp.Send(REQUEST, REQUEST.Length, _endpoint);
+                    var result = udp.Receive(ref _endpoint);
+                    lock(this)
+                        _buffer = result;
+                }
+                catch
+                {
+                    lock (this)
+                        _buffer = [];
+                }
+                Thread.Sleep(rate);
+            }
         }
 
         //ExtraDataFlag = (ExtraDataFlags)br.ReadByte();

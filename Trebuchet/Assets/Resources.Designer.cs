@@ -2324,6 +2324,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Not responding.
+        /// </summary>
+        public static string StatusFrozen {
+            get {
+                return ResourceManager.GetString("StatusFrozen", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Starting.
         /// </summary>
         public static string StatusNew {

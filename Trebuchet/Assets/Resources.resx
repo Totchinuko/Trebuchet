@@ -899,4 +899,7 @@ Do you wish to proceed ?</value>
         <value>The following file is currently busy with another process, please close the program so Trebuchet can continue its task:
 {0}</value>
     </data>
+    <data name="StatusFrozen" xml:space="preserve">
+        <value>Not responding</value>
+    </data>
 </root>

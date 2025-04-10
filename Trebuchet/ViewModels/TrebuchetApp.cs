@@ -117,6 +117,7 @@ public sealed class TrebuchetApp : ReactiveObject
     {
         _launcher.Dispose();
         _steam.Disconnect();
+        _timer.Stop();
         Task.Run(() =>
         {
             while (_steam.IsConnected)

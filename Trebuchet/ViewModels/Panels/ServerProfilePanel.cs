@@ -40,10 +40,9 @@ namespace Trebuchet.ViewModels.Panels
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
-            
-            LoadProfile(
-                _appFiles.Server.ResolveProfile(
-                    _uiConfig.CurrentClientProfile));
+
+            _selectedProfile = _appFiles.Server.ResolveProfile(_uiConfig.CurrentServerProfile);
+            LoadProfile(_selectedProfile);
             LoadProfileList();
             
             this.WhenAnyValue(x => x.SelectedProfile)
@@ -53,7 +52,7 @@ namespace Trebuchet.ViewModels.Panels
             DeleteProfileCommand = ReactiveCommand.Create(OnProfileDelete);
             DuplicateProfileCommand = ReactiveCommand.Create(OnProfileDuplicate);
             OpenFolderProfileCommand = ReactiveCommand.Create(OnOpenFolderProfile);
-            SaveProfile = ReactiveCommand.Create(_profile.SaveFile);
+            SaveProfile = ReactiveCommand.Create(() => _profile.SaveFile());
             RefreshPanel.IsExecuting
                 .Select((_) => Tools.IsServerInstallValid(_setup.Config))
                 .Subscribe((b) => CanTabBeClicked = b);

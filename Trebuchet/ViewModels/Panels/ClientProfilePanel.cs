@@ -39,9 +39,8 @@ namespace Trebuchet.ViewModels.Panels
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
-            LoadProfile(
-                _appFiles.Client.ResolveProfile(
-                    _uiConfig.CurrentClientProfile));
+            _selectedProfile = _appFiles.Client.ResolveProfile(_uiConfig.CurrentClientProfile);
+            LoadProfile(_selectedProfile);
             LoadProfileList();
 
             this.WhenAnyValue(x => x.SelectedProfile)

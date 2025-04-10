@@ -891,4 +891,7 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
         <value>Le fichier suivant est occupé par autre processus, merci de fermer le programme pour que Trebuchet puisse terminer ses taches:
 {0}</value>
     </data>
+    <data name="StatusFrozen" xml:space="preserve">
+        <value>Ne répond pas</value>
+    </data>
 </root>

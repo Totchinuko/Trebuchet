@@ -71,7 +71,7 @@ public class Launcher : IDisposable
         await _iniHandler.WriteClientSettingsAsync(profile);
         var process = CreateClientProcess(profile, tmpFile, isBattleEye);
 
-        process.Start();
+        await Task.Run(() => process.Start());
 
         var childProcess = await CatchClientChildProcess(process);
         if (childProcess == null)
@@ -185,7 +185,8 @@ public class Launcher : IDisposable
         await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
         await _iniHandler.WriteServerSettingsAsync(profile, instance);
         var process = CreateServerProcess(instance, tmpFile, profile);
-        process.Start();
+
+        await Task.Run(() => process.Start());
 
         var childProcess = await CatchServerChildProcess(process);
         if (childProcess == null)
@@ -212,7 +213,7 @@ public class Launcher : IDisposable
         process.StartInfo.FileName = filename;
         process.StartInfo.WorkingDirectory = dir;
         process.StartInfo.Arguments = args;
-        process.StartInfo.UseShellExecute = false;
+        process.StartInfo.UseShellExecute = true;
         process.EnableRaisingEvents = true;
         return process;
     }

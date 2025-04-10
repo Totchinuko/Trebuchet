@@ -62,7 +62,6 @@ namespace TrebuchetLib
             args.Add(string.Format(Constants.ServerArgsMaxPlayers, MaxPlayers));
             args.Add(string.Format(Constants.GameArgsModList, modlistPath));
             if (EnableMultiHome) args.Add(string.Format(Constants.ServerArgsMultiHome, MultiHomeAddress));
-            args.Add($"-TotInstance={instance}");
 
             return string.Join(" ", args);
         }

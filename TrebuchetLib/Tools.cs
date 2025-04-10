@@ -364,7 +364,11 @@ public static class Tools
 
     public static bool IsRunning(this ProcessState state)
     {
-        return state == ProcessState.RUNNING || state == ProcessState.STOPPING || state == ProcessState.ONLINE;
+        return state is 
+            ProcessState.RUNNING or 
+            ProcessState.STOPPING or 
+            ProcessState.ONLINE or 
+            ProcessState.FROZEN;
     }
 
     public static bool IsServerInstallValid(Config config)
