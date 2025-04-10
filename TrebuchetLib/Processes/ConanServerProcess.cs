@@ -108,18 +108,34 @@ public sealed class ConanServerProcess : IConanServerProcess
         MaxPlayers = _sourceQueryReader.MaxPlayers;
         Players = _sourceQueryReader.Players;
 
-        if (State == ProcessState.RUNNING && Online)
-            State = ProcessState.ONLINE;
-
         if (_process.Responding)
             _lastResponse = DateTime.UtcNow;
+        
+        switch (State)
+        {
+            case ProcessState.NEW:
+                State = ProcessState.RUNNING;
+                break;
+            case ProcessState.RUNNING:
+                if (Online) State = ProcessState.ONLINE;
+                if (_process.HasExited) State = ProcessState.CRASHED;
+                else await ZombieCheck();
+                break;
+            case ProcessState.ONLINE:
+                if (_process.HasExited) State = ProcessState.CRASHED;
+                else await ZombieCheck();
+                break;
+            case ProcessState.STOPPING:
+                if (_process.HasExited) State = ProcessState.STOPPED;
+                break;
+            case ProcessState.FAILED:
+                State = ProcessState.CRASHED;
+                break;
+        }
+    }
 
-        if (_process.HasExited)
-            State = ProcessState.STOPPED;
-
-        if (State is ProcessState.STOPPING or ProcessState.STOPPED or ProcessState.CRASHED)
-            return;
-
+    public async Task ZombieCheck()
+    {
         if (_lastResponse + TimeSpan.FromSeconds(ZombieCheckSeconds) < DateTime.UtcNow)
         {
             State = ProcessState.CRASHED;

@@ -139,6 +139,11 @@ public class Launcher : IDisposable
         }
     }
 
+    public async void ReCatapultServer(int instance)
+    {
+        await CatapultServer(instance);
+    }
+
     public async Task CatapultServer(int instance)
     {
         var profile = _setup.Config.GetInstanceProfile(instance);
@@ -366,8 +371,13 @@ public class Launcher : IDisposable
         {
             if (!server.Value.State.IsRunning())
             {
-                server.Value.Dispose();
                 _serverProcesses.Remove(server.Key);
+                var name = _setup.Config.GetInstanceProfile(server.Key);
+                if (server.Value.State == ProcessState.CRASHED && _appFiles.Server.Get(name).RestartWhenDown)
+                {
+                    ReCatapultServer(server.Key);
+                }
+                server.Value.Dispose();
             }
         }
     }
