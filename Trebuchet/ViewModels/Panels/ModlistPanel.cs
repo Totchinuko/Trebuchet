@@ -80,7 +80,7 @@ namespace Trebuchet.ViewModels.Panels
             ImportFromFileCommand = ReactiveCommand.Create(OnImportFromFile);
             ImportFromTextCommand = ReactiveCommand.Create(OnImportFromText);
             FetchCommand = ReactiveCommand.Create(OnFetchClicked);
-            RefreshModlistCommand = ReactiveCommand.Create(LoadModlist);
+            RefreshModlistCommand = ReactiveCommand.Create(ForceLoadModlist);
 
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
             UpdateModsCommand = ReactiveCommand.Create(() =>
@@ -221,6 +221,12 @@ namespace Trebuchet.ViewModels.Panels
                 _logger.LogError(tex.Message);
                 await _box.OpenErrorAsync(tex.Message);
             }
+        }
+
+        private void ForceLoadModlist()
+        {
+            _steamApi.InvalidateCache();
+            LoadModlist();
         }
 
         private async void LoadModlist()
