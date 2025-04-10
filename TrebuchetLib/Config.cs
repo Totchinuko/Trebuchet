@@ -21,7 +21,6 @@ namespace TrebuchetLib
         public int MaxDownloads { get; set; } = MaxDownloadsDefault;
         public int MaxServers { get; set; } = MaxServersDefault;
         public int ServerInstanceCount { get; set; } = ServerInstanceCountDefault;
-        public int UpdateCheckInterval { get; set; } = UpdateCheckIntervalDefault;
         public bool VerifyAll { get; set; } = VerifyAllDefault;
         public string SelectedClientModlist { get; set; } = string.Empty;
         public string SelectedClientProfile { get; set; } = string.Empty;
@@ -82,7 +81,6 @@ namespace TrebuchetLib
         public static readonly int MaxDownloadsDefault = 8;
         public static readonly int MaxServersDefault = 20;
         public static readonly int ServerInstanceCountDefault = 0;
-        public static readonly int UpdateCheckIntervalDefault = 300;
         public static readonly bool VerifyAllDefault = false;
     }
 }

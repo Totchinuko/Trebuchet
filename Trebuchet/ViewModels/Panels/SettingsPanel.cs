@@ -127,14 +127,6 @@ public class SettingsPanel : Panel
             .SetSetter((v) => _setup.Config.AutoUpdateStatus = v)
             .SetDefault(() => Config.AutoUpdateStatusDefault)
         );
-        Fields.Add(new IntSliderField(120, 3600, 1)
-            .WhenFieldChanged(SaveConfig)
-            .SetTitle(Resources.SettingUpdateCheckInterval)
-            .SetDescription(Resources.SettingUpdateCheckIntervalText)
-            .SetGetter(() => _setup.Config.UpdateCheckInterval)
-            .SetSetter((v) => _setup.Config.UpdateCheckInterval = v)
-            .SetDefault(() => Config.UpdateCheckIntervalDefault)
-        );
         Fields.Add(new ToggleField()
             .WhenFieldChanged(SaveConfig)
             .SetTitle(Resources.SettingVerifyAll)
