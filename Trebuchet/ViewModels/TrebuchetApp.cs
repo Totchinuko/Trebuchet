@@ -10,6 +10,7 @@ using ReactiveUI;
 using Trebuchet.Services;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
+using TrebuchetLib;
 using TrebuchetLib.Services;
 using Panel = Trebuchet.ViewModels.Panels.Panel;
 
@@ -152,6 +153,7 @@ public sealed class TrebuchetApp : ReactiveObject
             if (!await _onBoarding.OnBoardingLanguageChoice()) return;
             if (!await _onBoarding.OnBoardingCheckTrebuchet()) return;
             if (!await OnBoardingFirstLaunch()) return;
+            if (!await OnBoardingRepairBrokenJunctions()) return;
         }
         catch (OperationCanceledException ex)
         {
@@ -161,6 +163,13 @@ public sealed class TrebuchetApp : ReactiveObject
         
         _activePanel.Active = true;
         _activePanel.DisplayPanel.Execute().Subscribe();
+    }
+
+    private async Task<bool> OnBoardingRepairBrokenJunctions()
+    {
+        var clientDirectory = Path.GetFullPath(_setup.Config.ClientPath);
+        if (!Tools.IsClientInstallValid(clientDirectory)) return true;
+        return await _onBoarding.OnBoardingApplyConanManagement();
     }
 
     private async Task<bool> OnBoardingFirstLaunch()

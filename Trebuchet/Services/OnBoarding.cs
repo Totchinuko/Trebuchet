@@ -199,7 +199,10 @@ public class OnBoarding(
         {
             var path = JunctionPoint.GetTarget(savedDir);
             if (Path.GetFullPath(path) != Path.GetFullPath(appFiles.Client.GetPrimaryJunction()))
+            {
+                if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
                 JunctionPoint.Create(savedDir, appFiles.Client.GetPrimaryJunction(), true);
+            }
         }
 
         return true;
