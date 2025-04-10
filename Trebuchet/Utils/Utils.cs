@@ -53,27 +53,6 @@ namespace Trebuchet.Utils
                 desktop.Shutdown();
         }
 
-        public static bool ValidateInstallDirectory(string installPath, out string errorMessage)
-        {
-            errorMessage = string.Empty;
-            if (string.IsNullOrEmpty(installPath))
-            {
-                errorMessage = Resources.InvalidDirectory;
-                return false;
-            }
-            if (!Directory.Exists(installPath))
-            {
-                errorMessage = Resources.DirectoryNotFound;
-                return false;
-            }
-            if (Regex.IsMatch(installPath, Constants.RegexSavedFolder))
-            {
-                errorMessage = Resources.InstallPathInGameError;
-                return false;
-            }
-            return true;
-        }
-
         public static async Task<bool> SingleAppInstanceLock()
         {
             var process = Process.GetCurrentProcess();
