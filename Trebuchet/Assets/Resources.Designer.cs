@@ -222,7 +222,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Client failed to start.
+        ///   Looks up a localized string similar to The game failed to start.
         /// </summary>
         public static string ClientFailedToStart {
             get {
@@ -312,7 +312,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Do you wish to delete the selected profile {0} ?.
+        ///   Looks up a localized string similar to Do you wish to delete {0} ?.
         /// </summary>
         public static string DeletionText {
             get {
@@ -393,7 +393,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Some of the mods path cannot be resolved because the mod file was not found. In order to export your modlist, please unsure that all of the mods are not marked as missing..
+        ///   Looks up a localized string similar to Some of the mods cannot be resolved because the mod file was not found. In order to export your modlist, please unsure that all of the mods are not marked as missing..
         /// </summary>
         public static string ExportErrorModNotFound {
             get {
@@ -447,24 +447,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Game Folder Reset.
-        /// </summary>
-        public static string GameFolderReset {
-            get {
-                return ResourceManager.GetString("GameFolderReset", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again..
-        /// </summary>
-        public static string GameFolderResetText {
-            get {
-                return ResourceManager.GetString("GameFolderResetText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Game Save.
         /// </summary>
         public static string GameSave {
@@ -483,24 +465,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Saved Data.
-        /// </summary>
-        public static string HandleOriginalSavedDirectory {
-            get {
-                return ResourceManager.GetString("HandleOriginalSavedDirectory", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Your game directory contain saved data from your previous use of the game. In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original.\nDo you wish to continue ?.
-        /// </summary>
-        public static string HandleOriginalSavedDirectoryText {
-            get {
-                return ResourceManager.GetString("HandleOriginalSavedDirectoryText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Import mod list.
         /// </summary>
         public static string ImportModList {
@@ -515,15 +479,6 @@ namespace Trebuchet.Assets {
         public static string Install {
             get {
                 return ResourceManager.GetString("Install", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Install path cannot be in the game Saved folder.
-        /// </summary>
-        public static string InstallPathInGameError {
-            get {
-                return ResourceManager.GetString("InstallPathInGameError", resourceCulture);
             }
         }
         
@@ -881,7 +836,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} usued mods have been found, continue ?.
+        ///   Looks up a localized string similar to {0} unused mods have been found, continue ?.
         /// </summary>
         public static string OnBoardingModTrimConfirmSub {
             get {
@@ -1090,15 +1045,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Profile Name.
-        /// </summary>
-        public static string ProfileName {
-            get {
-                return ResourceManager.GetString("ProfileName", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Remove.
         /// </summary>
         public static string Remove {
@@ -1144,7 +1090,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Total size of your save on disk. Profiles not only store your settings, but also your server saves and logs.
+        ///   Looks up a localized string similar to Total size of your save on disk. Saves not only store your settings, but also your server saves and logs.
         /// </summary>
         public static string SaveSizeTip {
             get {
@@ -1185,15 +1131,6 @@ namespace Trebuchet.Assets {
         public static string ServerLogFilter {
             get {
                 return ResourceManager.GetString("ServerLogFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Some server instances are not yet installed..
-        /// </summary>
-        public static string ServerNotInstalled {
-            get {
-                return ResourceManager.GetString("ServerNotInstalled", resourceCulture);
             }
         }
         
@@ -1261,7 +1198,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO.
+        ///   Looks up a localized string similar to Refresh the mod lists every couple of minutes to check if their is any mod update pending.
         /// </summary>
         public static string SettingAutoRefreshModlistText {
             get {
@@ -1396,7 +1333,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO.
+        ///   Looks up a localized string similar to Max connection speed of the engine. This is untested..
         /// </summary>
         public static string SettingInternetSpeedText {
             get {
@@ -1441,7 +1378,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).
+        ///   Looks up a localized string similar to Filter the logs to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose).
         /// </summary>
         public static string SettingLogFilterText {
             get {
@@ -1468,15 +1405,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer..
-        /// </summary>
-        public static string SettingManageClientText {
-            get {
-                return ResourceManager.GetString("SettingManageClientText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Max Simultaneous Downloads.
         /// </summary>
         public static string SettingMaxDownloads {
@@ -1486,29 +1414,11 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Max amount of files downloaded at the same time on the steam network. This can increase the load on your CPU/Drive/Network but make the download potentially faster if your network allow it.
+        ///   Looks up a localized string similar to Max amount of files downloaded at the same time on the steam network. This can increase the load on your CPU/Drive but make the download potentially faster if your network allow it.
         /// </summary>
         public static string SettingMaxDownloadsText {
             get {
                 return ResourceManager.GetString("SettingMaxDownloadsText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Max Move Delta Time.
-        /// </summary>
-        public static string SettingMaxMoveDelta {
-            get {
-                return ResourceManager.GetString("SettingMaxMoveDelta", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to TODO.
-        /// </summary>
-        public static string SettingMaxMoveDeltaText {
-            get {
-                return ResourceManager.GetString("SettingMaxMoveDeltaText", resourceCulture);
             }
         }
         
@@ -1657,7 +1567,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable Battle Eye on your server instance.
+        ///   Looks up a localized string similar to Enable Battle Eye Anti-Cheat on your server instance.
         /// </summary>
         public static string SettingServerEnableBattleEyeText {
             get {
@@ -1675,7 +1585,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable Multi Home to allow multiple IP to connect to your server instance.
+        ///   Looks up a localized string similar to Enable Multi Home to allow multiple to have serveur IP to connect to.
         /// </summary>
         public static string SettingServerEnableMultiHomeText {
             get {
@@ -1693,7 +1603,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Enable RCON on your server instance.
+        ///   Looks up a localized string similar to Enable RCON console on your server instance.
         /// </summary>
         public static string SettingServerEnableRConText {
             get {
@@ -1756,7 +1666,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Kill Zombie Servers.
+        ///   Looks up a localized string similar to Kill Crashed Servers.
         /// </summary>
         public static string SettingServerKillZombies {
             get {
@@ -1963,7 +1873,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to TODO.
+        ///   Looks up a localized string similar to Secondary UDP port.
         /// </summary>
         public static string SettingServerRawUDPPortText {
             get {
@@ -2134,7 +2044,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Zombie Check Duration (Seconds).
+        ///   Looks up a localized string similar to Crash Check Duration (Seconds).
         /// </summary>
         public static string SettingServerZombieDuration {
             get {
@@ -2233,7 +2143,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to &quot;The interval in seconds between each update check.
+        ///   Looks up a localized string similar to The interval in seconds between each update check.
         /// </summary>
         public static string SettingUpdateCheckIntervalText {
             get {
@@ -2427,15 +2337,6 @@ namespace Trebuchet.Assets {
         public static string TranslatorsIdentity {
             get {
                 return ResourceManager.GetString("TranslatorsIdentity", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Trebuchet is busy..
-        /// </summary>
-        public static string TrebuchetBusy {
-            get {
-                return ResourceManager.GetString("TrebuchetBusy", resourceCulture);
             }
         }
         

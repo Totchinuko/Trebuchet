@@ -18,21 +18,11 @@
     <resheader name="writer">
         <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
     </resheader>
-
-    <data name="HandleOriginalSavedDirectoryText" xml:space="preserve">
-        <value>Your game directory contain saved data from your previous use of the game. In order to use the features of the launcher, the folder will be renamed and its content copied into a new profile to use with the launcher. All your data will still be under the folder Saved_Original.\nDo you wish to continue ?</value>
-    </data>
-    <data name="HandleOriginalSavedDirectory" xml:space="preserve">
-    <value>Saved Data</value>
-    </data>
     <data name="InvalidDirectory" xml:space="preserve">
     <value>Directory is invalid</value>
     </data>
     <data name="DirectoryNotFound" xml:space="preserve">
     <value>Directory does not exists</value>
-    </data>
-    <data name="InstallPathInGameError" xml:space="preserve">
-    <value>Install path cannot be in the game Saved folder</value>
     </data>
     <data name="GameDirectoryInvalidError" xml:space="preserve">
     <value>Game could not be found in this Directory</value>
@@ -49,23 +39,14 @@
     <data name="KillText" xml:space="preserve">
     <value>Killing a process will trigger an abrupt ending of the program and can lead to Data loss and/or data corruption. Do you wish to continue ?</value>
     </data>
-    <data name="GameFolderReset" xml:space="preserve">
-    <value>Game Folder Reset</value>
-    </data>
-    <data name="GameFolderResetText" xml:space="preserve">
-    <value>Your game directory contain saved data from your previous use of the game. Game Directory has been reset, please set it up again.</value>
-    </data>
     <data name="Create" xml:space="preserve">
     <value>Create</value>
-    </data>
-    <data name="ProfileName" xml:space="preserve">
-    <value>Profile Name</value>
     </data>
     <data name="Deletion" xml:space="preserve">
     <value>Deletion</value>
     </data>
     <data name="DeletionText" xml:space="preserve">
-    <value>Do you wish to delete the selected profile {0} ?</value>
+        <value>Do you wish to delete {0} ?</value>
     </data>
     <data name="Duplicate" xml:space="preserve">
     <value>Duplicate</value>
@@ -75,9 +56,6 @@
     </data>
     <data name="InvalidURLText" xml:space="preserve">
     <value>The steam URL seems to be missing its ID to be valid.</value>
-    </data>
-    <data name="TrebuchetBusy" xml:space="preserve">
-    <value>Trebuchet is busy.</value>
     </data>
     <data name="ModlistName" xml:space="preserve">
     <value>Modlist Name</value>
@@ -93,9 +71,6 @@
     </data>
     <data name="ServerFailedStartText" xml:space="preserve">
     <value>Server failed to start properly. See the logs for more information.</value>
-    </data>
-    <data name="ServerNotInstalled" xml:space="preserve">
-    <value>Some server instances are not yet installed.</value>
     </data>
     <data name="Install" xml:space="preserve">
     <value>Install</value>
@@ -185,9 +160,6 @@ Do you wish to proceed ?</value>
     </data>
     <data name="SettingManageClient" xml:space="preserve">
         <value>Manage Game Files</value>
-    </data>
-    <data name="SettingManageClientText" xml:space="preserve">
-        <value>Allow Trebuchet to manage the game files. Files are moved out of the game folder and into you documents. This will protected them when reinstalling the game and allow you to have multiple save folder that can swap, useful if multiple persons play on the same computer.</value>
     </data>
     <data name="SteamConnected" xml:space="preserve">
         <value>Connected to Steam</value>
@@ -353,17 +325,11 @@ Do you wish to proceed ?</value>
     <data name="SettingAsyncSceneText" xml:space="preserve">
         <value>Can improve performance, specially around heavy building areas</value>
     </data>
-    <data name="SettingMaxMoveDelta" xml:space="preserve">
-        <value>Max Move Delta Time</value>
-    </data>
-    <data name="SettingMaxMoveDeltaText" xml:space="preserve">
-        <value>TODO</value>
-    </data>
     <data name="SettingInternetSpeed" xml:space="preserve">
         <value>Configured Internet Speed</value>
     </data>
     <data name="SettingInternetSpeedText" xml:space="preserve">
-        <value>TODO</value>
+        <value>Max connection speed of the engine. This is untested.</value>
     </data>
     <data name="SettingLog" xml:space="preserve">
         <value>Display Log Console</value>
@@ -381,7 +347,7 @@ Do you wish to proceed ?</value>
         <value>Log Filters</value>
     </data>
     <data name="SettingLogFilterText" xml:space="preserve">
-        <value>Filter the log console to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+        <value>Filter the logs to only display specific types of logs (One per line). This can greatly help to reduce your log size. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
     </data>
     <data name="CatServerSettings" xml:space="preserve">
         <value>Server Settings</value>
@@ -456,13 +422,13 @@ Do you wish to proceed ?</value>
         <value>Restart Settings</value>
     </data>
     <data name="SettingServerKillZombies" xml:space="preserve">
-        <value>Kill Zombie Servers</value>
+        <value>Kill Crashed Servers</value>
     </data>
     <data name="SettingServerKillZombiesText" xml:space="preserve">
         <value>Kill server instances that have stopped responding (frozen) for a period of time</value>
     </data>
     <data name="SettingServerZombieDuration" xml:space="preserve">
-        <value>Zombie Check Duration (Seconds)</value>
+        <value>Crash Check Duration (Seconds)</value>
     </data>
     <data name="SettingServerZombieDurationText" xml:space="preserve">
         <value>Amount of time given to a server instance to respond before getting killed by trebuchet</value>
@@ -513,7 +479,7 @@ Do you wish to proceed ?</value>
         <value>Raw UDP Port</value>
     </data>
     <data name="SettingServerRawUDPPortText" xml:space="preserve">
-        <value>TODO</value>
+        <value>Secondary UDP port</value>
     </data>
     <data name="SettingServerSourceQueryPort" xml:space="preserve">
         <value>Source Query Port</value>
@@ -525,7 +491,7 @@ Do you wish to proceed ?</value>
         <value>Enable Multi Home</value>
     </data>
     <data name="SettingServerEnableMultiHomeText" xml:space="preserve">
-        <value>Enable Multi Home to allow multiple IP to connect to your server instance</value>
+        <value>Enable Multi Home to allow multiple to have serveur IP to connect to</value>
     </data>
     <data name="SettingServerMultiHomeAddress" xml:space="preserve">
         <value>Multi Home Address</value>
@@ -540,7 +506,7 @@ Do you wish to proceed ?</value>
         <value>Enable RCon</value>
     </data>
     <data name="SettingServerEnableRConText" xml:space="preserve">
-        <value>Enable RCON on your server instance</value>
+        <value>Enable RCON console on your server instance</value>
     </data>
     <data name="SettingServerRConPort" xml:space="preserve">
         <value>RCon Port</value>
@@ -573,7 +539,7 @@ Do you wish to proceed ?</value>
         <value>Enable Battle Eye</value>
     </data>
     <data name="SettingServerEnableBattleEyeText" xml:space="preserve">
-        <value>Enable Battle Eye on your server instance</value>
+        <value>Enable Battle Eye Anti-Cheat on your server instance</value>
     </data>
     <data name="CatMiscellaneous" xml:space="preserve">
         <value>Miscellaneous</value>
@@ -627,7 +593,7 @@ Do you wish to proceed ?</value>
         <value>Update Check Interval</value>
     </data>
     <data name="SettingUpdateCheckIntervalText" xml:space="preserve">
-        <value>"The interval in seconds between each update check</value>
+        <value>The interval in seconds between each update check</value>
     </data>
     <data name="SettingVerifyAll" xml:space="preserve">
         <value>Always Verify Files</value>
@@ -639,7 +605,7 @@ Do you wish to proceed ?</value>
         <value>Max Simultaneous Downloads</value>
     </data>
     <data name="SettingMaxDownloadsText" xml:space="preserve">
-        <value>Max amount of files downloaded at the same time on the steam network. This can increase the load on your CPU/Drive/Network but make the download potentially faster if your network allow it</value>
+        <value>Max amount of files downloaded at the same time on the steam network. This can increase the load on your CPU/Drive but make the download potentially faster if your network allow it</value>
     </data>
     <data name="SettingMaxServers" xml:space="preserve">
         <value>Max Download Servers</value>
@@ -651,7 +617,7 @@ Do you wish to proceed ?</value>
         <value>Auto Refresh Mod List</value>
     </data>
     <data name="SettingAutoRefreshModlistText" xml:space="preserve">
-        <value>TODO</value>
+        <value>Refresh the mod lists every couple of minutes to check if their is any mod update pending</value>
     </data>
     <data name="SettingDisplayWarningOnKill" xml:space="preserve">
         <value>Display Warning On Kill</value>
@@ -750,7 +716,7 @@ Do you wish to proceed ?</value>
         <value>Save Size</value>
     </data>
     <data name="SaveSizeTip" xml:space="preserve">
-        <value>Total size of your save on disk. Profiles not only store your settings, but also your server saves and logs</value>
+        <value>Total size of your save on disk. Saves not only store your settings, but also your server saves and logs</value>
     </data>
     <data name="Delete" xml:space="preserve">
         <value>Delete</value>
@@ -774,7 +740,7 @@ Do you wish to proceed ?</value>
         <value>Add local mods</value>
     </data>
     <data name="ExportErrorModNotFound" xml:space="preserve">
-        <value>Some of the mods path cannot be resolved because the mod file was not found. In order to export your modlist, please unsure that all of the mods are not marked as missing.</value>
+        <value>Some of the mods cannot be resolved because the mod file was not found. In order to export your modlist, please unsure that all of the mods are not marked as missing.</value>
     </data>
     <data name="ImportModList" xml:space="preserve">
         <value>Import mod list</value>
@@ -792,7 +758,7 @@ Do you wish to proceed ?</value>
         <value>This will verify all server and mod files. This may take a while. Do you want to continue?</value>
     </data>
     <data name="ClientFailedToStart" xml:space="preserve">
-        <value>Client failed to start</value>
+        <value>The game failed to start</value>
     </data>
     <data name="ClientFailedToStartText" xml:space="preserve">
         <value>See the logs for more information</value>
@@ -882,7 +848,7 @@ Do you wish to proceed ?</value>
         <value>Mod Trimming</value>
     </data>
     <data name="OnBoardingModTrimConfirmSub" xml:space="preserve">
-        <value>{0} usued mods have been found, continue ?</value>
+        <value>{0} unused mods have been found, continue ?</value>
     </data>
     <data name="TrimmingUnusedMods" xml:space="preserve">
         <value>Trimming unused mods</value>
