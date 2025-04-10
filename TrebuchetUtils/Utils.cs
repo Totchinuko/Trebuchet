@@ -7,6 +7,7 @@ using System.IO.Compression;
 using System.Linq;
 using System.Net.Http;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -603,5 +604,13 @@ public static class Utils
     {
         foreach (var x1 in collection)
             ocollection.Add(x1);
+    }
+
+    const int ERROR_SHARING_VIOLATION = 32;
+    const int ERROR_LOCK_VIOLATION = 33;
+    public static bool IsFileLocked(Exception exception)
+    {
+        int errorCode = Marshal.GetHRForException(exception) & ((1 << 16) - 1);
+        return errorCode == ERROR_SHARING_VIOLATION || errorCode == ERROR_LOCK_VIOLATION;
     }
 }

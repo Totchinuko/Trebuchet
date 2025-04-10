@@ -892,4 +892,11 @@ Do you wish to proceed ?</value>
     <data name="OnBoardingLanguageChangeConfirm" xml:space="preserve">
         <value>The language has been changed, but a restart is required to apply the change. Restart ?</value>
     </data>
+    <data name="OnBoardingProcessLock" xml:space="preserve">
+        <value>File opened in another process</value>
+    </data>
+    <data name="OnBoardingProcessLockSub" xml:space="preserve">
+        <value>The following file is currently busy with another process, please close the program so Trebuchet can continue its task:
+{0}</value>
+    </data>
 </root>

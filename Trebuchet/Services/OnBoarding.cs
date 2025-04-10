@@ -190,7 +190,7 @@ public class OnBoarding(
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
             var saveName = await OnBoardingChooseClientSaveName();
             await Tools.DeepCopyAsync(savedDir, appFiles.Client.GetFolder(saveName), CancellationToken.None);
-            Directory.Delete(savedDir, true);
+            await OnBoardingSafeIO(() => Directory.Delete(savedDir, true),savedDir);
             Tools.SetupSymboliclink(savedDir, appFiles.Client.GetPrimaryJunction());
             return true;
         }
@@ -259,6 +259,43 @@ public class OnBoarding(
 
         return true;
     }
+
+    public async Task<bool> OnBoardingSafeIO(Action ioAction, string file)
+    {
+        var currentPopup = dialogueBox.Popup;
+        dialogueBox.Close();
+        while (true)
+        {
+            try
+            {
+                ioAction.Invoke();
+                break;
+            }
+            catch (IOException ex)
+            {
+                if (TrebuchetUtils.Utils.IsFileLocked(ex))
+                {
+                    if (!dialogueBox.Active)
+                    {
+                        var message = new OnBoardingProgress(
+                            Resources.OnBoardingProcessLock,
+                            string.Format(Resources.OnBoardingProcessLockSub, file))
+                            .SetSize<OnBoardingProgress>(600, 250);
+                        message.Report(0);
+                        dialogueBox.Open(message);
+                    }
+                }
+                else
+                    throw;
+            }
+            await Task.Delay(1000);
+        }
+        if(dialogueBox.Active)
+            dialogueBox.Close();
+        if(currentPopup is not null)
+            dialogueBox.Open(currentPopup);
+        return true;
+    }
     
     #region Onboarding Upgrade
 
@@ -294,6 +331,7 @@ public class OnBoarding(
                 {
                     if (!await OnBoardingUpgradeTrebuchet(configuration.InstallPath, false, progress)) return false;
                     configuration.InstallPath = string.Empty;
+                    configuration.ManageClient = true;
                     configJson = JsonSerializer.Serialize(configuration);
                     await File.WriteAllTextAsync(AppConstants.GetConfigPath(false), configJson);
                 }
@@ -308,6 +346,7 @@ public class OnBoarding(
                 {
                     if(!await OnBoardingUpgradeTrebuchet(configuration.InstallPath, true, progress)) return false;
                     configuration.InstallPath = string.Empty;
+                    configuration.ManageClient = true;
                     configJson = JsonSerializer.Serialize(configuration);
                     await File.WriteAllTextAsync(AppConstants.GetConfigPath(true), configJson);
                 }
@@ -339,7 +378,7 @@ public class OnBoarding(
             await Tools.DeepCopyAsync(workshopDir, appFiles.Mods.GetWorkshopFolder(), CancellationToken.None, progress);
             if (isElevated)
                 Tools.SetEveryoneAccess(new DirectoryInfo(appFiles.Mods.GetWorkshopFolder()));
-            Directory.Delete(workshopDir, true);
+            await OnBoardingSafeIO(() => Directory.Delete(workshopDir, true), workshopDir);
         }
         
         progress.Report(0.0);
@@ -350,7 +389,7 @@ public class OnBoarding(
             await Tools.DeepCopyAsync(instanceDir, appFiles.Server.GetBaseInstancePath(testlive), CancellationToken.None, progress);
             if(isElevated)
                 Tools.SetEveryoneAccess(new DirectoryInfo(appFiles.Server.GetBaseInstancePath(testlive)));
-            Directory.Delete(instanceDir, true);
+            await OnBoardingSafeIO(() => Directory.Delete(instanceDir, true), instanceDir);
         }
         progress.Report(0.0);
         
@@ -360,13 +399,13 @@ public class OnBoarding(
             await Tools.DeepCopyAsync(dataDir, Path.Combine(AppFiles.GetDataDirectory().FullName, versionDir), CancellationToken.None, progress);
             if(isElevated)
                 Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(AppFiles.GetDataDirectory().FullName, versionDir)));
-            Directory.Delete(dataDir, true);
+            await OnBoardingSafeIO(() => Directory.Delete(dataDir, true),dataDir);
         }
         
         progress.Report(0.0);
         var logsDir = Path.Combine(installDir, @"Logs");
         if(Directory.Exists(logsDir))
-            Directory.Delete(logsDir, true);
+            await OnBoardingSafeIO(() => Directory.Delete(logsDir, true), logsDir);
         
         progress.Report(1.0);
         return true;

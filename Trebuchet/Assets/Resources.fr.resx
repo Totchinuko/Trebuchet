@@ -884,4 +884,11 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
     <data name="OnBoardingLanguageChangeConfirm" xml:space="preserve">
         <value>Le langage à été modifié mais un redémarrage est nécessaire pour appliquer le changement. Redémarrer ?</value>
     </data>
+    <data name="OnBoardingProcessLock" xml:space="preserve">
+        <value>Fichier occupé dans un autre processus</value>
+    </data>
+    <data name="OnBoardingProcessLockSub" xml:space="preserve">
+        <value>Le fichier suivant est occupé par autre processus, merci de fermer le programme pour que Trebuchet puisse terminer ses taches:
+{0}</value>
+    </data>
 </root>

@@ -899,6 +899,25 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File opened in another process.
+        /// </summary>
+        public static string OnBoardingProcessLock {
+            get {
+                return ResourceManager.GetString("OnBoardingProcessLock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The following file is currently busy with another process, please close the program so Trebuchet can continue its task:
+        ///{0}.
+        /// </summary>
+        public static string OnBoardingProcessLockSub {
+            get {
+                return ResourceManager.GetString("OnBoardingProcessLockSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server Instances.
         /// </summary>
         public static string OnBoardingServerInstanceCount {
