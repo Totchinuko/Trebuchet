@@ -169,7 +169,8 @@ public class Launcher : IDisposable
         if (IsServerProfileLocked(profileName))
             throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(_appFiles.Server.GetInstancePath(instance), profile.ProfileFolder);
+        SetupJunction(Path.Combine(_appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave), 
+            profile.ProfileFolder);
 
         _logger.LogDebug($"Locking folder {profile.ProfileName}");
         _logger.LogInformation(
