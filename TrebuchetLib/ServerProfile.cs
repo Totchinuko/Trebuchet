@@ -49,9 +49,10 @@ namespace TrebuchetLib
         /// Generate the server arguments for a server instance.
         /// </summary>
         /// <param name="instance"></param>
+        /// <param name="modlistPath"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public string GetServerArgs(int instance)
+        public string GetServerArgs(int instance, string modlistPath)
         {
             string? profileFolder = Path.GetDirectoryName(FilePath) ?? throw new Exception("Invalid folder directory.");
 
@@ -59,8 +60,7 @@ namespace TrebuchetLib
             if (Log) args.Add(Constants.GameArgsLog);
             if (UseAllCores) args.Add(Constants.GameArgsUseAllCore);
             args.Add(string.Format(Constants.ServerArgsMaxPlayers, MaxPlayers));
-            args.Add(string.Format(Constants.GameArgsModList,
-                Path.Combine(profileFolder, Constants.FileGeneratedModlist)));
+            args.Add(string.Format(Constants.GameArgsModList, modlistPath));
             if (EnableMultiHome) args.Add(string.Format(Constants.ServerArgsMultiHome, MultiHomeAddress));
             args.Add($"-TotInstance={instance}");
 

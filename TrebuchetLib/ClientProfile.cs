@@ -80,14 +80,14 @@ namespace TrebuchetLib
         [JsonIgnore]
         public string ProfileName => Path.GetFileName(Path.GetDirectoryName(FilePath)) ?? throw new Exception($"Invalid directory for {FilePath}.");
         
-        public string GetClientArgs()
+        public string GetClientArgs(string modlistPath)
         {
             string profileFolder = Path.GetDirectoryName(FilePath) ?? throw new Exception("Invalid folder directory.");
 
             List<string> args = new List<string>();
             if (Log) args.Add(Constants.GameArgsLog);
             if (UseAllCores) args.Add(Constants.GameArgsUseAllCore);
-            args.Add(string.Format(Constants.GameArgsModList, Path.Combine(profileFolder, Constants.FileGeneratedModlist)));
+            args.Add(string.Format(Constants.GameArgsModList, modlistPath));
 
             return string.Join(" ", args);
         }

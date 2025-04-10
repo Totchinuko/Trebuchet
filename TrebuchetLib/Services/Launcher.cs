@@ -66,8 +66,10 @@ public class Launcher : IDisposable
         _logger.LogDebug($"Locking folder {profile.ProfileName}");
         _logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
 
-        var process = CreateClientProcess(profile, isBattleEye);
-        await WriteClientConfiguration(profile, modlist);
+        var tmpFile = Path.GetTempFileName();
+        await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
+        await _iniHandler.WriteClientSettingsAsync(profile);
+        var process = CreateClientProcess(profile, tmpFile, isBattleEye);
 
         process.Start();
 
@@ -80,10 +82,10 @@ public class Launcher : IDisposable
         _conanClientProcess = new ConanClientProcess(childProcess);
     }
 
-    private Process CreateClientProcess(ClientProfile profile, bool isBattleEye)
+    private Process CreateClientProcess(ClientProfile profile, string modlistPath, bool isBattleEye)
     {
         var filename = isBattleEye ? _appFiles.Client.GetBattleEyeBinaryPath() : _appFiles.Client.GetGameBinaryPath();
-        var args = profile.GetClientArgs();
+        var args = profile.GetClientArgs(modlistPath);
 
         var dir = Path.GetDirectoryName(filename);
         if (dir == null)
@@ -97,13 +99,6 @@ public class Launcher : IDisposable
         process.EnableRaisingEvents = true;
 
         return process;
-    }
-
-    private async Task WriteClientConfiguration(ClientProfile profile, ModListProfile modlist)
-    {
-        var tmpFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
-        await _iniHandler.WriteClientSettingsAsync(profile);
     }
 
     private async Task<Process?> CatchClientChildProcess(Process parent)
@@ -180,8 +175,10 @@ public class Launcher : IDisposable
         _logger.LogInformation(
             $"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}");
 
-        var process = CreateServerProcess(instance, profile);
-        await WriteServerConfiguration(profile, modlist, instance);
+        var tmpFile = Path.GetTempFileName();
+        await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
+        await _iniHandler.WriteServerSettingsAsync(profile, instance);
+        var process = CreateServerProcess(instance, tmpFile, profile);
         process.Start();
 
         var childProcess = await CatchServerChildProcess(process);
@@ -195,12 +192,12 @@ public class Launcher : IDisposable
         _serverProcesses.TryAdd(instance, conanServerProcess);
     }
 
-    private Process CreateServerProcess(int instance, ServerProfile profile)
+    private Process CreateServerProcess(int instance, string modlistPath, ServerProfile profile)
     {
         var process = new Process();
 
         var filename = _appFiles.Server.GetIntanceBinary(instance);
-        var args = profile.GetServerArgs(instance);
+        var args = profile.GetServerArgs(instance, modlistPath);
 
         var dir = Path.GetDirectoryName(filename);
         if (dir == null)
@@ -212,13 +209,6 @@ public class Launcher : IDisposable
         process.StartInfo.UseShellExecute = false;
         process.EnableRaisingEvents = true;
         return process;
-    }
-
-    private async Task WriteServerConfiguration(ServerProfile profile, ModListProfile modlist, int instance)
-    {
-        var tmpFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
-        await _iniHandler.WriteServerSettingsAsync(profile, instance);
     }
 
     private async Task<Process?> CatchServerChildProcess(Process process)
@@ -419,9 +409,8 @@ public class Launcher : IDisposable
         return string.Empty;
     }
 
-    private void SetupJunction(string gamePath, string targetPath)
+    private void SetupJunction(string junction, string targetPath)
     {
-        var junction = Path.Combine(gamePath, Constants.FolderGameSave);
         Tools.RemoveSymboliclink(junction);
         Tools.SetupSymboliclink(junction, targetPath);
     }
