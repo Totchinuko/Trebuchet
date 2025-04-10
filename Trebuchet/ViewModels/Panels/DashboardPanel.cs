@@ -280,6 +280,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _setup.Config.SelectedClientModlist = modlist;
                 _setup.Config.SaveFile();
+                RefreshModlistUpdate([modlist]);
             };
             Client.ProfileSelected += (_, profile) =>
             {
@@ -320,38 +321,56 @@ namespace Trebuchet.ViewModels.Panels
             dashboard.SelectedProfile = profile;
         }
 
-        private void RefreshClientNeededUpdates(List<ulong> neededUpdates)
+        private void RefreshClientNeededUpdates(List<ulong> modChecked, List<ulong> neededUpdates)
         {
             var mods = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
-            Client.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
+            var list = Client.UpdateNeeded
+                .Intersect(mods)
+                .Except(modChecked)
+                .Union(neededUpdates.Intersect(mods));
+            Client.UpdateNeeded = list.ToList();
         }
 
-        private void RefreshServerNeededUpdates(List<ulong> neededUpdates)
+        private void RefreshServerNeededUpdates(List<ulong> modChecked, List<ulong> neededUpdates)
         {
             foreach (var dashboard in Instances)
-                RefreshServerNeededUpdates(dashboard, neededUpdates);
+                RefreshServerNeededUpdates(dashboard, modChecked, neededUpdates);
         }
 
-        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<ulong> neededUpdates)
+        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<ulong> modChecked, List<ulong> neededUpdates)
         {
             var mods = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
-            dashboard.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
+            var list = dashboard.UpdateNeeded
+                .Intersect(mods)
+                .Except(modChecked)
+                .Union(neededUpdates.Intersect(mods));
+            dashboard.UpdateNeeded = list.ToList();
+        }
+
+        private async void RefreshModlistUpdate(List<string> modlist)
+        {
+            await CheckModUpdates(modlist);
+        }
+
+        private Task CheckModUpdates()
+        {
+            var modlists = Instances.Select(i => i.SelectedModlist).ToList();
+            modlists.Add(Client.SelectedModlist);
+            return CheckModUpdates(modlists);
         }
         
-        private async Task CheckModUpdates()
+        private async Task CheckModUpdates(List<string> modlists)
         {
             try
             {
-                var modlists = Instances.Select(i => i.SelectedModlist).ToList();
-                modlists.Add(Client.SelectedModlist);
                 var mods = modlists.Distinct()
                     .Select(l => _appFiles.Mods.CollectAllMods(l))
                     .SelectMany(x => x)
                     .Distinct().ToList();
                 var response = await _steamApi.RequestModDetails(mods);
                 var neededUpdates = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList());
-                RefreshClientNeededUpdates(neededUpdates);
-                RefreshServerNeededUpdates(neededUpdates);
+                RefreshClientNeededUpdates(mods, neededUpdates);
+                RefreshServerNeededUpdates(mods, neededUpdates);
             }
             catch (TrebException tex)
             {
@@ -381,6 +400,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _setup.Config.SetInstanceModlist(arg.Instance, arg.Selection);
                 _setup.Config.SaveFile();
+                RefreshModlistUpdate([arg.Selection]);
             };
             instance.ProfileSelected += (_, arg) =>
             {
