@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Globalization;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -91,6 +92,8 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
             Dispatcher.UIThread.UnhandledException += OnDispatcherUnhandledException;
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
             desktop.ShutdownRequested += OnShutdownRequested;
+
+            Assets.Resources.Culture = CultureInfo.CreateSpecificCulture("fr");
             
             //CrashHandler.SetReportUri(@"");
             
