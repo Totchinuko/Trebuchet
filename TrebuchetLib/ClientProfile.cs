@@ -22,7 +22,7 @@ namespace TrebuchetLib
         public bool UseAllCores { get; set; } = UseAllCoresDefault;
         
         public static readonly long CPUThreadAffinityDefault = 0xffffffffffff;
-        public static readonly int ConfiguredInternetSpeedDefault = 50000; 
+        public static readonly int ConfiguredInternetSpeedDefault = 25000; 
         public static readonly bool BackgroundSoundDefault = false;
         public static readonly int AddedTexturePoolDefault = 0;
         public static readonly bool EnableAsyncSceneDefault = false;

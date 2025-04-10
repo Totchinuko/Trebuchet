@@ -262,7 +262,7 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.MaxMoveDeltaTime = v)
                 .SetDefault(() => ClientProfile.MaxMoveDeltaTimeDefault)
             );
-            Fields.Add(new IntSliderField(50000, 100000, 10000)
+            Fields.Add(new IntSliderField(10000, 100000, 1000)
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingInternetSpeed)
                 .SetDescription(Resources.SettingInternetSpeedText)
