@@ -153,7 +153,7 @@ public sealed class TrebuchetApp : ReactiveObject
             if (!await _onBoarding.OnBoardingCheckTrebuchet()) return;
             if (!await OnBoardingFirstLaunch()) return;
         }
-        catch (Exception ex)
+        catch (OperationCanceledException ex)
         {
             await _box.OpenErrorAndExitAsync(ex.Message);
             return;
