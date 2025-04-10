@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.IO;
 using System.Text.Json;
 using TrebuchetUtils;
@@ -12,6 +13,14 @@ public static class AppConstants
     public const string ConfigFileName = "settings.ui.json";
     public const string LogFolder = "logs";
     public const string LogFileName = "app.log";
+
+    public const string argLive = "--live";
+    public const string argTestLIve = "--testlive";
+    public const string argCatapult = "--catapult";
+    public const string argExperiment = "--experiment";
+    
+    [Localizable(false)]
+    public static readonly string[] UICultureList = ["en", "fr"];
 
     public static string GetLoggingPath()
     {

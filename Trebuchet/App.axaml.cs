@@ -1,11 +1,8 @@
 ﻿using System;
-using System.Globalization;
 using System.Linq;
 using System.Text.Json;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
-using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Markup.Xaml;
 using Avalonia.Media;
@@ -13,8 +10,8 @@ using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
-using SteamKit2;
 using Trebuchet.Services;
+using Trebuchet.Services.Language;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels;
@@ -25,8 +22,6 @@ using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
-using TrebuchetUtils.Services;
-using TrebuchetUtils.Services.Language;
 using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 // GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
@@ -38,14 +33,17 @@ namespace Trebuchet;
 public partial class App : Application, IApplication, ISubscriberErrorHandler
 {
     private ILogger<App>? _logger;
+    private UIConfig? _uiConfig;
+    private LanguageManager? _langManager;
     public bool HasCrashed { get; private set; }
     public IImage? AppIconPath => Resources[@"AppIcon"] as IImage;
 
     public override void Initialize()
     {
-        var culture = CultureInfo.CreateSpecificCulture("fr");
-        Assets.Resources.Culture = culture;
-        Thread.CurrentThread.CurrentUICulture = culture;
+        _uiConfig = UIConfig.LoadConfig(AppConstants.GetUIConfigPath());
+        var languageConfiguration = new LanguagesConfiguration(AppConstants.UICultureList);
+        _langManager = new LanguageManager(languageConfiguration);
+        _langManager.SetLanguage(_uiConfig.UICulture);
         
         AvaloniaXamlLoader.Load(this);
     }
@@ -130,7 +128,8 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     {
         services.AddSingleton<AppSetup>(
             new AppSetup(Config.LoadConfig(AppConstants.GetConfigPath(testlive)), testlive, catapult, experiment));
-        services.AddSingleton<UIConfig>(UIConfig.LoadConfig(AppConstants.GetUIConfigPath()));
+        services.AddSingleton<UIConfig>(_uiConfig!);
+        services.AddSingleton<ILanguageManager>(_langManager!);
         
         var logger = new LoggerConfiguration()
 #if !DEBUG
@@ -158,7 +157,6 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddSingleton<TaskBlocker>();
         services.AddSingleton<SteamAPI>();
         services.AddSingleton<ModFileFactory>();
-        services.AddSingleton<ILanguageManager, LanguageManager>();
 
         services.AddSingleton<SteamWidget>();
         services.AddSingleton<DialogueBox>();

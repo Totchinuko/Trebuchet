@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
+using DynamicData.Binding;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services;
+using Trebuchet.Services.Language;
+using Trebuchet.Services.TaskBlocker;
 using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.ViewModels.SettingFields;
 using TrebuchetLib;
@@ -15,29 +20,78 @@ namespace Trebuchet.ViewModels.Panels;
 
 public class SettingsPanel : Panel
 {
-    private readonly AppSetup _setup;
-    private readonly UIConfig _uiConfig;
-    private readonly OnBoarding _onBoarding;
+
 
     public SettingsPanel(
         AppSetup setup, 
         OnBoarding onBoarding,
+        ILanguageManager langManager,
+        DialogueBox box,
+        TaskBlocker blocker,
         UIConfig uiConfig) : 
         base(Resources.PanelSettings, "mdi-cog", true)
     {
         _setup = setup;
         _uiConfig = uiConfig;
         _onBoarding = onBoarding;
+        _langManager = langManager;
+        _box = box;
+        _blocker = blocker;
+
+        AvailableLocales.AddRange(langManager.AllLanguages);
+        _selectedLanguage = langManager.AllLanguages.Where(x => x.Code == _uiConfig.UICulture)
+            .FirstOrDefault(langManager.DefaultLanguage);
 
         SaveConfig = ReactiveCommand.Create(() => _setup.Config.SaveFile());
         SaveUiConfig = ReactiveCommand.Create(() => _uiConfig.SaveFile());
+        ChangeLanguage = ReactiveCommand.CreateFromTask<LanguageModel?>(OnLanguageChanged);
+        
+        this.WhenValueChanged<SettingsPanel, LanguageModel>(x => x.SelectedLanguage, false, () => _langManager.DefaultLanguage)
+            .InvokeCommand(ChangeLanguage);
             
         BuildFields();
     }
+    
+    private readonly AppSetup _setup;
+    private readonly UIConfig _uiConfig;
+    private readonly OnBoarding _onBoarding;
+    private readonly ILanguageManager _langManager;
+    private readonly DialogueBox _box;
+    private readonly TaskBlocker _blocker;
+    private LanguageModel _selectedLanguage;
 
     public ReactiveCommand<Unit,Unit> SaveConfig { get; }
     public ReactiveCommand<Unit,Unit> SaveUiConfig { get; }
+    public ReactiveCommand<LanguageModel?,Unit> ChangeLanguage { get; }
     public List<FieldElement> Fields { get; } = [];
+    public ObservableCollectionExtended<LanguageModel> AvailableLocales { get; } = [];
+
+    public LanguageModel SelectedLanguage
+    {
+        get => _selectedLanguage;
+        set => this.RaiseAndSetIfChanged(ref _selectedLanguage, value);
+    }
+
+    private async Task OnLanguageChanged(LanguageModel? model)
+    {
+        if (model is null) return;
+        _uiConfig.UICulture = model.Code;
+        _langManager.SetLanguage(model.Code);
+        _uiConfig.SaveFile();
+        if (_blocker.IsSet<SteamDownload>())
+        {
+            var message = new OnBoardingMessage(Resources.OnBoardingLanguageChange, Resources.OnBoardingLanguageChange);
+            await _box.OpenAsync(message);
+        }
+        else
+        {
+            var confirm = new OnBoardingConfirmation(Resources.OnBoardingLanguageChange,
+                Resources.OnBoardingLanguageChangeConfirm);
+            await _box.OpenAsync(confirm);
+            if(confirm.Result)
+                Utils.Utils.RestartProcess(_setup.IsTestLive);
+        }
+    }
 
     private void BuildFields()
     {

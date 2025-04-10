@@ -35,5 +35,9 @@
     <ItemGroup>
       <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
     </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Services\" />
+    </ItemGroup>
    
 </Project>

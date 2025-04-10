@@ -3,8 +3,9 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Threading;
+using TrebuchetUtils;
 
-namespace TrebuchetUtils.Services.Language;
+namespace Trebuchet.Services.Language;
 
 public class LanguageManager : ILanguageManager
 {
@@ -27,12 +28,13 @@ public class LanguageManager : ILanguageManager
 
     public void SetLanguage(string languageCode)
     {
-        if (string.IsNullOrEmpty(languageCode))
-        {
-            throw new ArgumentException($"{nameof(languageCode)} can't be empty.");
-        }
+        if (string.IsNullOrEmpty(languageCode) || !_configuration.AvailableLocales.Contains(languageCode))
+            languageCode = DefaultLanguage.Code;
+        
 
-        Thread.CurrentThread.CurrentUICulture = CultureInfo.GetCultureInfo(languageCode);
+        var culture = CultureInfo.GetCultureInfo(languageCode);
+        Assets.Resources.Culture = culture;
+        Thread.CurrentThread.CurrentUICulture = culture;
     }
 
     public void SetLanguage(LanguageModel languageModel) => SetLanguage(languageModel.Code);

@@ -735,6 +735,33 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Language.
+        /// </summary>
+        public static string OnBoardingLanguageChange {
+            get {
+                return ResourceManager.GetString("OnBoardingLanguageChange", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The language has been changed, but a restart is required to apply the change. Restart ?.
+        /// </summary>
+        public static string OnBoardingLanguageChangeConfirm {
+            get {
+                return ResourceManager.GetString("OnBoardingLanguageChangeConfirm", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The language has been changed but some tasks are currently running. To apply the change, please restart Trebuchet when the tasks are over..
+        /// </summary>
+        public static string OnBoardingLanguageChangeMessage {
+            get {
+                return ResourceManager.GetString("OnBoardingLanguageChangeMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Locate Conan Exiles.
         /// </summary>
         public static string OnBoardingLocateConan {

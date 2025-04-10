@@ -14,9 +14,11 @@ namespace Trebuchet
         public string CurrentServerProfile { get; set; } = string.Empty;
         public bool DisplayProcessPerformance { get; set; } = DisplayProcessPerformanceDefault;
         public bool DisplayWarningOnKill { get; set; } = DisplayWarningOnKillDefault;
+        public string UICulture { get; set; } = UICultureDefault;
         
         public static readonly bool DisplayProcessPerformanceDefault = true;
         public static readonly bool DisplayWarningOnKillDefault = true;
         public static readonly bool AutoRefreshModlistDefault = true;
+        public static readonly string UICultureDefault = @"en";
     }
 }

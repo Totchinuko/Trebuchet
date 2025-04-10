@@ -1,6 +1,6 @@
 using System.Collections.Generic;
 
-namespace TrebuchetUtils.Services.Language;
+namespace Trebuchet.Services.Language;
 
 public interface ILanguageManager
 {

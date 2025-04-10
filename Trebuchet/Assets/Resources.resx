@@ -883,4 +883,13 @@ Do you wish to proceed ?</value>
     <data name="TrimUnusedModsSub" xml:space="preserve">
         <value>Their is {0} unused mods. Unused mods are mods that have been downloaded by Trebuchet in the past but are not anymore used in a mod lists</value>
     </data>
+    <data name="OnBoardingLanguageChange" xml:space="preserve">
+        <value>Language</value>
+    </data>
+    <data name="OnBoardingLanguageChangeMessage" xml:space="preserve">
+        <value>The language has been changed but some tasks are currently running. To apply the change, please restart Trebuchet when the tasks are over.</value>
+    </data>
+    <data name="OnBoardingLanguageChangeConfirm" xml:space="preserve">
+        <value>The language has been changed, but a restart is required to apply the change. Restart ?</value>
+    </data>
 </root>

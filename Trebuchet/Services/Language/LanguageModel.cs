@@ -1,4 +1,4 @@
-namespace TrebuchetUtils.Services.Language;
+namespace Trebuchet.Services.Language;
 
 public class LanguageModel
 {

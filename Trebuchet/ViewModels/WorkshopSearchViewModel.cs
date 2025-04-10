@@ -13,8 +13,6 @@ using SteamWorksWebAPI.Interfaces;
 using SteamWorksWebAPI.Response;
 using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
-using TrebuchetUtils.Services;
 
 namespace Trebuchet.ViewModels;
 

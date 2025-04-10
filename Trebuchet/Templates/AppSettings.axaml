@@ -1,5 +1,6 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels"
+                    xmlns:l="clr-namespace:Trebuchet.Services.Language"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
@@ -7,11 +8,20 @@
         <ScrollViewer Grid.Row="1" AllowAutoHide="False" Padding="0 0 12 0">
             <StackPanel>
                 <Border Padding="12" Classes="Panel" Margin="0 0 0 12">
-                    <TextBlock>
-                        <Run Text="{x:Static a:Resources.TranslationAuthors}" />
-                        <Run Text=": " />
-                        <Run Text="{x:Static a:Resources.TranslatorsIdentity}" />
-                    </TextBlock>
+                    <DockPanel HorizontalAlignment="Stretch" LastChildFill="True">
+                        <ComboBox Width="180" DockPanel.Dock="Right" ItemsSource="{Binding AvailableLocales}" SelectedItem="{Binding SelectedLanguage}">
+                            <ComboBox.ItemTemplate>
+                                <DataTemplate DataType="l:LanguageModel">
+                                    <Label Content="{Binding NativeName}" />
+                                </DataTemplate>
+                            </ComboBox.ItemTemplate>
+                        </ComboBox>
+                        <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center">
+                            <Run Text="{x:Static a:Resources.TranslationAuthors}" />
+                            <Run Text=": " />
+                            <Run Text="{x:Static a:Resources.TranslatorsIdentity}" />
+                        </TextBlock>
+                    </DockPanel>
                 </Border>
                 <ItemsControl ItemsSource="{Binding Fields}">
                     <ItemsControl.ItemsPanel>
