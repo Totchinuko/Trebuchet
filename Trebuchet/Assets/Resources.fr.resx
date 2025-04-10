@@ -86,7 +86,7 @@
     <data name="CurrentLocation" xml:space="preserve">
         <value>Emplacement actuel</value>
     </data>
-    <data name="Dashboard" xml:space="preserve">
+    <data name="PanelDashboard" xml:space="preserve">
         <value>Tableau de bord</value>
     </data>
     <data name="Delete" xml:space="preserve">
@@ -143,8 +143,8 @@
     <data name="GameSave" xml:space="preserve">
         <value>Sauvegarde</value>
     </data>
-    <data name="GameSaves" xml:space="preserve">
-        <value>Sauvegardes</value>
+    <data name="PanelGameSaves" xml:space="preserve">
+        <value>Données de jeu</value>
     </data>
     <data name="ImportModList" xml:space="preserve">
         <value>Importer</value>
@@ -221,7 +221,7 @@
     <data name="ModlistReplaceText" xml:space="preserve">
         <value>Cette action remplacera votre list, souhaitez vous continuer ?</value>
     </data>
-    <data name="Mods" xml:space="preserve">
+    <data name="PanelMods" xml:space="preserve">
         <value>Mods</value>
     </data>
     <data name="No" xml:space="preserve">
@@ -246,13 +246,13 @@
         <value>Indiqué à Trebuchet oú trouver Conan Exiles</value>
     </data>
     <data name="OnBoardingManageConan" xml:space="preserve">
-        <value>Gestion de la sauvegarde</value>
+        <value>Gestion des données de jeu</value>
     </data>
     <data name="OnBoardingManageConanNo" xml:space="preserve">
         <value>Laisser le jeu intact</value>
     </data>
     <data name="OnBoardingManageConanNoSub" xml:space="preserve">
-        <value>Vos fichier de sauvegarde ne seront pas déplacé</value>
+        <value>Vos fichier ne seront pas déplacé</value>
     </data>
     <data name="OnBoardingManageConanText" xml:space="preserve">
         <value>Autoriser Trebuchet à gérer vos sauvegarde de jeu ? Si vous accéptez, Trebuchet déplacera vos sauvegardes dans Mes Documents. Cela permet deux choses:
@@ -266,7 +266,7 @@
         <value>Autoriser la gestion</value>
     </data>
     <data name="OnBoardingManageConanYesSub" xml:space="preserve">
-        <value>La sauvegarde sera déplacer dans Mes Documents</value>
+        <value>Les données seront déplacé dans Mes Documents</value>
     </data>
     <data name="OnBoardingModTrimConfirm" xml:space="preserve">
         <value>Réduire les mods</value>
@@ -275,7 +275,7 @@
         <value>{0} mods non utilisé ont été trouvé, continuer ?</value>
     </data>
     <data name="OnBoardingNewGameSave" xml:space="preserve">
-        <value>Choisissez un nom pour la sauvegarde Trebuchet qui contiendra vos fichiers</value>
+        <value>Choisissez un nom pour la sauvegarde Trebuchet qui contiendra vos données</value>
     </data>
     <data name="OnBoardingNoUnusedMods" xml:space="preserve">
         <value>Aucun mods non utilisé</value>
@@ -350,7 +350,7 @@
         <value>Enregistrer sous</value>
     </data>
     <data name="SaveFile" xml:space="preserve">
-        <value>Sauvegarde</value>
+        <value>Enregistrer</value>
     </data>
     <data name="SaveSize" xml:space="preserve">
         <value>Taille</value>
@@ -358,7 +358,7 @@
     <data name="SaveSizeTip" xml:space="preserve">
         <value>Taille total de votre sauvegarde sur le disque. La sauvegarde enregistre aussi vos donnée de jeu et journeaux</value>
     </data>
-    <data name="ServerConsoles" xml:space="preserve">
+    <data name="PanelServerConsoles" xml:space="preserve">
         <value>Console Serveur</value>
     </data>
     <data name="ServerFailedStart" xml:space="preserve">
@@ -367,14 +367,14 @@
     <data name="ServerFailedStartText" xml:space="preserve">
         <value>Le lancement du serveur ne c'est pas déroulé correctement, consultez les journeaux pour plus d'informations</value>
     </data>
-    <data name="ServerLogFilter" xml:space="preserve">
+    <data name="PanelServerLogFilter" xml:space="preserve">
         <value>Filtre Journeaux</value>
     </data>
     <data name="ServerSave" xml:space="preserve">
-        <value>Sauvegarde Serveur</value>
+        <value>Donnée serveur</value>
     </data>
-    <data name="ServerSaves" xml:space="preserve">
-        <value>Sauvegardes du Serveur</value>
+    <data name="PanelServerSaves" xml:space="preserve">
+        <value>Données serveur</value>
     </data>
     <data name="SettingAdminServerList" xml:space="preserve">
         <value>[Tot ! Admin] Ne pas charger la liste des serveurs</value>
@@ -560,19 +560,19 @@
         <value>Mise à jour</value>
     </data>
     <data name="UpdateAllMods" xml:space="preserve">
-        <value>MàJ les mods</value>
+        <value>MàJ des mods</value>
     </data>
     <data name="UpdateAvailable" xml:space="preserve">
         <value>MàJ Disponible</value>
     </data>
     <data name="UpdateMods" xml:space="preserve">
-        <value>MàJ les mods</value>
+        <value>MàJ des mods</value>
     </data>
     <data name="UpdateModsLabel" xml:space="preserve">
         <value>MàJ des mods</value>
     </data>
     <data name="UpdateServers" xml:space="preserve">
-        <value>MàJ les serveurs</value>
+        <value>MàJ serveur</value>
     </data>
     <data name="UpdateServersLabel" xml:space="preserve">
         <value>MàJ des serveurs</value>
@@ -637,7 +637,7 @@
     <data name="SettingServerCPUThreadAffinityText" xml:space="preserve">
         <value>L'affinité des Threads de CPU permet configurer à quels threads CPU le serveur à accés</value>
     </data>
-    <data name="Settings" xml:space="preserve">
+    <data name="PanelSettings" xml:space="preserve">
         <value>Paramétres</value>
     </data>
     <data name="SettingServerAdminPass" xml:space="preserve">

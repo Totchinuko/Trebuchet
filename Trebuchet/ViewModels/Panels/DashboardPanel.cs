@@ -39,7 +39,7 @@ namespace Trebuchet.ViewModels.Panels
             DialogueBox box,
             TaskBlocker blocker,
             ILogger<DashboardPanel> logger) : 
-            base(Resources.Dashboard, "mdi-view-dashboard", true)
+            base(Resources.PanelDashboard, "mdi-view-dashboard", true)
         {
             _setup = setup;
             _uiConfig = uiConfig;

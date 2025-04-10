@@ -55,7 +55,7 @@ namespace Trebuchet.ViewModels.Panels
             WorkshopSearchViewModel workshop,
             ModFileFactory modFileFactory,
             ILogger<ModlistPanel> logger) : 
-            base(Resources.Mods, "mdi-toy-brick", false)
+            base(Resources.PanelMods, "mdi-toy-brick", false)
         {
             _steamApi = steamApi;
             _appFiles = appFiles;

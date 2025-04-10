@@ -32,7 +32,7 @@ namespace Trebuchet.ViewModels.Panels
             AppSetup setup, 
             AppFiles appFiles, 
             UIConfig uiConfig) : 
-            base(Resources.GameSaves, "mdi-controller", false)
+            base(Resources.PanelGameSaves, "mdi-controller", false)
         {
             _box = box;
             _appFiles = appFiles;

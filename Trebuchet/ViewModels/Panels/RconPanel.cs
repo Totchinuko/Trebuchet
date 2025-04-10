@@ -37,7 +37,7 @@ namespace Trebuchet.ViewModels.Panels
         private int _selectedConsole;
         private bool _canSendCommand;
 
-        public RconPanel(AppSetup setup, Launcher launcher) : base(Resources.ServerConsoles, "mdi-console-line", false)
+        public RconPanel(AppSetup setup, Launcher launcher) : base(Resources.PanelServerConsoles, "mdi-console-line", false)
         {
             _setup = setup;
             _launcher = launcher;

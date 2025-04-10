@@ -34,7 +34,7 @@ namespace Trebuchet.ViewModels.Panels
             AppSetup setup,
             AppFiles appFiles,
             UIConfig uiConfig
-            ) : base(Resources.ServerSaves, "mdi-server-network", false)
+            ) : base(Resources.PanelServerSaves, "mdi-server-network", false)
         {
             _box = box;
             _setup = setup;

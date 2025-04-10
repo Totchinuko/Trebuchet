@@ -111,22 +111,22 @@
     <data name="Error" xml:space="preserve">
         <value>Error</value>
     </data>
-    <data name="Settings" xml:space="preserve">
+    <data name="PanelSettings" xml:space="preserve">
         <value>Settings</value>
     </data>
-    <data name="GameSaves" xml:space="preserve">
+    <data name="PanelGameSaves" xml:space="preserve">
         <value>Game Saves</value>
     </data>
-    <data name="Dashboard" xml:space="preserve">
+    <data name="PanelDashboard" xml:space="preserve">
         <value>Dashboard</value>
     </data>
-    <data name="Mods" xml:space="preserve">
+    <data name="PanelMods" xml:space="preserve">
         <value>Mods</value>
     </data>
-    <data name="ServerConsoles" xml:space="preserve">
+    <data name="PanelServerConsoles" xml:space="preserve">
         <value>Server Consoles</value>
     </data>
-    <data name="ServerSaves" xml:space="preserve">
+    <data name="PanelServerSaves" xml:space="preserve">
         <value>Server Saves</value>
     </data>
     <data name="LastModified" xml:space="preserve">
@@ -138,7 +138,7 @@
     <data name="LastUpdate" xml:space="preserve">
         <value>Last Update</value>
     </data>
-    <data name="ServerLogFilter" xml:space="preserve">
+    <data name="PanelServerLogFilter" xml:space="preserve">
         <value>Server Log Filters</value>
     </data>
     <data name="OnBoardingUpgradeUac" xml:space="preserve">

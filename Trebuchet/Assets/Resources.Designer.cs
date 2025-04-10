@@ -285,15 +285,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Dashboard.
-        /// </summary>
-        public static string Dashboard {
-            get {
-                return ResourceManager.GetString("Dashboard", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         public static string Delete {
@@ -452,15 +443,6 @@ namespace Trebuchet.Assets {
         public static string GameSave {
             get {
                 return ResourceManager.GetString("GameSave", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Game Saves.
-        /// </summary>
-        public static string GameSaves {
-            get {
-                return ResourceManager.GetString("GameSaves", resourceCulture);
             }
         }
         
@@ -686,15 +668,6 @@ namespace Trebuchet.Assets {
         public static string ModlistReplaceText {
             get {
                 return ResourceManager.GetString("ModlistReplaceText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Mods.
-        /// </summary>
-        public static string Mods {
-            get {
-                return ResourceManager.GetString("Mods", resourceCulture);
             }
         }
         
@@ -1018,6 +991,69 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dashboard.
+        /// </summary>
+        public static string PanelDashboard {
+            get {
+                return ResourceManager.GetString("PanelDashboard", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Game Saves.
+        /// </summary>
+        public static string PanelGameSaves {
+            get {
+                return ResourceManager.GetString("PanelGameSaves", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Mods.
+        /// </summary>
+        public static string PanelMods {
+            get {
+                return ResourceManager.GetString("PanelMods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Consoles.
+        /// </summary>
+        public static string PanelServerConsoles {
+            get {
+                return ResourceManager.GetString("PanelServerConsoles", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Log Filters.
+        /// </summary>
+        public static string PanelServerLogFilter {
+            get {
+                return ResourceManager.GetString("PanelServerLogFilter", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Saves.
+        /// </summary>
+        public static string PanelServerSaves {
+            get {
+                return ResourceManager.GetString("PanelServerSaves", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Settings.
+        /// </summary>
+        public static string PanelSettings {
+            get {
+                return ResourceManager.GetString("PanelSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Peak.
         /// </summary>
         public static string Peak {
@@ -1099,15 +1135,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Server Consoles.
-        /// </summary>
-        public static string ServerConsoles {
-            get {
-                return ResourceManager.GetString("ServerConsoles", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Server failed to start.
         /// </summary>
         public static string ServerFailedStart {
@@ -1126,29 +1153,11 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Server Log Filters.
-        /// </summary>
-        public static string ServerLogFilter {
-            get {
-                return ResourceManager.GetString("ServerLogFilter", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Server Save.
         /// </summary>
         public static string ServerSave {
             get {
                 return ResourceManager.GetString("ServerSave", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Server Saves.
-        /// </summary>
-        public static string ServerSaves {
-            get {
-                return ResourceManager.GetString("ServerSaves", resourceCulture);
             }
         }
         
@@ -1491,15 +1500,6 @@ namespace Trebuchet.Assets {
         public static string SettingProcessPrioText {
             get {
                 return ResourceManager.GetString("SettingProcessPrioText", resourceCulture);
-            }
-        }
-        
-        /// <summary>
-        ///   Looks up a localized string similar to Settings.
-        /// </summary>
-        public static string Settings {
-            get {
-                return ResourceManager.GetString("Settings", resourceCulture);
             }
         }
         

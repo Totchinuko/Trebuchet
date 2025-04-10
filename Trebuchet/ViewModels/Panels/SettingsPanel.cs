@@ -29,7 +29,7 @@ public class SettingsPanel : Panel
         OnBoarding onBoarding,
         DialogueBox box,
         ILogger<SettingsPanel> logger) : 
-        base(Resources.Settings, "mdi-cog", true)
+        base(Resources.PanelSettings, "mdi-cog", true)
     {
         _setup = setup;
         _uiConfig = uiConfig;
