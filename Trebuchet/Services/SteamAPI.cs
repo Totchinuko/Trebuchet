@@ -15,6 +15,7 @@ namespace Trebuchet.Services;
 public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker taskBlocker)
 {
     private Dictionary<ulong, PublishedFile> _publishedFiles = [];
+    private DateTime _lastCacheClear = DateTime.MinValue;
     
     public async Task<List<PublishedFile>> RequestModDetails(List<ulong> list)
     {
@@ -39,11 +40,17 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
     public void InvalidateCache()
     {
         _publishedFiles.Clear();
+        _lastCacheClear = DateTime.UtcNow;
     }
 
     public List<PublishedFile> GetCache(List<ulong> list)
     {
         List<PublishedFile> results = [];
+        if ((DateTime.UtcNow - _lastCacheClear).TotalMinutes > 1.0)
+        {
+            _publishedFiles.Clear();
+            _lastCacheClear = DateTime.UtcNow;
+        }
         for (var i = list.Count - 1; i >= 0; i--)
         {
             var mod = list[i];

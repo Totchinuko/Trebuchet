@@ -20,16 +20,6 @@ namespace Trebuchet.ViewModels.Panels
 {
     public class DashboardPanel : Panel
     {
-        private readonly AppSetup _setup;
-        private readonly UIConfig _uiConfig;
-        private readonly AppFiles _appFiles;
-        private readonly SteamAPI _steamApi;
-        private readonly Launcher _launcher;
-        private readonly DialogueBox _box;
-        private readonly TaskBlocker _blocker;
-        private readonly ILogger<DashboardPanel> _logger;
-        private DispatcherTimer _timer;
-
         public DashboardPanel(
             AppSetup setup, 
             UIConfig uiConfig, 
@@ -75,6 +65,17 @@ namespace Trebuchet.ViewModels.Panels
 
             _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, (_,_) => OnCheckModUpdate());
         }
+        
+        private readonly AppSetup _setup;
+        private readonly UIConfig _uiConfig;
+        private readonly AppFiles _appFiles;
+        private readonly SteamAPI _steamApi;
+        private readonly Launcher _launcher;
+        private readonly DialogueBox _box;
+        private readonly TaskBlocker _blocker;
+        private readonly ILogger<DashboardPanel> _logger;
+        private DispatcherTimer _timer;
+        private DateTime _lastUpdateCheck = DateTime.MinValue;
 
         public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
         public ClientInstanceDashboard Client { get; }
@@ -268,6 +269,12 @@ namespace Trebuchet.ViewModels.Panels
             await Client.ProcessRefresh(_launcher.GetClientProcess(), _uiConfig.DisplayProcessPerformance);
             foreach (var instance in _launcher.GetServerProcesses())
                 await Instances[instance.Instance].ProcessRefresh(instance, _uiConfig.DisplayProcessPerformance);
+
+            if ((DateTime.UtcNow - _lastUpdateCheck).TotalSeconds >= 300)
+            {
+                _lastUpdateCheck = DateTime.UtcNow;
+                await CheckModUpdates();
+            }
         }
 
         private async void Initialize()
