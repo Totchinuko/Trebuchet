@@ -2,6 +2,7 @@
 using System.Globalization;
 using System.Linq;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
@@ -42,6 +43,10 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
 
     public override void Initialize()
     {
+        var culture = CultureInfo.CreateSpecificCulture("fr");
+        Assets.Resources.Culture = culture;
+        Thread.CurrentThread.CurrentUICulture = culture;
+        
         AvaloniaXamlLoader.Load(this);
     }
 
@@ -96,8 +101,6 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
             TaskScheduler.UnobservedTaskException += OnUnobservedTaskException;
             desktop.ShutdownRequested += OnShutdownRequested;
 
-            Assets.Resources.Culture = CultureInfo.CreateSpecificCulture("fr");
-            
             //CrashHandler.SetReportUri(@"");
             
             if (desktop.Args?.Length > 0)

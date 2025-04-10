@@ -12,7 +12,7 @@
             <WrapPanel Orientation="Horizontal" Margin="0,0,0,12">
                 <Border Classes="Panel" HorizontalAlignment="Left" Padding="8,8,8,0" Margin="0,0,12,0">
                     <WrapPanel Orientation="Horizontal">
-                        <Button Command="{Binding CreateProfileCommand}" Classes="Base Green" ToolTip.Tip="Create" Margin="0,0,6,0" VerticalAlignment="Top">
+                        <Button Command="{Binding CreateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}" Margin="0,0,6,0" VerticalAlignment="Top">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
                         <Border VerticalAlignment="Top" Height="32">

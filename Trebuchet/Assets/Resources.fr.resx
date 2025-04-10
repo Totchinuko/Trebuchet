@@ -141,7 +141,7 @@
         <value>Le jeu n'a pas pu être trouvé dans ce dossier</value>
     </data>
     <data name="GameSave" xml:space="preserve">
-        <value>Sauvegarde</value>
+        <value>Donnée de jeu</value>
     </data>
     <data name="PanelGameSaves" xml:space="preserve">
         <value>Données de jeu</value>
@@ -180,10 +180,10 @@
         <value>Terminer un processus procédera à la fin brutal du programme et peut conduire à des perte/corruption de donnée. Souhaitez vous continuer ?</value>
     </data>
     <data name="LastModified" xml:space="preserve">
-        <value>Modifié le</value>
+        <value>Modifié</value>
     </data>
     <data name="LastUpdate" xml:space="preserve">
-        <value>Mis à jour le</value>
+        <value>Mis à jour</value>
     </data>
     <data name="Launch" xml:space="preserve">
         <value>Lancer</value>
@@ -246,7 +246,7 @@
         <value>Indiqué à Trebuchet oú trouver Conan Exiles</value>
     </data>
     <data name="OnBoardingManageConan" xml:space="preserve">
-        <value>Gestion des données de jeu</value>
+        <value>Gestion des données</value>
     </data>
     <data name="OnBoardingManageConanNo" xml:space="preserve">
         <value>Laisser le jeu intact</value>
@@ -395,7 +395,7 @@
         <value>Rafraichie les listes de mods réguliérement afin de détécter de potentiel mise à jour</value>
     </data>
     <data name="SettingAutoUpdateStatus" xml:space="preserve">
-        <value>Mettre à jour les instance serveur</value>
+        <value>Mettre à jour les instances serveur</value>
     </data>
     <data name="SettingAutoUpdateStatusCheck" xml:space="preserve">
         <value>Verifier les mises à jour</value>
@@ -419,7 +419,7 @@
         <value>Dossier d'installation de Conan Exiles</value>
     </data>
     <data name="SettingClientInstallationText" xml:space="preserve">
-        <value>Indiquer à Trebuchet oú trouver le dossier de jeu de Conan Exiles. Vous choisirez aussi si Trebuchet devrait gérer vos fichier de sauvegarde</value>
+        <value>Indiquer à Trebuchet oú trouver le dossier de jeu de Conan Exiles. Vous choisirez aussi si Trebuchet devrait gérer vos données de jeu</value>
     </data>
     <data name="SettingCpuAffinity" xml:space="preserve">
         <value>Affinité des Threads de CPU</value>
@@ -692,7 +692,7 @@
         <value>Affiche les journeaux en temps réel à travers une console</value>
     </data>
     <data name="SettingManageClient" xml:space="preserve">
-        <value>Gestion des fichiers du jeu</value>
+        <value>Gestion des données</value>
     </data>
     <data name="SettingMaxDownloads" xml:space="preserve">
         <value>Téléchargement simultané</value>
@@ -825,7 +825,7 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
         <value>Augmente la netteté des textures en fonction de l'angle de vue, sur le paramétre Ultra. Ceci peut avoir un coût en fonction de votre matériel</value>
     </data>
     <data name="SettingUpdateCheckInterval" xml:space="preserve">
-        <value>Interval de vérification des MàJ</value>
+        <value>Interval de vérification des mise à jour</value>
     </data>
     <data name="SettingUpdateCheckIntervalText" xml:space="preserve">
         <value>L'intervale en secondes pour vérifier la présence de mise à jours</value>
@@ -834,7 +834,7 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
         <value>Supposé améliorer les performance du jeu, mais c'est non vérifié.</value>
     </data>
     <data name="SettingVerifyAllText" xml:space="preserve">
-        <value>Lorsque les fichiers sont mis à jour, le système vérifie ses données de cache pour déterminer rapidement si il a besoin de télécharger le contenu. En activant cette option, vous forcez le système à inspecter les fichiers à chaque fois. Ceci rend le procédé de mise à jour bien plus lent, mais est utile pour détécter de potentiel corruption. Si vous soupçoner que vos fichiers sont corrompu, je vous conseil d'utiliser le bouton sur le tableau de bord plutôt que d'utiliser ce paramétre</value>
+        <value>Lorsque les fichiers sont mis à jour, le système vérifie ses données de cache pour déterminer rapidement si il a besoin de télécharger le contenu. En activant cette option, vous forcez le système à inspecter les fichiers à chaque fois. Ceci rend le procédé de mise à jour bien plus lent, mais est utile pour détécter de potentiel corruption. Si vous soupçonnez que vos fichiers sont corrompu, je vous conseil d'utiliser le bouton sur le tableau de bord plutôt que d'utiliser ce paramétre</value>
     </data>
     <data name="UACDialogText" xml:space="preserve">
         <value>Trebuchet requiers des droits d'administration afin de gérer des fichier protégé pour la raison suivante:</value>
@@ -844,5 +844,29 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
     </data>
     <data name="WrongTypeText" xml:space="preserve">
         <value>Le type de fichier fournis n'est pas supporté</value>
+    </data>
+    <data name="WorkshopSteam" xml:space="preserve">
+        <value>Workshop</value>
+    </data>
+    <data name="PasteTxt" xml:space="preserve">
+        <value>Coller .txt</value>
+    </data>
+    <data name="ImportTxt" xml:space="preserve">
+        <value>Importer .txt</value>
+    </data>
+    <data name="ExportTxt" xml:space="preserve">
+        <value>Exporter .txt</value>
+    </data>
+    <data name="ExportJson" xml:space="preserve">
+        <value>Exporter .json</value>
+    </data>
+    <data name="Sync" xml:space="preserve">
+        <value>Synchroniser</value>
+    </data>
+    <data name="RefreshModInfos" xml:space="preserve">
+        <value>Rafraichir les données de mods</value>
+    </data>
+    <data name="Servers" xml:space="preserve">
+        <value>Serveurs</value>
     </data>
 </root>

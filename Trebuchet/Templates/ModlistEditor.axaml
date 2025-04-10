@@ -12,7 +12,7 @@
             <WrapPanel Margin="0 0 0 0">
                 <Border Classes="Panel" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
                     <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding CreateModlistCommand}" Classes="Base Green" ToolTip.Tip="Create" Margin="0,0,3,0" VerticalAlignment="Top">
+                        <Button Command="{Binding CreateModlistCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}" Margin="0,0,3,0" VerticalAlignment="Top">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
                         <Border VerticalAlignment="Center" Height="32">
@@ -24,16 +24,16 @@
                                 </ComboBox.SelectionBoxItemTemplate>
                             </ComboBox>
                         </Border>
-                        <Button Command="{Binding DeleteModlistCommand}" Classes="Base Red" ToolTip.Tip="Delete" Margin="0,0,3,0" VerticalAlignment="Center">
+                        <Button Command="{Binding DeleteModlistCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Delete}" Margin="0,0,3,0" VerticalAlignment="Center">
                             <i:Icon Value="mdi-delete" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding DuplicateModlistCommand}" Classes="Base Green" ToolTip.Tip="Duplicate" Margin="0 0 3 0" VerticalAlignment="Center">
+                        <Button Command="{Binding DuplicateModlistCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Duplicate}" Margin="0 0 3 0" VerticalAlignment="Center">
                             <i:Icon Value="mdi-content-copy" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding RefreshModlistCommand}" Classes="Base" ToolTip.Tip="Refresh mod infos" Margin="0 0 3 0" VerticalAlignment="Center">
+                        <Button Command="{Binding RefreshModlistCommand}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.RefreshModInfos}" Margin="0 0 3 0" VerticalAlignment="Center">
                             <i:Icon Value="mdi-refresh" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue" ToolTip.Tip="Update Mods" Margin="0 0 3 0" VerticalAlignment="Center">
+                        <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue" ToolTip.Tip="{x:Static a:Resources.UpdateMods}" Margin="0 0 3 0" VerticalAlignment="Center">
                             <i:Icon Value="mdi-update" Classes="Normal"/>
                         </Button>
                     </StackPanel>
@@ -42,12 +42,12 @@
                     <StackPanel Orientation="Horizontal">
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
-                                Content="Workshop"
+                                Content="{x:Static a:Resources.WorkshopSteam}"
                                 Margin="0 0 3 0"
                                 Command="{Binding ExploreWorkshopCommand}" />
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
-                                Content="Local Mod"
+                                Content="{x:Static a:Resources.LocalMod}"
                                 Command="{Binding ExploreLocalCommand}" />
                     </StackPanel>
                 </Border>
@@ -55,12 +55,12 @@
                     <StackPanel Orientation="Horizontal">
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
-                                Content="Paste .txt"
+                                Content="{x:Static a:Resources.PasteTxt}"
                                 Margin="0 0 3 0"
                                 Command="{Binding ImportFromTextCommand}" />
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
-                                Content="Import .txt"
+                                Content="{x:Static a:Resources.ImportTxt}"
                                 Command="{Binding ImportFromFileCommand}" />
                     </StackPanel>
                 </Border>
@@ -68,12 +68,12 @@
                     <StackPanel Orientation="Horizontal">
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
-                                Content="Export .json"
+                                Content="{x:Static a:Resources.ExportJson}"
                                 Margin="0 0 3 0"
                                 Command="{Binding ExportToJsonCommand}" />
                         <Button Classes="Base"
                                 VerticalAlignment="Center"
-                                Content="Export .txt"
+                                Content="{x:Static a:Resources.ExportTxt}"
                                 Command="{Binding ExportToTxtCommand}" />
                     </StackPanel>
                 </Border>
@@ -84,7 +84,7 @@
                         </Grid>
                         <Button Classes="Base Yellow"
                                 VerticalAlignment="Center"
-                                Content="Fetch"
+                                Content="{x:Static a:Resources.Sync}"
                                 Command="{Binding FetchCommand}" />
                     </WrapPanel>
                 </Border>

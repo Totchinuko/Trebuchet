@@ -393,6 +393,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Export .json.
+        /// </summary>
+        public static string ExportJson {
+            get {
+                return ResourceManager.GetString("ExportJson", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export .txt.
+        /// </summary>
+        public static string ExportTxt {
+            get {
+                return ResourceManager.GetString("ExportTxt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Find.
         /// </summary>
         public static string Find {
@@ -452,6 +470,15 @@ namespace Trebuchet.Assets {
         public static string ImportModList {
             get {
                 return ResourceManager.GetString("ImportModList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import .txt.
+        /// </summary>
+        public static string ImportTxt {
+            get {
+                return ResourceManager.GetString("ImportTxt", resourceCulture);
             }
         }
         
@@ -1054,6 +1081,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Paste .txt.
+        /// </summary>
+        public static string PasteTxt {
+            get {
+                return ResourceManager.GetString("PasteTxt", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Peak.
         /// </summary>
         public static string Peak {
@@ -1077,6 +1113,15 @@ namespace Trebuchet.Assets {
         public static string Players {
             get {
                 return ResourceManager.GetString("Players", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh mods data.
+        /// </summary>
+        public static string RefreshModInfos {
+            get {
+                return ResourceManager.GetString("RefreshModInfos", resourceCulture);
             }
         }
         
@@ -1149,6 +1194,15 @@ namespace Trebuchet.Assets {
         public static string ServerFailedStartText {
             get {
                 return ResourceManager.GetString("ServerFailedStartText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Servers.
+        /// </summary>
+        public static string Servers {
+            get {
+                return ResourceManager.GetString("Servers", resourceCulture);
             }
         }
         
@@ -2305,6 +2359,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Sync.
+        /// </summary>
+        public static string Sync {
+            get {
+                return ResourceManager.GetString("Sync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Test Live.
         /// </summary>
         public static string TestLive {
@@ -2526,6 +2589,15 @@ namespace Trebuchet.Assets {
         public static string WatermarkModlistURL {
             get {
                 return ResourceManager.GetString("WatermarkModlistURL", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Workshop.
+        /// </summary>
+        public static string WorkshopSteam {
+            get {
+                return ResourceManager.GetString("WorkshopSteam", resourceCulture);
             }
         }
         

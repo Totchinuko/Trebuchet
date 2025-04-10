@@ -853,4 +853,28 @@ Do you wish to proceed ?</value>
     <data name="TrimmingUnusedMods" xml:space="preserve">
         <value>Trimming unused mods</value>
     </data>
+    <data name="WorkshopSteam" xml:space="preserve">
+        <value>Workshop</value>
+    </data>
+    <data name="PasteTxt" xml:space="preserve">
+        <value>Paste .txt</value>
+    </data>
+    <data name="ImportTxt" xml:space="preserve">
+        <value>Import .txt</value>
+    </data>
+    <data name="ExportTxt" xml:space="preserve">
+        <value>Export .txt</value>
+    </data>
+    <data name="ExportJson" xml:space="preserve">
+        <value>Export .json</value>
+    </data>
+    <data name="Sync" xml:space="preserve">
+        <value>Sync</value>
+    </data>
+    <data name="RefreshModInfos" xml:space="preserve">
+        <value>Refresh mods data</value>
+    </data>
+    <data name="Servers" xml:space="preserve">
+        <value>Servers</value>
+    </data>
 </root>

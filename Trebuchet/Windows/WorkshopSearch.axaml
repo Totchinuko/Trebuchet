@@ -8,7 +8,7 @@
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         mc:Ignorable="d"
-        Title="Workshop Search"
+        Title="{x:Static a:Resources.WorkshopSteam}"
         Height="650" Width="900"
         MinHeight="450" MinWidth="700"
         WindowStartupLocation="CenterScreen"
@@ -21,7 +21,7 @@
         UseLayoutRounding="True">
     <Border x:Name="MainBorder">
         <Grid RowDefinitions="Auto,*">
-            <controls:WindowTitlebar x:Name="TitleBar" Title="Workshop Search" />
+            <controls:WindowTitlebar x:Name="TitleBar" Title="{x:Static a:Resources.WorkshopSteam}" />
             <Border Grid.Row="1" Padding="12">
                 <Grid x:Name="WindowContent" Margin="0,12,0,0" RowDefinitions="auto,auto,*" ColumnDefinitions="5*,3*">
                     <Border Classes="Panel" CornerRadius="3" HorizontalAlignment="Stretch" Padding="8">
