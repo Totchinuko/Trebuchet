@@ -57,9 +57,9 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         bool experiment = false;
         if (desktop.Args?.Length > 0)
         {
-            if(desktop.Args.Contains(@"--catapult"))
+            if(desktop.Args.Contains(AppConstants.argCatapult))
                 catapult = true;
-            if (desktop.Args.Contains(@"--experiment"))
+            if (desktop.Args.Contains(AppConstants.argExperiment))
                 experiment = true;
         }
         
@@ -103,12 +103,12 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
             
             if (desktop.Args?.Length > 0)
             {
-                if (desktop.Args.Contains(@"--testlive"))
+                if (desktop.Args.Contains(AppConstants.argTestLive))
                 {
                     OpenApp(true);
                     return;
                 }
-                else if (desktop.Args.Contains(@"--live"))
+                else if (desktop.Args.Contains(AppConstants.argLive))
                 {
                     OpenApp(false);
                     return;

@@ -89,7 +89,7 @@ public class SettingsPanel : Panel
                 Resources.OnBoardingLanguageChangeConfirm);
             await _box.OpenAsync(confirm);
             if(confirm.Result)
-                Utils.Utils.RestartProcess(_setup.IsTestLive);
+                Utils.Utils.RestartProcess(_setup);
         }
     }
 

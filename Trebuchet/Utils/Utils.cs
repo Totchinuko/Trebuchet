@@ -8,6 +8,7 @@ using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Trebuchet.Assets;
 using TrebuchetLib;
+using TrebuchetLib.Services;
 
 namespace Trebuchet.Utils
 {
@@ -34,12 +35,16 @@ namespace Trebuchet.Utils
             return true;
         }
         
-        public static void RestartProcess(bool testlive, bool asAdmin = false)
+        public static void RestartProcess(AppSetup setup, bool asAdmin = false)
         {
             var data = Tools.GetProcess(Environment.ProcessId);
+            var version = setup.IsTestLive ? AppConstants.argTestLive : AppConstants.argLive;
+            if (!data.args.Contains(version))
+                data.args += version;
+            
             Process process = new Process();
             process.StartInfo.FileName = data.filename;
-            process.StartInfo.Arguments = data.args + (testlive ? @" -testlive" : @" -live");
+            process.StartInfo.Arguments = data.args;
             process.StartInfo.UseShellExecute = true;
             if (asAdmin)
                 process.StartInfo.Verb = "runas";

@@ -232,7 +232,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
                 .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
             await dialogueBox.OpenAsync(uac);
             if(uac.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
-            Utils.Utils.RestartProcess(setup.IsTestLive, true);
+            Utils.Utils.RestartProcess(setup, true);
             return false;
         }
 
@@ -293,7 +293,7 @@ public class OnBoarding(AppFiles appFiles, AppSetup setup, DialogueBox dialogueB
                 File.Delete(configTestlive);
             }
             
-            Utils.Utils.RestartProcess(setup.IsTestLive);
+            Utils.Utils.RestartProcess(setup);
             return false;
         }
         

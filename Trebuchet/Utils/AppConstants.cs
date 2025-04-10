@@ -15,7 +15,7 @@ public static class AppConstants
     public const string LogFileName = "app.log";
 
     public const string argLive = "--live";
-    public const string argTestLIve = "--testlive";
+    public const string argTestLive = "--testlive";
     public const string argCatapult = "--catapult";
     public const string argExperiment = "--experiment";
     
