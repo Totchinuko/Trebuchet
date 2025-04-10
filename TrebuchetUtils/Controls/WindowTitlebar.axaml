@@ -30,45 +30,40 @@
         </Style>
     </UserControl.Styles>
     <Border Height="40">
-        <Grid>
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="auto" />
-            </Grid.ColumnDefinitions>
-            <Image x:Name="AppLogo" Classes="AppLogo" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" IsHitTestVisible="false" Height="20" Width="20" VerticalAlignment="Center" Margin="6,0,6,0" />
-            <TextBlock Grid.Column="1" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" IsHitTestVisible="false" FontWeight="Bold" VerticalAlignment="Center" Margin="6,0,12,0">
-                <Run x:Name="TitleRun" />
-            </TextBlock>
-            <ContentPresenter Grid.Column="2" Content="{Binding $parent[UserControl].Header}" Margin="0,0,12,0" />
-            <StackPanel Orientation="Horizontal" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" VerticalAlignment="Top" Grid.Column="3">
-                <Button x:Name="MinimizeBtn"
-                        Classes="WinNormal"
-                        Width="40"
-                        Height="30"
-                        Click="Minimize_MouseLeftButtonUp">
-                    <i:Icon Value="mdi-window-minimize" FontSize="20" HorizontalAlignment="Center" />
-                </Button>
-                <Button x:Name="MaximizeBtn"
-                        Classes="WinNormal"
-                        Width="40"
-                        Height="30"
-                        Click="MaximizeButton_MouseLeftButtonUp">
-                    <Grid>
-                        <i:Icon Value="mdi-window-maximize" IsVisible="{Binding !$parent[UserControl].IsMaximized}" FontSize="20" HorizontalAlignment="Center" />
-                        <i:Icon Value="mdi-window-restore" IsVisible="{Binding $parent[UserControl].IsMaximized}" FontSize="20" HorizontalAlignment="Center" />
-                    </Grid>
-                </Button>
-
-                <Button x:Name="CloseBtn"
-                        Classes="WinClose"
-                        Width="40"
-                        Height="30"
-                        Click="Close_MouseLeftButtonUp">
-                    <i:Icon Value="mdi-window-close" FontSize="20" HorizontalAlignment="Center" />
-                </Button>
-            </StackPanel>
-        </Grid>
+        <Panel>
+            <DockPanel LastChildFill="True">
+                <Image x:Name="AppLogo" DockPanel.Dock="Left" Classes="AppLogo" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" IsHitTestVisible="false" Height="20" Width="20" VerticalAlignment="Center" Margin="6,0,6,0" />
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" VerticalAlignment="Top">
+                    <Button x:Name="MinimizeBtn"
+                            Classes="WinNormal"
+                            Width="40"
+                            Height="30"
+                            Click="Minimize_MouseLeftButtonUp">
+                        <i:Icon Value="mdi-window-minimize" FontSize="20" HorizontalAlignment="Center" />
+                    </Button>
+                    <Button x:Name="MaximizeBtn"
+                            Classes="WinNormal"
+                            Width="40"
+                            Height="30"
+                            Click="MaximizeButton_MouseLeftButtonUp">
+                        <Grid>
+                            <i:Icon Value="mdi-window-maximize" IsVisible="{Binding !$parent[UserControl].IsMaximized}" FontSize="20" HorizontalAlignment="Center" />
+                            <i:Icon Value="mdi-window-restore" IsVisible="{Binding $parent[UserControl].IsMaximized}" FontSize="20" HorizontalAlignment="Center" />
+                        </Grid>
+                    </Button>
+                    <Button x:Name="CloseBtn"
+                            Classes="WinClose"
+                            Width="40"
+                            Height="30"
+                            Click="Close_MouseLeftButtonUp">
+                        <i:Icon Value="mdi-window-close" FontSize="20" HorizontalAlignment="Center" />
+                    </Button>
+                </StackPanel>
+                <TextBlock DockPanel.Dock="Left" IsVisible="{Binding $parent[UserControl].DisplayWindowControls}" IsHitTestVisible="false" FontWeight="Bold" VerticalAlignment="Center" Margin="6,0,12,0">
+                    <Run x:Name="TitleRun" />
+                </TextBlock>
+            </DockPanel>
+            <ContentPresenter Content="{Binding $parent[UserControl].Header}" Margin="0,0,12,0" />
+        </Panel>
     </Border>
 </UserControl>
