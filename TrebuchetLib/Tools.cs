@@ -69,6 +69,8 @@ public static class Tools
         var dirInfo = new DirectoryInfo(directory);
 
         var files = dirInfo.GetFiles("*.*", SearchOption.AllDirectories);
+        if (files.Length == 0) return;
+        
         long total = files.Select(f => f.Length).Aggregate((a, b) => a + b);
         long count = 0;
         foreach (FileInfo file in files)
