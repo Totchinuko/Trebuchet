@@ -317,7 +317,7 @@ namespace Trebuchet.ViewModels.Panels
             var modlist = _appFiles.Mods.ResolveProfile(dashboard.SelectedModlist);
             var profile = _appFiles.Client.ResolveProfile(dashboard.SelectedProfile);
             
-            dashboard.Profiles = _appFiles.Client.ListProfiles().ToList();
+            dashboard.Profiles = _appFiles.Server.ListProfiles().ToList();
             dashboard.Modlists = _appFiles.Mods.ListProfiles().ToList();
             dashboard.SelectedModlist = modlist;
             dashboard.SelectedProfile = profile;
