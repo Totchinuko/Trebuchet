@@ -17,60 +17,27 @@ public class SettingsPanel : Panel
 {
     private readonly AppSetup _setup;
     private readonly UIConfig _uiConfig;
-    private readonly SteamAPI _steamApi;
     private readonly OnBoarding _onBoarding;
-    private readonly DialogueBox _box;
-    private readonly ILogger<SettingsPanel> _logger;
 
     public SettingsPanel(
         AppSetup setup, 
-        UIConfig uiConfig, 
-        SteamAPI steamApi, 
         OnBoarding onBoarding,
-        DialogueBox box,
-        ILogger<SettingsPanel> logger) : 
+        UIConfig uiConfig) : 
         base(Resources.PanelSettings, "mdi-cog", true)
     {
         _setup = setup;
         _uiConfig = uiConfig;
-        _steamApi = steamApi;
         _onBoarding = onBoarding;
-        _box = box;
-        _logger = logger;
 
         SaveConfig = ReactiveCommand.Create(() => _setup.Config.SaveFile());
         SaveUiConfig = ReactiveCommand.Create(() => _uiConfig.SaveFile());
-        RemoveUnusedMods = ReactiveCommand.CreateFromTask(OnRemoveUnusedMods);
             
         BuildFields();
     }
 
     public ReactiveCommand<Unit,Unit> SaveConfig { get; }
     public ReactiveCommand<Unit,Unit> SaveUiConfig { get; }
-    public ReactiveCommand<Unit,Unit> RemoveUnusedMods { get; }
     public List<FieldElement> Fields { get; } = [];
-
-    private async Task OnRemoveUnusedMods()
-    {
-        try
-        {
-            await _onBoarding.OnBoardingRemoveUnusedMods();
-        }
-        catch(OperationCanceledException) {}
-    }
-
-    private async void OnServerInstanceInstall(object? obj)
-    {
-        try
-        {
-            await _steamApi.UpdateServers();
-        }
-        catch (TrebException tex)
-        {
-            _logger.LogError(tex.Message);
-            await _box.OpenErrorAsync(tex.Message);
-        }
-    }
 
     private void BuildFields()
     {

@@ -13,16 +13,6 @@
                         <Run Text="{x:Static a:Resources.TranslatorsIdentity}" />
                     </TextBlock>
                 </Border>
-                <Border Padding="12" Classes="Panel" Margin="0 0 0 12">
-                    <StackPanel Orientation="Horizontal" Spacing="6" >
-                        <Button Classes="Base Red" Command="{Binding RemoveUnusedMods}">
-                            <StackPanel Spacing="3" Orientation="Horizontal">
-                                <i:Icon Value="mdi-delete" Classes="Normal" />
-                                <TextBlock Text="{x:Static a:Resources.TrimUnusedMods}" />
-                            </StackPanel>
-                        </Button>
-                    </StackPanel>
-                </Border>
                 <ItemsControl ItemsSource="{Binding Fields}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>

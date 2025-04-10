@@ -836,7 +836,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to {0} unused mods have been found, continue ?.
+        ///   Looks up a localized string similar to {0} unused mods have been found, delete ?.
         /// </summary>
         public static string OnBoardingModTrimConfirmSub {
             get {
@@ -1077,6 +1077,15 @@ namespace Trebuchet.Assets {
         public static string PanelSettings {
             get {
                 return ResourceManager.GetString("PanelSettings", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Toolbox.
+        /// </summary>
+        public static string PanelToolbox {
+            get {
+                return ResourceManager.GetString("PanelToolbox", resourceCulture);
             }
         }
         
@@ -2418,6 +2427,15 @@ namespace Trebuchet.Assets {
         public static string TrimUnusedMods {
             get {
                 return ResourceManager.GetString("TrimUnusedMods", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Their is {0} unused mods. Unused mods are mods that have been downloaded by Trebuchet in the past but are not anymore used in a mod lists.
+        /// </summary>
+        public static string TrimUnusedModsSub {
+            get {
+                return ResourceManager.GetString("TrimUnusedModsSub", resourceCulture);
             }
         }
         

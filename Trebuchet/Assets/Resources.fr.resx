@@ -272,7 +272,7 @@
         <value>Réduire les mods</value>
     </data>
     <data name="OnBoardingModTrimConfirmSub" xml:space="preserve">
-        <value>{0} mods non utilisé ont été trouvé, continuer ?</value>
+        <value>{0} mods non utilisé ont été trouvé, supprimer ?</value>
     </data>
     <data name="OnBoardingNewGameSave" xml:space="preserve">
         <value>Choisissez un nom pour la sauvegarde Trebuchet qui contiendra vos données</value>
@@ -868,5 +868,11 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
     </data>
     <data name="Servers" xml:space="preserve">
         <value>Serveurs</value>
+    </data>
+    <data name="PanelToolbox" xml:space="preserve">
+        <value>Boite à outils</value>
+    </data>
+    <data name="TrimUnusedModsSub" xml:space="preserve">
+        <value>Il y a {0} mods non utilisé. Les mods non utilisé sont les mods qui ont été téléchargé par le passé par Trebuchet, mais qui ne sont désormais plus présent dans aucune des mod listes</value>
     </data>
 </root>

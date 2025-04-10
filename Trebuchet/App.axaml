@@ -52,6 +52,7 @@
                 <MergeResourceInclude Source="Templates\OnBoardingIntSlider.axaml" />
                 <MergeResourceInclude Source="Templates\ServerInstallationField.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingMessage.axaml" />
+                <MergeResourceInclude Source="Templates\PanelToolbox.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -89,5 +90,6 @@
         <StaticResource ResourceKey="OnBoardingIntSlider" />
         <StaticResource ResourceKey="ServerInstallationField" />
         <StaticResource ResourceKey="OnBoardingMessage" />
+        <StaticResource ResourceKey="PanelToolbox" />
     </Application.DataTemplates>
 </Application>

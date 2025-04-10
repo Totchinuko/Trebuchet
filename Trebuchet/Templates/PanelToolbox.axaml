@@ -1,0 +1,19 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="PanelToolbox" x:DataType="p:ToolboxPanel">
+        <WrapPanel>
+            <Border Margin="12" Classes="Panel" Width="250" Height="250" Padding="12">
+                <DockPanel LastChildFill="True">
+                    <TextBlock DockPanel.Dock="Top" Margin="0 0 0 12" Text="{x:Static a:Resources.TrimUnusedMods}" Classes="SmallTitle" TextWrapping="Wrap" />
+                    <Button DockPanel.Dock="Bottom" Command="{Binding RemoveUnusedMods}" Classes="Base Red Colored Heavy" Margin="0 12 0 0" HorizontalAlignment="Right">
+                        <i:Icon Value="mdi-broom" Classes="Normal" />
+                    </Button>
+                    <TextBlock DockPanel.Dock="Top" Text="{Binding UnusedModsSub}" TextWrapping="Wrap" />
+                </DockPanel>
+            </Border>
+        </WrapPanel>
+    </DataTemplate>
+</ResourceDictionary>

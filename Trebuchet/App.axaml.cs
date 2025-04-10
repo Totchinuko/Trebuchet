@@ -175,6 +175,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         }
         
         services.AddSingleton<Panel, DashboardPanel>();
+        services.AddSingleton<Panel, ToolboxPanel>();
         services.AddSingleton<Panel, SettingsPanel>();
     }
 

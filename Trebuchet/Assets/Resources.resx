@@ -848,7 +848,7 @@ Do you wish to proceed ?</value>
         <value>Mod Trimming</value>
     </data>
     <data name="OnBoardingModTrimConfirmSub" xml:space="preserve">
-        <value>{0} unused mods have been found, continue ?</value>
+        <value>{0} unused mods have been found, delete ?</value>
     </data>
     <data name="TrimmingUnusedMods" xml:space="preserve">
         <value>Trimming unused mods</value>
@@ -876,5 +876,11 @@ Do you wish to proceed ?</value>
     </data>
     <data name="Servers" xml:space="preserve">
         <value>Servers</value>
+    </data>
+    <data name="PanelToolbox" xml:space="preserve">
+        <value>Toolbox</value>
+    </data>
+    <data name="TrimUnusedModsSub" xml:space="preserve">
+        <value>Their is {0} unused mods. Unused mods are mods that have been downloaded by Trebuchet in the past but are not anymore used in a mod lists</value>
     </data>
 </root>
