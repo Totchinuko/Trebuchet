@@ -272,6 +272,8 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void Initialize()
         {
+            Client.SelectedModlist = _setup.Config.SelectedClientModlist;
+            Client.SelectedProfile = _setup.Config.SelectedClientProfile;
             CreateInstancesIfNeeded();
             RefreshClientSelection();
             RefreshServerSelection();
