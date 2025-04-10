@@ -95,7 +95,7 @@ public sealed class TrebuchetApp : ReactiveObject
             _activePanel.Active = false;
             this.RaiseAndSetIfChanged(ref _activePanel, value);
             _activePanel.Active = true;
-            _activePanel.DisplayPanel.Execute();
+            _activePanel.DisplayPanel.Execute().Subscribe();
         }
     }
 
@@ -159,7 +159,7 @@ public sealed class TrebuchetApp : ReactiveObject
         }
         
         _activePanel.Active = true;
-        _activePanel.DisplayPanel.Execute();
+        _activePanel.DisplayPanel.Execute().Subscribe();
     }
 
     private async Task<bool> OnBoardingFirstLaunch()
