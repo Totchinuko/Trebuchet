@@ -51,15 +51,18 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
             throw new Exception(@"Not supported");
         
         bool catapult = false;
+        bool experiment = false;
         if (desktop.Args?.Length > 0)
         {
             if(desktop.Args.Contains(@"-catapult"))
                 catapult = true;
+            if (desktop.Args.Contains(@"-experiment"))
+                experiment = true;
         }
         
         //todo: move to services (And get rid of the tiny return sub messages)
         var serviceCollection = new ServiceCollection();
-        ConfigureServices(serviceCollection, testlive, catapult);
+        ConfigureServices(serviceCollection, testlive, catapult, experiment);
         var services = serviceCollection.BuildServiceProvider();
         _logger = services.GetRequiredService<ILogger<App>>();
         
@@ -120,10 +123,10 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         base.OnFrameworkInitializationCompleted();
     }
 
-    private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult)
+    private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult, bool experiment)
     {
         services.AddSingleton<AppSetup>(
-            new AppSetup(Config.LoadConfig(AppConstants.GetConfigPath(testlive)), testlive, catapult));
+            new AppSetup(Config.LoadConfig(AppConstants.GetConfigPath(testlive)), testlive, catapult, experiment));
         services.AddSingleton<UIConfig>(UIConfig.LoadConfig(AppConstants.GetUIConfigPath()));
         
         var logger = new LoggerConfiguration()
@@ -162,10 +165,11 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddSingleton<Panel, ModlistPanel>();
         services.AddSingleton<Panel, ClientProfilePanel>();
         services.AddSingleton<Panel, ServerProfilePanel>();
-        #if DEBUG
-        services.AddSingleton<Panel, RconPanel>();
-        services.AddSingleton<Panel, LogFilterPanel>();
-        #endif
+        if (experiment)
+        {
+            services.AddSingleton<Panel, RconPanel>();
+            services.AddSingleton<Panel, LogFilterPanel>();
+        }
         
         services.AddSingleton<Panel, DashboardPanel>();
         services.AddSingleton<Panel, SettingsPanel>();

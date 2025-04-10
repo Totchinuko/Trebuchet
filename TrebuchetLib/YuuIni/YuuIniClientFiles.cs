@@ -5,7 +5,7 @@ using Yuu.Ini;
 
 namespace TrebuchetLib.YuuIni;
 
-public class YuuIniClientFiles(AppFiles appFiles)
+public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
 {
     public async Task WriteIni(ClientProfile profile)
     {
@@ -91,8 +91,9 @@ public class YuuIniClientFiles(AppFiles appFiles)
     [IniSetting(Constants.FileIniUser, "Game")]
     public void UserGameSetting(ClientProfile profile, IniDocument document)
     {
-        document.GetSection("/script/engine.player")
-            .SetParameter("ConfiguredInternetSpeed", profile.ConfiguredInternetSpeed.ToString());
+        if (setup.Experiment)
+            document.GetSection("/script/engine.player")
+                .SetParameter("ConfiguredInternetSpeed", profile.ConfiguredInternetSpeed.ToString());
     }
     
     private IEnumerable<MethodInfo> GetIniMethods(object target)

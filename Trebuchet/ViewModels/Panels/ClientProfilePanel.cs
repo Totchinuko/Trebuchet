@@ -21,6 +21,7 @@ namespace Trebuchet.ViewModels.Panels
     public class ClientProfilePanel : Panel
     {
         private readonly DialogueBox _box;
+        private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private ClientProfile _profile;
@@ -35,6 +36,7 @@ namespace Trebuchet.ViewModels.Panels
             base(Resources.PanelGameSaves, "mdi-controller", false)
         {
             _box = box;
+            _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             LoadProfile(
@@ -254,14 +256,15 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.EnableAsyncScene = v)
                 .SetDefault(() => ClientProfile.EnableAsyncSceneDefault)
             );
-            Fields.Add(new IntSliderField(10000, 100000, 1000)
-                .WhenFieldChanged(SaveProfile)
-                .SetTitle(Resources.SettingInternetSpeed)
-                .SetDescription(Resources.SettingInternetSpeedText)
-                .SetGetter(() => _profile.ConfiguredInternetSpeed)
-                .SetSetter((v) => _profile.ConfiguredInternetSpeed = v)
-                .SetDefault(() => ClientProfile.ConfiguredInternetSpeedDefault)
-            );
+            if(_setup.Experiment)
+                Fields.Add(new IntSliderField(10000, 100000, 1000)
+                    .WhenFieldChanged(SaveProfile)
+                    .SetTitle(Resources.SettingInternetSpeed)
+                    .SetDescription(Resources.SettingInternetSpeedText)
+                    .SetGetter(() => _profile.ConfiguredInternetSpeed)
+                    .SetSetter((v) => _profile.ConfiguredInternetSpeed = v)
+                    .SetDefault(() => ClientProfile.ConfiguredInternetSpeedDefault)
+                );
             Fields.Add(new ToggleField()
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingLog)

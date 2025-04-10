@@ -3,11 +3,11 @@ using TrebuchetLib.Services;
 
 namespace TrebuchetLib.YuuIni;
 
-public class YuuIniGenerator(AppFiles appFiles) : IIniGenerator
+public class YuuIniGenerator(AppFiles appFiles, AppSetup setup) : IIniGenerator
 {
     public async Task WriteClientSettingsAsync(ClientProfile profile)
     {
-        await new YuuIniClientFiles(appFiles).WriteIni(profile);
+        await new YuuIniClientFiles(appFiles, setup).WriteIni(profile);
     }
 
     public async Task WriteServerSettingsAsync(ServerProfile profile, int instance)
