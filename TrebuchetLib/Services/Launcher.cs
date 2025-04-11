@@ -85,8 +85,8 @@ public class Launcher : IDisposable
 
         var args = new List<string>();
         args.Add(Constants.cmdBoulderLambClient);
-        args.Add($"{Constants.argBoulderSave} {profile}");
-        args.Add($"{Constants.argBoulderModlist} {modlist}");
+        args.Add($"{Constants.argBoulderSave} \"{profile}\"");
+        args.Add($"{Constants.argBoulderModlist} \"{modlist}\"");
         if(battleEye)
             args.Add(Constants.argBoulderBattleEye);
         
@@ -102,15 +102,6 @@ public class Launcher : IDisposable
         startProcess.StartInfo.RedirectStandardOutput = true;
         startProcess.Start();
         await startProcess.WaitForExitAsync();
-
-        // StdOut continue to read the stuff from conan. Instead we let the process discovery find the process
-        // var result = await Utils.ReadToEnd(startProcess);
-        // if (!result.IsSuccess) throw new Exception($"Boulder encountered an error: {result.StdErr}");
-        // if (!int.TryParse(result.StdOut, out var pid)) throw new Exception($"Boulder did not return a valid PID: {result.StdOut}");
-        //
-        // Process process = Process.GetProcessById(pid);
-        //
-        // _conanClientProcess = new ConanClientProcess(process);
     }
 
     public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye)
@@ -261,9 +252,9 @@ public class Launcher : IDisposable
 
         var args = new List<string>();
         args.Add(Constants.cmdBoulderLambServer);
-        args.Add($"{Constants.argBoulderSave} {profile}");
+        args.Add($"{Constants.argBoulderSave} \"{profile}\"");
         args.Add($"{Constants.argBoulderInstance} {instance}");
-        args.Add($"{Constants.argBoulderModlist} {modlist}");
+        args.Add($"{Constants.argBoulderModlist} \"{modlist}\"");
         
         Process startProcess = new Process();
         startProcess.StartInfo = new ProcessStartInfo();
@@ -277,17 +268,6 @@ public class Launcher : IDisposable
         startProcess.StartInfo.RedirectStandardOutput = true;
         startProcess.Start();
         await startProcess.WaitForExitAsync();
-
-        // StdOut continue to read the stuff from conan. Instead we let the process discovery find the process
-        // var result = await Utils.ReadToEnd(startProcess);
-        // if (!result.IsSuccess) throw new Exception($"Boulder encountered an error: {result.StdErr}");
-        // if (!int.TryParse(result.StdOut, out var pid)) throw new Exception($"Boulder did not return a valid PID: {result.StdOut}");
-        //
-        // Process process = Process.GetProcessById(pid);
-        //
-        // var serverInfos = new ConanServerInfos(_appFiles.Server.Get(profile), instance);
-        // var conanServerProcess = new ConanServerProcess(process, serverInfos);
-        // _serverProcesses.TryAdd(instance, conanServerProcess);
     }
 
     public async Task<Process> CatapultServerProcess(string profileName, string modlistName, int instance)
