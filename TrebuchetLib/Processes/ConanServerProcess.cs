@@ -103,10 +103,15 @@ public sealed class ConanServerProcess : IConanServerProcess
         _sourceQueryReader.Dispose();
     }
 
-    public Task RefreshAsync()
+    public async Task RefreshAsync()
     {
-        _process.Refresh();
-        if (_process.Responding)
+        var responding = await Task.Run(() =>
+        {
+            _process.Refresh();
+            return _process.Responding;
+        });
+        
+        if (responding)
             _lastResponse = DateTime.UtcNow;
         
         _sourceQueryReader.Refresh();
@@ -140,8 +145,6 @@ public sealed class ConanServerProcess : IConanServerProcess
                 State = ProcessState.CRASHED;
                 break;
         }
-
-        return Task.CompletedTask;
     }
 
     public void ZombieCheck()
