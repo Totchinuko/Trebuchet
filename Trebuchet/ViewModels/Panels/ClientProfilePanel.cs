@@ -7,6 +7,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using DynamicData.Binding;
 using Humanizer;
 using ReactiveUI;
 using Trebuchet.Assets;
@@ -72,7 +73,7 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit, Unit> DuplicateProfileCommand { get; }
         public ReactiveCommand<Unit, Unit> OpenFolderProfileCommand { get; }
         public ReactiveCommand<Unit, Unit> SaveProfile { get; }
-        public ObservableCollection<string> Profiles { get; } = [];
+        public ObservableCollectionExtended<string> Profiles { get; } = [];
 
         public string ProfileSize
         {
