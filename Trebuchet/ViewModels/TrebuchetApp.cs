@@ -18,17 +18,8 @@ namespace Trebuchet.ViewModels;
 
 public sealed class TrebuchetApp : ReactiveObject
 {
-    private readonly AppSetup _setup;
-    private readonly AppFiles _appFiles;
-    private readonly Launcher _launcher;
-    private readonly Steam _steam;
-    private readonly DialogueBox _box;
-    private readonly OnBoarding _onBoarding;
-    private Panel _activePanel;
-    private List<Panel> _panels;
-    private DispatcherTimer _timer;
-    private bool _foldedMenu;
-
+    public static string VersionHeader => tot_lib.Utils.GetFileVersion();
+    
     public TrebuchetApp(
         AppSetup setup,
         AppFiles appFiles,
@@ -67,6 +58,17 @@ public sealed class TrebuchetApp : ReactiveObject
             
         OnBoardingActions();
     }
+    
+    private readonly AppSetup _setup;
+    private readonly AppFiles _appFiles;
+    private readonly Launcher _launcher;
+    private readonly Steam _steam;
+    private readonly DialogueBox _box;
+    private readonly OnBoarding _onBoarding;
+    private Panel _activePanel;
+    private List<Panel> _panels;
+    private DispatcherTimer _timer;
+    private bool _foldedMenu;
 
     private async void OnTimerTick(object? sender, EventArgs e)
     {
@@ -76,8 +78,6 @@ public sealed class TrebuchetApp : ReactiveObject
             await panel.Tick();
         _timer.Start();
     }
-
-    public static string AppTitle => @$"Tot ! Trebuchet {tot_lib.Utils.GetFileVersion()}";
 
     public bool FoldedMenu
     {

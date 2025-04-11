@@ -4,10 +4,11 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
+        xmlns:tl="clr-namespace:tot_lib;assembly=tot-lib"
         xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
         xmlns:viewModels="clr-namespace:Trebuchet.ViewModels"
         mc:Ignorable="d"
-        Title="{x:Static viewModels:TrebuchetApp.AppTitle}"
+        Title="Tot!Trebuchet"
         Height="650" Width="1010"
         MinHeight="550" MinWidth="800"
         WindowStartupLocation="CenterScreen"
@@ -32,10 +33,10 @@
                 </Border>
             </Panel>
             <controls:WindowTitlebar
-                x:Name="TitleBar"
                 ZIndex="2"
                 Grid.Row="0"
-                Title="{x:Static viewModels:TrebuchetApp.AppTitle}">
+                SubTitle="{x:Static viewModels:TrebuchetApp.VersionHeader}"
+                Title="Tot!Trebuchet">
                 <controls:WindowTitlebar.Header>
                     <ContentControl ContentTemplate="{StaticResource SteamWidget}" Content="{Binding SteamWidget}" />
                 </controls:WindowTitlebar.Header>

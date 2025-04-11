@@ -13,17 +13,26 @@ namespace TrebuchetUtils.Controls
     public partial class WindowTitlebar : UserControl
     {
 
-        public static readonly StyledProperty<bool> DisableCloseProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableClose));
+        public static readonly StyledProperty<bool> DisableCloseProperty
+            = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableClose));
 
-        public static readonly StyledProperty<bool> DisableMaximizeProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableMaximize));
-        
-        public static readonly StyledProperty<bool> DisableMinimizeProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableMinimize));
+        public static readonly StyledProperty<bool> DisableMaximizeProperty
+            = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableMaximize));
 
-        public static readonly StyledProperty<object?> HeaderProperty = AvaloniaProperty.Register<WindowTitlebar, object?>(nameof(Header));
+        public static readonly StyledProperty<bool> DisableMinimizeProperty
+            = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(DisableMinimize));
 
-        public static readonly StyledProperty<string> TitleProperty = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(Title));
-        
-        public static readonly StyledProperty<bool> IsMaximizedProperty = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(IsMaximized));
+        public static readonly StyledProperty<object?> HeaderProperty
+            = AvaloniaProperty.Register<WindowTitlebar, object?>(nameof(Header));
+
+        public static readonly StyledProperty<string> TitleProperty
+            = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(Title));
+
+        public static readonly StyledProperty<string> SubTitleProperty
+            = AvaloniaProperty.Register<WindowTitlebar, string>(nameof(SubTitle));
+
+        public static readonly StyledProperty<bool> IsMaximizedProperty
+            = AvaloniaProperty.Register<WindowTitlebar, bool>(nameof(IsMaximized));
 
         public WindowTitlebar()
         {
@@ -31,6 +40,7 @@ namespace TrebuchetUtils.Controls
             DisableMaximizeProperty.Changed.AddClassHandler<WindowTitlebar>(OnDisableChanged);
             DisableMinimizeProperty.Changed.AddClassHandler<WindowTitlebar>(OnDisableChanged);
             TitleProperty.Changed.AddClassHandler<WindowTitlebar>(OnTitleChanged);
+            SubTitleProperty.Changed.AddClassHandler<WindowTitlebar>(OnSubTitleChanged);
             InitializeComponent();
 
         }
@@ -83,6 +93,12 @@ namespace TrebuchetUtils.Controls
             get => GetValue(TitleProperty);
             set => SetValue(TitleProperty, value);
         }
+        
+        public string SubTitle
+        {
+            get => GetValue(SubTitleProperty);
+            set => SetValue(SubTitleProperty, value);
+        }
 
         public bool DisplayWindowControls => !Utils.UseOsChrome();
 
@@ -102,6 +118,11 @@ namespace TrebuchetUtils.Controls
         private static void OnTitleChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
         {
             sender.TitleRun.Text = sender.Title;
+        }
+        
+        private static void OnSubTitleChanged(WindowTitlebar sender, AvaloniaPropertyChangedEventArgs e)
+        {
+            sender.SubTitleRun.Text = sender.SubTitle;
         }
 
         private void Close_MouseLeftButtonUp(object sender, RoutedEventArgs e)
