@@ -1,0 +1,26 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <OutputType>Exe</OutputType>
+        <TargetFramework>net9.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <PublishAot>true</PublishAot>
+        <InvariantGlobalization>true</InvariantGlobalization>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <PackageReference Include="System.CommandLine" Version="2.0.0-beta4.22272.1" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\TrebuchetLib\TrebuchetLib.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Reference Include="tot-lib">
+        <HintPath>..\..\TotChef\tot-lib\bin\Release\net9.0\win-x64\publish\tot-lib.dll</HintPath>
+      </Reference>
+    </ItemGroup>
+
+</Project>
