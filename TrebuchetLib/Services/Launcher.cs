@@ -38,6 +38,13 @@ public class Launcher : IDisposable
         await CatapultClient(profile, modlist, isBattleEye);
     }
 
+    public async Task<Process> CatapultClientProcess(bool isBattleEye)
+    {
+        var profile = _setup.Config.SelectedClientProfile;
+        var modlist = _setup.Config.SelectedClientModlist;
+        return await CatapultClientProcess(profile, modlist, isBattleEye);
+    }
+
     /// <summary>
     ///     Launch a client process while taking care of everything. Generate the modlist, generate the ini settings, etc.
     ///     Process is created on a separate thread, and fire the event ClientProcessStarted when the process is running.
@@ -50,9 +57,17 @@ public class Launcher : IDisposable
     ///     Profiles can only be used by one process at a times, since they contain the db of
     ///     the game.
     /// </exception>
-    internal async Task CatapultClient(string profileName, string modlistName, bool isBattleEye)
+    public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye)
     {
         if (_conanClientProcess != null) return;
+
+        var process = await CatapultClientProcess(profileName, modlistName, isBattleEye);
+
+        _conanClientProcess = new ConanClientProcess(process);
+    }
+
+    public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye)
+    {
 
         if (!_appFiles.Client.TryGet(profileName, out var profile))
             throw new TrebException($"{profileName} profile not found.");
@@ -66,26 +81,26 @@ public class Launcher : IDisposable
         _logger.LogDebug($"Locking folder {profile.ProfileName}");
         _logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
 
-        var tmpFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
         await _iniHandler.WriteClientSettingsAsync(profile);
-        var process = CreateClientProcess(profile, tmpFile, isBattleEye);
+        var process = await CreateClientProcess(profile, modlist, isBattleEye);
 
         await Task.Run(() => process.Start());
 
         var childProcess = await CatchClientChildProcess(process);
         if (childProcess == null)
             throw new TrebException("Could not launch the game");
-
+        
         ConfigureProcess(profile.ProcessPriority, profile.CPUThreadAffinity, childProcess);
 
-        _conanClientProcess = new ConanClientProcess(childProcess);
+        return childProcess;
     }
 
-    private Process CreateClientProcess(ClientProfile profile, string modlistPath, bool isBattleEye)
+    private async Task<Process> CreateClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye)
     {
         var filename = isBattleEye ? _appFiles.Client.GetBattleEyeBinaryPath() : _appFiles.Client.GetGameBinaryPath();
-        var args = profile.GetClientArgs(modlistPath);
+        var modlistFile = Path.GetTempFileName();
+        await File.WriteAllLinesAsync(modlistFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
+        var args = profile.GetClientArgs(modlistFile);
 
         var dir = Path.GetDirectoryName(filename);
         if (dir == null)
@@ -150,6 +165,13 @@ public class Launcher : IDisposable
         var modlist = _setup.Config.GetInstanceModlist(instance);
         await CatapultServer(profile, modlist, instance);
     }
+
+    public async Task<Process> CatapultServerProcess(int instance)
+    {
+        var profile = _setup.Config.GetInstanceProfile(instance);
+        var modlist = _setup.Config.GetInstanceModlist(instance);
+        return await CatapultServerProcess(profile, modlist, instance);
+    }
     
     /// <summary>
     ///     Launch a server process while taking care of everything. Generate the modlist, generate the ini settings, etc.
@@ -163,10 +185,19 @@ public class Launcher : IDisposable
     ///     Profiles can only be used by one process at a times, since they contain the db of
     ///     the game.
     /// </exception>
-    internal async Task CatapultServer(string profileName, string modlistName, int instance)
+    public async Task CatapultServer(string profileName, string modlistName, int instance)
     {
         if (_serverProcesses.ContainsKey(instance)) return;
 
+        var process = await CatapultServerProcess(profileName, modlistName, instance);
+
+        var serverInfos = new ConanServerInfos(_appFiles.Server.Get(profileName), instance);
+        var conanServerProcess = new ConanServerProcess(process, serverInfos);
+        _serverProcesses.TryAdd(instance, conanServerProcess);
+    }
+
+    public async Task<Process> CatapultServerProcess(string profileName, string modlistName, int instance)
+    {
         if (!_appFiles.Server.TryGet(profileName, out var profile))
             throw new FileNotFoundException($"{profileName} profile not found.");
         if (!_appFiles.Mods.TryGet(modlistName, out var modlist))
@@ -181,10 +212,8 @@ public class Launcher : IDisposable
         _logger.LogInformation(
             $"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}");
 
-        var tmpFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(tmpFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
         await _iniHandler.WriteServerSettingsAsync(profile, instance);
-        var process = CreateServerProcess(instance, tmpFile, profile);
+        var process = await CreateServerProcess(instance, profile, modlist);
 
         await Task.Run(() => process.Start());
 
@@ -194,17 +223,19 @@ public class Launcher : IDisposable
 
         ConfigureProcess(profile.ProcessPriority, profile.CPUThreadAffinity, childProcess);
 
-        var serverInfos = new ConanServerInfos(profile, instance);
-        var conanServerProcess = new ConanServerProcess(childProcess, serverInfos);
-        _serverProcesses.TryAdd(instance, conanServerProcess);
+        return childProcess;
     }
 
-    private Process CreateServerProcess(int instance, string modlistPath, ServerProfile profile)
+    private async Task<Process> CreateServerProcess(int instance, ServerProfile profile, ModListProfile modlist)
     {
         var process = new Process();
 
         var filename = _appFiles.Server.GetIntanceBinary(instance);
-        var args = profile.GetServerArgs(instance, modlistPath);
+        
+        var modfileFile = Path.GetTempFileName();
+        await File.WriteAllLinesAsync(modfileFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
+        
+        var args = profile.GetServerArgs(instance, modfileFile);
 
         var dir = Path.GetDirectoryName(filename);
         if (dir == null)
