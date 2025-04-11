@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TrebuchetUtils", "Trebuchet
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Boulder", "Boulder\Boulder.csproj", "{C521114F-22F1-4BE3-8E9E-928C4230C510}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tot-lib", "tot-lib\tot-lib.csproj", "{6C57C4DF-150A-447B-9B69-237253E11304}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -39,6 +41,10 @@ Global
 		{C521114F-22F1-4BE3-8E9E-928C4230C510}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C521114F-22F1-4BE3-8E9E-928C4230C510}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C521114F-22F1-4BE3-8E9E-928C4230C510}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6C57C4DF-150A-447B-9B69-237253E11304}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6C57C4DF-150A-447B-9B69-237253E11304}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6C57C4DF-150A-447B-9B69-237253E11304}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6C57C4DF-150A-447B-9B69-237253E11304}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
