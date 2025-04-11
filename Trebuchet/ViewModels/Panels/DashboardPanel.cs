@@ -270,7 +270,7 @@ namespace Trebuchet.ViewModels.Panels
             foreach (var instance in _launcher.GetServerProcesses())
                 await Instances[instance.Instance].ProcessRefresh(instance, _uiConfig.DisplayProcessPerformance);
 
-            if ((DateTime.UtcNow - _lastUpdateCheck).TotalSeconds >= 300)
+            if ((DateTime.UtcNow - _lastUpdateCheck).TotalSeconds >= 300 && _uiConfig.AutoRefreshModlist)
             {
                 _lastUpdateCheck = DateTime.UtcNow;
                 await CheckModUpdatesAsync();
