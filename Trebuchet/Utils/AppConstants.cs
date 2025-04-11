@@ -15,11 +15,6 @@ public static class AppConstants
     public const string LogFolder = "logs";
     public const string LogFileName = "app.log";
 
-    public const string argLive = "--live";
-    public const string argTestLive = "--testlive";
-    public const string argCatapult = "--catapult";
-    public const string argExperiment = "--experiment";
-    
     [Localizable(false)]
     public static readonly string[] UICultureList = ["en", "fr"];
 

@@ -38,7 +38,7 @@ namespace Trebuchet.Utils
         public static void RestartProcess(AppSetup setup, bool asAdmin = false)
         {
             var data = Tools.GetProcess(Environment.ProcessId);
-            var version = setup.IsTestLive ? AppConstants.argTestLive : AppConstants.argLive;
+            var version = setup.IsTestLive ? Constants.argTestLive : Constants.argLive;
             if (!data.args.Contains(version))
                 data.args += version;
             

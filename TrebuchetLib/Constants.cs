@@ -39,4 +39,9 @@ public static class Constants
     public const string SteamWorkshopURL = "https://steamcommunity.com/sharedfiles/filedetails/?id={0}";
     public const string GamePrimaryJunction = "GameSaved";
     public const string GameEmptyJunction = "EmptyGame";
+    
+    public const string argLive = "--live";
+    public const string argTestLive = "--testlive";
+    public const string argCatapult = "--catapult";
+    public const string argExperiment = "--experiment";
 }
