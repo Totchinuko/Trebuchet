@@ -14,13 +14,8 @@
     </ItemGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\tot-lib\tot-lib.csproj" />
       <ProjectReference Include="..\TrebuchetLib\TrebuchetLib.csproj" />
-    </ItemGroup>
-
-    <ItemGroup>
-      <Reference Include="tot-lib">
-        <HintPath>..\..\TotChef\tot-lib\bin\Release\net9.0\win-x64\publish\tot-lib.dll</HintPath>
-      </Reference>
     </ItemGroup>
 
 </Project>

@@ -9,8 +9,6 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using SteamWorksWebAPI;
 using tot_lib;
-using TrebuchetLib.Services;
-using TrebuchetUtils;
 
 namespace TrebuchetLib;
 
