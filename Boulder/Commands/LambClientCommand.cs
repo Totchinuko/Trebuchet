@@ -22,7 +22,7 @@ public class LambClientCommand : ITotCommand, ITotCommandInvoked, ITotCommandOpt
         yield return modlistOpt;
         var profileOpt = new TotOption<string>("--save", "client save name as seen in trebuchet");
         profileOpt.AddAlias("-s");
-        modlistOpt.AddSetter(x => Profile = x ?? string.Empty);
+        profileOpt.AddSetter(x => Profile = x ?? string.Empty);
         yield return profileOpt;
         var battleEyeOpt = new TotOption<bool>("--battle-eye", "start with battle eye");
         battleEyeOpt.AddAlias("-b");

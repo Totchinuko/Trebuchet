@@ -22,11 +22,12 @@ public class LambServerCommand : ITotCommand, ITotCommandInvoked, ITotCommandOpt
         yield return modlistOpt;
         var profileOpt = new TotOption<string>("--save", "server save name as seen in trebuchet");
         profileOpt.AddAlias("-s");
-        modlistOpt.AddSetter(x => Profile = x ?? string.Empty);
+        profileOpt.AddSetter(x => Profile = x ?? string.Empty);
         yield return profileOpt;
         var instance = new TotOption<int>("--instance", "instance number of your trebuchet install");
         instance.AddAlias("-i");
         instance.AddSetter(x => Instance = x);
+        instance.SetDefaultValue(0);
         yield return instance;
     }
     
