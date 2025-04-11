@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services.Language;
 using Trebuchet.Utils;
@@ -276,7 +277,7 @@ public class OnBoarding(
             }
             catch (IOException ex)
             {
-                if (TrebuchetUtils.Utils.IsFileLocked(ex))
+                if (tot_lib.Utils.IsFileLocked(ex))
                 {
                     if (!dialogueBox.Active)
                     {

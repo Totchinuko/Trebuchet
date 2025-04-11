@@ -31,7 +31,7 @@ namespace TrebuchetUtils
 
         public static void Load(string embededPath)
         {
-            var node = JsonSerializer.Deserialize<JsonNode>(Utils.GetEmbeddedTextFile(embededPath));
+            var node = JsonSerializer.Deserialize<JsonNode>(tot_lib.Utils.GetEmbeddedTextFile(embededPath));
             if (node == null) return;
 
             Instance._texts.Clear();

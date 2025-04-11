@@ -92,7 +92,7 @@ namespace Trebuchet.ViewModels.SettingFields
 
         public Field()
         {
-            HyperlinkClick = ReactiveCommand.Create(() => TrebuchetUtils.Utils.OpenWeb(Hyperlink));
+            HyperlinkClick = ReactiveCommand.Create(() => tot_lib.Utils.OpenWeb(Hyperlink));
         }
 
         public bool IsVisible

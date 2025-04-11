@@ -85,7 +85,7 @@ namespace Trebuchet.ViewModels.Panels
             set => this.RaiseAndSetIfChanged(ref _profileSize, value);
         }
 
-        public ObservableCollection<string> Profiles { get; } = [];
+        public ObservableCollectionExtended<string> Profiles { get; } = [];
         
 
         [MemberNotNull("_profile")]

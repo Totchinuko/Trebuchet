@@ -142,7 +142,7 @@ public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskB
             "mdi-steam",
             ReactiveCommand.Create(() =>
             {
-                TrebuchetUtils.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, file.PublishedId));
+                tot_lib.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, file.PublishedId));
             }))
         );
     }

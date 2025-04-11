@@ -205,7 +205,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     private static AppSettings GetAppSettings()
     {
         var settings = JsonSerializer.Deserialize<AppSettings>(
-            TrebuchetUtils.Utils.GetEmbeddedTextFile(@"Trebuchet.AppSettings.json"));
+            tot_lib.Utils.GetEmbeddedTextFile(@"Trebuchet.AppSettings.json"));
         if(settings == null) throw new JsonException(@"AppSettings could not be loaded");
         return settings;
     }

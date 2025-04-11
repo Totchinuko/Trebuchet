@@ -33,7 +33,7 @@ public class DialogueBox : BaseViewModel
     public async Task OpenAsync(DialogueContent popup)
     {
         Open(popup);
-        await TrebuchetUtils.Utils.WaitUntil(() => !Active);
+        await tot_lib.Utils.WaitUntil(() => !Active);
         Close();
     }
 

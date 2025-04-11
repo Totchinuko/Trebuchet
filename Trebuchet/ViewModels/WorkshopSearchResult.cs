@@ -30,7 +30,7 @@ namespace Trebuchet.ViewModels
             AddModCommand = ReactiveCommand.Create(() => ModAdded?.Invoke(this, this));
             OpenWeb = ReactiveCommand.Create(() =>
             {
-                TrebuchetUtils.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, PublishedFileId));
+                tot_lib.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, PublishedFileId));
             });
         }
 
