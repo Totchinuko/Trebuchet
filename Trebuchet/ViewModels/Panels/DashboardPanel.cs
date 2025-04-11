@@ -108,7 +108,7 @@ namespace Trebuchet.ViewModels.Panels
             RefreshClientSelection();
             RefreshServerSelection();
             RefreshDashboards();
-            await CheckModUpdates();
+            await CheckModUpdatesAsync();
         }
 
         public void RefreshDashboards()
@@ -273,7 +273,7 @@ namespace Trebuchet.ViewModels.Panels
             if ((DateTime.UtcNow - _lastUpdateCheck).TotalSeconds >= 300)
             {
                 _lastUpdateCheck = DateTime.UtcNow;
-                await CheckModUpdates();
+                await CheckModUpdatesAsync();
             }
         }
 
@@ -289,7 +289,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _setup.Config.SelectedClientModlist = modlist;
                 _setup.Config.SaveFile();
-                RefreshModlistUpdate([modlist]);
+                CheckModUpdates();
             };
             Client.ProfileSelected += (_, profile) =>
             {
@@ -299,7 +299,7 @@ namespace Trebuchet.ViewModels.Panels
             Client.KillClicked += (_, _)  => KillClient();
             Client.LaunchClicked += (_, battleEye) => LaunchClient(battleEye);
             Client.UpdateClicked += (_, _) => UpdateMods();
-            await CheckModUpdates();
+            await CheckModUpdatesAsync();
         }
 
         private void RefreshClientSelection()
@@ -333,11 +333,7 @@ namespace Trebuchet.ViewModels.Panels
         private void RefreshClientNeededUpdates(List<ulong> modChecked, List<ulong> neededUpdates)
         {
             var mods = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
-            var list = Client.UpdateNeeded
-                .Intersect(mods)
-                .Except(modChecked)
-                .Union(neededUpdates.Intersect(mods));
-            Client.UpdateNeeded = list.ToList();
+            Client.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
         }
 
         private void RefreshServerNeededUpdates(List<ulong> modChecked, List<ulong> neededUpdates)
@@ -349,26 +345,27 @@ namespace Trebuchet.ViewModels.Panels
         private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<ulong> modChecked, List<ulong> neededUpdates)
         {
             var mods = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
-            var list = dashboard.UpdateNeeded
-                .Intersect(mods)
-                .Except(modChecked)
-                .Union(neededUpdates.Intersect(mods));
-            dashboard.UpdateNeeded = list.ToList();
+            dashboard.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
         }
 
         private async void RefreshModlistUpdate(List<string> modlist)
         {
-            await CheckModUpdates(modlist);
+            await CheckModUpdatesAsync(modlist);
         }
 
-        private Task CheckModUpdates()
+        private async void CheckModUpdates()
+        {
+            await CheckModUpdatesAsync();
+        }
+
+        private Task CheckModUpdatesAsync()
         {
             var modlists = Instances.Select(i => i.SelectedModlist).ToList();
             modlists.Add(Client.SelectedModlist);
-            return CheckModUpdates(modlists);
+            return CheckModUpdatesAsync(modlists);
         }
         
-        private async Task CheckModUpdates(List<string> modlists)
+        private async Task CheckModUpdatesAsync(List<string> modlists)
         {
             try
             {
@@ -409,7 +406,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _setup.Config.SetInstanceModlist(arg.Instance, arg.Selection);
                 _setup.Config.SaveFile();
-                RefreshModlistUpdate([arg.Selection]);
+                CheckModUpdates();
             };
             instance.ProfileSelected += (_, arg) =>
             {
@@ -424,7 +421,7 @@ namespace Trebuchet.ViewModels.Panels
         private async void OnCheckModUpdate()
         {
             if (!_uiConfig.AutoRefreshModlist) return;
-            await CheckModUpdates();
+            await CheckModUpdatesAsync();
         }
 
         private void OnCloseAll()

@@ -47,10 +47,7 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
     {
         List<PublishedFile> results = [];
         if ((DateTime.UtcNow - _lastCacheClear).TotalMinutes > 1.0)
-        {
-            _publishedFiles.Clear();
-            _lastCacheClear = DateTime.UtcNow;
-        }
+            InvalidateCache();
         for (var i = list.Count - 1; i >= 0; i--)
         {
             var mod = list[i];
@@ -63,10 +60,11 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
 
         return results;
     }
-    
+
     public List<ulong> CheckModsForUpdate(ICollection<(ulong pubId, ulong manifestId)> mods)
     {
         var updated = steam.GetUpdatedUGCFileIDs(mods).ToList();
+        
         foreach (var (pubId, _) in mods)
         {
             string mod = pubId.ToString();
