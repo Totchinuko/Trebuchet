@@ -2,11 +2,32 @@
 
     <PropertyGroup>
         <OutputType>Exe</OutputType>
+        <AssemblyName>boulder</AssemblyName>
         <TargetFramework>net9.0</TargetFramework>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <PublishAot>true</PublishAot>
+        <!--<PublishAot>true</PublishAot>-->
         <InvariantGlobalization>true</InvariantGlobalization>
+        <PublishSingleFile>true</PublishSingleFile>
+        <SelfContained>true</SelfContained>
+        <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+        <Deterministic>true</Deterministic>
+        <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+
+        <Authors>Totchinuko</Authors>
+        <Product>trebuchet</Product>
+        <Description>Open Source Conan Exile Launcher</Description>
+        <Company>totchinuko</Company>
+        <Copyright>Copyright © $([System.DateTime]::Now.Year) Totchinuko https://github.com/Totchinuko</Copyright>
+        <PackageLicenseExpression>GPL-2.0</PackageLicenseExpression>
+        <PackageProjectUrl>https://github.com/Totchinuko/Trebuchet.git</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/Totchinuko/Trebuchet.git</RepositoryUrl>
+        <RepositoryType>Private</RepositoryType>
+        <ApplicationIcon>app.red.ico</ApplicationIcon>
+    </PropertyGroup>
+
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+        <DebugType>none</DebugType>
     </PropertyGroup>
 
     <ItemGroup>
@@ -16,6 +37,10 @@
     <ItemGroup>
       <ProjectReference Include="..\tot-lib\tot-lib.csproj" />
       <ProjectReference Include="..\TrebuchetLib\TrebuchetLib.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <AvaloniaResource Include="app.red.ico" />
     </ItemGroup>
 
 </Project>
