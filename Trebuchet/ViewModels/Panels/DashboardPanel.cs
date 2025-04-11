@@ -197,7 +197,7 @@ namespace Trebuchet.ViewModels.Panels
 
             _setup.Config.SelectedClientProfile = Client.SelectedProfile;
             _setup.Config.SelectedClientModlist = Client.SelectedModlist;
-            await _launcher.CatapultClient(isBattleEye);
+            await _launcher.CatapultClientBoulder(isBattleEye);
         }
         
         public async void CloseServer(int instance)
@@ -244,7 +244,7 @@ namespace Trebuchet.ViewModels.Panels
 
                 _setup.Config.SetInstanceParameters(dashboard.Instance, dashboard.SelectedModlist,
                     dashboard.SelectedProfile);
-                await _launcher.CatapultServer(dashboard.Instance);
+                await _launcher.CatapultServerBoulder(dashboard.Instance);
             }
             catch (TrebException tex)
             {

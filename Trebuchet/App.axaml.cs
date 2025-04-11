@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -136,7 +137,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
             .MinimumLevel.Information()
 #endif
             .WriteTo.File(
-                AppConstants.GetLoggingPath(),
+                Path.Combine(Constants.GetLoggingDirectory().FullName, @"app.log"),
                 retainedFileTimeLimit: TimeSpan.FromDays(7),
                 rollingInterval: RollingInterval.Day)
             .CreateLogger();

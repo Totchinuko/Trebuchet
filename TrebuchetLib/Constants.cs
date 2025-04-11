@@ -41,11 +41,22 @@ public static class Constants
     public const string SteamWorkshopURL = "https://steamcommunity.com/sharedfiles/filedetails/?id={0}";
     public const string GamePrimaryJunction = "GameSaved";
     public const string GameEmptyJunction = "EmptyGame";
+
+    public const string BoulderExe = "boulder.exe";
     
     public const string argLive = "--live";
     public const string argTestLive = "--testlive";
     public const string argCatapult = "--catapult";
     public const string argExperiment = "--experiment";
+    public const string argBoulderSave = "--save";
+    public const string argBoulderInstance = "--instance";
+    public const string argBoulderModlist = "--modlist";
+    public const string argBoulderBattleEye = "--battle-eye";
+    public const string cmdBoulderLamb = "lamb";
+    public const string cmdBoulderLambClient = "lamb client";
+    public const string cmdBoulderLambServer = "lamb server";
+    
+    public const string LogFolder = "logs";
     
     public static string GetConfigPath(bool testlive)
     {
@@ -53,5 +64,13 @@ public static class Constants
         if(!folder.Exists)
             Directory.CreateDirectory(folder.FullName);
         return Path.Combine(folder.FullName, testlive ? Constants.FileTestLiveConfig : Constants.FileLiveConfig);
+    }
+    
+    public static DirectoryInfo GetLoggingDirectory()
+    {
+        var folder = typeof(Config).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
+        if(!folder.Exists)
+            Directory.CreateDirectory(folder.FullName);
+        return new DirectoryInfo(Path.Combine(folder.FullName, LogFolder));
     }
 }
