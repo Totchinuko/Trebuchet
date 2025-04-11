@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -58,6 +59,7 @@ namespace Trebuchet.Utils
                 desktop.Shutdown();
         }
 
+        [Obsolete]
         public static async Task<bool> SingleAppInstanceLock()
         {
             var process = Process.GetCurrentProcess();

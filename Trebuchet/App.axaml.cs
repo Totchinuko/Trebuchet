@@ -89,10 +89,8 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         
     public void Crash() => HasCrashed = true;
     
-    public override async void OnFrameworkInitializationCompleted()
+    public override void OnFrameworkInitializationCompleted()
     {
-        if (!await Utils.Utils.SingleAppInstanceLock()) return;
-        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
