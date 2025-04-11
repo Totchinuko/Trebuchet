@@ -38,7 +38,7 @@ public class LambServerCommand : ITotCommand, ITotCommandInvoked, ITotCommandOpt
         try
         {
             var process = await launcher.CatapultServerProcess(Profile, Modlist, Instance);
-            console.Write(process.Id.ToString());
+            console.WriteLine(process.Id.ToString());
             return 0;
         }
         catch (Exception ex)

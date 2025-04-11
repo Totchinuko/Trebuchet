@@ -38,7 +38,7 @@ public class LambClientCommand : ITotCommand, ITotCommandInvoked, ITotCommandOpt
         try
         {
             var process = await launcher.CatapultClientProcess(Profile, Modlist, BattleEye);
-            console.Write(process.Id.ToString());
+            console.WriteLine(process.Id.ToString());
             return 0;
         }
         catch (Exception ex)
