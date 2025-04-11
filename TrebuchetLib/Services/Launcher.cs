@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Text;
 using Microsoft.Extensions.Logging;
 using tot_lib;
 using TrebuchetLib.Processes;
@@ -38,6 +39,13 @@ public class Launcher : IDisposable
         await CatapultClient(profile, modlist, isBattleEye);
     }
 
+    public async Task CatapultClientBoulder(bool isBattleEye)
+    {
+        var profile = _setup.Config.SelectedClientProfile;
+        var modlist = _setup.Config.SelectedClientModlist;
+        await CatapultClientBoulder(profile, modlist, isBattleEye);
+    }
+
     public async Task<Process> CatapultClientProcess(bool isBattleEye)
     {
         var profile = _setup.Config.SelectedClientProfile;
@@ -64,6 +72,45 @@ public class Launcher : IDisposable
         var process = await CatapultClientProcess(profileName, modlistName, isBattleEye);
 
         _conanClientProcess = new ConanClientProcess(process);
+    }
+    
+    public async Task CatapultClientBoulder(string profile, string modlist, bool battleEye)
+    {
+        if (_conanClientProcess != null) return;
+        
+        string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
+        if (appFolder is null) throw new IOException("Can't access app folder");
+        var boulder = Path.Combine(appFolder, Constants.BoulderExe);
+        if (!File.Exists(boulder)) throw new IOException("boulder not found");
+
+        var args = new List<string>();
+        args.Add(Constants.cmdBoulderLambClient);
+        args.Add($"{Constants.argBoulderSave} {profile}");
+        args.Add($"{Constants.argBoulderModlist} {modlist}");
+        if(battleEye)
+            args.Add(Constants.argBoulderBattleEye);
+        
+        Process startProcess = new Process();
+        startProcess.StartInfo = new ProcessStartInfo();
+        startProcess.StartInfo.Arguments = string.Join(' ', args);
+        startProcess.StartInfo.FileName = boulder;
+        startProcess.StartInfo.UseShellExecute = false;
+        startProcess.StartInfo.CreateNoWindow = true;
+        startProcess.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+        startProcess.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+        startProcess.StartInfo.RedirectStandardError = true;
+        startProcess.StartInfo.RedirectStandardOutput = true;
+        startProcess.Start();
+        await startProcess.WaitForExitAsync();
+
+        // StdOut continue to read the stuff from conan. Instead we let the process discovery find the process
+        // var result = await Utils.ReadToEnd(startProcess);
+        // if (!result.IsSuccess) throw new Exception($"Boulder encountered an error: {result.StdErr}");
+        // if (!int.TryParse(result.StdOut, out var pid)) throw new Exception($"Boulder did not return a valid PID: {result.StdOut}");
+        //
+        // Process process = Process.GetProcessById(pid);
+        //
+        // _conanClientProcess = new ConanClientProcess(process);
     }
 
     public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye)
@@ -165,6 +212,13 @@ public class Launcher : IDisposable
         var modlist = _setup.Config.GetInstanceModlist(instance);
         await CatapultServer(profile, modlist, instance);
     }
+    
+    public async Task CatapultServerBoulder(int instance)
+    {
+        var profile = _setup.Config.GetInstanceProfile(instance);
+        var modlist = _setup.Config.GetInstanceModlist(instance);
+        await CatapultServerBoulder(profile, modlist, instance);
+    }
 
     public async Task<Process> CatapultServerProcess(int instance)
     {
@@ -194,6 +248,46 @@ public class Launcher : IDisposable
         var serverInfos = new ConanServerInfos(_appFiles.Server.Get(profileName), instance);
         var conanServerProcess = new ConanServerProcess(process, serverInfos);
         _serverProcesses.TryAdd(instance, conanServerProcess);
+    }
+    
+    public async Task CatapultServerBoulder(string profile, string modlist, int instance)
+    {
+        if (_serverProcesses.ContainsKey(instance)) return;
+        
+        string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
+        if (appFolder is null) throw new IOException("Can't access app folder");
+        var boulder = Path.Combine(appFolder, Constants.BoulderExe);
+        if (!File.Exists(boulder)) throw new IOException("boulder not found");
+
+        var args = new List<string>();
+        args.Add(Constants.cmdBoulderLambServer);
+        args.Add($"{Constants.argBoulderSave} {profile}");
+        args.Add($"{Constants.argBoulderInstance} {instance}");
+        args.Add($"{Constants.argBoulderModlist} {modlist}");
+        
+        Process startProcess = new Process();
+        startProcess.StartInfo = new ProcessStartInfo();
+        startProcess.StartInfo.Arguments = string.Join(' ', args);
+        startProcess.StartInfo.FileName = boulder;
+        startProcess.StartInfo.UseShellExecute = false;
+        startProcess.StartInfo.CreateNoWindow = true;
+        startProcess.StartInfo.StandardOutputEncoding = Encoding.UTF8;
+        startProcess.StartInfo.StandardErrorEncoding = Encoding.UTF8;
+        startProcess.StartInfo.RedirectStandardError = true;
+        startProcess.StartInfo.RedirectStandardOutput = true;
+        startProcess.Start();
+        await startProcess.WaitForExitAsync();
+
+        // StdOut continue to read the stuff from conan. Instead we let the process discovery find the process
+        // var result = await Utils.ReadToEnd(startProcess);
+        // if (!result.IsSuccess) throw new Exception($"Boulder encountered an error: {result.StdErr}");
+        // if (!int.TryParse(result.StdOut, out var pid)) throw new Exception($"Boulder did not return a valid PID: {result.StdOut}");
+        //
+        // Process process = Process.GetProcessById(pid);
+        //
+        // var serverInfos = new ConanServerInfos(_appFiles.Server.Get(profile), instance);
+        // var conanServerProcess = new ConanServerProcess(process, serverInfos);
+        // _serverProcesses.TryAdd(instance, conanServerProcess);
     }
 
     public async Task<Process> CatapultServerProcess(string profileName, string modlistName, int instance)
@@ -225,6 +319,8 @@ public class Launcher : IDisposable
 
         return childProcess;
     }
+
+
 
     private async Task<Process> CreateServerProcess(int instance, ServerProfile profile, ModListProfile modlist)
     {
