@@ -1,3 +1,5 @@
+using tot_lib;
+
 namespace TrebuchetLib;
 
 public static class Constants
@@ -44,4 +46,12 @@ public static class Constants
     public const string argTestLive = "--testlive";
     public const string argCatapult = "--catapult";
     public const string argExperiment = "--experiment";
+    
+    public static string GetConfigPath(bool testlive)
+    {
+        var folder = typeof(Config).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
+        if(!folder.Exists)
+            Directory.CreateDirectory(folder.FullName);
+        return Path.Combine(folder.FullName, testlive ? Constants.FileTestLiveConfig : Constants.FileLiveConfig);
+    }
 }

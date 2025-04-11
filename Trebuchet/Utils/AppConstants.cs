@@ -26,14 +26,6 @@ public static class AppConstants
         return Path.Combine(folder.FullName, LogFolder, LogFileName);
     }
     
-    public static string GetConfigPath(bool testlive)
-    {
-        var folder = typeof(UIConfig).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
-        if(!folder.Exists)
-            Directory.CreateDirectory(folder.FullName);
-        return Path.Combine(folder.FullName, testlive ? Constants.FileTestLiveConfig : Constants.FileLiveConfig);
-    }
-        
     public static string GetUIConfigPath()
     {
         var folder = typeof(UIConfig).GetStandardFolder(Environment.SpecialFolder.ApplicationData);

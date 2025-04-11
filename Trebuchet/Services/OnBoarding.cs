@@ -337,7 +337,7 @@ public class OnBoarding(
                     configuration.InstallPath = string.Empty;
                     configuration.ManageClient = true;
                     configJson = JsonSerializer.Serialize(configuration);
-                    await File.WriteAllTextAsync(AppConstants.GetConfigPath(false), configJson);
+                    await File.WriteAllTextAsync(Constants.GetConfigPath(false), configJson);
                 }
                 File.Delete(configLive);
             }
@@ -352,7 +352,7 @@ public class OnBoarding(
                     configuration.InstallPath = string.Empty;
                     configuration.ManageClient = true;
                     configJson = JsonSerializer.Serialize(configuration);
-                    await File.WriteAllTextAsync(AppConstants.GetConfigPath(true), configJson);
+                    await File.WriteAllTextAsync(Constants.GetConfigPath(true), configJson);
                 }
                 File.Delete(configTestlive);
             }

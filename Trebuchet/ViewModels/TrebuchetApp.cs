@@ -175,7 +175,7 @@ public sealed class TrebuchetApp : ReactiveObject
 
     private async Task<bool> OnBoardingFirstLaunch()
     {
-        var configPath = AppConstants.GetConfigPath(_setup.IsTestLive);
+        var configPath = Constants.GetConfigPath(_setup.IsTestLive);
         if(File.Exists(configPath)) return true;
         if (!await _onBoarding.OnBoardingUsageChoice()) return false;
         _setup.Config.SaveFile();

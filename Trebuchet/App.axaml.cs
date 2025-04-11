@@ -127,7 +127,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
     private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult, bool experiment)
     {
         services.AddSingleton<AppSetup>(
-            new AppSetup(Config.LoadConfig(AppConstants.GetConfigPath(testlive)), testlive, catapult, experiment));
+            new AppSetup(Config.LoadConfig(Constants.GetConfigPath(testlive)), testlive, catapult, experiment));
         services.AddSingleton<UIConfig>(_uiConfig!);
         services.AddSingleton<ILanguageManager>(_langManager!);
         
