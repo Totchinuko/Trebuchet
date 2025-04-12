@@ -13,9 +13,9 @@
         <Product>trebuchet-utils</Product>
     </PropertyGroup>
     
-    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
-        <DebugType>none</DebugType>
-    </PropertyGroup>
+<!--    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">-->
+<!--        <DebugType>none</DebugType>-->
+<!--    </PropertyGroup>-->
 
     <ItemGroup>
         <PackageReference Include="Avalonia" Version="11.2.5" />
