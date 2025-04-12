@@ -187,7 +187,7 @@ public partial class App : Application, IApplication
         }
         catch(Exception ex)
         {
-            _logger?.LogTrace(ex, @"OnDispatcherUnhandledException");
+            _logger?.LogCritical(ex, @"OnDispatcherUnhandledException");
         }
     }
     
@@ -200,7 +200,7 @@ public partial class App : Application, IApplication
         }
         catch(Exception ex)
         {
-            _logger?.LogTrace(ex, @"OnUnhandledException");
+            _logger?.LogCritical(ex, @"OnUnhandledException");
         }
     }
 
@@ -213,7 +213,7 @@ public partial class App : Application, IApplication
         }
         catch(Exception ex)
         {
-            _logger?.LogTrace(ex, @"OnUnobservedTaskException");
+            _logger?.LogCritical(ex, @"OnUnobservedTaskException");
         }
     }
 }

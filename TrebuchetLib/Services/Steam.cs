@@ -145,19 +145,6 @@ namespace TrebuchetLib.Services
             }).ConfigureAwait(false);
         }
 
-        public async Task<IEnumerable<PublishedFileDetails>> GetPublishedFiles(IEnumerable<ulong> modlist)
-        {
-            try
-            {
-                return await _session.GetPublishedFileDetailsComplete([Constants.AppIDLiveClient, Constants.AppIDTestLiveClient], modlist);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogTrace(ex, "GetPublishedFiles failed to retrieve details");
-                return [];
-            }
-        }
-
         public async Task<CPublishedFile_QueryFiles_Response?> QueryWorkshopSearch(uint appId, string searchTerms, uint perPage,
             uint page)
         {
@@ -167,7 +154,7 @@ namespace TrebuchetLib.Services
             }
             catch (Exception ex)
             {
-                _logger.LogTrace(ex, "QueryWorkshopSearch failed");
+                _logger.LogWarning(ex, "QueryWorkshopSearch failed");
                 return null;
             }
         }
