@@ -14,6 +14,7 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using DynamicData.Binding;
+using Humanizer;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using SteamWorksWebAPI;
@@ -32,21 +33,6 @@ namespace Trebuchet.ViewModels.Panels
 {
     public class ModlistPanel : Panel
     {
-        private readonly SteamApi _steamApi;
-        private readonly AppFiles _appFiles;
-        private readonly UIConfig _uiConfig;
-        private readonly DialogueBox _box;
-        private readonly ModlistImporter _importer;
-        private readonly WorkshopSearchViewModel _workshop;
-        private readonly ModFileFactory _modFileFactory;
-        private readonly ILogger<ModlistPanel> _logger;
-        private FileSystemWatcher _modWatcher;
-        private bool _needRefresh;
-        private ModListProfile _profile;
-        private WorkshopSearch? _searchWindow;
-        private string _modlistUrl = string.Empty;
-        private string _selectedModlist = string.Empty;
-
         public ModlistPanel(
             SteamApi steamApi, 
             AppFiles appFiles,
@@ -113,6 +99,22 @@ namespace Trebuchet.ViewModels.Panels
             this.WhenAnyValue(x => x.SelectedModlist)
                 .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnModlistChanged));
         }
+        
+        private readonly SteamApi _steamApi;
+        private readonly AppFiles _appFiles;
+        private readonly UIConfig _uiConfig;
+        private readonly DialogueBox _box;
+        private readonly ModlistImporter _importer;
+        private readonly WorkshopSearchViewModel _workshop;
+        private readonly ModFileFactory _modFileFactory;
+        private readonly ILogger<ModlistPanel> _logger;
+        private FileSystemWatcher _modWatcher;
+        private bool _needRefresh;
+        private ModListProfile _profile;
+        private WorkshopSearch? _searchWindow;
+        private string _modlistUrl;
+        private string _selectedModlist;
+        private string _modlistSize = string.Empty;
 
         public ReactiveCommand<Unit, Unit> CreateModlistCommand { get; }
         public ReactiveCommand<Unit, Unit> DeleteModlistCommand { get; }
@@ -145,13 +147,13 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        public ObservableCollectionExtended<string> Profiles { get; } = [];
-
-        private ModListProfile Profile
+        public string ModlistSize
         {
-            get => _profile;
-            set => this.RaiseAndSetIfChanged(ref _profile, value);
+            get => _modlistSize;
+            set => this.RaiseAndSetIfChanged(ref _modlistSize, value);
         }
+
+        public ObservableCollectionExtended<string> Profiles { get; } = [];
        
         public async Task AddModFromWorkshop(WorkshopSearchResult mod)
         {
@@ -160,6 +162,7 @@ namespace Trebuchet.ViewModels.Panels
             Modlist.Add(file);
             _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
             _profile.SaveFile();
+            ModlistSize = CalculateModlistSize().Bytes().Humanize();
         }
 
         public Task RemoveModFile(IModFile mod)
@@ -167,6 +170,7 @@ namespace Trebuchet.ViewModels.Panels
             Modlist.Remove(mod);
             _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
             _profile.SaveFile();
+            ModlistSize = CalculateModlistSize().Bytes().Humanize();
             return Task.CompletedTask;
         }
 
@@ -195,6 +199,11 @@ namespace Trebuchet.ViewModels.Panels
             _profile = _appFiles.Mods.Get(modlist);
             ModlistUrl = _profile.SyncURL;
             await LoadModlist();
+        }
+
+        private long CalculateModlistSize()
+        {
+            return Modlist.Count == 0 ? 0 : Modlist.Select(x => x.FileSize).Aggregate((a, b) => a+b);
         }
 
         private async Task UpdateMods(List<ulong> mods)
@@ -268,6 +277,7 @@ namespace Trebuchet.ViewModels.Panels
             foreach (var mod in _profile.Modlist)
                 Modlist.Add(_modFileFactory.Create(mod));
             await _modFileFactory.QueryFromWorkshop(Modlist);
+            ModlistSize = CalculateModlistSize().Bytes().Humanize();
         }
 
         private async Task OnExploreLocal()
@@ -289,6 +299,7 @@ namespace Trebuchet.ViewModels.Panels
                 );
             _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
             _profile.SaveFile();
+            ModlistSize = CalculateModlistSize().Bytes().Humanize();
         }
 
         private void OnExploreWorkshop()

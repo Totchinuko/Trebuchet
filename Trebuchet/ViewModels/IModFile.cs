@@ -15,6 +15,7 @@ public interface IModFile
     ObservableCollection<string> IconClasses { get; }
     string LastUpdate { get; }
     string FilePath { get; }
+    long FileSize { get; }
     ObservableCollection<ModFileAction> Actions { get; }
     string Export();
 }

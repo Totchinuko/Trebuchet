@@ -15,6 +15,7 @@ public class PublishedModFile : ReactiveObject, IPublishedModFile
         Title = Path.GetFileName(path);
         LastUpdate = string.Empty;
         IconClasses.Add(@"Live");
+        FileSize = 0;
         StatusClasses.Add(File.Exists(path) ? @"Loading" : @"Missing");
     }
     
@@ -24,6 +25,7 @@ public class PublishedModFile : ReactiveObject, IPublishedModFile
     public ObservableCollection<string> IconClasses { get; } = [];
     public string LastUpdate { get; }
     public string FilePath { get; }
+    public long FileSize { get; }
     public ObservableCollection<ModFileAction> Actions { get; } = [];
     
     public string Export()

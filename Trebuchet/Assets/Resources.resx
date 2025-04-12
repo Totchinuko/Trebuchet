@@ -905,4 +905,10 @@ Do you wish to proceed ?</value>
     <data name="WatermarkModlistURLTip" xml:space="preserve">
         <value>Valid URL are either pointing to a steam collection or a json response/file</value>
     </data>
+    <data name="ModlistSize" xml:space="preserve">
+        <value>List Size</value>
+    </data>
+    <data name="ModlistSizeTip" xml:space="preserve">
+        <value>The total size of the mods in your list. Missing mod use the size of the mod indicated in the workshop database. Missing local files count for zero.</value>
+    </data>
 </root>

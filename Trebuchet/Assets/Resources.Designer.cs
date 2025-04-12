@@ -699,6 +699,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to List Size.
+        /// </summary>
+        public static string ModlistSize {
+            get {
+                return ResourceManager.GetString("ModlistSize", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to The total size of the mods in your list. Missing mod use the size of the mod indicated in the workshop database. Missing local files count for zero..
+        /// </summary>
+        public static string ModlistSizeTip {
+            get {
+                return ResourceManager.GetString("ModlistSizeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>
         public static string No {

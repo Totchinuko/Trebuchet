@@ -23,6 +23,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         LastDateUpdate = updateDate;
         LastUpdate = @$"{Resources.LastUpdate}: {updateDate.Humanize()}";
         IconClasses.Add(file.ConsumerAppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
+        FileSize = file.FileSize;
         if(File.Exists(path))
             StatusClasses.Add(needUpdate ? @"UpdateAvailable" : @"Up2Date");
         else
@@ -43,6 +44,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         LastDateUpdate = file.LastUpdate;
         LastUpdate = @$"{Resources.LastUpdate}: {file.LastUpdate.Humanize()}";
         IconClasses.Add(file.AppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
+        FileSize = (long)file.Size;
         if(File.Exists(path))
             StatusClasses.Add(needUpdate ? @"UpdateAvailable" : @"Up2Date");
         else
@@ -64,6 +66,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         LastDateUpdate = file.LastDateUpdate;
         LastUpdate = @$"{Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
         IconClasses.Add(file.AppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
+        FileSize = file.FileSize;
         if(File.Exists(path))
             StatusClasses.Add(NeedUpdate ? @"UpdateAvailable" : @"Up2Date");
         else
@@ -75,6 +78,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
     public ulong PublishedId { get; }
     public string Title { get; }
     public string FilePath { get; }
+    public long FileSize { get; }
     public DateTime LastDateUpdate { get; }
     public ObservableCollection<string> StatusClasses { get; } = [];
     public ObservableCollection<string> IconClasses { get; } = [];

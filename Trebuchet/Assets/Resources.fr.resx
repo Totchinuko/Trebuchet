@@ -353,7 +353,7 @@
         <value>Enregistrer</value>
     </data>
     <data name="SaveSize" xml:space="preserve">
-        <value>Taille</value>
+        <value>Poid</value>
     </data>
     <data name="SaveSizeTip" xml:space="preserve">
         <value>Taille total de votre sauvegarde sur le disque. La sauvegarde enregistre aussi vos donnée de jeu et journeaux</value>
@@ -896,5 +896,11 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
     </data>
     <data name="WatermarkModlistURLTip" xml:space="preserve">
         <value>Valide URL sont soit une collection Steam ou réponse/ficher json</value>
+    </data>
+    <data name="ModlistSize" xml:space="preserve">
+        <value>Poid</value>
+    </data>
+    <data name="ModlistSizeTip" xml:space="preserve">
+        <value>Le poid total des mods dans votre liste. Les mods manquant utilise la taille indiqué dans la base de donnée du workshop. Les mods locaux qui sont manquant compte pour zéro.</value>
     </data>
 </root>

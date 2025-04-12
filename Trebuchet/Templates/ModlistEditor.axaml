@@ -75,6 +75,13 @@
                                 Command="{Binding FetchCommand}" />
                     </StackPanel>
                 </Border>
+                <Border Classes="Panel" Padding="8" Margin="0 0 6 6" ToolTip.Tip="{x:Static a:Resources.ModlistSizeTip}">
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="{x:Static a:Resources.ModlistSize}" FontWeight="Bold" />
+                        <LineBreak/>
+                        <Run Text="{Binding ModlistSize}" />
+                    </TextBlock>
+                </Border>
             </WrapPanel>
             <Border DockPanel.Dock="Top" Padding="0 12 0 0">
                 <ListBox ScrollViewer.AllowAutoHide="False" Classes="draggableVirtualizing NoSelection" ItemsSource="{Binding Modlist}" ItemTemplate="{StaticResource ModlistItems}"/>
