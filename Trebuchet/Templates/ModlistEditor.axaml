@@ -6,7 +6,7 @@
     <DataTemplate x:Key="ModlistEditor" x:DataType="p:ModlistPanel">
         <DockPanel LastChildFill="True">
             <WrapPanel DockPanel.Dock="Top">
-                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                <Border Classes="Panel" Padding="8" Margin="0 0 6 6">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <Button Command="{Binding CreateModlistCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
@@ -32,7 +32,7 @@
                         </Button>
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                <Border Classes="Panel" Padding="8" Margin="0 0 6 6">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <Button Classes="Base"
                                 Content="{x:Static a:Resources.WorkshopSteam}"
@@ -42,7 +42,7 @@
                                 Command="{Binding ExploreLocalCommand}" />
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                <Border Classes="Panel" Padding="8" Margin="0 0 6 6">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <Button Classes="Base"
                                 Content="{x:Static a:Resources.PasteTxt}"
@@ -52,7 +52,7 @@
                                 Command="{Binding ImportFromFileCommand}" />
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                <Border Classes="Panel" Padding="8" Margin="0 0 6 6">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <Button Classes="Base"
                                 Content="{x:Static a:Resources.ExportJson}"
@@ -62,7 +62,7 @@
                                 Command="{Binding ExportToTxtCommand}" />
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                <Border Classes="Panel" Padding="8" Margin="0 0 6 6">
                     <StackPanel Spacing="6" Orientation="Horizontal">
                         <TextBox Name="ModlistUrl" 
                                  Watermark="{x:Static a:Resources.WatermarkModlistURL}" 

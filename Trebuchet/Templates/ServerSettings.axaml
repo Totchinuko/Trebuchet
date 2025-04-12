@@ -10,7 +10,7 @@
                 <RowDefinition Height="*" />
             </Grid.RowDefinitions>
             <WrapPanel Orientation="Horizontal" Margin="0,0,0,12">
-                <Border Classes="Panel" Margin="6 0 6 6" Padding="8">
+                <Border Classes="Panel" Margin="0 0 6 6" Padding="8">
                     <StackPanel Spacing="6" Orientation="Horizontal">
                         <Button Command="{Binding CreateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
@@ -33,7 +33,7 @@
                         </Button>
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" Margin="6 0 6 6" Padding="8">
+                <Border Classes="Panel" Margin="0 0 6 6" Padding="8">
                     <ToolTip.Tip>
                         <TextBlock TextWrapping="Wrap" Text="{x:Static a:Resources.SaveSizeTip}" />
                     </ToolTip.Tip>
