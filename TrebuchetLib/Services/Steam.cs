@@ -244,7 +244,18 @@ namespace TrebuchetLib.Services
 
             UpdateDownloaderConfig();
             ContentDownloader.Config.InstallDirectory = Path.Combine(_appFiles.Mods.GetWorkshopFolder());
-            await Task.Run(() => ContentDownloader.DownloadUGCAsync([Constants.AppIDLiveClient, Constants.AppIDTestLiveClient], enumerable, ContentDownloader.DEFAULT_BRANCH, cts));
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    await ContentDownloader.DownloadUGCAsync([Constants.AppIDLiveClient, Constants.AppIDTestLiveClient],
+                        enumerable, ContentDownloader.DEFAULT_BRANCH, cts);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogWarning(ex, "Cannot update the mods");
+                }
+            });
         }
 
         /// <summary>
