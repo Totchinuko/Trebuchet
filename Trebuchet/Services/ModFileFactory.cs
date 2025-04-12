@@ -6,17 +6,14 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using SteamWorksWebAPI;
 using Trebuchet.Assets;
-using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels;
-using Trebuchet.ViewModels.Panels;
 using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
 
 namespace Trebuchet.Services;
 
-public class ModFileFactory(AppFiles appFiles, SteamAPI steam, TaskBlocker.TaskBlocker taskBlocker)
+public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskBlocker taskBlocker)
 {
     public event IModFileArgs? Removed;
     public event IPublishedModFileArgs? Updated;

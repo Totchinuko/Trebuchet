@@ -12,9 +12,9 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
 
-public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker taskBlocker)
+public class SteamApi(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker taskBlocker)
 {
-    private Dictionary<ulong, PublishedFile> _publishedFiles = [];
+    private readonly Dictionary<ulong, PublishedFile> _publishedFiles = [];
     private DateTime _lastCacheClear = DateTime.MinValue;
     
     public async Task<List<PublishedFile>> RequestModDetails(List<ulong> list)
@@ -130,11 +130,10 @@ public class SteamAPI(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
 
     public int CountUnusedMods()
     {
-        int count = 0;
         var installedMods = steam.GetUGCFileIdsFromStorage();
         var usedMods = appFiles.Mods.ListProfiles()
             .SelectMany(x => appFiles.Mods.Get(x).GetWorkshopMods());
-        count = installedMods.Except(usedMods).Count();
+        var count = installedMods.Except(usedMods).Count();
         return count;
     }
 

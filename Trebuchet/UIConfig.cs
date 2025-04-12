@@ -1,14 +1,11 @@
-﻿using System;
-using System.IO;
-using TrebuchetLib;
-using TrebuchetUtils;
+﻿using TrebuchetLib;
 
 namespace Trebuchet
 {
     public sealed class UIConfig : ConfigFile<UIConfig>
     {
         public bool AutoRefreshModlist { get; set; } = AutoRefreshModlistDefault;
-        public bool FoldedMenu { get; set; } = false;
+        public bool FoldedMenu { get; set; }
         public string CurrentClientProfile { get; set; } = string.Empty;
         public string CurrentModlistProfile { get; set; } = string.Empty;
         public string CurrentServerProfile { get; set; } = string.Empty;

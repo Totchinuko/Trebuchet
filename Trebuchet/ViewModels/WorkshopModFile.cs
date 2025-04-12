@@ -1,17 +1,15 @@
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
-using DynamicData;
 using Humanizer;
 using ReactiveUI;
 using SteamWorksWebAPI;
 using Trebuchet.Assets;
-using Trebuchet.ViewModels.Panels;
 using TrebuchetLib;
 
 namespace Trebuchet.ViewModels;
 
-public class WorkshopModFile : ReactiveObject, IModFile, IPublishedModFile
+public class WorkshopModFile : ReactiveObject, IPublishedModFile
 {
     public WorkshopModFile(string path, PublishedFile file, bool needUpdate = false)
     {

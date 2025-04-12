@@ -1,5 +1,6 @@
 using System.IO;
 using System.Reactive;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
@@ -18,7 +19,7 @@ public class OnBoardingModlistImport : ValidatedInputDialogue<string, OnBoarding
         _fileType = type;
         AppendCommand = ReactiveCommand.Create(OnAppend);
         ApplyCommand = ReactiveCommand.Create(OnApply);
-        SaveCommand = ReactiveCommand.Create(OnSave);
+        SaveCommand = ReactiveCommand.CreateFromTask(OnSave);
     }
     
     private bool _append;
@@ -50,7 +51,7 @@ public class OnBoardingModlistImport : ValidatedInputDialogue<string, OnBoarding
         Close();
     }
 
-    private async void OnSave()
+    private async Task OnSave()
     {
         if (!_export) return;
         if (string.IsNullOrEmpty(Value)) return;

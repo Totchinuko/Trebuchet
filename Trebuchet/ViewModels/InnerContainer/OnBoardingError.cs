@@ -8,8 +8,8 @@ namespace Trebuchet.ViewModels.InnerContainer;
 
 public class OnBoardingError : TitledDialogue<OnBoardingError>
 {
-    private ObservableAsPropertyHelper<string> _label;
-    private bool _exit;
+    private readonly ObservableAsPropertyHelper<string> _label;
+    private readonly bool _exit;
     
     public OnBoardingError(string title, string description, bool exit) : base(title, description)
     {
@@ -27,7 +27,7 @@ public class OnBoardingError : TitledDialogue<OnBoardingError>
     public bool Exit
     {
         get => _exit;
-        set => this.RaiseAndSetIfChanged(ref _exit, value);
+        init => this.RaiseAndSetIfChanged(ref _exit, value);
     }
 
     public string Label => _label.Value;

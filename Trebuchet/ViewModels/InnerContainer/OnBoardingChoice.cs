@@ -1,8 +1,6 @@
 using System;
 using System.Reactive;
-using System.Windows.Input;
 using ReactiveUI;
-using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 

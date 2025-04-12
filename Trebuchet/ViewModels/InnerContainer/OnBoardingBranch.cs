@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingBranch(string title, string description) : DialogueContent()
+public class OnBoardingBranch(string title, string description) : DialogueContent
 {
     public ObservableCollection<OnBoardingChoice> Choices { get; } = [];
     public string Title { get; } = title;

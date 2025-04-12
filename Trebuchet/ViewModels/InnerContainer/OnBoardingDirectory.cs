@@ -1,6 +1,7 @@
 using System;
 using System.IO;
 using System.Reactive;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -14,13 +15,13 @@ public class OnBoardingDirectory : ValidatedInputDialogue<string, OnBoardingDire
 
     public OnBoardingDirectory(string title, string description, string defaultPath = "") : base(title, description)
     {
-        SearchDirectoryCommand = ReactiveCommand.Create(OnSearchDirectory);
+        SearchDirectoryCommand = ReactiveCommand.CreateFromTask(OnSearchDirectory);
         Value = defaultPath;
     }
 
     public ReactiveCommand<Unit, Unit> SearchDirectoryCommand { get; }
     
-    private async void OnSearchDirectory()
+    private async Task OnSearchDirectory()
     {
         var defaultFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception(@"App is installed in an invalid directory");
         if(Application.Current is null || Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)

@@ -1,13 +1,8 @@
 namespace Trebuchet.ViewModels.InnerContainer;
 
-public class OnBoardingIntSlider : ValidatedInputDialogue<int, OnBoardingIntSlider>
+public class OnBoardingIntSlider(string title, string description, int minimum, int maximum)
+    : ValidatedInputDialogue<int, OnBoardingIntSlider>(title, description)
 {
-    public OnBoardingIntSlider(string title, string description, int minimum, int maximum) : base(title, description)
-    {
-        Minimum = minimum;
-        Maximum = maximum;
-    }
-    
-    public int Minimum { get; }
-    public int Maximum { get; }
+    public int Minimum { get; } = minimum;
+    public int Maximum { get; } = maximum;
 }

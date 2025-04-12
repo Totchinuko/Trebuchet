@@ -9,7 +9,7 @@ using TrebuchetLib;
 
 namespace Trebuchet;
 
-sealed class Program
+static class Program
 {
     // Initialization code. Don't use any Avalonia, third-party APIs or any
     // SynchronizationContext-reliant code before AppMain is called: things aren't initialized
@@ -17,21 +17,19 @@ sealed class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        bool createdNew = true;
-        using (var mutex = new Mutex(true, @"TotTrebuchet", out createdNew))
+        using var mutex = new Mutex(true, @"TotTrebuchet", out var createdNew);
+        
+        if(createdNew)
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        else
         {
-            if(createdNew)
-                BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-            else
+            var currentProcess = Process.GetCurrentProcess();
+            foreach (var process in Process.GetProcessesByName(currentProcess.ProcessName))
             {
-                var currentProcess = Process.GetCurrentProcess();
-                foreach (var process in Process.GetProcessesByName(currentProcess.ProcessName))
+                if (process.Id != currentProcess.Id)
                 {
-                    if (process.Id != currentProcess.Id)
-                    {
-                        Tools.FocusWindow(process.MainWindowHandle);
-                        break;
-                    }
+                    Tools.FocusWindow(process.MainWindowHandle);
+                    break;
                 }
             }
         }

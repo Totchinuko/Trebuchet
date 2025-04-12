@@ -1,32 +1,24 @@
 using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Threading;
-using System.Windows.Input;
+using System.Threading.Tasks;
 using DynamicData.Binding;
 using ReactiveUI;
-using SteamWorksWebAPI;
-using SteamWorksWebAPI.Interfaces;
-using SteamWorksWebAPI.Response;
+using tot_lib;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels;
 
-public class WorkshopSearchViewModel : ReactiveObject
+public sealed class WorkshopSearchViewModel : ReactiveObject
 {
-
-
     public WorkshopSearchViewModel(Steam steam)
     {
         _steam = steam;
-        SearchCommand = ReactiveCommand.Create(() =>
+        SearchFirstPage = ReactiveCommand.CreateFromTask(() =>
         {
             Page = 1;
-            Search(_searchTerm, _testLiveWorkshop, 1);
+            return Search(_searchTerm, _testLiveWorkshop, 1);
         });
 
         NextPage = ReactiveCommand.Create<Unit>((_) =>
@@ -39,14 +31,13 @@ public class WorkshopSearchViewModel : ReactiveObject
             Page--;
         }, this.WhenAnyValue(x => x.Page, (p) => p > 1));
 
-        this.WhenValueChanged<WorkshopSearchViewModel, bool>(x => x.TestLiveWorkshop, false, () => false)
+        this.WhenValueChanged(x => x.TestLiveWorkshop, false, () => false)
             .Select(_ => Unit.Default)
-            .InvokeCommand(SearchCommand);
+            .InvokeCommand(SearchFirstPage);
         this.WhenValueChanged<WorkshopSearchViewModel, uint>(x => x.Page, false, () => 1)
-            .Subscribe((p) => Search(SearchTerm, TestLiveWorkshop, p));
+            .InvokeCommand(ReactiveCommand.CreateFromTask<uint>(Search));
     }
-    
-    private ObservableCollection<WorkshopSearchResult> _searchResults = [];
+
     private bool _testLiveWorkshop;
     private string _searchTerm = string.Empty;
     private readonly Steam _steam;
@@ -54,12 +45,11 @@ public class WorkshopSearchViewModel : ReactiveObject
     private int _maxPage = 1;
     private uint _page = 1;
 
-
-    public event EventHandler<WorkshopSearchResult>? ModAdded;
-    public event EventHandler? PageLoaded;
+    public event AsyncEventHandler<WorkshopSearchResult>? ModAdded;
+    public event AsyncEventHandler? PageLoaded;
     public ObservableCollectionExtended<WorkshopSearchResult> SearchResults { get; } = [];
     
-    public ReactiveCommand<Unit,Unit> SearchCommand { get; }
+    public ReactiveCommand<Unit,Unit> SearchFirstPage { get; }
     public ReactiveCommand<Unit,Unit> NextPage { get; }
     public ReactiveCommand<Unit,Unit> PreviousPage { get; }
 
@@ -93,22 +83,24 @@ public class WorkshopSearchViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _searchTerm, value);
     }
 
-    public async void Search(string searchTerm, bool testLive, uint page)
+    private Task Search(uint page) => Search(SearchTerm, TestLiveWorkshop, page);
+
+    private async Task Search(string searchTerm, bool testLive, uint page)
     {
         IsLoading = true;
 
         var appId = testLive ? Constants.AppIDTestLiveClient : Constants.AppIDLiveClient;
-        var wresult = await _steam.QueryWorkshopSearch(appId, searchTerm, 20, page);
-        if (wresult is null)
+        var response = await _steam.QueryWorkshopSearch(appId, searchTerm, 20, page);
+        if (response is null)
         {
             IsLoading = false;
             return;
         }
-        MaxPage = Math.Max((int)wresult.total / 20, 1);
-        if (wresult.total > 0)
+        MaxPage = Math.Max((int)response.total / 20, 1);
+        if (response.total > 0)
         {
             SearchResults.Clear();
-            foreach (var file in wresult.publishedfiledetails)
+            foreach (var file in response.publishedfiledetails)
             {
                 var searchResult = new WorkshopSearchResult(file);
                 searchResult.ModAdded += OnModAdded;
@@ -121,8 +113,8 @@ public class WorkshopSearchViewModel : ReactiveObject
         PageLoaded?.Invoke(this, EventArgs.Empty);
         IsLoading = false;
     }
-    
-    protected virtual void OnModAdded(object? sender, WorkshopSearchResult result)
+
+    private void OnModAdded(object? sender, WorkshopSearchResult result)
     {
         ModAdded?.Invoke(this, result);
     }

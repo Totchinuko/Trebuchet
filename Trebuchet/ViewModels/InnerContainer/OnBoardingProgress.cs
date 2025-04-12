@@ -10,7 +10,7 @@ public class OnBoardingProgress : DialogueContent, IProgress<double>
     private double _progress;
     private readonly ObservableAsPropertyHelper<bool> _isIndeterminate;
 
-    public OnBoardingProgress(string title, string description, double maxValue = 1.0) : base()
+    public OnBoardingProgress(string title, string description, double maxValue = 1.0)
     {
         Title = title;
         Description = description;
@@ -31,10 +31,7 @@ public class OnBoardingProgress : DialogueContent, IProgress<double>
         set => this.RaiseAndSetIfChanged(ref _progress, value);
     }
 
-    public bool IsIndeterminate
-    {
-        get => _isIndeterminate.Value;
-    }
+    public bool IsIndeterminate => _isIndeterminate.Value;
 
     public void Report(double value)
     {

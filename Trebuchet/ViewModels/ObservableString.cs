@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using TrebuchetUtils;
+﻿using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {

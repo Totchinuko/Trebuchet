@@ -1,10 +1,8 @@
-using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using Humanizer;
 using ReactiveUI;
 using Trebuchet.Assets;
-using Trebuchet.ViewModels.Panels;
 
 namespace Trebuchet.ViewModels;
 

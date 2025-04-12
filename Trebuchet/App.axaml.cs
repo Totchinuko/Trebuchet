@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -32,7 +31,7 @@ using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet;
 
-public partial class App : Application, IApplication, ISubscriberErrorHandler
+public partial class App : Application, IApplication
 {
     private ILogger<App>? _logger;
     private UIConfig? _uiConfig;
@@ -81,12 +80,6 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         mainWindow.Show();
         currentWindow?.Close();
     }
-
-    private async void TestError()
-    {
-        await Task.Delay(500);
-        await CrashHandler.Handle(new Exception(@"Test Error"));
-    }
         
     public void Crash() => HasCrashed = true;
     
@@ -116,8 +109,10 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
             }
             
             GameBuildViewModel modal = new (this);
-            GameBuildWindow window = new GameBuildWindow();
-            window.DataContext = modal;
+            GameBuildWindow window = new ()
+            {
+                DataContext = modal
+            };
             desktop.MainWindow = window;
             window.Show();
         }
@@ -126,9 +121,9 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
 
     private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult, bool experiment)
     {
-        services.AddSingleton<AppSetup>(
+        services.AddSingleton(
             new AppSetup(Config.LoadConfig(Constants.GetConfigPath(testlive)), testlive, catapult, experiment));
-        services.AddSingleton<UIConfig>(_uiConfig!);
+        services.AddSingleton(_uiConfig!);
         services.AddSingleton<ILanguageManager>(_langManager!);
         
         var logger = new LoggerConfiguration()
@@ -142,7 +137,6 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
             .CreateLogger();
 
         services.AddLogging(builder => builder.AddSerilog(logger, true));
-        services.AddSingleton<ITinyMessengerHub>(new TinyMessengerHub(this));
         
         services.AddSingleton<AppClientFiles>();
         services.AddSingleton<AppServerFiles>();
@@ -155,7 +149,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddSingleton<Steam>();
         services.AddSingleton<Launcher>();
         services.AddSingleton<TaskBlocker>();
-        services.AddSingleton<SteamAPI>();
+        services.AddSingleton<SteamApi>();
         services.AddSingleton<ModFileFactory>();
 
         services.AddSingleton<SteamWidget>();
@@ -185,26 +179,41 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
 
     private async void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        _logger?.LogError(e.Exception, @"DispatcherUnhandledException");
-        e.Handled = true;
-        await CrashHandler.Handle(e.Exception);
+        try
+        {
+            _logger?.LogError(e.Exception, @"DispatcherUnhandledException");
+            e.Handled = true;
+            await CrashHandler.Handle(e.Exception);
+        }
+        catch(Exception ex)
+        {
+            _logger?.LogTrace(ex, @"OnDispatcherUnhandledException");
+        }
     }
     
     private async void OnUnhandledException(object sender, UnhandledExceptionEventArgs e)
     {
-        _logger?.LogError((Exception)e.ExceptionObject, @"UnhandledException");
-        await CrashHandler.Handle((Exception)e.ExceptionObject);
+        try
+        {
+            _logger?.LogError((Exception)e.ExceptionObject, @"UnhandledException");
+            await CrashHandler.Handle((Exception)e.ExceptionObject);
+        }
+        catch(Exception ex)
+        {
+            _logger?.LogTrace(ex, @"OnUnhandledException");
+        }
     }
 
     private async void OnUnobservedTaskException(object? sender, UnobservedTaskExceptionEventArgs e)
     {
-        _logger?.LogError(e.Exception, @"UnobservedTaskException");
-        await CrashHandler.Handle(e.Exception);
-    }
-
-    public async void Handle(ITinyMessage message, Exception exception)
-    {
-        _logger?.LogError(exception, @"UnobservedTaskException");
-        await CrashHandler.Handle(exception);
+        try
+        {
+            _logger?.LogError(e.Exception, @"UnobservedTaskException");
+            await CrashHandler.Handle(e.Exception);
+        }
+        catch(Exception ex)
+        {
+            _logger?.LogTrace(ex, @"OnUnobservedTaskException");
+        }
     }
 }

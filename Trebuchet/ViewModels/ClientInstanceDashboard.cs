@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
+using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.ViewModels.InnerContainer;
@@ -12,7 +13,7 @@ using TrebuchetLib.Processes;
 
 namespace Trebuchet.ViewModels;
 
-public class ClientInstanceDashboard : ReactiveObject
+public sealed class ClientInstanceDashboard : ReactiveObject
 {
     private readonly DialogueBox _box;
     private ProcessState _lastState;
@@ -31,28 +32,27 @@ public class ClientInstanceDashboard : ReactiveObject
         _box = box;
         ProcessStats = processStats;
 
-        KillCommand = ReactiveCommand.Create(OnKilled, this.WhenAnyValue(x => x.CanKill));
+        KillCommand = ReactiveCommand.CreateFromTask(OnKilled, this.WhenAnyValue(x => x.CanKill));
         CanKill = false;
 
         var canBlockerLaunch = blocker.WhenAnyValue(x => x.CanLaunch);
         var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
         var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(canBlockerLaunch, (f,s) => f && s);
-        LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch);
-        LaunchBattleEyeCommand = ReactiveCommand.Create(OnBattleEyeLaunched, canLaunch);
-        UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, canDownloadMods);
+        LaunchCommand = ReactiveCommand.CreateFromTask(OnLaunched, canLaunch);
+        LaunchBattleEyeCommand = ReactiveCommand.CreateFromTask(OnBattleEyeLaunched, canLaunch);
+        UpdateModsCommand = ReactiveCommand.CreateFromTask(OnModUpdate, canDownloadMods);
 
         this.WhenAnyValue(x => x.SelectedModlist)
-            .Subscribe((x) => ModlistSelected?.Invoke(this, x));
+            .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnModlistSelected));
         this.WhenAnyValue(x => x.SelectedProfile)
-            .Subscribe((x) => ProfileSelected?.Invoke(this, x));
+            .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnProfileSelected));
     }
 
-    public event EventHandler? KillClicked;
-    public event EventHandler<bool>? LaunchClicked;
-    public event EventHandler<string>? ProfileSelected;
-    public event EventHandler<string>? ModlistSelected;
-
-    public event EventHandler? UpdateClicked;
+    public event AsyncEventHandler? KillClicked;
+    public event AsyncEventHandler<bool>? LaunchClicked;
+    public event AsyncEventHandler<string>? ProfileSelected;
+    public event AsyncEventHandler<string>? ModlistSelected;
+    public event AsyncEventHandler? UpdateClicked;
 
     public ReactiveCommand<Unit,Unit> KillCommand { get; }
     public ReactiveCommand<Unit,Unit> LaunchBattleEyeCommand { get; }
@@ -115,7 +115,7 @@ public class ClientInstanceDashboard : ReactiveObject
 
     public IProcessStats ProcessStats { get; }
 
-    public Task ProcessRefresh(IConanProcess? process, bool refreshStats)
+    public async Task ProcessRefresh(IConanProcess? process, bool refreshStats)
     {
         var state = process?.State ?? ProcessState.STOPPED;
         if (_lastState.IsRunning() && !state.IsRunning())
@@ -124,39 +124,69 @@ public class ClientInstanceDashboard : ReactiveObject
             OnProcessStarted(process, refreshStats);
 
         if (state == ProcessState.FAILED)
-            OnProcessFailed();
+            await OnProcessFailed();
         else if (ProcessRunning && process is not null)
             ProcessStats.Details = process;
 
         _lastState = state;
-        return Task.CompletedTask;
     }
 
-    private void OnBattleEyeLaunched()
+    private async Task OnKillClicked()
+    {
+        if (KillClicked is not null)
+            await KillClicked.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task OnLaunchClicked(bool battleEye)
+    {
+        if (LaunchClicked is not null)
+            await LaunchClicked.Invoke(this, battleEye);
+    }
+
+    private async Task OnProfileSelected(string profile)
+    {
+        if (ProfileSelected is not null)
+            await ProfileSelected.Invoke(this, profile);
+    }
+
+    private async Task OnModlistSelected(string modlist)
+    {
+        if (ModlistSelected is not null)
+            await ModlistSelected.Invoke(this, modlist);
+    }
+
+    private async Task OnUpdateClicked()
+    {
+        if (UpdateClicked is not null)
+            await UpdateClicked.Invoke(this, EventArgs.Empty);
+    }
+
+    private async Task OnBattleEyeLaunched()
     {
         CanLaunch = false;
-        LaunchClicked?.Invoke(this, true);
+        if(LaunchClicked is not null)
+            await LaunchClicked.Invoke(this, true);
     }
 
-    private void OnKilled()
+    private async Task OnKilled()
     {
         CanKill = false;
-        KillClicked?.Invoke(this, EventArgs.Empty);
+        await OnKillClicked();
     }
 
-    private void OnLaunched()
+    private async Task OnLaunched()
     {
         CanLaunch = false;
-        LaunchClicked?.Invoke(this, false);
+        await OnLaunchClicked(false);
     }
 
-    private void OnModUpdate()
+    private async Task OnModUpdate()
     {
         if (string.IsNullOrEmpty(SelectedModlist)) return;
-        UpdateClicked?.Invoke(this, EventArgs.Empty);
+        await OnUpdateClicked();
     }
 
-    private async void OnProcessFailed()
+    private async Task OnProcessFailed()
     {
         CanKill = false;
         CanLaunch = true;

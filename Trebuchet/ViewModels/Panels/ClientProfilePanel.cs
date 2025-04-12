@@ -1,11 +1,9 @@
 ﻿using System;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DynamicData.Binding;
 using Humanizer;
@@ -15,7 +13,6 @@ using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.ViewModels.SettingFields;
 using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.Panels
 {
@@ -26,8 +23,8 @@ namespace Trebuchet.ViewModels.Panels
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private ClientProfile _profile;
-        private string _profileSize = new(string.Empty);
-        private string _selectedProfile = new(string.Empty);
+        private string _profileSize = string.Empty;
+        private string _selectedProfile;
 
         public ClientProfilePanel(
             DialogueBox box,
@@ -40,28 +37,19 @@ namespace Trebuchet.ViewModels.Panels
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
-            _selectedProfile = _appFiles.Client.ResolveProfile(_uiConfig.CurrentClientProfile);
-            LoadProfile(_selectedProfile);
             LoadProfileList();
+            _selectedProfile = _appFiles.Client.ResolveProfile(_uiConfig.CurrentClientProfile);
+            _profile = _appFiles.Client.Get(_selectedProfile);
 
             this.WhenAnyValue(x => x.SelectedProfile)
-                .Subscribe(OnProfileChanged);
+                .InvokeCommand(
+                    ReactiveCommand.CreateFromTask<string>(OnProfileChanged));
 
-            CreateProfileCommand = ReactiveCommand.Create(OnProfileCreate);
-            DeleteProfileCommand = ReactiveCommand.Create(OnProfileDelete);
-            DuplicateProfileCommand = ReactiveCommand.Create(OnProfileDuplicate);
+            CreateProfileCommand = ReactiveCommand.CreateFromTask(OnProfileCreate);
+            DeleteProfileCommand = ReactiveCommand.CreateFromTask(OnProfileDelete);
+            DuplicateProfileCommand = ReactiveCommand.CreateFromTask(OnProfileDuplicate);
             OpenFolderProfileCommand = ReactiveCommand.Create(OnOpenFolderProfile);
             SaveProfile = ReactiveCommand.Create(() => _profile.SaveFile());
-            RefreshPanel.IsExecuting
-                .Where(x => x)
-                .Select(_ => Tools.IsClientInstallValid(setup.Config) && setup.Config.ManageClient)
-                .Subscribe(x => CanTabBeClicked = x);
-            
-            RefreshPanel.Subscribe((_) =>
-            {
-                LoadProfile(SelectedProfile);
-                LoadProfileList();
-            });
             
             BuildFields();
         }
@@ -72,7 +60,7 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit, Unit> DeleteProfileCommand { get; }
         public ReactiveCommand<Unit, Unit> DuplicateProfileCommand { get; }
         public ReactiveCommand<Unit, Unit> OpenFolderProfileCommand { get; }
-        public ReactiveCommand<Unit, Unit> SaveProfile { get; }
+        private ReactiveCommand<Unit, Unit> SaveProfile { get; }
         public ObservableCollectionExtended<string> Profiles { get; } = [];
 
         public string ProfileSize
@@ -84,19 +72,23 @@ namespace Trebuchet.ViewModels.Panels
         public string SelectedProfile
         {
             get => _selectedProfile;
-            set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
+            set
+            {
+                var resolved = _appFiles.Client.ResolveProfile(value);
+                this.RaiseAndSetIfChanged(ref _selectedProfile, resolved);
+            }
         }
 
-        [MemberNotNull("_profile")]
-        private void LoadProfile(string profile)
+        public override async Task RefreshPanel()
         {
-            _profile = _appFiles.Client.Get(profile);
-            RefreshProfileSize(profile);
+            CanTabBeClicked = Tools.IsClientInstallValid(_setup.Config) && _setup.Config.ManageClient;
+            _profile = _appFiles.Client.Get(SelectedProfile);
             foreach (var f in Fields.OfType<IValueField>())
                 f.Update.Execute().Subscribe();
+            await RefreshProfileSize(SelectedProfile);
         }
 
-        private async void RefreshProfileSize(string profile)
+        private async Task RefreshProfileSize(string profile)
         {
             var path = _appFiles.Client.GetFolder(profile);
             var size = await Task.Run(() => Tools.DirectorySize(path));
@@ -116,21 +108,14 @@ namespace Trebuchet.ViewModels.Panels
             Process.Start("explorer.exe", folder);
         }
 
-        private void OnProfileChanged(string newProfile)
+        private async Task OnProfileChanged(string newProfile)
         {
-            var resolved = _appFiles.Client.ResolveProfile(newProfile);
-            if (resolved != newProfile)
-            {
-                SelectedProfile = resolved;
-                return;
-            }
-
             _uiConfig.CurrentClientProfile = SelectedProfile;
             _uiConfig.SaveFile();
-            LoadProfile(newProfile);
+            await RefreshPanel();
         }
 
-        private async void OnProfileCreate()
+        private async Task OnProfileCreate()
         {
             var name = await GetNewProfileName();
             if (name is null) return;
@@ -150,7 +135,7 @@ namespace Trebuchet.ViewModels.Panels
             return Validation.Valid;
         }
 
-        private async void OnProfileDelete()
+        private async Task OnProfileDelete()
         {
             if (string.IsNullOrEmpty(SelectedProfile)) return;
 
@@ -160,13 +145,13 @@ namespace Trebuchet.ViewModels.Panels
             await _box.OpenAsync(confirm);
             if (!confirm.Result) return;
             
-            _appFiles.Client.Delete(_profile.ProfileName);
+            _appFiles.Client.Delete(SelectedProfile);
 
             LoadProfileList();
             SelectedProfile = string.Empty;
         }
 
-        private async void OnProfileDuplicate()
+        private async Task OnProfileDuplicate()
         {
             var name = await GetNewProfileName();
             if (name is null) return;
@@ -229,7 +214,7 @@ namespace Trebuchet.ViewModels.Panels
                 .SetDescription(Resources.SettingCpuAffinityText)
                 .SetSetter((v) => _profile.CPUThreadAffinity = v)
                 .SetGetter(() => _profile.CPUThreadAffinity)
-                .SetDefault(() => CpuAffinityField.DefaultValue())
+                .SetDefault(CpuAffinityField.DefaultValue)
             );
             Fields.Add(new TitleField().SetTitle(Resources.CatGraphics));
             Fields.Add(new ToggleField()

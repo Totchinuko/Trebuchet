@@ -1,31 +1,15 @@
-﻿using System;
-using System.Reactive.Linq;
-using ReactiveUI;
+﻿using System.Threading.Tasks;
 using Trebuchet.Assets;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public class LogFilterPanel : Panel
+    public class LogFilterPanel(AppSetup setup) : Panel(Resources.PanelServerLogFilter, "mdi-filter", false)
     {
-        private readonly AppSetup _setup;
-
-        public LogFilterPanel(AppSetup setup) : base(Resources.PanelServerLogFilter, "mdi-filter", false)
+        public override Task RefreshPanel()
         {
-            _setup = setup;
-            RefreshPanel.IsExecuting
-                .Where(x => x)
-                .Select(_ => _setup.Config is { ServerInstanceCount: > 0 })
-                .Subscribe(x => CanTabBeClicked = x);
-            RefreshPanel.Subscribe((_) =>
-            {
-                LoadPanel();
-            });
-            LoadPanel();
-        }
-
-        private void LoadPanel()
-        {
+            CanTabBeClicked = setup.Config is { ServerInstanceCount: > 0 };
+            return Task.CompletedTask;
         }
     }
 }

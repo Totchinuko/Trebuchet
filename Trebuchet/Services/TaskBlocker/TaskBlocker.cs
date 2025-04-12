@@ -1,13 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using ReactiveUI;
-using TrebuchetUtils;
 
 namespace Trebuchet.Services.TaskBlocker
 {
@@ -32,19 +30,18 @@ namespace Trebuchet.Services.TaskBlocker
             }
         }
         
-        private Dictionary<Type, BlockedTask> _tasks = [];
-        private readonly ITinyMessengerHub _messenger;
+        private readonly Dictionary<Type, BlockedTask> _tasks = [];
+        private readonly ObservableAsPropertyHelper<bool> _canDownloadMods;
+        private readonly ObservableAsPropertyHelper<bool> _canDownloadServers;
+        private readonly ObservableAsPropertyHelper<bool> _canLaunch;
+        
         private event EventHandler<TaskChangedEventArgs>? TaskChanged;
-        private ObservableAsPropertyHelper<bool> _canDownloadMods;
-        private ObservableAsPropertyHelper<bool> _canDownloadServers;
-        private ObservableAsPropertyHelper<bool> _canLaunch;
 
-        public TaskBlocker(ITinyMessengerHub messenger)
+        public TaskBlocker()
         {
-            _messenger = messenger;
             TaskChanges = Observable.FromEventPattern<TaskChangedEventArgs>(
                 handler => TaskChanged += handler,
-                hander => TaskChanged -= hander);
+                handler => TaskChanged -= handler);
 
             Type[] downloadMods = [typeof(SteamDownload), typeof(ServersRunning), typeof(ClientRunning)];
             Type[] downloadServers = [typeof(SteamDownload), typeof(ServersRunning)];
@@ -77,7 +74,6 @@ namespace Trebuchet.Services.TaskBlocker
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _tasks[operation.GetType()] = task;
             OnTaskChanged(operation, true);
-            OnTaskSourceChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
             return task;
         }
@@ -94,7 +90,6 @@ namespace Trebuchet.Services.TaskBlocker
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _tasks[operation.GetType()] = task;
             OnTaskChanged(operation, true);
-            OnTaskSourceChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
             return task;
         }
@@ -139,7 +134,6 @@ namespace Trebuchet.Services.TaskBlocker
                 source.Semaphore.Dispose();
                 _tasks.Remove(task.Type.GetType());
                 OnTaskChanged(task.Type, false);
-                OnTaskSourceChanged(source.Type, false);
             }
         }
 
@@ -153,11 +147,6 @@ namespace Trebuchet.Services.TaskBlocker
             foreach(var blockingType in type.BlockingTypes)
                 if (_tasks.TryGetValue(blockingType, out var task))
                     await Task.Run(() => task.Semaphore.AvailableWaitHandle.WaitOne(), token);
-        }
-
-        private void OnTaskSourceChanged(IBlockedTaskType type, bool active)
-        {
-            _messenger.Publish(new BlockedTaskStateChanged(type, active));
         }
 
         private void OnTaskChanged(IBlockedTaskType t, bool toggled)

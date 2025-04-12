@@ -3,9 +3,7 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using Trebuchet.Assets;
@@ -15,7 +13,6 @@ using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.Panels
 {
@@ -25,7 +22,7 @@ namespace Trebuchet.ViewModels.Panels
             AppSetup setup, 
             UIConfig uiConfig, 
             AppFiles appFiles, 
-            SteamAPI steamApi,
+            SteamApi steamApi,
             Launcher launcher, 
             DialogueBox box,
             TaskBlocker blocker,
@@ -43,39 +40,30 @@ namespace Trebuchet.ViewModels.Panels
 
             var canDownloadServer = blocker.WhenAnyValue(x => x.CanDownloadServer);
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
-            CloseAllCommand = ReactiveCommand.Create(OnCloseAll);
-            KillAllCommand = ReactiveCommand.Create(OnKillAll);
-            LaunchAllCommand = ReactiveCommand.Create(
+            CloseAllCommand = ReactiveCommand.CreateFromTask(OnCloseAll);
+            KillAllCommand = ReactiveCommand.CreateFromTask(OnKillAll);
+            LaunchAllCommand = ReactiveCommand.CreateFromTask(
                 canExecute: canDownloadServer, execute: OnLaunchAll);
-            UpdateServerCommand = ReactiveCommand.Create(
+            UpdateServerCommand = ReactiveCommand.CreateFromTask(
                 canExecute: canDownloadServer, execute: UpdateServer);
-            UpdateAllModsCommand = ReactiveCommand.Create(
+            UpdateAllModsCommand = ReactiveCommand.CreateFromTask(
                 canExecute: canDownloadMods, execute:UpdateMods);
-            VerifyFilesCommand = ReactiveCommand.Create(
+            VerifyFilesCommand = ReactiveCommand.CreateFromTask(
                 canExecute: canDownloadMods, execute:OnFileVerification);
 
-            RefreshPanel.Subscribe((_) =>
-                {
-                    CanTabBeClicked = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
-                    RefreshDashboards();
-                });
-            DisplayPanel.Subscribe((_) => PanelDisplayed());
-
             Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker, _box);
-            Initialize();
-
-            _timer = new DispatcherTimer(TimeSpan.FromMinutes(5), DispatcherPriority.Background, (_,_) => OnCheckModUpdate());
+            ConfigureClient(Client);
+            RefreshClientSelection();
         }
         
         private readonly AppSetup _setup;
         private readonly UIConfig _uiConfig;
         private readonly AppFiles _appFiles;
-        private readonly SteamAPI _steamApi;
+        private readonly SteamApi _steamApi;
         private readonly Launcher _launcher;
         private readonly DialogueBox _box;
         private readonly TaskBlocker _blocker;
         private readonly ILogger<DashboardPanel> _logger;
-        private DispatcherTimer _timer;
         private DateTime _lastUpdateCheck = DateTime.MinValue;
 
         public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
@@ -88,46 +76,11 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit,Unit> UpdateServerCommand { get; }
         public ReactiveCommand<Unit,Unit> VerifyFilesCommand { get; }
 
-
-        /// <summary>
-        ///     Collect all used modlists of all the client and server instances. Can have duplicates.
-        /// </summary>
-        /// <returns></returns>
-        public IEnumerable<string> CollectAllModlistNames()
-        {
-            if (Client.CanUseDashboard && !string.IsNullOrEmpty(Client.SelectedModlist))
-                yield return Client.SelectedModlist;
-
-            foreach (var i in Instances)
-                if (i.CanUseDashboard && !string.IsNullOrEmpty(i.SelectedModlist))
-                    yield return i.SelectedModlist;
-        }
-
-        private async void PanelDisplayed()
-        {
-            CreateInstancesIfNeeded();
-            RefreshClientSelection();
-            RefreshServerSelection();
-            RefreshDashboards();
-            await CheckModUpdatesAsync();
-        }
-
-        public void RefreshDashboards()
-        {
-            Client.CanUseDashboard = Tools.IsClientInstallValid(_setup.Config);
-            int installedCount = _steamApi.GetInstalledServerInstanceCount();
-            foreach (var instance in Instances)
-            {
-                instance.CanUseDashboard = _setup.Config.ServerInstanceCount > instance.Instance &&
-                                           installedCount > instance.Instance;
-            }
-        }
-
         /// <summary>
         ///     Collect all used mods of all the client and server instances and update them. Will not perform any action if the
         ///     game is running or the main task is blocked.
         /// </summary>
-        public async void UpdateMods()
+        public async Task UpdateMods()
         {
             try
             {
@@ -149,7 +102,7 @@ namespace Trebuchet.ViewModels.Panels
         /// <summary>
         ///     Update all server instances. Will not perform any action if the game is running or the main task is blocked.
         /// </summary>
-        public async void UpdateServer()
+        public async Task UpdateServer()
         {
             try
             {
@@ -162,7 +115,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
         
-        public async void KillClient()
+        public async Task KillClient()
         {
             if (!Client.ProcessRunning) return;
 
@@ -185,7 +138,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
         
-        public async void LaunchClient(bool isBattleEye)
+        public async Task LaunchClient(bool isBattleEye)
         {
             if (Client.ProcessRunning) return;
 
@@ -201,7 +154,7 @@ namespace Trebuchet.ViewModels.Panels
             await _launcher.CatapultClient(isBattleEye);
         }
         
-        public async void CloseServer(int instance)
+        public async Task CloseServer(int instance)
         {
             var dashboard = GetServerInstance(instance);
             if (!dashboard.ProcessRunning) return;
@@ -210,7 +163,7 @@ namespace Trebuchet.ViewModels.Panels
             await _launcher.CloseServer(instance);
         }
         
-        public async void KillServer(int instance)
+        public async Task KillServer(int instance)
         {
             var dashboard = GetServerInstance(instance);
             if (!dashboard.ProcessRunning) return;
@@ -227,7 +180,7 @@ namespace Trebuchet.ViewModels.Panels
             await _launcher.KillServer(dashboard.Instance);
         }
         
-        public async void LaunchServer(int instance)
+        public async Task LaunchServer(int instance)
         {
             var dashboard = GetServerInstance(instance);
             if(dashboard.ProcessRunning) return;
@@ -278,29 +231,46 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private async void Initialize()
+        public override Task RefreshPanel()
         {
-            Client.SelectedModlist = _setup.Config.SelectedClientModlist;
-            Client.SelectedProfile = _setup.Config.SelectedClientProfile;
+            CanTabBeClicked = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
+            Client.CanUseDashboard = Tools.IsClientInstallValid(_setup.Config);
+            int installedCount = _steamApi.GetInstalledServerInstanceCount();
+            foreach (var instance in Instances)
+            {
+                instance.CanUseDashboard = _setup.Config.ServerInstanceCount > instance.Instance &&
+                                           installedCount > instance.Instance;
+            }
+            
+            return Task.CompletedTask;
+        }
+
+        public override async Task DisplayPanel()
+        {
             CreateInstancesIfNeeded();
             RefreshClientSelection();
             RefreshServerSelection();
-            
-            Client.ModlistSelected += (_, modlist) =>
+            await RefreshPanel();
+            await CheckModUpdatesAsync();
+        }
+
+        private void ConfigureClient(ClientInstanceDashboard client)
+        {
+            client.ModlistSelected += (_, modlist) =>
             {
                 _setup.Config.SelectedClientModlist = modlist;
                 _setup.Config.SaveFile();
-                CheckModUpdates();
+                return CheckModUpdatesAsync();
             };
-            Client.ProfileSelected += (_, profile) =>
+            client.ProfileSelected += (_, profile) =>
             {
                 _setup.Config.SelectedClientProfile = profile;
                 _setup.Config.SaveFile();
+                return Task.CompletedTask;
             };
-            Client.KillClicked += (_, _)  => KillClient();
-            Client.LaunchClicked += (_, battleEye) => LaunchClient(battleEye);
-            Client.UpdateClicked += (_, _) => UpdateMods();
-            await CheckModUpdatesAsync();
+            client.KillClicked += (_, _)  => KillClient();
+            client.LaunchClicked += (_, battleEye) => LaunchClient(battleEye);
+            client.UpdateClicked += (_, _) => UpdateMods();
         }
 
         private void RefreshClientSelection()
@@ -331,32 +301,22 @@ namespace Trebuchet.ViewModels.Panels
             dashboard.SelectedProfile = profile;
         }
 
-        private void RefreshClientNeededUpdates(List<ulong> modChecked, List<ulong> neededUpdates)
+        private void RefreshClientNeededUpdates(List<ulong> neededUpdates)
         {
             var mods = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
             Client.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
         }
 
-        private void RefreshServerNeededUpdates(List<ulong> modChecked, List<ulong> neededUpdates)
+        private void RefreshServerNeededUpdates(List<ulong> neededUpdates)
         {
             foreach (var dashboard in Instances)
-                RefreshServerNeededUpdates(dashboard, modChecked, neededUpdates);
+                RefreshServerNeededUpdates(dashboard, neededUpdates);
         }
 
-        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<ulong> modChecked, List<ulong> neededUpdates)
+        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<ulong> neededUpdates)
         {
             var mods = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
             dashboard.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
-        }
-
-        private async void RefreshModlistUpdate(List<string> modlist)
-        {
-            await CheckModUpdatesAsync(modlist);
-        }
-
-        private async void CheckModUpdates()
-        {
-            await CheckModUpdatesAsync();
         }
 
         private Task CheckModUpdatesAsync()
@@ -376,8 +336,8 @@ namespace Trebuchet.ViewModels.Panels
                     .Distinct().ToList();
                 var response = await _steamApi.RequestModDetails(mods);
                 var neededUpdates = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList());
-                RefreshClientNeededUpdates(mods, neededUpdates);
-                RefreshServerNeededUpdates(mods, neededUpdates);
+                RefreshClientNeededUpdates(neededUpdates);
+                RefreshServerNeededUpdates(neededUpdates);
             }
             catch (TrebException tex)
             {
@@ -393,9 +353,11 @@ namespace Trebuchet.ViewModels.Panels
 
             for (var i = Instances.Count; i < _setup.Config.ServerInstanceCount; i++)
             {
-                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(), _blocker, _box);
-                instance.SelectedModlist = _setup.Config.GetInstanceModlist(i);
-                instance.SelectedProfile = _setup.Config.GetInstanceProfile(i);
+                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(), _blocker, _box)
+                    {
+                        SelectedModlist = _setup.Config.GetInstanceModlist(i),
+                        SelectedProfile = _setup.Config.GetInstanceProfile(i)
+                    };
                 RegisterServerInstanceEvents(instance);
                 Instances.Add(instance);
             }
@@ -407,31 +369,27 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _setup.Config.SetInstanceModlist(arg.Instance, arg.Selection);
                 _setup.Config.SaveFile();
-                CheckModUpdates();
+                return CheckModUpdatesAsync();
             };
             instance.ProfileSelected += (_, arg) =>
             {
                 _setup.Config.SetInstanceProfile(arg.Instance, arg.Selection);
                 _setup.Config.SaveFile();
+                return Task.CompletedTask;
             };
             instance.KillClicked += (_, arg) => KillServer(arg);
             instance.LaunchClicked += (_, arg) => LaunchServer(arg);
             instance.CloseClicked += (_, arg) => CloseServer(arg);
+            instance.UpdateClicked += (_, _) => UpdateMods();
         }
 
-        private async void OnCheckModUpdate()
-        {
-            if (!_uiConfig.AutoRefreshModlist) return;
-            await CheckModUpdatesAsync();
-        }
-
-        private void OnCloseAll()
+        private async Task OnCloseAll()
         {
             foreach (var i in Instances)
-                CloseServer(i.Instance);
+                await CloseServer(i.Instance);
         }
 
-        private async void OnFileVerification()
+        private async Task OnFileVerification()
         {
             var confirm = new OnBoardingConfirmation(Resources.VerifyFiles, Resources.VerifyFilesText);
             await _box.OpenAsync(confirm);
@@ -440,8 +398,8 @@ namespace Trebuchet.ViewModels.Panels
             try
             {
                 _steamApi.InvalidateCache();
-                UpdateServer();
-                UpdateMods();
+                await UpdateServer();
+                await UpdateMods();
             }
             catch (TrebException tex)
             {
@@ -450,16 +408,16 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private void OnKillAll()
+        private async Task OnKillAll()
         {
             foreach (var i in Instances)
-                KillServer(i.Instance);
+                await KillServer(i.Instance);
         }
 
-        private void OnLaunchAll()
+        private async Task OnLaunchAll()
         {
             foreach(var i in Instances)
-                LaunchServer(i.Instance);
+                await LaunchServer(i.Instance);
         }
     }
 }

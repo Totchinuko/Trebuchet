@@ -12,10 +12,20 @@ public class Progress : IProgressCallback<double>
 
     public async void Report(double value)
     {
-        await _semaphore.WaitAsync();
-        _value = value;
-        ProgressChanged?.Invoke(this, value);
-        _semaphore.Release();
+        try
+        {
+            await _semaphore.WaitAsync();
+            _value = value;
+            ProgressChanged?.Invoke(this, value);
+        }
+        catch
+        {
+            return;
+        }
+        finally
+        {
+            _semaphore.Release();
+        }
     }
 
     public async Task<double> GetProgressAsync()

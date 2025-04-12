@@ -5,7 +5,7 @@ using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Reactive;
-using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Avalonia.Threading;
 using DynamicData;
 using ReactiveUI;
@@ -42,9 +42,6 @@ namespace Trebuchet.ViewModels.Panels
             _setup = setup;
             _launcher = launcher;
             SendCommand = ReactiveCommand.Create<string>(OnSendCommand, this.WhenAnyValue(x => x.CanSendCommand));
-            RefreshPanel.IsExecuting.Select(_ => _setup.Config is { ServerInstanceCount: > 0 })
-                .Subscribe(x => CanTabBeClicked = x);
-            RefreshPanel.Subscribe((_) => LoadPanel());
 
             this.WhenAnyValue(x => x.SelectedConsole)
                 .Subscribe((_) => OnConsoleSelectionChanged());
@@ -73,6 +70,13 @@ namespace Trebuchet.ViewModels.Panels
         {
             _servers = servers;
             RefreshConsoleList();
+        }
+
+        public override Task RefreshPanel()
+        {
+            CanTabBeClicked = _setup.Config is { ServerInstanceCount: > 0 };
+            LoadPanel();
+            return Task.CompletedTask;
         }
 
         private void LoadConsole(IConsole console)

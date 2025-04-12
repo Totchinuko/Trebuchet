@@ -6,14 +6,14 @@ namespace Trebuchet.ViewModels.InnerContainer;
 
 public class ValidatedInputDialogue<T, TD> : TitledDialogue<TD> where TD : ValidatedInputDialogue<T, TD>
 {
-    protected Func<T?, Validation> _validation;
+    protected Func<T?, Validation> Validation;
     private T? _value;
     private string _errorMessage = string.Empty;
     private bool _isValid;
 
-    public ValidatedInputDialogue(string title, string description) : base(title, description)
+    protected ValidatedInputDialogue(string title, string description) : base(title, description)
     {
-        _validation = (_) => Validation.Valid;
+        Validation = (_) => Trebuchet.Validation.Valid;
         ConfirmCommand = ReactiveCommand.Create(Close);
         CancelCommand = ReactiveCommand.Create(() =>
         {
@@ -24,7 +24,7 @@ public class ValidatedInputDialogue<T, TD> : TitledDialogue<TD> where TD : Valid
         this.WhenAnyValue(x => x.Value)
             .Subscribe((v) =>
             {
-                var result = _validation.Invoke(v);
+                var result = Validation.Invoke(v);
                 IsValid = result.IsValid;
                 ErrorMessage = result.ErrorMessage;
             });
@@ -52,8 +52,8 @@ public class ValidatedInputDialogue<T, TD> : TitledDialogue<TD> where TD : Valid
 
     public ValidatedInputDialogue<T, TD> SetValidation(Func<T?, Validation> validation)
     {
-        _validation = validation;
-        var result = _validation.Invoke(Value);
+        Validation = validation;
+        var result = Validation.Invoke(Value);
         IsValid = result.IsValid;
         ErrorMessage = result.ErrorMessage;
         return this;

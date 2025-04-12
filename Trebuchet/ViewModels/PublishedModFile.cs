@@ -4,7 +4,7 @@ using ReactiveUI;
 
 namespace Trebuchet.ViewModels;
 
-public class PublishedModFile : ReactiveObject, IModFile, IPublishedModFile
+public class PublishedModFile : ReactiveObject, IPublishedModFile
 {
     public PublishedModFile(string path, ulong publishedId)
     {
@@ -15,10 +15,7 @@ public class PublishedModFile : ReactiveObject, IModFile, IPublishedModFile
         Title = Path.GetFileName(path);
         LastUpdate = string.Empty;
         IconClasses.Add(@"Live");
-        if (File.Exists(path))
-            StatusClasses.Add(@"Loading");
-        else
-            StatusClasses.Add(@"Missing");
+        StatusClasses.Add(File.Exists(path) ? @"Loading" : @"Missing");
     }
     
     public ulong PublishedId { get; }

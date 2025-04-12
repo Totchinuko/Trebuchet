@@ -27,19 +27,19 @@ namespace Trebuchet.Controls
         
         public int MaxValue
         {
-            get => (int)GetValue(MaxValueProperty);
+            get => GetValue(MaxValueProperty);
             set => SetValue(MaxValueProperty, value);
         }
         
         public int MinValue
         {
-            get => (int)GetValue(MinValueProperty);
+            get => GetValue(MinValueProperty);
             set => SetValue(MinValueProperty, value);
         }
         
         public int Value
         {
-            get => Math.Clamp((int)GetValue(ValueProperty), MinValue, MaxValue);
+            get => Math.Clamp(GetValue(ValueProperty), MinValue, MaxValue);
             set => SetValue(ValueProperty, Math.Clamp(value, MinValue, MaxValue));
         }
         

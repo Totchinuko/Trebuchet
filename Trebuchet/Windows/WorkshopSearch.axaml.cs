@@ -1,7 +1,7 @@
 ﻿using System;
+using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Input;
 using Trebuchet.ViewModels;
 using TrebuchetUtils;
 
@@ -26,10 +26,11 @@ namespace Trebuchet.Windows
                 nvm.PageLoaded += OnPageLoaded;
         }
 
-        private void OnPageLoaded(object? sender, EventArgs e)
+        private Task OnPageLoaded(object? sender, EventArgs e)
         {
             var scrollViewer = this.FindControl<ScrollViewer>(@"PageScrollViewer");
             scrollViewer?.ScrollToHome();
+            return Task.CompletedTask;
         }
     }
 }

@@ -1,6 +1,4 @@
 ﻿using System;
-using System.IO;
-using Avalonia.Controls;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Controls.Primitives;
@@ -42,7 +40,7 @@ namespace Trebuchet.Windows
             FlyoutBase.ShowAttachedFlyout(MainBorder);
         }
 
-        protected virtual void OnWindowShown()
+        protected void OnWindowShown()
         {
             _app?.OnWindowShow();
         }

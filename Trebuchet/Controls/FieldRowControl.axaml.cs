@@ -1,13 +1,11 @@
 using Avalonia;
 using Avalonia.Controls;
-using Avalonia.Markup.Xaml;
-using Avalonia.Metadata;
 
 namespace Trebuchet.Controls;
 
 public partial class FieldRowControl : UserControl
 {
-    public readonly static StyledProperty<object?> FieldContentProperty
+    public static readonly StyledProperty<object?> FieldContentProperty
         = AvaloniaProperty.Register<FieldRowControl, object?>(nameof(FieldContent));
     public FieldRowControl()
     {

@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services;
-using Trebuchet.ViewModels.InnerContainer;
 
 namespace Trebuchet.ViewModels.Panels;
 
@@ -14,30 +13,23 @@ public class ToolboxPanel : Panel
 
     public ToolboxPanel(
         OnBoarding onBoarding,
-        SteamAPI steamApi, 
-        DialogueBox box
+        SteamApi steamApi 
         ) : base(Resources.PanelToolbox, "mdi-toolbox", true)
     {
         _onBoarding = onBoarding;
         _steamApi = steamApi;
-        _box = box;
 
         _unusedModsSub = this.WhenAnyValue(x => x.UnusedMods)
             .Select(x => string.Format(Resources.TrimUnusedModsSub, x))
             .ToProperty(this, x => x.UnusedModsSub);
         
         RemoveUnusedMods = ReactiveCommand.CreateFromTask(OnRemoveUnusedMods, this.WhenAnyValue(x => x.UnusedMods, x => x > 0));
-        DisplayPanel.Subscribe((_) =>
-        {
-            UnusedMods = _steamApi.CountUnusedMods();
-        });
     }
     
     private readonly OnBoarding _onBoarding;
-    private readonly SteamAPI _steamApi;
-    private readonly DialogueBox _box;
+    private readonly SteamApi _steamApi;
     private int _unusedMods;
-    private ObservableAsPropertyHelper<string> _unusedModsSub;
+    private readonly ObservableAsPropertyHelper<string> _unusedModsSub;
 
     public string UnusedModsSub => _unusedModsSub.Value;
     public int UnusedMods
@@ -47,7 +39,13 @@ public class ToolboxPanel : Panel
     }
 
     public ReactiveCommand<Unit,Unit> RemoveUnusedMods { get; }
-    
+
+    public override Task DisplayPanel()
+    {
+        UnusedMods = _steamApi.CountUnusedMods();
+        return Task.CompletedTask;
+    }
+
     private async Task OnRemoveUnusedMods()
     {
         try

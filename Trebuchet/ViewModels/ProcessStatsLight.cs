@@ -1,7 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
@@ -10,6 +7,7 @@ using ReactiveUI;
 using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
+using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {
@@ -17,8 +15,8 @@ namespace Trebuchet.ViewModels
     {
         public ProcessStatsLight()
         {
-            _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Tick());
-            _timer.Stop();
+            var timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, (_, _) => Tick());
+            timer.Stop();
             _details = ConanProcess.Empty;
 
             this.WhenAnyValue(x => x.Details)
@@ -27,13 +25,13 @@ namespace Trebuchet.ViewModels
                     if (d.State.IsRunning())
                     {
                         State = d.State;
-                        _timer.Start();
+                        timer.Start();
                     }
                     else
                     {
                         State = ProcessState.STOPPED;
                         _peakMemoryConsumption = 0;
-                        _timer.Stop();
+                        timer.Stop();
                     }
                 });
 
@@ -42,25 +40,24 @@ namespace Trebuchet.ViewModels
                 .Select(x => x.PId)
                 .ToProperty(this, x => x.PID);
             _processStatus = this.WhenAnyValue(x => x.State)
-                .Select(x => TranslateState(x))
+                .Select(TranslateState)
                 .ToProperty(this, x => x.ProcessStatus);
             _running = this.WhenAnyValue(x => x.State)
                 .Select(x => x.IsRunning())
                 .ToProperty(this, x => x.Running);
         }
         
+        private readonly ObservableAsPropertyHelper<int> _pid;
+        private readonly ObservableAsPropertyHelper<string> _processStatus;
+        private readonly ObservableAsPropertyHelper<bool> _running;
         private IConanProcess _details;
         private long _peakMemoryConsumption;
-        private DispatcherTimer _timer;
         private string _playerCount = string.Empty;
         private string _memoryPeakConsumption = string.Empty;
         private string _memoryConsumption = string.Empty;
         private string _cpuUsage = string.Empty;
         private string _uptime = string.Empty;
         private ProcessState _state;
-        private ObservableAsPropertyHelper<int> _pid;
-        private ObservableAsPropertyHelper<string> _processStatus;
-        private ObservableAsPropertyHelper<bool> _running;
 
         public string CpuUsage
         {
@@ -137,6 +134,19 @@ namespace Trebuchet.ViewModels
 
         private async void Tick()
         {
+            try
+            {
+                await TickAsync();
+            }
+            catch (OperationCanceledException){}
+            catch (Exception ex)
+            {
+                await CrashHandler.Handle(ex);
+            }
+        }
+
+        private async Task TickAsync()
+        {
             if (!Running) return;
 
             State = _details.State;
@@ -166,18 +176,6 @@ namespace Trebuchet.ViewModels
             var cpuUsageTotal = cpuUsedMs / (Environment.ProcessorCount * totalMsPassed);
 
             return cpuUsageTotal * 100.0;
-        }
-
-        private bool TryGetProcess(int pid, [NotNullWhen(true)] out Process? process)
-        {
-            process = null;
-
-            try
-            {
-                process = Process.GetProcessById(pid);
-                return true;
-            }
-            catch { return false; }
         }
     }
 }

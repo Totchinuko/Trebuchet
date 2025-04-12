@@ -5,7 +5,7 @@ namespace Trebuchet.ViewModels.InnerContainer;
 
 public class TitledDialogue<T> : DialogueContent where T : TitledDialogue<T>
 {
-    public TitledDialogue(string title, string description)
+    protected TitledDialogue(string title, string description)
     {
         Title = title;
         Description = description;

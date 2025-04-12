@@ -33,19 +33,19 @@ namespace Trebuchet.Controls
 
         public ICommand Command
         {
-            get => (ICommand)GetValue(CommandProperty);
+            get => GetValue(CommandProperty);
             set => SetValue(CommandProperty, value);
         }
         
         public int MaxLength
         {
-            get => (int)GetValue(MaxLengthProperty);
+            get => GetValue(MaxLengthProperty);
             set => SetValue(MaxLengthProperty, value);
         }
         
         public string Placeholder
         {
-            get => (string)GetValue(PlaceholderProperty);
+            get => GetValue(PlaceholderProperty);
             set => SetValue(PlaceholderProperty, value);
         }
         
@@ -57,10 +57,10 @@ namespace Trebuchet.Controls
         
         private static void OnCommandChanged(ConsoleField sender, AvaloniaPropertyChangedEventArgs e)
         {
-            if (e.OldValue != null && e.OldValue is ICommand oldCommand)
+            if (e.OldValue is ICommand oldCommand)
                 oldCommand.CanExecuteChanged -= sender.Command_CanExecuteChanged;
             sender.Command_CanExecuteChanged(sender.Command, EventArgs.Empty);
-            if (e.NewValue != null && e.NewValue is ICommand newCommand)
+            if (e.NewValue is ICommand newCommand)
                 newCommand.CanExecuteChanged += sender.Command_CanExecuteChanged;
         }
         
@@ -72,7 +72,7 @@ namespace Trebuchet.Controls
         
         private void Command_CanExecuteChanged(object? sender, EventArgs e)
         {
-            IsEnabled = Command?.CanExecute(null) ?? false;
+            IsEnabled = Command.CanExecute(null);
         }
         
         private void Console_GotFocus(object sender, RoutedEventArgs e)
@@ -97,7 +97,7 @@ namespace Trebuchet.Controls
         {
             if (e.Key == Key.Enter && !string.IsNullOrWhiteSpace(Console.Text))
             {
-                Command?.Execute(Console.Text);
+                Command.Execute(Console.Text);
                 Console.Text = string.Empty;
             }
         }

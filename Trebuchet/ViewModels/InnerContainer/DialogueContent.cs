@@ -1,7 +1,6 @@
 using System;
 using Avalonia.Layout;
 using ReactiveUI;
-using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 

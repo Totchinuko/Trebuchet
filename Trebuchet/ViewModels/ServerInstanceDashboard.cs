@@ -4,6 +4,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI;
+using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.ViewModels.InnerContainer;
@@ -39,7 +40,7 @@ namespace Trebuchet.ViewModels
             Instance = instance;
             ProcessStats = stats;
             
-            KillCommand = ReactiveCommand.Create(OnKilled, this.WhenAnyValue(x => x.CanKill));
+            KillCommand = ReactiveCommand.CreateFromTask(OnKilled, this.WhenAnyValue(x => x.CanKill));
             CanKill = false;
             
             CloseCommand = ReactiveCommand.Create(OnClose, this.WhenAnyValue(x => x.CanClose));
@@ -48,22 +49,21 @@ namespace Trebuchet.ViewModels
             var canBlockLaunch = blocker.WhenAnyValue(x => x.CanLaunch);
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
             var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(canBlockLaunch, (f,s) => f && s);
-            LaunchCommand = ReactiveCommand.Create(OnLaunched, canLaunch.StartWith(true));
-            UpdateModsCommand = ReactiveCommand.Create(OnModUpdate, canDownloadMods);
-            
+            LaunchCommand = ReactiveCommand.CreateFromTask(OnLaunched, canLaunch.StartWith(true));
+            UpdateModsCommand = ReactiveCommand.CreateFromTask(OnModUpdate, canDownloadMods);
+
             this.WhenAnyValue(x => x.SelectedModlist)
-                .Subscribe((x) => ModlistSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, x)));
+                .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnModlistSelected));
             this.WhenAnyValue(x => x.SelectedProfile)
-                .Subscribe((x) => ProfileSelected?.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, x)));
+                .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnProfileSelected));
         }
 
-        public event EventHandler<int>? LaunchClicked;
-        public event EventHandler<int>? KillClicked;
-        public event EventHandler<int>? CloseClicked;
-        public event EventHandler<ServerInstanceSelectionEventArgs>? ModlistSelected;
-        public event EventHandler<ServerInstanceSelectionEventArgs>? ProfileSelected;
-
-        public event EventHandler<int>? UpdateClicked;
+        public event AsyncEventHandler<int>? LaunchClicked;
+        public event AsyncEventHandler<int>? KillClicked;
+        public event AsyncEventHandler<int>? CloseClicked;
+        public event AsyncEventHandler<ServerInstanceSelectionEventArgs>? ModlistSelected;
+        public event AsyncEventHandler<ServerInstanceSelectionEventArgs>? ProfileSelected;
+        public event AsyncEventHandler<int>? UpdateClicked;
 
         public bool CanClose
         {
@@ -133,7 +133,7 @@ namespace Trebuchet.ViewModels
         public ReactiveCommand<Unit,Unit> LaunchCommand { get; }
         public ReactiveCommand<Unit,Unit> UpdateModsCommand { get; private set; }
 
-        public Task ProcessRefresh(IConanProcess? process, bool refreshStats)
+        public async Task ProcessRefresh(IConanProcess? process, bool refreshStats)
         {
             var state = process?.State ?? ProcessState.STOPPED;
             if (_lastState.IsRunning() && !state.IsRunning())
@@ -142,12 +142,41 @@ namespace Trebuchet.ViewModels
                 OnProcessStarted(process, refreshStats);
 
             if (state == ProcessState.FAILED)
-                OnProcessFailed();
+                await OnProcessFailed();
             else if (ProcessRunning && process is not null)
                 ProcessStats.Details = process;
 
             _lastState = state;
-            return Task.CompletedTask;
+        }
+        
+        private async Task OnKillClicked()
+        {
+            if (KillClicked is not null)
+                await KillClicked.Invoke(this, Instance);
+        }
+
+        private async Task OnLaunchClicked()
+        {
+            if (LaunchClicked is not null)
+                await LaunchClicked.Invoke(this, Instance);
+        }
+
+        private async Task OnProfileSelected(string profile)
+        {
+            if (ProfileSelected is not null)
+                await ProfileSelected.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, profile));
+        }
+
+        private async Task OnModlistSelected(string modlist)
+        {
+            if (ModlistSelected is not null)
+                await ModlistSelected.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, modlist));
+        }
+
+        private async Task OnUpdateClicked()
+        {
+            if (UpdateClicked is not null)
+                await UpdateClicked.Invoke(this, Instance);
         }
 
         private void OnClose()
@@ -156,26 +185,26 @@ namespace Trebuchet.ViewModels
             CloseClicked?.Invoke(this, Instance);
         }
 
-        private void OnKilled()
+        private async Task OnKilled()
         {
             CanKill = false;
-            KillClicked?.Invoke(this, Instance);
+            await OnKillClicked();
         }
 
-        private void OnLaunched()
+        private async Task OnLaunched()
         {
             if (!CanUseDashboard) return;
             CanLaunch = false;
-            LaunchClicked?.Invoke(this, Instance);
+            await OnLaunchClicked();
         }
 
-        private void OnModUpdate()
+        private async Task OnModUpdate()
         {
             if (string.IsNullOrEmpty(SelectedModlist)) return;
-            UpdateClicked?.Invoke(this, Instance);
+            await OnUpdateClicked();
         }
 
-        private async void OnProcessFailed()
+        private async Task OnProcessFailed()
         {
             CanKill = false;
             CanClose = false;

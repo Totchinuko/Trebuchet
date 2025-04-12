@@ -1,7 +1,5 @@
-﻿using System;
-using System.Reactive;
+﻿using System.Reactive;
 using ReactiveUI;
-using Trebuchet.Assets;
 
 namespace Trebuchet.ViewModels;
 

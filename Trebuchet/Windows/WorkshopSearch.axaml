@@ -28,7 +28,7 @@
                         <Grid ColumnDefinitions="*,Auto">
                             <TextBox VerticalContentAlignment="Center" Classes="AutoFocus" Name="SearchField" Text="{Binding SearchTerm, Mode=OneWayToSource, UpdateSourceTrigger=PropertyChanged}" Margin="0,0,12,0" VerticalAlignment="Center" Height="25" />
                             <StackPanel Orientation="Horizontal" Grid.Column="1" Spacing="6">
-                                <Button Command="{Binding SearchCommand}" HotKey="Enter" Margin="0,0,12,0" Classes="Base Blue">
+                                <Button Command="{Binding SearchFirstPage}" HotKey="Enter" Margin="0,0,12,0" Classes="Base Blue">
                                     <i:Icon Value="mdi-magnify" Classes="Normal"/>
                                 </Button>
                                 <Button Classes="Base" Command="{Binding PreviousPage}">

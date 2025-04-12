@@ -28,10 +28,10 @@ namespace Trebuchet.Controls
         
         private static void OnLogChanged(ConsoleLog sender, AvaloniaPropertyChangedEventArgs e)
         {
-            if (e.OldValue != null && e.OldValue is ObservableCollection<ObservableConsoleLog> oldCollection)
+            if (e.OldValue is ObservableCollection<ObservableConsoleLog> oldCollection)
                 oldCollection.CollectionChanged -= sender.ConsoleLogs_CollectionChanged;
             sender.ConsoleLogs_CollectionChanged(sender, new NotifyCollectionChangedEventArgs(NotifyCollectionChangedAction.Reset));
-            if (e.NewValue != null && e.NewValue is ObservableCollection<ObservableConsoleLog> newCollection)
+            if (e.NewValue is ObservableCollection<ObservableConsoleLog> newCollection)
                 newCollection.CollectionChanged += sender.ConsoleLogs_CollectionChanged;
         }
         

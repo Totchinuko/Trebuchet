@@ -1,6 +1,3 @@
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using TrebuchetUtils;
 
@@ -22,17 +19,17 @@ public class DialogueBox : BaseViewModel
 
     public bool Active => Popup != null;
     
-    public void Open(DialogueContent popup)
+    public void Show(DialogueContent popup)
     {
         Popup?.OnClose();
         Popup = popup;
-        Popup.CloseRequested += (_, __) => Close();
+        Popup.CloseRequested += (_, _) => Close();
         Popup.OnOpen();
     }
 
     public async Task OpenAsync(DialogueContent popup)
     {
-        Open(popup);
+        Show(popup);
         await tot_lib.Utils.WaitUntil(() => !Active);
         Close();
     }

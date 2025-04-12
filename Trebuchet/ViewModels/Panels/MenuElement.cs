@@ -1,8 +1,4 @@
-﻿using System;
-using Avalonia;
-using Avalonia.Controls.Templates;
-using ReactiveUI;
-using TrebuchetUtils;
+﻿using ReactiveUI;
 
 namespace Trebuchet.ViewModels.Panels
 {

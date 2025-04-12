@@ -1,11 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using DynamicData.Binding;
-using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services;
@@ -97,12 +94,12 @@ public class SettingsPanel : Panel
     {
         Fields.Add(new TitleField().SetTitle(Resources.OnBoardingUsageChoice));
         Fields.Add(new ClientInstallationField(_onBoarding, _setup)
-            .WhenFieldChanged(RequestAppRefresh)
+            .WhenFieldChanged(ReactiveCommand.CreateFromTask(OnRequestAppRefresh))
             .SetTitle(Resources.SettingClientInstallation)
             .SetDescription(Resources.SettingClientInstallationText)
         );
         Fields.Add(new ServerInstallationField(_onBoarding, _setup)
-            .WhenFieldChanged(RequestAppRefresh)
+            .WhenFieldChanged(ReactiveCommand.CreateFromTask(OnRequestAppRefresh))
             .SetTitle(Resources.SettingServerInstanceCount)
             .SetDescription(Resources.SettingServerInstanceCountText)
         );

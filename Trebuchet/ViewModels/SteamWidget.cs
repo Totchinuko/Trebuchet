@@ -6,7 +6,6 @@ using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels
 {
@@ -83,10 +82,7 @@ namespace Trebuchet.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isConnected, value);
         }
 
-        public bool IsIndeterminate
-        {
-            get => _isIndeterminate.Value;
-        }
+        public bool IsIndeterminate => _isIndeterminate.Value;
 
         public double Progress
         {

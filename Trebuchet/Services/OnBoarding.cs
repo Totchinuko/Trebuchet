@@ -1,5 +1,4 @@
 using System;
-using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
@@ -8,11 +7,9 @@ using System.Threading.Tasks;
 using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services.Language;
-using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
 
 namespace Trebuchet.Services;
 
@@ -23,7 +20,7 @@ public class OnBoarding(
     UIConfig uiConfig,
     ILanguageManager langManager,
     Steam steam, 
-    SteamAPI steamApi)
+    SteamApi steamApi)
 {
     public async Task<bool> OnBoardingRemoveUnusedMods()
     {
@@ -41,7 +38,7 @@ public class OnBoarding(
         if (!confirm.Result) throw new OperationCanceledException(@"OnBoarding was cancelled");
         var progress = new OnBoardingProgress(Resources.OnBoardingModTrimConfirm, string.Empty);
         progress.Report(0);
-        dialogueBox.Open(progress);
+        dialogueBox.Show(progress);
         await steamApi.RemoveUnusedMods();
         dialogueBox.Close();
         return true;
@@ -93,8 +90,10 @@ public class OnBoarding(
         var choice = new OnBoardingIntSlider(
             Resources.OnBoardingServerInstanceCount, 
             Resources.OnBoardingServerInstanceCountSub,
-            1, 6);
-        choice.Value = setup.Config.ServerInstanceCount;
+            1, 6)
+        {
+            Value = setup.Config.ServerInstanceCount
+        };
         await dialogueBox.OpenAsync(choice);
         if(choice.Value == 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
         setup.Config.ServerInstanceCount = choice.Value;
@@ -105,7 +104,7 @@ public class OnBoarding(
     {
         var progress = new OnBoardingProgress(Resources.UpdateServersLabel, string.Empty)
             .SetSize<OnBoardingProgress>(600, 250);
-        dialogueBox.Open(progress);
+        dialogueBox.Show(progress);
         steam.SetTemporaryProgress(progress);
         if(!steam.IsConnected)
             await steam.Connect();
@@ -286,7 +285,7 @@ public class OnBoarding(
                             string.Format(Resources.OnBoardingProcessLockSub, file))
                             .SetSize<OnBoardingProgress>(600, 250);
                         message.Report(0);
-                        dialogueBox.Open(message);
+                        dialogueBox.Show(message);
                     }
                 }
                 else
@@ -297,7 +296,7 @@ public class OnBoarding(
         if(dialogueBox.Active)
             dialogueBox.Close();
         if(currentPopup is not null)
-            dialogueBox.Open(currentPopup);
+            dialogueBox.Show(currentPopup);
         return true;
     }
     
@@ -325,7 +324,7 @@ public class OnBoarding(
 
             var progress = new OnBoardingProgress(Resources.Upgrade, Resources.OnBoardingUpgradeCopy)
                 .SetSize<OnBoardingProgress>(600, 250);
-            dialogueBox.Open(progress);
+            dialogueBox.Show(progress);
 
             if (File.Exists(configLive))
             {

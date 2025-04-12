@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Interactivity;
@@ -24,9 +23,9 @@ namespace Trebuchet.Controls
 
         public CpuSelector()
         {
-            int maxCPU = Environment.ProcessorCount;
-            CpuList = new List<int>(maxCPU);
-            for (int i = 0; i < maxCPU; i++)
+            int maxCpu = Environment.ProcessorCount;
+            CpuList = new List<int>(maxCpu);
+            for (int i = 0; i < maxCpu; i++)
                 CpuList.Add(i);
             CpuAffinityProperty.Changed.AddClassHandler<CpuSelector>(OnCPUAffinityChanged);
             InitializeComponent();
@@ -37,14 +36,8 @@ namespace Trebuchet.Controls
         /// </summary>
         public long CpuAffinity
         {
-            get
-            {
-                return Tools.Clamp2CPUThreads(GetValue(CpuAffinityProperty));
-            }
-            set
-            {
-                SetValue(CpuAffinityProperty, Tools.Clamp2CPUThreads(value));
-            }
+            get => Tools.Clamp2CPUThreads(GetValue(CpuAffinityProperty));
+            set => SetValue(CpuAffinityProperty, Tools.Clamp2CPUThreads(value));
         }
         
         public List<int> CpuList { get; }

@@ -6,23 +6,12 @@ using TrebuchetLib.Processes;
 
 namespace TrebuchetLib.Services;
 
-public class Launcher : IDisposable
+public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandler, ILogger<Launcher> logger)
+    : IDisposable
 {
-    private readonly AppFiles _appFiles;
-    private readonly AppSetup _setup;
-    private readonly IIniGenerator _iniHandler;
-    private readonly ILogger<Launcher> _logger;
     private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
     private IConanProcess? _conanClientProcess;
     private bool _hasCatapulted;
-
-    public Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandler, ILogger<Launcher> logger)
-    {
-        _appFiles = appFiles;
-        _setup = setup;
-        _iniHandler = iniHandler;
-        _logger = logger;
-    }
 
     public void Dispose()
     {
@@ -34,22 +23,22 @@ public class Launcher : IDisposable
 
     public async Task CatapultClient(bool isBattleEye)
     {
-        var profile = _setup.Config.SelectedClientProfile;
-        var modlist = _setup.Config.SelectedClientModlist;
+        var profile = setup.Config.SelectedClientProfile;
+        var modlist = setup.Config.SelectedClientModlist;
         await CatapultClient(profile, modlist, isBattleEye);
     }
 
     public async Task CatapultClientBoulder(bool isBattleEye)
     {
-        var profile = _setup.Config.SelectedClientProfile;
-        var modlist = _setup.Config.SelectedClientModlist;
+        var profile = setup.Config.SelectedClientProfile;
+        var modlist = setup.Config.SelectedClientModlist;
         await CatapultClientBoulder(profile, modlist, isBattleEye);
     }
 
     public async Task<Process> CatapultClientProcess(bool isBattleEye)
     {
-        var profile = _setup.Config.SelectedClientProfile;
-        var modlist = _setup.Config.SelectedClientModlist;
+        var profile = setup.Config.SelectedClientProfile;
+        var modlist = setup.Config.SelectedClientModlist;
         return await CatapultClientProcess(profile, modlist, isBattleEye);
     }
 
@@ -83,23 +72,27 @@ public class Launcher : IDisposable
         var boulder = Path.Combine(appFolder, Constants.BoulderExe);
         if (!File.Exists(boulder)) throw new IOException("boulder not found");
 
-        var args = new List<string>();
-        args.Add(Constants.cmdBoulderLambClient);
-        args.Add($"{Constants.argBoulderSave} \"{profile}\"");
-        args.Add($"{Constants.argBoulderModlist} \"{modlist}\"");
+        var args = new List<string>
+        {
+            Constants.cmdBoulderLambClient,
+            $"{Constants.argBoulderSave} \"{profile}\"",
+            $"{Constants.argBoulderModlist} \"{modlist}\""
+        };
         if(battleEye)
             args.Add(Constants.argBoulderBattleEye);
         
-        Process startProcess = new Process();
-        startProcess.StartInfo = new ProcessStartInfo();
-        startProcess.StartInfo.Arguments = string.Join(' ', args);
-        startProcess.StartInfo.FileName = boulder;
-        startProcess.StartInfo.UseShellExecute = false;
-        startProcess.StartInfo.CreateNoWindow = true;
-        startProcess.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-        startProcess.StartInfo.StandardErrorEncoding = Encoding.UTF8;
-        startProcess.StartInfo.RedirectStandardError = true;
-        startProcess.StartInfo.RedirectStandardOutput = true;
+        Process startProcess = new();
+        startProcess.StartInfo = new ProcessStartInfo
+        {
+            Arguments = string.Join(' ', args),
+            FileName = boulder,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true
+        };
         startProcess.Start();
         await startProcess.WaitForExitAsync();
     }
@@ -107,19 +100,19 @@ public class Launcher : IDisposable
     public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye)
     {
 
-        if (!_appFiles.Client.TryGet(profileName, out var profile))
+        if (!appFiles.Client.TryGet(profileName, out var profile))
             throw new TrebException($"{profileName} profile not found.");
-        if (!_appFiles.Mods.TryGet(modlistName, out var modlist))
+        if (!appFiles.Mods.TryGet(modlistName, out var modlist))
             throw new TrebException($"{modlistName} modlist not found.");
         if (IsClientProfileLocked(profileName))
             throw new TrebException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(_appFiles.Client.GetPrimaryJunction(), profile.ProfileFolder);
+        SetupJunction(appFiles.Client.GetPrimaryJunction(), profile.ProfileFolder);
 
-        _logger.LogDebug($"Locking folder {profile.ProfileName}");
-        _logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
+        logger.LogDebug($"Locking folder {profile.ProfileName}");
+        logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
 
-        await _iniHandler.WriteClientSettingsAsync(profile);
+        await iniHandler.WriteClientSettingsAsync(profile);
         var process = await CreateClientProcess(profile, modlist, isBattleEye);
 
         await Task.Run(() => process.Start());
@@ -135,9 +128,9 @@ public class Launcher : IDisposable
 
     private async Task<Process> CreateClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye)
     {
-        var filename = isBattleEye ? _appFiles.Client.GetBattleEyeBinaryPath() : _appFiles.Client.GetGameBinaryPath();
+        var filename = isBattleEye ? appFiles.Client.GetBattleEyeBinaryPath() : appFiles.Client.GetGameBinaryPath();
         var modlistFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modlistFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
+        await File.WriteAllLinesAsync(modlistFile, appFiles.Mods.GetResolvedModlist(modlist.Modlist));
         var args = profile.GetClientArgs(modlistFile);
 
         var dir = Path.GetDirectoryName(filename);
@@ -192,29 +185,29 @@ public class Launcher : IDisposable
         }
     }
 
-    public async void ReCatapultServer(int instance)
+    public async Task ReCatapultServer(int instance)
     {
         await CatapultServer(instance);
     }
 
     public async Task CatapultServer(int instance)
     {
-        var profile = _setup.Config.GetInstanceProfile(instance);
-        var modlist = _setup.Config.GetInstanceModlist(instance);
+        var profile = setup.Config.GetInstanceProfile(instance);
+        var modlist = setup.Config.GetInstanceModlist(instance);
         await CatapultServer(profile, modlist, instance);
     }
     
     public async Task CatapultServerBoulder(int instance)
     {
-        var profile = _setup.Config.GetInstanceProfile(instance);
-        var modlist = _setup.Config.GetInstanceModlist(instance);
+        var profile = setup.Config.GetInstanceProfile(instance);
+        var modlist = setup.Config.GetInstanceModlist(instance);
         await CatapultServerBoulder(profile, modlist, instance);
     }
 
     public async Task<Process> CatapultServerProcess(int instance)
     {
-        var profile = _setup.Config.GetInstanceProfile(instance);
-        var modlist = _setup.Config.GetInstanceModlist(instance);
+        var profile = setup.Config.GetInstanceProfile(instance);
+        var modlist = setup.Config.GetInstanceModlist(instance);
         return await CatapultServerProcess(profile, modlist, instance);
     }
     
@@ -236,7 +229,7 @@ public class Launcher : IDisposable
 
         var process = await CatapultServerProcess(profileName, modlistName, instance);
 
-        var serverInfos = new ConanServerInfos(_appFiles.Server.Get(profileName), instance);
+        var serverInfos = new ConanServerInfos(appFiles.Server.Get(profileName), instance);
         var conanServerProcess = new ConanServerProcess(process, serverInfos);
         _serverProcesses.TryAdd(instance, conanServerProcess);
     }
@@ -250,43 +243,47 @@ public class Launcher : IDisposable
         var boulder = Path.Combine(appFolder, Constants.BoulderExe);
         if (!File.Exists(boulder)) throw new IOException("boulder not found");
 
-        var args = new List<string>();
-        args.Add(Constants.cmdBoulderLambServer);
-        args.Add($"{Constants.argBoulderSave} \"{profile}\"");
-        args.Add($"{Constants.argBoulderInstance} {instance}");
-        args.Add($"{Constants.argBoulderModlist} \"{modlist}\"");
-        
-        Process startProcess = new Process();
-        startProcess.StartInfo = new ProcessStartInfo();
-        startProcess.StartInfo.Arguments = string.Join(' ', args);
-        startProcess.StartInfo.FileName = boulder;
-        startProcess.StartInfo.UseShellExecute = false;
-        startProcess.StartInfo.CreateNoWindow = true;
-        startProcess.StartInfo.StandardOutputEncoding = Encoding.UTF8;
-        startProcess.StartInfo.StandardErrorEncoding = Encoding.UTF8;
-        startProcess.StartInfo.RedirectStandardError = true;
-        startProcess.StartInfo.RedirectStandardOutput = true;
+        var args = new List<string>
+        {
+            Constants.cmdBoulderLambServer,
+            $"{Constants.argBoulderSave} \"{profile}\"",
+            $"{Constants.argBoulderInstance} {instance}",
+            $"{Constants.argBoulderModlist} \"{modlist}\""
+        };
+
+        Process startProcess = new();
+        startProcess.StartInfo = new()
+        {
+            Arguments = string.Join(' ', args),
+            FileName = boulder,
+            UseShellExecute = false,
+            CreateNoWindow = true,
+            StandardOutputEncoding = Encoding.UTF8,
+            StandardErrorEncoding = Encoding.UTF8,
+            RedirectStandardError = true,
+            RedirectStandardOutput = true
+        };
         startProcess.Start();
         await startProcess.WaitForExitAsync();
     }
 
     public async Task<Process> CatapultServerProcess(string profileName, string modlistName, int instance)
     {
-        if (!_appFiles.Server.TryGet(profileName, out var profile))
+        if (!appFiles.Server.TryGet(profileName, out var profile))
             throw new FileNotFoundException($"{profileName} profile not found.");
-        if (!_appFiles.Mods.TryGet(modlistName, out var modlist))
+        if (!appFiles.Mods.TryGet(modlistName, out var modlist))
             throw new FileNotFoundException($"{modlistName} modlist not found.");
         if (IsServerProfileLocked(profileName))
             throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(Path.Combine(_appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave), 
+        SetupJunction(Path.Combine(appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave), 
             profile.ProfileFolder);
 
-        _logger.LogDebug($"Locking folder {profile.ProfileName}");
-        _logger.LogInformation(
+        logger.LogDebug($"Locking folder {profile.ProfileName}");
+        logger.LogInformation(
             $"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}");
 
-        await _iniHandler.WriteServerSettingsAsync(profile, instance);
+        await iniHandler.WriteServerSettingsAsync(profile, instance);
         var process = await CreateServerProcess(instance, profile, modlist);
 
         await Task.Run(() => process.Start());
@@ -306,10 +303,10 @@ public class Launcher : IDisposable
     {
         var process = new Process();
 
-        var filename = _appFiles.Server.GetIntanceBinary(instance);
+        var filename = appFiles.Server.GetIntanceBinary(instance);
         
         var modfileFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modfileFile, _appFiles.Mods.GetResolvedModlist(modlist.Modlist));
+        await File.WriteAllLinesAsync(modfileFile, appFiles.Mods.GetResolvedModlist(modlist.Modlist));
         
         var args = profile.GetServerArgs(instance, modfileFile);
 
@@ -345,7 +342,7 @@ public class Launcher : IDisposable
     /// <param name="instance"></param>
     public async Task CloseServer(int instance)
     {
-        _logger.LogInformation($"Requesting server instance {instance} stop");
+        logger.LogInformation($"Requesting server instance {instance} stop");
         if (_serverProcesses.TryGetValue(instance, out var watcher))
             await watcher.StopAsync();
     }
@@ -370,7 +367,7 @@ public class Launcher : IDisposable
     }
 
     /// <summary>
-    ///     Get the server port informations for all the running server processes.
+    ///     Get the server port information for all the running server processes.
     /// </summary>
     /// <returns></returns>
     public IEnumerable<IConanServerProcess> GetServerProcesses()
@@ -395,7 +392,7 @@ public class Launcher : IDisposable
     public async Task KillClient()
     {
         if (_conanClientProcess == null) return;
-        _logger.LogInformation("Requesting client process kill");
+        logger.LogInformation("Requesting client process kill");
         await _conanClientProcess.KillAsync();
     }
 
@@ -407,21 +404,21 @@ public class Launcher : IDisposable
     {
         if (_serverProcesses.TryGetValue(instance, out var watcher))
         {
-            _logger.LogInformation($"Requesting server process kill on instance {instance}");
+            logger.LogInformation($"Requesting server process kill on instance {instance}");
             await watcher.KillAsync();
         }
     }
 
     public async Task Tick()
     {
-        if (!_hasCatapulted && _setup.Catapult)
+        if (!_hasCatapulted && setup.Catapult)
         {
             _hasCatapulted = true;
-            for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
+            for (int i = 0; i < setup.Config.ServerInstanceCount; i++)
                 await CatapultServer(i);
         }
 
-        CleanStoppedProcesses();
+        await CleanStoppedProcesses();
         await FindExistingClient();
         await FindExistingServers();
 
@@ -429,10 +426,10 @@ public class Launcher : IDisposable
             await _conanClientProcess.RefreshAsync();
         foreach (var process in _serverProcesses.Values)
         {
-            var name = _setup.Config.GetInstanceProfile(process.Instance);
-            if (_appFiles.Server.Exists(name))
+            var name = setup.Config.GetInstanceProfile(process.Instance);
+            if (appFiles.Server.Exists(name))
             {
-                var profile = _appFiles.Server.Get(name);
+                var profile = appFiles.Server.Get(name);
                 process.KillZombies = profile.KillZombies;
                 process.ZombieCheckSeconds = profile.ZombieCheckSeconds;
             }
@@ -457,17 +454,17 @@ public class Launcher : IDisposable
         var processes = await Tools.GetProcessesWithName(Constants.FileServerBin);
         foreach (var p in processes)
         {
-            if (!_appFiles.Server.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
+            if (!appFiles.Server.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
             if (_serverProcesses.ContainsKey(instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
-            var infos = await _iniHandler.GetInfosFromServerAsync(instance).ConfigureAwait(false);
+            var infos = await iniHandler.GetInfosFromServerAsync(instance).ConfigureAwait(false);
             IConanServerProcess server = new ConanServerProcess(process, infos, p.start);
             _serverProcesses.TryAdd(instance, server);
         }
     }
 
-    private void CleanStoppedProcesses()
+    private async Task CleanStoppedProcesses()
     {
         if (_conanClientProcess != null && !_conanClientProcess.State.IsRunning())
         {
@@ -480,10 +477,10 @@ public class Launcher : IDisposable
             if (!server.Value.State.IsRunning())
             {
                 _serverProcesses.Remove(server.Key);
-                var name = _setup.Config.GetInstanceProfile(server.Key);
-                if (server.Value.State == ProcessState.CRASHED && _appFiles.Server.Get(name).RestartWhenDown)
+                var name = setup.Config.GetInstanceProfile(server.Key);
+                if (server.Value.State == ProcessState.CRASHED && appFiles.Server.Get(name).RestartWhenDown)
                 {
-                    ReCatapultServer(server.Key);
+                    await ReCatapultServer(server.Key);
                 }
                 server.Value.Dispose();
             }
@@ -494,13 +491,13 @@ public class Launcher : IDisposable
     {
         if (_conanClientProcess == null) return false;
         var junction = Path.GetFullPath(GetCurrentClientJunction());
-        var profilePath = Path.GetFullPath(_appFiles.Client.GetFolder(profileName));
+        var profilePath = Path.GetFullPath(appFiles.Client.GetFolder(profileName));
         return string.Equals(junction, profilePath, StringComparison.Ordinal);
     }
 
     public bool IsServerProfileLocked(string profileName)
     {
-        var profilePath = Path.GetFullPath(_appFiles.Server.GetFolder(profileName));
+        var profilePath = Path.GetFullPath(appFiles.Server.GetFolder(profileName));
         foreach (var s in _serverProcesses.Values)
         {
             var instance = s.Instance;
@@ -514,7 +511,7 @@ public class Launcher : IDisposable
 
     private string GetCurrentClientJunction()
     {
-        var path = Path.Combine(_appFiles.Client.GetClientFolder(), Constants.FolderGameSave);
+        var path = Path.Combine(appFiles.Client.GetClientFolder(), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;
@@ -522,7 +519,7 @@ public class Launcher : IDisposable
 
     private string GetCurrentServerJunction(int instance)
     {
-        var path = Path.Combine(_appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave);
+        var path = Path.Combine(appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;

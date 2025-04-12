@@ -3,8 +3,6 @@ using System.Reactive;
 using Humanizer;
 using ReactiveUI;
 using SteamKit2.Internal;
-using SteamWorksWebAPI;
-using SteamWorksWebAPI.Response;
 using TrebuchetLib;
 using TrebuchetUtils;
 
@@ -12,9 +10,6 @@ namespace Trebuchet.ViewModels
 {
     public class WorkshopSearchResult : BaseViewModel
     {
-        private string _creatorAvatar = string.Empty;
-        private string _creator = string.Empty;
-
         public WorkshopSearchResult(PublishedFileDetails result)
         {
             AppId = result.consumer_appid;
