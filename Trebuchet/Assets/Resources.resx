@@ -857,10 +857,10 @@ Do you wish to proceed ?</value>
         <value>Workshop</value>
     </data>
     <data name="PasteTxt" xml:space="preserve">
-        <value>Paste .txt</value>
+        <value>Paste</value>
     </data>
     <data name="ImportTxt" xml:space="preserve">
-        <value>Import .txt</value>
+        <value>Import</value>
     </data>
     <data name="ExportTxt" xml:space="preserve">
         <value>Export .txt</value>

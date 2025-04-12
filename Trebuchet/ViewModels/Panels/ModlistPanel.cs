@@ -27,6 +27,7 @@ using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
+using TrebuchetLib.Services.Importer;
 
 namespace Trebuchet.ViewModels.Panels
 {
@@ -36,6 +37,7 @@ namespace Trebuchet.ViewModels.Panels
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private readonly DialogueBox _box;
+        private readonly ModlistImporter _importer;
         private readonly WorkshopSearchViewModel _workshop;
         private readonly ModFileFactory _modFileFactory;
         private readonly ILogger<ModlistPanel> _logger;
@@ -52,6 +54,7 @@ namespace Trebuchet.ViewModels.Panels
             UIConfig uiConfig, 
             TaskBlocker blocker,
             DialogueBox box,
+            ModlistImporter importer,
             WorkshopSearchViewModel workshop,
             ModFileFactory modFileFactory,
             ILogger<ModlistPanel> logger) : 
@@ -61,6 +64,7 @@ namespace Trebuchet.ViewModels.Panels
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             _box = box;
+            _importer = importer;
             _workshop = workshop;
             _modFileFactory = modFileFactory;
             _logger = logger;
@@ -286,7 +290,7 @@ namespace Trebuchet.ViewModels.Panels
 
         private async void OnExportToJson()
         {
-            var json = JsonSerializer.Serialize(new ModlistExport { Modlist = _profile.Modlist });
+            var json = _importer.Export(_profile.Modlist, ImportFormats.Json);
             var editor = new OnBoardingModlistImport(json, true, FileType.Json);
             await _box.OpenAsync(editor);
             
@@ -296,7 +300,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             try
             {
-                var content = string.Join(Environment.NewLine, _appFiles.Mods.GetResolvedModlist(_profile.Modlist));
+                var content = _importer.Export(_profile.Modlist, ImportFormats.Txt);
                 var editor = new OnBoardingModlistImport(content, true, FileType.Txt);
                 await _box.OpenAsync(editor);
             }
@@ -350,62 +354,46 @@ namespace Trebuchet.ViewModels.Panels
             if (!files[0].Path.IsFile) return;
             var file = files[0].Path.LocalPath;
             var path = Path.GetFullPath(file);
-            var ext = Path.GetExtension(file);
-            if (ext == FileType.JsonExt)
-                OnImportFromJsonFile(await File.ReadAllTextAsync(path));
-            else if (ext == FileType.TxtExt)
-                OnImportFromTxtFile(await File.ReadAllTextAsync(path));
-            else
+
+            var content = await File.ReadAllTextAsync(path);
+            if (_importer.GetFormat(content) == ImportFormats.Invalid)
                 await _box.OpenErrorAsync(Resources.WrongType, Resources.WrongTypeText);
-        }
-
-        private async void OnImportFromJsonFile(string json)
-        {
-            var modlist = JsonSerializer.Deserialize<ModlistExport>(json);
-            if (modlist == null)
-            {
-                await _box.OpenErrorAsync(Resources.InvalidJson, Resources.InvalidJsonText);
-                return;
-            }
-
-            _profile.Modlist = modlist.Modlist;
-            _profile.SaveFile();
-            LoadModlist();
+            else
+                OnImportFromText(content);
+            
         }
 
         private async void OnImportFromText()
         {
-            var editor = new OnBoardingModlistImport(string.Empty, false, FileType.Json);
+            var clipboard = await Utils.Utils.GetClipBoard();
+            if (_importer.GetFormat(clipboard) == ImportFormats.Invalid)
+                clipboard = string.Empty;
+            
+            OnImportFromText(clipboard);
+        }
+
+        private async void OnImportFromText(string import)
+        {
+            var editor = new OnBoardingModlistImport(import, false, FileType.Json);
             await _box.OpenAsync(editor);
             if (editor.Canceled || editor.Value == null) return;
 
             var text = editor.Value;
-            List<string>? modlist;
+            List<string> modlist = [];
             try
             {
-                var export = JsonSerializer.Deserialize<ModlistExport>(text);
-                if (export == null)
-                    throw new Exception(@"This is not Json.");
-                modlist = export.Modlist;
+                modlist.AddRange(_importer.Import(text));
             }
             catch
             {
-                var split = text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-                modlist = _appFiles.Mods.ParseModList(split).ToList();
+                await _box.OpenErrorAsync(Resources.WrongType, Resources.WrongTypeText);
+                return;
             }
 
             if (editor.Append)
                 _profile.Modlist.AddRange(modlist);
             else
                 _profile.Modlist = modlist;
-            _profile.SaveFile();
-            LoadModlist();
-        }
-
-        private void OnImportFromTxtFile(string text)
-        {
-            var split = text.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries);
-            _profile.Modlist = _appFiles.Mods.ParseModList(split).ToList();
             _profile.SaveFile();
             LoadModlist();
         }

@@ -91,4 +91,14 @@ internal static class Utils
                 yield return (file.PublishedFileID, manifest);
         }
     }
+
+    public static async Task<string> GetClipBoard()
+    {
+        if (Application.Current is null ||
+            Application.Current.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop)
+            return string.Empty;
+        if (desktop.MainWindow?.Clipboard is null) 
+            return string.Empty;
+        return await desktop.MainWindow.Clipboard.GetTextAsync()  ?? string.Empty;
+    }
 }

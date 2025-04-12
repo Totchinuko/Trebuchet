@@ -4,10 +4,6 @@ namespace Trebuchet.Utils
 {
     public static class FileType
     {
-        public const string JsonExt = "json";
-        public const string PakExt = "pak";
-        public const string TxtExt = "txt";
-        
         public static readonly FilePickerFileType Json = new(@"Json Text")
         {
             MimeTypes = [@"application/json"],

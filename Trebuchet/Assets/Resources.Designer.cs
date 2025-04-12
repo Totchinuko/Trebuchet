@@ -474,7 +474,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Import .txt.
+        ///   Looks up a localized string similar to Import.
         /// </summary>
         public static string ImportTxt {
             get {
@@ -1136,7 +1136,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Paste .txt.
+        ///   Looks up a localized string similar to Paste.
         /// </summary>
         public static string PasteTxt {
             get {

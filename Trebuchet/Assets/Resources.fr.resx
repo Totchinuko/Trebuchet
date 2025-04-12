@@ -849,10 +849,10 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
         <value>Workshop</value>
     </data>
     <data name="PasteTxt" xml:space="preserve">
-        <value>Coller .txt</value>
+        <value>Coller</value>
     </data>
     <data name="ImportTxt" xml:space="preserve">
-        <value>Importer .txt</value>
+        <value>Importer</value>
     </data>
     <data name="ExportTxt" xml:space="preserve">
         <value>Exporter .txt</value>

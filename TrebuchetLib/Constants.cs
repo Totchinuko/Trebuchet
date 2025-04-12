@@ -41,7 +41,10 @@ public static class Constants
     public const string SteamWorkshopURL = "https://steamcommunity.com/sharedfiles/filedetails/?id={0}";
     public const string GamePrimaryJunction = "GameSaved";
     public const string GameEmptyJunction = "EmptyGame";
-
+    public const string JsonExt = "json";
+    public const string PakExt = "pak";
+    public const string TxtExt = "txt";
+    
     public const string BoulderExe = "boulder.exe";
     
     public const string argLive = "--live";

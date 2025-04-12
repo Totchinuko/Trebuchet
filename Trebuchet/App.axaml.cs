@@ -21,6 +21,7 @@ using Trebuchet.ViewModels.Panels;
 using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
+using TrebuchetLib.Services.Importer;
 using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
 using Panel = Trebuchet.ViewModels.Panels.Panel;
@@ -147,6 +148,7 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddSingleton<AppServerFiles>();
         services.AddSingleton<AppModlistFiles>();
         services.AddSingleton<AppFiles>();
+        services.AddSingleton<ModlistImporter>();
         services.AddSingleton<OnBoarding>();
         services.AddSingleton<IIniGenerator, YuuIniGenerator>();
         services.AddSingleton<IProgressCallback<double>, Progress>();
