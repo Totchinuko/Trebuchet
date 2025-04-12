@@ -4,48 +4,43 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="ClientSettings" x:DataType="p:ClientProfilePanel">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <WrapPanel Orientation="Horizontal" Margin="0,0,0,12">
-                <Border Classes="Panel" HorizontalAlignment="Left" Padding="8,8,8,0" Margin="0,0,12,0">
-                    <WrapPanel Orientation="Horizontal">
-                        <Button Command="{Binding CreateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}" Margin="0,0,6,0" VerticalAlignment="Top">
+        <DockPanel LastChildFill="True">
+            <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0 0 0 12">
+                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                    <StackPanel Spacing="6" Orientation="Horizontal">
+                        <Button Command="{Binding CreateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
-                        <Border VerticalAlignment="Top" Height="32">
-                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center">
-                                <ComboBox.SelectionBoxItemTemplate>
-                                    <DataTemplate>
-                                        <Label Content="{Binding $parent[ComboBox].((p:ClientProfilePanel)DataContext).SelectedProfile}" />
-                                    </DataTemplate>
-                                </ComboBox.SelectionBoxItemTemplate>
-                            </ComboBox>
-                        </Border>
-                        <Button Command="{Binding DeleteProfileCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Delete}" Margin="0,0,3,6" VerticalAlignment="Top">
+                        <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" MinWidth="250">
+                            <ComboBox.SelectionBoxItemTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding $parent[ComboBox].((p:ClientProfilePanel)DataContext).SelectedProfile}" />
+                                </DataTemplate>
+                            </ComboBox.SelectionBoxItemTemplate>
+                        </ComboBox>
+                        <Button Command="{Binding DeleteProfileCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Delete}">
                             <i:Icon Value="mdi-delete" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding DuplicateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Duplicate}" Margin="0 0 3 0" VerticalAlignment="Top">
+                        <Button Command="{Binding DuplicateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Duplicate}">
                             <i:Icon Value="mdi-content-copy" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding OpenFolderProfileCommand}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.OpenSaveFolder}" Margin="0 0 3 0" VerticalAlignment="Top">
+                        <Button Command="{Binding OpenFolderProfileCommand}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.OpenSaveFolder}">
                             <i:Icon Value="mdi-folder-open" Classes="Normal" />
                         </Button>
-                    </WrapPanel>
+                    </StackPanel>
                 </Border>
-                <Border Classes="Panel" HorizontalAlignment="Left" Padding="8,8,8,0">
+                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
                     <ToolTip.Tip>
                         <TextBlock TextWrapping="Wrap" Text="{x:Static a:Resources.SaveSizeTip}" />
                     </ToolTip.Tip>
-                    <StackPanel Orientation="Vertical">
-                        <TextBlock Text="{x:Static a:Resources.SaveSize}" FontWeight="Bold" />
-                        <TextBlock Text="{Binding ProfileSize}" />
-                    </StackPanel>
+                    <TextBlock TextAlignment="Center">
+                        <Run Text="{x:Static a:Resources.SaveSize}" FontWeight="Bold" />
+                        <LineBreak />
+                        <Run Text="{Binding ProfileSize}" />
+                    </TextBlock>
                 </Border>
             </WrapPanel>
-            <ScrollViewer Grid.Row="1" AllowAutoHide="False" Padding="0 0 12 0">
+            <ScrollViewer DockPanel.Dock="Top" AllowAutoHide="False" Padding="0 0 12 0">
                 <ItemsControl ItemsSource="{Binding Fields}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -54,6 +49,6 @@
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
             </ScrollViewer>
-        </Grid>
+        </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

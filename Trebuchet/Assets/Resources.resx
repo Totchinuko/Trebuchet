@@ -902,4 +902,7 @@ Do you wish to proceed ?</value>
     <data name="StatusFrozen" xml:space="preserve">
         <value>Not responding</value>
     </data>
+    <data name="WatermarkModlistURLTip" xml:space="preserve">
+        <value>Valid URL are either pointing to a steam collection or a json response/file</value>
+    </data>
 </root>

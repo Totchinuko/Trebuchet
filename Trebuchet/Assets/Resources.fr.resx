@@ -894,4 +894,7 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
     <data name="StatusFrozen" xml:space="preserve">
         <value>Ne répond pas</value>
     </data>
+    <data name="WatermarkModlistURLTip" xml:space="preserve">
+        <value>Valide URL sont soit une collection Steam ou réponse/ficher json</value>
+    </data>
 </root>

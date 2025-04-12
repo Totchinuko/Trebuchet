@@ -2666,6 +2666,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Valid URL are either pointing to a steam collection or a json response/file.
+        /// </summary>
+        public static string WatermarkModlistURLTip {
+            get {
+                return ResourceManager.GetString("WatermarkModlistURLTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Workshop.
         /// </summary>
         public static string WorkshopSteam {

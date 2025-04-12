@@ -4,94 +4,81 @@
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="ModlistEditor" x:DataType="p:ModlistPanel">
-        <Grid>
-            <Grid.RowDefinitions>
-                <RowDefinition Height="auto" />
-                <RowDefinition Height="*" />
-            </Grid.RowDefinitions>
-            <WrapPanel Margin="0 0 0 0">
-                <Border Classes="Panel" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
-                    <StackPanel Orientation="Horizontal">
-                        <Button Command="{Binding CreateModlistCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}" Margin="0,0,3,0" VerticalAlignment="Top">
+        <DockPanel LastChildFill="True">
+            <WrapPanel DockPanel.Dock="Top">
+                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Command="{Binding CreateModlistCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
-                        <Border VerticalAlignment="Center" Height="32">
-                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" Margin="0,0,6,0" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="200" Height="26" VerticalAlignment="Center">
-                                <ComboBox.SelectionBoxItemTemplate>
-                                    <DataTemplate>
-                                        <Label Content="{Binding $parent[ComboBox].((p:ModlistPanel)DataContext).SelectedModlist}" />
-                                    </DataTemplate>
-                                </ComboBox.SelectionBoxItemTemplate>
-                            </ComboBox>
-                        </Border>
-                        <Button Command="{Binding DeleteModlistCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Delete}" Margin="0,0,3,0" VerticalAlignment="Center">
+                        <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" MinWidth="250">
+                            <ComboBox.SelectionBoxItemTemplate>
+                                <DataTemplate>
+                                    <Label Content="{Binding $parent[ComboBox].((p:ModlistPanel)DataContext).SelectedModlist}" />
+                                </DataTemplate>
+                            </ComboBox.SelectionBoxItemTemplate>
+                        </ComboBox>
+                        <Button Command="{Binding DeleteModlistCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Delete}">
                             <i:Icon Value="mdi-delete" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding DuplicateModlistCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Duplicate}" Margin="0 0 3 0" VerticalAlignment="Center">
+                        <Button Command="{Binding DuplicateModlistCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Duplicate}">
                             <i:Icon Value="mdi-content-copy" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding RefreshModlistCommand}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.RefreshModInfos}" Margin="0 0 3 0" VerticalAlignment="Center">
+                        <Button Command="{Binding RefreshModlistCommand}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.RefreshModInfos}">
                             <i:Icon Value="mdi-refresh" Classes="Normal"/>
                         </Button>
-                        <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue" ToolTip.Tip="{x:Static a:Resources.UpdateMods}" Margin="0 0 3 0" VerticalAlignment="Center">
+                        <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue" ToolTip.Tip="{x:Static a:Resources.UpdateMods}">
                             <i:Icon Value="mdi-update" Classes="Normal"/>
                         </Button>
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" Padding="8" Margin="0,0,6,6">
-                    <StackPanel Orientation="Horizontal">
+                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
                         <Button Classes="Base"
-                                VerticalAlignment="Center"
                                 Content="{x:Static a:Resources.WorkshopSteam}"
-                                Margin="0 0 3 0"
                                 Command="{Binding ExploreWorkshopCommand}" />
                         <Button Classes="Base"
-                                VerticalAlignment="Center"
                                 Content="{x:Static a:Resources.LocalMod}"
                                 Command="{Binding ExploreLocalCommand}" />
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" Padding="8" Margin="0,0,6,6">
-                    <StackPanel Orientation="Horizontal">
+                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
                         <Button Classes="Base"
-                                VerticalAlignment="Center"
                                 Content="{x:Static a:Resources.PasteTxt}"
-                                Margin="0 0 3 0"
                                 Command="{Binding ImportFromTextCommand}" />
                         <Button Classes="Base"
-                                VerticalAlignment="Center"
                                 Content="{x:Static a:Resources.ImportTxt}"
                                 Command="{Binding ImportFromFileCommand}" />
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" Padding="8" Margin="0,0,6,6">
-                    <StackPanel Orientation="Horizontal">
+                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
                         <Button Classes="Base"
-                                VerticalAlignment="Center"
                                 Content="{x:Static a:Resources.ExportJson}"
-                                Margin="0 0 3 0"
                                 Command="{Binding ExportToJsonCommand}" />
                         <Button Classes="Base"
-                                VerticalAlignment="Center"
                                 Content="{x:Static a:Resources.ExportTxt}"
                                 Command="{Binding ExportToTxtCommand}" />
                     </StackPanel>
                 </Border>
-                <Border Classes="Panel" HorizontalAlignment="Left" Padding="8" Margin="0,0,6,6">
-                    <WrapPanel>
-                        <Grid Margin="0,0,12,0" VerticalAlignment="Center">
-                            <TextBox Name="ModlistUrl" Watermark="{x:Static a:Resources.WatermarkModlistURL}" Text="{Binding ModlistUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" Width="400" FontSize="16" VerticalContentAlignment="Center" ToolTip.Tip="Valid URL are either pointing to a steam collection or a json response/file" />
-                        </Grid>
+                <Border Classes="Panel" Padding="8" Margin="6 0 6 6">
+                    <StackPanel Spacing="6" Orientation="Horizontal">
+                        <TextBox Name="ModlistUrl" 
+                                 Watermark="{x:Static a:Resources.WatermarkModlistURL}" 
+                                 Text="{Binding ModlistUrl, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" 
+                                 Width="400" 
+                                 FontSize="16" 
+                                 ToolTip.Tip="{x:Static a:Resources.WatermarkModlistURLTip}" />
                         <Button Classes="Base Yellow"
-                                VerticalAlignment="Center"
                                 Content="{x:Static a:Resources.Sync}"
                                 Command="{Binding FetchCommand}" />
-                    </WrapPanel>
+                    </StackPanel>
                 </Border>
             </WrapPanel>
-            <Border Grid.Row="1" Padding="0,12,0,0">
+            <Border DockPanel.Dock="Top" Padding="0 12 0 0">
                 <ListBox ScrollViewer.AllowAutoHide="False" Classes="draggableVirtualizing NoSelection" ItemsSource="{Binding Modlist}" ItemTemplate="{StaticResource ModlistItems}"/>
             </Border>
-        </Grid>
+        </DockPanel>
     </DataTemplate>
 </ResourceDictionary>
