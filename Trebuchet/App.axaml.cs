@@ -143,7 +143,6 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         services.AddLogging(builder => builder.AddSerilog(logger, true));
         services.AddSingleton<ITinyMessengerHub>(new TinyMessengerHub(this));
         
-        services.AddSingleton<AppSettings>(GetAppSettings());
         services.AddSingleton<AppClientFiles>();
         services.AddSingleton<AppServerFiles>();
         services.AddSingleton<AppModlistFiles>();
@@ -201,14 +200,6 @@ public partial class App : Application, IApplication, ISubscriberErrorHandler
         await CrashHandler.Handle(e.Exception);
     }
 
-    private static AppSettings GetAppSettings()
-    {
-        var settings = JsonSerializer.Deserialize<AppSettings>(
-            tot_lib.Utils.GetEmbeddedTextFile(@"Trebuchet.AppSettings.json"));
-        if(settings == null) throw new JsonException(@"AppSettings could not be loaded");
-        return settings;
-    }
-    
     public async void Handle(ITinyMessage message, Exception exception)
     {
         _logger?.LogError(exception, @"UnobservedTaskException");

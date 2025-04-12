@@ -1,3 +1,6 @@
 [submodule "tot-lib"]
 	path = tot-lib
 	url = https://github.com/Totchinuko/tot-lib.git
+[submodule "DepotDownloader"]
+	path = DepotDownloader
+	url = https://github.com/Totchinuko/DepotDownloader.git

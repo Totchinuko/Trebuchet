@@ -33,7 +33,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
       <ProjectReference Include="..\tot-lib\tot-lib.csproj" />
     </ItemGroup>
 

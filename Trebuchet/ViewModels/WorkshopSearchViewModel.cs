@@ -20,9 +20,9 @@ public class WorkshopSearchViewModel : ReactiveObject
 {
 
 
-    public WorkshopSearchViewModel(AppSettings appSettings)
+    public WorkshopSearchViewModel(Steam steam)
     {
-        _appSettings = appSettings;
+        _steam = steam;
         SearchCommand = ReactiveCommand.Create(() =>
         {
             Page = 1;
@@ -49,7 +49,7 @@ public class WorkshopSearchViewModel : ReactiveObject
     private ObservableCollection<WorkshopSearchResult> _searchResults = [];
     private bool _testLiveWorkshop;
     private string _searchTerm = string.Empty;
-    private readonly AppSettings _appSettings;
+    private readonly Steam _steam;
     private bool _isLoading;
     private int _maxPage = 1;
     private uint _page = 1;
@@ -96,26 +96,19 @@ public class WorkshopSearchViewModel : ReactiveObject
     public async void Search(string searchTerm, bool testLive, uint page)
     {
         IsLoading = true;
-        var query = new QueryFilesQuery(_appSettings.ApiKey)
-        {
-            Page = page,
-            SearchText = searchTerm,
-            AppId = testLive ? Constants.AppIDTestLiveClient : Constants.AppIDLiveClient,
-            FileType = PublishedFileType.Items_ReadyToUse,
-            NumPerPage = 20,
-            StripDescriptionBBcode = true,
-            ReturnDetails = true,
-            QueryType = PublishedFileQueryType.RankedByTextSearch,
-            ReturnVoteData = true,
-            ReturnShortDescription = true
-        };
 
-        var files = await PublishedFileService.QueryFiles(query, CancellationToken.None);
-        MaxPage = Math.Max(files.Total / 20, 1);
-        if (files.Total > 0)
+        var appId = testLive ? Constants.AppIDTestLiveClient : Constants.AppIDLiveClient;
+        var wresult = await _steam.QueryWorkshopSearch(appId, searchTerm, 20, page);
+        if (wresult is null)
+        {
+            IsLoading = false;
+            return;
+        }
+        MaxPage = Math.Max((int)wresult.total / 20, 1);
+        if (wresult.total > 0)
         {
             SearchResults.Clear();
-            foreach (var file in files.PublishedFileDetails)
+            foreach (var file in wresult.publishedfiledetails)
             {
                 var searchResult = new WorkshopSearchResult(file);
                 searchResult.ModAdded += OnModAdded;
@@ -126,25 +119,6 @@ public class WorkshopSearchViewModel : ReactiveObject
             SearchResults.Clear();
 
         PageLoaded?.Invoke(this, EventArgs.Empty);
-        var summary = new GetPlayerSummariesResponse();
-        if (files.Total != 0)
-        {
-            var playerQuery = new GetPlayerSummariesQuery(_appSettings.ApiKey, SearchResults.Select(r => r.CreatorId));
-            summary = await SteamUser.GetPlayerSummaries(playerQuery, CancellationToken.None);
-        }
-
-        if (summary.Players.Length == 0)
-        {
-            IsLoading = false;
-            return;
-        }
-
-        var enumeration =
-            from result in SearchResults
-            join player in summary.Players on result.CreatorId equals player.SteamID
-            select new KeyValuePair<WorkshopSearchResult, PlayerSummary>(result, player);
-        foreach (var e in enumeration)
-            e.Key.SetCreator(e.Value);
         IsLoading = false;
     }
     

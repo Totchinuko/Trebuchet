@@ -1,6 +1,7 @@
 ﻿using DepotDownloader;
 using Microsoft.Extensions.Logging;
 using SteamKit2;
+using SteamKit2.Internal;
 
 namespace TrebuchetLib.Services
 {
@@ -142,6 +143,33 @@ namespace TrebuchetLib.Services
                 _session.RequestAppInfo(_appSetup.ServerAppId, true);
                 return ContentDownloader.GetSteam3AppBuildNumber(_appSetup.ServerAppId, ContentDownloader.DEFAULT_BRANCH);
             }).ConfigureAwait(false);
+        }
+
+        public async Task<IEnumerable<PublishedFileDetails>> GetPublishedFiles(IEnumerable<ulong> modlist)
+        {
+            try
+            {
+                return await _session.GetPublishedFileDetailsComplete([Constants.AppIDLiveClient, Constants.AppIDTestLiveClient], modlist);
+            }
+            catch(Exception ex)
+            {
+                _logger.LogTrace(ex, "GetPublishedFiles failed to retrieve details");
+                return [];
+            }
+        }
+
+        public async Task<CPublishedFile_QueryFiles_Response?> QueryWorkshopSearch(uint appId, string searchTerms, uint perPage,
+            uint page)
+        {
+            try
+            {
+                return await _session.QueryPublishedFileSearch(appId, searchTerms, perPage, page);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogTrace(ex, "QueryWorkshopSearch failed");
+                return null;
+            }
         }
 
         /// <summary>

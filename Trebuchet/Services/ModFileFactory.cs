@@ -7,6 +7,7 @@ using ReactiveUI;
 using SteamWorksWebAPI;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Utils;
 using Trebuchet.ViewModels;
 using Trebuchet.ViewModels.Panels;
 using TrebuchetLib;

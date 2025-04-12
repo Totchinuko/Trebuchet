@@ -11,9 +11,6 @@
                 <StackPanel Grid.Row="0" Orientation="Vertical" Grid.Column="1" Margin="6 0">
                     <TextBlock TextWrapping="Wrap" Margin="0,0,3,0" FontSize="16">
                         <Run Text="{Binding Title, Mode=OneWay}" />
-                        <Run Text=" (" />
-                        <Run Text="{Binding Creator, Mode=OneWay}" />
-                        <Run Text=")" />
                     </TextBlock>
                     <TextBlock Classes="SubText">
                         <Run Text="{x:Static a:Resources.LastUpdate}" />

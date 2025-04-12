@@ -13,7 +13,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
-using SteamWorksWebAPI;
 
 namespace TrebuchetUtils;
 

@@ -2,6 +2,7 @@
 using System.Reactive;
 using Humanizer;
 using ReactiveUI;
+using SteamKit2.Internal;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Response;
 using TrebuchetLib;
@@ -14,19 +15,19 @@ namespace Trebuchet.ViewModels
         private string _creatorAvatar = string.Empty;
         private string _creator = string.Empty;
 
-        public WorkshopSearchResult(QueriedPublishedFile result)
+        public WorkshopSearchResult(PublishedFileDetails result)
         {
-            AppId = result.ConsumerAppID;
-            CreatorId = result.Creator;
-            LastUpdate = Tools.UnixTimeStampToDateTime(result.TimeUpdated);
-            PublishedFileId = result.PublishedFileID;
-            ShortDescription = result.ShortDescription;
-            Size = result.FileSize;
-            Subs = result.Subscriptions;
-            Title = result.Title;
-            VoteDown = result.VoteData.VotesDown;
-            VoteUp = result.VoteData.VotesUp;
-            PreviewUrl = result.PreviewUrl;
+            AppId = result.consumer_appid;
+            CreatorId = result.creator;
+            LastUpdate = Tools.UnixTimeStampToDateTime(result.time_updated);
+            PublishedFileId = result.publishedfileid;
+            ShortDescription = result.short_description;
+            Size = result.file_size;
+            Subs = result.subscriptions;
+            Title = result.title;
+            VoteDown = result.vote_data.votes_down;
+            VoteUp = result.vote_data.votes_up;
+            PreviewUrl = result.preview_url;
             AddModCommand = ReactiveCommand.Create(() => ModAdded?.Invoke(this, this));
             OpenWeb = ReactiveCommand.Create(() =>
             {
@@ -38,19 +39,7 @@ namespace Trebuchet.ViewModels
 
         public uint AppId { get; }
 
-        public string Creator
-        {
-            get => _creator;
-            private set => SetField(ref _creator, value);
-        }
-
-        public string CreatorAvatar
-        {
-            get => _creatorAvatar;
-            private set => SetField(ref _creatorAvatar, value);
-        }
-
-        public string CreatorId { get; }
+        public ulong CreatorId { get; }
 
         public DateTime LastUpdate { get; }
 
@@ -62,7 +51,7 @@ namespace Trebuchet.ViewModels
         
         public string PreviewUrl { get; }
 
-        public long Size { get; }
+        public ulong Size { get; }
 
         public uint Subs { get; }
 
@@ -74,11 +63,5 @@ namespace Trebuchet.ViewModels
         
         public ReactiveCommand<Unit,Unit> AddModCommand { get; }
         public ReactiveCommand<Unit,Unit> OpenWeb { get; }
-
-        public void SetCreator(PlayerSummary summary)
-        {
-            Creator = summary.PersonaName;
-            CreatorAvatar = summary.Avatar;
-        }
     }
 }

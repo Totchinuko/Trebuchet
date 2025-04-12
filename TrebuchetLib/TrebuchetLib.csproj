@@ -26,13 +26,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <Reference Include="DepotDownloader">
-            <HintPath>..\..\DepotDownloader\DepotDownloader\bin\Release\net9.0\DepotDownloader.dll</HintPath>
-        </Reference>
-    </ItemGroup>
-
-    <ItemGroup>
-      <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
+      <ProjectReference Include="..\DepotDownloader\DepotDownloader\DepotDownloader.csproj" />
       <ProjectReference Include="..\tot-lib\tot-lib.csproj" />
     </ItemGroup>
 

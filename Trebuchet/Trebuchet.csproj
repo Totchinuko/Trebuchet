@@ -36,8 +36,6 @@
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <AvaloniaResource Include="app.red.ico" />
-        <EmbeddedResource Include="AppSettings.json.sample" />
-        <EmbeddedResource Include="AppSettings.json" />
     </ItemGroup>
 
     <ItemGroup>
