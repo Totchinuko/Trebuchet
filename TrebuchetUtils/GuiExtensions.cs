@@ -15,7 +15,7 @@ namespace TrebuchetUtils
 {
     public static class GuiExtensions
     {
-        public static IEnumerable<T> FindVisualChildren<T>(Visual depObj) where T : Visual
+        public static IEnumerable<T> FindVisualChildren<T>(this Visual depObj) where T : Visual
         {
             foreach (var child in VisualExtensions.GetVisualChildren(depObj))
             {
@@ -40,7 +40,7 @@ namespace TrebuchetUtils
             System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(Environment.ProcessPath);
             return fvi.FileVersion ?? string.Empty;
         }
-        public static IEnumerable<Visual> FindVisualChildren(Visual depObj)
+        public static IEnumerable<Visual> FindVisualChildren(this Visual depObj)
         {
             foreach (var child in VisualExtensions.GetVisualChildren(depObj))
             {
@@ -86,7 +86,7 @@ namespace TrebuchetUtils
         /// <summary>
         /// Finds a Child of a given item in the visual tree.
         /// </summary>
-        public static bool TryFindChild<T>(Visual parent, string childName, [NotNullWhen(true)] out T? foundChild)
+        public static bool TryFindChild<T>(this Visual parent, string childName, [NotNullWhen(true)] out T? foundChild)
            where T : Visual
         {
             foundChild = null;
