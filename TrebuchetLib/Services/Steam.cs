@@ -132,17 +132,26 @@ namespace TrebuchetLib.Services
         /// Force refresh of the steam app info cache and get the current build id of the server app.
         /// </summary>
         /// <returns></returns>
-        public async Task<ulong> GetSteamBuildID()
+        public async Task<uint> GetSteamBuildID()
         {
             UpdateDownloaderConfig();
 
             if (_session == null)
                 throw new InvalidOperationException("Steam session is not functioning");
-            return await Task.Run(() =>
+            return await Task.Run(async () =>
             {
-                _session.RequestAppInfo(_appSetup.ServerAppId, true);
-                return ContentDownloader.GetSteam3AppBuildNumber(_appSetup.ServerAppId, ContentDownloader.DEFAULT_BRANCH);
-            }).ConfigureAwait(false);
+                try
+                {
+                    await _session.RequestAppInfo(_appSetup.ServerAppId, true);
+                    return ContentDownloader.GetSteam3AppBuildNumber(_appSetup.ServerAppId,
+                        ContentDownloader.DEFAULT_BRANCH);
+                }
+                catch(Exception ex)
+                {
+                    _logger.LogWarning(ex, "Cannot retrieve build ID");
+                    return 0U;
+                }
+            });
         }
 
         public async Task<CPublishedFile_QueryFiles_Response?> QueryWorkshopSearch(uint appId, string searchTerms, uint perPage,
