@@ -17,7 +17,7 @@
                 <Border Margin="0 0 6 0" ToolTip.Tip="Drag to reorder" Background="Transparent" Cursor="SizeNorthSouth">
                     <i:Icon Value="mdi-drag-vertical" Foreground="{DynamicResource TPanelAccent}" FontSize="30"  />
                 </Border>
-                <Border Grid.Column="1" Margin="0,0,12,0" u:Classes.List="{Binding IconClasses}">
+                <Border Grid.Column="1" Margin="0,0,12,0" ToolTip.Tip="{Binding IconToolTip}" u:Classes.List="{Binding IconClasses}">
                     <i:Icon Classes="Normal"  />
                 </Border>
                 <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Title, Mode=OneWay}" />

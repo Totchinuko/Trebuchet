@@ -13,6 +13,7 @@ public interface IModFile
     string Title { get; }
     ObservableCollection<string> StatusClasses { get; }
     ObservableCollection<string> IconClasses { get; }
+    string IconToolTip { get; }
     string LastUpdate { get; }
     string FilePath { get; }
     long FileSize { get; }

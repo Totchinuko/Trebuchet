@@ -13,28 +13,25 @@
     </Style>
     
     <Style Selector=":is(Border).ModIcon">
+        <Setter Property="Background" Value="Transparent"/>
         <Style Selector="^.Live">
             <Style Selector="^ i|Icon">
                 <Setter Property="Value" Value="mdi-steam" />
-            </Style>
-            <Style Selector="^ ToolTip">
-                <Setter Property="Tip" Value="{x:Static a:Resources.LiveMod}" />
             </Style>
         </Style>
         <Style Selector="^.TestLive">
             <Style Selector="^ i|Icon">
                 <Setter Property="Value" Value="mdi-test-tube" />
             </Style>
-            <Style Selector="^ ToolTip">
-                <Setter Property="Tip" Value="{x:Static a:Resources.TestLiveMod}" />
+        </Style>
+        <Style Selector="^.Unknown">
+            <Style Selector="^ i|Icon">
+                <Setter Property="Value" Value="mdi-help" />
             </Style>
         </Style>
         <Style Selector="^.Local">
             <Style Selector="^ i|Icon">
                 <Setter Property="Value" Value="mdi-file" />
-            </Style>
-            <Style Selector="^ ToolTip">
-                <Setter Property="Tip" Value="{x:Static a:Resources.LocalMod}" />
             </Style>
         </Style>
     </Style>

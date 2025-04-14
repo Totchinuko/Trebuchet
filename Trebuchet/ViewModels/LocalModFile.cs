@@ -15,6 +15,7 @@ public class LocalModFile : ReactiveObject, IModFile
         FilePath = path;
         Title = Path.GetFileName(path);
         IconClasses.Add(@"Local");
+        IconToolTip = Resources.LocalMod;
         
         var fileInfo = new FileInfo(path);
         if (fileInfo.Exists)
@@ -34,6 +35,7 @@ public class LocalModFile : ReactiveObject, IModFile
     public string Title { get; }
     public ObservableCollection<string> StatusClasses { get; } = [];
     public ObservableCollection<string> IconClasses { get; } = [];
+    public string IconToolTip { get; }
     public string LastUpdate { get; }
     public string FilePath { get; }
     public long FileSize { get; }

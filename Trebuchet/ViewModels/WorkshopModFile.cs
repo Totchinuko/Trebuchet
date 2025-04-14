@@ -23,6 +23,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         LastDateUpdate = updateDate;
         LastUpdate = @$"{Resources.LastUpdate}: {updateDate.Humanize()}";
         IconClasses.Add(file.ConsumerAppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
+        IconToolTip = file.ConsumerAppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = file.FileSize;
         if(File.Exists(path))
             StatusClasses.Add(needUpdate ? @"UpdateAvailable" : @"Up2Date");
@@ -44,6 +45,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         LastDateUpdate = file.LastUpdate;
         LastUpdate = @$"{Resources.LastUpdate}: {file.LastUpdate.Humanize()}";
         IconClasses.Add(file.AppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
+        IconToolTip = file.AppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = (long)file.Size;
         if(File.Exists(path))
             StatusClasses.Add(needUpdate ? @"UpdateAvailable" : @"Up2Date");
@@ -66,6 +68,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         LastDateUpdate = file.LastDateUpdate;
         LastUpdate = @$"{Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
         IconClasses.Add(file.AppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
+        IconToolTip = file.AppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = file.FileSize;
         if(File.Exists(path))
             StatusClasses.Add(NeedUpdate ? @"UpdateAvailable" : @"Up2Date");
@@ -82,6 +85,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
     public DateTime LastDateUpdate { get; }
     public ObservableCollection<string> StatusClasses { get; } = [];
     public ObservableCollection<string> IconClasses { get; } = [];
+    public string IconToolTip { get; }
     public string LastUpdate { get; }
     public ObservableCollection<ModFileAction> Actions { get; } = [];
     
