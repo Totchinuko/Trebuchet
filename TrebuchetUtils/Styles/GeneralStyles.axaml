@@ -25,22 +25,27 @@
                     <SolidColorBrush x:Key="PopupOverlay" Color="#000000" Opacity="0.6"/>
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TRedFaded" Color="{DynamicResource TRedBase}" Opacity="0.4" />
+                    <SolidColorBrush x:Key="TRedDull" Color="{DynamicResource TRedBase}" Opacity="0.55" />
                     <SolidColorBrush x:Key="TRedDim" Color="{DynamicResource TRedBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TRed" Color="{DynamicResource TRedBase}" />
                     <SolidColorBrush x:Key="TGreenAbsent" Color="{DynamicResource TGreenBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TGreenFaded" Color="{DynamicResource TGreenBase}" Opacity="0.4" />
+                    <SolidColorBrush x:Key="TGreenDull" Color="{DynamicResource TGreenBase}" Opacity="0.55" />
                     <SolidColorBrush x:Key="TGreenDim" Color="{DynamicResource TGreenBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TGreen" Color="{DynamicResource TGreenBase}" />
                     <SolidColorBrush x:Key="TYellowAbsent" Color="{DynamicResource TYellowBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TYellowFaded" Color="{DynamicResource TYellowBase}" Opacity="0.4" />
+                    <SolidColorBrush x:Key="TYellowDull" Color="{DynamicResource TYellowBase}" Opacity="0.55" />
                     <SolidColorBrush x:Key="TYellowDim" Color="{DynamicResource TYellowBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TYellow" Color="{DynamicResource TYellowBase}" />
                     <SolidColorBrush x:Key="TPurpleAbsent" Color="{DynamicResource TPurpleBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TPurpleFaded" Color="{DynamicResource TPurpleBase}" Opacity="0.4" />
+                    <SolidColorBrush x:Key="TPurpleDull" Color="{DynamicResource TPurpleBase}" Opacity="0.55" />
                     <SolidColorBrush x:Key="TPurpleDim" Color="{DynamicResource TPurpleBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TPurple" Color="{DynamicResource TPurpleBase}" />
                     <SolidColorBrush x:Key="TBlueAbsent" Color="{DynamicResource TBlueBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.4" />
+                    <SolidColorBrush x:Key="TBlueDull" Color="{DynamicResource TBlueBase}" Opacity="0.55" />
                     <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
                     <x:Double x:Key="TScrollbarSize">14</x:Double>
@@ -65,22 +70,27 @@
                     <SolidColorBrush x:Key="PopupOverlay" Color="#000000" Opacity="0.6"/>
                     <SolidColorBrush x:Key="TRedAbsent" Color="{DynamicResource TRedBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TRedFaded" Color="{DynamicResource TRedBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TRedDull" Color="{DynamicResource TRedBase}" Opacity="0.3" />
                     <SolidColorBrush x:Key="TRedDim" Color="{DynamicResource TRedBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TRed" Color="{DynamicResource TRedBase}" />
                     <SolidColorBrush x:Key="TGreenAbsent" Color="{DynamicResource TGreenBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TGreenFaded" Color="{DynamicResource TGreenBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TGreenDull" Color="{DynamicResource TGreenBase}" Opacity="0.3" />
                     <SolidColorBrush x:Key="TGreenDim" Color="{DynamicResource TGreenBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TGreen" Color="{DynamicResource TGreenBase}" />
                     <SolidColorBrush x:Key="TYellowAbsent" Color="{DynamicResource TYellowBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TYellowFaded" Color="{DynamicResource TYellowBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TYellowDull" Color="{DynamicResource TYellowBase}" Opacity="0.3" />
                     <SolidColorBrush x:Key="TYellowDim" Color="{DynamicResource TYellowBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TYellow" Color="{DynamicResource TYellowBase}" />
                     <SolidColorBrush x:Key="TPurpleAbsent" Color="{DynamicResource TPurpleBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TPurpleFaded" Color="{DynamicResource TPurpleBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TPurpleDull" Color="{DynamicResource TPurpleBase}" Opacity="0.3" />
                     <SolidColorBrush x:Key="TPurpleDim" Color="{DynamicResource TPurpleBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TPurple" Color="{DynamicResource TPurpleBase}" />
                     <SolidColorBrush x:Key="TBlueAbsent" Color="{DynamicResource TBlueBase}" Opacity="0" />
                     <SolidColorBrush x:Key="TBlueFaded" Color="{DynamicResource TBlueBase}" Opacity="0.1" />
+                    <SolidColorBrush x:Key="TBlueDull" Color="{DynamicResource TBlueBase}" Opacity="0.3" />
                     <SolidColorBrush x:Key="TBlueDim" Color="{DynamicResource TBlueBase}" Opacity="0.65" />
                     <SolidColorBrush x:Key="TBlue" Color="{DynamicResource TBlueBase}" />
                     <x:Double x:Key="TScrollbarSize">14</x:Double>
@@ -605,7 +615,7 @@
 
             <!--  Selected PointerOver State  -->
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
+                <Setter Property="Background" Value="{DynamicResource TBlueDull}" />
                 <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
             </Style>
 

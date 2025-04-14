@@ -84,7 +84,7 @@
                 </Border>
             </WrapPanel>
             <Border DockPanel.Dock="Top" Padding="0 12 0 0">
-                <ListBox ScrollViewer.AllowAutoHide="False" Classes="draggableVirtualizing NoSelection" ItemsSource="{Binding Modlist}" ItemTemplate="{StaticResource ModlistItems}"/>
+                <ListBox ScrollViewer.AllowAutoHide="False" Classes="draggableVirtualizing" SelectionMode="Multiple" ItemsSource="{Binding Modlist}" ItemTemplate="{StaticResource ModlistItems}"/>
             </Border>
         </DockPanel>
     </DataTemplate>

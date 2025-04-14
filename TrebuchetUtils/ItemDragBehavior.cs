@@ -1,13 +1,19 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
+using System.Linq;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Metadata;
 using Avalonia.Controls.Primitives;
 using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media.Transformation;
+using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactivity;
+using tot_lib;
 
 namespace TrebuchetUtils;
 
@@ -26,6 +32,7 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
     private bool _captured;
     private Vector _scrollOffset;
     private Point _lastPosition;
+    private List<object?>? _selection;
 
     /// <summary>
     /// 
@@ -109,8 +116,15 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
             _targetIndex = -1;
             _itemsControl = itemsControl;
             _draggedContainer = AssociatedObject;
-            
-            if (_itemsControl is ListBox { Scroll: ScrollViewer scrollable })
+
+            if (_itemsControl is ListBox {ItemsSource: IList list} listBox)
+            {
+                var indexes = listBox.Selection.SelectedIndexes.ToList();
+                indexes.Sort();
+                _selection = indexes.Select(x => list[x]).ToList();
+            }
+
+            if (TryGetScroller(out var scrollable))
             {
                 _scrollOffset = scrollable.Offset;
                 scrollable.ScrollChanged += OnScrollChanged;
@@ -125,6 +139,22 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
 
             _captured = true;
         }
+    }
+
+    private bool TryGetScroller([NotNullWhen(true)]out ScrollViewer? scrollViewer)
+    {
+        scrollViewer = null;
+        if (_itemsControl is null) return false;
+        var attr = _itemsControl.GetType().GetCustomAttributes(typeof(TemplatePartAttribute), true)
+            .OfType<TemplatePartAttribute>().FirstOrDefault(x => x.Type == typeof(IScrollable));
+        var nameScope = _itemsControl.FindNameScope();
+        if (attr is not null && _itemsControl.TryFindChild<ScrollViewer>(attr.Name, out scrollViewer))
+            return true;
+
+        if (!_itemsControl.TryGetParent<ScrollViewer>(out var scrollParent)) return false;
+        scrollViewer = scrollParent;
+        return true;
+
     }
 
     private void PointerReleased(object? sender, PointerReleasedEventArgs e)
@@ -163,7 +193,7 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
             }
         }
         
-        if (_itemsControl is ListBox { Scroll: ScrollViewer scrollable })
+        if (TryGetScroller(out var scrollable))
         {
             scrollable.ScrollChanged -= OnScrollChanged;
         }
@@ -233,16 +263,44 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
             var container = itemsControl.ContainerFromIndex(i);
             if (container is not null)
             {
-                SetTranslateTransform(container, 0, 0);
+                //SetTranslateTransform(container, 0, 0);
+                container.RenderTransform = null;
             }
   
             i++;
         }  
     }
-
+    
     private void MoveDraggedItem(ItemsControl? itemsControl, int draggedIndex, int targetIndex)
     {
-        if (itemsControl?.ItemsSource is IList itemsSource)
+        if (_selection is not null && 
+            itemsControl is ListBox
+            {
+                SelectionMode: SelectionMode.Multiple, 
+                ItemsSource: IList listSource
+            } listBox)
+        {
+            var i = 0;
+            if (draggedIndex < targetIndex) targetIndex++;
+            foreach(var item in _selection)
+            {
+                var tIndex = targetIndex + i;
+                if (listSource.IndexOf(item) < tIndex)
+                    tIndex--;
+                else
+                    i++;
+                listSource.Remove(item);
+                if (listSource.Count <= tIndex)
+                    listSource.Add(item);
+                else
+                    listSource.Insert(tIndex, item);
+
+            }
+            listBox.Selection.SelectRange(listSource.IndexOf(_selection.First()), listSource.IndexOf(_selection.Last()));
+
+            _selection = null;
+        }
+        else if (itemsControl?.ItemsSource is IList itemsSource)
         {
             var draggedItem = itemsSource[draggedIndex];
             itemsSource.RemoveAt(draggedIndex);
@@ -291,7 +349,7 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
         }
 
         Vector offset = Vector.Zero;
-        if (_itemsControl is ListBox { Scroll: { } scrollable })
+        if (TryGetScroller(out var scrollable))
         {
             offset = scrollable.Offset - _scrollOffset;
         }
