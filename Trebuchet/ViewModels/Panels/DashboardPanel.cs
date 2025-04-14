@@ -91,6 +91,7 @@ namespace Trebuchet.ViewModels.Panels
                     .SelectMany(x => x)
                     .Distinct().ToList();
                 await _steamApi.UpdateMods(mods);
+                await OnRequestAppRefresh();
             }
             catch (TrebException tex)
             {

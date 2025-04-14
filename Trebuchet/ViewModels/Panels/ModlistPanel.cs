@@ -181,7 +181,8 @@ namespace Trebuchet.ViewModels.Panels
 
         public override Task RefreshPanel()
         {
-            _needRefresh = true;
+            if(!Active)
+                _needRefresh = true;
             return Task.CompletedTask;
         }
 
@@ -212,6 +213,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 await _steamApi.UpdateMods(mods);
                 await _modFileFactory.QueryFromWorkshop(Modlist);
+                await OnRequestAppRefresh();
             }
             catch (TrebException tex)
             {
