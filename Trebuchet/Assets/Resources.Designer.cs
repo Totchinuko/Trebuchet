@@ -2531,6 +2531,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Unknown Workshop Mod. This can happen if the mod has been deleted or hidden on the workshop.
+        /// </summary>
+        public static string UnknownMod {
+            get {
+                return ResourceManager.GetString("UnknownMod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Untitled.
         /// </summary>
         public static string Untitled {

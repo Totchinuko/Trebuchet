@@ -903,4 +903,7 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
     <data name="ModlistSizeTip" xml:space="preserve">
         <value>Le poid total des mods dans votre liste. Les mods manquant utilise la taille indiqué dans la base de donnée du workshop. Les mods locaux qui sont manquant compte pour zéro.</value>
     </data>
+    <data name="UnknownMod" xml:space="preserve">
+        <value>Mod Workshop Inconnu. Cela peut arriver si le mod a été supprimé ou caché sur le workshop</value>
+    </data>
 </root>

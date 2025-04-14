@@ -911,4 +911,7 @@ Do you wish to proceed ?</value>
     <data name="ModlistSizeTip" xml:space="preserve">
         <value>The total size of the mods in your list. Missing mod use the size of the mod indicated in the workshop database. Missing local files count for zero.</value>
     </data>
+    <data name="UnknownMod" xml:space="preserve">
+        <value>Unknown Workshop Mod. This can happen if the mod has been deleted or hidden on the workshop</value>
+    </data>
 </root>

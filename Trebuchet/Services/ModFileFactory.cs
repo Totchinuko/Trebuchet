@@ -26,7 +26,16 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
             return CreatePublished(path, publishedFileId);
         return CreateLocal(path);
     }
-    
+
+    public IModFile CreateUnknown(string path, ulong publishedFile)
+    {
+        var file = new UnknownModFile(path, publishedFile);
+        AddOpenWorkshopDisabledAction(file);
+        AddUpdateDisabledAction(file);
+        AddRemoveAction(file);
+        return file;
+    }
+
     public IModFile Create(IModFile modfile, string path)
     {
         switch (modfile)
@@ -49,6 +58,12 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
                 AddUpdateAction(wfile);
                 AddRemoveAction(wfile);
                 return wfile;
+            case UnknownModFile u:
+                var ufile = new UnknownModFile(path, u.PublishedId);
+                AddOpenWorkshopDisabledAction(ufile);
+                AddUpdateDisabledAction(ufile);
+                AddRemoveAction(ufile);
+                return ufile;
             default:
                 throw new NotImplementedException();
         }
@@ -65,7 +80,10 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
             if (current is not IPublishedModFile pub) continue;
             var workshop = details.FirstOrDefault(d => d.PublishedFileID == pub.PublishedId);
             if (workshop is null) continue;
-            files[i] = Create(workshop, needUpdate.Contains(workshop.PublishedFileID));
+            if (workshop.CreatorAppId != 0)
+                files[i] = Create(workshop, needUpdate.Contains(workshop.PublishedFileID));
+            else
+                files[i] = CreateUnknown(pub.FilePath, pub.PublishedId);
         }
     }
 
