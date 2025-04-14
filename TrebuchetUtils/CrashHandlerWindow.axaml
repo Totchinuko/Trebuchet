@@ -37,6 +37,9 @@
                         <Button Classes="Base" Command="{Binding SendReport}" IsVisible="{Binding HasReporter}">
                             <TextBlock Text="Send Report" />
                         </Button>
+                        <Button Classes="Base" Command="{Binding SaveReport}" IsVisible="{Binding !HasReporter}">
+                            <TextBlock Text="Save Report" />
+                        </Button>
                         <Button Classes="Base Red Colored Heavy" Click="Exit_Button_OnClick">
                             <TextBlock Text="Exit" />
                         </Button>

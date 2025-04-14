@@ -1,13 +1,16 @@
 using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using ReactiveUI;
 using tot_lib;
@@ -19,6 +22,7 @@ internal class CrashHandlerViewModel : ReactiveObject
 
     public CrashHandlerViewModel(Exception ex)
     {
+        _payload = new CrashHandlerPayload(ex);
         Title = ex.GetType().Name;
         Message = ex.Message;
         CallStack = ex.GetAllExceptions();
@@ -33,6 +37,7 @@ internal class CrashHandlerViewModel : ReactiveObject
         var canSend = this.WhenAnyValue(x => x.ReportSent);
 
         SendReport = ReactiveCommand.CreateFromTask(SendReportAsync, canSend);
+        SaveReport = ReactiveCommand.CreateFromTask(SaveReportAsync);
         FoldCallStack = ReactiveCommand.Create<Unit>((_) => FoldedCallstack = !FoldedCallstack);
         FoldedCallstack = true;
         HasReporter = CrashHandler.HasReportUri();
@@ -41,6 +46,7 @@ internal class CrashHandlerViewModel : ReactiveObject
     private bool _hasReporter;
     private bool _reportSent;
     private bool _sending;
+    private CrashHandlerPayload _payload;
     private ObservableAsPropertyHelper<string> _foldIcon;
     private ObservableAsPropertyHelper<int> _windowHeight;
 
@@ -52,6 +58,7 @@ internal class CrashHandlerViewModel : ReactiveObject
     
     public ReactiveCommand<Unit, Unit> FoldCallStack { get; }
     public ReactiveCommand<Unit, Unit> SendReport { get; }
+    public ReactiveCommand<Unit, Unit> SaveReport { get; }
     
     public bool FoldedCallstack
     {
@@ -81,10 +88,35 @@ internal class CrashHandlerViewModel : ReactiveObject
     {
         ReportSent = true;
         Sending = true;
-        var report = new CrashHandlerPayload();
-        var result = await CrashHandler.SendReport(report);
+        var result = await CrashHandler.SendReport(_payload);
         Sending = false;
         ReportSent = result;
+    }
+
+    private async Task SaveReportAsync()
+    {
+        ReportSent = true;
+        Sending = true;
+        var json = JsonSerializer.Serialize(_payload, CrashHandlerPayloadJsonContext.Default.CrashHandlerPayload);
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+        if (desktop.MainWindow == null) return;
+
+        var file = await desktop.MainWindow.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
+        {
+            Title = "Save Report",
+            SuggestedFileName = "Report.json",
+            FileTypeChoices = [new(@"Json Text")
+            {
+                MimeTypes = [@"application/json"],
+                Patterns = [@"*.json"],
+            }]
+        });
+
+        if (file is null) return;
+        if (!file.Path.IsFile) return;
+        var path = Path.GetFullPath(file.Path.LocalPath);
+        await File.WriteAllTextAsync(path, json);
+        Sending = false;
     }
 }
 
