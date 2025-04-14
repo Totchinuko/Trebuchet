@@ -1,11 +1,11 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:l="clr-namespace:Trebuchet.ViewModels.InnerContainer"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-    <DataTemplate x:Key="OnBoardingProgress" DataType="l:OnBoardingProgress">
+    <DataTemplate x:Key="OnBoardingProgress" DataType="l:IOnBoardingProgress">
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
             <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" />
-            <ProgressBar Margin="25 0" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Maximum="{Binding MaxValue, Mode=OneTime}" Minimum="0.0" Value="{Binding Progress}" IsIndeterminate="{Binding IsIndeterminate}" />
+            <ProgressBar Margin="25 0" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Maximum="1.0" Minimum="0.0" Value="{Binding CurrentProgress}" IsIndeterminate="{Binding IsIndeterminate}" />
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

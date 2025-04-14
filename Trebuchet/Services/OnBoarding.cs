@@ -36,7 +36,7 @@ public class OnBoarding(
             string.Format(Resources.OnBoardingModTrimConfirmSub, count));
         await dialogueBox.OpenAsync(confirm);
         if (!confirm.Result) throw new OperationCanceledException(@"OnBoarding was cancelled");
-        var progress = new OnBoardingProgress(Resources.OnBoardingModTrimConfirm, string.Empty);
+        var progress = new OnBoardingProgress<double>(Resources.OnBoardingModTrimConfirm, string.Empty, 0.0, 1.0);
         progress.Report(0);
         dialogueBox.Show(progress);
         await steamApi.RemoveUnusedMods();
@@ -102,8 +102,8 @@ public class OnBoarding(
 
     public async Task<bool> OnBoardingServerDownload()
     {
-        var progress = new OnBoardingProgress(Resources.UpdateServersLabel, string.Empty)
-            .SetSize<OnBoardingProgress>(600, 250);
+        var progress = new OnBoardingProgress<double>(Resources.UpdateServersLabel, string.Empty, 0.0, 1.0)
+            .SetSize<OnBoardingProgress<double>>(600, 250);
         dialogueBox.Show(progress);
         steam.SetTemporaryProgress(progress);
         if(!steam.IsConnected)
@@ -280,10 +280,11 @@ public class OnBoarding(
                 {
                     if (!dialogueBox.Active)
                     {
-                        var message = new OnBoardingProgress(
+                        var message = new OnBoardingProgress<double>(
                             Resources.OnBoardingProcessLock,
-                            string.Format(Resources.OnBoardingProcessLockSub, file))
-                            .SetSize<OnBoardingProgress>(600, 250);
+                            string.Format(Resources.OnBoardingProcessLockSub, file),
+                            0.0, 1.0)
+                            .SetSize<OnBoardingProgress<double>>(600, 250);
                         message.Report(0);
                         dialogueBox.Show(message);
                     }
@@ -322,8 +323,8 @@ public class OnBoarding(
 
             if (!await OnBoardingElevationRequest(trebuchetDir, Resources.OnBoardingUpgradeUac)) return false;
 
-            var progress = new OnBoardingProgress(Resources.Upgrade, Resources.OnBoardingUpgradeCopy)
-                .SetSize<OnBoardingProgress>(600, 250);
+            var progress = new OnBoardingProgress<double>(Resources.Upgrade, Resources.OnBoardingUpgradeCopy, 0.0, 1.0)
+                .SetSize<OnBoardingProgress<double>>(600, 250);
             dialogueBox.Show(progress);
 
             if (File.Exists(configLive))
