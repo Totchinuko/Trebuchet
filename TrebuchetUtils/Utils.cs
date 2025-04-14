@@ -11,8 +11,10 @@ using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Media.Imaging;
 using Avalonia.Platform;
+using Avalonia.Styling;
 
 namespace TrebuchetUtils;
 
@@ -159,5 +161,13 @@ public static class Utils
         ITinyMessageProxy proxy) where TMessage : class, ITinyMessage
     {
         return hub.Subscribe(recipient.Receive, messageFilter, useStrongReferences, proxy);
+    }
+
+    public static string GetMarkdownHtmlHeader()
+    {
+        if (Application.Current is null) return string.Empty;
+        if (Application.Current.ActualThemeVariant.Key == ThemeVariant.Dark.Key)
+            return tot_lib.Utils.GetEmbeddedTextFile<Classes>("TrebuchetUtils.MarkdownHeaderDark.html");
+        return tot_lib.Utils.GetEmbeddedTextFile<Classes>("TrebuchetUtils.MarkdownHeaderLight.html");
     }
 }

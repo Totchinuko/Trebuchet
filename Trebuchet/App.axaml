@@ -54,6 +54,7 @@
                 <MergeResourceInclude Source="Templates\OnBoardingMessage.axaml" />
                 <MergeResourceInclude Source="Templates\PanelToolbox.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingLanguage.axaml" />
+                <MergeResourceInclude Source="Templates\OnBoardingUpdate.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -93,5 +94,7 @@
         <StaticResource ResourceKey="OnBoardingMessage" />
         <StaticResource ResourceKey="PanelToolbox" />
         <StaticResource ResourceKey="OnBoardingLanguage" />
+        <StaticResource ResourceKey="OnBoardingLanguage" />
+        <StaticResource ResourceKey="OnBoardingUpdate" />
     </Application.DataTemplates>
 </Application>

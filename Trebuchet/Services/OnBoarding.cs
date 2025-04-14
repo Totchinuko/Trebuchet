@@ -43,7 +43,9 @@ public class OnBoarding(
         }
 
         var title = string.Format(Resources.OnBoardingUpdate, updater.Version);
-        var confirm = new OnBoardingConfirmation(title, Resources.OnBoardingUpdateSub);
+        var confirm = new OnBoardingUpdate(title)
+            .SetStretch<OnBoardingUpdate>()
+            .LoadMarkdownDescription(updater.Body);
         await dialogueBox.OpenAsync(confirm);
         if (!confirm.Result) return true;
 

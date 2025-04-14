@@ -1,0 +1,29 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:l="clr-namespace:Trebuchet.ViewModels.InnerContainer"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:html="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="OnBoardingUpdate" DataType="l:OnBoardingUpdate">
+        <DockPanel LastChildFill="True" MinWidth="550" MinHeight="150">
+            <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
+            <StackPanel Spacing="6" Orientation="Horizontal" HorizontalAlignment="Right" DockPanel.Dock="Bottom" Margin="0 12 0 0">
+                <Button Classes="Base Green" HotKey="Enter" Command="{Binding ConfirmCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <i:Icon Value="mdi-update" Classes="Normal" />
+                        <TextBlock Text="{x:Static a:Resources.Update}" />
+                    </StackPanel>
+                </Button>
+                <Button Classes="Base" HotKey="Escape" IsVisible="{Binding $self.IsEnabled}" Command="{Binding CancelCommand}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <i:Icon Value="mdi-cancel" Classes="Normal" />
+                        <TextBlock Text="{x:Static a:Resources.Cancel}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+            <ScrollViewer DockPanel.Dock="Top">
+                <html:HtmlPanel Margin="12" IsVisible="{Binding Description}" Text="{Binding Description}" />
+            </ScrollViewer>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>
