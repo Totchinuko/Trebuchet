@@ -1,9 +1,12 @@
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using SteamKit2.GC.Dota.Internal;
 using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services.Language;
@@ -19,9 +22,57 @@ public class OnBoarding(
     DialogueBox dialogueBox,
     UIConfig uiConfig,
     ILanguageManager langManager,
+    ILogger<OnBoarding> logger,
     Steam steam, 
     SteamApi steamApi)
 {
+    public async Task<bool> OnBoardingCheckForUpdate(IUpdater updater)
+    {
+        if (!OperatingSystem.IsWindows()) return true;
+
+        try
+        {
+            var currentVersion = ProcessUtil.GetAppVersion();
+            await updater.CheckForUpdates(currentVersion);
+            if (updater.IsUpToDate) return true;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, @"Could not check for update");
+            return true; //Pretend that nothing happened
+        }
+
+        var title = string.Format(Resources.OnBoardingUpdate, updater.Version);
+        var confirm = new OnBoardingConfirmation(title, Resources.OnBoardingUpdateSub);
+        await dialogueBox.OpenAsync(confirm);
+        if (!confirm.Result) return true;
+
+        try
+        {
+            var progress = new OnBoardingProgress<long>(title, string.Empty, 0, updater.Size);
+            dialogueBox.Show(progress);
+            var file = await updater.DownloadUpdate(progress);
+            progress.Report(0);
+
+            new Process
+            {
+                StartInfo = new ProcessStartInfo()
+                {
+                    FileName = file,
+                    // Arguments = "/silent",
+                    UseShellExecute = false
+                }
+            }.Start();
+            Utils.Utils.ShutdownDesktopProcess();
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, @"Update failed");
+            return true;
+        }
+    }
+    
     public async Task<bool> OnBoardingRemoveUnusedMods()
     {
         var count = steamApi.CountUnusedMods();

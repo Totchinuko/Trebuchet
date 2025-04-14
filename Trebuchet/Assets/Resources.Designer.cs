@@ -954,6 +954,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Trebuchet Update ({0}).
+        /// </summary>
+        public static string OnBoardingUpdate {
+            get {
+                return ResourceManager.GetString("OnBoardingUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A more recent version of trebuchet has been found, would like to download and install it ?.
+        /// </summary>
+        public static string OnBoardingUpdateSub {
+            get {
+                return ResourceManager.GetString("OnBoardingUpdateSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to A previous installation of Trebuchet has been detected and must be upgraded to function with this version. Once this task is over, previous version of Trebuchet will not work anymore. 
         ///Do you wish to proceed ?.
         /// </summary>

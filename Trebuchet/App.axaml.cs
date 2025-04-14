@@ -10,6 +10,7 @@ using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
 using Trebuchet.Services.TaskBlocker;
@@ -125,6 +126,11 @@ public partial class App : Application, IApplication
             new AppSetup(Config.LoadConfig(Constants.GetConfigPath(testlive)), testlive, catapult, experiment));
         services.AddSingleton(_uiConfig!);
         services.AddSingleton<ILanguageManager>(_langManager!);
+        services.AddSingleton<IUpdater>(
+            new GithubUpdater(
+                AppConstants.GithubOwnerUpdate,
+                AppConstants.GithubRepoUpdate,
+                AppConstants.GetUpdateContentType()));
         
         var logger = new LoggerConfiguration()
 #if !DEBUG

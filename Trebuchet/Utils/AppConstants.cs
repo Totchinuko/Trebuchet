@@ -12,6 +12,8 @@ namespace Trebuchet.Utils;
 public static class AppConstants
 {
     public const string ConfigFileName = "settings.ui.json";
+    public const string GithubOwnerUpdate = "Totchinuko";
+    public const string GithubRepoUpdate = "Trebuchet";
 
     [Localizable(false)]
     public static readonly string[] UICultureList = ["en", "fr"];
@@ -22,5 +24,11 @@ public static class AppConstants
         if(!folder.Exists)
             Directory.CreateDirectory(folder.FullName);
         return Path.Combine(folder.FullName, ConfigFileName);
+    }
+
+    public static string GetUpdateContentType()
+    {
+        if (OperatingSystem.IsWindows()) return GithubUpdater.WindowsMimeType;
+        return string.Empty;
     }
 }

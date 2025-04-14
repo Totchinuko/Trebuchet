@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using ReactiveUI;
+using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
@@ -31,6 +32,7 @@ public sealed class TrebuchetApp : ReactiveObject
         SteamWidget steamWidget,
         DialogueBox dialogueBox,
         OnBoarding onBoarding,
+        IUpdater updater,
         IEnumerable<Panel> panels)
     {
         _setup = setup;
@@ -39,6 +41,7 @@ public sealed class TrebuchetApp : ReactiveObject
         _steam = steam;
         _box = box;
         _onBoarding = onBoarding;
+        _updater = updater;
         _panels = panels.ToList();
         SteamWidget = steamWidget;
         DialogueBox = dialogueBox;
@@ -80,6 +83,7 @@ public sealed class TrebuchetApp : ReactiveObject
     private readonly Steam _steam;
     private readonly DialogueBox _box;
     private readonly OnBoarding _onBoarding;
+    private readonly IUpdater _updater;
     private readonly List<Panel> _panels;
     private readonly DispatcherTimer _timer;
     private Panel _activePanel;
@@ -180,6 +184,7 @@ public sealed class TrebuchetApp : ReactiveObject
             if (!await _onBoarding.OnBoardingCheckTrebuchet()) return;
             if (!await OnBoardingFirstLaunch()) return;
             if (!await OnBoardingRepairBrokenJunctions()) return;
+            if (!await _onBoarding.OnBoardingCheckForUpdate(_updater)) return;
             
             _activePanel.Active = true;
             await ActivePanel.DisplayPanel();

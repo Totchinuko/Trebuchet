@@ -914,4 +914,10 @@ Do you wish to proceed ?</value>
     <data name="UnknownMod" xml:space="preserve">
         <value>Unknown Workshop Mod. This can happen if the mod has been deleted or hidden on the workshop</value>
     </data>
+    <data name="OnBoardingUpdate" xml:space="preserve">
+        <value>Trebuchet Update ({0})</value>
+    </data>
+    <data name="OnBoardingUpdateSub" xml:space="preserve">
+        <value>A more recent version of trebuchet has been found, would like to download and install it ?</value>
+    </data>
 </root>
