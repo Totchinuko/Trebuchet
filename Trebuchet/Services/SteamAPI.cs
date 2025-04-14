@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Services.TaskBlocker;
@@ -12,8 +14,13 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
 
-public class SteamApi(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker taskBlocker)
+public class SteamApi(
+    Steam steam, 
+    AppFiles appFiles, 
+    ILogger<SteamApi> logger,
+    TaskBlocker.TaskBlocker taskBlocker)
 {
+    private readonly ILogger<SteamApi> _logger = logger;
     private readonly Dictionary<ulong, PublishedFile> _publishedFiles = [];
     private DateTime _lastCacheClear = DateTime.MinValue;
     
@@ -23,7 +30,8 @@ public class SteamApi(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
         if (list.Count <= 0) return results;
         try
         {
-            var response = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list), CancellationToken.None);
+            var response = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list),
+                CancellationToken.None);
             foreach (var r in response.PublishedFileDetails)
             {
                 results.Add(r);
@@ -32,7 +40,13 @@ public class SteamApi(Steam steam, AppFiles appFiles, TaskBlocker.TaskBlocker ta
 
             return results;
         }
-        catch(OperationCanceledException) {}
+        catch (OperationCanceledException)
+        {
+        }
+        catch (HttpRequestException ex)
+        {
+            _logger.LogWarning(ex, @"Could not download mod infos");
+        }
 
         return [];
     }
