@@ -246,7 +246,7 @@ public class OnBoarding(
     public async Task<bool> OnBoardingElevationRequest(string path, string reason)
     {
         var canWriteInTrebuchet = Tools.IsDirectoryWritable(path);
-        var isRoot = Tools.IsProcessElevated();
+        var isRoot = ProcessUtil.IsProcessElevated();
         if (!canWriteInTrebuchet)
         {
             if(isRoot) 
@@ -366,7 +366,7 @@ public class OnBoarding(
 
     public async Task<bool> OnBoardingUpgradeTrebuchet(string installDir, bool testlive, IProgress<double> progress)
     {
-        bool isElevated = Tools.IsProcessElevated();
+        bool isElevated = ProcessUtil.IsProcessElevated();
         string appDir = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception(@"App is installed in an invalid directory");
         installDir = installDir.Replace(@"%APP_DIRECTORY%", appDir); 
         if(string.IsNullOrEmpty(installDir)) return true;

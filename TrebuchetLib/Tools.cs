@@ -485,20 +485,6 @@ public static class Tools
                 entry.ExtractToFile(Path.Join(destination, entry.FullName));
     }
 
-    public static bool IsProcessElevated()
-    {
-        if (OperatingSystem.IsWindows())
-            return IsProcessElevatedWindows();
-        return false;
-    }
-    
-
-    [SupportedOSPlatform("windows")]
-    private static bool IsProcessElevatedWindows()
-    {
-        return new WindowsPrincipal(WindowsIdentity.GetCurrent()).IsInRole(WindowsBuiltInRole.Administrator);
-    }
-
     public static bool ValidateInstallDirectory(string installPath)
     {
         if (string.IsNullOrEmpty(installPath))

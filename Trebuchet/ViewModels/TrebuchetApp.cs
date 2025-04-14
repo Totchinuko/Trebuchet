@@ -19,7 +19,7 @@ namespace Trebuchet.ViewModels;
 
 public sealed class TrebuchetApp : ReactiveObject
 {
-    public static string VersionHeader => tot_lib.Utils.GetFileVersion();
+    public static string VersionHeader => tot_lib.ProcessUtil.GetStringVersion();
     
     public TrebuchetApp(
         AppSetup setup,
