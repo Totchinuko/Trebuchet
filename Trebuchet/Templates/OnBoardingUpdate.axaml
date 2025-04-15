@@ -21,7 +21,7 @@
                     </StackPanel>
                 </Button>
             </StackPanel>
-            <ScrollViewer DockPanel.Dock="Top" MaxWidth="{Binding Width}">
+            <ScrollViewer DockPanel.Dock="Top">
                 <html:HtmlPanel Margin="12" IsVisible="{Binding Description}" Text="{Binding Description}" />
             </ScrollViewer>
         </DockPanel>
