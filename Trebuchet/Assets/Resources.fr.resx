@@ -916,4 +916,10 @@ ATTENTION : Ceci peut rendre la détection des processus sans réponse inefficac
         <value>Les données suivante sont introuvable:
 {0}</value>
     </data>
+    <data name="OnBoardingSteamClientOffline" xml:space="preserve">
+        <value>Steam n'est pas lancé</value>
+    </data>
+    <data name="OnBoardingSteamClientOfflineSub" xml:space="preserve">
+        <value>Votre client Steam n'est pas lancé, Conan Exiles requiére que vous soyez connecté à Steam pour jouer en ligne.</value>
+    </data>
 </root>

@@ -964,6 +964,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Steam is not running.
+        /// </summary>
+        public static string OnBoardingSteamClientOffline {
+            get {
+                return ResourceManager.GetString("OnBoardingSteamClientOffline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Your Steam client is not currently running, Conan Exiles require your to be logged in to Steam to play online..
+        /// </summary>
+        public static string OnBoardingSteamClientOfflineSub {
+            get {
+                return ResourceManager.GetString("OnBoardingSteamClientOfflineSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Trebuchet Update ({0}).
         /// </summary>
         public static string OnBoardingUpdate {

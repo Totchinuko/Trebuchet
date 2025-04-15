@@ -163,20 +163,17 @@ public sealed class ClientInstanceDashboard : ReactiveObject
 
     private async Task OnBattleEyeLaunched()
     {
-        CanLaunch = false;
         if(LaunchClicked is not null)
             await LaunchClicked.Invoke(this, true);
     }
 
     private async Task OnKilled()
     {
-        CanKill = false;
         await OnKillClicked();
     }
 
     private async Task OnLaunched()
     {
-        CanLaunch = false;
         await OnLaunchClicked(false);
     }
 

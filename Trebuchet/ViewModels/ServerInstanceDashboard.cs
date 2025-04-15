@@ -181,20 +181,17 @@ namespace Trebuchet.ViewModels
 
         private void OnClose()
         {
-            CanClose = false;
             CloseClicked?.Invoke(this, Instance);
         }
 
         private async Task OnKilled()
         {
-            CanKill = false;
             await OnKillClicked();
         }
 
         private async Task OnLaunched()
         {
             if (!CanUseDashboard) return;
-            CanLaunch = false;
             await OnLaunchClicked();
         }
 

@@ -46,6 +46,7 @@ public static class Constants
     public const string TxtExt = "txt";
     
     public const string BoulderExe = "boulder.exe";
+    public const string SteamClientExe = "steam.exe";
     
     public const string argLive = "--live";
     public const string argTestLive = "--testlive";

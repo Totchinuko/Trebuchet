@@ -924,4 +924,10 @@ Do you wish to proceed ?</value>
         <value>The following data was not found:
 {0}</value>
     </data>
+    <data name="OnBoardingSteamClientOffline" xml:space="preserve">
+        <value>Steam is not running</value>
+    </data>
+    <data name="OnBoardingSteamClientOfflineSub" xml:space="preserve">
+        <value>Your Steam client is not currently running, Conan Exiles require your to be logged in to Steam to play online.</value>
+    </data>
 </root>

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive;
@@ -55,7 +56,7 @@ namespace Trebuchet.ViewModels.Panels
 
             Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker, _box);
             ConfigureClient(Client);
-            RefreshClientSelection();
+            RefreshClientSelection(_setup.Config.SelectedClientProfile, _setup.Config.SelectedClientModlist);
         }
         
         private readonly AppSetup _setup;
@@ -157,6 +158,7 @@ namespace Trebuchet.ViewModels.Panels
         public async Task LaunchClient(bool isBattleEye)
         {
             if (Client.ProcessRunning) return;
+            if (!await CheckForSteamClientRunning()) return;
 
             Client.CanLaunch = false;
             if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
@@ -319,8 +321,13 @@ namespace Trebuchet.ViewModels.Panels
 
         private void RefreshClientSelection()
         {
-            var modlist = _appFiles.Mods.ResolveProfile(Client.SelectedModlist);
-            var profile = _appFiles.Client.ResolveProfile(Client.SelectedProfile);
+            RefreshClientSelection(Client.SelectedProfile, Client.SelectedModlist);
+        }
+        
+        private void RefreshClientSelection(string profile, string modlist)
+        {
+            modlist = _appFiles.Mods.ResolveProfile(modlist);
+            profile = _appFiles.Client.ResolveProfile(profile);
 
             Client.Modlists = _appFiles.Mods.ListProfiles().ToList();
             Client.Profiles = _appFiles.Client.ListProfiles().ToList();
@@ -468,6 +475,16 @@ namespace Trebuchet.ViewModels.Panels
         {
             if (RequestRefresh is not null)
                 await RequestRefresh.Invoke(this, EventArgs.Empty);
+        }
+
+        private async Task<bool> CheckForSteamClientRunning()
+        {
+            var process = await Tools.GetProcessesWithName(Constants.SteamClientExe);
+            if (process.Count > 0) return true;
+
+            await _box.OpenErrorAsync(Resources.OnBoardingSteamClientOffline,
+                Resources.OnBoardingSteamClientOfflineSub);
+            return false;
         }
     }
 }
