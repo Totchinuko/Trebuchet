@@ -32,7 +32,6 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
     private bool _captured;
     private Vector _scrollOffset;
     private Point _lastPosition;
-    private List<object?>? _selection;
 
     /// <summary>
     /// 
@@ -116,13 +115,6 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
             _targetIndex = -1;
             _itemsControl = itemsControl;
             _draggedContainer = AssociatedObject;
-
-            if (_itemsControl is ListBox {ItemsSource: IList list} listBox)
-            {
-                var indexes = listBox.Selection.SelectedIndexes.ToList();
-                indexes.Sort();
-                _selection = indexes.Select(x => list[x]).ToList();
-            }
 
             if (TryGetScroller(out var scrollable))
             {
@@ -273,16 +265,20 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
     
     private void MoveDraggedItem(ItemsControl? itemsControl, int draggedIndex, int targetIndex)
     {
-        if (_selection is not null && 
-            itemsControl is ListBox
+        if (itemsControl is ListBox
             {
                 SelectionMode: SelectionMode.Multiple, 
-                ItemsSource: IList listSource
+                ItemsSource: IList listSource,
+                SelectedItems.Count: > 1
             } listBox)
         {
             var i = 0;
             if (draggedIndex < targetIndex) targetIndex++;
-            foreach(var item in _selection)
+            var indexes = listBox.Selection.SelectedIndexes.ToList();
+            if(!indexes.Contains(draggedIndex)) indexes.Add(draggedIndex);
+            indexes.Sort();
+            var list = indexes.Select(x => listSource[x]).ToList();
+            foreach(var item in list)
             {
                 var tIndex = targetIndex + i;
                 if (listSource.IndexOf(item) < tIndex)
@@ -296,9 +292,12 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
                     listSource.Insert(tIndex, item);
 
             }
-            listBox.Selection.SelectRange(listSource.IndexOf(_selection.First()), listSource.IndexOf(_selection.Last()));
 
-            _selection = null;
+            if (list.Count == 1)
+                listBox.SelectedIndex = listSource.IndexOf(list.First());
+            else
+                listBox.Selection.SelectRange(listSource.IndexOf(list.First()), listSource.IndexOf(list.Last()));
+
         }
         else if (itemsControl?.ItemsSource is IList itemsSource)
         {
