@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
@@ -16,7 +17,7 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public class DashboardPanel : Panel
+    public class DashboardPanel : ReactiveObject, ITickingPanel, IRefreshablePanel, IDisplablePanel, IRefreshingPanel, IBottomPanel
     {
         public DashboardPanel(
             AppSetup setup, 
@@ -26,8 +27,7 @@ namespace Trebuchet.ViewModels.Panels
             Launcher launcher, 
             DialogueBox box,
             TaskBlocker blocker,
-            ILogger<DashboardPanel> logger) : 
-            base(Resources.PanelDashboard, "mdi-view-dashboard", true)
+            ILogger<DashboardPanel> logger) 
         {
             _setup = setup;
             _uiConfig = uiConfig;
@@ -37,6 +37,7 @@ namespace Trebuchet.ViewModels.Panels
             _box = box;
             _blocker = blocker;
             _logger = logger;
+            CanBeOpened = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
 
             var canDownloadServer = blocker.WhenAnyValue(x => x.CanDownloadServer);
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
@@ -65,6 +66,16 @@ namespace Trebuchet.ViewModels.Panels
         private readonly TaskBlocker _blocker;
         private readonly ILogger<DashboardPanel> _logger;
         private DateTime _lastUpdateCheck = DateTime.MinValue;
+        private bool _canBeOpened;
+
+        public string Icon => @"mdi-view-dashboard";
+        public string Label => Resources.PanelDashboard;
+
+        public bool CanBeOpened
+        {
+            get => _canBeOpened;
+            set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
+        }
 
         public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
         public ClientInstanceDashboard Client { get; }
@@ -75,6 +86,9 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit,Unit> UpdateAllModsCommand { get; }
         public ReactiveCommand<Unit,Unit> UpdateServerCommand { get; }
         public ReactiveCommand<Unit,Unit> VerifyFilesCommand { get; }
+        
+        public event AsyncEventHandler? RequestRefresh;
+
 
         /// <summary>
         ///     Collect all used mods of all the client and server instances and update them. Will not perform any action if the
@@ -91,7 +105,7 @@ namespace Trebuchet.ViewModels.Panels
                     .SelectMany(x => x)
                     .Distinct().ToList();
                 await _steamApi.UpdateMods(mods);
-                await OnRequestAppRefresh();
+                await OnRequestRefresh();
             }
             catch (TrebException tex)
             {
@@ -219,7 +233,7 @@ namespace Trebuchet.ViewModels.Panels
             return Instances[instance];
         }
 
-        public override async Task Tick()
+        public async Task TickPanel()
         {
             await Client.ProcessRefresh(_launcher.GetClientProcess(), _uiConfig.DisplayProcessPerformance);
             foreach (var instance in _launcher.GetServerProcesses())
@@ -232,9 +246,9 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        public override Task RefreshPanel()
+        public Task RefreshPanel()
         {
-            CanTabBeClicked = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
+            CanBeOpened = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
             Client.CanUseDashboard = Tools.IsClientInstallValid(_setup.Config);
             int installedCount = _steamApi.GetInstalledServerInstanceCount();
             foreach (var instance in Instances)
@@ -246,7 +260,7 @@ namespace Trebuchet.ViewModels.Panels
             return Task.CompletedTask;
         }
 
-        public override async Task DisplayPanel()
+        public async Task DisplayPanel()
         {
             CreateInstancesIfNeeded();
             RefreshClientSelection();
@@ -419,6 +433,12 @@ namespace Trebuchet.ViewModels.Panels
         {
             foreach(var i in Instances)
                 await LaunchServer(i.Instance);
+        }
+
+        private async Task OnRequestRefresh()
+        {
+            if (RequestRefresh is not null)
+                await RequestRefresh.Invoke(this, EventArgs.Empty);
         }
     }
 }

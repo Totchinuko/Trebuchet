@@ -28,29 +28,40 @@ namespace Trebuchet.ViewModels.Panels
     }
 
     [Localizable(false)]
-    public class RconPanel : Panel
+    public class RconPanel : ReactiveObject, IRefreshablePanel
     {
-        private readonly AppSetup _setup;
-        private readonly Launcher _launcher;
-        private IConsole? _console;
-        private List<IConanServerProcess> _servers = [];
-        private int _selectedConsole;
-        private bool _canSendCommand;
-
-        public RconPanel(AppSetup setup, Launcher launcher) : base(Resources.PanelServerConsoles, "mdi-console-line", false)
+        public RconPanel(AppSetup setup, Launcher launcher)
         {
             _setup = setup;
             _launcher = launcher;
             SendCommand = ReactiveCommand.Create<string>(OnSendCommand, this.WhenAnyValue(x => x.CanSendCommand));
+            CanBeOpened = _setup.Config is { ServerInstanceCount: > 0 };
 
             this.WhenAnyValue(x => x.SelectedConsole)
                 .Subscribe((_) => OnConsoleSelectionChanged());
             
             LoadPanel();
         }
+        private readonly AppSetup _setup;
+        private readonly Launcher _launcher;
+        private IConsole? _console;
+        private List<IConanServerProcess> _servers = [];
+        private int _selectedConsole;
+        private bool _canSendCommand;
+        private bool _canBeOpened;
 
         public List<string> AvailableConsoles { get; } = [];
         public ObservableCollection<ObservableConsoleLog> ConsoleLogs { get; private set; } = [];
+
+
+        public string Icon => @"mdi-console-line";
+        public string Label => Resources.PanelServerConsoles;
+
+        public bool CanBeOpened
+        {
+            get => _canBeOpened;
+            set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
+        }
 
         public int SelectedConsole
         {
@@ -72,9 +83,9 @@ namespace Trebuchet.ViewModels.Panels
             RefreshConsoleList();
         }
 
-        public override Task RefreshPanel()
+        public Task RefreshPanel()
         {
-            CanTabBeClicked = _setup.Config is { ServerInstanceCount: > 0 };
+            CanBeOpened = _setup.Config is { ServerInstanceCount: > 0 };
             LoadPanel();
             return Task.CompletedTask;
         }
@@ -140,5 +151,6 @@ namespace Trebuchet.ViewModels.Panels
             if (valid)
                 LoadConsole(_launcher.GetServerConsole(SelectedConsole));
         }
+
     }
 }

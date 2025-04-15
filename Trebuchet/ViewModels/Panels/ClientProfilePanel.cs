@@ -16,27 +16,20 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public class ClientProfilePanel : Panel
+    public class ClientProfilePanel : ReactiveObject, IRefreshablePanel
     {
-        private readonly DialogueBox _box;
-        private readonly AppSetup _setup;
-        private readonly AppFiles _appFiles;
-        private readonly UIConfig _uiConfig;
-        private ClientProfile _profile;
-        private string _profileSize = string.Empty;
-        private string _selectedProfile;
-
         public ClientProfilePanel(
             DialogueBox box,
             AppSetup setup, 
             AppFiles appFiles, 
-            UIConfig uiConfig) : 
-            base(Resources.PanelGameSaves, "mdi-controller", false)
+            UIConfig uiConfig)
         {
             _box = box;
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
+            CanBeOpened = Tools.IsClientInstallValid(_setup.Config) && _setup.Config.ManageClient;
+            
             LoadProfileList();
             _selectedProfile = _appFiles.Client.ResolveProfile(_uiConfig.CurrentClientProfile);
             _profile = _appFiles.Client.Get(_selectedProfile);
@@ -53,7 +46,17 @@ namespace Trebuchet.ViewModels.Panels
             
             BuildFields();
         }
+        private readonly DialogueBox _box;
+        private readonly AppSetup _setup;
+        private readonly AppFiles _appFiles;
+        private readonly UIConfig _uiConfig;
+        private ClientProfile _profile;
+        private string _profileSize = string.Empty;
+        private string _selectedProfile;
+        private bool _canBeOpened;
 
+        public string Icon => @"mdi-controller";
+        public string Label => Resources.PanelGameSaves;
         public ObservableCollection<FieldElement> Fields { get; } = [];
        
         public ReactiveCommand<Unit, Unit> CreateProfileCommand { get; }
@@ -79,9 +82,15 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        public override async Task RefreshPanel()
+        public bool CanBeOpened
         {
-            CanTabBeClicked = Tools.IsClientInstallValid(_setup.Config) && _setup.Config.ManageClient;
+            get => _canBeOpened;
+            set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
+        }
+
+        public async Task RefreshPanel()
+        {
+            CanBeOpened = Tools.IsClientInstallValid(_setup.Config) && _setup.Config.ManageClient;
             _profile = _appFiles.Client.Get(SelectedProfile);
             foreach (var f in Fields.OfType<IValueField>())
                 f.Update.Execute().Subscribe();
@@ -275,5 +284,7 @@ namespace Trebuchet.ViewModels.Panels
                 .SetDefault(() => string.Join(Environment.NewLine, ClientProfile.LogFiltersDefault))
             );
         }
+
+
     }
 }

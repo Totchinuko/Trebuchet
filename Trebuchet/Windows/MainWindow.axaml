@@ -61,7 +61,7 @@
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
                     <Border x:Name="ContentPanel" Classes="DarkPanel" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3" CornerRadius="10,0,0,0" Padding="12,12,2,12">
-                        <ContentControl Content="{Binding ActivePanel}" />
+                        <ContentControl Content="{Binding ActivePanel.Panel}" />
                     </Border>
                 </Grid>
             </Panel>

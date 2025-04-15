@@ -11,16 +11,16 @@ using ReactiveUI;
 using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.ViewModels.InnerContainer;
+using Trebuchet.ViewModels.Panels;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetUtils;
-using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 namespace Trebuchet.ViewModels;
 
 public sealed class TrebuchetApp : ReactiveObject
 {
-    public static string VersionHeader => tot_lib.ProcessUtil.GetStringVersion();
+    public static string VersionHeader => ProcessUtil.GetStringVersion();
     
     public TrebuchetApp(
         AppSetup setup,
@@ -33,7 +33,7 @@ public sealed class TrebuchetApp : ReactiveObject
         DialogueBox dialogueBox,
         OnBoarding onBoarding,
         IUpdater updater,
-        IEnumerable<Panel> panels)
+        IEnumerable<IPanel> panels)
     {
         _setup = setup;
         _appFiles = appFiles;
@@ -48,21 +48,19 @@ public sealed class TrebuchetApp : ReactiveObject
         
         foreach (var panel in _panels)
         {
-            panel.PanelSelected += (_, p) => ActivePanel = p;
-            panel.RequestAppRefresh += (_,_) => RefreshPanels();
+            var command = new PanelTab(panel);
+            command.PanelSelected += OnTabClicked;
             
-            if(panel.BottomPosition)
-                BottomPanels.Add(panel);
+            if(panel is IRefreshingPanel refreshing)
+                refreshing.RequestRefresh += (_,_) => RefreshPanels();
+            
+            if(panel is IBottomPanel)
+                BottomPanels.Add(command);
             else
-                TopPanels.Add(panel);
+                TopPanels.Add(command);
         }
 
-        _activePanel = BottomPanels.First(x => x.CanTabBeClicked);
-        this.WhenAnyValue(x => x.ActivePanel)
-            .StartWith(_activePanel)
-            .Buffer(2, 1)
-            .Select(b => (Previous: b[0], Current: b[1]))
-            .InvokeCommand(ReactiveCommand.CreateFromTask<(Panel, Panel)>(OnPanelActivated));
+        _activePanel = BottomPanels.First(x => x.Panel.CanBeOpened);
 
         FoldedMenu = uiConfig.FoldedMenu;
         ToggleFoldedCommand = ReactiveCommand.Create(() =>
@@ -84,27 +82,10 @@ public sealed class TrebuchetApp : ReactiveObject
     private readonly DialogueBox _box;
     private readonly OnBoarding _onBoarding;
     private readonly IUpdater _updater;
-    private readonly List<Panel> _panels;
+    private readonly List<IPanel> _panels;
     private readonly DispatcherTimer _timer;
-    private Panel _activePanel;
+    private PanelTab _activePanel;
     private bool _foldedMenu;
-
-    private async void OnTimerTick(object? sender, EventArgs e)
-    {
-        try
-        {
-            _timer.Stop();
-            await _launcher.Tick();
-            foreach (var panel in _panels)
-                await panel.Tick();
-            _timer.Start();
-        }
-        catch (OperationCanceledException) {}
-        catch (Exception ex)
-        {
-            await CrashHandler.Handle(ex);
-        }
-    }
 
     public bool FoldedMenu
     {
@@ -114,14 +95,14 @@ public sealed class TrebuchetApp : ReactiveObject
         
     public ReactiveCommand<Unit, Unit> ToggleFoldedCommand { get; }
         
-    public Panel ActivePanel
+    public PanelTab ActivePanel
     {
         get => _activePanel;
         set => this.RaiseAndSetIfChanged(ref _activePanel, value);
     }
 
-    public ObservableCollection<Panel> TopPanels { get; } = [];
-    public ObservableCollection<Panel> BottomPanels { get; } = [];
+    public ObservableCollection<PanelTab> TopPanels { get; } = [];
+    public ObservableCollection<PanelTab> BottomPanels { get; } = [];
 
     public SteamWidget SteamWidget { get; }
         
@@ -129,7 +110,6 @@ public sealed class TrebuchetApp : ReactiveObject
 
     public async Task OnWindowShow()
     {
-        _panels.ForEach(x => x.OnWindowShow());
         await _steam.Connect();
     }
         
@@ -145,13 +125,42 @@ public sealed class TrebuchetApp : ReactiveObject
         }).Wait();
     }
 
+    private async Task OnTabClicked(object? sender, PanelTab tab)
+    {
+        ActivePanel.Active = false;
+        ActivePanel = tab;
+        ActivePanel.Active = true;
+        if (ActivePanel.Panel is IDisplablePanel displayable)
+            await displayable.DisplayPanel();
+    }
+    
+    private async void OnTimerTick(object? sender, EventArgs e)
+    {
+        try
+        {
+            _timer.Stop();
+            await _launcher.Tick();
+            foreach (var panel in _panels)
+                if(panel is ITickingPanel ticking)
+                    await ticking.TickPanel();
+            _timer.Start();
+        }
+        catch (OperationCanceledException) {}
+        catch (Exception ex)
+        {
+            await CrashHandler.Handle(ex);
+        }
+    }
+
     private async void Start()
     {
         try
         {
             _timer.Start();
-            foreach (var panel in _panels)
-                await panel.RefreshPanel();
+            _activePanel.Active = true;
+            if(_activePanel.Panel is IDisplablePanel displayed) 
+                await displayed.DisplayPanel(); 
+            await RefreshPanels();
             await OnBoardingActions();
         }
         catch (OperationCanceledException){}
@@ -162,17 +171,11 @@ public sealed class TrebuchetApp : ReactiveObject
         
     }
 
-    private async Task OnPanelActivated((Panel previous, Panel current) args)
-    {
-        args.previous.Active = false;
-        args.current.Active = true;
-        await args.current.DisplayPanel();
-    }
-
     private async Task RefreshPanels()
     {
         foreach (var panel in _panels)
-            await panel.RefreshPanel();
+            if(panel is IRefreshablePanel refreshable)
+                await refreshable.RefreshPanel();
     }
 
     private async Task OnBoardingActions()
@@ -185,9 +188,6 @@ public sealed class TrebuchetApp : ReactiveObject
             if (!await OnBoardingFirstLaunch()) return;
             if (!await OnBoardingRepairBrokenJunctions()) return;
             if (!await _onBoarding.OnBoardingCheckForUpdate(_updater)) return;
-            
-            _activePanel.Active = true;
-            await ActivePanel.DisplayPanel();
         }
         catch (OperationCanceledException ex)
         {

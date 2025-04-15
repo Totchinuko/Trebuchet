@@ -8,13 +8,13 @@ using Trebuchet.Services;
 
 namespace Trebuchet.ViewModels.Panels;
 
-public class ToolboxPanel : Panel
+public class ToolboxPanel : ReactiveObject, IDisplablePanel
 {
 
     public ToolboxPanel(
         OnBoarding onBoarding,
         SteamApi steamApi 
-        ) : base(Resources.PanelToolbox, "mdi-toolbox", true)
+        )
     {
         _onBoarding = onBoarding;
         _steamApi = steamApi;
@@ -30,6 +30,7 @@ public class ToolboxPanel : Panel
     private readonly SteamApi _steamApi;
     private int _unusedMods;
     private readonly ObservableAsPropertyHelper<string> _unusedModsSub;
+    private bool _canBeOpened = true;
 
     public string UnusedModsSub => _unusedModsSub.Value;
     public int UnusedMods
@@ -38,9 +39,18 @@ public class ToolboxPanel : Panel
         set => this.RaiseAndSetIfChanged(ref _unusedMods, value);
     }
 
+    public string Icon => @"mdi-toolbox";
+    public string Label => Resources.PanelToolbox;
+
+    public bool CanBeOpened
+    {
+        get => _canBeOpened;
+        set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
+    }
+
     public ReactiveCommand<Unit,Unit> RemoveUnusedMods { get; }
 
-    public override Task DisplayPanel()
+    public Task DisplayPanel()
     {
         UnusedMods = _steamApi.CountUnusedMods();
         return Task.CompletedTask;

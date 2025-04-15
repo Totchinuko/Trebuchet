@@ -16,7 +16,7 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public class ServerProfilePanel : Panel
+    public class ServerProfilePanel : ReactiveObject, IRefreshablePanel, IDisplablePanel
     {
         private readonly DialogueBox _box;
         private readonly AppSetup _setup;
@@ -25,18 +25,20 @@ namespace Trebuchet.ViewModels.Panels
         private ServerProfile _profile;
         private string _selectedProfile;
         private string _profileSize = string.Empty;
+        private bool _canBeOpened;
 
         public ServerProfilePanel(
             DialogueBox box,
             AppSetup setup,
             AppFiles appFiles,
             UIConfig uiConfig
-            ) : base(Resources.PanelServerSaves, "mdi-server-network", false)
+            )
         {
             _box = box;
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
+            CanBeOpened = Tools.IsServerInstallValid(_setup.Config);
 
             LoadProfileList();
             _selectedProfile = _appFiles.Server.ResolveProfile(_uiConfig.CurrentServerProfile);
@@ -78,18 +80,27 @@ namespace Trebuchet.ViewModels.Panels
             set => this.RaiseAndSetIfChanged(ref _profileSize, value);
         }
 
+        public string Icon => @"mdi-server-network";
+        public string Label => Resources.PanelServerSaves;
+
+        public bool CanBeOpened
+        {
+            get => _canBeOpened;
+            set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
+        }
+
         public ObservableCollectionExtended<string> Profiles { get; } = [];
 
-        public override async Task RefreshPanel()
+        public async Task RefreshPanel()
         {
-            CanTabBeClicked = Tools.IsServerInstallValid(_setup.Config);
+            CanBeOpened = Tools.IsServerInstallValid(_setup.Config);
             _profile = _appFiles.Server.Get(SelectedProfile);
             await RefreshProfileSize(SelectedProfile);
             foreach (var f in Fields.OfType<IValueField>())
                 f.Update.Execute().Subscribe();
         }
 
-        public override async Task DisplayPanel()
+        public async Task DisplayPanel()
         {
             await RefreshProfileSize(SelectedProfile);
         }

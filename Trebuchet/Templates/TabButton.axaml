@@ -3,17 +3,16 @@
                     xmlns:t="clr-namespace:Trebuchet.ViewModels"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
-    <DataTemplate x:Key="TabButtonTemplate" x:DataType="panels:Panel">
+    <DataTemplate x:Key="TabButtonTemplate" x:DataType="panels:PanelTab">
         <Button Classes="Base Blue TabLeft Heavy"
                 Padding="6 8"
                 HorizontalAlignment="Stretch"
                 Classes.Sneak="{Binding !Active}"
                 Classes.Colored="{Binding Active}"
-                Command="{Binding TabClick}"
-                CommandParameter="{Binding .}"
+                Command="{Binding Click}"
                 HorizontalContentAlignment="Left">
             <StackPanel Orientation="Horizontal">
-                <i:Icon Value="{Binding IconPath}" Classes="Normal" VerticalAlignment="Center" />
+                <i:Icon Value="{Binding Icon}" Classes="Normal" VerticalAlignment="Center" />
                 <TextBlock Classes="" Text="{Binding Label}" FontSize="14" Margin="12 0 0 0" VerticalAlignment="Center" />
             </StackPanel>
         </Button>

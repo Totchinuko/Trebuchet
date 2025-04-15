@@ -1,9 +1,11 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using DynamicData.Binding;
 using ReactiveUI;
+using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
@@ -15,7 +17,7 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels;
 
-public class SettingsPanel : Panel
+public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
 {
 
 
@@ -25,8 +27,7 @@ public class SettingsPanel : Panel
         ILanguageManager langManager,
         DialogueBox box,
         TaskBlocker blocker,
-        UIConfig uiConfig) : 
-        base(Resources.PanelSettings, "mdi-cog", true)
+        UIConfig uiConfig)
     {
         _setup = setup;
         _uiConfig = uiConfig;
@@ -56,6 +57,7 @@ public class SettingsPanel : Panel
     private readonly DialogueBox _box;
     private readonly TaskBlocker _blocker;
     private LanguageModel _selectedLanguage;
+    private bool _canBeOpened = true;
 
     public ReactiveCommand<Unit,Unit> SaveConfig { get; }
     public ReactiveCommand<Unit,Unit> SaveUiConfig { get; }
@@ -68,6 +70,17 @@ public class SettingsPanel : Panel
         get => _selectedLanguage;
         set => this.RaiseAndSetIfChanged(ref _selectedLanguage, value);
     }
+
+    public string Icon => @"mdi-cog";
+    public string Label => Resources.PanelSettings;
+
+    public bool CanBeOpened
+    {
+        get => _canBeOpened;
+        set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
+    }
+
+    public event AsyncEventHandler? RequestRefresh;
 
     private async Task OnLanguageChanged(LanguageModel? model)
     {
@@ -94,12 +107,12 @@ public class SettingsPanel : Panel
     {
         Fields.Add(new TitleField().SetTitle(Resources.OnBoardingUsageChoice));
         Fields.Add(new ClientInstallationField(_onBoarding, _setup)
-            .WhenFieldChanged(ReactiveCommand.CreateFromTask(OnRequestAppRefresh))
+            .WhenFieldChanged(ReactiveCommand.CreateFromTask(OnRequestRefresh))
             .SetTitle(Resources.SettingClientInstallation)
             .SetDescription(Resources.SettingClientInstallationText)
         );
         Fields.Add(new ServerInstallationField(_onBoarding, _setup)
-            .WhenFieldChanged(ReactiveCommand.CreateFromTask(OnRequestAppRefresh))
+            .WhenFieldChanged(ReactiveCommand.CreateFromTask(OnRequestRefresh))
             .SetTitle(Resources.SettingServerInstanceCount)
             .SetDescription(Resources.SettingServerInstanceCountText)
         );
@@ -156,5 +169,11 @@ public class SettingsPanel : Panel
             .SetSetter((v) => _uiConfig.AutoRefreshModlist = v)
             .SetDefault(() => UIConfig.AutoRefreshModlistDefault)
         );
-    }    
+    }
+
+    private async Task OnRequestRefresh()
+    {
+        if (RequestRefresh is not null)
+            await RequestRefresh.Invoke(this, EventArgs.Empty);
+    }
 }

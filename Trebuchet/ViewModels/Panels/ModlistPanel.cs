@@ -19,6 +19,7 @@ using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
+using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
@@ -31,7 +32,7 @@ using TrebuchetLib.Services.Importer;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public class ModlistPanel : Panel
+    public class ModlistPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRefreshingPanel
     {
         public ModlistPanel(
             SteamApi steamApi, 
@@ -42,8 +43,7 @@ namespace Trebuchet.ViewModels.Panels
             ModlistImporter importer,
             WorkshopSearchViewModel workshop,
             ModFileFactory modFileFactory,
-            ILogger<ModlistPanel> logger) : 
-            base(Resources.PanelMods, "mdi-toy-brick", false)
+            ILogger<ModlistPanel> logger) 
         {
             _steamApi = steamApi;
             _appFiles = appFiles;
@@ -115,6 +115,7 @@ namespace Trebuchet.ViewModels.Panels
         private string _modlistUrl;
         private string _selectedModlist;
         private string _modlistSize = string.Empty;
+        private bool _canBeOpened = true;
 
         public ReactiveCommand<Unit, Unit> CreateModlistCommand { get; }
         public ReactiveCommand<Unit, Unit> DeleteModlistCommand { get; }
@@ -130,6 +131,15 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit, Unit> RefreshModlistCommand { get; }
 
         public ObservableCollectionExtended<IModFile> Modlist { get; } = [];
+
+        public string Icon => @"mdi-toy-brick";
+        public string Label => Resources.PanelMods;
+
+        public bool CanBeOpened
+        {
+            get => _canBeOpened;
+            set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
+        }
 
         public string ModlistUrl
         {
@@ -154,6 +164,9 @@ namespace Trebuchet.ViewModels.Panels
         }
 
         public ObservableCollectionExtended<string> Profiles { get; } = [];
+        
+        public event AsyncEventHandler? RequestRefresh;
+
        
         public async Task AddModFromWorkshop(WorkshopSearchResult mod)
         {
@@ -179,14 +192,13 @@ namespace Trebuchet.ViewModels.Panels
             return UpdateMods([mod.PublishedId]);
         }
 
-        public override Task RefreshPanel()
+        public Task RefreshPanel()
         {
-            if(!Active)
-                _needRefresh = true;
+            _needRefresh = true;
             return Task.CompletedTask;
         }
 
-        public override async Task DisplayPanel()
+        public async Task DisplayPanel()
         {
             if (!_needRefresh) return;
             _needRefresh = false;
@@ -213,7 +225,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 await _steamApi.UpdateMods(mods);
                 await _modFileFactory.QueryFromWorkshop(Modlist);
-                await OnRequestAppRefresh();
+                await OnRequestRefresh();
             }
             catch (TrebException tex)
             {
@@ -541,5 +553,10 @@ namespace Trebuchet.ViewModels.Panels
         }
 
 
+        private async Task OnRequestRefresh()
+        {
+            if(RequestRefresh is not null)
+                await RequestRefresh.Invoke(this, EventArgs.Empty);
+        }
     }
 }

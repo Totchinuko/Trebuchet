@@ -24,7 +24,6 @@ using TrebuchetLib.Services;
 using TrebuchetLib.Services.Importer;
 using TrebuchetLib.YuuIni;
 using TrebuchetUtils;
-using Panel = Trebuchet.ViewModels.Panels.Panel;
 
 // GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
 // Copyright (C) 2025 Totchinuko https://github.com/Totchinuko
@@ -163,18 +162,18 @@ public partial class App : Application, IApplication
         services.AddSingleton<TrebuchetApp>();
         services.AddTransient<WorkshopSearchViewModel>();
 
-        services.AddSingleton<Panel, ModlistPanel>();
-        services.AddSingleton<Panel, ClientProfilePanel>();
-        services.AddSingleton<Panel, ServerProfilePanel>();
+        services.AddSingleton<IPanel, ModlistPanel>();
+        services.AddSingleton<IPanel, ClientProfilePanel>();
+        services.AddSingleton<IPanel, ServerProfilePanel>();
         if (experiment)
         {
-            services.AddSingleton<Panel, RconPanel>();
-            services.AddSingleton<Panel, LogFilterPanel>();
+            services.AddSingleton<IPanel, RconPanel>();
+            services.AddSingleton<IPanel, LogFilterPanel>();
         }
         
-        services.AddSingleton<Panel, DashboardPanel>();
-        services.AddSingleton<Panel, ToolboxPanel>();
-        services.AddSingleton<Panel, SettingsPanel>();
+        services.AddSingleton<IPanel, DashboardPanel>();
+        services.AddSingleton<IPanel, ToolboxPanel>();
+        services.AddSingleton<IPanel, SettingsPanel>();
     }
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)

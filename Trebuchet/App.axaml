@@ -33,7 +33,6 @@
                 <MergeResourceInclude Source="Templates\ClientSettings.axaml" />
                 <MergeResourceInclude Source="Templates\ServerSettings.axaml" />
                 <MergeResourceInclude Source="Templates\TabButton.axaml" />
-                <MergeResourceInclude Source="Templates\TabLabel.axaml" />
                 <MergeResourceInclude Source="Templates\MapField.axaml" />
                 <MergeResourceInclude Source="Templates\IntField.axaml" />
                 <MergeResourceInclude Source="Templates\FloatField.axaml" />
