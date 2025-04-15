@@ -13,6 +13,10 @@
         <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
         <Deterministic>true</Deterministic>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+        <Version>
+            $([System.IO.File]::ReadAllText("$(MSBuildProjectDirectory)\\..\\VERSION"))
+            .$([MSBuild]::Divide($([MSBuild]::Modulo($([System.DateTimeOffset]::UtcNow.ToUnixTimeSeconds()), 86400)), 2))
+        </Version>
 
         <Authors>Totchinuko</Authors>
         <Product>trebuchet</Product>
