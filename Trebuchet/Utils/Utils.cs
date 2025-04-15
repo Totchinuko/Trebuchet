@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -41,12 +42,15 @@ internal static class Utils
     {
         var data = Tools.GetProcess(Environment.ProcessId);
         var version = setup.IsTestLive ? Constants.argTestLive : Constants.argLive;
-        if (!data.args.Contains(version))
-            data.args += version;
+        List<string> arguments = data.args.Split(' ').ToList();
+        if (!arguments.Contains(version))
+            arguments.Add(version);
+        if(!arguments.Contains(AppConstants.RestartArg))
+            arguments.Add(AppConstants.RestartArg);
             
         Process process = new Process();
         process.StartInfo.FileName = data.filename;
-        process.StartInfo.Arguments = data.args;
+        process.StartInfo.Arguments = string.Join(' ', arguments);
         process.StartInfo.UseShellExecute = true;
         if (asAdmin)
             process.StartInfo.Verb = "runas";
@@ -58,19 +62,6 @@ internal static class Utils
     {
         if(Application.Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
             desktop.Shutdown();
-    }
-
-    public static void FocusOtherProcess()
-    {
-        var currentProcess = Process.GetCurrentProcess();
-        foreach (var process in Process.GetProcessesByName(currentProcess.ProcessName))
-        {
-            if (process.Id != currentProcess.Id)
-            {
-                Tools.FocusWindow(process.MainWindowHandle);
-                break;
-            }
-        }
     }
 
     [Obsolete]

@@ -1,10 +1,12 @@
 using Avalonia;
 using System;
 using System.Diagnostics;
+using System.Linq;
 using System.Threading;
 using Avalonia.ReactiveUI;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
+using Trebuchet.Utils;
 using TrebuchetLib;
 
 namespace Trebuchet;
@@ -17,7 +19,22 @@ static class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        using var mutex = new Mutex(true, @"TotTrebuchet", out var createdNew);
+        
+        if(createdNew || args.Contains(AppConstants.RestartArg))
+            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+        else
+        {
+            var currentProcess = Process.GetCurrentProcess();
+            foreach (var process in Process.GetProcessesByName(currentProcess.ProcessName))
+            {
+                if (process.Id != currentProcess.Id)
+                {
+                    Tools.FocusWindow(process.MainWindowHandle);
+                    break;
+                }
+            }
+        }
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

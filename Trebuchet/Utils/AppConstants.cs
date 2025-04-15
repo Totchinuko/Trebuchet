@@ -16,6 +16,8 @@ public static class AppConstants
     public const string GithubOwnerUpdate = "Totchinuko";
     public const string GithubRepoUpdate = "Trebuchet";
 
+    public const string RestartArg = "--restart";
+
     [Localizable(false)]
     public static readonly string[] UICultureList = ["en", "fr"];
 
