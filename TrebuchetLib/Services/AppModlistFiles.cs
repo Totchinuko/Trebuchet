@@ -4,7 +4,7 @@ namespace TrebuchetLib.Services;
 
 public class AppModlistFiles(AppSetup setup)
 {
-    private Dictionary<string, ModListProfile> _cache = [];
+    private readonly Dictionary<string, ModListProfile> _cache = [];
     public ModListProfile Create(string name)
     {
         if (_cache.TryGetValue(name, out var profile))
@@ -208,7 +208,7 @@ public class AppModlistFiles(AppSetup setup)
         catch { return false; }
     }
 
-    public bool TryParseDirectory2ModID(string path, out ulong id)
+    public bool TryParseDirectory2ModId(string path, out ulong id)
     {
         id = 0;
         if (ulong.TryParse(Path.GetFileName(path), out id))
@@ -242,7 +242,7 @@ public class AppModlistFiles(AppSetup setup)
         if (Path.GetExtension(path) == ".pak")
             return TryParseFile2ModId(path, out id);
         else
-            return TryParseDirectory2ModID(path, out id);
+            return TryParseDirectory2ModId(path, out id);
     }
     
     public IEnumerable<KeyValuePair<ulong, FileInfo>> GetModFiles(IEnumerable<string> files)

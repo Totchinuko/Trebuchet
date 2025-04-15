@@ -1,13 +1,11 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Text.Json;
-using TrebuchetLib.Processes;
 
 namespace TrebuchetLib.Services;
 
 public class AppServerFiles(AppSetup appSetup)
 {
     
-    private Dictionary<string, ServerProfile> _cache = [];
+    private readonly Dictionary<string, ServerProfile> _cache = [];
     public ServerProfile Create(string name)
     {
         if (_cache.TryGetValue(name, out var profile))

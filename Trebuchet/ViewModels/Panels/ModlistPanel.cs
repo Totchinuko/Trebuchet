@@ -445,7 +445,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 var watch = new Stopwatch();
                 watch.Start();
-                if (!_appFiles.Mods.TryParseDirectory2ModID(fullPath, out var id)) return;
+                if (!_appFiles.Mods.TryParseDirectory2ModId(fullPath, out var id)) return;
                 for (var i = 0; i < Modlist.Count; i++)
                 {
                     var modFile = Modlist[i];

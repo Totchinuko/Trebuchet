@@ -4,7 +4,7 @@ namespace TrebuchetLib.Services;
 
 public class AppClientFiles(AppSetup appSetup)
 {
-    private Dictionary<string, ClientProfile> _cache = [];
+    private readonly Dictionary<string, ClientProfile> _cache = [];
     public ClientProfile Create(string name)
     {
         if (_cache.TryGetValue(name, out var profile))
