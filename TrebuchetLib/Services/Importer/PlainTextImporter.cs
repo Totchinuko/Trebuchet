@@ -55,12 +55,13 @@ public class PlainTextImporter(AppModlistFiles files) : ITrebuchetImporter
             
         if (Path.GetExtension(file) != "."+Constants.PakExt) 
             throw new IOException($"modlist file contain unsupported format {file}");
-            
-        var fileName = Path.GetFileNameWithoutExtension(file);
-        if (ulong.TryParse(fileName, out modId))
-            return modId.ToString();
+
         var parentDir = Directory.GetParent(file)?.Name ?? string.Empty;
         if (ulong.TryParse(parentDir, out modId))
+            return modId.ToString();
+        
+        var fileName = Path.GetFileNameWithoutExtension(file);
+        if (ulong.TryParse(fileName, out modId))
             return modId.ToString();
 
         return file;
