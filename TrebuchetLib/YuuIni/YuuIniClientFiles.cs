@@ -10,13 +10,18 @@ public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
     public async Task WriteIni(ClientProfile profile)
     {
         Dictionary<string, IniDocument> documents = new Dictionary<string, IniDocument>();
+        // Modify the default SectionName parse because funcom sometime does an oupsi and generate sections with an empty name
+        var iniParserConfiguration = new IniParserConfiguration();
+        iniParserConfiguration.SectionNameRegex = "\\s*[^\\[\\]]*\\s*";
 
         foreach (var method in GetIniMethods(this))
         {
             IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
             if (!documents.TryGetValue(attr.Path, out IniDocument? document))
             {
-                document = IniParser.Parse(await Tools.GetFileContent(Path.Combine(appFiles.Client.GetClientFolder(), attr.Path)));
+                var iniPath = Path.Combine(appFiles.Client.GetClientFolder(), attr.Path);
+                var iniContent = await Tools.GetFileContent(iniPath);
+                document = IniParser.Parse(iniContent, iniParserConfiguration);
                 documents.Add(attr.Path, document);
             }
             method.Invoke(this, [profile, document]);

@@ -10,6 +10,9 @@ public class YuuIniServerFiles(AppFiles appFiles)
     public async Task WriteIni(ServerProfile profile, int instance)
     {
         Dictionary<string, IniDocument> documents = new Dictionary<string, IniDocument>();
+        // Modify the default SectionName parse because funcom sometime does an oupsi and generate sections with an empty name
+        var iniParserConfiguration = new IniParserConfiguration();
+        iniParserConfiguration.SectionNameRegex = "\\s*[^\\[\\]]*\\s*";
 
         foreach (var method in GetIniMethods(this))
         {
@@ -18,7 +21,7 @@ public class YuuIniServerFiles(AppFiles appFiles)
             {
                 var path = Path.Combine(appFiles.Server.GetInstancePath(instance), attr.Path);
                 var content = await Tools.GetFileContent(path);
-                document = IniParser.Parse(content);
+                document = IniParser.Parse(content, iniParserConfiguration);
                 documents.Add(attr.Path, document);
             }
             method.Invoke(this, [profile, document]);
