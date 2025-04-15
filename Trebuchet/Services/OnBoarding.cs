@@ -177,7 +177,7 @@ public class OnBoarding(
         
         var finder = new OnBoardingDirectory(Resources.OnBoardingLocateConan, Resources.OnBoardingLocateConanText, setup.Config.ClientPath)
             .SetValidation(ValidateConanExileLocation)
-            .SetSize<OnBoardingDirectory>(600, 200);
+            .SetSize<OnBoardingDirectory>(650, 200);
         await dialogueBox.OpenAsync(finder);
         if(finder.Value is null) throw new OperationCanceledException(@"OnBoarding was cancelled");
         setup.Config.ClientPath = finder.Value;
