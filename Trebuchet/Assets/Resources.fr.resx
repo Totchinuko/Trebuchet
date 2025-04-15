@@ -937,4 +937,17 @@ ATTENTION : Ceci peut rendre la détection des processus sans réponse inefficac
     <data name="SettingPlateformThemeLight" xml:space="preserve">
         <value>Clair</value>
     </data>
+    <data name="OnBoardingDataDirectory" xml:space="preserve">
+        <value>Dossier de données téléchargé</value>
+    </data>
+    <data name="OnBoardingDataDirectorySub" xml:space="preserve">
+        <value>Ce dossier contient les mods and fichier serveurs téléchargé par Trebuchet depuis le Workshop Steam. Vous pouvez changer son emplacement par défaut pour quelque chose de plus adapté.
+Ne le placez JAMAIS dans votre dossier Steam.</value>
+    </data>
+    <data name="ErrorInvalidDirectory" xml:space="preserve">
+        <value>Ce dossier est invalide</value>
+    </data>
+    <data name="Reset" xml:space="preserve">
+        <value>Réinitialiser</value>
+    </data>
 </root>

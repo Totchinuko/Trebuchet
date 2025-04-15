@@ -126,6 +126,10 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
             .SetTitle(Resources.SettingServerInstanceCount)
             .SetDescription(Resources.SettingServerInstanceCountText)
         );
+        Fields.Add(new AppDataDirectoryField(_onBoarding, _setup)
+            .SetTitle(Resources.OnBoardingDataDirectory)
+            .SetDescription(Resources.OnBoardingDataDirectorySub)
+        );
         Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
         Fields.Add(new ToggleField()
             .WhenFieldChanged(SaveUiConfig)

@@ -26,6 +26,7 @@ namespace TrebuchetLib
         public string SelectedClientProfile { get; set; } = string.Empty;
         public string[] SelectedServerModlists { get => _selectedServerModlists; set => _selectedServerModlists = value; }
         public string[] SelectedServerProfiles { get => _selectedServerProfiles; set => _selectedServerProfiles = value; }
+        public string DataDirectory { get; set; } = DataDirectoryDefault;
         
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         [Obsolete]
@@ -82,5 +83,6 @@ namespace TrebuchetLib
         public static readonly int MaxServersDefault = 20;
         public static readonly int ServerInstanceCountDefault = 0;
         public static readonly bool VerifyAllDefault = false;
+        public static readonly string DataDirectoryDefault = string.Empty;
     }
 }

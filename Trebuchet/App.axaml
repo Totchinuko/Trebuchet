@@ -54,6 +54,7 @@
                 <MergeResourceInclude Source="Templates\PanelToolbox.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingLanguage.axaml" />
                 <MergeResourceInclude Source="Templates\OnBoardingUpdate.axaml" />
+                <MergeResourceInclude Source="Templates\AppDataDirectoryField.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -95,5 +96,6 @@
         <StaticResource ResourceKey="OnBoardingLanguage" />
         <StaticResource ResourceKey="OnBoardingLanguage" />
         <StaticResource ResourceKey="OnBoardingUpdate" />
+        <StaticResource ResourceKey="AppDataDirectoryField" />
     </Application.DataTemplates>
 </Application>

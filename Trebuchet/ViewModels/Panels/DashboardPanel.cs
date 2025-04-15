@@ -124,6 +124,7 @@ namespace Trebuchet.ViewModels.Panels
             try
             {
                 await _steamApi.UpdateServers();
+                await RefreshPanel();
             }
             catch (TrebException tex)
             {

@@ -945,4 +945,17 @@ Do you wish to proceed ?</value>
     <data name="SettingPlateformThemeLight" xml:space="preserve">
         <value>Light</value>
     </data>
+    <data name="OnBoardingDataDirectory" xml:space="preserve">
+        <value>Downloaded data directory</value>
+    </data>
+    <data name="OnBoardingDataDirectorySub" xml:space="preserve">
+        <value>This directory contain mods and server files downloaded by Trebuchet from the Steam Workshop. You can change its default location to a more suitable one.
+DO NOT place it in your Steam Directory.</value>
+    </data>
+    <data name="ErrorInvalidDirectory" xml:space="preserve">
+        <value>This directory is invalid</value>
+    </data>
+    <data name="Reset" xml:space="preserve">
+        <value>Reset</value>
+    </data>
 </root>

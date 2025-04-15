@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using tot_lib;
 
 namespace TrebuchetLib.Services;
@@ -31,11 +32,26 @@ public class AppSetup
     
     public DirectoryInfo GetCommonAppDataDirectory()
     {
-        return typeof(Config).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
+        if (TryGetCustomDirectory(Config.DataDirectory, out var dir))
+            return dir;
+        return GetCommonAppDataDirectoryDefault();
     }
 
     public static DirectoryInfo GetAppConfigDirectory()
     {
         return typeof(Config).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
+    }
+
+    private bool TryGetCustomDirectory(string dirPath, [NotNullWhen(true)]out DirectoryInfo? dir)
+    {
+        dir = null;
+        if (!AppFiles.IsDirectoryValidForData(dirPath)) return false;
+        dir = new DirectoryInfo(dirPath);
+        return true;
+    }
+
+    public static DirectoryInfo GetCommonAppDataDirectoryDefault()
+    {
+        return typeof(Config).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
     }
 }

@@ -21,6 +21,19 @@ public class AppFiles(AppClientFiles clientFiles, AppServerFiles serverFiles, Ap
 
         return true;
     }
-    
 
+    public static bool IsDirectoryValidForData(string path)
+    {
+        try
+        {
+            if (string.IsNullOrEmpty(path)) return false;
+            if (!Directory.Exists(path)) return false;
+            if (!Utils.IsDirectoryWritable(path)) return false;
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+    }
 }

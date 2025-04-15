@@ -349,6 +349,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to This directory is invalid.
+        /// </summary>
+        public static string ErrorInvalidDirectory {
+            get {
+                return ResourceManager.GetString("ErrorInvalidDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to This name is already taken.
         /// </summary>
         public static string ErrorNameAlreadyTaken {
@@ -750,6 +759,25 @@ namespace Trebuchet.Assets {
         public static string OnBoardingChooseGameSaveText {
             get {
                 return ResourceManager.GetString("OnBoardingChooseGameSaveText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Downloaded data directory.
+        /// </summary>
+        public static string OnBoardingDataDirectory {
+            get {
+                return ResourceManager.GetString("OnBoardingDataDirectory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to This directory contain mods and server files downloaded by Trebuchet from the Steam Workshop. You can change its default location to a more suitable one.
+        ///DO NOT place it in your Steam Directory..
+        /// </summary>
+        public static string OnBoardingDataDirectorySub {
+            get {
+                return ResourceManager.GetString("OnBoardingDataDirectorySub", resourceCulture);
             }
         }
         
@@ -1259,6 +1287,15 @@ namespace Trebuchet.Assets {
         public static string RemoveFromList {
             get {
                 return ResourceManager.GetString("RemoveFromList", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reset.
+        /// </summary>
+        public static string Reset {
+            get {
+                return ResourceManager.GetString("Reset", resourceCulture);
             }
         }
         

@@ -6,7 +6,6 @@ using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
-using SteamKit2.GC.Dota.Internal;
 using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services.Language;
@@ -74,7 +73,26 @@ public class OnBoarding(
             return true;
         }
     }
-    
+
+    public async Task<bool> OnBoardingChangeDataDirectory()
+    {
+        var directoryChoice
+            = new OnBoardingDirectory(Resources.OnBoardingDataDirectory, Resources.OnBoardingDataDirectorySub)
+                .SetValidation(ValidateDataDirectory)
+                .SetSize<OnBoardingDirectory>(650, 200);
+        await dialogueBox.OpenAsync(directoryChoice);
+        if(directoryChoice.Value is null)throw new OperationCanceledException(@"OnBoarding was cancelled");
+        setup.Config.DataDirectory = directoryChoice.Value;
+        return true;
+    }
+
+    private Validation ValidateDataDirectory(string? arg)
+    {
+        if(arg is null) return Validation.Invalid(Resources.ErrorInvalidDirectory);
+        if (!AppFiles.IsDirectoryValidForData(arg)) return Validation.Invalid(Resources.ErrorInvalidDirectory);
+        return Validation.Valid;
+    }
+
     public async Task<bool> OnBoardingRemoveUnusedMods()
     {
         var count = steamApi.CountUnusedMods();
