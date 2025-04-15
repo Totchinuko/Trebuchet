@@ -1,4 +1,5 @@
 using tot_lib;
+using TrebuchetLib.Services;
 
 namespace TrebuchetLib;
 
@@ -64,7 +65,7 @@ public static class Constants
     
     public static string GetConfigPath(bool testlive)
     {
-        var folder = typeof(Config).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
+        var folder = AppSetup.GetAppConfigDirectory();
         if(!folder.Exists)
             Directory.CreateDirectory(folder.FullName);
         return Path.Combine(folder.FullName, testlive ? Constants.FileTestLiveConfig : Constants.FileLiveConfig);
@@ -72,7 +73,7 @@ public static class Constants
     
     public static DirectoryInfo GetLoggingDirectory()
     {
-        var folder = typeof(Config).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
+        var folder = AppSetup.GetAppConfigDirectory();
         if(!folder.Exists)
             Directory.CreateDirectory(folder.FullName);
         return new DirectoryInfo(Path.Combine(folder.FullName, LogFolder));

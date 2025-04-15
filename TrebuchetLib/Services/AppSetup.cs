@@ -31,6 +31,11 @@ public class AppSetup
     
     public DirectoryInfo GetCommonAppDataDirectory()
     {
-        return typeof(Tools).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
+        return typeof(Config).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
+    }
+
+    public static DirectoryInfo GetAppConfigDirectory()
+    {
+        return typeof(Config).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
     }
 }

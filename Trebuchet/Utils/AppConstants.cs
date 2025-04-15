@@ -6,6 +6,7 @@ using System.Text.Json;
 using tot_lib;
 using TrebuchetUtils;
 using TrebuchetLib;
+using TrebuchetLib.Services;
 
 namespace Trebuchet.Utils;
 
@@ -20,7 +21,7 @@ public static class AppConstants
 
     public static string GetUIConfigPath()
     {
-        var folder = typeof(UIConfig).GetStandardFolder(Environment.SpecialFolder.ApplicationData);
+        var folder = AppSetup.GetAppConfigDirectory();
         if(!folder.Exists)
             Directory.CreateDirectory(folder.FullName);
         return Path.Combine(folder.FullName, ConfigFileName);
