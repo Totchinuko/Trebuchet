@@ -197,8 +197,7 @@ public sealed class TrebuchetApp : ReactiveObject
 
     private async Task<bool> OnBoardingRepairBrokenJunctions()
     {
-        var clientDirectory = Path.GetFullPath(_setup.Config.ClientPath);
-        if (!Tools.IsClientInstallValid(clientDirectory)) return true;
+        if (!Tools.IsClientInstallValid(_setup.Config)) return true;
         return await _onBoarding.OnBoardingApplyConanManagement();
     }
 
