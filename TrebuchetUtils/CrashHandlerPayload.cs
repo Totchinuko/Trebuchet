@@ -20,4 +20,5 @@ public class CrashHandlerPayload(Exception ex)
     public string OperatingSystem { get; } = System.Runtime.InteropServices.RuntimeInformation.OSDescription;
     public string ProcessPath { get; } = Environment.ProcessPath ?? string.Empty;
     public bool RunAs { get; } = ProcessUtil.IsProcessElevated();
+    public string TrebuchetVersion { get; } = ProcessUtil.GetAppVersion().ToString();
 }
