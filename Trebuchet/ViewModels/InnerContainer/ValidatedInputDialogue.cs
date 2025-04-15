@@ -17,7 +17,7 @@ public class ValidatedInputDialogue<T, TD> : TitledDialogue<TD> where TD : Valid
         ConfirmCommand = ReactiveCommand.Create(Close);
         CancelCommand = ReactiveCommand.Create(() =>
         {
-            Value = default;
+            _value = default;
             Close();
         });
 
