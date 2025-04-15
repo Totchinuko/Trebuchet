@@ -453,9 +453,9 @@ public class OnBoarding(
         var dataDir = Path.Combine(installDir, versionDir);
         if (Directory.Exists(dataDir))
         {
-            await Tools.DeepCopyAsync(dataDir, Path.Combine(AppFiles.GetDataDirectory().FullName, versionDir), CancellationToken.None, progress);
+            await Tools.DeepCopyAsync(dataDir, Path.Combine(setup.GetDataDirectory().FullName, versionDir), CancellationToken.None, progress);
             if(isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(AppFiles.GetDataDirectory().FullName, versionDir)));
+                Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(setup.GetDataDirectory().FullName, versionDir)));
             await OnBoardingSafeIO(() => Directory.Delete(dataDir, true),dataDir);
         }
         
