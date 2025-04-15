@@ -4,7 +4,7 @@
     <DataTemplate x:Key="OnBoardingBranch" DataType="l:OnBoardingBranch">
         <DockPanel>
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
-            <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" />
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="{Binding Width}" />
             <ItemsControl ItemsSource="{Binding Choices}" ItemTemplate="{StaticResource OnBoardingChoice}">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>

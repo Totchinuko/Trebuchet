@@ -6,7 +6,7 @@
     <DataTemplate x:Key="OnBoardingModlistImport" DataType="l:OnBoardingModlistImport">
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
-            <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" />
+            <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="{Binding Width}" />
             <TextBlock DockPanel.Dock="Top" Classes="Error" Classes.Hidden="{Binding !IsValid}" Text="{Binding ErrorMessage}" />
             <WrapPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"  Margin="0 12 0 0">
                 <Button Classes="Base"

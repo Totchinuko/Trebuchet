@@ -6,7 +6,7 @@
     <DataTemplate x:Key="OnBoardingNameSelection" DataType="l:OnBoardingNameSelection">
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
-            <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" />
+            <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="{Binding Width}" />
             <TextBlock DockPanel.Dock="Top" Classes="Error" Classes.Hidden="{Binding !IsValid}" Text="{Binding ErrorMessage}" />
             <StackPanel Spacing="6" Orientation="Horizontal" HorizontalAlignment="Center" DockPanel.Dock="Top" Margin="0 12 0 0">
                 <TextBox Classes="AutoFocus" VerticalAlignment="Center" Margin="0 0 12 0" Text="{Binding Value, UpdateSourceTrigger=PropertyChanged}" Width="300" />
