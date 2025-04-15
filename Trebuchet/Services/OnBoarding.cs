@@ -206,8 +206,8 @@ public class OnBoarding(
 
     public async Task<bool> OnBoardingApplyConanManagement()
     {
+        if (!Tools.IsClientInstallValid(setup.Config)) return false;
         var clientDirectory = Path.GetFullPath(setup.Config.ClientPath);
-        if (!Tools.IsClientInstallValid(clientDirectory)) return false;
         var savedDir = Path.Combine(clientDirectory, Constants.FolderGameSave);
         
         if (!Directory.Exists(savedDir))
