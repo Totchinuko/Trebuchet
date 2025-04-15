@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -164,6 +165,20 @@ namespace Trebuchet.ViewModels.Panels
                 await _steamApi.UpdateMods(modlist);
             }
 
+            if (!File.Exists(_appFiles.Client.GetPath(Client.SelectedProfile)))
+            {
+                await _box.OpenErrorAsync(Resources.Error, 
+                    string.Format(Resources.DataNotFound, @$"{Resources.GameSave}: {Client.SelectedProfile}"));
+                return;
+            }
+            
+            if (!File.Exists(_appFiles.Mods.GetPath(Client.SelectedModlist)))
+            {
+                await _box.OpenErrorAsync(Resources.Error, 
+                    string.Format(Resources.DataNotFound, @$"{Resources.ModList}: {Client.SelectedModlist}"));
+                return;
+            }
+
             _setup.Config.SelectedClientProfile = Client.SelectedProfile;
             _setup.Config.SelectedClientModlist = Client.SelectedModlist;
             await _launcher.CatapultClient(isBattleEye);
@@ -209,6 +224,20 @@ namespace Trebuchet.ViewModels.Panels
                     var modlist = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
                     await _steamApi.UpdateServers();
                     await _steamApi.UpdateMods(modlist);
+                }
+                
+                if (!File.Exists(_appFiles.Server.GetPath(dashboard.SelectedProfile)))
+                {
+                    await _box.OpenErrorAsync(Resources.Error, 
+                        string.Format(Resources.DataNotFound, @$"{Resources.ServerSave}: {dashboard.SelectedProfile}"));
+                    return;
+                }
+            
+                if (!File.Exists(_appFiles.Mods.GetPath(dashboard.SelectedModlist)))
+                {
+                    await _box.OpenErrorAsync(Resources.Error, 
+                        string.Format(Resources.DataNotFound, @$"{Resources.ModList}: {dashboard.SelectedModlist}"));
+                    return;
                 }
 
                 _setup.Config.SetInstanceParameters(dashboard.Instance, dashboard.SelectedModlist,
