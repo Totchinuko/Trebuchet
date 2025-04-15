@@ -48,25 +48,25 @@
         <value>Ports</value>
     </data>
     <data name="CatProcessPerformance" xml:space="preserve">
-        <value>Performance Processus</value>
+        <value>Perf. Processus</value>
     </data>
     <data name="CatRCon" xml:space="preserve">
         <value>RCon</value>
     </data>
     <data name="CatRestartSettings" xml:space="preserve">
-        <value>Paramètre de redémarrage</value>
+        <value>Param. redémarrage</value>
     </data>
     <data name="CatServerSettings" xml:space="preserve">
-        <value>Paramètre server</value>
+        <value>Param. serveur</value>
     </data>
     <data name="CatUpdates" xml:space="preserve">
-        <value>Mise à jours</value>
+        <value>Mise à jour</value>
     </data>
     <data name="Change" xml:space="preserve">
         <value>Changer</value>
     </data>
     <data name="ClientFailedToStart" xml:space="preserve">
-        <value>Le lancement du jeu à échoué</value>
+        <value>Le lancement du jeu a échoué</value>
     </data>
     <data name="ClientFailedToStartText" xml:space="preserve">
         <value>Consultez les journaux pour plus d'informations</value>
@@ -96,7 +96,7 @@
         <value>Suppression</value>
     </data>
     <data name="DeletionText" xml:space="preserve">
-        <value>Souhaitez vous supprimer {0} ?</value>
+        <value>Souhaitez-vous supprimer {0} ?</value>
     </data>
     <data name="DirectoryNotFound" xml:space="preserve">
         <value>Le dossier n'existe pas</value>
@@ -114,7 +114,7 @@
         <value>Le nom ne peut être vide</value>
     </data>
     <data name="ErrorNameInvalidCharacters" xml:space="preserve">
-        <value>Ce nom contient des symbole invalid</value>
+        <value>Ce nom contient des symboles invalides</value>
     </data>
     <data name="ErrorValueEmpty" xml:space="preserve">
         <value>La valeur ne peut être vide</value>
@@ -123,7 +123,7 @@
         <value>Quitter</value>
     </data>
     <data name="ExportErrorModNotFound" xml:space="preserve">
-        <value>Certain des mods ne peuvent être résolut car le fichier est introuvable. Pour exporter la mod liste, assurez vous qu'aucun des mods ne soient marqué comme manquant.</value>
+        <value>Certains mods ne peuvent être chargés car le fichier est introuvable. Pour exporter la liste de mods, assurez-vous qu'aucun d'entre eux ne soient indiqués comme manquants.</value>
     </data>
     <data name="Find" xml:space="preserve">
         <value>Recherche</value>
@@ -135,13 +135,13 @@
         <value>Jeu</value>
     </data>
     <data name="GameBuild" xml:space="preserve">
-        <value>Version du Jeu</value>
+        <value>Version du jeu</value>
     </data>
     <data name="GameDirectoryInvalidError" xml:space="preserve">
         <value>Le jeu n'a pas pu être trouvé dans ce dossier</value>
     </data>
     <data name="GameSave" xml:space="preserve">
-        <value>Donnée de jeu</value>
+        <value>Données de jeu</value>
     </data>
     <data name="PanelGameSaves" xml:space="preserve">
         <value>Données de jeu</value>
@@ -159,25 +159,25 @@
         <value>Dossier invalide</value>
     </data>
     <data name="InvalidJson" xml:space="preserve">
-        <value>Json Invalide</value>
+        <value>Json invalide</value>
     </data>
     <data name="InvalidJsonText" xml:space="preserve">
-        <value>Le Json chargé est intraduisible</value>
+        <value>Le json chargé est intraduisible</value>
     </data>
     <data name="InvalidURL" xml:space="preserve">
         <value>URL invalide</value>
     </data>
     <data name="InvalidURLText" xml:space="preserve">
-        <value>L'URL steam ne contient pas d'ID</value>
+        <value>L'URL Steam ne contient pas d'ID</value>
     </data>
     <data name="Kill" xml:space="preserve">
         <value>Terminer</value>
     </data>
     <data name="KillAll" xml:space="preserve">
-        <value>Tout Terminer</value>
+        <value>Tout terminer</value>
     </data>
     <data name="KillText" xml:space="preserve">
-        <value>Terminer un processus procédera à la fin brutal du programme et peut conduire à des perte/corruption de donnée. Souhaitez vous continuer ?</value>
+        <value>Terminer un processus procèdera à l'arrêt abrupt du programme et peut conduire à une perte/corruption des données. Souhaitez-vous continuer ?</value>
     </data>
     <data name="LastModified" xml:space="preserve">
         <value>Modifié</value>
@@ -219,7 +219,7 @@
         <value>Remplacer</value>
     </data>
     <data name="ModlistReplaceText" xml:space="preserve">
-        <value>Cette action remplacera votre list, souhaitez vous continuer ?</value>
+        <value>Cette action remplacera votre liste de mods. Souhaitez-vous continuer ?</value>
     </data>
     <data name="PanelMods" xml:space="preserve">
         <value>Mods</value>
@@ -228,10 +228,10 @@
         <value>Non</value>
     </data>
     <data name="NoResultFound" xml:space="preserve">
-        <value>Aucun resultat</value>
+        <value>Aucun résultat</value>
     </data>
     <data name="OnBoardingChooseGameSaveText" xml:space="preserve">
-        <value>Choisissez quelle sauvegarde copier dans votre dossier de jeu</value>
+        <value>Choisissez la sauvegarde à copier dans votre dossier de jeu.</value>
     </data>
     <data name="OnBoardingGameSave" xml:space="preserve">
         <value>Sauvegarde</value>
@@ -243,7 +243,7 @@
         <value>Le dossier sélectionné ne contient pas Conan Exiles</value>
     </data>
     <data name="OnBoardingLocateConanText" xml:space="preserve">
-        <value>Indiqué à Trebuchet oú trouver Conan Exiles</value>
+        <value>Indiquer à Trebuchet où trouver Conan Exiles</value>
     </data>
     <data name="OnBoardingManageConan" xml:space="preserve">
         <value>Gestion des données</value>
@@ -252,78 +252,78 @@
         <value>Laisser le jeu intact</value>
     </data>
     <data name="OnBoardingManageConanNoSub" xml:space="preserve">
-        <value>Vos fichier ne seront pas déplacé</value>
+        <value>Vos fichiers ne seront pas déplacés.</value>
     </data>
     <data name="OnBoardingManageConanText" xml:space="preserve">
-        <value>Autoriser Trebuchet à gérer vos sauvegarde de jeu ? Si vous accéptez, Trebuchet déplacera vos sauvegardes dans Mes Documents. Cela permet deux choses:
- (a) De pouvoir crèer autant de sauvegarde que vous le souhaitez et lancer le jeu avec l'une d'entre elles.
- (b) D'offrir des paramétre supplémentaire à travers Trebuchet.</value>
+        <value>Autoriser Trebuchet à gérer vos sauvegardes de jeu ? Si vous acceptez, Trebuchet déplacera vos sauvegardes dans le dossier Mes Documents. Cela permet deux choses :
+ (a) De pouvoir créer autant de sauvegardes que vous le souhaitez et de lancer le jeu avec l'une d'entre elles.
+ (b) De proposer des paramétres supplémentaires à travers Trebuchet.</value>
     </data>
     <data name="OnBoardingManageConanUac" xml:space="preserve">
-        <value>Pour appliquer vos choix, Trebuchet à besoin de permission supplémentaire pour accéder à votre dossier de jeu</value>
+        <value>Pour appliquer vos choix, Trebuchet a besoin de permissions supplémentaires pour accéder à votre dossier de jeu</value>
     </data>
     <data name="OnBoardingManageConanYes" xml:space="preserve">
         <value>Autoriser la gestion</value>
     </data>
     <data name="OnBoardingManageConanYesSub" xml:space="preserve">
-        <value>Les données seront déplacé dans Mes Documents</value>
+        <value>Les données seront déplacées dans Mes Documents</value>
     </data>
     <data name="OnBoardingModTrimConfirm" xml:space="preserve">
         <value>Réduire les mods</value>
     </data>
     <data name="OnBoardingModTrimConfirmSub" xml:space="preserve">
-        <value>{0} mods non utilisé ont été trouvé, supprimer ?</value>
+        <value>{0} mods non utilisés ont été trouvés. Supprimer ?</value>
     </data>
     <data name="OnBoardingNewGameSave" xml:space="preserve">
         <value>Choisissez un nom pour la sauvegarde Trebuchet qui contiendra vos données</value>
     </data>
     <data name="OnBoardingNoUnusedMods" xml:space="preserve">
-        <value>Aucun mods non utilisé</value>
+        <value>Aucun mod non utilisé</value>
     </data>
     <data name="OnBoardingNoUnusedModsSub" xml:space="preserve">
-        <value>Il n'y aucun mods non utilisé à supprimer</value>
+        <value>Il n'y aucun mod non utilisé à supprimer</value>
     </data>
     <data name="OnBoardingServerInstanceCount" xml:space="preserve">
         <value>Instances serveur</value>
     </data>
     <data name="OnBoardingServerInstanceCountSub" xml:space="preserve">
-        <value>Choisissez combien d'instance serveur Trebuchet doit gérer. A moins que vous souhaitiez metre en place un groupe, un seul devrait suffir.</value>
+        <value>Choisissez combien d'instances serveur Trebuchet doit gérer. À moins que vous ne souhaitiez mettre en place un groupe, un seul devrait suffire.</value>
     </data>
     <data name="OnBoardingUpgrade" xml:space="preserve">
-        <value>Un version précédente de Trébuchet à été détecté et doit être mis à jour. Une fois cette tache terminé, les version précédente de Trebuchet ne fonctionneront plus. Souhaitez vous continuer ?</value>
+        <value>Une version précédente de Trebuchet a été détectée et doit être mise à jour. Une fois cette tâche terminée, les versions précédentes de Trebuchet ne fonctionneront plus. Souhaitez-vous continuer ?</value>
     </data>
     <data name="OnBoardingUpgradeCopy" xml:space="preserve">
-        <value>Merci de patienter pendant que vos fichier sont copié</value>
+        <value>Merci de patienter pendant la copie des fichiers.</value>
     </data>
     <data name="OnBoardingUpgradeSub" xml:space="preserve">
         <value>Si vous ne souhaitez pas mettre à jour maintenant, merci de fermer Trebuchet.</value>
     </data>
     <data name="OnBoardingUpgradeUac" xml:space="preserve">
-        <value>Pour mettre à jour votre installation de Trebuchet, des permission d'écriture sont nécéssaire. Avec votre permission, Trebuchet va redémarrer and demander des priviléges d'administrateur.</value>
+        <value>Pour mettre à jour votre installation de Trebuchet, des permission d'écriture sont nécessaires. Avec votre permission, Trebuchet va redémarrer et demander des privilèges administrateur.</value>
     </data>
     <data name="OnBoardingUsageChoice" xml:space="preserve">
-        <value>Fonctionalités de Trebuchet</value>
+        <value>Fonctionnalités de Trebuchet</value>
     </data>
     <data name="OnBoardingUsageChoiceModder" xml:space="preserve">
         <value>Modding</value>
     </data>
     <data name="OnBoardingUsageChoiceModderSub" xml:space="preserve">
-        <value>Cela activera à la fois les fonctions de jeu et serveur pour tester les mods plus simplement</value>
+        <value>Activera à la fois les fonctions de jeu et de serveur pour tester les mods plus simplement</value>
     </data>
     <data name="OnBoardingUsageChoicePlayer" xml:space="preserve">
         <value>Jouer à Conan Exiles</value>
     </data>
     <data name="OnBoardingUsageChoicePlayerSub" xml:space="preserve">
-        <value>Cela désactivera les fonctions serveur</value>
+        <value>Désactivera les fonctions serveur</value>
     </data>
     <data name="OnBoardingUsageChoiceServer" xml:space="preserve">
         <value>Gestion serveur</value>
     </data>
     <data name="OnBoardingUsageChoiceServerSub" xml:space="preserve">
-        <value>Cela désactivera les fonctions de jeu</value>
+        <value>Désactivera les fonctions de jeu</value>
     </data>
     <data name="OnBoardingUsageChoiceText" xml:space="preserve">
-        <value>Merci de choisir les fonctionalité à Activer. Cela préconfigurera Trebuchet avec des paramétre prédéterminé que vous pourrez changer à tout moment.</value>
+        <value>Merci de choisir les fonctionnalités à activer. Cela préconfigurera Trebuchet avec des paramètres prédéterminés que vous pourrez changer à tout moment.</value>
     </data>
     <data name="OpenSaveFolder" xml:space="preserve">
         <value>Ouvrir le dossier de sauvegarde</value>
@@ -332,7 +332,7 @@
         <value>Ouvrir la page du workshop</value>
     </data>
     <data name="Peak" xml:space="preserve">
-        <value>Maximal</value>
+        <value>Maximum</value>
     </data>
     <data name="PID_ProcessID" xml:space="preserve">
         <value>PID</value>
@@ -353,10 +353,10 @@
         <value>Enregistrer</value>
     </data>
     <data name="SaveSize" xml:space="preserve">
-        <value>Poid</value>
+        <value>Poids</value>
     </data>
     <data name="SaveSizeTip" xml:space="preserve">
-        <value>Taille total de votre sauvegarde sur le disque. La sauvegarde enregistre aussi vos donnée de jeu et journeaux</value>
+        <value>Taille totale de votre sauvegarde sur le disque. La sauvegarde enregistre aussi vos données de jeu et journaux.</value>
     </data>
     <data name="PanelServerConsoles" xml:space="preserve">
         <value>Console Serveur</value>
@@ -365,13 +365,13 @@
         <value>Le lancement du serveur à échoué</value>
     </data>
     <data name="ServerFailedStartText" xml:space="preserve">
-        <value>Le lancement du serveur ne c'est pas déroulé correctement, consultez les journeaux pour plus d'informations</value>
+        <value>Le lancement du serveur ne s'est pas déroulé correctement : consultez les journaux pour plus d'informations.</value>
     </data>
     <data name="PanelServerLogFilter" xml:space="preserve">
-        <value>Filtre Journeaux</value>
+        <value>Filtre Journaux</value>
     </data>
     <data name="ServerSave" xml:space="preserve">
-        <value>Donnée serveur</value>
+        <value>Données serveur</value>
     </data>
     <data name="PanelServerSaves" xml:space="preserve">
         <value>Données serveur</value>
@@ -380,25 +380,25 @@
         <value>[Tot ! Admin] Ne pas charger la liste des serveurs</value>
     </data>
     <data name="SettingAdminServerListText" xml:space="preserve">
-        <value>Empécher la liste des serveur de ce charger dans le menu principal du jeu</value>
+        <value>Empêcher la liste des serveurs de se charger dans le menu principal du jeu</value>
     </data>
     <data name="SettingAsyncScene" xml:space="preserve">
-        <value>Activer Scéne Asynchrone</value>
+        <value>Activer Scène Asynchrone</value>
     </data>
     <data name="SettingAsyncSceneText" xml:space="preserve">
-        <value>Peut améliorer les performance, notament dans les zones de construction dense</value>
+        <value>Peut améliorer les performances, notamment dans les zones denses en constructions.</value>
     </data>
     <data name="SettingAutoRefreshModlist" xml:space="preserve">
-        <value>Rafraichissement automatique des liste de mods</value>
+        <value>Rafraîchissement automatique des listes de mods</value>
     </data>
     <data name="SettingAutoRefreshModlistText" xml:space="preserve">
-        <value>Rafraichie les listes de mods réguliérement afin de détécter de potentiel mise à jour</value>
+        <value>Rafraichit les listes de mods régulièrement afin de détecter de potentielles mises à jour</value>
     </data>
     <data name="SettingAutoUpdateStatus" xml:space="preserve">
         <value>Mettre à jour les instances serveur</value>
     </data>
     <data name="SettingAutoUpdateStatusCheck" xml:space="preserve">
-        <value>Verifier les mises à jour</value>
+        <value>Vérifier les mises à jour</value>
     </data>
     <data name="SettingAutoUpdateStatusLaunchOnly" xml:space="preserve">
         <value>Uniquement au lancement</value>
@@ -410,46 +410,46 @@
         <value>Choisissez quand mettre à jour vos serveurs. Ceci ne s'applique pas au jeu.</value>
     </data>
     <data name="SettingBackgroundSound" xml:space="preserve">
-        <value>Son en arriére plan</value>
+        <value>Son en arrière-plan</value>
     </data>
     <data name="SettingBackgroundSoundText" xml:space="preserve">
-        <value>Garde le son actif quand le jeu est en arriére plan</value>
+        <value>Garde le son actif quand le jeu est en arrière-plan</value>
     </data>
     <data name="SettingClientInstallation" xml:space="preserve">
         <value>Dossier d'installation de Conan Exiles</value>
     </data>
     <data name="SettingClientInstallationText" xml:space="preserve">
-        <value>Indiquer à Trebuchet oú trouver le dossier de jeu de Conan Exiles. Vous choisirez aussi si Trebuchet devrait gérer vos données de jeu</value>
+        <value>Indiquer à Trebuchet où trouver le dossier de jeu de Conan Exiles et si Trebuchet doit gérer vos données de jeu.</value>
     </data>
     <data name="SettingCpuAffinity" xml:space="preserve">
-        <value>Affinité des Threads de CPU</value>
+        <value>Affinité des threads de CPU</value>
     </data>
     <data name="SettingCpuAffinityText" xml:space="preserve">
-        <value>L'affinité des Threads de CPU permet configurer à quels threads CPU le serveur à accés</value>
+        <value>L'affinité des threads de CPU permet de configurer les threads CPU auxquels le serveur a accès.</value>
     </data>
     <data name="SettingDisplayWarningOnKill" xml:space="preserve">
         <value>Afficher une alerte avant de terminer</value>
     </data>
     <data name="SettingDisplayWarningOnKillText" xml:space="preserve">
-        <value>Cliquer sur terminer affichera une alerte à propos de risque de perte de donnée</value>
+        <value>Cliquer sur terminer affichera une alerte à propos du risque de perte/corruption de données.</value>
     </data>
     <data name="SettingInternetSpeed" xml:space="preserve">
         <value>Vitesse Internet</value>
     </data>
     <data name="SettingInternetSpeedText" xml:space="preserve">
-        <value>Vitesse de connection maximal du moteur. Jamais testé.</value>
+        <value>Vitesse de connexion maximale du moteur. Jamais testé.</value>
     </data>
     <data name="SettingIntroVid" xml:space="preserve">
-        <value>Retirer la vidéo d'intro</value>
+        <value>Désactiver intro</value>
     </data>
     <data name="SettingIntroVidText" xml:space="preserve">
-        <value>Au lieu d'afficher la video d'intro, vous aurez un écran noir et le menu principal sera affiché dés que le chargement sera terminé</value>
+        <value>Au lieu d'afficher la vidéo d'introduction, affiche un écran noir durant le chargement.</value>
     </data>
     <data name="SettingLog" xml:space="preserve">
         <value>Afficher la console</value>
     </data>
     <data name="SettingLogFilter" xml:space="preserve">
-        <value>Filtre des journeaux</value>
+        <value>Filtre des journaux</value>
     </data>
     <data name="Yes" xml:space="preserve">
         <value>Oui</value>
@@ -476,7 +476,7 @@
         <value>Arrêté</value>
     </data>
     <data name="StatusStopping" xml:space="preserve">
-        <value>En cour d'arrêt</value>
+        <value>En cours d'arrêt</value>
     </data>
     <data name="SteamConnected" xml:space="preserve">
         <value>Connecté à Steam</value>
@@ -485,13 +485,13 @@
         <value>Steam n'est pas disponible</value>
     </data>
     <data name="Stop" xml:space="preserve">
-        <value>Arréter</value>
+        <value>Arrêter</value>
     </data>
     <data name="StopAll" xml:space="preserve">
-        <value>Tout Arréter</value>
+        <value>Tout Arrêter</value>
     </data>
     <data name="SettingServerUseAllCores" xml:space="preserve">
-        <value>Utiliser tout les coeurs</value>
+        <value>Utiliser tous les cœurs</value>
     </data>
     <data name="SettingServerRegionJapan" xml:space="preserve">
         <value>Japon</value>
@@ -521,10 +521,10 @@
         <value>Amérique du Sud</value>
     </data>
     <data name="SettingServerSourceQueryPort" xml:space="preserve">
-        <value>Port de requette Source</value>
+        <value>Port de requête source</value>
     </data>
     <data name="SettingUseAllCore" xml:space="preserve">
-        <value>Utiliser tout les coeurs</value>
+        <value>Utiliser tous les cœurs</value>
     </data>
     <data name="SettingVerifyAll" xml:space="preserve">
         <value>Toujours vérifier les fichiers</value>
@@ -542,13 +542,13 @@
         <value>Auteurs de la traduction</value>
     </data>
     <data name="TranslatorsIdentity" xml:space="preserve">
-        <value>Totchinuko</value>
+        <value>Totchinuko, Yiajmhat</value>
     </data>
     <data name="TrimmingUnusedMods" xml:space="preserve">
         <value>Nettoyage des mods</value>
     </data>
     <data name="TrimUnusedMods" xml:space="preserve">
-        <value>Nettoyer mods inutilisé</value>
+        <value>Nettoyer mods inutilisés</value>
     </data>
     <data name="UACDialog" xml:space="preserve">
         <value>Permission d'écriture</value>
@@ -563,7 +563,7 @@
         <value>MàJ des mods</value>
     </data>
     <data name="UpdateAvailable" xml:space="preserve">
-        <value>MàJ Disponible</value>
+        <value>MàJ disponible</value>
     </data>
     <data name="UpdateMods" xml:space="preserve">
         <value>MàJ des mods</value>
@@ -593,28 +593,28 @@
         <value>Vérifier fichiers</value>
     </data>
     <data name="WrongType" xml:space="preserve">
-        <value>Type incorrécte</value>
+        <value>Type incorrect</value>
     </data>
     <data name="SettingProcessPrioNormal" xml:space="preserve">
-        <value>Normal</value>
+        <value>Normale</value>
     </data>
     <data name="SettingProcessPrioHigh" xml:space="preserve">
-        <value>Élevé</value>
+        <value>Élevée</value>
     </data>
     <data name="SettingProcessPrioAboveNormal" xml:space="preserve">
-        <value>Suppérieur</value>
+        <value>Supérieure</value>
     </data>
     <data name="SettingProcessPrio" xml:space="preserve">
         <value>Priorité processus</value>
     </data>
     <data name="SettingMaxServers" xml:space="preserve">
-        <value>Serveur de téléchargement max</value>
+        <value>Serveurs de téléchargement max</value>
     </data>
     <data name="SettingProcessPrioRealtime" xml:space="preserve">
-        <value>Temp réel (Non Recommandé)</value>
+        <value>Temps réel (non recommandé)</value>
     </data>
     <data name="SettingServerLogFilters" xml:space="preserve">
-        <value>Filtre journeaux</value>
+        <value>Filtre journaux</value>
     </data>
     <data name="SettingServerGameClientPort" xml:space="preserve">
         <value>Port du jeu</value>
@@ -632,16 +632,16 @@
         <value>Activer Battle Eye</value>
     </data>
     <data name="SettingServerCPUThreadAffinity" xml:space="preserve">
-        <value>Affinité des Threads de CPU</value>
+        <value>Affinité des threads de CPU</value>
     </data>
     <data name="SettingServerCPUThreadAffinityText" xml:space="preserve">
-        <value>L'affinité des Threads de CPU permet configurer à quels threads CPU le serveur à accés</value>
+        <value>L'affinité des threads de CPU permet de configurer les threads CPU auxquels le serveur a accès.</value>
     </data>
     <data name="PanelSettings" xml:space="preserve">
-        <value>Paramétres</value>
+        <value>Paramètres</value>
     </data>
     <data name="SettingServerAdminPass" xml:space="preserve">
-        <value>Mot de pass Administrateur</value>
+        <value>Mot de passe administrateur</value>
     </data>
     <data name="SettingServerPass" xml:space="preserve">
         <value>Mot de passe serveur</value>
@@ -650,7 +650,7 @@
         <value>Priorité processus</value>
     </data>
     <data name="SettingServerRawUDPPort" xml:space="preserve">
-        <value>Port UDP brute</value>
+        <value>Port UDP brut</value>
     </data>
     <data name="SettingServerRawUDPPortText" xml:space="preserve">
         <value>Second port UDP du jeu</value>
@@ -668,7 +668,7 @@
         <value>Joueurs Maximum</value>
     </data>
     <data name="SettingServerMaximumTickRate" xml:space="preserve">
-        <value>Frame Maximum</value>
+        <value>Frames Maximum</value>
     </data>
     <data name="VerifyModsLabel" xml:space="preserve">
         <value>Vérifier les mods</value>
@@ -683,13 +683,13 @@
         <value>Mot de passe utilisé pour RCon</value>
     </data>
     <data name="SettingSudoAdminList" xml:space="preserve">
-        <value>List Administrateur Sudo</value>
+        <value>Liste Admin Sudo</value>
     </data>
     <data name="SettingLogFilterText" xml:space="preserve">
-        <value>Filtre les journeaux pour n'afficher que certain type (Un filtre par ligne). Cela peut grandement réduire la taille de vos logs. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+        <value>Filtre les journaux pour n'afficher que certains types de messages (un filtre par ligne). Cela peut grandement réduire la taille de vos logs. Les filtres sont : NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
     </data>
     <data name="SettingLogText" xml:space="preserve">
-        <value>Affiche les journeaux en temps réel à travers une console</value>
+        <value>Affiche les journaux en temps réel à travers une console.</value>
     </data>
     <data name="SettingManageClient" xml:space="preserve">
         <value>Gestion des données</value>
@@ -698,13 +698,13 @@
         <value>Téléchargement simultané</value>
     </data>
     <data name="SettingMaxDownloadsText" xml:space="preserve">
-        <value>Montant maximal de téléchargement simultané sur le réseau Steam. Cela peut augmenter la charge sur votre CPU/Disque, mais peut accélérer le téléchargement de fichier si votre connection le permet.</value>
+        <value>Montant maximal de téléchargements simultanés sur le réseau Steam. Cela peut augmenter la charge sur votre CPU/disque, mais peut accélérer le téléchargement de fichiers si votre connexion le permet.</value>
     </data>
     <data name="SettingMaxServersText" xml:space="preserve">
-        <value>Montant maximal de connection à des serveur de téléchargement sur le réseau Steam</value>
+        <value>Nombre maximal de connexions à des serveurs de téléchargement sur le réseau Steam</value>
     </data>
     <data name="SettingProcessPrioText" xml:space="preserve">
-        <value>Priorité du processus serveur. Une priorité plus élevé peut rendre votre serveur plus réactif, au détriment des autres processus du système.</value>
+        <value>Priorité du processus serveur. Une priorité plus élevée peut rendre votre serveur plus réactif, au détriment des autres processus du système.</value>
     </data>
     <data name="SettingServerAdminPassText" xml:space="preserve">
         <value>Mot de passe administrateur pour cette instance serveur</value>
@@ -713,7 +713,7 @@
         <value>Redémarrer les serveurs automatiquement</value>
     </data>
     <data name="SettingServerCrashRestartText" xml:space="preserve">
-        <value>Redémarre un serveur quand ce dernier c'est arrété de maniére inattendu</value>
+        <value>Redémarre un serveur quand ce dernier s'est arrêté de manière inattendue.</value>
     </data>
     <data name="SettingServerEnableBattleEyeText" xml:space="preserve">
         <value>Activer l'anti-triche Battle Eye pour votre instance serveur</value>
@@ -728,44 +728,44 @@
         <value>Activer l'anti-triche Valve sur votre serveur</value>
     </data>
     <data name="SettingServerGameClientPortText" xml:space="preserve">
-        <value>Port utilisé pour recevoir les connections du jeu</value>
+        <value>Port utilisé pour recevoir les connexions du jeu</value>
     </data>
     <data name="SettingServerInstanceCount" xml:space="preserve">
-        <value>Nombre d'intances serveur</value>
+        <value>Nombre d'instances serveur</value>
     </data>
     <data name="SettingServerInstanceCountText" xml:space="preserve">
-        <value>Le montant d'instances serveur géré par Trebuchet. Laissez le à 0 si vous n'avez pas besoin de lancer de serveur sur ce système</value>
+        <value>Le nombre d'instances serveur gérées par Trebuchet. Laissez-le à 0 si vous n'avez pas besoin de lancer de serveur sur ce système.</value>
     </data>
     <data name="SettingServerKillZombies" xml:space="preserve">
-        <value>Terminer les serveurs planté</value>
+        <value>Terminer les serv. dysfonctionnels</value>
     </data>
     <data name="SettingServerKillZombiesText" xml:space="preserve">
-        <value>Termine les instances serveur qui ont cessé de répondre (Gelé) pour une période donné</value>
+        <value>Termine les instances serveur qui ont cessé de répondre (gelées) pour une période donnée</value>
     </data>
     <data name="SettingServerLog" xml:space="preserve">
         <value>Afficher la console</value>
     </data>
     <data name="SettingServerLogFiltersText" xml:space="preserve">
-        <value>Filtre les journeaux pour n'afficher que certain type (Un filtre par ligne). Cela peut grandement réduire la taille de vos logs. Log levels are NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
+        <value>Filtre les journaux pour n'afficher que certains types de messages (un filtre par ligne). Cela peut grandement réduire la taille de vos logs. Les filtres sont : NoLogging, Fatal, Error, Warning, Display, Log, Verbose, VeryVerbose, All (=VeryVerbose)</value>
     </data>
     <data name="SettingServerLogText" xml:space="preserve">
-        <value>Affiche les journeaux en temps réel à travers une console.
-ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je ne conseil pas d'utiliser ceci sur un serveude production</value>
+        <value>Affiche les journaux en temps réel à travers une console.
+ATTENTION : Ceci peut rendre la détection des processus sans réponse inefficace. Il est déconseillé de l'utiliser sur un serveur en production.</value>
     </data>
     <data name="SettingServerMapText" xml:space="preserve">
-        <value>Le chemin de démarage de la carte à charger sur votre serveur. Le bouton permet de configurer facilement certaines carte populaire</value>
+        <value>Le chemin de démarrage de la carte à charger sur votre serveur. Le bouton permet de configurer facilement certaines cartes populaires.</value>
     </data>
     <data name="SettingServerMaximumTickRateText" xml:space="preserve">
-        <value>Nombre maximum de rafraichissement par secondes</value>
+        <value>Nombre maximum de rafraîchissement par seconde</value>
     </data>
     <data name="SettingServerMaxPlayerText" xml:space="preserve">
-        <value>Nombre maximum de joueur sur votre serveur</value>
+        <value>Nombre maximum de joueurs sur votre serveur</value>
     </data>
     <data name="SettingServerMultiHomeAddress" xml:space="preserve">
         <value>Adresse Multi-Home</value>
     </data>
     <data name="SettingServerMultiHomeAddressText" xml:space="preserve">
-        <value>Adress IP utilisé dans un configuration Multi-Home. En général votre IP local</value>
+        <value>Adresse IP utilisée dans une configuration Multi-Home (en général votre IP locale)</value>
     </data>
     <data name="SettingServerName" xml:space="preserve">
         <value>Nom du serveur</value>
@@ -777,73 +777,73 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
         <value>Pas d'IA</value>
     </data>
     <data name="SettingServerNoAISpawnText" xml:space="preserve">
-        <value>Empéche la création du PnJ sur la carte. Certaines catégories de PnJ ne sont pas affecté par ce paramétre, comme ceux dans les donjons de Siptah</value>
+        <value>Empêche la création de PNJ sur la carte. Certaines catégories de PNJ ne sont pas affectées par ce paramètre (ex: donjons de Siptah).</value>
     </data>
     <data name="SettingServerPassText" xml:space="preserve">
         <value>Mot de passe pour se connecter à votre serveur</value>
     </data>
     <data name="SettingServerProcessPriorityText" xml:space="preserve">
-        <value>Priorité du processus serveur. Une priorité plus élevé peut rendre votre serveur plus réactif, au détriment des autres processus du système.</value>
+        <value>Priorité du processus serveur. Une priorité plus élevée peut rendre votre serveur plus réactif, au détriment des autres processus du système.</value>
     </data>
     <data name="SettingServerRConMaxKarmaText" xml:space="preserve">
         <value>Karma maximum pour se connecter à votre console RCon</value>
     </data>
     <data name="SettingServerRegionText" xml:space="preserve">
-        <value>Région serveur affiché dans la liste des serveurs</value>
+        <value>Région serveur affichée dans la liste des serveurs</value>
     </data>
     <data name="SettingServerSourceQueryPortText" xml:space="preserve">
-        <value>Port utilisé par la liste serveur pour efféctué des requettes d'informations</value>
+        <value>Port utilisé par la liste serveur pour effectuer des requêtes d'informations.</value>
     </data>
     <data name="SettingServerUseAllCoresText" xml:space="preserve">
-        <value>Supposé améliorer les performance du jeu, mais c'est non vérifié.</value>
+        <value>Supposé améliorer les performances du jeu (non vérifié)</value>
     </data>
     <data name="SettingServerZombieDuration" xml:space="preserve">
-        <value>Durée max de plantage (Secondes)</value>
+        <value>Durée max sans réponse (secondes)</value>
     </data>
     <data name="SettingServerZombieDurationText" xml:space="preserve">
-        <value>Durée laissé à l'instance serveur pour répondre, avant d'être concidéré comme planté et terminé de force</value>
+        <value>Durée laissée à l'instance serveur pour répondre, avant d'être considérée comme dysfonctionnelle et terminée de force</value>
     </data>
     <data name="SettingSudoAdminListText" xml:space="preserve">
-        <value>Liste des ID Steam pour être Administrateur Sudo, un par ligne. Laissez vide si vous n'utilisez pas Sudo</value>
+        <value>Liste des ID Steam pour être Administrateur Sudo (un par ligne). Laissez vide si vous n'utilisez pas Sudo.</value>
     </data>
     <data name="SettingTexPool" xml:space="preserve">
         <value>Augmentation de la mémoire de texture en Ultra (Mo)</value>
     </data>
     <data name="SettingTexPoolText" xml:space="preserve">
-        <value>Pour que la mémoire de votre GPU ne sature pas, le jeu échange réguliérement des textures dont il n'a plus besoin. Pour cela, il réserve une portion de la mémoire de votre GPU pour cette tache. Par défaut, en Ultra, cette quantité est de 1500 Mo. C'est suffisant pour jouer sans mods, mais peut être limité quand il y a beaucoup de contenu moddé, affichant alors des texture flou. Avec ce réglage, vous pouvez ajouter aux 1500 de base. Gardez à l'esprit que trop ajouter peut avoir un impact négatif.</value>
+        <value>Pour que la mémoire de votre GPU ne sature pas, le jeu échange régulièrement des textures dont il n'a plus besoin. Pour cela, il réserve une portion de la mémoire de votre GPU pour cette tâche. Par défaut, en Ultra, cette quantité est de 1500 Mo. C'est suffisant pour jouer sans mods, mais peut être limité quand il y a beaucoup de contenu moddé, affichant alors des textures floues. Avec ce réglage, vous pouvez ajouter aux 1500 de base. Gardez à l'esprit que trop en ajouter peut avoir un impact négatif sur votre système.</value>
     </data>
     <data name="SettingTotAdminPrecision" xml:space="preserve">
         <value>Désactiver le mode de précision pour Tot!Admin</value>
     </data>
     <data name="SettingTotAdminPrecisionText" xml:space="preserve">
-        <value>Pour une plus grande compatibilité avec d'autre mods, vous pouvez désactiver le mode de précision à deux décimal de Tot!Admin pour déplacer les décoration avec son outils de positionement</value>
+        <value>Pour une plus grande compatibilité avec d'autres mods, vous pouvez désactiver le mode de précision à deux décimales de Tot!Admin pour déplacer les décorations avec son outil de positionnement</value>
     </data>
     <data name="SettingUltraAniso" xml:space="preserve">
-        <value>Meilleurs textures en Ultra</value>
+        <value>Meilleures textures en Ultra</value>
     </data>
     <data name="SettingUltraAnisoText" xml:space="preserve">
-        <value>Augmente la netteté des textures en fonction de l'angle de vue, sur le paramétre Ultra. Ceci peut avoir un coût en fonction de votre matériel</value>
+        <value>Augmente la netteté des textures en fonction de l'angle de vue selon le paramètre Ultra. Ceci peut avoir un coût en fonction de votre matériel.</value>
     </data>
     <data name="SettingUpdateCheckInterval" xml:space="preserve">
-        <value>Interval de vérification des mise à jour</value>
+        <value>Intervale de vérification des mises à jour</value>
     </data>
     <data name="SettingUpdateCheckIntervalText" xml:space="preserve">
-        <value>L'intervale en secondes pour vérifier la présence de mise à jours</value>
+        <value>L'intervale en secondes pour vérifier la présence de mises à jour</value>
     </data>
     <data name="SettingUseAllCoreText" xml:space="preserve">
-        <value>Supposé améliorer les performance du jeu, mais c'est non vérifié.</value>
+        <value>Supposé améliorer les performances du jeu (non vérifié)</value>
     </data>
     <data name="SettingVerifyAllText" xml:space="preserve">
-        <value>Lorsque les fichiers sont mis à jour, le système vérifie ses données de cache pour déterminer rapidement si il a besoin de télécharger le contenu. En activant cette option, vous forcez le système à inspecter les fichiers à chaque fois. Ceci rend le procédé de mise à jour bien plus lent, mais est utile pour détécter de potentiel corruption. Si vous soupçonnez que vos fichiers sont corrompu, je vous conseil d'utiliser le bouton sur le tableau de bord plutôt que d'utiliser ce paramétre</value>
+        <value>Lorsque les fichiers sont mis à jour, le système vérifie les données de cache pour déterminer rapidement s'il a besoin de télécharger le contenu. En activant cette option, vous forcez le système à inspecter les fichiers à chaque fois. Cela rend le procédé de mise à jour bien plus lent, mais est utile pour détecter de potentielles corruptions de données. Si vous soupçonnez que vos fichiers sont corrompus, utilisez plutôt le bouton sur le tableau de bord.</value>
     </data>
     <data name="UACDialogText" xml:space="preserve">
-        <value>Trebuchet requiers des droits d'administration afin de gérer des fichier protégé pour la raison suivante:</value>
+        <value>Trebuchet requiert des droits d'administration afin de gérer des fichiers protégés pour la raison suivante :</value>
     </data>
     <data name="VerifyFilesText" xml:space="preserve">
-        <value>Tout vos fichiers serveur et de mod seront vérifié. Cela peut prendre du temp. Souhaitez vous continuer ?</value>
+        <value>Tous vos fichiers serveur et de mods seront vérifiés. Cela peut prendre du temps. Souhaitez-vous continuer ?</value>
     </data>
     <data name="WrongTypeText" xml:space="preserve">
-        <value>Le type de fichier fournis n'est pas supporté</value>
+        <value>Le type de fichier fourni n'est pas supporté</value>
     </data>
     <data name="WorkshopSteam" xml:space="preserve">
         <value>Workshop</value>
@@ -864,52 +864,52 @@ ATTENTION: Ceci peut rendre la détéction de processus planté inéfficace. Je 
         <value>Synchroniser</value>
     </data>
     <data name="RefreshModInfos" xml:space="preserve">
-        <value>Rafraichir les données de mods</value>
+        <value>Rafraîchir les données de mods</value>
     </data>
     <data name="Servers" xml:space="preserve">
         <value>Serveurs</value>
     </data>
     <data name="PanelToolbox" xml:space="preserve">
-        <value>Boite à outils</value>
+        <value>Boîte à outils</value>
     </data>
     <data name="TrimUnusedModsSub" xml:space="preserve">
-        <value>Il y a {0} mods non utilisé. Les mods non utilisé sont les mods qui ont été téléchargé par le passé par Trebuchet, mais qui ne sont désormais plus présent dans aucune des mod listes</value>
+        <value>Il y a {0} mod(s) non utilisé(s). Les mods non utilisés sont les mods qui ont été téléchargés par Trebuchet auparavant mais qui ne sont désormais plus présents dans aucune des listes de mods.</value>
     </data>
     <data name="OnBoardingLanguageChange" xml:space="preserve">
         <value>Langage</value>
     </data>
     <data name="OnBoardingLanguageChangeMessage" xml:space="preserve">
-        <value>Le langage à été modifié mais des taches sont en cour d'execution. Pour appliquer le changement, merci de redémarrer Trebuchet une fois les taches terminé.</value>
+        <value>Le langage a été modifié mais des tâches sont en cours d'exécution. Pour appliquer le changement, merci de redémarrer Trebuchet une fois les tâches terminées.</value>
     </data>
     <data name="OnBoardingLanguageChangeConfirm" xml:space="preserve">
-        <value>Le langage à été modifié mais un redémarrage est nécessaire pour appliquer le changement. Redémarrer ?</value>
+        <value>Le langage a été modifié mais un redémarrage est nécessaire pour appliquer le changement. Redémarrer quand même ?</value>
     </data>
     <data name="OnBoardingProcessLock" xml:space="preserve">
         <value>Fichier occupé dans un autre processus</value>
     </data>
     <data name="OnBoardingProcessLockSub" xml:space="preserve">
-        <value>Le fichier suivant est occupé par autre processus, merci de fermer le programme pour que Trebuchet puisse terminer ses taches:
+        <value>Les fichiers suivants sont utilisés par un autre processus, merci de fermer le programme pour que Trebuchet puisse terminer ses tâches :
 {0}</value>
     </data>
     <data name="StatusFrozen" xml:space="preserve">
         <value>Ne répond pas</value>
     </data>
     <data name="WatermarkModlistURLTip" xml:space="preserve">
-        <value>Valide URL sont soit une collection Steam ou réponse/ficher json</value>
+        <value>Valide les URLs qui sont soit une collection Steam ou un(e) réponse/fichier .json</value>
     </data>
     <data name="ModlistSize" xml:space="preserve">
-        <value>Poid</value>
+        <value>Poids</value>
     </data>
     <data name="ModlistSizeTip" xml:space="preserve">
-        <value>Le poid total des mods dans votre liste. Les mods manquant utilise la taille indiqué dans la base de donnée du workshop. Les mods locaux qui sont manquant compte pour zéro.</value>
+        <value>Poids total des mods dans votre liste. Les mods manquants utilisent la taille indiquée dans la base de données du workshop. Les mods locaux manquants ne comptent pas.</value>
     </data>
     <data name="UnknownMod" xml:space="preserve">
-        <value>Mod Workshop Inconnu. Cela peut arriver si le mod a été supprimé ou caché sur le workshop</value>
+        <value>Mod du workshop inconnu. Cela peut arriver si le mod a été supprimé ou caché sur le workshop.</value>
     </data>
     <data name="OnBoardingUpdate" xml:space="preserve">
         <value>Mise à jour Trebuchet ({0})</value>
     </data>
     <data name="OnBoardingUpdateSub" xml:space="preserve">
-        <value>Une version plus récente de Trebuchet a été trouvé, souhaitez vous la télécharger et l'installer ?</value>
+        <value>Une version plus récente de Trebuchet a été trouvée. Souhaitez vous la télécharger et l'installer ?</value>
     </data>
 </root>
