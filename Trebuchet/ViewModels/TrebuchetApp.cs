@@ -184,10 +184,10 @@ public sealed class TrebuchetApp : ReactiveObject
         {
             _appFiles.SetupFolders();
             if (!await _onBoarding.OnBoardingLanguageChoice()) return;
+            if (!await _onBoarding.OnBoardingCheckForUpdate(_updater)) return;
             if (!await _onBoarding.OnBoardingCheckTrebuchet()) return;
             if (!await OnBoardingFirstLaunch()) return;
             if (!await OnBoardingRepairBrokenJunctions()) return;
-            if (!await _onBoarding.OnBoardingCheckForUpdate(_updater)) return;
         }
         catch (OperationCanceledException ex)
         {
