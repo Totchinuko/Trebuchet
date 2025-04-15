@@ -39,5 +39,21 @@
                 throw new Exception("Failed to load profile file.", ex);
             }
         }
+
+        internal static void RepairMissingProfileFile(string path)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(path)) throw new ArgumentException("path is empty");
+                var dir = Path.GetDirectoryName(path) ?? throw new IOException("Profile folder is invalid");
+                if (File.Exists(path) || !Directory.Exists(dir)) return;
+                var profile = CreateFile(path);
+                profile.SaveFile();
+            }
+            catch (Exception ex)
+            {
+                throw new Exception("Failed to repair broken profile", ex);
+            }
+        }
     }
 }

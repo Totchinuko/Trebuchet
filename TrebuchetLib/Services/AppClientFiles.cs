@@ -22,6 +22,8 @@ public class AppClientFiles(AppSetup appSetup)
     {
         if (_cache.TryGetValue(name, out var profile))
             return profile;
+        
+        ClientProfile.RepairMissingProfileFile(GetPath(name));
         var file = ClientProfile.LoadProfile(GetPath(name));
         _cache[name] = file;
         return file;
