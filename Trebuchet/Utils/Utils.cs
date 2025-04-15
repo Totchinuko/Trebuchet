@@ -5,6 +5,8 @@ using System.IO;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
+using Avalonia.Platform;
+using Avalonia.Styling;
 using SteamWorksWebAPI;
 using Trebuchet.Assets;
 using TrebuchetLib;
@@ -100,5 +102,23 @@ internal static class Utils
         if (desktop.MainWindow?.Clipboard is null) 
             return string.Empty;
         return await desktop.MainWindow.Clipboard.GetTextAsync()  ?? string.Empty;
+    }
+
+    public static void ApplyPlateformTheme(PlateformTheme theme)
+    {
+        if (Application.Current is null) return;
+        
+        switch (theme)
+        {
+            case PlateformTheme.Default:
+                Application.Current.RequestedThemeVariant = ThemeVariant.Default;
+                return;
+            case PlateformTheme.Dark:
+                Application.Current.RequestedThemeVariant = ThemeVariant.Dark;
+                return;
+            case PlateformTheme.Light:
+                Application.Current.RequestedThemeVariant = ThemeVariant.Light;
+                return;
+        }
     }
 }

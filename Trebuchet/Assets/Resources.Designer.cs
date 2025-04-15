@@ -1623,6 +1623,51 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Application Theme.
+        /// </summary>
+        public static string SettingPlateformTheme {
+            get {
+                return ResourceManager.GetString("SettingPlateformTheme", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Dark.
+        /// </summary>
+        public static string SettingPlateformThemeDark {
+            get {
+                return ResourceManager.GetString("SettingPlateformThemeDark", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Operating System.
+        /// </summary>
+        public static string SettingPlateformThemeDefault {
+            get {
+                return ResourceManager.GetString("SettingPlateformThemeDefault", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Light.
+        /// </summary>
+        public static string SettingPlateformThemeLight {
+            get {
+                return ResourceManager.GetString("SettingPlateformThemeLight", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Choose between Dark and Light theme.
+        /// </summary>
+        public static string SettingPlateformThemeText {
+            get {
+                return ResourceManager.GetString("SettingPlateformThemeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Process Priority.
         /// </summary>
         public static string SettingProcessPrio {

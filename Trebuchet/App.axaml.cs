@@ -94,6 +94,8 @@ public partial class App : Application, IApplication
 
             //CrashHandler.SetReportUri(@"");
             
+            Utils.Utils.ApplyPlateformTheme((PlateformTheme)_uiConfig!.PlateformTheme);
+            
             if (desktop.Args?.Length > 0)
             {
                 if (desktop.Args.Contains(Constants.argTestLive))

@@ -922,4 +922,19 @@ ATTENTION : Ceci peut rendre la détection des processus sans réponse inefficac
     <data name="OnBoardingSteamClientOfflineSub" xml:space="preserve">
         <value>Votre client Steam n'est pas lancé, Conan Exiles requiére que vous soyez connecté à Steam pour jouer en ligne.</value>
     </data>
+    <data name="SettingPlateformTheme" xml:space="preserve">
+        <value>Theme de l'application</value>
+    </data>
+    <data name="SettingPlateformThemeText" xml:space="preserve">
+        <value>Choisissez entre le theme sombre ou clair</value>
+    </data>
+    <data name="SettingPlateformThemeDefault" xml:space="preserve">
+        <value>Système d'exploitation</value>
+    </data>
+    <data name="SettingPlateformThemeDark" xml:space="preserve">
+        <value>Sombre</value>
+    </data>
+    <data name="SettingPlateformThemeLight" xml:space="preserve">
+        <value>Clair</value>
+    </data>
 </root>

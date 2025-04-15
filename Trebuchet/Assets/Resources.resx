@@ -930,4 +930,19 @@ Do you wish to proceed ?</value>
     <data name="OnBoardingSteamClientOfflineSub" xml:space="preserve">
         <value>Your Steam client is not currently running, Conan Exiles require your to be logged in to Steam to play online.</value>
     </data>
+    <data name="SettingPlateformTheme" xml:space="preserve">
+        <value>Application Theme</value>
+    </data>
+    <data name="SettingPlateformThemeText" xml:space="preserve">
+        <value>Choose between Dark and Light theme</value>
+    </data>
+    <data name="SettingPlateformThemeDefault" xml:space="preserve">
+        <value>Operating System</value>
+    </data>
+    <data name="SettingPlateformThemeDark" xml:space="preserve">
+        <value>Dark</value>
+    </data>
+    <data name="SettingPlateformThemeLight" xml:space="preserve">
+        <value>Light</value>
+    </data>
 </root>

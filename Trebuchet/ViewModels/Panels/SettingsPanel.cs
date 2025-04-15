@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using Avalonia;
+using Avalonia.Controls.ApplicationLifetimes;
 using DynamicData.Binding;
 using ReactiveUI;
 using tot_lib;
@@ -10,6 +12,7 @@ using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
 using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.ViewModels.SettingFields;
 using TrebuchetLib;
@@ -43,6 +46,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
         SaveConfig = ReactiveCommand.Create(() => _setup.Config.SaveFile());
         SaveUiConfig = ReactiveCommand.Create(() => _uiConfig.SaveFile());
         ChangeLanguage = ReactiveCommand.CreateFromTask<LanguageModel?>(OnLanguageChanged);
+        ChangePlateformTheme = ReactiveCommand.Create(OnPlateformThemeChanged);
         
         this.WhenValueChanged<SettingsPanel, LanguageModel>(x => x.SelectedLanguage, false, () => _langManager.DefaultLanguage)
             .InvokeCommand(ChangeLanguage);
@@ -61,6 +65,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
 
     public ReactiveCommand<Unit,Unit> SaveConfig { get; }
     public ReactiveCommand<Unit,Unit> SaveUiConfig { get; }
+    public ReactiveCommand<Unit, Unit> ChangePlateformTheme { get; }
     public ReactiveCommand<LanguageModel?,Unit> ChangeLanguage { get; }
     public List<FieldElement> Fields { get; } = [];
     public ObservableCollectionExtended<LanguageModel> AvailableLocales { get; } = [];
@@ -103,6 +108,11 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
         }
     }
 
+    private void OnPlateformThemeChanged()
+    {
+        Utils.Utils.ApplyPlateformTheme((PlateformTheme)_uiConfig.PlateformTheme);
+    }
+
     private void BuildFields()
     {
         Fields.Add(new TitleField().SetTitle(Resources.OnBoardingUsageChoice));
@@ -124,6 +134,18 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
             .SetGetter(() => _uiConfig.DisplayWarningOnKill)
             .SetSetter((v) => _uiConfig.DisplayWarningOnKill = v)
             .SetDefault(() => UIConfig.DisplayWarningOnKillDefault)
+        );
+        Fields.Add(new ComboBoxField()
+            .WhenFieldChanged(ChangePlateformTheme)
+            .WhenFieldChanged(SaveUiConfig)
+            .SetTitle(Resources.SettingPlateformTheme)
+            .SetDescription(Resources.SettingPlateformThemeText)
+            .AddOption(Resources.SettingPlateformThemeDefault)
+            .AddOption(Resources.SettingPlateformThemeDark)
+            .AddOption(Resources.SettingPlateformThemeLight)
+            .SetGetter(() => _uiConfig.PlateformTheme)
+            .SetSetter((v) => _uiConfig.PlateformTheme = v)
+            .SetDefault(() => UIConfig.PlatformThemeDefault)
         );
         Fields.Add(new TitleField().SetTitle(Resources.CatUpdates));
         Fields.Add(new ComboBoxField()
