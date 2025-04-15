@@ -141,14 +141,15 @@ public class OnBoarding(
     public async Task<bool> OnBoardingServerInstanceSelection()
     {
         var choice = new OnBoardingIntSlider(
-            Resources.OnBoardingServerInstanceCount, 
-            Resources.OnBoardingServerInstanceCountSub,
-            1, 6)
+                Resources.OnBoardingServerInstanceCount,
+                Resources.OnBoardingServerInstanceCountSub,
+                1, 6)
         {
             Value = setup.Config.ServerInstanceCount
-        };
+        }.SetSize<OnBoardingIntSlider>(600, 200);
+        
         await dialogueBox.OpenAsync(choice);
-        if(choice.Value == 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
+        if(choice.Cancelled) throw new OperationCanceledException(@"OnBoarding was cancelled");
         setup.Config.ServerInstanceCount = choice.Value;
         return await OnBoardingServerDownload();
     }

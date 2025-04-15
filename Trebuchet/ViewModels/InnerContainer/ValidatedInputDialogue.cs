@@ -18,6 +18,7 @@ public class ValidatedInputDialogue<T, TD> : TitledDialogue<TD> where TD : Valid
         CancelCommand = ReactiveCommand.Create(() =>
         {
             _value = default;
+            Cancelled = true;
             Close();
         });
 
@@ -49,6 +50,8 @@ public class ValidatedInputDialogue<T, TD> : TitledDialogue<TD> where TD : Valid
         get => _isValid;
         protected set => this.RaiseAndSetIfChanged(ref _isValid, value);
     }
+    
+    public bool Cancelled { get; private set; }
 
     public ValidatedInputDialogue<T, TD> SetValidation(Func<T?, Validation> validation)
     {
