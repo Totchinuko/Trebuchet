@@ -17,22 +17,7 @@ static class Program
     [STAThread]
     public static void Main(string[] args)
     {
-        using var mutex = new Mutex(true, @"TotTrebuchet", out var createdNew);
-        
-        if(createdNew)
-            BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
-        else
-        {
-            var currentProcess = Process.GetCurrentProcess();
-            foreach (var process in Process.GetProcessesByName(currentProcess.ProcessName))
-            {
-                if (process.Id != currentProcess.Id)
-                {
-                    Tools.FocusWindow(process.MainWindowHandle);
-                    break;
-                }
-            }
-        }
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 
     // Avalonia configuration, don't remove; also used by visual designer.

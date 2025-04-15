@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -36,6 +37,7 @@ public partial class App : Application, IApplication
     private ILogger<App>? _logger;
     private UIConfig? _uiConfig;
     private LanguageManager? _langManager;
+    private Mutex? _mutex;
     public bool HasCrashed { get; private set; }
     public IImage? AppIconPath => Resources[@"AppIcon"] as IImage;
 
@@ -85,6 +87,14 @@ public partial class App : Application, IApplication
     
     public override void OnFrameworkInitializationCompleted()
     {
+        _mutex = new Mutex(true, @"TotTrebuchet", out var createdNew);
+        if (!createdNew)
+        {
+            Utils.Utils.FocusOtherProcess();
+            Utils.Utils.ShutdownDesktopProcess();
+            return;
+        }
+        
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             AppDomain.CurrentDomain.UnhandledException += OnUnhandledException;
@@ -175,6 +185,8 @@ public partial class App : Application, IApplication
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
     {
+        _mutex?.Dispose();
+        _mutex = null;
         _logger?.LogInformation(@"Trebuchet off");
         _logger?.LogInformation(@"----------------------------------------");
     }

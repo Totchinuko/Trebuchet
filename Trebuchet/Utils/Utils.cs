@@ -60,6 +60,19 @@ internal static class Utils
             desktop.Shutdown();
     }
 
+    public static void FocusOtherProcess()
+    {
+        var currentProcess = Process.GetCurrentProcess();
+        foreach (var process in Process.GetProcessesByName(currentProcess.ProcessName))
+        {
+            if (process.Id != currentProcess.Id)
+            {
+                Tools.FocusWindow(process.MainWindowHandle);
+                break;
+            }
+        }
+    }
+
     [Obsolete]
     public static async Task<bool> SingleAppInstanceLock()
     {
