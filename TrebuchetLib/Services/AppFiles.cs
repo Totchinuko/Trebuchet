@@ -22,13 +22,5 @@ public class AppFiles(AppClientFiles clientFiles, AppServerFiles serverFiles, Ap
         return true;
     }
     
-    public static DirectoryInfo GetDataDirectory()
-    {
-        return typeof(Config).GetStandardFolder(Environment.SpecialFolder.MyDocuments);
-    }
-    
-    public static DirectoryInfo GetCommonAppDataDirectory()
-    {
-        return typeof(Tools).GetStandardFolder(Environment.SpecialFolder.CommonApplicationData);
-    }
+
 }

@@ -86,7 +86,7 @@ public class AppModlistFiles(AppSetup setup)
     public string GetBaseFolder()
     {
         return Path.Combine(
-            AppFiles.GetDataDirectory().FullName, 
+            setup.GetDataDirectory().FullName, 
             setup.VersionFolder, 
             Constants.FolderModlistProfiles);
     }
@@ -100,7 +100,7 @@ public class AppModlistFiles(AppSetup setup)
 
     public IEnumerable<string> ListProfiles()
     {
-        string folder = Path.Combine(AppFiles.GetDataDirectory().FullName, setup.VersionFolder, Constants.FolderModlistProfiles);
+        string folder = Path.Combine(setup.GetDataDirectory().FullName, setup.VersionFolder, Constants.FolderModlistProfiles);
         if (!Directory.Exists(folder))
             yield break;
 
@@ -121,16 +121,16 @@ public class AppModlistFiles(AppSetup setup)
     public string GetWorkshopFolder()
     {
         return Path.Combine(
-            AppFiles.GetCommonAppDataDirectory().FullName,
+            setup.GetCommonAppDataDirectory().FullName,
             Constants.FolderWorkshop
         );
     }
 
-    private bool ResolveMod(uint appID, ref string mod)
+    private bool ResolveMod(uint appId, ref string mod)
     {
         string file = mod;
         if (long.TryParse(mod, out _))
-            file = Path.Combine(GetWorkshopFolder(), appID.ToString(), mod, "none");
+            file = Path.Combine(GetWorkshopFolder(), appId.ToString(), mod, "none");
 
         string? folder = Path.GetDirectoryName(file);
         if (folder == null)
@@ -186,7 +186,7 @@ public class AppModlistFiles(AppSetup setup)
                 return profileName;
         }
 
-        profileName = Tools.GetFirstFileName(Path.Combine(AppFiles.GetDataDirectory().FullName, setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
+        profileName = Tools.GetFirstFileName(Path.Combine(setup.GetDataDirectory().FullName, setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
         if (!string.IsNullOrEmpty(profileName)) 
             return profileName;
 
