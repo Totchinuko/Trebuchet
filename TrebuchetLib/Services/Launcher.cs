@@ -336,6 +336,11 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
         return targetProcess;
     }
 
+    public IEnumerable<int> GetActiveServers()
+    {
+        return _serverProcesses.Keys;
+    }
+
     /// <summary>
     ///     Ask a particular server instance to close. If the process is borked, this will not work.
     /// </summary>
@@ -458,7 +463,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
             if (_serverProcesses.ContainsKey(instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
-            var infos = await iniHandler.GetInfosFromServerAsync(instance).ConfigureAwait(false);
+            var infos = await iniHandler.GetInfosFromServerAsync(instance);
             IConanServerProcess server = new ConanServerProcess(process, infos, p.start);
             _serverProcesses.TryAdd(instance, server);
         }

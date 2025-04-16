@@ -1,9 +1,10 @@
 using System.ComponentModel;
 using System.Diagnostics;
+using tot_lib;
 
 namespace TrebuchetLib.Processes;
 
-public interface IConanProcess : IDisposable
+public interface IConanProcess : IDisposable, INotifyPropertyChanged
 {
     int PId { get; }
     
@@ -14,6 +15,8 @@ public interface IConanProcess : IDisposable
     DateTime StartUtc { get; }
     
     ProcessState State { get; }
+
+    event EventHandler<ProcessState>? StateChanged;
 
     Task RefreshAsync();
 

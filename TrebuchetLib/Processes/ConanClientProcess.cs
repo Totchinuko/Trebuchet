@@ -15,6 +15,10 @@ internal class EmptyConanProcess : IConanProcess
     public TimeSpan CpuTime { get; } = TimeSpan.Zero;
     public DateTime StartUtc { get; } = DateTime.MinValue;
     public ProcessState State { get; } = ProcessState.STOPPED;
+    
+    public event EventHandler<ProcessState>? StateChanged; 
+    public event PropertyChangedEventHandler? PropertyChanged;
+
     public Task RefreshAsync()
     {
         return Task.CompletedTask;
@@ -23,6 +27,16 @@ internal class EmptyConanProcess : IConanProcess
     public Task KillAsync()
     {
         return Task.CompletedTask;
+    }
+    
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+    
+    private void OnStateChanged(ProcessState args)
+    {
+        StateChanged?.Invoke(this, args);
     }
 }
 
@@ -33,8 +47,6 @@ public static class ConanProcess
 
 public sealed class ConanClientProcess : IConanProcess
 {
-    private readonly Process _process;
-
     public ConanClientProcess(Process process, DateTime startTime)
     {
         _process = process;
@@ -46,6 +58,12 @@ public sealed class ConanClientProcess : IConanProcess
     public ConanClientProcess(Process process) : this(process, DateTime.UtcNow)
     {
     }
+    
+    private readonly Process _process;
+    private ProcessState _state;
+
+    public event EventHandler<ProcessState>? StateChanged; 
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public long MemoryUsage
     {
@@ -70,7 +88,15 @@ public sealed class ConanClientProcess : IConanProcess
     public int PId { get; }
     public DateTime StartUtc { get; }
 
-    public ProcessState State { get; private set; }
+    public ProcessState State
+    {
+        get => _state;
+        private set
+        {
+            if (SetField(ref _state, value))
+                OnStateChanged(_state);
+        }
+    }
 
     public void Dispose()
     {
@@ -100,5 +126,23 @@ public sealed class ConanClientProcess : IConanProcess
         State = ProcessState.STOPPING;
         _process.Kill();
         return Task.CompletedTask;
+    }
+    
+    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
+    {
+        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+    }
+
+    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
+    {
+        if (EqualityComparer<T>.Default.Equals(field, value)) return false;
+        field = value;
+        OnPropertyChanged(propertyName);
+        return true;
+    }
+    
+    private void OnStateChanged(ProcessState args)
+    {
+        StateChanged?.Invoke(this, args);
     }
 }

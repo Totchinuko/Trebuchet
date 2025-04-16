@@ -2,20 +2,12 @@ using System.ComponentModel;
 using System.Diagnostics;
 using System.Net;
 using System.Runtime.CompilerServices;
-using SteamKit2.GC.Dota.Internal;
 
 namespace TrebuchetLib.Processes;
 
 public sealed class ConanServerProcess : IConanServerProcess
 {
-    private readonly ConanServerInfos _infos;
-    private readonly Process _process;
-    private readonly SourceQueryReader _sourceQueryReader;
-    private DateTime _lastResponse;
-    private int _maxPlayers;
-    private bool _online;
-    private int _players;
-    private ProcessState _state;
+
 
     public ConanServerProcess(Process process, ConanServerInfos infos, DateTime startTime)
     {
@@ -29,13 +21,25 @@ public sealed class ConanServerProcess : IConanServerProcess
             = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, _infos.QueryPort), 4 * 1000, 5 * 1000);
         _sourceQueryReader.StartQueryThread();
         
-        RCon = new Rcon(new IPEndPoint(IPAddress.Loopback, _infos.RConPort), _infos.RConPassword);
+        RCon = new Rcon(new IPEndPoint(IPAddress.Loopback, _infos.RConPort), _infos.RConPassword, timeout:10, keepAlive:300);
         Console = new MixedConsole(RCon);
     }
 
     public ConanServerProcess(Process process, ConanServerInfos infos) : this(process, infos, DateTime.UtcNow)
     {
     }
+    
+    private readonly ConanServerInfos _infos;
+    private readonly Process _process;
+    private readonly SourceQueryReader _sourceQueryReader;
+    private DateTime _lastResponse;
+    private int _maxPlayers;
+    private bool _online;
+    private int _players;
+    private ProcessState _state;
+
+    public event EventHandler<ProcessState>? StateChanged; 
+    public event PropertyChangedEventHandler? PropertyChanged;
 
     public long MemoryUsage
     {
@@ -65,7 +69,11 @@ public sealed class ConanServerProcess : IConanServerProcess
     public ProcessState State
     {
         get => _state;
-        private set => SetField(ref _state, value);
+        private set
+        {
+            if (SetField(ref _state, value))
+                OnStateChanged(_state);
+        }
     }
 
     public int MaxPlayers
@@ -171,8 +179,6 @@ public sealed class ConanServerProcess : IConanServerProcess
         return Task.CompletedTask;
     }
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
@@ -184,5 +190,10 @@ public sealed class ConanServerProcess : IConanServerProcess
         field = value;
         OnPropertyChanged(propertyName);
         return true;
+    }
+
+    private void OnStateChanged(ProcessState args)
+    {
+        StateChanged?.Invoke(this, args);
     }
 }

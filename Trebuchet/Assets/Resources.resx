@@ -958,4 +958,7 @@ DO NOT place it in your Steam Directory.</value>
     <data name="Reset" xml:space="preserve">
         <value>Reset</value>
     </data>
+    <data name="AutoScroll" xml:space="preserve">
+        <value>Auto Scroll</value>
+    </data>
 </root>

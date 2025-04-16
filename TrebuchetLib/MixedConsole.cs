@@ -1,4 +1,6 @@
 ﻿
+using tot_lib;
+
 namespace TrebuchetLib
 {
     public class MixedConsole : IDisposable, IConsole
@@ -14,7 +16,7 @@ namespace TrebuchetLib
             _rcon.RconSent += OnRconSent;
         }
 
-        public event EventHandler<ConsoleLogEventArgs>? LogReceived;
+        public event AsyncEventHandler<ConsoleLogEventArgs>? LogReceived;
 
         public IEnumerable<ConsoleLog> Historic
         {
@@ -29,12 +31,11 @@ namespace TrebuchetLib
         {
             _rcon.RconSent -= OnRconMessaged;
             _rcon.RconResponded -= OnRconMessaged;
-            _rcon.Cancel();
         }
 
-        public void SendCommand(string data)
+        public async Task SendCommand(string data, CancellationToken ct)
         {
-            _rcon.Send(data);
+            await _rcon.Send(data, ct);
         }
 
         private void AddLog(ConsoleLog log)
@@ -48,20 +49,22 @@ namespace TrebuchetLib
             LogReceived?.Invoke(this, new ConsoleLogEventArgs(log));
         }
 
-        private void OnRconMessaged(object? sender, RconEventArgs e)
+        private Task OnRconMessaged(object? sender, RconEventArgs e)
         {
             if (e.Exception != null)
                 AddLog(new ConsoleLog(e.Exception.Message, true, true));
             else if (!string.IsNullOrWhiteSpace(e.Response))
                 AddLog(new ConsoleLog(e.Response, false, true));
+            return Task.CompletedTask;
         }
 
-        private void OnRconSent(object? sender, RconEventArgs e)
+        private Task OnRconSent(object? sender, RconEventArgs e)
         {
             if (e.Exception != null)
                 AddLog(new ConsoleLog(e.Exception.Message, true, false));
             else if (!string.IsNullOrWhiteSpace(e.Response))
                 AddLog(new ConsoleLog(e.Response, false, false));
+            return Task.CompletedTask;
         }
     }
 }

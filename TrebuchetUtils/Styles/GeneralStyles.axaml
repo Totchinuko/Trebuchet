@@ -250,6 +250,12 @@
             <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
         </Style>
     </Style>
+    <Style Selector="Border.BackPanel">
+        <Setter Property="CornerRadius" Value="3" />
+        <Setter Property="Background" Value="{DynamicResource TBackground}" />
+        <Setter Property="BorderThickness" Value="1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+    </Style>
     
     <!-- Button Base -->
     <Style Selector="Button.Base /template/ ContentPresenter#PART_ContentPresenter">
@@ -697,6 +703,17 @@
             <BehaviorCollectionTemplate>
                 <BehaviorCollection>
                     <u:AutoFocusBehavior />
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
+    </Style>
+    
+    <!-- Auto Scroll Element -->
+    <Style Selector="ScrollViewer.AutoScroller">
+        <Setter Property="(Interaction.Behaviors)">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <u:AutoScrollBehavior />
                 </BehaviorCollection>
             </BehaviorCollectionTemplate>
         </Setter>

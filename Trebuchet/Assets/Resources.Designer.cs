@@ -87,6 +87,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto Scroll.
+        /// </summary>
+        public static string AutoScroll {
+            get {
+                return ResourceManager.GetString("AutoScroll", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Battle Eye.
         /// </summary>
         public static string BattleEye {

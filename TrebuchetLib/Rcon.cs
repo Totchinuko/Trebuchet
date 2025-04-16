@@ -1,102 +1,172 @@
 ﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using System.Threading.Tasks;
+using tot_lib;
 
 namespace TrebuchetLib
 {
     public class Rcon : IRcon, IDisposable
     {
-        private CancellationTokenSource? _cts;
-        private IPEndPoint _endpoint;
+        private TcpClient? _client;
         private int _id;
-        private int _keepAlive;
-        private object _lock = new object();
-        private string _password;
-        private ConcurrentQueue<RconPacket> _queue = new ConcurrentQueue<RconPacket>();
-        private int _timeout;
+        private readonly Queue<RconPacket> _rconQueue = [];
+        private readonly SemaphoreSlim _semaphore = new(1, 1);
+        private readonly IPEndPoint _endpoint;
+        private readonly string _password;
+        private readonly int _keepAlive;
+        private CancellationTokenSource? _timeoutCts;
 
         public Rcon(IPEndPoint endpoint, string password, int timeout = 5000, int keepAlive = 0)
         {
             _endpoint = endpoint;
-            _timeout = timeout;
             _password = password;
             _keepAlive = keepAlive;
+
         }
 
-        public event EventHandler<RconEventArgs>? RconResponded;
+        public event AsyncEventHandler<RconEventArgs>? RconResponded;
 
-        public event EventHandler<RconEventArgs>? RconSent;
-
-        public void Cancel()
-        {
-            lock (_lock)
-            {
-                _cts?.Cancel();
-            }
-        }
+        public event AsyncEventHandler<RconEventArgs>? RconSent;
 
         public void Dispose()
         {
-            if (_cts != null)
+            _client?.Close();
+            _client?.Dispose();
+            _client = null;
+        }
+
+        public async Task<int> Send(string data, CancellationToken token)
+        {
+            if (data.Length > 4086)
+                throw new ArgumentOutOfRangeException(nameof(data), "Data must be less than 4086 characters.");
+
+            var packet = new RconPacket
             {
-                _cts.Cancel();
-                _cts.Dispose();
-                _cts = null;
+                Id = _id++,
+                Type = RconPacketType.SERVERDATA_EXECCOMMAND,
+                Body = data
+            };
+
+            await _semaphore.WaitAsync(token);
+            await Connect(token);
+            await RConSend(_client, packet, token);
+            _semaphore.Release();
+            AutoDisconnect();
+            return packet.Id;
+        }
+
+        public int QueueData(string data)
+        {
+            if (data.Length > 4086)
+                throw new ArgumentOutOfRangeException(nameof(data), "Data must be less than 4086 characters.");
+
+            var packet = new RconPacket
+            {
+                Id = _id++,
+                Type = RconPacketType.SERVERDATA_EXECCOMMAND,
+                Body = data
+            };
+            _rconQueue.Enqueue(packet);
+            return packet.Id;
+        }
+
+        public async Task FlushQueue(CancellationToken token)
+        {
+            if (_rconQueue.Count == 0) return;
+            
+            await _semaphore.WaitAsync(token);
+            await Connect(token);
+            while (_rconQueue.Count > 0)
+            {
+                var packet = _rconQueue.Dequeue();
+                await RConSend(_client, packet, token);
+            }
+            _semaphore.Release();
+            AutoDisconnect();
+        }
+
+        public async Task<List<int>> Send(IEnumerable<string> data, CancellationToken ct)
+        {
+            List<int> ids = [];
+            foreach (var d in data)
+                ids.Add(QueueData(d));
+            await FlushQueue(ct);
+            return ids;
+        }
+
+        
+        [MemberNotNull("_client")]
+        public async Task Connect(CancellationToken token)
+        {
+            if (_client is not null && _client.Connected) return;
+            if (_client is not null)
+                await Disconnect();
+            _client = new();
+            await _client.ConnectAsync(_endpoint, token);
+            await RConLogin(_password, _client.GetStream(), token);
+        }
+
+        public async Task Disconnect()
+        {
+            await _semaphore.WaitAsync();
+            _client?.Close(); 
+            _client?.Dispose();
+            _client = null;
+            _semaphore.Release();
+        }
+
+        protected async Task OnRconResponded(RconEventArgs e)
+        {
+            if(RconResponded is not null)
+                await RconResponded.Invoke(this, e);
+        }
+
+        protected async Task OnRconResponded(Exception ex)
+        {
+            if (ex is not OperationCanceledException)
+                if(RconResponded is not null)
+                    await RconResponded.Invoke(this, new RconEventArgs(string.Empty, ex));
+        }
+
+        protected async Task OnRconSent(RconEventArgs e)
+        {
+            if(RconSent is not null)
+                await RconSent.Invoke(this, e);
+        }
+
+        private void AutoDisconnect()
+        {
+            Task.Run(AutoDisconnectTask);
+        }
+ 
+        private async Task AutoDisconnectTask()
+        {
+            try
+            {
+                await _semaphore.WaitAsync();
+                if (_timeoutCts is not null)
+                    await _timeoutCts.CancelAsync();
+                _timeoutCts = new();
+                var ct = _timeoutCts.Token;
+                _semaphore.Release();
+
+                await Task.Delay(_keepAlive * 1000, ct);
+                await Disconnect();
+            }
+            catch (OperationCanceledException)
+            {
             }
         }
 
-        public int Send(string data)
-        {
-            if (data.Length > 4086)
-                throw new ArgumentOutOfRangeException("data", "Data must be less than 4086 characters.");
-
-            var packet = new RconPacket
-            {
-                id = _id++,
-                type = RconPacketType.SERVERDATA_EXECCOMMAND,
-                body = data
-            };
-
-            _queue.Enqueue(packet);
-            StartRconJob();
-
-            return packet.id;
-        }
-
-        public IEnumerable<int> Send(IEnumerable<string> data)
-        {
-            foreach (string s in data)
-                yield return Send(s);
-        }
-
-        protected void OnRconResponded(RconEventArgs e)
-        {
-            RconResponded?.Invoke(this, e);
-        }
-
-        protected void OnRconResponded(Exception ex)
-        {
-            if (ex is not OperationCanceledException)
-                RconResponded?.Invoke(this, new RconEventArgs(string.Empty, ex));
-        }
-
-        protected void OnRconSent(RconEventArgs e)
-        {
-            RconSent?.Invoke(this, e);
-        }
-
-        private RconPacket BuildAuthPacket()
+        private RconPacket BuildAuthPacket(string password)
         {
             var packet = new RconPacket
             {
-                id = ++_id,
-                type = RconPacketType.SERVERDATA_AUTH,
-                body = _password
+                Id = ++_id,
+                Type = RconPacketType.SERVERDATA_AUTH,
+                Body = password
             };
 
             return packet;
@@ -106,13 +176,14 @@ namespace TrebuchetLib
         {
             int size = br.ReadInt32();
             if (size < 10 || size > 4096) // rcon message (called packet) can never be larger than 4096 bytes and never smaller than 10, this is by design in the protocol definition
-                throw new Exception("Invalid packet received.");
+                throw new Exception($"Invalid packet received (size=10<{size}<4096)");
 
-            int id = br.ReadInt32();
-            RconPacketType type = (RconPacketType)br.ReadInt32();
-            string? response = br.ReadNullTerminatedString();
-            if (br.ReadByte() != 0)
-                throw new Exception("Invalid packet received.");
+            var id = br.ReadInt32();
+            _ = (RconPacketType)br.ReadInt32();
+            var response = br.ReadNullTerminatedString();
+            var code = br.ReadByte();
+            if (code != 0)
+                throw new Exception($"Invalid packet received ({code})");
 
             if (id == -1)
                 throw new Exception("Authentication failed.");
@@ -120,97 +191,32 @@ namespace TrebuchetLib
             return response;
         }
 
-        private async Task RconThread(CancellationToken ct)
+        private async Task RConLogin(string password, NetworkStream stream, CancellationToken ct)
         {
-            var client = new TcpClient();
-            client.SendTimeout = _timeout;
-            client.ReceiveTimeout = _timeout;
-            try
-            {
-                client.Connect(_endpoint);
-                if (!client.Connected)
-                    throw new Exception("Failed to connect to server.");
-
-                RconThreadLogin(client.GetStream(), ct);
-                ct.ThrowIfCancellationRequested();
-
-                await RconThreadLoop(ct, client);
-            }
-            catch (Exception ex)
-            {
-                OnRconResponded(ex);
-            }
-            finally
-            {
-                client.Dispose();
-                StopRconJob();
-            }
-        }
-
-        private void RconThreadLogin(NetworkStream stream, CancellationToken ct)
-        {
-            var auth = BuildAuthPacket();
+            var auth = BuildAuthPacket(password);
             using var bw = new BinaryWriter(stream, Encoding.ASCII, true);
-            auth.WriteBinary(bw);
+            await auth.WriteBinary(bw);
             ct.ThrowIfCancellationRequested();
-            RconThreadReceive(stream, ct);
+            await RConReceive(stream, ct);
         }
 
-        private async Task RconThreadLoop(CancellationToken ct, TcpClient client)
-        {
-            DateTime lastKeepAlive = DateTime.Now;
-            while (!ct.IsCancellationRequested && client.Connected)
-            {
-                if (_queue.Count != 0)
-                {
-                    lastKeepAlive = DateTime.Now;
-                    RconThreadSend(client, ct);
-                }
-
-                if (_keepAlive == 0 || (DateTime.Now - lastKeepAlive).TotalMilliseconds > _keepAlive)
-                    return;
-                await Task.Delay(100);
-            }
-        }
-
-        private void RconThreadReceive(NetworkStream stream, CancellationToken ct)
+        private async Task RConReceive(NetworkStream stream, CancellationToken ct)
         {
             using var br = new BinaryReader(stream, Encoding.ASCII, true);
             ct.ThrowIfCancellationRequested();
-            string body = EvaluateRconResponse(br) ?? string.Empty;
-            OnRconResponded(new RconEventArgs(body));
+            var body = EvaluateRconResponse(br) ?? string.Empty;
+            if(!string.IsNullOrEmpty(body))
+                await OnRconResponded(new RconEventArgs(body));
         }
 
-        private void RconThreadSend(TcpClient client, CancellationToken ct)
+        private async Task RConSend(TcpClient client, RconPacket packet, CancellationToken ct)
         {
             using var bw = new BinaryWriter(client.GetStream(), Encoding.ASCII, true);
-            while (_queue.TryDequeue(out var packet))
-            {
-                packet.WriteBinary(bw);
-                if (!string.IsNullOrEmpty(packet.body))
-                    OnRconSent(new RconEventArgs(packet.body));
-                ct.ThrowIfCancellationRequested();
-            }
-            RconThreadReceive(client.GetStream(), ct);
-        }
-
-        private void StartRconJob()
-        {
-            lock (_lock)
-            {
-                if (_cts != null) return;
-                _cts = new CancellationTokenSource();
-                Task.Run(() => RconThread(_cts.Token), _cts.Token);
-            }
-        }
-
-        private void StopRconJob()
-        {
-            lock (_lock)
-            {
-                _cts?.Cancel();
-                _cts = null;
-            }
+            await packet.WriteBinary(bw);
+            if (!string.IsNullOrEmpty(packet.Body))
+                await OnRconSent(new RconEventArgs(packet.Body));
+            ct.ThrowIfCancellationRequested();
+            await RConReceive(client.GetStream(), ct);
         }
 
         private void WriteEmpty(BinaryWriter bw, int id)
@@ -228,11 +234,11 @@ namespace TrebuchetLib
         // https://developer.valvesoftware.com/wiki/Source_RCON_Protocol
         private class RconPacket
         {
-            public string body = string.Empty;
-            public int id;
-            public RconPacketType type;
+            public string Body { get; init; } = string.Empty;
+            public int Id { get; init; }
+            public RconPacketType Type { get; init; }
 
-            public int Length => body.Length + 10;
+            public int Length => Body.Length + 10;
 
             public static byte[] GetAutoBytes(int integer)
             {
@@ -249,13 +255,23 @@ namespace TrebuchetLib
                 return BitConverter.ToInt32(data);
             }
 
-            public void WriteBinary(BinaryWriter bw)
+            public async Task WriteBinary(BinaryWriter bw)
             {
-                bw.Write(Length);
-                bw.Write(id);
-                bw.Write((int)type);
-                bw.WriteNullTerminatedString(body);
-                bw.Write((byte)0);
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        bw.Write(Length);
+                        bw.Write(Id);
+                        bw.Write((int)Type);
+                        bw.WriteNullTerminatedString(Body);
+                        bw.Write((byte)0);
+                    }
+                    catch
+                    {
+                        return;
+                    }
+                });
             }
         }
     }

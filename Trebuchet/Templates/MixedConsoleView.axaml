@@ -1,0 +1,14 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:html="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="MixedConsoleView" DataType="vm:MixedConsoleViewModel">
+        <DockPanel LastChildFill="True">
+            <CheckBox IsChecked="{Binding AutoScroll}" Content="{x:Static a:Resources.AutoScroll}" HorizontalAlignment="Left" DockPanel.Dock="Bottom" />
+            <ScrollViewer Focusable="True" Classes="AutoScroller" DockPanel.Dock="Top" Margin="0 12">
+                <html:HtmlPanel Text="{Binding FinalLog}" />
+            </ScrollViewer>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

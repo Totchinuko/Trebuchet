@@ -166,6 +166,14 @@ public static class Utils
     public static string GetMarkdownHtmlHeader()
     {
         if (Application.Current is null) return string.Empty;
+        if (Application.Current.RequestedThemeVariant is not null &&
+            Application.Current.RequestedThemeVariant.Key != ThemeVariant.Default.Key)
+        {
+            if (Application.Current.RequestedThemeVariant.Key == ThemeVariant.Dark.Key)
+                return tot_lib.Utils.GetEmbeddedTextFile<Classes>("TrebuchetUtils.MarkdownHeaderDark.html");
+            return tot_lib.Utils.GetEmbeddedTextFile<Classes>("TrebuchetUtils.MarkdownHeaderLight.html");
+        }
+
         if (Application.Current.ActualThemeVariant.Key == ThemeVariant.Dark.Key)
             return tot_lib.Utils.GetEmbeddedTextFile<Classes>("TrebuchetUtils.MarkdownHeaderDark.html");
         return tot_lib.Utils.GetEmbeddedTextFile<Classes>("TrebuchetUtils.MarkdownHeaderLight.html");

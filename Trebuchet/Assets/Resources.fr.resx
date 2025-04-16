@@ -950,4 +950,7 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="Reset" xml:space="preserve">
         <value>Réinitialiser</value>
     </data>
+    <data name="AutoScroll" xml:space="preserve">
+        <value>Scroll Automatique</value>
+    </data>
 </root>
