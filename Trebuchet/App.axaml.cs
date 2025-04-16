@@ -56,7 +56,13 @@ public partial class App : Application, IApplication
             throw new Exception(@"Not supported");
         
         bool catapult = false;
+        
+        #if DEBUG
+        bool experiment = true;
+        #else
         bool experiment = false;
+        #endif
+        
         if (desktop.Args?.Length > 0)
         {
             if(desktop.Args.Contains(Constants.argCatapult))
@@ -64,6 +70,7 @@ public partial class App : Application, IApplication
             if (desktop.Args.Contains(Constants.argExperiment))
                 experiment = true;
         }
+   
         
         //todo: move to services (And get rid of the tiny return sub messages)
         var serviceCollection = new ServiceCollection();
@@ -168,7 +175,8 @@ public partial class App : Application, IApplication
         services.AddSingleton<IPanel, ModlistPanel>();
         services.AddSingleton<IPanel, ClientProfilePanel>();
         services.AddSingleton<IPanel, ServerProfilePanel>();
-        services.AddSingleton<IPanel, RconPanel>();
+        if(experiment)
+            services.AddSingleton<IPanel, RconPanel>();
        
         services.AddSingleton<IPanel, DashboardPanel>();
         services.AddSingleton<IPanel, ToolboxPanel>();
