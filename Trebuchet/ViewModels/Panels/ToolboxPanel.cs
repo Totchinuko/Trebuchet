@@ -8,7 +8,7 @@ using Trebuchet.Services;
 
 namespace Trebuchet.ViewModels.Panels;
 
-public class ToolboxPanel : ReactiveObject, IDisplablePanel
+public class ToolboxPanel : ReactiveObject, IDisplablePanel, IBottomPanel
 {
 
     public ToolboxPanel(
