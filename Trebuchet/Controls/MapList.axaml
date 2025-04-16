@@ -19,7 +19,7 @@
             <i:Icon Value="mdi-map" Classes="Normal" />
         </Button>
         <Popup Name="MapListPopup" IsLightDismissEnabled="True">
-            <Border Classes="Panel" Background="{DynamicResource TBackground}" BorderThickness="1" CornerRadius="3" MaxHeight="300" MinWidth="100" Width="200">
+            <Border Classes="BackPanel" MaxHeight="300" MinWidth="100" Width="200">
                 <ScrollViewer>
                     <StackPanel Spacing="6">
                         <ItemsControl ItemsSource="{Binding $parent[local:MapList].MapListData}">
