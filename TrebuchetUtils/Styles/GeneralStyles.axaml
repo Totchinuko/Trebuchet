@@ -345,6 +345,9 @@
     <Style Selector="Button.Heavy /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="BorderThickness" Value="1" />
     </Style>
+    <Style Selector="Button.Flat /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
     <Style Selector="Button.TabRight /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="BorderThickness" Value="1 1 0 1" />
         <Setter Property="CornerRadius" Value="3 0 0 3"/>
