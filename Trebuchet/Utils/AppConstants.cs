@@ -19,7 +19,7 @@ public static class AppConstants
     public const string RestartArg = "--restart";
 
     [Localizable(false)]
-    public static readonly string[] UICultureList = ["en", "fr"];
+    public static readonly string[] UICultureList = ["en", "fr", "de"];
 
     public static string GetUIConfigPath()
     {
