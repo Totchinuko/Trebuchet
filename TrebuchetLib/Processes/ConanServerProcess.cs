@@ -9,7 +9,7 @@ public sealed class ConanServerProcess : IConanServerProcess
 {
 
 
-    public ConanServerProcess(Process process, ConanServerInfos infos, DateTime startTime)
+    public ConanServerProcess(Process process, ConanServerInfos infos, string logFile, DateTime startTime)
     {
         _process = process;
         PId = _process.Id;
@@ -20,18 +20,23 @@ public sealed class ConanServerProcess : IConanServerProcess
         _sourceQueryReader
             = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, _infos.QueryPort), 4 * 1000, 5 * 1000);
         _sourceQueryReader.StartQueryThread();
+
+        _logReader = new LogReader(logFile);
+        _logReader.Start();
         
         RCon = new Rcon(new IPEndPoint(IPAddress.Loopback, _infos.RConPort), _infos.RConPassword, timeout:10, keepAlive:300);
-        Console = new MixedConsole(RCon);
+        Console = new MixedConsole(RCon).AddLogSource(_logReader, ConsoleLogSource.ServerLog);
+        LogReader = _logReader;
     }
 
-    public ConanServerProcess(Process process, ConanServerInfos infos) : this(process, infos, DateTime.UtcNow)
+    public ConanServerProcess(Process process, ConanServerInfos infos, string logFile) : this(process, infos, logFile, DateTime.UtcNow)
     {
     }
     
     private readonly ConanServerInfos _infos;
     private readonly Process _process;
     private readonly SourceQueryReader _sourceQueryReader;
+    private readonly LogReader _logReader;
     private DateTime _lastResponse;
     private int _maxPlayers;
     private bool _online;
@@ -94,9 +99,11 @@ public sealed class ConanServerProcess : IConanServerProcess
         private set => SetField(ref _online, value);
     }
 
-    public IConsole Console { get; }
+    public ITrebuchetConsole Console { get; }
     
     public IRcon RCon { get; }
+    
+    public ILogReader LogReader { get; }
 
     public int Instance => _infos.Instance;
     public int Port => _infos.Port;
@@ -109,6 +116,7 @@ public sealed class ConanServerProcess : IConanServerProcess
     {
         _process.Dispose();
         _sourceQueryReader.Dispose();
+        _logReader.Dispose();
     }
 
     public async Task RefreshAsync()

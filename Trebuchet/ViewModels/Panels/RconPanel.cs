@@ -24,7 +24,7 @@ namespace Trebuchet.ViewModels.Panels
             var canSendCommand = this.WhenAnyValue(x => x.Console.CanSend, x => x.CommandField,
                 (c, f) => c && !string.IsNullOrEmpty(f));
             
-            SendCommand = ReactiveCommand.Create(OnSendCommand, canSendCommand);
+            SendCommand = ReactiveCommand.CreateFromTask(OnSendCommand, canSendCommand);
             CanBeOpened = _setup.Config is { ServerInstanceCount: > 0 };
 
             OpenPopup = ReactiveCommand.Create<Unit>((_) => PopupOpen = true);
@@ -104,10 +104,11 @@ namespace Trebuchet.ViewModels.Panels
             PopupOpen = false;
         }
 
-        private void OnSendCommand()
+        private async Task OnSendCommand()
         {
-            _console.Send(CommandField);
+            var command = CommandField;
             CommandField = string.Empty;
+            await _console.Send(command);
         }
     }
 }

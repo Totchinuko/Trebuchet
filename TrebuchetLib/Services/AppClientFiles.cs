@@ -1,4 +1,5 @@
 using System.Diagnostics.CodeAnalysis;
+using System.Reflection.Metadata;
 
 namespace TrebuchetLib.Services;
 
@@ -169,5 +170,15 @@ public class AppClientFiles(AppSetup appSetup)
     public string GetClientFolder()
     {
         return appSetup.Config.ClientPath;
+    }
+
+    public string GetGameLogs(string name)
+    {
+        return Path.Combine(
+            GetBaseFolder(),
+            name,
+            Constants.FolderGameSaveLog,
+            Constants.FileGameLogFile
+        );
     }
 }

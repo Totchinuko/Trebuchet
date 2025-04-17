@@ -20,9 +20,11 @@ public interface IConanServerProcess : IConanProcess
     
     public bool Online { get; }
     
-    public IConsole Console { get; }
+    public ITrebuchetConsole Console { get; }
     
     public IRcon RCon { get; }
+    
+    public ILogReader LogReader { get; }
     
     public bool KillZombies { get; set; }
     

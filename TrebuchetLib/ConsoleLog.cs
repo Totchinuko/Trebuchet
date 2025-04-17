@@ -1,27 +1,46 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Microsoft.Extensions.Logging;
 
 namespace TrebuchetLib
 {
     public class ConsoleLog
     {
-        public ConsoleLog(string body, bool isError, bool isReceived)
+        protected ConsoleLog(string body)
         {
-            UtcTime = DateTime.UtcNow;
             Body = body;
-            IsError = isError;
-            IsReceived = isReceived;
         }
 
         public string Body { get; }
+        public LogLevel LogLevel { get; init; } = LogLevel.Information;
+        public DateTime UtcTime { get; init; } = DateTime.UtcNow;
+        public ConsoleLogSource Source { get; init; }
+        
+        public static ConsoleLog CreateError(string body, ConsoleLogSource source)
+        {
+            return new ConsoleLog(body)
+            {
+                LogLevel = LogLevel.Error,
+                Source = source
+            };
+        }
 
-        public bool IsError { get; }
-
-        public bool IsReceived { get; }
-
-        public DateTime UtcTime { get; }
+        public static ConsoleLog Create(string body, LogLevel level, ConsoleLogSource source)
+        {
+            return new ConsoleLog(body)
+            {
+                Source = source,
+                LogLevel = level
+            };
+        }
+        
+        public static ConsoleLog Create(string body, LogLevel level, DateTime date, ConsoleLogSource source)
+        {
+            return new ConsoleLog(body)
+            {
+                Source = source,
+                LogLevel = level
+            };
+        }
     }
+    
+
 }

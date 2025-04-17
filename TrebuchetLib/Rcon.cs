@@ -30,8 +30,6 @@ namespace TrebuchetLib
 
         public event AsyncEventHandler<RconEventArgs>? RconResponded;
 
-        public event AsyncEventHandler<RconEventArgs>? RconSent;
-
         public void Dispose()
         {
             _client?.Close();
@@ -134,12 +132,6 @@ namespace TrebuchetLib
                     await RconResponded.Invoke(this, new RconEventArgs(string.Empty, ex));
         }
 
-        protected async Task OnRconSent(RconEventArgs e)
-        {
-            if(RconSent is not null)
-                await RconSent.Invoke(this, e);
-        }
-
         private void AutoDisconnect()
         {
             Task.Run(AutoDisconnectTask);
@@ -232,8 +224,6 @@ namespace TrebuchetLib
             var result = await packet.WriteBinary(bw);
             if (!string.IsNullOrEmpty(result.Response))
                 await OnRconResponded(result);
-            if (!string.IsNullOrEmpty(packet.Body))
-                await OnRconSent(new RconEventArgs(packet.Body));
             ct.ThrowIfCancellationRequested();
             await RConReceive(client.GetStream(), ct);
         }

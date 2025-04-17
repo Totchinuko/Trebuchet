@@ -23,9 +23,11 @@ public static class Constants
     public const string FileProfileConfig = "profile.json";
     public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
     public const string FileServerProxyBin = "ConanSandboxServer.exe";
+    public const string FileGameLogFile = "ConanSandbox.log";
     public const string FolderClientProfiles = "ClientProfiles";
     public const string FolderGameBinaries = "ConanSandbox\\Binaries\\Win64";
     public const string FolderGameSave = "ConanSandbox\\Saved";
+    public const string FolderGameSaveLog = "Logs";
     public const string FolderInstancePattern = "Instance_{0}";
     public const string FolderLive = "Live";
     public const string FolderModlistProfiles = "Modlists";

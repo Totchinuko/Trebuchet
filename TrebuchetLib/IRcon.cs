@@ -11,8 +11,6 @@ namespace TrebuchetLib
     {
         event AsyncEventHandler<RconEventArgs>? RconResponded;
 
-        event AsyncEventHandler<RconEventArgs>? RconSent;
-
         Task<int> Send(string data, CancellationToken token);
         Task<List<int>> Send(IEnumerable<string> data, CancellationToken token);
         int QueueData(string data);

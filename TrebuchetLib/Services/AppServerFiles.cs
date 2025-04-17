@@ -229,4 +229,14 @@ public class AppServerFiles(AppSetup appSetup)
         }
         return false;
     }
+    
+    public string GetGameLogs(string name)
+    {
+        return Path.Combine(
+            GetBaseFolder(),
+            name,
+            Constants.FolderGameSaveLog,
+            Constants.FileGameLogFile
+        );
+    }
 }

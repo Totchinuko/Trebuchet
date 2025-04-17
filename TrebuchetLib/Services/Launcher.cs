@@ -230,7 +230,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
         var process = await CatapultServerProcess(profileName, modlistName, instance);
 
         var serverInfos = new ConanServerInfos(appFiles.Server.Get(profileName), instance);
-        var conanServerProcess = new ConanServerProcess(process, serverInfos);
+        var conanServerProcess = new ConanServerProcess(process, serverInfos, appFiles.Server.GetGameLogs(profileName));
         _serverProcesses.TryAdd(instance, conanServerProcess);
     }
     
@@ -357,7 +357,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
         return _conanClientProcess;
     }
 
-    public IConsole GetServerConsole(int instance)
+    public ITrebuchetConsole GetServerConsole(int instance)
     {
         if (_serverProcesses.TryGetValue(instance, out var watcher))
             return watcher.Console;
@@ -464,7 +464,11 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
             if (!p.TryGetProcess(out var process)) continue;
 
             var infos = await iniHandler.GetInfosFromServerAsync(instance);
-            IConanServerProcess server = new ConanServerProcess(process, infos, p.start);
+            var gameLogs = Path.Combine(appFiles.Server.GetInstancePath(instance),
+                Constants.FolderGameSave,
+                Constants.FolderGameSaveLog,
+                Constants.FileGameLogFile);
+            IConanServerProcess server = new ConanServerProcess(process, infos, gameLogs, p.start);
             _serverProcesses.TryAdd(instance, server);
         }
     }

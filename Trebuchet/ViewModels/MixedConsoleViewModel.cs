@@ -1,11 +1,17 @@
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Threading;
+using Cyotek.Collections.Generic;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using tot_lib;
 using TrebuchetLib;
@@ -40,8 +46,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         _finalLog = this.WhenAnyValue(x => x.Log)
             .Select(x => _header + BODY + STARTLOG + x + ENDLOG + ENDBODY)
             .ToProperty(this, x => x.FinalLog);
-        
-        
 
         Select = ReactiveCommand.Create(OnConsoleSelected);
         RefreshLabel();
@@ -55,6 +59,8 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
     private string _header;
     private bool _canSend;
     private bool _autoScroll = true;
+    private CircularBuffer<int> _lineSizes = new(200);
+    private StringBuilder _logBuilder = new();
 
     public event EventHandler<int>? ConsoleSelected; 
     public event EventHandler? ScrollToEnd;
@@ -94,11 +100,15 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
     
     public ReactiveCommand<Unit,Unit> Select { get; }
 
-    public void Send(string input)
+    public async Task Send(string input)
     {
         try
         {
-            Process?.Console.SendCommand(input, CancellationToken.None);
+            if (Process is not null)
+            {
+                WriteLine(@"> " + input, ConsoleColor.Gray);
+                await Process.Console.Send(input, CancellationToken.None);
+            }
         }
         catch (Exception ex)
         {
@@ -108,16 +118,14 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
 
     public void WriteLine(ConsoleLog log)
     {
-        string header = log.IsReceived ? @$"[{log.UtcTime.ToLocalTime():HH:mm:ss}] " : @"> ";
-        if(log.IsError)
-            WriteLine(header + log.Body, ConsoleColor.Red);
-        else
-            WriteLine(header + log.Body);
+        string header = @$"[{log.UtcTime.ToLocalTime():HH:mm:ss}]{LogLevelToTag(log.LogLevel)} ";
+        WriteLine(header + log.Body, LogLevelToColor(log.LogLevel));
     }
 
-    public void WriteLine(string line)
+    public void WriteLine(string text)
     {
-        Log += ConsoleLineToHtml(line) + NEWLINE + Environment.NewLine;
+        foreach (var line in LineToHtml(SplitLines(text)))
+            AppendLine(line);
         OnScrollToEnd();
     }
 
@@ -127,9 +135,10 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
             WriteLine(line, color);
     }
 
-    public void WriteLine(string line, ConsoleColor color)
+    public void WriteLine(string text, ConsoleColor color)
     {
-        Log += string.Format(SPANIN, ColorToClass(color)) + ConsoleLineToHtml(line) + SPANOUT + NEWLINE + Environment.NewLine;
+        foreach (var line in LineToHtml(SplitLines(text), color))
+            AppendLine(line);
         OnScrollToEnd();
     }
 
@@ -138,26 +147,61 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         return Enum.GetName(color)?.ToLower() ?? "white";
     }
 
+    private ConsoleColor LogLevelToColor(LogLevel level)
+    {
+        switch (level)
+        {
+            case LogLevel.Error:
+            case LogLevel.Critical:
+                return ConsoleColor.Red;
+            case LogLevel.Warning:
+                return ConsoleColor.Yellow;
+            default:
+                return ConsoleColor.White;
+        }
+    }
+
+    private string LogLevelToTag(LogLevel level)
+    {
+        switch (level)  
+        {
+            case LogLevel.Information:
+                return "[INF]";
+            case LogLevel.Debug:
+                return "[DBG]";
+            case LogLevel.Critical:
+                return "[CRT]";
+            case LogLevel.Error:
+                return "[ERR]";
+            case LogLevel.Warning:
+                return "[WRN]";
+            default:
+                return string.Empty;
+        }
+    }
+
     private void OnProcessChanged((IConanServerProcess? old, IConanServerProcess? current) args)
     {
         if (args.old is not null)
         {
             args.old.StateChanged -= OnStateChanged;
-            args.old.Console.LogReceived -= OnLogReceived;
+            args.old.Console.Received -= OnReceived;
         }
 
         if (args.current is not null)
         {
             args.current.StateChanged += OnStateChanged;
-            args.current.Console.LogReceived += OnLogReceived;
+            args.current.Console.Received += OnReceived;
         }
         RefreshLabel();
     }
 
-    private Task OnLogReceived(object? sender, ConsoleLogEventArgs args)
+    private async Task OnReceived(object? sender, ConsoleLog args)
     {
-        WriteLine(args.ConsoleLog);
-        return Task.CompletedTask;
+        await Dispatcher.UIThread.InvokeAsync(() =>
+        {
+            WriteLine(args);
+        });
     }
 
     private void OnStateChanged(object? sender, ProcessState e)
@@ -181,6 +225,40 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         }
     }
 
+    private void AppendLine(string line)
+    {
+        int remove = 0;
+        if (_lineSizes.Count() == _lineSizes.Capacity)
+            remove = _lineSizes.Peek();
+        _lineSizes.Put(line.Length);
+        _logBuilder.Append(line);
+        if(remove > 0)
+            _logBuilder.Remove(0, remove);
+        Log = _logBuilder.ToString();
+    }
+
+    private IEnumerable<string> SplitLines(string input)
+    {
+        return input.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
+    }
+
+    private IEnumerable<string> LineToHtml(IEnumerable<string> lines, ConsoleColor color)
+    {
+        return lines
+            .Select(x => WebUtility.HtmlEncode(x))
+            .Select(x => x.Replace("\t", TABSPACE))
+            .Select(x => string.Format(SPANIN, ColorToClass(color)) + x + SPANOUT + NEWLINE)
+            .Select(x => x.Trim());
+    }
+    
+    private IEnumerable<string> LineToHtml(IEnumerable<string> lines)
+    {
+        return lines
+            .Select(x => WebUtility.HtmlEncode(x) + NEWLINE)
+            .Select(x => x.Replace("\t", TABSPACE))
+            .Select(x => x.Trim());
+    }
+
     private void OnConsoleSelected()
     {
         ConsoleSelected?.Invoke(this, _instance);
@@ -196,14 +274,5 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
     {
         if(AutoScroll)
             ScrollToHome?.Invoke(this, EventArgs.Empty);
-    }
-
-    private string ConsoleLineToHtml(string line)
-    {
-        line = WebUtility.HtmlEncode(line).Trim();
-        line = line.Replace("\t", TABSPACE);
-        var lines = line.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
-        line = string.Join(NEWLINE + Environment.NewLine, lines);
-        return line;
     }
 }
