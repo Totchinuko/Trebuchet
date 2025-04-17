@@ -9,9 +9,9 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="3*" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition MinWidth="220" Width="Auto" />
+                    <ColumnDefinition MinWidth="220" Width="2*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <Border Margin="0 0 6 0" ToolTip.Tip="Drag to reorder" Background="Transparent" Cursor="SizeNorthSouth">
