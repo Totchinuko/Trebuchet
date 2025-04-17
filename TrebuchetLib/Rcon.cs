@@ -15,6 +15,7 @@ namespace TrebuchetLib
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly IPEndPoint _endpoint;
         private readonly string _password;
+        private readonly int _timeout;
         private readonly int _keepAlive;
         private CancellationTokenSource? _timeoutCts;
 
@@ -22,6 +23,7 @@ namespace TrebuchetLib
         {
             _endpoint = endpoint;
             _password = password;
+            _timeout = timeout;
             _keepAlive = keepAlive;
 
         }
@@ -104,6 +106,8 @@ namespace TrebuchetLib
             if (_client is not null)
                 await Disconnect();
             _client = new();
+            _client.ReceiveTimeout = _timeout * 1000;
+            _client.SendTimeout = _timeout * 1000;
             await _client.ConnectAsync(_endpoint, token);
             await RConLogin(_password, _client.GetStream(), token);
         }
@@ -172,30 +176,43 @@ namespace TrebuchetLib
             return packet;
         }
 
-        private string? EvaluateRconResponse(BinaryReader br)
+        private async Task<RconEventArgs> EvaluateRconResponse(BinaryReader br)
         {
-            int size = br.ReadInt32();
-            if (size < 10 || size > 4096) // rcon message (called packet) can never be larger than 4096 bytes and never smaller than 10, this is by design in the protocol definition
-                throw new Exception($"Invalid packet received (size=10<{size}<4096)");
+            return await Task.Run(() =>
+            {
+                try
+                {
+                    int size = br.ReadInt32();
+                    if (size < 10 ||
+                        size > 4096) // rcon message (called packet) can never be larger than 4096 bytes and never smaller than 10, this is by design in the protocol definition
+                        throw new Exception($"Invalid packet received (size=10<{size}<4096)");
 
-            var id = br.ReadInt32();
-            _ = (RconPacketType)br.ReadInt32();
-            var response = br.ReadNullTerminatedString();
-            var code = br.ReadByte();
-            if (code != 0)
-                throw new Exception($"Invalid packet received ({code})");
+                    var id = br.ReadInt32();
+                    _ = (RconPacketType)br.ReadInt32();
+                    var response = br.ReadNullTerminatedString();
+                    var code = br.ReadByte();
+                    if (code != 0)
+                        throw new Exception($"Invalid packet received ({code})");
 
-            if (id == -1)
-                throw new Exception("Authentication failed.");
+                    if (id == -1)
+                        throw new Exception("Authentication failed.");
 
-            return response;
+                    return new RconEventArgs(response ?? string.Empty);
+                }
+                catch(Exception ex)
+                {
+                    return new RconEventArgs(ex.Message, ex);
+                }
+            });
         }
 
         private async Task RConLogin(string password, NetworkStream stream, CancellationToken ct)
         {
             var auth = BuildAuthPacket(password);
             using var bw = new BinaryWriter(stream, Encoding.ASCII, true);
-            await auth.WriteBinary(bw);
+            var result = await auth.WriteBinary(bw);
+            if (!string.IsNullOrEmpty(result.Response))
+                await OnRconResponded(result);
             ct.ThrowIfCancellationRequested();
             await RConReceive(stream, ct);
         }
@@ -204,29 +221,31 @@ namespace TrebuchetLib
         {
             using var br = new BinaryReader(stream, Encoding.ASCII, true);
             ct.ThrowIfCancellationRequested();
-            var body = EvaluateRconResponse(br) ?? string.Empty;
-            if(!string.IsNullOrEmpty(body))
-                await OnRconResponded(new RconEventArgs(body));
+            var response = await EvaluateRconResponse(br);
+            if(!string.IsNullOrEmpty(response.Response))
+                await OnRconResponded(response);
         }
 
         private async Task RConSend(TcpClient client, RconPacket packet, CancellationToken ct)
         {
             using var bw = new BinaryWriter(client.GetStream(), Encoding.ASCII, true);
-            await packet.WriteBinary(bw);
+            var result = await packet.WriteBinary(bw);
+            if (!string.IsNullOrEmpty(result.Response))
+                await OnRconResponded(result);
             if (!string.IsNullOrEmpty(packet.Body))
                 await OnRconSent(new RconEventArgs(packet.Body));
             ct.ThrowIfCancellationRequested();
             await RConReceive(client.GetStream(), ct);
         }
 
-        private void WriteEmpty(BinaryWriter bw, int id)
-        {
-            bw.Write(10);
-            bw.Write(id);
-            bw.Write((int)RconPacketType.SERVERDATA_RESPONSE_VALUE);
-            bw.Write((byte)0);
-            bw.Write((byte)0);
-        }
+        // private void WriteEmpty(BinaryWriter bw, int id)
+        // {
+        //     bw.Write(10);
+        //     bw.Write(id);
+        //     bw.Write((int)RconPacketType.SERVERDATA_RESPONSE_VALUE);
+        //     bw.Write((byte)0);
+        //     bw.Write((byte)0);
+        // }
 
         // Message contains int32 length, int32 request id, int32 type, string body null terminated, string null terminator
         // It is important to note that the length is not including itself, so the minimum length is 10 bytes
@@ -255,9 +274,9 @@ namespace TrebuchetLib
                 return BitConverter.ToInt32(data);
             }
 
-            public async Task WriteBinary(BinaryWriter bw)
+            public async Task<RconEventArgs> WriteBinary(BinaryWriter bw)
             {
-                await Task.Run(() =>
+                return await Task.Run(() =>
                 {
                     try
                     {
@@ -266,10 +285,11 @@ namespace TrebuchetLib
                         bw.Write((int)Type);
                         bw.WriteNullTerminatedString(Body);
                         bw.Write((byte)0);
+                        return new RconEventArgs(string.Empty);
                     }
-                    catch
+                    catch(Exception ex)
                     {
-                        return;
+                        return new RconEventArgs(ex.Message, ex);
                     }
                 });
             }

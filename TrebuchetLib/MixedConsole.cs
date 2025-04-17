@@ -29,7 +29,7 @@ namespace TrebuchetLib
 
         public void Dispose()
         {
-            _rcon.RconSent -= OnRconMessaged;
+            _rcon.RconSent -= OnRconSent;
             _rcon.RconResponded -= OnRconMessaged;
         }
 
@@ -52,18 +52,18 @@ namespace TrebuchetLib
         private Task OnRconMessaged(object? sender, RconEventArgs e)
         {
             if (e.Exception != null)
-                AddLog(new ConsoleLog(e.Exception.Message, true, true));
+                AddLog(new ConsoleLog(e.Exception.Message, isError:true, isReceived:true));
             else if (!string.IsNullOrWhiteSpace(e.Response))
-                AddLog(new ConsoleLog(e.Response, false, true));
+                AddLog(new ConsoleLog(e.Response, isError:false, isReceived:true));
             return Task.CompletedTask;
         }
 
         private Task OnRconSent(object? sender, RconEventArgs e)
         {
             if (e.Exception != null)
-                AddLog(new ConsoleLog(e.Exception.Message, true, false));
+                AddLog(new ConsoleLog(e.Exception.Message, isError:true, isReceived:false));
             else if (!string.IsNullOrWhiteSpace(e.Response))
-                AddLog(new ConsoleLog(e.Response, false, false));
+                AddLog(new ConsoleLog(e.Response, isError:false, isReceived:false));
             return Task.CompletedTask;
         }
     }

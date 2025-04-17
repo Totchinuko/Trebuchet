@@ -18,8 +18,10 @@ namespace Trebuchet.ViewModels;
 public class MixedConsoleViewModel : ReactiveObject, IScrollController
 {
     public const string NEWLINE = "<br />";
-    public const string SPANIN = "<span class\".{0}\">";
+    public const string SPANIN = "<span class=\"{0}\">";
     public const string SPANOUT = "</span>";
+    public const string BODY = "<body class=\"consolas\">";
+    public const string ENDBODY = "</body>";
     public const string STARTLOG = "<p>";
     public const string ENDLOG = "</p>";
     public const string TABSPACE = "&nbsp;&nbsp;&nbsp;&nbsp;";
@@ -36,7 +38,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         _header = TrebuchetUtils.Utils.GetMarkdownHtmlHeader();
 
         _finalLog = this.WhenAnyValue(x => x.Log)
-            .Select(x => _header + STARTLOG + x + ENDLOG)
+            .Select(x => _header + BODY + STARTLOG + x + ENDLOG + ENDBODY)
             .ToProperty(this, x => x.FinalLog);
         
         
@@ -115,7 +117,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
 
     public void WriteLine(string line)
     {
-        Log += ConsoleLineToHtml(line) + NEWLINE;
+        Log += ConsoleLineToHtml(line) + NEWLINE + Environment.NewLine;
         OnScrollToEnd();
     }
 
@@ -127,8 +129,13 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
 
     public void WriteLine(string line, ConsoleColor color)
     {
-        Log += string.Format(SPANIN, Enum.GetName(color)) + ConsoleLineToHtml(line) + SPANOUT + NEWLINE;
+        Log += string.Format(SPANIN, ColorToClass(color)) + ConsoleLineToHtml(line) + SPANOUT + NEWLINE + Environment.NewLine;
         OnScrollToEnd();
+    }
+
+    private string ColorToClass(ConsoleColor color)
+    {
+        return Enum.GetName(color)?.ToLower() ?? "white";
     }
 
     private void OnProcessChanged((IConanServerProcess? old, IConanServerProcess? current) args)
@@ -196,7 +203,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         line = WebUtility.HtmlEncode(line).Trim();
         line = line.Replace("\t", TABSPACE);
         var lines = line.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
-        line = string.Join(NEWLINE, lines);
+        line = string.Join(NEWLINE + Environment.NewLine, lines);
         return line;
     }
 }
