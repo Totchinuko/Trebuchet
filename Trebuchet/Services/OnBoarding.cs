@@ -78,8 +78,7 @@ public class OnBoarding(
     {
         var directoryChoice
             = new OnBoardingDirectory(Resources.OnBoardingDataDirectory, Resources.OnBoardingDataDirectorySub)
-                .SetValidation(ValidateDataDirectory)
-                .SetSize<OnBoardingDirectory>(650, 200);
+                .SetValidation(ValidateDataDirectory);
         await dialogueBox.OpenAsync(directoryChoice);
         if(directoryChoice.Value is null)throw new OperationCanceledException(@"OnBoarding was cancelled");
         setup.Config.DataDirectory = directoryChoice.Value;
@@ -131,7 +130,6 @@ public class OnBoarding(
     public async Task<bool> OnBoardingUsageChoice()
     {
         var choice = new OnBoardingBranch(Resources.OnBoardingUsageChoice, Resources.OnBoardingUsageChoiceText)
-            .SetSize<OnBoardingBranch>(750, 400)
             .AddChoice(Resources.OnBoardingUsageChoicePlayer, Resources.OnBoardingUsageChoicePlayerSub)
             .AddChoice(Resources.OnBoardingUsageChoiceServer, Resources.OnBoardingUsageChoiceServerSub)
             .AddChoice(Resources.OnBoardingUsageChoiceModder, Resources.OnBoardingUsageChoiceModderSub);
@@ -164,7 +162,7 @@ public class OnBoarding(
                 1, 6)
         {
             Value = setup.Config.ServerInstanceCount
-        }.SetSize<OnBoardingIntSlider>(600, 200);
+        };
         
         await dialogueBox.OpenAsync(choice);
         if(choice.Cancelled) throw new OperationCanceledException(@"OnBoarding was cancelled");
@@ -174,8 +172,7 @@ public class OnBoarding(
 
     public async Task<bool> OnBoardingServerDownload()
     {
-        var progress = new OnBoardingProgress<double>(Resources.UpdateServersLabel, string.Empty, 0.0, 1.0)
-            .SetSize<OnBoardingProgress<double>>(600, 250);
+        var progress = new OnBoardingProgress<double>(Resources.UpdateServersLabel, string.Empty, 0.0, 1.0);
         dialogueBox.Show(progress);
         steam.SetTemporaryProgress(progress);
         if(!steam.IsConnected)
@@ -194,8 +191,7 @@ public class OnBoarding(
             return await OnBoardingApplyConanManagement();
         
         var finder = new OnBoardingDirectory(Resources.OnBoardingLocateConan, Resources.OnBoardingLocateConanText, setup.Config.ClientPath)
-            .SetValidation(ValidateConanExileLocation)
-            .SetSize<OnBoardingDirectory>(650, 200);
+            .SetValidation(ValidateConanExileLocation);
         await dialogueBox.OpenAsync(finder);
         if(finder.Value is null) throw new OperationCanceledException(@"OnBoarding was cancelled");
         setup.Config.ClientPath = finder.Value;
@@ -214,7 +210,6 @@ public class OnBoarding(
     public async Task<bool> OnBoardingAllowConanManagement()
     {
         var choice = new OnBoardingBranch(Resources.OnBoardingManageConan, Resources.OnBoardingManageConanText)
-            .SetSize<OnBoardingBranch>(650, 300)
             .AddChoice(Resources.OnBoardingManageConanNo, Resources.OnBoardingManageConanNoSub)
             .AddChoice(Resources.OnBoardingManageConanYes, Resources.OnBoardingManageConanYesSub);
         await dialogueBox.OpenAsync(choice);
@@ -288,8 +283,7 @@ public class OnBoarding(
         var choice = new OnBoardingListSelection(
                 Resources.OnBoardingGameSave, 
                 Resources.OnBoardingChooseGameSaveText, 
-                appFiles.Client.ListProfiles().ToList())
-            .SetSize<OnBoardingListSelection>(650, 200);
+                appFiles.Client.ListProfiles().ToList());
         await dialogueBox.OpenAsync(choice);
         if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException(@"OnBoarding was cancelled");
         return choice.Value;
@@ -298,8 +292,7 @@ public class OnBoarding(
     public async Task<string> OnBoardingChooseClientSaveName()
     {
         var choice = new OnBoardingNameSelection( Resources.OnBoardingGameSave, Resources.OnBoardingNewGameSave)
-            .SetValidation(ValidateClientSaveName)
-            .SetSize<OnBoardingNameSelection>(650, 200);
+            .SetValidation(ValidateClientSaveName);
         await dialogueBox.OpenAsync(choice);
         if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException(@"OnBoarding was cancelled");
         return choice.Value;
@@ -324,7 +317,6 @@ public class OnBoarding(
             if(isRoot) 
                 throw new IOException(@$"Can't write in {path}, permission denied");
             var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
-                .SetSize<OnBoardingBranch>(650, 250)
                 .AddChoice(Resources.UACDialog, Resources.OnBoardingUpgradeSub);
             await dialogueBox.OpenAsync(uac);
             if(uac.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
@@ -355,8 +347,7 @@ public class OnBoarding(
                         var message = new OnBoardingProgress<double>(
                             Resources.OnBoardingProcessLock,
                             string.Format(Resources.OnBoardingProcessLockSub, file),
-                            0.0, 1.0)
-                            .SetSize<OnBoardingProgress<double>>(600, 250);
+                            0.0, 1.0);
                         message.Report(0);
                         dialogueBox.Show(message);
                     }
@@ -388,15 +379,13 @@ public class OnBoarding(
         if (File.Exists(configLive) || File.Exists(configTestlive))
         {
             var upgrade = new OnBoardingBranch(Resources.Upgrade, Resources.OnBoardingUpgrade)
-                .SetSize<OnBoardingBranch>(650, 250)
                 .AddChoice(Resources.Upgrade, Resources.OnBoardingUpgradeSub);
             await dialogueBox.OpenAsync(upgrade);
             if(upgrade.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
 
             if (!await OnBoardingElevationRequest(trebuchetDir, Resources.OnBoardingUpgradeUac)) return false;
 
-            var progress = new OnBoardingProgress<double>(Resources.Upgrade, Resources.OnBoardingUpgradeCopy, 0.0, 1.0)
-                .SetSize<OnBoardingProgress<double>>(600, 250);
+            var progress = new OnBoardingProgress<double>(Resources.Upgrade, Resources.OnBoardingUpgradeCopy, 0.0, 1.0);
             dialogueBox.Show(progress);
 
             if (File.Exists(configLive))

@@ -28,7 +28,7 @@
             <Panel Grid.RowSpan="2" Classes="DialogueBox" Classes.Active="{Binding DialogueBox.Active}">
                 <Border Classes="Overlay" />
                 <Border Classes="Blocker" Background="Transparent" />
-                <Border Classes="Popup" HorizontalAlignment="{Binding DialogueBox.Popup.HorizontalAlignment, FallbackValue=Stretch}" VerticalAlignment="{Binding DialogueBox.Popup.VerticalAlignment, FallbackValue=Stretch}" MinHeight="{Binding DialogueBox.Popup.Height, FallbackValue=-1}" MinWidth="{Binding DialogueBox.Popup.Width, FallbackValue=-1}">
+                <Border Classes="Popup" HorizontalAlignment="{Binding DialogueBox.Popup.HorizontalAlignment, FallbackValue=Stretch}" VerticalAlignment="{Binding DialogueBox.Popup.VerticalAlignment, FallbackValue=Stretch}" MinHeight="200" MinWidth="550">
                     <ContentControl Content="{Binding DialogueBox.Popup}"  />
                 </Border>
             </Panel>

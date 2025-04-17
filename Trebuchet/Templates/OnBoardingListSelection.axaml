@@ -6,7 +6,7 @@
     <DataTemplate x:Key="OnBoardingListSelection" DataType="l:OnBoardingListSelection">
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
-            <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="{Binding Width}" />
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="550" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="6">
                 <ComboBox ItemsSource="{Binding List}" VerticalAlignment="Center" SelectedItem="{Binding Value}" Width="250" />
                 <Button Classes="Base Green" Content="{x:Static a:Resources.Validate}" Command="{Binding ConfirmCommand}" />

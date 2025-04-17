@@ -4,7 +4,7 @@
     <DataTemplate x:Key="OnBoardingProgress" DataType="l:IOnBoardingProgress">
         <DockPanel LastChildFill="True">
             <TextBlock DockPanel.Dock="Top" Classes="Title" Text="{Binding Title}" />
-            <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="{Binding Width}" />
+            <TextBlock DockPanel.Dock="Top" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="550" />
             <ProgressBar Margin="25 0" DockPanel.Dock="Top" HorizontalAlignment="Stretch" Maximum="1.0" Minimum="0.0" Value="{Binding CurrentProgress}" IsIndeterminate="{Binding IsIndeterminate}" />
         </DockPanel>
     </DataTemplate>
