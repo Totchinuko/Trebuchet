@@ -95,7 +95,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
         _uiConfig.SaveFile();
         if (_blocker.IsSet<SteamDownload>())
         {
-            var message = new OnBoardingMessage(Resources.OnBoardingLanguageChange, Resources.OnBoardingLanguageChange);
+            var message = new OnBoardingMessage(Resources.OnBoardingLanguageChange, Resources.OnBoardingLanguageChangeMessage);
             await _box.OpenAsync(message);
         }
         else
