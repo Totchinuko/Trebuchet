@@ -2,6 +2,7 @@
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels"
+                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:a="clr-namespace:Trebuchet.Assets">
     <DataTemplate x:Key="ServerSettings" x:DataType="p:ServerProfilePanel">
         <Grid>
@@ -15,13 +16,7 @@
                         <Button Command="{Binding CreateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
-                        <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" MinWidth="250">
-                            <ComboBox.SelectionBoxItemTemplate>
-                                <DataTemplate>
-                                    <Label Content="{Binding $parent[ComboBox].((p:ServerProfilePanel)DataContext).SelectedProfile}" />
-                                </DataTemplate>
-                            </ComboBox.SelectionBoxItemTemplate>
-                        </ComboBox>
+                        <c:ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" MinWidth="250" />
                         <Button Command="{Binding DeleteProfileCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Deletion}">
                             <i:Icon Value="mdi-delete" Classes="Normal"/>
                         </Button>

@@ -57,6 +57,7 @@ namespace Trebuchet.ViewModels.Panels
         }
 
         public ObservableCollection<FieldElement> Fields { get; } = [];
+        public ObservableCollectionExtended<string> Profiles { get; } = [];
 
         public ReactiveCommand<Unit,Unit> CreateProfileCommand { get; }
         public ReactiveCommand<Unit,Unit> DeleteProfileCommand { get; }
@@ -88,8 +89,6 @@ namespace Trebuchet.ViewModels.Panels
             get => _canBeOpened;
             set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
         }
-
-        public ObservableCollectionExtended<string> Profiles { get; } = [];
 
         public async Task RefreshPanel()
         {

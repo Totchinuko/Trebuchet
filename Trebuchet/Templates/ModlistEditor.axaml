@@ -2,6 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="ModlistEditor" x:DataType="p:ModlistPanel">
         <DockPanel LastChildFill="True">
@@ -11,13 +12,7 @@
                         <Button Command="{Binding CreateModlistCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}">
                             <i:Icon Value="mdi-plus-box" Classes="Normal"/>
                         </Button>
-                        <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" MinWidth="250">
-                            <ComboBox.SelectionBoxItemTemplate>
-                                <DataTemplate>
-                                    <Label Content="{Binding $parent[ComboBox].((p:ModlistPanel)DataContext).SelectedModlist}" />
-                                </DataTemplate>
-                            </ComboBox.SelectionBoxItemTemplate>
-                        </ComboBox>
+                        <c:ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedModlist}" MinWidth="250" />
                         <Button Command="{Binding DeleteModlistCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Delete}">
                             <i:Icon Value="mdi-delete" Classes="Normal"/>
                         </Button>

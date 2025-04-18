@@ -1,6 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
     <DataTemplate x:Key="ServerDashboard" x:DataType="viewModels:ServerInstanceDashboard">
@@ -33,11 +34,11 @@
                     <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,20,0,12">
                         <Grid Margin="0,20,0,0" IsEnabled="{Binding !ProcessRunning}">
                             <TextBlock Margin="0,-18,0,0" Text="{x:Static a:Resources.ServerSave}" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                            <ComboBox ItemsSource="{Binding Profiles, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedProfile, Mode=TwoWay}" Width="250" Margin="0,0,12,0" />
+                            <c:ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" Width="250" VerticalAlignment="Center" Margin="0,0,12,0" />
                         </Grid>
                         <Grid Margin="0,20,0,0" IsEnabled="{Binding !ProcessRunning}">
                             <TextBlock Margin="0,-18,0,0" Text="{x:Static a:Resources.ModList}" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                            <ComboBox ItemsSource="{Binding Modlists, Mode=OneWay}" VerticalAlignment="Center" Height="25" SelectedItem="{Binding SelectedModlist, Mode=TwoWay}" Width="250" Margin="0,0,12,0" />
+                            <c:ComboBox ItemsSource="{Binding Modlists}" SelectedItem="{Binding SelectedModlist}" Width="250" VerticalAlignment="Center" Margin="0,0,12,0" />
                         </Grid>
                     </WrapPanel>
                     <WrapPanel Grid.Row="1" Orientation="Horizontal">
