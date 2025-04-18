@@ -160,14 +160,14 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     public void WriteLine(ConsoleLog log)
     {
         if (!_sources.Contains(log.Source)) return;
-        string header = LogLevelHeader(log.UtcTime, log.LogLevel);
+        string header = LogLevelHeader(log.UtcTime, log.LogLevel, log.Source);
         WriteLine(header + log.Body);
     }
 
     public void WriteLine(LogEventLine log, ConsoleLogSource source)
     {
         if (!_sources.Contains(source)) return;
-        string header = LogLevelHeader(log.Date.ToUniversalTime(), log.LogLevel);
+        string header = LogLevelHeader(log.Date.ToUniversalTime(), log.LogLevel, source);
         WriteLine(header + log.Output);
     }
 
@@ -191,14 +191,31 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
 
     public void WriteLine(string text)
     {
-        foreach (var line in SplitLines(text).Select(x => x.Trim() + Environment.NewLine))
+        foreach (var line in SplitLines(text).Select(x => x + Environment.NewLine))
             AppendLine(line);
         OnScrollToEnd();
     }
 
-    private string LogLevelHeader(DateTime date, LogLevel level)
+    private string LogLevelHeader(DateTime date, LogLevel level, ConsoleLogSource source)
     {
-        return @$"[{date.ToLocalTime():HH:mm:ss}]{LogLevelToTag(level)} ";
+
+        return @$"[{date.ToLocalTime():HH:mm:ss}]{LogSourceToTag(source)}{LogLevelToTag(level)} ";
+    }
+
+    private string LogSourceToTag(ConsoleLogSource source)
+    {
+        var sourceTag = string.Empty;
+        switch (source)
+        {
+            case ConsoleLogSource.ServerLog:
+                return @"[SRV]";
+            case ConsoleLogSource.RCon:
+                return @"[RCN]";
+            case ConsoleLogSource.Trebuchet:
+                return @"[TRB]";
+            default:
+                return @"[LOG]";
+        }
     }
 
     private string LogLevelToTag(LogLevel level)

@@ -9,6 +9,9 @@
         <Rule color="Timecode" multiline="false">
             ^\[[0-9]+:[0-9]+:[0-9]+\]
         </Rule>
+        <Rule color="Input" multiline="false">
+            \[(SRV|RCN|TRB)\]
+        </Rule>
         <Span color="Input" multiline="false">
             <Begin>^></Begin>
         </Span>
