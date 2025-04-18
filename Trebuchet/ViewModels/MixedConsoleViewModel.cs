@@ -56,6 +56,14 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
             else Sources.Remove(ConsoleLogSource.Trebuchet);
             DisplayTrebuchetLog = Sources.Contains(ConsoleLogSource.Trebuchet);
         });
+
+        ClearText = ReactiveCommand.Create(() =>
+        {
+            _logBuilder.Clear();
+            _lineSizes.Clear();
+            Text = string.Empty;
+            TextCleared?.Invoke(this, EventArgs.Empty);
+        });
         
         Select = ReactiveCommand.Create(OnConsoleSelected);
         RefreshLabel();
@@ -79,6 +87,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     public event EventHandler? ScrollToEnd;
     public event EventHandler? ScrollToHome;
     public event EventHandler<string>? LineAppended;
+    public event EventHandler? TextCleared;
 
     public int MaxLines => MAX_LINES;
     
@@ -140,6 +149,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     public ReactiveCommand<Unit,Unit> ToggleServerLogs { get; }
     public ReactiveCommand<Unit,Unit> ToggleTrebuchetLogs { get; }
     public ReactiveCommand<Unit,Unit> ToggleAutoScroll { get; }
+    public ReactiveCommand<Unit,Unit> ClearText { get; }
 
     public async Task Send(string input)
     {

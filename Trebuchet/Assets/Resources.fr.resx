@@ -962,4 +962,7 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="Unavailable" xml:space="preserve">
         <value>Indisponible</value>
     </data>
+    <data name="Clear" xml:space="preserve">
+        <value>Vider</value>
+    </data>
 </root>

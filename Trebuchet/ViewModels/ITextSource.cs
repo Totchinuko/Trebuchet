@@ -8,4 +8,5 @@ public interface ITextSource
     bool AutoScroll { get; }
     int MaxLines { get; }
     event EventHandler<string>? LineAppended;
+    event EventHandler? TextCleared;
 }

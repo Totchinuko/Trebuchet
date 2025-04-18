@@ -32,6 +32,12 @@
                         <TextBlock Text="{x:Static a:Resources.TrebuchetLogs}" />
                     </StackPanel>
                 </Button>
+                <Button Classes="Base Yellow" Command="{Binding ClearText}">
+                    <StackPanel Spacing="3" Orientation="Horizontal">
+                        <i:Icon Value="mdi-broom" Classes="Normal" />
+                        <TextBlock Text="{x:Static a:Resources.Clear}" />
+                    </StackPanel>
+                </Button>
             </StackPanel>
             <ThemeVariantScope RequestedThemeVariant="Dark">
                 <Border Background="{DynamicResource TBackground}" CornerRadius="3" Margin="0 12" DockPanel.Dock="Top">

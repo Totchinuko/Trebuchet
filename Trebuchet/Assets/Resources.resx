@@ -970,4 +970,7 @@ DO NOT place it in your Steam Directory.</value>
     <data name="Unavailable" xml:space="preserve">
         <value>Unavailable</value>
     </data>
+    <data name="Clear" xml:space="preserve">
+        <value>Clear</value>
+    </data>
 </root>

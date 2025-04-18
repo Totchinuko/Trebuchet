@@ -1,3 +1,4 @@
+using System;
 using Avalonia;
 using Avalonia.Xaml.Interactivity;
 using AvaloniaEdit;
@@ -38,16 +39,26 @@ public class ConsoleTextBindingBehavior : Behavior<TextEditor>
     private void OnTextSourceChanged(ConsoleTextBindingBehavior sender, AvaloniaPropertyChangedEventArgs<ITextSource?> args)
     {
         if (_textEditor is not { Document: not null }) return;
-            
+
         if (args.OldValue.Value is { } previous)
+        {
             previous.LineAppended -= OnLineAppended;
+            previous.TextCleared -= OnTextCleared;
+        }
             
         if (args.NewValue.Value is not { } current) return;
         current.LineAppended += OnLineAppended;
+        current.TextCleared += OnTextCleared;
         _textEditor.Clear();
         _textEditor.AppendText(current.Text);
         if(current.AutoScroll)
             _textEditor.ScrollToEnd();
+    }
+
+    private void OnTextCleared(object? sender, EventArgs e)
+    {
+        if (_textEditor is not { Document: not null } || TextSource is null) return;
+        _textEditor.Clear();
     }
 
     private void OnLineAppended(object? sender, string line)
