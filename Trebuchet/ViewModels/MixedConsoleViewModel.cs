@@ -22,6 +22,8 @@ namespace Trebuchet.ViewModels;
 
 public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSource
 {
+    public const int MAX_LINES = 1000;
+    
     public MixedConsoleViewModel(int instance, InternalLogSink trebuchetLog, ILogger logger)
     {
         _instance = instance;
@@ -61,7 +63,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
 
     private bool _displayServerLog;
     private bool _displayTrebuchetLog;
-    private readonly CircularBuffer<int> _lineSizes = new(1000);
+    private readonly CircularBuffer<int> _lineSizes = new(MAX_LINES);
     private readonly StringBuilder _logBuilder = new();
     private readonly int _instance;
     private readonly ILogger _logger;
@@ -78,6 +80,8 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     public event EventHandler? ScrollToHome;
     public event EventHandler<string>? LineAppended;
 
+    public int MaxLines => MAX_LINES;
+    
     private ObservableCollectionExtended<ConsoleLogSource> Sources
     {
         get => _sources;

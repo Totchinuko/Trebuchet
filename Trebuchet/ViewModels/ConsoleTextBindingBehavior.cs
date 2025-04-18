@@ -55,7 +55,7 @@ public class ConsoleTextBindingBehavior : Behavior<TextEditor>
         if (_textEditor is not { Document: not null } || TextSource is null) return;
             
         var caretOffset = _textEditor.CaretOffset;
-        if(_textEditor.Document.LineCount == 200)
+        if(_textEditor.Document.LineCount == TextSource.MaxLines)
             _textEditor.Document.Remove(
                 _textEditor.Document.GetLineByNumber(1));
         _textEditor.AppendText(line);
