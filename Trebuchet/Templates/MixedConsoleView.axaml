@@ -3,10 +3,19 @@
                     xmlns:e="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:t="clr-namespace:Trebuchet"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="MixedConsoleView" DataType="vm:MixedConsoleViewModel">
         <DockPanel LastChildFill="True">
             <CheckBox IsChecked="{Binding AutoScroll}" Content="{x:Static a:Resources.AutoScroll}" HorizontalAlignment="Left" DockPanel.Dock="Bottom" />
+            <Border DockPanel.Dock="Bottom" Padding="8" CornerRadius="3" Margin="0,0,0,0">
+                <DockPanel LastChildFill="True">
+                    <Button Classes="Base Blue" HotKey="Enter" DockPanel.Dock="Right" Command="{Binding SendCommand}">
+                        <i:Icon Value="mdi-send" Classes="Normal" />
+                    </Button>
+                    <TextBox DockPanel.Dock="Left" Text="{Binding CommandField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="4000" Watermark="Command" Margin="0 0 6 0" />
+                </DockPanel>
+            </Border>
             <ThemeVariantScope RequestedThemeVariant="Dark">
                 <Border Background="{DynamicResource TBackground}" CornerRadius="3" Margin="0 12" DockPanel.Dock="Top">
                     <e:TextEditor 
@@ -19,7 +28,7 @@
                         SyntaxHighlighting="Log"
                         FontFamily="{StaticResource Hack}">
                         <Interaction.Behaviors>
-                            <t:DocumentTextBindingBehavior TextSource="{Binding .}" />
+                            <vm:ConsoleTextBindingBehavior TextSource="{Binding .}" />
                         </Interaction.Behaviors>
                     </e:TextEditor>
                 </Border>

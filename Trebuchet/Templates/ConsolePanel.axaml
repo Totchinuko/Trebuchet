@@ -26,14 +26,6 @@
                     </Border>
                 </Popup>
             </StackPanel>
-            <Border DockPanel.Dock="Bottom" Padding="8" CornerRadius="3" Margin="0,0,0,0">
-                <DockPanel LastChildFill="True">
-                    <Button Classes="Base Blue" HotKey="Enter" DockPanel.Dock="Right" Command="{Binding SendCommand}">
-                        <i:Icon Value="mdi-send" Classes="Normal" />
-                    </Button>
-                    <TextBox DockPanel.Dock="Left" Text="{Binding CommandField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="4000" Watermark="Command" Margin="0 0 6 0" />
-                </DockPanel>
-            </Border>
             <ContentControl Content="{Binding Console}" />
         </DockPanel>
     </DataTemplate>

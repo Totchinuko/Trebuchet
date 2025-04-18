@@ -31,6 +31,11 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
             .Select(b => (b[0], b[1]))
             .InvokeCommand(ReactiveCommand.Create<(IConanServerProcess?, IConanServerProcess?)>(OnProcessChanged));
 
+        var canSendCommand = this.WhenAnyValue(x => x.CanSend, x => x.CommandField,
+            (c, f) => c && !string.IsNullOrEmpty(f));
+            
+        SendCommand = ReactiveCommand.CreateFromTask(OnSendCommand, canSendCommand);
+        
         Select = ReactiveCommand.Create(OnConsoleSelected);
         RefreshLabel();
     }
@@ -43,6 +48,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     private string _serverLabel = string.Empty;
     private bool _canSend;
     private bool _autoScroll = true;
+    private string _commandField = string.Empty;
 
     public event EventHandler<int>? ConsoleSelected; 
     public event EventHandler? ScrollToEnd;
@@ -78,8 +84,15 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         get => _autoScroll;
         set => this.RaiseAndSetIfChanged(ref _autoScroll, value);
     }
+    
+    public string CommandField
+    {
+        get => _commandField;
+        set => this.RaiseAndSetIfChanged(ref _commandField, value);
+    }
 
     public ReactiveCommand<Unit,Unit> Select { get; }
+    public ReactiveCommand<Unit, Unit> SendCommand { get; }
 
     public async Task Send(string input)
     {
@@ -250,6 +263,12 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         if(AutoScroll)
             ScrollToHome?.Invoke(this, EventArgs.Empty);
     }
-
+    
+    private async Task OnSendCommand()
+    {
+        var command = CommandField;
+        CommandField = string.Empty;
+        await Send(command);
+    }
 
 }
