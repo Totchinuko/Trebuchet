@@ -959,4 +959,7 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="TrebuchetLogs" xml:space="preserve">
         <value>Journaux Trebuchet</value>
     </data>
+    <data name="Unavailable" xml:space="preserve">
+        <value>Indisponible</value>
+    </data>
 </root>

@@ -13,13 +13,13 @@ using Cyotek.Collections.Generic;
 using DynamicData.Binding;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
 using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels;
 
-[Localizable(false)]
 public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSource
 {
     public MixedConsoleViewModel(int instance, InternalLogSink trebuchetLog, ILogger logger)
@@ -149,7 +149,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Could not Send command");
+            _logger.LogError(ex, @"Could not Send command");
         }
     }
 
@@ -202,15 +202,15 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         switch (level)  
         {
             case LogLevel.Information:
-                return "[INF]";
+                return @"[INF]";
             case LogLevel.Debug:
-                return "[DBG]";
+                return @"[DBG]";
             case LogLevel.Critical:
-                return "[CRT]";
+                return @"[CRT]";
             case LogLevel.Error:
-                return "[ERR]";
+                return @"[ERR]";
             case LogLevel.Warning:
-                return "[WRN]";
+                return @"[WRN]";
             default:
                 return string.Empty;
         }
@@ -260,14 +260,14 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         if (Process is null)
         {
             CanSend = false;
-            ServerLabel = $"Unavailable - Instance {_instance}";
+            ServerLabel = $@"{Resources.Unavailable} - {Resources.Instance} {_instance}";
         }
         else
         {
             CanSend = Process is { RConPort: > 0, State: ProcessState.ONLINE };
             ServerLabel = CanSend
-                ? $"RCON - {Process.Title} ({Process.Instance}) - {IPAddress.Loopback}:{Process.RConPort}"
-                : $"Unavailable - Instance {_instance}";
+                ? $@"{Resources.CatRCon} - {Process.Title} ({Process.Instance}) - {IPAddress.Loopback}:{Process.RConPort}"
+                : $@"{Resources.Unavailable} - {Resources.Instance} {_instance}";
         }
     }
 
@@ -284,6 +284,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         LineAppended?.Invoke(this, line);
     }
 
+    [Localizable(false)]
     private IEnumerable<string> SplitLines(string input)
     {
         return input.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);

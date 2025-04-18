@@ -11,7 +11,6 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels;
 
-[Localizable(false)]
 public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
 {
     public ConsolePanel(AppSetup setup, Launcher launcher, InternalLogSink logSink, ILogger<ConsolePanel> logger)
