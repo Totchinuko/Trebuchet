@@ -10,6 +10,7 @@ internal class EmptyConanProcess : IConanProcess
     {
     }
 
+    public Process Process { get; } = new ();
     public int PId { get; } = 0;
     public long MemoryUsage { get; } = 0;
     public TimeSpan CpuTime { get; } = TimeSpan.Zero;
@@ -45,33 +46,29 @@ public static class ConanProcess
     public static IConanProcess Empty => new EmptyConanProcess();
 }
 
-public sealed class ConanClientProcess : IConanProcess
+internal sealed class ConanClientProcess : IConanProcess
 {
-    public ConanClientProcess(Process process, DateTime startTime)
+    public ConanClientProcess(Process process)
     {
-        _process = process;
-        PId = _process.Id;
-        StartUtc = startTime;
+        Process = process;
+        PId = Process.Id;
         State = ProcessState.RUNNING;
     }
+
     
-    public ConanClientProcess(Process process) : this(process, DateTime.UtcNow)
-    {
-    }
-    
-    private readonly Process _process;
     private ProcessState _state;
 
     public event EventHandler<ProcessState>? StateChanged; 
     public event PropertyChangedEventHandler? PropertyChanged;
 
+    public Process Process { get; }
     public long MemoryUsage
     {
         get
         {
-            if (_process.HasExited)
+            if (Process.HasExited)
                 return 0;
-            return _process.WorkingSet64;
+            return Process.WorkingSet64;
         }
     }
 
@@ -79,14 +76,14 @@ public sealed class ConanClientProcess : IConanProcess
     {
         get
         {
-            if(_process.HasExited)
+            if(Process.HasExited)
                 return TimeSpan.Zero;
-            return _process.TotalProcessorTime;
+            return Process.TotalProcessorTime;
         }
     }
     
     public int PId { get; }
-    public DateTime StartUtc { get; }
+    public DateTime StartUtc { get; init; }
 
     public ProcessState State
     {
@@ -100,20 +97,20 @@ public sealed class ConanClientProcess : IConanProcess
 
     public void Dispose()
     {
-        _process.Dispose();
+        Process.Dispose();
     }
 
     public Task RefreshAsync()
     {
-        _process.Refresh();
+        Process.Refresh();
         switch (State)
         {
             case ProcessState.RUNNING:
-                if (_process.HasExited)
+                if (Process.HasExited)
                     State = ProcessState.CRASHED;
                 break;
             case ProcessState.STOPPING:
-                if (_process.HasExited)
+                if (Process.HasExited)
                     State = ProcessState.STOPPED;
                 break;
         }
@@ -124,7 +121,7 @@ public sealed class ConanClientProcess : IConanProcess
     public Task KillAsync()
     {
         State = ProcessState.STOPPING;
-        _process.Kill();
+        Process.Kill();
         return Task.CompletedTask;
     }
     

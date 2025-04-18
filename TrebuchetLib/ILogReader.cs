@@ -46,7 +46,7 @@ public class LogEventArgs : EventArgs
     }
 }
 
-public interface ILogReader
+public interface ILogReader : IDisposable
 {
     public event AsyncEventHandler<LogEventArgs>? LogReceived;
 }

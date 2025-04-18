@@ -6,6 +6,7 @@ namespace TrebuchetLib.Processes;
 
 public interface IConanProcess : IDisposable, INotifyPropertyChanged
 {
+    Process Process { get; }
     int PId { get; }
     
     long MemoryUsage { get; }

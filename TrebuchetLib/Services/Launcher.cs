@@ -60,7 +60,8 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
         var process = await CatapultClientProcess(profileName, modlistName, isBattleEye);
 
-        _conanClientProcess = new ConanClientProcess(process);
+        _conanClientProcess = ConanProcessBuilder.Create().SetProcess(process).BuildServer();
+        
     }
     
     public async Task CatapultClientBoulder(string profile, string modlist, bool battleEye)
@@ -229,9 +230,13 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
         var process = await CatapultServerProcess(profileName, modlistName, instance);
 
-        var serverInfos = new ConanServerInfos(appFiles.Server.Get(profileName), instance);
-        var conanServerProcess = new ConanServerProcess(process, serverInfos, appFiles.Server.GetGameLogs(profileName));
-        _serverProcesses.TryAdd(instance, conanServerProcess);
+        var serverProcess = ConanProcessBuilder.Create()
+            .SetServerInfos(appFiles.Server.Get(profileName), instance)
+            .SetProcess(process)
+            .SetLogFile(appFiles.Server.GetGameLogs(profileName))
+            .StartLogAtBeginning()
+            .BuildServer();
+        _serverProcesses.TryAdd(instance, serverProcess);
     }
     
     public async Task CatapultServerBoulder(string profile, string modlist, int instance)
@@ -450,7 +455,10 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
         if (data.IsEmpty) return;
         if (!data.TryGetProcess(out var process)) return;
 
-        IConanProcess client = new ConanClientProcess(process, data.start);
+        IConanProcess client = ConanProcessBuilder.Create()
+            .SetProcess(process)
+            .SetStartingTime(data.start)
+            .BuildClient();
         _conanClientProcess = client;
     }
 
@@ -463,12 +471,16 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
             if (_serverProcesses.ContainsKey(instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
-            var infos = await iniHandler.GetInfosFromServerAsync(instance);
             var gameLogs = Path.Combine(appFiles.Server.GetInstancePath(instance),
                 Constants.FolderGameSave,
                 Constants.FolderGameSaveLog,
                 Constants.FileGameLogFile);
-            IConanServerProcess server = new ConanServerProcess(process, infos, gameLogs, p.start);
+            IConanServerProcess server = (await ConanProcessBuilder.Create().SetServerInfos(iniHandler, instance))
+                .SetProcess(process)
+                .SetLogFile(gameLogs)
+                .SetStartingTime(p.start)
+                .BuildServer();
+                
             _serverProcesses.TryAdd(instance, server);
         }
     }

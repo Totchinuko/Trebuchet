@@ -19,7 +19,7 @@ public class ConanServerInfos
     public int Instance { get; set; }
     public int Port { get; set; }
     public int QueryPort { get; set; }
-    public string RConPassword { get; set; } = String.Empty;
+    public string RConPassword { get; set; } = string.Empty;
     public int RConPort { get; set; }
-    public string Title { get; set; } = String.Empty;
+    public string Title { get; set; } = string.Empty;
 }

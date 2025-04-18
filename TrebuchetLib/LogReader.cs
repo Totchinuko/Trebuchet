@@ -8,6 +8,7 @@ public partial class LogReader(string logPath) : IDisposable, ILogReader
 {
     private long _offset = -1;
     private CancellationTokenSource? _cts;
+    private DateTime _start = DateTime.MinValue;
 
     public event AsyncEventHandler<LogEventArgs>? LogReceived;
     
@@ -23,6 +24,16 @@ public partial class LogReader(string logPath) : IDisposable, ILogReader
     {
         if (_cts is not null) return;
         _cts = new();
+        _start = DateTime.UtcNow;
+        Task.Run(() => BackgroundThread(_cts.Token), _cts.Token);
+    }
+
+    public void StartAtBeginning()
+    {
+        if (_cts is not null) return;
+        _cts = new();
+        _start = DateTime.UtcNow;
+        _offset = 0;
         Task.Run(() => BackgroundThread(_cts.Token), _cts.Token);
     }
 
@@ -57,6 +68,9 @@ public partial class LogReader(string logPath) : IDisposable, ILogReader
     private async Task<string> Read(CancellationToken ct)
     {
         if (!File.Exists(LogPath)) throw new IOException("File not found" + LogPath);
+        var lastWrite = File.GetLastWriteTimeUtc(LogPath);
+        if (lastWrite < _start) return string.Empty;
+        
         await using var fs = new FileStream(LogPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
         if (_offset < 0) _offset = fs.Length < 2000 ? 0 : fs.Length - 1;
         fs.Seek(_offset, SeekOrigin.Begin);

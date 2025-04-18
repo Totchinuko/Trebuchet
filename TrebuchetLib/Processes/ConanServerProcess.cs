@@ -1,42 +1,21 @@
 using System.ComponentModel;
 using System.Diagnostics;
-using System.Net;
 using System.Runtime.CompilerServices;
 
 namespace TrebuchetLib.Processes;
 
-public sealed class ConanServerProcess : IConanServerProcess
+internal sealed class ConanServerProcess : IConanServerProcess
 {
 
 
-    public ConanServerProcess(Process process, ConanServerInfos infos, string logFile, DateTime startTime)
+    public ConanServerProcess(Process process)
     {
-        _process = process;
-        PId = _process.Id;
-        StartUtc = startTime;
+        Process = process;
+        PId = Process.Id;
         State = ProcessState.RUNNING;
-        _infos = infos;
         _lastResponse = DateTime.UtcNow;
-        _sourceQueryReader
-            = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, _infos.QueryPort), 4 * 1000, 5 * 1000);
-        _sourceQueryReader.StartQueryThread();
-
-        _logReader = new LogReader(logFile);
-        _logReader.Start();
-        
-        RCon = new Rcon(new IPEndPoint(IPAddress.Loopback, _infos.RConPort), _infos.RConPassword, timeout:10, keepAlive:300);
-        Console = new MixedConsole(RCon).AddLogSource(_logReader, ConsoleLogSource.ServerLog);
-        LogReader = _logReader;
     }
 
-    public ConanServerProcess(Process process, ConanServerInfos infos, string logFile) : this(process, infos, logFile, DateTime.UtcNow)
-    {
-    }
-    
-    private readonly ConanServerInfos _infos;
-    private readonly Process _process;
-    private readonly SourceQueryReader _sourceQueryReader;
-    private readonly LogReader _logReader;
     private DateTime _lastResponse;
     private int _maxPlayers;
     private bool _online;
@@ -50,9 +29,9 @@ public sealed class ConanServerProcess : IConanServerProcess
     {
         get
         {
-            if (_process.HasExited)
+            if (Process.HasExited)
                 return 0;
-            return _process.WorkingSet64;
+            return Process.WorkingSet64;
         }
     }
 
@@ -60,16 +39,16 @@ public sealed class ConanServerProcess : IConanServerProcess
     {
         get
         {
-            if(_process.HasExited)
+            if(Process.HasExited)
                 return TimeSpan.Zero;
-            return _process.TotalProcessorTime;
+            return Process.TotalProcessorTime;
         }
     }
     
     public bool KillZombies { get; set; }
     public int ZombieCheckSeconds { get; set; }
     public int PId { get; }
-    public DateTime StartUtc { get; }
+    public DateTime StartUtc { get; init; }
 
     public ProcessState State
     {
@@ -99,41 +78,42 @@ public sealed class ConanServerProcess : IConanServerProcess
         private set => SetField(ref _online, value);
     }
 
-    public ITrebuchetConsole Console { get; }
-    
-    public IRcon RCon { get; }
-    
-    public ILogReader LogReader { get; }
+    public Process Process { get; }
+    public required ConanServerInfos ServerInfos { get; init; }
+    public required SourceQueryReader SourceQueryReader { get; init; }
+    public required ITrebuchetConsole Console { get; init; }
+    public required IRcon RCon { get; init; }
+    public required ILogReader LogReader { get; init; }
 
-    public int Instance => _infos.Instance;
-    public int Port => _infos.Port;
-    public int QueryPort => _infos.QueryPort;
-    public string RConPassword => _infos.RConPassword;
-    public int RConPort => _infos.RConPort;
-    public string Title => _infos.Title;
+    public int Instance => ServerInfos.Instance;
+    public int Port => ServerInfos.Port;
+    public int QueryPort => ServerInfos.QueryPort;
+    public string RConPassword => ServerInfos.RConPassword;
+    public int RConPort => ServerInfos.RConPort;
+    public string Title => ServerInfos.Title;
 
     public void Dispose()
     {
-        _process.Dispose();
-        _sourceQueryReader.Dispose();
-        _logReader.Dispose();
+        Process.Dispose();
+        SourceQueryReader.Dispose();
+        LogReader.Dispose();
     }
 
     public async Task RefreshAsync()
     {
         var responding = await Task.Run(() =>
         {
-            _process.Refresh();
-            return _process.Responding;
+            Process.Refresh();
+            return Process.Responding;
         });
         
         if (responding)
             _lastResponse = DateTime.UtcNow;
         
-        _sourceQueryReader.Refresh();
-        Online = _sourceQueryReader.Online;
-        MaxPlayers = _sourceQueryReader.MaxPlayers;
-        Players = _sourceQueryReader.Players;
+        SourceQueryReader.Refresh();
+        Online = SourceQueryReader.Online;
+        MaxPlayers = SourceQueryReader.MaxPlayers;
+        Players = SourceQueryReader.Players;
         
         
         switch (State)
@@ -143,19 +123,19 @@ public sealed class ConanServerProcess : IConanServerProcess
                 break;
             case ProcessState.RUNNING:
                 if (Online) State = ProcessState.ONLINE;
-                if (_process.HasExited) State = ProcessState.CRASHED;
-                else if (!_process.Responding) State = ProcessState.FROZEN;
+                if (Process.HasExited) State = ProcessState.CRASHED;
+                else if (!Process.Responding) State = ProcessState.FROZEN;
                 break;
             case ProcessState.ONLINE:
-                if (_process.HasExited) State = ProcessState.CRASHED;
-                else if (!_process.Responding) State = ProcessState.FROZEN;
+                if (Process.HasExited) State = ProcessState.CRASHED;
+                else if (!Process.Responding) State = ProcessState.FROZEN;
                 break;
             case ProcessState.FROZEN:
-                if (_process.Responding) State = ProcessState.RUNNING;
+                if (Process.Responding) State = ProcessState.RUNNING;
                 else ZombieCheck();
                 break;
             case ProcessState.STOPPING:
-                if (_process.HasExited) State = ProcessState.STOPPED;
+                if (Process.HasExited) State = ProcessState.STOPPED;
                 break;
             case ProcessState.FAILED:
                 State = ProcessState.CRASHED;
@@ -169,21 +149,21 @@ public sealed class ConanServerProcess : IConanServerProcess
         {
             State = ProcessState.CRASHED;
             if (KillZombies)
-                _process.Kill();
+                Process.Kill();
         }
     }
 
     public Task KillAsync()
     {
         State = ProcessState.STOPPING;
-        _process.Kill();
+        Process.Kill();
         return Task.CompletedTask;
     }
 
     public Task StopAsync()
     {
         State = ProcessState.STOPPING;
-        _process.CloseMainWindow();
+        Process.CloseMainWindow();
         return Task.CompletedTask;
     }
 
