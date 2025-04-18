@@ -36,6 +36,8 @@
           <CopyToOutputDirectory>Always</CopyToOutputDirectory>
         </None>
         <AvaloniaResource Include="app.red.ico" />
+        <None Remove="Assets\Hack-Regular.ttf" />
+        <AvaloniaResource Include="Assets\Hack-Regular.ttf" />
     </ItemGroup>
 
     <ItemGroup>

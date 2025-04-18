@@ -11,9 +11,9 @@ using TrebuchetLib.Services;
 namespace Trebuchet.ViewModels.Panels
 {
     [Localizable(false)]
-    public class RconPanel : ReactiveObject, IRefreshablePanel, ITickingPanel
+    public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
     {
-        public RconPanel(AppSetup setup, Launcher launcher)
+        public ConsolePanel(AppSetup setup, Launcher launcher)
         {
             _setup = setup;
             _launcher = launcher;

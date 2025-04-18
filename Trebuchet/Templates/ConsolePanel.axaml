@@ -4,7 +4,7 @@
                     xmlns:vm="clr-namespace:Trebuchet.ViewModels"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
-    <DataTemplate x:Key="RconPanel" x:DataType="panels:RconPanel">
+    <DataTemplate x:Key="ConsolePanel" x:DataType="panels:ConsolePanel">
         <DockPanel LastChildFill="True">
             <StackPanel DockPanel.Dock="Top">
                 <Button x:Name="ConsoleSelector" HorizontalAlignment="Left" Classes="Base Flat" Command="{Binding OpenPopup}">

@@ -76,4 +76,58 @@
             </Style>
         </Style>
     </Style>
+    
+    <!-- Console Colors --> 
+    <Style Selector="Run.black">
+        <Setter Property="Foreground" Value="{DynamicResource TBackground}" />
+    </Style>
+    <Style Selector="Run.white">
+        <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+    </Style>
+    <Style Selector="Run.red">
+        <Setter Property="Foreground" Value="{DynamicResource TRed}" />
+    </Style>
+    <Style Selector="Run.gray">
+        <Setter Property="Foreground" Value="{DynamicResource TGray}" />
+    </Style>
+    <Style Selector="Run.blue">
+        <Setter Property="Foreground" Value="{DynamicResource TBlue}" />
+    </Style>
+    <Style Selector="Run.green">
+        <Setter Property="Foreground" Value="{DynamicResource TGreen}" />
+    </Style>
+    <Style Selector="Run.cyan">
+        <Setter Property="Foreground" Value="{DynamicResource TBlue}" />
+    </Style>
+    <Style Selector="Run.magenta">
+        <Setter Property="Foreground" Value="{DynamicResource TPurple}" />
+    </Style>
+    <Style Selector="Run.yellow">
+        <Setter Property="Foreground" Value="{DynamicResource TYellow}" />
+    </Style>
+    <Style Selector="Run.darkred">
+        <Setter Property="Foreground" Value="{DynamicResource TRedDim}" />
+    </Style>
+    <Style Selector="Run.darkgray">
+        <Setter Property="Foreground" Value="{DynamicResource TGrayDim}" />
+    </Style>
+    <Style Selector="Run.darkblue">
+        <Setter Property="Foreground" Value="{DynamicResource TBlueDim}" />
+    </Style>
+    <Style Selector="Run.darkgreen">
+        <Setter Property="Foreground" Value="{DynamicResource TGreenDim}" />
+    </Style>
+    <Style Selector="Run.darkcyan">
+        <Setter Property="Foreground" Value="{DynamicResource TBlueDim}" />
+    </Style>
+    <Style Selector="Run.darkmagenta">
+        <Setter Property="Foreground" Value="{DynamicResource TPurpleDim}" />
+    </Style>
+    <Style Selector="Run.darkyellow">
+        <Setter Property="Foreground" Value="{DynamicResource TYellowDim}" />
+    </Style>
+    <Style Selector="SelectableTextBlock.console">
+        <Setter Property="FontFamily" Value="{StaticResource Hack}"/>
+        <Setter Property="FontSize" Value="12"/>
+    </Style>
 </Styles>

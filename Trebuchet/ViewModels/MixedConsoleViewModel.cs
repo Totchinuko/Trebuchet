@@ -1,16 +1,15 @@
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls;
+using Avalonia.Controls.Documents;
 using Avalonia.Threading;
-using Cyotek.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using tot_lib;
@@ -23,28 +22,17 @@ namespace Trebuchet.ViewModels;
 [Localizable(false)]
 public class MixedConsoleViewModel : ReactiveObject, IScrollController
 {
-    public const string NEWLINE = "<br />";
-    public const string SPANIN = "<span class=\"{0}\">";
-    public const string SPANOUT = "</span>";
-    public const string BODY = "<body class=\"consolas\">";
-    public const string ENDBODY = "</body>";
-    public const string STARTLOG = "<p>";
-    public const string ENDLOG = "</p>";
-    public const string TABSPACE = "&nbsp;&nbsp;&nbsp;&nbsp;";
-    
     public MixedConsoleViewModel(int instance)
     {
         _instance = instance;
+        _block.Classes.Add("console");
         
         this.WhenAnyValue(x => x.Process)
             .Buffer(2, 1)
             .Select(b => (b[0], b[1]))
             .InvokeCommand(ReactiveCommand.Create<(IConanServerProcess?, IConanServerProcess?)>(OnProcessChanged));
 
-        _header = TrebuchetUtils.Utils.GetMarkdownHtmlHeader();
-
         _finalLog = this.WhenAnyValue(x => x.Log)
-            .Select(x => _header + BODY + STARTLOG + x + ENDLOG + ENDBODY)
             .ToProperty(this, x => x.FinalLog);
 
         Select = ReactiveCommand.Create(OnConsoleSelected);
@@ -52,15 +40,13 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
     }
 
     private readonly int _instance;
+    private readonly ObservableAsPropertyHelper<string> _finalLog;
+    private readonly SelectableTextBlock _block = new ();
     private IConanServerProcess? _process;
     private string _log = string.Empty;
     private string _serverLabel = string.Empty;
-    private ObservableAsPropertyHelper<string> _finalLog;
-    private string _header;
     private bool _canSend;
     private bool _autoScroll = true;
-    private CircularBuffer<int> _lineSizes = new(200);
-    private StringBuilder _logBuilder = new();
 
     public event EventHandler<int>? ConsoleSelected; 
     public event EventHandler? ScrollToEnd;
@@ -97,6 +83,8 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         get => _autoScroll;
         set => this.RaiseAndSetIfChanged(ref _autoScroll, value);
     }
+
+    public SelectableTextBlock Block => _block;
     
     public ReactiveCommand<Unit,Unit> Select { get; }
 
@@ -106,7 +94,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         {
             if (Process is not null)
             {
-                WriteLine(@"> " + input, ConsoleColor.Gray);
+                WriteLine(@"> " + input, ConsoleColor.Cyan);
                 await Process.Console.Send(input, CancellationToken.None);
             }
         }
@@ -124,7 +112,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
 
     public void WriteLine(string text)
     {
-        foreach (var line in LineToHtml(SplitLines(text)))
+        foreach (var line in LineToInline(SplitLines(text)))
             AppendLine(line);
         OnScrollToEnd();
     }
@@ -137,7 +125,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
 
     public void WriteLine(string text, ConsoleColor color)
     {
-        foreach (var line in LineToHtml(SplitLines(text), color))
+        foreach (var line in LineToInline(SplitLines(text), color))
             AppendLine(line);
         OnScrollToEnd();
     }
@@ -225,16 +213,12 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         }
     }
 
-    private void AppendLine(string line)
+    private void AppendLine(Inline inline)
     {
-        int remove = 0;
-        if (_lineSizes.Count() == _lineSizes.Capacity)
-            remove = _lineSizes.Peek();
-        _lineSizes.Put(line.Length);
-        _logBuilder.Append(line);
-        if(remove > 0)
-            _logBuilder.Remove(0, remove);
-        Log = _logBuilder.ToString();
+        _block.Inlines ??= new InlineCollection();
+        if(_block.Inlines.Count == 400)
+            _block.Inlines.RemoveAt(0);
+        _block.Inlines?.Add(inline);
     }
 
     private IEnumerable<string> SplitLines(string input)
@@ -242,21 +226,18 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController
         return input.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
     }
 
-    private IEnumerable<string> LineToHtml(IEnumerable<string> lines, ConsoleColor color)
+    private IEnumerable<Inline> LineToInline(IEnumerable<string> lines, ConsoleColor color = ConsoleColor.White)
     {
-        return lines
-            .Select(x => WebUtility.HtmlEncode(x))
-            .Select(x => x.Replace("\t", TABSPACE))
-            .Select(x => string.Format(SPANIN, ColorToClass(color)) + x + SPANOUT + NEWLINE)
-            .Select(x => x.Trim());
-    }
-    
-    private IEnumerable<string> LineToHtml(IEnumerable<string> lines)
-    {
-        return lines
-            .Select(x => WebUtility.HtmlEncode(x) + NEWLINE)
-            .Select(x => x.Replace("\t", TABSPACE))
-            .Select(x => x.Trim());
+        string cClass = ColorToClass(color);
+        return lines.SelectMany<string, Inline>(x =>
+        {
+            var run = new Run
+            {
+                Text = x
+            };
+            run.Classes.Add(cClass);
+            return [run, new LineBreak()];
+        });
     }
 
     private void OnConsoleSelected()

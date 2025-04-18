@@ -6,8 +6,8 @@
     <DataTemplate x:Key="MixedConsoleView" DataType="vm:MixedConsoleViewModel">
         <DockPanel LastChildFill="True">
             <CheckBox IsChecked="{Binding AutoScroll}" Content="{x:Static a:Resources.AutoScroll}" HorizontalAlignment="Left" DockPanel.Dock="Bottom" />
-            <ScrollViewer Focusable="True" Classes="AutoScroller" DockPanel.Dock="Top" Margin="0 12">
-                <html:HtmlPanel Text="{Binding FinalLog}" />
+            <ScrollViewer BringIntoViewOnFocusChange="False" Focusable="True" Classes="AutoScroller" DockPanel.Dock="Top" Margin="0 12">
+                <ContentControl Content="{Binding Block}" />
             </ScrollViewer>
         </DockPanel>
     </DataTemplate>
