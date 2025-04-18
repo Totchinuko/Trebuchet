@@ -7,20 +7,23 @@
     <DataTemplate x:Key="MixedConsoleView" DataType="vm:MixedConsoleViewModel">
         <DockPanel LastChildFill="True">
             <CheckBox IsChecked="{Binding AutoScroll}" Content="{x:Static a:Resources.AutoScroll}" HorizontalAlignment="Left" DockPanel.Dock="Bottom" />
-            <e:TextEditor 
-                DockPanel.Dock="Top"
-                IsReadOnly="True" 
-                WordWrap="True" 
-                HorizontalScrollBarVisibility="Disabled" 
-                ScrollViewer.BringIntoViewOnFocusChange="False"
-                ShowLineNumbers="False"
-                FontSize="12" 
-                Margin="0 12"
-                FontFamily="{StaticResource Hack}">
-                <Interaction.Behaviors>
-                    <t:DocumentTextBindingBehavior TextSource="{Binding .}" />
-                </Interaction.Behaviors>
-            </e:TextEditor>
+            <ThemeVariantScope RequestedThemeVariant="Dark">
+                <Border Background="{DynamicResource TBackground}" CornerRadius="3" Margin="0 12" DockPanel.Dock="Top">
+                    <e:TextEditor 
+                        IsReadOnly="True" 
+                        WordWrap="True" 
+                        HorizontalScrollBarVisibility="Disabled" 
+                        ScrollViewer.BringIntoViewOnFocusChange="False"
+                        ShowLineNumbers="False"
+                        FontSize="12" 
+                        SyntaxHighlighting="Log"
+                        FontFamily="{StaticResource Hack}">
+                        <Interaction.Behaviors>
+                            <t:DocumentTextBindingBehavior TextSource="{Binding .}" />
+                        </Interaction.Behaviors>
+                    </e:TextEditor>
+                </Border>
+            </ThemeVariantScope>
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

@@ -83,6 +83,8 @@
             <Generator>PublicResXFileCodeGenerator</Generator>
             <LastGenOutput>Resources.Designer.cs</LastGenOutput>
         </EmbeddedResource>
+        <None Remove="Assets\LogHightlighting.xshd" />
+        <EmbeddedResource Include="Assets\LogHightlighting.xshd" />
     </ItemGroup>
     
     <ItemGroup>

@@ -35,7 +35,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         RefreshLabel();
     }
 
-    private readonly CircularBuffer<int> _lineSizes = new(200);
+    private readonly CircularBuffer<int> _lineSizes = new(1000);
     private readonly StringBuilder _logBuilder = new();
     private readonly int _instance;
     private IConanServerProcess? _process;

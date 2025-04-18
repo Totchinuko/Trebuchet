@@ -85,7 +85,11 @@ public partial class LogReader(string logPath) : IDisposable, ILogReader
         foreach (var line in lines)
         {
             var matches = LogRegex().Match(line);
-            if(!matches.Success) yield return LogEventLine.Create(line, DateTime.Now, LogLevel.Information);
+            if (!matches.Success)
+            {
+                yield return LogEventLine.Create(line, DateTime.Now, LogLevel.Information);
+                continue;
+            }
             
             var date = ParseDate(matches.Groups[1].Value);
             var source = matches.Groups[3].Value.Trim();

@@ -1,8 +1,11 @@
 using System;
+using System.IO;
+using System.Xml;
 using Avalonia;
 using Avalonia.Media.TextFormatting;
 using Avalonia.Xaml.Interactivity;
 using AvaloniaEdit;
+using AvaloniaEdit.Highlighting;
 using AvaloniaEdit.Rendering;
 using ITextSource = Trebuchet.ViewModels.ITextSource;
 

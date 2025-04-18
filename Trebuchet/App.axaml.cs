@@ -72,11 +72,12 @@ public partial class App : Application, IApplication
         }
    
         
-        //todo: move to services (And get rid of the tiny return sub messages)
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection, testlive, catapult, experiment);
         var services = serviceCollection.BuildServiceProvider();
         _logger = services.GetRequiredService<ILogger<App>>();
+        
+        CodeHighlighting.RegisterHighlight(@"Trebuchet.Assets.LogHightlighting.xshd", @"Log", [@".log"]);
         
         _logger.LogInformation(@"Starting Taskmaster");
         _logger.LogInformation(@$"Selecting {(testlive ? @"testlive" : @"live")}");
