@@ -32,6 +32,7 @@ public class AppClientFiles(AppSetup appSetup)
 
     public bool Exists(string name)
     {
+        ClientProfile.RepairMissingProfileFile(GetPath(name));
         return File.Exists(GetPath(name));
     }
 
@@ -115,6 +116,7 @@ public class AppClientFiles(AppSetup appSetup)
         if (!string.IsNullOrEmpty(profileName))
         {
             string path = GetPath(profileName);
+            ClientProfile.RepairMissingProfileFile(path);
             if (File.Exists(path)) 
                 return profileName;
         }
