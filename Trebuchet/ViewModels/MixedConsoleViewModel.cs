@@ -13,7 +13,6 @@ using Cyotek.Collections.Generic;
 using DynamicData.Binding;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using tot_lib;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
 using TrebuchetUtils;
@@ -23,9 +22,11 @@ namespace Trebuchet.ViewModels;
 [Localizable(false)]
 public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSource
 {
-    public MixedConsoleViewModel(int instance)
+    public MixedConsoleViewModel(int instance, InternalLogSink trebuchetLog, ILogger logger)
     {
         _instance = instance;
+        _logger = logger;
+        trebuchetLog.LogReceived += OnTrebuchetLogReceived;
         
         this.WhenAnyValue(x => x.Process)
             .Buffer(2, 1)
@@ -63,6 +64,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     private readonly CircularBuffer<int> _lineSizes = new(1000);
     private readonly StringBuilder _logBuilder = new();
     private readonly int _instance;
+    private readonly ILogger _logger;
     private IConanServerProcess? _process;
     private string _text = string.Empty;
     private string _serverLabel = string.Empty;
@@ -141,64 +143,58 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         {
             if (Process is not null)
             {
-                WriteLine(@"> " + input, ConsoleColor.Cyan);
+                WriteLine(@"> " + input);
                 await Process.Console.Send(input, CancellationToken.None);
             }
         }
         catch (Exception ex)
         {
-            WriteLines(ConsoleColor.Red, ex.GetAllExceptions().Split(Environment.NewLine));
+            _logger.LogError(ex, "Could not Send command");
         }
     }
 
     public void WriteLine(ConsoleLog log)
     {
         if (!_sources.Contains(log.Source)) return;
-        string header = @$"[{log.UtcTime.ToLocalTime():HH:mm:ss}]{LogLevelToTag(log.LogLevel)} ";
-        WriteLine(header + log.Body, LogLevelToColor(log.LogLevel));
+        string header = LogLevelHeader(log.UtcTime, log.LogLevel);
+        WriteLine(header + log.Body);
     }
 
-    public void WriteLine(IEnumerable<ConsoleLog> logs)
+    public void WriteLine(LogEventLine log, ConsoleLogSource source)
+    {
+        if (!_sources.Contains(source)) return;
+        string header = LogLevelHeader(log.Date.ToUniversalTime(), log.LogLevel);
+        WriteLine(header + log.Output);
+    }
+
+    public void WriteLines(IEnumerable<ConsoleLog> logs)
     {
         foreach (var log in logs)
             WriteLine(log);
     }
+    
+    public void WriteLines(IEnumerable<LogEventLine> logs, ConsoleLogSource source)
+    {
+        foreach (var log in logs)
+            WriteLine(log, source);
+    }
+
+    public void WriteLines(params string[] lines)
+    {
+        foreach (var line in lines)
+            WriteLine(line);
+    }
 
     public void WriteLine(string text)
     {
-        WriteLine(text, ConsoleColor.White);
-    }
-
-    public void WriteLines(ConsoleColor color, params string[] lines)
-    {
-        foreach (var line in lines)
-            WriteLine(line, color);
-    }
-
-    public void WriteLine(string text, ConsoleColor color)
-    {
-        foreach (var line in LineToFormated(SplitLines(text), color))
+        foreach (var line in SplitLines(text).Select(x => x.Trim() + Environment.NewLine))
             AppendLine(line);
         OnScrollToEnd();
     }
 
-    private string ColorToClass(ConsoleColor color)
+    private string LogLevelHeader(DateTime date, LogLevel level)
     {
-        return Enum.GetName(color)?.ToLower() ?? "white";
-    }
-
-    private ConsoleColor LogLevelToColor(LogLevel level)
-    {
-        switch (level)
-        {
-            case LogLevel.Error:
-            case LogLevel.Critical:
-                return ConsoleColor.Red;
-            case LogLevel.Warning:
-                return ConsoleColor.Yellow;
-            default:
-                return ConsoleColor.White;
-        }
+        return @$"[{date.ToLocalTime():HH:mm:ss}]{LogLevelToTag(level)} ";
     }
 
     private string LogLevelToTag(LogLevel level)
@@ -240,7 +236,16 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     {
         Dispatcher.UIThread.Invoke(() =>
         {
-            WriteLine(args.Logs);
+            WriteLines(args.Logs);
+        });
+        return Task.CompletedTask;
+    }
+    
+    private Task OnTrebuchetLogReceived(object? sender, LogEventArgs args)
+    {
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            WriteLines(args.Lines, ConsoleLogSource.Trebuchet);
         });
         return Task.CompletedTask;
     }
@@ -282,11 +287,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     private IEnumerable<string> SplitLines(string input)
     {
         return input.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
-    }
-
-    private IEnumerable<string> LineToFormated(IEnumerable<string> lines, ConsoleColor color)
-    {
-        return lines.Select(x => x + Environment.NewLine);
     }
 
     private void OnConsoleSelected()

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
 using DynamicData.Binding;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using Trebuchet.Assets;
 using TrebuchetLib.Services;
@@ -13,10 +14,12 @@ namespace Trebuchet.ViewModels.Panels;
 [Localizable(false)]
 public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
 {
-    public ConsolePanel(AppSetup setup, Launcher launcher)
+    public ConsolePanel(AppSetup setup, Launcher launcher, InternalLogSink logSink, ILogger<ConsolePanel> logger)
     {
         _setup = setup;
         _launcher = launcher;
+        _logSink = logSink;
+        _logger = logger;
 
         AdjustConsoleListIfNeeded();
         _console = ConsoleList[0];
@@ -29,6 +32,8 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
 
     private readonly AppSetup _setup;
     private readonly Launcher _launcher;
+    private readonly InternalLogSink _logSink;
+    private readonly ILogger<ConsolePanel> _logger;
     private MixedConsoleViewModel _console;
     private bool _canBeOpened;
     private bool _popupOpen;
@@ -82,7 +87,7 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
         if (ConsoleList.Count >= count) return;
         for (var i = ConsoleList.Count; i < count; i++)
         {
-            var console = new MixedConsoleViewModel(i);
+            var console = new MixedConsoleViewModel(i, _logSink, _logger);
             console.ConsoleSelected += OnConsoleSelected;
             ConsoleList.Add(console);
         }

@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -11,6 +10,7 @@ using Avalonia.Threading;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
+using Serilog.Configuration;
 using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
@@ -141,6 +141,9 @@ public partial class App : Application, IApplication
                 AppConstants.GithubOwnerUpdate,
                 AppConstants.GithubRepoUpdate,
                 AppConstants.GetUpdateContentType()));
+
+        var internalLogSink = new InternalLogSink();
+        services.AddSingleton(internalLogSink);
         
         var logger = new LoggerConfiguration()
 #if !DEBUG
@@ -150,6 +153,12 @@ public partial class App : Application, IApplication
                 Path.Combine(Constants.GetLoggingDirectory().FullName, @"app.log"),
                 retainedFileTimeLimit: TimeSpan.FromDays(7),
                 rollingInterval: RollingInterval.Day)
+            .WriteTo.Sink(internalLogSink, new BatchingOptions()
+            {
+                BatchSizeLimit = 50,
+                BufferingTimeLimit = TimeSpan.FromMilliseconds(500),
+                EagerlyEmitFirstEvent = false
+            })
             .CreateLogger();
 
         services.AddLogging(builder => builder.AddSerilog(logger, true));

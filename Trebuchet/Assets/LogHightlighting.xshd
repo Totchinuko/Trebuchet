@@ -3,11 +3,15 @@
     <Color name="Warning" foreground="#ffb300" exampleText="[23:59:59][WRN] Log content" />
     <Color name="Timecode" foreground="#5a9b40" exampleText="[23:59:59]" />
     <Color name="Status" foreground="#EA7C3C" exampleText="[WRN]" />
+    <Color name="Input" foreground="#3a8eda" exampleText="> command" />
     
     <RuleSet>
         <Rule color="Timecode" multiline="false">
             ^\[[0-9]+:[0-9]+:[0-9]+\]
         </Rule>
+        <Span color="Input" multiline="false">
+            <Begin>^></Begin>
+        </Span>
         <Span color="Error">
             <Begin color="Status">\[ERR\]</Begin>
         </Span>
