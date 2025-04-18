@@ -185,8 +185,7 @@ public partial class App : Application, IApplication
         services.AddSingleton<IPanel, ModlistPanel>();
         services.AddSingleton<IPanel, ClientProfilePanel>();
         services.AddSingleton<IPanel, ServerProfilePanel>();
-        if(experiment)
-            services.AddSingleton<IPanel, ConsolePanel>();
+        services.AddSingleton<IPanel, ConsolePanel>();
        
         services.AddSingleton<IPanel, DashboardPanel>();
         services.AddSingleton<IPanel, ToolboxPanel>();
