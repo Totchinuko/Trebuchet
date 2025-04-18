@@ -99,7 +99,8 @@
     </Application.DataTemplates>
     <Application.Styles>
         <FluentTheme />
-        <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml"></StyleInclude>
-        <StyleInclude Source="avares://Trebuchet/LocalStyles.axaml"></StyleInclude>
+        <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml" />
+        <StyleInclude Source="avares://Trebuchet/LocalStyles.axaml" />
+        <StyleInclude Source="avares://AvaloniaEdit/Themes/Fluent/AvaloniaEdit.xaml" />
     </Application.Styles>
 </Application>

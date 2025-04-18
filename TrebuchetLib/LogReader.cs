@@ -53,8 +53,7 @@ public partial class LogReader(string logPath) : IDisposable, ILogReader
             {
                 var output = await Read(ct);
                 if (!string.IsNullOrEmpty(output))
-                    foreach (var log in ParseOutput(output))
-                        await OnLogReceived(log);
+                    await OnLogReceived(ParseOutput(output));
             }
             catch (Exception ex)
             {
@@ -80,19 +79,19 @@ public partial class LogReader(string logPath) : IDisposable, ILogReader
         return text;
     }
 
-    private IEnumerable<LogEventArgs> ParseOutput(string output)
+    private IEnumerable<LogEventLine> ParseOutput(string output)
     {
         var lines = output.Trim().Split(["\r\n", "\r", "\n"], StringSplitOptions.RemoveEmptyEntries);
         foreach (var line in lines)
         {
             var matches = LogRegex().Match(line);
-            if(!matches.Success) yield return LogEventArgs.Create(line, DateTime.Now, LogLevel.Information);
+            if(!matches.Success) yield return LogEventLine.Create(line, DateTime.Now, LogLevel.Information);
             
             var date = ParseDate(matches.Groups[1].Value);
             var source = matches.Groups[3].Value.Trim();
             var level = ParseLogLevel(matches.Groups[4].Value);
             var content = matches.Groups[5].Value;
-            yield return LogEventArgs.Create(content, date, level, source);
+            yield return LogEventLine.Create(content, date, level, source);
         }
     }
 
@@ -136,11 +135,17 @@ public partial class LogReader(string logPath) : IDisposable, ILogReader
         if (LogReceived is not null)
             await LogReceived.Invoke(this, log);
     }
+
+    private async Task OnLogReceived(IEnumerable<LogEventLine> lines)
+    {
+        if (LogReceived is not null)
+            await LogReceived.Invoke(this, new LogEventArgs().Append(lines));
+    }
     
     private async Task OnLogReceived(Exception ex)
     {
         if (LogReceived is not null)
-            await LogReceived.Invoke(this, LogEventArgs.CreateError(ex));
+            await LogReceived.Invoke(this, new LogEventArgs().Append(LogEventLine.CreateError(ex)));
     }
 
     //regexr /^\[([0-9\.\-\:]+)\]\[([0-9\s]+)\]([\w\s]+):(?:([\w\s]+):)?(.+)/

@@ -43,6 +43,7 @@
     <ItemGroup>
         <PackageReference Include="AsyncImageLoader.Avalonia" Version="3.3.0" />
         <PackageReference Include="Avalonia" Version="11.2.5" />
+        <PackageReference Include="Avalonia.AvaloniaEdit" Version="11.2.0" />
         <PackageReference Include="Avalonia.Desktop" Version="11.2.5" />
         <PackageReference Include="Avalonia.HtmlRenderer" Version="11.0.0" />
         <PackageReference Include="Avalonia.ReactiveUI" Version="11.2.5" />
@@ -53,6 +54,7 @@
             <IncludeAssets Condition="'$(Configuration)' != 'Debug'">None</IncludeAssets>
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
+        <PackageReference Include="Cyotek.CircularBuffer" Version="1.2.1" />
         <PackageReference Include="Humanizer" Version="2.14.1" />
         <PackageReference Include="HyperText.Avalonia" Version="2.0.0" />
         <PackageReference Include="Markdig" Version="0.40.0" />

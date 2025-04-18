@@ -9,7 +9,7 @@ namespace TrebuchetLib
 {
     public interface ITrebuchetConsole
     {
-        event AsyncEventHandler<ConsoleLog>? Received;
+        event AsyncEventHandler<ConsoleLogArgs>? Received;
         Task Send(string data, CancellationToken ct);
     }
 }

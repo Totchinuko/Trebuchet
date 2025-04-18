@@ -1,14 +1,26 @@
 <ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:vm="clr-namespace:Trebuchet.ViewModels"
-                    xmlns:html="clr-namespace:TheArtOfDev.HtmlRenderer.Avalonia;assembly=Avalonia.HtmlRenderer"
+                    xmlns:e="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:t="clr-namespace:Trebuchet"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="MixedConsoleView" DataType="vm:MixedConsoleViewModel">
         <DockPanel LastChildFill="True">
             <CheckBox IsChecked="{Binding AutoScroll}" Content="{x:Static a:Resources.AutoScroll}" HorizontalAlignment="Left" DockPanel.Dock="Bottom" />
-            <ScrollViewer BringIntoViewOnFocusChange="False" Focusable="True" Classes="AutoScroller" DockPanel.Dock="Top" Margin="0 12">
-                <ContentControl Content="{Binding Block}" />
-            </ScrollViewer>
+            <e:TextEditor 
+                DockPanel.Dock="Top"
+                IsReadOnly="True" 
+                WordWrap="True" 
+                HorizontalScrollBarVisibility="Disabled" 
+                ScrollViewer.BringIntoViewOnFocusChange="False"
+                ShowLineNumbers="False"
+                FontSize="12" 
+                Margin="0 12"
+                FontFamily="{StaticResource Hack}">
+                <Interaction.Behaviors>
+                    <t:DocumentTextBindingBehavior TextSource="{Binding .}" />
+                </Interaction.Behaviors>
+            </e:TextEditor>
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>
