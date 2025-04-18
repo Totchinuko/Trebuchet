@@ -10,6 +10,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using Cyotek.Collections.Generic;
+using DynamicData.Binding;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using tot_lib;
@@ -35,11 +36,30 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
             (c, f) => c && !string.IsNullOrEmpty(f));
             
         SendCommand = ReactiveCommand.CreateFromTask(OnSendCommand, canSendCommand);
+
+        ToggleAutoScroll = ReactiveCommand.Create<Unit>((_) => AutoScroll = !AutoScroll);
+        ToggleServerLogs = ReactiveCommand.Create(() =>
+        {
+            if (!Sources.Contains(ConsoleLogSource.ServerLog)) 
+                Sources.Add(ConsoleLogSource.ServerLog);
+            else Sources.Remove(ConsoleLogSource.ServerLog);
+            DisplayServerLog = Sources.Contains(ConsoleLogSource.ServerLog);
+        });
+        
+        ToggleTrebuchetLogs = ReactiveCommand.Create(() =>
+        {
+            if (!Sources.Contains(ConsoleLogSource.Trebuchet)) 
+                Sources.Add(ConsoleLogSource.Trebuchet);
+            else Sources.Remove(ConsoleLogSource.Trebuchet);
+            DisplayTrebuchetLog = Sources.Contains(ConsoleLogSource.Trebuchet);
+        });
         
         Select = ReactiveCommand.Create(OnConsoleSelected);
         RefreshLabel();
     }
 
+    private bool _displayServerLog;
+    private bool _displayTrebuchetLog;
     private readonly CircularBuffer<int> _lineSizes = new(1000);
     private readonly StringBuilder _logBuilder = new();
     private readonly int _instance;
@@ -49,11 +69,18 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     private bool _canSend;
     private bool _autoScroll = true;
     private string _commandField = string.Empty;
+    private ObservableCollectionExtended<ConsoleLogSource> _sources = [ConsoleLogSource.RCon];
 
     public event EventHandler<int>? ConsoleSelected; 
     public event EventHandler? ScrollToEnd;
     public event EventHandler? ScrollToHome;
     public event EventHandler<string>? LineAppended;
+
+    private ObservableCollectionExtended<ConsoleLogSource> Sources
+    {
+        get => _sources;
+        set => this.RaiseAndSetIfChanged(ref _sources, value);
+    }
 
     public IConanServerProcess? Process
     {
@@ -91,8 +118,22 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         set => this.RaiseAndSetIfChanged(ref _commandField, value);
     }
 
+    public bool DisplayServerLog
+    {
+        get => _displayServerLog;
+        set => this.RaiseAndSetIfChanged(ref _displayServerLog, value);
+    }
+    public bool DisplayTrebuchetLog
+    {
+        get => _displayTrebuchetLog;
+        set => this.RaiseAndSetIfChanged(ref _displayTrebuchetLog, value);
+    }
+
     public ReactiveCommand<Unit,Unit> Select { get; }
     public ReactiveCommand<Unit, Unit> SendCommand { get; }
+    public ReactiveCommand<Unit,Unit> ToggleServerLogs { get; }
+    public ReactiveCommand<Unit,Unit> ToggleTrebuchetLogs { get; }
+    public ReactiveCommand<Unit,Unit> ToggleAutoScroll { get; }
 
     public async Task Send(string input)
     {
@@ -112,6 +153,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
 
     public void WriteLine(ConsoleLog log)
     {
+        if (!_sources.Contains(log.Source)) return;
         string header = @$"[{log.UtcTime.ToLocalTime():HH:mm:ss}]{LogLevelToTag(log.LogLevel)} ";
         WriteLine(header + log.Body, LogLevelToColor(log.LogLevel));
     }

@@ -1363,6 +1363,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Server Logs.
+        /// </summary>
+        public static string ServerLogs {
+            get {
+                return ResourceManager.GetString("ServerLogs", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Servers.
         /// </summary>
         public static string Servers {
@@ -2619,6 +2628,15 @@ namespace Trebuchet.Assets {
         public static string TranslatorsIdentity {
             get {
                 return ResourceManager.GetString("TranslatorsIdentity", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Trebuchet Logs.
+        /// </summary>
+        public static string TrebuchetLogs {
+            get {
+                return ResourceManager.GetString("TrebuchetLogs", resourceCulture);
             }
         }
         

@@ -961,4 +961,10 @@ DO NOT place it in your Steam Directory.</value>
     <data name="AutoScroll" xml:space="preserve">
         <value>Auto Scroll</value>
     </data>
+    <data name="ServerLogs" xml:space="preserve">
+        <value>Server Logs</value>
+    </data>
+    <data name="TrebuchetLogs" xml:space="preserve">
+        <value>Trebuchet Logs</value>
+    </data>
 </root>

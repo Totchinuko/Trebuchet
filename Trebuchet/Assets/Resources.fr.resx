@@ -953,4 +953,10 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="AutoScroll" xml:space="preserve">
         <value>Scroll Automatique</value>
     </data>
+    <data name="ServerLogs" xml:space="preserve">
+        <value>Journaux Serveur</value>
+    </data>
+    <data name="TrebuchetLogs" xml:space="preserve">
+        <value>Journaux Trebuchet</value>
+    </data>
 </root>
