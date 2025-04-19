@@ -22,7 +22,6 @@ public class OnBoarding(
     UIConfig uiConfig,
     ILanguageManager langManager,
     ILogger<OnBoarding> logger,
-    Steam steam, 
     SteamApi steamApi)
 {
     public async Task<bool> OnBoardingCheckForUpdate(IUpdater updater)
@@ -174,13 +173,9 @@ public class OnBoarding(
     {
         var progress = new OnBoardingProgress<double>(Resources.UpdateServersLabel, string.Empty, 0.0, 1.0);
         dialogueBox.Show(progress);
-        steam.SetTemporaryProgress(progress);
-        if(!steam.IsConnected)
-            await steam.Connect();
-        var cts = new CancellationTokenSource();
-        await steam.UpdateServerInstances(cts);
+        using var downProgress = steamApi.SetDownloaderProgress(progress);
+        await steamApi.UpdateServers();
         progress.Progress = 1.0;
-        steam.RestoreProgress();
         progress.Close();
         return true;
     }

@@ -10,6 +10,7 @@ using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Assets;
+using Trebuchet.ViewModels;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
@@ -176,6 +177,13 @@ public class SteamApi(
         {
             task.Release();
         }
+    }
+
+
+    public IDisposable SetDownloaderProgress(IProgress<double> progress)
+    {
+        steam.SetTemporaryProgress(progress);
+        return new SteamProgressRestore(steam);
     }
 
     public int GetInstalledServerInstanceCount()
