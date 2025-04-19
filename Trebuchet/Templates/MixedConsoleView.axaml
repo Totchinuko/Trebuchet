@@ -7,13 +7,13 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="MixedConsoleView" DataType="vm:MixedConsoleViewModel">
         <DockPanel LastChildFill="True">
-            <DockPanel DockPanel.Dock="Bottom" LastChildFill="True">
+            <DockPanel DockPanel.Dock="Bottom" LastChildFill="True" Margin="0 0 12 0">
                 <Button Classes="Base Blue" HotKey="Enter" DockPanel.Dock="Right" Command="{Binding SendCommand}">
                     <i:Icon Value="mdi-send" Classes="Normal" />
                 </Button>
                 <TextBox DockPanel.Dock="Left" Text="{Binding CommandField, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" MaxLength="4000" Watermark="Command" Margin="0 0 6 0" />
             </DockPanel>
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="6" DockPanel.Dock="Bottom" Margin="0 0 0 12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" Spacing="6" DockPanel.Dock="Bottom" Margin="0 0 12 12">
                 <Button Classes="Base Blue" Classes.Heavy="{Binding AutoScroll}" Classes.Colored="{Binding AutoScroll}" Command="{Binding ToggleAutoScroll}">
                     <StackPanel Spacing="3" Orientation="Horizontal">
                         <i:Icon Value="mdi-arrow-vertical-lock" Classes="Normal" />
@@ -40,7 +40,7 @@
                 </Button>
             </StackPanel>
             <ThemeVariantScope RequestedThemeVariant="Dark">
-                <Border Background="{DynamicResource TBackground}" CornerRadius="3" Margin="0 12" DockPanel.Dock="Top">
+                <Border Background="{DynamicResource TBackground}" CornerRadius="3" Margin="0 12 12 12" DockPanel.Dock="Top">
                     <e:TextEditor 
                         IsReadOnly="True" 
                         WordWrap="True" 
