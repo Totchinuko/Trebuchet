@@ -162,29 +162,24 @@ namespace Trebuchet.ViewModels.Panels
             if (!await CheckForSteamClientRunning()) return;
 
             Client.CanLaunch = false;
-            if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
+            try
             {
-                var modlist = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
-                await _steamApi.UpdateMods(modlist);
-            }
+                if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
+                {
+                    var modlist = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
+                    await _steamApi.UpdateMods(modlist);
+                }
 
-            if (!File.Exists(_appFiles.Client.GetPath(Client.SelectedProfile)))
-            {
-                await _box.OpenErrorAsync(Resources.Error, 
-                    string.Format(Resources.DataNotFound, @$"{Resources.GameSave}: {Client.SelectedProfile}"));
-                return;
+                _setup.Config.SelectedClientProfile = Client.SelectedProfile;
+                _setup.Config.SelectedClientModlist = Client.SelectedModlist;
+                await _launcher.CatapultClient(isBattleEye);
             }
-            
-            if (!File.Exists(_appFiles.Mods.GetPath(Client.SelectedModlist)))
+            catch (Exception ex)
             {
-                await _box.OpenErrorAsync(Resources.Error, 
-                    string.Format(Resources.DataNotFound, @$"{Resources.ModList}: {Client.SelectedModlist}"));
-                return;
+                _logger.LogError(ex, @"Failed");
+                await _box.OpenErrorAsync(ex.Message);
+                Client.CanLaunch = true;
             }
-
-            _setup.Config.SelectedClientProfile = Client.SelectedProfile;
-            _setup.Config.SelectedClientModlist = Client.SelectedModlist;
-            await _launcher.CatapultClient(isBattleEye);
         }
         
         public async Task CloseServer(int instance)
@@ -228,32 +223,15 @@ namespace Trebuchet.ViewModels.Panels
                     await _steamApi.UpdateServers();
                     await _steamApi.UpdateMods(modlist);
                 }
-                
-                if (!File.Exists(_appFiles.Server.GetPath(dashboard.SelectedProfile)))
-                {
-                    await _box.OpenErrorAsync(Resources.Error, 
-                        string.Format(Resources.DataNotFound, @$"{Resources.ServerSave}: {dashboard.SelectedProfile}"));
-                    return;
-                }
-            
-                if (!File.Exists(_appFiles.Mods.GetPath(dashboard.SelectedModlist)))
-                {
-                    await _box.OpenErrorAsync(Resources.Error, 
-                        string.Format(Resources.DataNotFound, @$"{Resources.ModList}: {dashboard.SelectedModlist}"));
-                    return;
-                }
 
                 _setup.Config.SetInstanceParameters(dashboard.Instance, dashboard.SelectedModlist,
                     dashboard.SelectedProfile);
                 await _launcher.CatapultServer(dashboard.Instance);
             }
-            catch (TrebException tex)
+            catch (Exception ex)
             {
-                _logger.LogError(tex.Message);
-                await _box.OpenErrorAsync(tex.Message);
-            }
-            finally
-            {
+                _logger.LogError(ex.Message);
+                await _box.OpenErrorAsync(ex.Message);
                 dashboard.CanLaunch = true;
             }
         }

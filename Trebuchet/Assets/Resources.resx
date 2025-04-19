@@ -920,10 +920,6 @@ Do you wish to proceed ?</value>
     <data name="OnBoardingUpdateSub" xml:space="preserve">
         <value>A more recent version of trebuchet has been found, would like to download and install it ?</value>
     </data>
-    <data name="DataNotFound" xml:space="preserve">
-        <value>The following data was not found:
-{0}</value>
-    </data>
     <data name="OnBoardingSteamClientOffline" xml:space="preserve">
         <value>Steam is not running</value>
     </data>

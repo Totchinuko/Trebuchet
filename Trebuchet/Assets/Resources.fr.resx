@@ -912,10 +912,6 @@ ATTENTION : Ceci peut rendre la détection des processus sans réponse inefficac
     <data name="OnBoardingUpdateSub" xml:space="preserve">
         <value>Une version plus récente de Trebuchet a été trouvée. Souhaitez vous la télécharger et l'installer ?</value>
     </data>
-    <data name="DataNotFound" xml:space="preserve">
-        <value>Les données suivante sont introuvable:
-{0}</value>
-    </data>
     <data name="OnBoardingSteamClientOffline" xml:space="preserve">
         <value>Steam n'est pas lancé</value>
     </data>

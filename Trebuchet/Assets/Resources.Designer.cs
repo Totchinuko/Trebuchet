@@ -303,16 +303,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to The following data was not found:
-        ///{0}.
-        /// </summary>
-        public static string DataNotFound {
-            get {
-                return ResourceManager.GetString("DataNotFound", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Delete.
         /// </summary>
         public static string Delete {
