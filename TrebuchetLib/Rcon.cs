@@ -19,7 +19,7 @@ namespace TrebuchetLib
         private readonly int _keepAlive;
         private CancellationTokenSource? _timeoutCts;
 
-        public Rcon(IPEndPoint endpoint, string password, int timeout = 5000, int keepAlive = 0)
+        public Rcon(IPEndPoint endpoint, string password, int timeout = 15, int keepAlive = 300)
         {
             _endpoint = endpoint;
             _password = password;
