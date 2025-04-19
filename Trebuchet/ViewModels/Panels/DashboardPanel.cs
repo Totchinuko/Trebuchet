@@ -449,9 +449,14 @@ namespace Trebuchet.ViewModels.Panels
 
             try
             {
-                _steamApi.InvalidateCache();
-                await UpdateServer();
-                await UpdateMods();
+                var modlists = Instances.Select(i => i.SelectedModlist).ToList();
+                modlists.Add(Client.SelectedModlist);
+                var mods = modlists.Distinct()
+                    .Select(l => _appFiles.Mods.CollectAllMods(l))
+                    .SelectMany(x => x)
+                    .Distinct().ToList();
+                
+                await _steamApi.VerifyFiles(mods);
             }
             catch (TrebException tex)
             {

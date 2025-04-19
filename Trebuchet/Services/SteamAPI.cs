@@ -120,6 +120,7 @@ public class SteamApi(
     {
         var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyServersLabel));
         steam.ClearCache();
+        InvalidateCache();
         try
         {
             await steam.UpdateServerInstances(task.Cts);
