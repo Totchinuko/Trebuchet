@@ -10,10 +10,11 @@
                 Classes.Sneak="{Binding !Active}"
                 Classes.Colored="{Binding Active}"
                 Command="{Binding Click}"
+                ToolTip.Tip="{Binding Label}"
                 HorizontalContentAlignment="Left">
-            <StackPanel Orientation="Horizontal">
+            <StackPanel Orientation="Horizontal" Spacing="6">
                 <i:Icon Value="{Binding Icon}" Classes="Normal" VerticalAlignment="Center" />
-                <TextBlock Classes="" Text="{Binding Label}" FontSize="14" Margin="12 0 0 0" VerticalAlignment="Center" />
+                <Label Content="{Binding Label}" VerticalAlignment="Center" />
             </StackPanel>
         </Button>
     </DataTemplate>
