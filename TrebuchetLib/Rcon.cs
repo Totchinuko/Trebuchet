@@ -1,5 +1,4 @@
-﻿using System;
-using System.Diagnostics.CodeAnalysis;
+﻿using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
@@ -9,24 +8,30 @@ namespace TrebuchetLib
 {
     public class Rcon : IRcon, IDisposable
     {
-        private TcpClient? _client;
-        private int _id;
+        public Rcon(IPEndPoint endpoint, string password)
+        {
+            EndPoint = endpoint;
+            _password = password;
+        }
+        
         private readonly Queue<RconPacket> _rconQueue = [];
         private readonly SemaphoreSlim _semaphore = new(1, 1);
-        private readonly IPEndPoint _endpoint;
         private readonly string _password;
-        private readonly int _timeout;
-        private readonly int _keepAlive;
+        private TcpClient? _client;
         private CancellationTokenSource? _timeoutCts;
+        private int _id;
+        
+        public IPEndPoint EndPoint { get; }
+        
+        /// <summary>
+        /// Timeout duration for each RCon requests, in seconds
+        /// </summary>
+        public int Timeout { get; init; } = 15;
 
-        public Rcon(IPEndPoint endpoint, string password, int timeout = 15, int keepAlive = 300)
-        {
-            _endpoint = endpoint;
-            _password = password;
-            _timeout = timeout;
-            _keepAlive = keepAlive;
-
-        }
+        /// <summary>
+        /// Keep alive duration for the active RCon duration, in seconds
+        /// </summary>
+        public int KeepAlive { get; init; } = 300;
 
         public event AsyncEventHandler<RconEventArgs>? RconResponded;
 
@@ -104,9 +109,9 @@ namespace TrebuchetLib
             if (_client is not null)
                 await Disconnect();
             _client = new();
-            _client.ReceiveTimeout = _timeout * 1000;
-            _client.SendTimeout = _timeout * 1000;
-            await _client.ConnectAsync(_endpoint, token);
+            _client.ReceiveTimeout = Timeout * 1000;
+            _client.SendTimeout = Timeout * 1000;
+            await _client.ConnectAsync(EndPoint, token);
             await RConLogin(_password, _client.GetStream(), token);
         }
 
@@ -148,7 +153,7 @@ namespace TrebuchetLib
                 var ct = _timeoutCts.Token;
                 _semaphore.Release();
 
-                await Task.Delay(_keepAlive * 1000, ct);
+                await Task.Delay(KeepAlive * 1000, ct);
                 await Disconnect();
             }
             catch (OperationCanceledException)
@@ -228,15 +233,6 @@ namespace TrebuchetLib
             await RConReceive(client.GetStream(), ct);
         }
 
-        // private void WriteEmpty(BinaryWriter bw, int id)
-        // {
-        //     bw.Write(10);
-        //     bw.Write(id);
-        //     bw.Write((int)RconPacketType.SERVERDATA_RESPONSE_VALUE);
-        //     bw.Write((byte)0);
-        //     bw.Write((byte)0);
-        // }
-
         // Message contains int32 length, int32 request id, int32 type, string body null terminated, string null terminator
         // It is important to note that the length is not including itself, so the minimum length is 10 bytes
         // The maximum length is 4096 bytes, this is by design in the protocol definition
@@ -248,21 +244,6 @@ namespace TrebuchetLib
             public RconPacketType Type { get; init; }
 
             public int Length => Body.Length + 10;
-
-            public static byte[] GetAutoBytes(int integer)
-            {
-                var bytes = BitConverter.GetBytes(integer);
-                if (!BitConverter.IsLittleEndian)
-                    Array.Reverse(bytes);
-                return bytes;
-            }
-
-            public static int GetAutoInt32(byte[] data)
-            {
-                if (!BitConverter.IsLittleEndian)
-                    Array.Reverse(data);
-                return BitConverter.ToInt32(data);
-            }
 
             public async Task<RconEventArgs> WriteBinary(BinaryWriter bw)
             {
