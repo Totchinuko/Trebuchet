@@ -29,7 +29,7 @@ public class OnBoardingUpdate : TitledDialogue<OnBoardingUpdate>
             UseHttpsForWWWLinks = true
         }));
         var result = Markdown.ToHtml(markdown, builder.Build());
-        Description = header + result;
+        Description = header + @"<body>" + result + @"</body>";
         return this;
     }
     
