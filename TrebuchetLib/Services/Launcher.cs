@@ -60,8 +60,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
         var process = await CatapultClientProcess(profileName, modlistName, isBattleEye);
 
-        _conanClientProcess = ConanProcessBuilder.Create().SetProcess(process).BuildServer();
-        
+        _conanClientProcess = ConanProcessBuilder.Create().SetProcess(process).BuildClient();
     }
     
     public async Task CatapultClientBoulder(string profile, string modlist, bool battleEye)
