@@ -965,4 +965,19 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="Clear" xml:space="preserve">
         <value>Vider</value>
     </data>
+    <data name="OnBoardingRestartProcess" xml:space="preserve">
+        <value>Redémarrage requis</value>
+    </data>
+    <data name="OnBoardingRestartProcessSub" xml:space="preserve">
+        <value>Un paramétre qui nécessite aun redémarrage à changé, redémarrer ?</value>
+    </data>
+    <data name="OnBoardingRestartProcessSubMessage" xml:space="preserve">
+        <value>Un paramétre qui nécessite un redémarrage a changé, mais certaine taches sont toujours en cour. Merci de redémarrer Trebuchet une fois qu'elles seront terminé.</value>
+    </data>
+    <data name="SettingExperiments" xml:space="preserve">
+        <value>Expériences</value>
+    </data>
+    <data name="SettingExperimentsText" xml:space="preserve">
+        <value>Active les fonctions expérimental de Trebuchet, qui ne sont pas forcement stable ou finie.</value>
+    </data>
 </root>

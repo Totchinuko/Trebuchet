@@ -992,6 +992,33 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Restart Requiried.
+        /// </summary>
+        public static string OnBoardingRestartProcess {
+            get {
+                return ResourceManager.GetString("OnBoardingRestartProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A settings that need a restart was change, restart ?.
+        /// </summary>
+        public static string OnBoardingRestartProcessSub {
+            get {
+                return ResourceManager.GetString("OnBoardingRestartProcessSub", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to A setting that need a restart has changed, but some tasks are still on going. Please restart Trebuchet once all the tasks are completed..
+        /// </summary>
+        public static string OnBoardingRestartProcessSubMessage {
+            get {
+                return ResourceManager.GetString("OnBoardingRestartProcessSubMessage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server Instances.
         /// </summary>
         public static string OnBoardingServerInstanceCount {
@@ -1566,6 +1593,24 @@ namespace Trebuchet.Assets {
         public static string SettingDisplayWarningOnKillText {
             get {
                 return ResourceManager.GetString("SettingDisplayWarningOnKillText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Experiments.
+        /// </summary>
+        public static string SettingExperiments {
+            get {
+                return ResourceManager.GetString("SettingExperiments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Unable the experimental features of Trebuchet, which are not always stable or even finished at all..
+        /// </summary>
+        public static string SettingExperimentsText {
+            get {
+                return ResourceManager.GetString("SettingExperimentsText", resourceCulture);
             }
         }
         

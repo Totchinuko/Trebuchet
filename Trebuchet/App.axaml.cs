@@ -57,12 +57,7 @@ public partial class App : Application, IApplication
         
         bool catapult = false;
         
-        #if DEBUG
-        bool experiment = true;
-        #else
-        bool experiment = false;
-        #endif
-        
+        bool experiment = _uiConfig!.Experiments;
         if (desktop.Args?.Length > 0)
         {
             if(desktop.Args.Contains(Constants.argCatapult))

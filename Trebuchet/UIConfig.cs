@@ -13,11 +13,13 @@ namespace Trebuchet
         public bool DisplayWarningOnKill { get; set; } = DisplayWarningOnKillDefault;
         public string UICulture { get; set; } = UICultureDefault;
         public int PlateformTheme { get; set; } = PlatformThemeDefault;
+        public bool Experiments { get; set; } = ExperimentsDefault;
         
         public static readonly bool DisplayProcessPerformanceDefault = true;
         public static readonly bool DisplayWarningOnKillDefault = true;
         public static readonly bool AutoRefreshModlistDefault = true;
         public static readonly string UICultureDefault = string.Empty;
         public static readonly int PlatformThemeDefault = 0;
+        public static readonly bool ExperimentsDefault = false;
     }
 }

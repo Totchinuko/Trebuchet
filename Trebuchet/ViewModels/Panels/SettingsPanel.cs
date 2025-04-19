@@ -47,6 +47,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
         SaveUiConfig = ReactiveCommand.Create(() => _uiConfig.SaveFile());
         ChangeLanguage = ReactiveCommand.CreateFromTask<LanguageModel?>(OnLanguageChanged);
         ChangePlateformTheme = ReactiveCommand.Create(OnPlateformThemeChanged);
+        RestartProcess = ReactiveCommand.CreateFromTask(OnRestartProcess);
         
         this.WhenValueChanged<SettingsPanel, LanguageModel>(x => x.SelectedLanguage, false, () => _langManager.DefaultLanguage)
             .InvokeCommand(ChangeLanguage);
@@ -67,6 +68,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
     public ReactiveCommand<Unit,Unit> SaveUiConfig { get; }
     public ReactiveCommand<Unit, Unit> ChangePlateformTheme { get; }
     public ReactiveCommand<LanguageModel?,Unit> ChangeLanguage { get; }
+    public ReactiveCommand<Unit,Unit> RestartProcess { get; }
     public List<FieldElement> Fields { get; } = [];
     public ObservableCollectionExtended<LanguageModel> AvailableLocales { get; } = [];
 
@@ -102,6 +104,23 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
         {
             var confirm = new OnBoardingConfirmation(Resources.OnBoardingLanguageChange,
                 Resources.OnBoardingLanguageChangeConfirm);
+            await _box.OpenAsync(confirm);
+            if(confirm.Result)
+                Utils.Utils.RestartProcess(_setup);
+        }
+    }
+
+    public async Task OnRestartProcess()
+    {
+        if (_blocker.IsSet<SteamDownload>())
+        {
+            var message = new OnBoardingMessage(Resources.OnBoardingRestartProcess, Resources.OnBoardingRestartProcessSubMessage);
+            await _box.OpenAsync(message);
+        }
+        else
+        {
+            var confirm = new OnBoardingConfirmation(Resources.OnBoardingRestartProcess,
+                Resources.OnBoardingRestartProcessSub);
             await _box.OpenAsync(confirm);
             if(confirm.Result)
                 Utils.Utils.RestartProcess(_setup);
@@ -151,6 +170,15 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
             .SetSetter((v) => _uiConfig.PlateformTheme = v)
             .SetDefault(() => UIConfig.PlatformThemeDefault)
         );
+        Fields.Add(new ToggleField()
+            .WhenFieldChanged(SaveUiConfig)
+            .WhenFieldChanged(RestartProcess)
+            .SetTitle(Resources.SettingExperiments)
+            .SetDescription(Resources.SettingExperimentsText)
+            .SetGetter(() => _uiConfig.Experiments)
+            .SetSetter((v) => _uiConfig.Experiments = v)
+            .SetDefault(() => UIConfig.ExperimentsDefault)
+            );
         Fields.Add(new TitleField().SetTitle(Resources.CatUpdates));
         Fields.Add(new ComboBoxField()
             .WhenFieldChanged(SaveConfig)
