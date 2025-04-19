@@ -73,8 +73,11 @@ public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
         IniSection section = document.GetSection("Core.Log");
         section.GetParameters().ForEach(section.Remove);
 
+        var enableAsyncScene = setup.Experiment
+            ? profile.EnableAsyncScene
+            : ClientProfile.EnableAsyncSceneDefault;
         document.GetSection("/script/engine.physicssettings")
-            .SetParameter("bEnableAsyncScene", profile.EnableAsyncScene ? "True" : "False");
+            .SetParameter("bEnableAsyncScene", enableAsyncScene ? "True" : "False");
 
         if (profile.LogFilters.Count > 0)
             foreach (string filter in profile.LogFilters)
@@ -96,9 +99,12 @@ public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
     [IniSetting(Constants.FileIniUser, "Game")]
     public void UserGameSetting(ClientProfile profile, IniDocument document)
     {
-        if (setup.Experiment)
-            document.GetSection("/script/engine.player")
-                .SetParameter("ConfiguredInternetSpeed", profile.ConfiguredInternetSpeed.ToString());
+        document.GetSection("/script/engine.player")
+            .SetParameter("ConfiguredInternetSpeed", 
+                setup.Experiment 
+                    ? profile.ConfiguredInternetSpeed.ToString()
+                    : ClientProfile.ConfiguredInternetSpeedDefault.ToString()
+                    );
     }
     
     private IEnumerable<MethodInfo> GetIniMethods(object target)
