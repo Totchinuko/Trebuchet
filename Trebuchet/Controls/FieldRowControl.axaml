@@ -4,6 +4,7 @@
              xmlns:s="clr-namespace:Trebuchet.ViewModels.SettingFields"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:a="clr-namespace:Trebuchet.Assets"
              xmlns:c="using:Trebuchet.Controls"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
@@ -17,7 +18,10 @@
                 <ColumnDefinition Width="auto" />
             </Grid.ColumnDefinitions>
             <StackPanel Grid.Column="1" Margin="12,0,0,0">
-                <TextBlock Text="{Binding Title}" FontWeight="Bold" Margin="0,0,0,6" />
+                <StackPanel Orientation="Horizontal" Spacing="3" Margin="0,0,0,6">
+                    <i:Icon Value="mdi-test-tube" IsVisible="{Binding Experiment}" ToolTip.Tip="{x:Static a:Resources.SettingExperiments}" Classes="Normal" Background="Transparent" />
+                    <TextBlock Text="{Binding Title}" FontWeight="Bold"/>
+                </StackPanel>
                 <Border  Margin="0,0,0,6" MinHeight="0">
                     <Border.IsVisible>
                         <MultiBinding Converter="{x:Static BoolConverters.Or}">
@@ -37,7 +41,7 @@
                 <ContentControl IsEnabled="{Binding IsEnabled}" Classes.Disabled="{Binding $self.IsEnabled}" Content="{Binding $parent[c:FieldRowControl].FieldContent}" />
             </StackPanel>
             <Button Grid.Column="2"
-                    ToolTip.Tip="Reset to default"
+                    ToolTip.Tip="{x:Static a:Resources.Reset}"
                     ToolTip.ShowDelay="0"
                     Classes="Base"
                     x:Name="Reset"

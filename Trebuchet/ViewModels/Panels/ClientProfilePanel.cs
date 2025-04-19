@@ -242,17 +242,20 @@ namespace Trebuchet.ViewModels.Panels
                 .SetDefault(() => ClientProfile.AddedTexturePoolDefault)
             );
             Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
-            Fields.Add(new ToggleField()
-                .WhenFieldChanged(SaveProfile)
-                .SetTitle(Resources.SettingAsyncScene)
-                .SetDescription(Resources.SettingAsyncSceneText)
-                .SetGetter(() => _profile.EnableAsyncScene)
-                .SetSetter((v) => _profile.EnableAsyncScene = v)
-                .SetDefault(() => ClientProfile.EnableAsyncSceneDefault)
-            );
+            if(_setup.Experiment)
+                Fields.Add(new ToggleField()
+                    .WhenFieldChanged(SaveProfile)
+                    .SetExperiment()
+                    .SetTitle(Resources.SettingAsyncScene)
+                    .SetDescription(Resources.SettingAsyncSceneText)
+                    .SetGetter(() => _profile.EnableAsyncScene)
+                    .SetSetter((v) => _profile.EnableAsyncScene = v)
+                    .SetDefault(() => ClientProfile.EnableAsyncSceneDefault)
+                );
             if(_setup.Experiment)
                 Fields.Add(new IntSliderField(10000, 100000, 1000)
                     .WhenFieldChanged(SaveProfile)
+                    .SetExperiment()
                     .SetTitle(Resources.SettingInternetSpeed)
                     .SetDescription(Resources.SettingInternetSpeedText)
                     .SetGetter(() => _profile.ConfiguredInternetSpeed)

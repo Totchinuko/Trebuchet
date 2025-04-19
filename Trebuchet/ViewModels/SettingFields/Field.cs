@@ -12,6 +12,7 @@ namespace Trebuchet.ViewModels.SettingFields
         ReactiveCommand<Unit, Unit> Update { get; }
         ReactiveCommand<Unit, Unit> Reset { get; }
         ReactiveCommand<Unit, Unit> HyperlinkClick { get; }
+        bool Experiment { get; }
         bool IsDefault { get; }
         bool IsVisible { get; }
         string Title { get; }
@@ -30,6 +31,7 @@ namespace Trebuchet.ViewModels.SettingFields
     public abstract class FieldElement<F> : FieldElement where F : FieldElement<F>
     {
         private string _title = string.Empty;
+        private bool _experiment = false;
 
         public string Title
         {
@@ -37,9 +39,21 @@ namespace Trebuchet.ViewModels.SettingFields
             protected set => this.RaiseAndSetIfChanged(ref _title, value);
         }
 
+        public bool Experiment
+        {
+            get => _experiment;
+            protected set => this.RaiseAndSetIfChanged(ref _experiment, value);
+        }
+
         public F SetTitle(string title)
         {
             Title = title;
+            return (F)this;
+        }
+
+        public F SetExperiment()
+        {
+            _experiment = true;
             return (F)this;
         }
     }
