@@ -13,7 +13,11 @@ namespace Trebuchet.ViewModels.Panels;
 
 public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
 {
-    public ConsolePanel(AppSetup setup, Launcher launcher, InternalLogSink logSink, ILogger<ConsolePanel> logger)
+    public ConsolePanel(
+        AppSetup setup, 
+        Launcher launcher, 
+        InternalLogSink logSink, 
+        ILogger<ConsolePanel> logger)
     {
         _setup = setup;
         _launcher = launcher;
@@ -22,10 +26,8 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
 
         AdjustConsoleListIfNeeded();
         _console = ConsoleList[0];
-            
 
         CanBeOpened = _setup.Config is { ServerInstanceCount: > 0 };
-
         OpenPopup = ReactiveCommand.Create<Unit>((_) => PopupOpen = true);
     }
 
@@ -45,8 +47,6 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
         get => _canBeOpened;
         set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
     }
-
-
 
     public MixedConsoleViewModel Console
     {
@@ -76,6 +76,7 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
 
     public Task RefreshPanel()
     {
+        _logger.LogDebug(@"Refresh panel");
         CanBeOpened = _setup.Config is { ServerInstanceCount: > 0 };
         return Task.CompletedTask;
     }
@@ -95,7 +96,10 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
     private void OnConsoleSelected(object? sender, int e)
     {
         if (sender is MixedConsoleViewModel console)
+        {
+            _logger.LogInformation(@"Opening console {name}", console.ServerLabel);
             Console = console;
+        }
         PopupOpen = false;
     }
 }

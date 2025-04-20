@@ -157,13 +157,21 @@ namespace TrebuchetLib.Services
         public async Task<CPublishedFile_QueryFiles_Response?> QueryWorkshopSearch(uint appId, string searchTerms, uint perPage,
             uint page)
         {
+            var data = new Dictionary<string, object>
+            {
+                {@"search", searchTerms},
+                {@"perPage", perPage},
+                {@"page", page}
+            };
+            using var scope = _logger.BeginScope(data);
+            _logger.LogInformation(@"Begin workshop search");
             try
             {
                 return await _session.QueryPublishedFileSearch(appId, searchTerms, perPage, page);
             }
             catch (Exception ex)
             {
-                _logger.LogWarning(ex, "QueryWorkshopSearch failed");
+                _logger.LogWarning(ex, "Failed");
                 return null;
             }
         }
@@ -292,7 +300,18 @@ namespace TrebuchetLib.Services
             Tools.CreateDir(instance);
             UpdateDownloaderConfig();
             ContentDownloader.Config.InstallDirectory = instance;
-            await Task.Run(() => ContentDownloader.DownloadAppAsync(_appSetup.ServerAppId, [], ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts), cts.Token).ConfigureAwait(false);
+            await Task.Run(async () =>
+            {
+                try
+                {
+                    await ContentDownloader.DownloadAppAsync(_appSetup.ServerAppId, [],
+                        ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, @"Failed to update server");
+                }
+            }, cts.Token).ConfigureAwait(false);
         }
 
         /// <summary>

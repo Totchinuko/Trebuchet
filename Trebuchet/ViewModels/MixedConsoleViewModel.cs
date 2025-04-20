@@ -1,18 +1,18 @@
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Avalonia.Threading;
-using Cyotek.Collections.Generic;
 using DynamicData.Binding;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using Serilog.Events;
+using Serilog.Filters;
+using Serilog.Formatting.Display;
 using Trebuchet.Assets;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
@@ -22,13 +22,19 @@ namespace Trebuchet.ViewModels;
 
 public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSource
 {
-    public const int MAX_LINES = 1000;
+    public const int MAX_CHAR = 500000;
     
     public MixedConsoleViewModel(int instance, InternalLogSink trebuchetLog, ILogger logger)
     {
+        trebuchetLog.LogReceived += OnSinkLogReceived;
+        
         _instance = instance;
         _logger = logger;
-        trebuchetLog.LogReceived += OnTrebuchetLogReceived;
+        _InstanceEqual = Matching.WithProperty<int>(@"instance", p => p == _instance);
+        _hasAnySource = Matching.WithProperty<ConsoleLogSource>(@"TrebSource", _ => true);
+        _canBeDisplayed = Matching.WithProperty<ConsoleLogSource>(@"TrebSource", p => _sources.Contains(p));
+        _textWriter = new ConsoleWriter(500, MAX_CHAR);
+        _textWriter.TextFlushed += OnTextFlushed;
         
         this.WhenAnyValue(x => x.Process)
             .Buffer(2, 1)
@@ -59,9 +65,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
 
         ClearText = ReactiveCommand.Create(() =>
         {
-            _logBuilder.Clear();
-            _lineSizes.Clear();
-            Text = string.Empty;
+            _textWriter.Clear();
             TextCleared?.Invoke(this, EventArgs.Empty);
         });
         
@@ -69,27 +73,42 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         RefreshLabel();
     }
 
+    private Task OnSinkLogReceived(object? sender, IReadOnlyCollection<LogEvent> args)
+    {
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            WriteLogs(args);
+        });
+        return Task.CompletedTask;
+    }
+
     private bool _displayServerLog;
     private bool _displayTrebuchetLog;
-    private readonly CircularBuffer<int> _lineSizes = new(MAX_LINES);
-    private readonly StringBuilder _logBuilder = new();
     private readonly int _instance;
     private readonly ILogger _logger;
     private IConanServerProcess? _process;
-    private string _text = string.Empty;
     private string _serverLabel = string.Empty;
     private bool _canSend;
     private bool _autoScroll = true;
     private string _commandField = string.Empty;
     private ObservableCollectionExtended<ConsoleLogSource> _sources = [ConsoleLogSource.RCon];
+    private readonly Func<LogEvent, bool> _InstanceEqual;
+    private readonly Func<LogEvent, bool> _hasAnySource;
+    private readonly Func<LogEvent, bool> _canBeDisplayed;
+    private readonly ConsoleWriter _textWriter;
+
+    private readonly MessageTemplateTextFormatter _textFormater = new (
+        @"[{Timestamp:HH:mm:ss}][{Level:u3}] {TrebSource}: {Message:lj}{NewLine}{Exception}");
+    private readonly MessageTemplateTextFormatter _trebFormater = new (
+        @"[{Timestamp:HH:mm:ss}][{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
 
     public event EventHandler<int>? ConsoleSelected; 
     public event EventHandler? ScrollToEnd;
     public event EventHandler? ScrollToHome;
-    public event EventHandler<string>? LineAppended;
+    public event EventHandler<string>? TextAppended;
     public event EventHandler? TextCleared;
 
-    public int MaxLines => MAX_LINES;
+    public int MaxChar => MAX_CHAR;
     
     private ObservableCollectionExtended<ConsoleLogSource> Sources
     {
@@ -103,11 +122,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         set => this.RaiseAndSetIfChanged(ref _process, value);
     }
 
-    public string Text
-    {
-        get => _text;
-        set => this.RaiseAndSetIfChanged(ref _text, value);
-    }
+    public string Text => _textWriter.Text;
 
     public bool CanSend
     {
@@ -157,8 +172,9 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         {
             if (Process is not null)
             {
-                WriteLine(@"> " + input);
-                await Process.Console.Send(input, CancellationToken.None);
+                _logger.LogInformation(@"Send {command}", input);
+                await _textWriter.WriteLineAsync(@"> " + input);
+                await Process.RCon.Send(input, CancellationToken.None);
             }
         }
         catch (Exception ex)
@@ -167,120 +183,42 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         }
     }
 
-    public void WriteLine(ConsoleLog log)
+    public void WriteLogs(IEnumerable<LogEvent> events)
     {
-        if (!_sources.Contains(log.Source)) return;
-        string header = LogLevelHeader(log.UtcTime, log.LogLevel, log.Source);
-        WriteLine(header + log.Body);
+        foreach (var log in events)
+        {
+            if (_hasAnySource(log))
+            {
+                if (_InstanceEqual(log) && _canBeDisplayed(log)) 
+                    _textFormater.Format(log, _textWriter);
+            }
+            else if(DisplayTrebuchetLog)
+                _trebFormater.Format(log, _textWriter);
+        }
+        _textWriter.Flush();
     }
 
-    public void WriteLine(LogEventLine log, ConsoleLogSource source)
+    private void OnTextFlushed(object? sender, string e)
     {
-        if (!_sources.Contains(source)) return;
-        string header = LogLevelHeader(log.Date.ToUniversalTime(), log.LogLevel, source);
-        WriteLine(header + log.Output);
-    }
-
-    public void WriteLines(IEnumerable<ConsoleLog> logs)
-    {
-        foreach (var log in logs)
-            WriteLine(log);
-    }
-    
-    public void WriteLines(IEnumerable<LogEventLine> logs, ConsoleLogSource source)
-    {
-        foreach (var log in logs)
-            WriteLine(log, source);
-    }
-
-    public void WriteLines(params string[] lines)
-    {
-        foreach (var line in lines)
-            WriteLine(line);
-    }
-
-    public void WriteLine(string text)
-    {
-        foreach (var line in SplitLines(text).Select(x => x + Environment.NewLine))
-            AppendLine(line);
+        if (string.IsNullOrEmpty(e)) return;
+        TextAppended?.Invoke(this, e);
         OnScrollToEnd();
     }
-
-    private string LogLevelHeader(DateTime date, LogLevel level, ConsoleLogSource source)
-    {
-
-        return @$"[{date.ToLocalTime():HH:mm:ss}]{LogSourceToTag(source)}{LogLevelToTag(level)} ";
-    }
-
-    private string LogSourceToTag(ConsoleLogSource source)
-    {
-        var sourceTag = string.Empty;
-        switch (source)
-        {
-            case ConsoleLogSource.ServerLog:
-                return @"[SRV]";
-            case ConsoleLogSource.RCon:
-                return @"[RCN]";
-            case ConsoleLogSource.Trebuchet:
-                return @"[TRB]";
-            default:
-                return @"[LOG]";
-        }
-    }
-
-    private string LogLevelToTag(LogLevel level)
-    {
-        switch (level)  
-        {
-            case LogLevel.Information:
-                return @"[INF]";
-            case LogLevel.Debug:
-                return @"[DBG]";
-            case LogLevel.Critical:
-                return @"[CRT]";
-            case LogLevel.Error:
-                return @"[ERR]";
-            case LogLevel.Warning:
-                return @"[WRN]";
-            default:
-                return string.Empty;
-        }
-    }
-
+    
     private void OnProcessChanged((IConanServerProcess? old, IConanServerProcess? current) args)
     {
         if (args.old is not null)
         {
             args.old.StateChanged -= OnStateChanged;
-            args.old.Console.Received -= OnReceived;
         }
 
         if (args.current is not null)
         {
             args.current.StateChanged += OnStateChanged;
-            args.current.Console.Received += OnReceived;
         }
         RefreshLabel();
     }
-
-    private Task OnReceived(object? sender, ConsoleLogArgs args)
-    {
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            WriteLines(args.Logs);
-        });
-        return Task.CompletedTask;
-    }
     
-    private Task OnTrebuchetLogReceived(object? sender, LogEventArgs args)
-    {
-        Dispatcher.UIThread.Invoke(() =>
-        {
-            WriteLines(args.Lines, ConsoleLogSource.Trebuchet);
-        });
-        return Task.CompletedTask;
-    }
-
     private void OnStateChanged(object? sender, ProcessState e)
     {
         RefreshLabel();
@@ -300,19 +238,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
                 ? $@"{Resources.CatRCon} - {Process.Title} ({Process.Instance}) - {IPAddress.Loopback}:{Process.RConPort}"
                 : $@"{Resources.Unavailable} - {Resources.Instance} {_instance}";
         }
-    }
-
-    private void AppendLine(string line)
-    {
-        int remove = 0;
-        if (_lineSizes.IsFull)
-            remove = _lineSizes.Peek();
-
-        _logBuilder.Remove(0, remove);
-        _logBuilder.Append(line);
-        _lineSizes.Put(line.Length);
-        Text = _logBuilder.ToString();
-        LineAppended?.Invoke(this, line);
     }
 
     [Localizable(false)]

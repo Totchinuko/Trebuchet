@@ -98,6 +98,7 @@ namespace Trebuchet.ViewModels.Panels
         /// </summary>
         public async Task UpdateMods()
         {
+            _logger.LogInformation(@"Updating mods");
             try
             {
                 var modlists = Instances.Select(i => i.SelectedModlist).ToList();
@@ -109,9 +110,9 @@ namespace Trebuchet.ViewModels.Panels
                 await _steamApi.UpdateMods(mods);
                 await OnRequestRefresh();
             }
-            catch (TrebException tex)
+            catch (Exception tex)
             {
-                _logger.LogError(tex.Message);
+                _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
         }
@@ -121,14 +122,15 @@ namespace Trebuchet.ViewModels.Panels
         /// </summary>
         public async Task UpdateServer()
         {
+            _logger.LogInformation(@"Updating servers");
             try
             {
                 await _steamApi.UpdateServers();
                 await RefreshPanel();
             }
-            catch (TrebException tex)
+            catch (Exception tex)
             {
-                _logger.LogError(tex.Message);
+                _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
         }
@@ -144,14 +146,15 @@ namespace Trebuchet.ViewModels.Panels
                 if (!confirm.Result) return;
             }
 
+            _logger.LogWarning(@"Killing client");
             Client.CanKill = false;
             try
             {
                 await _launcher.KillClient();
             }
-            catch (TrebException tex)
+            catch (Exception tex)
             {
-                _logger.LogError(tex.Message);
+                _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
         }
@@ -161,6 +164,8 @@ namespace Trebuchet.ViewModels.Panels
             if (Client.ProcessRunning) return;
             if (!await CheckForSteamClientRunning()) return;
 
+            using(_logger.BeginScope((@"isBattleEye", isBattleEye)))
+                _logger.LogInformation(@"Launching client");
             Client.CanLaunch = false;
             try
             {
@@ -187,6 +192,7 @@ namespace Trebuchet.ViewModels.Panels
             var dashboard = GetServerInstance(instance);
             if (!dashboard.ProcessRunning) return;
 
+            _logger.LogInformation(@"Closing server {instance}", instance);
             dashboard.CanClose = false;
             await _launcher.CloseServer(instance);
         }
@@ -203,6 +209,7 @@ namespace Trebuchet.ViewModels.Panels
                 if (!confirm.Result) return;
             }
 
+            _logger.LogWarning(@"Killing server {instance}", instance);
             dashboard.CanKill = false;
             dashboard.CanClose = false;
             await _launcher.KillServer(dashboard.Instance);
@@ -214,11 +221,15 @@ namespace Trebuchet.ViewModels.Panels
             if(dashboard.ProcessRunning) return;
             dashboard.CanLaunch = false;
 
+            using(_logger.BeginScope((@"instance", instance)))
+                _logger.LogInformation(@"Launching server");
+            
             try
             {
                 if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning() &&
                     !_launcher.IsClientRunning())
                 {
+                    _logger.LogInformation(@"Update before launch");
                     var modlist = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
                     await _steamApi.UpdateServers();
                     await _steamApi.UpdateMods(modlist);
@@ -230,7 +241,7 @@ namespace Trebuchet.ViewModels.Panels
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex.Message);
+                _logger.LogError(ex, @"Failed");
                 await _box.OpenErrorAsync(ex.Message);
                 dashboard.CanLaunch = true;
             }
@@ -258,6 +269,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public Task RefreshPanel()
         {
+            _logger.LogDebug(@"Refresh panel");
             CanBeOpened = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
             Client.CanUseDashboard = Tools.IsClientInstallValid(_setup.Config);
             int installedCount = _steamApi.GetInstalledServerInstanceCount();
@@ -272,6 +284,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public async Task DisplayPanel()
         {
+            _logger.LogDebug(@"Display panel");
             CreateInstancesIfNeeded();
             RefreshClientSelection();
             RefreshServerSelection();
@@ -358,6 +371,7 @@ namespace Trebuchet.ViewModels.Panels
         
         private async Task CheckModUpdatesAsync(List<string> modlists)
         {
+            _logger.LogInformation(@"Check for mod updates");
             try
             {
                 var mods = modlists.Distinct()
@@ -369,9 +383,9 @@ namespace Trebuchet.ViewModels.Panels
                 RefreshClientNeededUpdates(neededUpdates);
                 RefreshServerNeededUpdates(neededUpdates);
             }
-            catch (TrebException tex)
+            catch (Exception tex)
             {
-                _logger.LogError(tex.Message);
+                _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
         }
@@ -425,6 +439,7 @@ namespace Trebuchet.ViewModels.Panels
             await _box.OpenAsync(confirm);
             if (!confirm.Result) return;
 
+            _logger.LogInformation(@"File Verification");
             try
             {
                 var modlists = Instances.Select(i => i.SelectedModlist).ToList();
@@ -436,9 +451,9 @@ namespace Trebuchet.ViewModels.Panels
                 
                 await _steamApi.VerifyFiles(mods);
             }
-            catch (TrebException tex)
+            catch (Exception tex)
             {
-                _logger.LogError(tex.Message);
+                _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
         }

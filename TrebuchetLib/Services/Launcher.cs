@@ -6,7 +6,12 @@ using TrebuchetLib.Processes;
 
 namespace TrebuchetLib.Services;
 
-public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandler, ILogger<Launcher> logger)
+public class Launcher(
+    AppFiles appFiles, 
+    AppSetup setup, 
+    IIniGenerator iniHandler, 
+    ConanProcessFactory processFactory,
+    ILogger<Launcher> logger)
     : IDisposable
 {
     private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
@@ -60,12 +65,20 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
         var process = await CatapultClientProcess(profileName, modlistName, isBattleEye);
 
-        _conanClientProcess = ConanProcessBuilder.Create().SetProcess(process).BuildClient();
+        _conanClientProcess = await processFactory.Create().SetProcess(process).BuildClient();
     }
     
     public async Task CatapultClientBoulder(string profile, string modlist, bool battleEye)
     {
         if (_conanClientProcess != null) return;
+        var data = new Dictionary<string, object>
+        {
+            {@"profile", profile},
+            {"modlist", modlist},
+            {"isBattleEye", battleEye}
+        };
+        using var scope = logger.BeginScope(data);
+        logger.LogInformation("Launching Boulder");
         
         string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
         if (appFolder is null) throw new IOException("Can't access app folder");
@@ -99,7 +112,15 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
     public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye)
     {
-
+        var data = new Dictionary<string, object>
+        {
+            {@"profile", profileName},
+            {"modlist", modlistName},
+            {"isBattleEye", isBattleEye}
+        };
+        using var scope = logger.BeginScope(data);
+        logger.LogInformation("Launching");
+        
         if (!appFiles.Client.TryGet(profileName, out var profile))
             throw new TrebException($"{profileName} profile not found.");
         if (!appFiles.Mods.TryGet(modlistName, out var modlist))
@@ -108,9 +129,6 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
             throw new TrebException($"Profile {profileName} folder is currently locked by another process.");
 
         SetupJunction(appFiles.Client.GetPrimaryJunction(), profile.ProfileFolder);
-
-        logger.LogDebug($"Locking folder {profile.ProfileName}");
-        logger.LogInformation($"Launching client process with profile {profileName} and modlist {modlistName}");
 
         await iniHandler.WriteClientSettingsAsync(profile);
         var process = await CreateClientProcess(profile, modlist, isBattleEye);
@@ -229,9 +247,9 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
         var process = await CatapultServerProcess(profileName, modlistName, instance);
 
-        var serverProcess = ConanProcessBuilder.Create()
-            .SetServerInfos(appFiles.Server.Get(profileName), instance)
+        var serverProcess = await processFactory.Create()
             .SetProcess(process)
+            .SetServerInfos(appFiles.Server.Get(profileName), instance)
             .SetLogFile(appFiles.Server.GetGameLogs(profileName))
             .StartLogAtBeginning()
             .BuildServer();
@@ -241,6 +259,14 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
     public async Task CatapultServerBoulder(string profile, string modlist, int instance)
     {
         if (_serverProcesses.ContainsKey(instance)) return;
+        var data = new Dictionary<string, object>
+        {
+            {@"profile", profile},
+            {"modlist", modlist},
+            {"instance", instance}
+        };
+        using var scope = logger.BeginScope(data);
+        logger.LogInformation("Launching Boulder");
         
         string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
         if (appFolder is null) throw new IOException("Can't access app folder");
@@ -273,6 +299,15 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
     public async Task<Process> CatapultServerProcess(string profileName, string modlistName, int instance)
     {
+        var data = new Dictionary<string, object>
+        {
+            {@"profile", profileName},
+            {"modlist", modlistName},
+            {"instance", instance}
+        };
+        using var scope = logger.BeginScope(data);
+        logger.LogInformation("Launching");
+        
         if (!appFiles.Server.TryGet(profileName, out var profile))
             throw new FileNotFoundException($"{profileName} profile not found.");
         if (!appFiles.Mods.TryGet(modlistName, out var modlist))
@@ -282,10 +317,6 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
         SetupJunction(Path.Combine(appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave), 
             profile.ProfileFolder);
-
-        logger.LogDebug($"Locking folder {profile.ProfileName}");
-        logger.LogInformation(
-            $"Launching server process with profile {profileName} and modlist {modlistName} on instance {instance}");
 
         await iniHandler.WriteServerSettingsAsync(profile, instance);
         var process = await CreateServerProcess(instance, profile, modlist);
@@ -300,8 +331,6 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
         return childProcess;
     }
-
-
 
     private async Task<Process> CreateServerProcess(int instance, ServerProfile profile, ModListProfile modlist)
     {
@@ -351,7 +380,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
     /// <param name="instance"></param>
     public async Task CloseServer(int instance)
     {
-        logger.LogInformation($"Requesting server instance {instance} stop");
+        logger.LogInformation($"Close Server {instance}");
         if (_serverProcesses.TryGetValue(instance, out var watcher))
             await watcher.StopAsync();
     }
@@ -359,13 +388,6 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
     public IConanProcess? GetClientProcess()
     {
         return _conanClientProcess;
-    }
-
-    public ITrebuchetConsole GetServerConsole(int instance)
-    {
-        if (_serverProcesses.TryGetValue(instance, out var watcher))
-            return watcher.Console;
-        throw new ArgumentException($"Server instance {instance} is not running.");
     }
 
     public IRcon GetServerRcon(int instance)
@@ -401,7 +423,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
     public async Task KillClient()
     {
         if (_conanClientProcess == null) return;
-        logger.LogInformation("Requesting client process kill");
+        logger.LogInformation("Kill client");
         await _conanClientProcess.KillAsync();
     }
 
@@ -413,7 +435,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
     {
         if (_serverProcesses.TryGetValue(instance, out var watcher))
         {
-            logger.LogInformation($"Requesting server process kill on instance {instance}");
+            logger.LogInformation($"Kill server {instance}");
             await watcher.KillAsync();
         }
     }
@@ -454,11 +476,10 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
         if (data.IsEmpty) return;
         if (!data.TryGetProcess(out var process)) return;
 
-        IConanProcess client = ConanProcessBuilder.Create()
+        _conanClientProcess = await processFactory.Create()
+            .SetStartDate(data.start)
             .SetProcess(process)
-            .SetStartingTime(data.start)
             .BuildClient();
-        _conanClientProcess = client;
     }
 
     private async Task FindExistingServers()
@@ -470,14 +491,16 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
             if (_serverProcesses.ContainsKey(instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
+            logger.LogInformation("Found process {process}", process.ProcessName);
             var gameLogs = Path.Combine(appFiles.Server.GetInstancePath(instance),
                 Constants.FolderGameSave,
                 Constants.FolderGameSaveLog,
                 Constants.FileGameLogFile);
-            IConanServerProcess server = (await ConanProcessBuilder.Create().SetServerInfos(iniHandler, instance))
+            IConanServerProcess server = await processFactory.Create()
+                .SetStartDate(p.start)
                 .SetProcess(process)
+                .SetServerInfos(iniHandler, instance)
                 .SetLogFile(gameLogs)
-                .SetStartingTime(p.start)
                 .BuildServer();
                 
             _serverProcesses.TryAdd(instance, server);
@@ -488,6 +511,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
     {
         if (_conanClientProcess != null && !_conanClientProcess.State.IsRunning())
         {
+            logger.LogInformation("Client stopped");
             _conanClientProcess.Dispose();
             _conanClientProcess = null;
         }
@@ -496,6 +520,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
         {
             if (!server.Value.State.IsRunning())
             {
+                logger.LogInformation("Server {instance} stopped", server.Key);
                 _serverProcesses.Remove(server.Key);
                 var name = setup.Config.GetInstanceProfile(server.Key);
                 if (server.Value.State == ProcessState.CRASHED && appFiles.Server.Get(name).RestartWhenDown)
@@ -547,6 +572,7 @@ public class Launcher(AppFiles appFiles, AppSetup setup, IIniGenerator iniHandle
 
     private void SetupJunction(string junction, string targetPath)
     {
+        logger.LogInformation("Setup new junction {junction} > {target}", junction, targetPath);
         Tools.RemoveSymboliclink(junction);
         Tools.SetupSymboliclink(junction, targetPath);
     }

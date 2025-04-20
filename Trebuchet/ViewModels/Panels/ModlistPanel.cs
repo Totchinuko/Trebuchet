@@ -171,6 +171,7 @@ namespace Trebuchet.ViewModels.Panels
         public async Task AddModFromWorkshop(WorkshopSearchResult mod)
         {
             if (Modlist.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
+            _logger.LogInformation(@"Adding mod {mod} from workshop", mod.PublishedFileId);
             var file = await _modFileFactory.Create(mod);
             Modlist.Add(file);
             _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
@@ -180,6 +181,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public Task RemoveModFile(IModFile mod)
         {
+            _logger.LogInformation(@"Remove mod {mod} from list {name}", mod.Export(), SelectedModlist);
             Modlist.Remove(mod);
             _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
             _profile.SaveFile();
@@ -194,12 +196,14 @@ namespace Trebuchet.ViewModels.Panels
 
         public Task RefreshPanel()
         {
+            _logger.LogDebug(@"Refresh panel");
             _needRefresh = true;
             return Task.CompletedTask;
         }
 
         public async Task DisplayPanel()
         {
+            _logger.LogDebug(@"Display panel");
             if (!_needRefresh) return;
             _needRefresh = false;
             await LoadModlist();
@@ -207,6 +211,7 @@ namespace Trebuchet.ViewModels.Panels
 
         private async Task OnModlistChanged(string modlist)
         {
+            _logger.LogDebug(@"Swap to modlist {modlist}", modlist);
             _uiConfig.CurrentModlistProfile = modlist;
             _uiConfig.SaveFile();
             _profile = _appFiles.Mods.Get(modlist);
@@ -221,21 +226,25 @@ namespace Trebuchet.ViewModels.Panels
 
         private async Task UpdateMods(List<ulong> mods)
         {
+            _logger.LogInformation(@"Updating mods");
             try
             {
                 await _steamApi.UpdateMods(mods);
                 await _modFileFactory.QueryFromWorkshop(Modlist);
                 await OnRequestRefresh();
             }
-            catch (TrebException tex)
+            catch (Exception tex)
             {
-                _logger.LogError(tex.Message);
+                _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
         }
 
         private async Task FetchJsonList(UriBuilder builder)
         {
+            using(_logger.BeginScope((@"url", builder.ToString())))
+                _logger.LogInformation(@"Fetching json list");
+            
             try
             {
                 var result = await Tools.DownloadModList(builder.ToString(), CancellationToken.None);
@@ -243,9 +252,9 @@ namespace Trebuchet.ViewModels.Panels
                 _profile.SaveFile();
                 await LoadModlist();
             }
-            catch (TrebException tex)
+            catch (Exception tex)
             {
-                _logger.LogError(tex.Message);
+                _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
 
@@ -253,6 +262,9 @@ namespace Trebuchet.ViewModels.Panels
 
         private async Task FetchSteamCollection(UriBuilder builder)
         {
+            using(_logger.BeginScope((@"url", builder.ToString())))
+                _logger.LogInformation(@"Fetching steam collection");
+            
             var query = HttpUtility.ParseQueryString(builder.Query);
             var id = query.Get(@"id");
             if (id == null || !ulong.TryParse(id, out var collectionId))
@@ -272,9 +284,9 @@ namespace Trebuchet.ViewModels.Panels
                 _profile.SaveFile();
                 await LoadModlist();
             }
-            catch (TrebException tex)
+            catch (Exception tex)
             {
-                _logger.LogError(tex.Message);
+                _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
         }
@@ -306,6 +318,7 @@ namespace Trebuchet.ViewModels.Panels
                 AllowMultiple = true
             });
 
+            _logger.BeginScope(@"Adding local mods");
             Modlist.AddRange(
                 files.Where(f => f.Path.IsFile)
                     .Select(f => Path.GetFullPath(f.Path.LocalPath))
@@ -353,6 +366,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             if (string.IsNullOrEmpty(ModlistUrl)) return;
 
+            _logger.LogInformation(@"Sync modlist");
             OnBoardingConfirmation confirm = new OnBoardingConfirmation(
                 Resources.ModlistReplace,
                 string.Format(Resources.ModlistReplaceText, SelectedModlist));
@@ -364,8 +378,9 @@ namespace Trebuchet.ViewModels.Panels
             {
                 builder = new UriBuilder(ModlistUrl);
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogWarning(ex, @"Failed");
                 await _box.OpenErrorAsync(Resources.InvalidURL);
                 return;
             }
@@ -417,14 +432,16 @@ namespace Trebuchet.ViewModels.Panels
             await _box.OpenAsync(editor);
             if (editor.Canceled || editor.Value == null) return;
 
+            _logger.LogInformation(@"Importing modlist");
             var text = editor.Value;
             List<string> modlist = [];
             try
             {
                 modlist.AddRange(_importer.Import(text));
             }
-            catch
+            catch(Exception ex)
             {
+                _logger.LogWarning(ex, @"Failed");
                 await _box.OpenErrorAsync(Resources.WrongType, Resources.WrongTypeText);
                 return;
             }
@@ -440,7 +457,6 @@ namespace Trebuchet.ViewModels.Panels
         private void OnModFileChanged(object sender, FileSystemEventArgs e)
         {
             var fullPath = e.FullPath;
-            Debug.WriteLine(@$"OnModFileChanged.fullPath={fullPath}");
             Dispatcher.UIThread.Invoke(() =>
             {
                 var watch = new Stopwatch();
@@ -455,7 +471,8 @@ namespace Trebuchet.ViewModels.Panels
                     Modlist[i] = _modFileFactory.Create(modFile, path);
                 }
                 watch.Stop();
-                Debug.WriteLine(@$"OnModFileChanged={watch.ElapsedMilliseconds}ms");
+                using(_logger.BeginScope((@"fullPath", fullPath)))
+                    _logger.LogDebug(@$"Update time {watch.ElapsedMilliseconds}ms");
             });
         }
 
@@ -463,6 +480,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             var name = await GetNewProfileName();
             if (name is null) return;
+            _logger.LogInformation(@"Create modlist {name}", name);
             _appFiles.Mods.Create(name);
             RefreshProfiles();
             SelectedModlist = name;
@@ -478,6 +496,7 @@ namespace Trebuchet.ViewModels.Panels
             await _box.OpenAsync(confirm);
             if (!confirm.Result) return;
             
+            _logger.LogInformation(@"Modlist delete {name}", SelectedModlist);
             _appFiles.Mods.Delete(SelectedModlist);
 
             RefreshProfiles();
@@ -507,6 +526,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             var name = await GetNewProfileName();
             if (name is null) return;
+            _logger.LogInformation(@"Modlist duplicate {from} to {to}", _profile.ProfileName, name);
             _profile = _appFiles.Mods.Duplicate(_profile.ProfileName, name);
             RefreshProfiles();
             SelectedModlist = name;
@@ -531,6 +551,7 @@ namespace Trebuchet.ViewModels.Panels
             if (_modWatcher != null)
                 return;
 
+            _logger.LogInformation(@"Starting mod file watcher");
             var path = Path.Combine(_appFiles.Mods.GetWorkshopFolder());
             if (!Directory.Exists(path))
                 Tools.CreateDir(path);

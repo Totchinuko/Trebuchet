@@ -2,24 +2,31 @@
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
-using tot_lib;
+using Microsoft.Extensions.Logging;
 
 namespace TrebuchetLib
 {
     public class Rcon : IRcon, IDisposable
     {
-        public Rcon(IPEndPoint endpoint, string password)
+        public Rcon(IPEndPoint endpoint, string password, ILogger<Rcon> logger)
         {
             EndPoint = endpoint;
             _password = password;
+            _logger = logger;
         }
-        
+
+        private readonly ILogger<Rcon> _logger;
         private readonly Queue<RconPacket> _rconQueue = [];
         private readonly SemaphoreSlim _semaphore = new(1, 1);
         private readonly string _password;
         private TcpClient? _client;
         private CancellationTokenSource? _timeoutCts;
         private int _id;
+
+        private readonly Dictionary<string, object> _context = new()
+        {
+            { "TrebSource", ConsoleLogSource.RCon }
+        };
         
         public IPEndPoint EndPoint { get; }
         
@@ -33,8 +40,6 @@ namespace TrebuchetLib
         /// </summary>
         public int KeepAlive { get; init; } = 300;
 
-        public event AsyncEventHandler<RconEventArgs>? RconResponded;
-
         public void Dispose()
         {
             _client?.Close();
@@ -42,7 +47,13 @@ namespace TrebuchetLib
             _client = null;
         }
 
-        public async Task<int> Send(string data, CancellationToken token)
+        public Rcon SetContext(string key, object value)
+        {
+            _context[key] = value;
+            return this;
+        }
+
+        public async Task<RConResponse> Send(string data, CancellationToken token)
         {
             if (data.Length > 4086)
                 throw new ArgumentOutOfRangeException(nameof(data), "Data must be less than 4086 characters.");
@@ -56,10 +67,10 @@ namespace TrebuchetLib
 
             await _semaphore.WaitAsync(token);
             await Connect(token);
-            await RConSend(_client, packet, token);
+            var response = await RConSend(_client, packet, token);
             _semaphore.Release();
             AutoDisconnect();
-            return packet.Id;
+            return response;
         }
 
         public int QueueData(string data)
@@ -77,28 +88,30 @@ namespace TrebuchetLib
             return packet.Id;
         }
 
-        public async Task FlushQueue(CancellationToken token)
+        public async Task<List<RConResponse>> FlushQueue(CancellationToken token)
         {
-            if (_rconQueue.Count == 0) return;
+            if (_rconQueue.Count == 0) return [];
             
             await _semaphore.WaitAsync(token);
             await Connect(token);
+            List<RConResponse> responses = [];
             while (_rconQueue.Count > 0)
             {
                 var packet = _rconQueue.Dequeue();
-                await RConSend(_client, packet, token);
+                responses.Add(await RConSend(_client, packet, token));
             }
             _semaphore.Release();
             AutoDisconnect();
+            return responses;
         }
 
-        public async Task<List<int>> Send(IEnumerable<string> data, CancellationToken ct)
+        public async Task<List<RConResponse>> Send(IEnumerable<string> data, CancellationToken ct)
         {
             List<int> ids = [];
             foreach (var d in data)
                 ids.Add(QueueData(d));
-            await FlushQueue(ct);
-            return ids;
+            var responses = await FlushQueue(ct);
+            return ids.Select(x => responses.FirstOrDefault(r => r.Id == x, RConResponse.Empty)).ToList();
         }
 
         
@@ -122,19 +135,6 @@ namespace TrebuchetLib
             _client?.Dispose();
             _client = null;
             _semaphore.Release();
-        }
-
-        protected async Task OnRconResponded(RconEventArgs e)
-        {
-            if(RconResponded is not null)
-                await RconResponded.Invoke(this, e);
-        }
-
-        protected async Task OnRconResponded(Exception ex)
-        {
-            if (ex is not OperationCanceledException)
-                if(RconResponded is not null)
-                    await RconResponded.Invoke(this, new RconEventArgs(string.Empty, ex));
         }
 
         private void AutoDisconnect()
@@ -173,7 +173,7 @@ namespace TrebuchetLib
             return packet;
         }
 
-        private async Task<RconEventArgs> EvaluateRconResponse(BinaryReader br)
+        private async Task<RConResponse> EvaluateRconResponse(BinaryReader br)
         {
             return await Task.Run(() =>
             {
@@ -194,11 +194,11 @@ namespace TrebuchetLib
                     if (id == -1)
                         throw new Exception("Authentication failed.");
 
-                    return new RconEventArgs(response ?? string.Empty);
+                    return new RConResponse(id, response ?? string.Empty);
                 }
                 catch(Exception ex)
                 {
-                    return new RconEventArgs(ex.Message, ex);
+                    return new RConResponse(ex);
                 }
             });
         }
@@ -206,31 +206,40 @@ namespace TrebuchetLib
         private async Task RConLogin(string password, NetworkStream stream, CancellationToken ct)
         {
             var auth = BuildAuthPacket(password);
-            using var bw = new BinaryWriter(stream, Encoding.ASCII, true);
+            await using var bw = new BinaryWriter(stream, Encoding.ASCII, true);
             var result = await auth.WriteBinary(bw);
-            if (!string.IsNullOrEmpty(result.Response))
-                await OnRconResponded(result);
+            LogResponse(result);
             ct.ThrowIfCancellationRequested();
             await RConReceive(stream, ct);
         }
 
-        private async Task RConReceive(NetworkStream stream, CancellationToken ct)
+        private async Task<RConResponse> RConReceive(NetworkStream stream, CancellationToken ct)
         {
             using var br = new BinaryReader(stream, Encoding.ASCII, true);
             ct.ThrowIfCancellationRequested();
             var response = await EvaluateRconResponse(br);
-            if(!string.IsNullOrEmpty(response.Response))
-                await OnRconResponded(response);
+            LogResponse(response);
+            return response;
         }
 
-        private async Task RConSend(TcpClient client, RconPacket packet, CancellationToken ct)
+        private async Task<RConResponse> RConSend(TcpClient client, RconPacket packet, CancellationToken ct)
         {
-            using var bw = new BinaryWriter(client.GetStream(), Encoding.ASCII, true);
+            await using var bw = new BinaryWriter(client.GetStream(), Encoding.ASCII, true);
             var result = await packet.WriteBinary(bw);
-            if (!string.IsNullOrEmpty(result.Response))
-                await OnRconResponded(result);
+            LogResponse(result);
             ct.ThrowIfCancellationRequested();
-            await RConReceive(client.GetStream(), ct);
+            return await RConReceive(client.GetStream(), ct);
+        }
+
+        private void LogResponse(RConResponse response)
+        {
+            if (response.IsEmpty) return;
+            using var scope = _logger.BeginScope(_context);
+
+            if (response.Exception is not null)
+                _logger.LogError(response.Exception, response.Response);
+            else
+                _logger.LogInformation(response.Response);   
         }
 
         // Message contains int32 length, int32 request id, int32 type, string body null terminated, string null terminator
@@ -243,9 +252,9 @@ namespace TrebuchetLib
             public int Id { get; init; }
             public RconPacketType Type { get; init; }
 
-            public int Length => Body.Length + 10;
+            private int Length => Body.Length + 10;
 
-            public async Task<RconEventArgs> WriteBinary(BinaryWriter bw)
+            public async Task<RConResponse> WriteBinary(BinaryWriter bw)
             {
                 return await Task.Run(() =>
                 {
@@ -256,27 +265,14 @@ namespace TrebuchetLib
                         bw.Write((int)Type);
                         bw.WriteNullTerminatedString(Body);
                         bw.Write((byte)0);
-                        return new RconEventArgs(string.Empty);
+                        return RConResponse.Empty;
                     }
                     catch(Exception ex)
                     {
-                        return new RconEventArgs(ex.Message, ex);
+                        return new RConResponse(Id, ex);
                     }
                 });
             }
         }
-    }
-
-    public class RconEventArgs
-    {
-        public RconEventArgs(string response, Exception? exception = null)
-        {
-            Response = response;
-            Exception = exception;
-        }
-
-        public Exception? Exception { get; }
-
-        public string Response { get; }
     }
 }

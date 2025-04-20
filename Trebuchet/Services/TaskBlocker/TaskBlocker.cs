@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
 namespace Trebuchet.Services.TaskBlocker
@@ -18,6 +19,8 @@ namespace Trebuchet.Services.TaskBlocker
     
     public sealed class TaskBlocker : ReactiveObject
     {
+        private readonly ILogger<TaskBlocker> _logger;
+
         private class BlockedTask(SemaphoreSlim semaphore, CancellationTokenSource cts, IBlockedTaskType type) : IBlockedTask
         {
             public SemaphoreSlim Semaphore { get; } = semaphore;
@@ -37,8 +40,9 @@ namespace Trebuchet.Services.TaskBlocker
         
         private event EventHandler<TaskChangedEventArgs>? TaskChanged;
 
-        public TaskBlocker()
+        public TaskBlocker(ILogger<TaskBlocker> logger)
         {
+            _logger = logger;
             TaskChanges = Observable.FromEventPattern<TaskChangedEventArgs>(
                 handler => TaskChanged += handler,
                 handler => TaskChanged -= handler);
@@ -72,6 +76,7 @@ namespace Trebuchet.Services.TaskBlocker
                 task.OperationReleased += (_, t) => Release(t);
             }
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
+            _logger.LogInformation(@$"Entering task {operation.GetType().Name}");
             _tasks[operation.GetType()] = task;
             OnTaskChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
@@ -88,6 +93,7 @@ namespace Trebuchet.Services.TaskBlocker
             var task = CreateTask(operation, cancelAfterSec);
             task.OperationReleased += (_, t) => Release(t);
             await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
+            _logger.LogInformation(@$"Entering task {operation.GetType().Name}");
             _tasks[operation.GetType()] = task;
             OnTaskChanged(operation, true);
             await WaitForBlockingTasks(operation, task.Cts.Token).ConfigureAwait(false);
@@ -98,6 +104,7 @@ namespace Trebuchet.Services.TaskBlocker
         {
             if (_tasks.TryGetValue(typeof(T), out var source))
             {
+                _logger.LogInformation(@$"Canceling task {typeof(T).Name}");
                 source.Cts.Cancel();
             }
         }
@@ -129,6 +136,7 @@ namespace Trebuchet.Services.TaskBlocker
         {
             if (_tasks.TryGetValue(task.Type.GetType(), out var source))
             {
+                _logger.LogInformation(@$"Releasing task {task.GetType().Name}");
                 source.Cts.Dispose();
                 source.Semaphore.Release();
                 source.Semaphore.Dispose();

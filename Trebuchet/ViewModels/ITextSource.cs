@@ -6,7 +6,7 @@ public interface ITextSource
 {
     string Text { get; }
     bool AutoScroll { get; }
-    int MaxLines { get; }
-    event EventHandler<string>? LineAppended;
+    int MaxChar { get; }
+    event EventHandler<string>? TextAppended;
     event EventHandler? TextCleared;
 }

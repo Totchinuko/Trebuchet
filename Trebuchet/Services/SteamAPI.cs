@@ -21,7 +21,6 @@ public class SteamApi(
     ILogger<SteamApi> logger,
     TaskBlocker.TaskBlocker taskBlocker)
 {
-    private readonly ILogger<SteamApi> _logger = logger;
     private readonly Dictionary<ulong, PublishedFile> _publishedFiles = [];
     private DateTime _lastCacheClear = DateTime.MinValue;
     
@@ -29,6 +28,8 @@ public class SteamApi(
     {
         var results = GetCache(list);
         if (list.Count <= 0) return results;
+        using(logger.BeginScope((@"ModList", list)))
+            logger.LogInformation(@"Seeking mod details");
         try
         {
             var response = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list),
@@ -46,7 +47,7 @@ public class SteamApi(
         }
         catch (HttpRequestException ex)
         {
-            _logger.LogWarning(ex, @"Could not download mod infos");
+            logger.LogWarning(ex, @"Could not download mod infos");
         }
 
         return [];
@@ -54,6 +55,7 @@ public class SteamApi(
 
     public void InvalidateCache()
     {
+        logger.LogInformation(@"Invalidating mod details cache");
         _publishedFiles.Clear();
         _lastCacheClear = DateTime.UtcNow;
     }
@@ -91,6 +93,8 @@ public class SteamApi(
 
     public async Task UpdateMods(List<ulong> list)
     {
+        using(logger.BeginScope((@"ModList", list)))
+            logger.LogInformation(@"Updating mods");
         var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateModsLabel));
         try
         {
@@ -105,6 +109,7 @@ public class SteamApi(
 
     public async Task UpdateServers()
     {
+        logger.LogInformation(@"Updating servers");
         var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateServersLabel));
         try
         {
@@ -120,6 +125,7 @@ public class SteamApi(
     public async Task VerifyFiles(IEnumerable<ulong> modlist)
     {
         var task = await taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyServersLabel));
+        logger.LogInformation(@"Verifying server files");
         steam.ClearCache();
         InvalidateCache();
         try
@@ -133,9 +139,12 @@ public class SteamApi(
         }
         
         task = await taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyModsLabel));
+        var enumerable = modlist.ToList();
+        using(logger.BeginScope((@"ModList", enumerable)))
+            logger.LogInformation(@"Verifying mod files");
         try
         {
-            await steam.UpdateMods(modlist, task.Cts);
+            await steam.UpdateMods(enumerable, task.Cts);
         }
         catch (OperationCanceledException) {}
         finally
@@ -163,12 +172,14 @@ public class SteamApi(
                 .SelectMany(x => appFiles.Mods.Get(x).GetWorkshopMods());
             var toRemove = installedMods.Except(usedMods).ToList();
             steam.ClearUGCFileIdsFromStorage(toRemove);
-            
+
+            logger.LogInformation(@"Cleaning unused mods");
             foreach (var mod in toRemove)
             {
                 var path = mod.ToString();
-                if(!appFiles.Mods.ResolveMod(ref path)) continue;
-                if(!File.Exists(path)) continue;
+                if (!appFiles.Mods.ResolveMod(ref path)) continue;
+                if (!File.Exists(path)) continue;
+                logger.LogInformation(path);
                 File.Delete(path);
             }
         }

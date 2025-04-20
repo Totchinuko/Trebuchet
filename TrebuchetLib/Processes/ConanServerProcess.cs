@@ -8,9 +8,10 @@ internal sealed class ConanServerProcess : IConanServerProcess
 {
 
 
-    public ConanServerProcess(Process process)
+    public ConanServerProcess(Process process, LogReader logReader)
     {
         Process = process;
+        _logReader = logReader;
         PId = Process.Id;
         State = ProcessState.RUNNING;
         _lastResponse = DateTime.UtcNow;
@@ -21,6 +22,7 @@ internal sealed class ConanServerProcess : IConanServerProcess
     private bool _online;
     private int _players;
     private ProcessState _state;
+    private LogReader _logReader;
 
     public event EventHandler<ProcessState>? StateChanged; 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -81,9 +83,7 @@ internal sealed class ConanServerProcess : IConanServerProcess
     public Process Process { get; }
     public required ConanServerInfos ServerInfos { get; init; }
     public required SourceQueryReader SourceQueryReader { get; init; }
-    public required ITrebuchetConsole Console { get; init; }
     public required IRcon RCon { get; init; }
-    public required ILogReader LogReader { get; init; }
 
     public int Instance => ServerInfos.Instance;
     public int Port => ServerInfos.Port;
@@ -96,7 +96,7 @@ internal sealed class ConanServerProcess : IConanServerProcess
     {
         Process.Dispose();
         SourceQueryReader.Dispose();
-        LogReader.Dispose();
+        _logReader.Dispose();
     }
 
     public async Task RefreshAsync()

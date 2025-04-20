@@ -1,4 +1,5 @@
 ﻿using System;
+using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Serilog;
 using Serilog.Configuration;
+using Serilog.Filters;
+using Serilog.Templates;
 using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
@@ -21,6 +24,7 @@ using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.ViewModels.Panels;
 using Trebuchet.Windows;
 using TrebuchetLib;
+using TrebuchetLib.Processes;
 using TrebuchetLib.Services;
 using TrebuchetLib.Services.Importer;
 using TrebuchetLib.YuuIni;
@@ -74,8 +78,10 @@ public partial class App : Application, IApplication
         
         CodeHighlighting.RegisterHighlight(@"Trebuchet.Assets.LogHightlighting.xshd", @"Log", [@".log"]);
         
-        _logger.LogInformation(@"Starting Taskmaster");
+        _logger.LogInformation(@"Starting Trebuchet");
         _logger.LogInformation(@$"Selecting {(testlive ? @"testlive" : @"live")}");
+        if(ProcessUtil.IsProcessElevated())
+            _logger.LogInformation(@"Process is elevated");
 
         MainWindow mainWindow = new ();
         var currentWindow = desktop.MainWindow;
@@ -125,6 +131,7 @@ public partial class App : Application, IApplication
         base.OnFrameworkInitializationCompleted();
     }
 
+    [Localizable(false)]
     private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult, bool experiment)
     {
         services.AddSingleton(
@@ -144,13 +151,24 @@ public partial class App : Application, IApplication
 #if !DEBUG
             .MinimumLevel.Information()
 #endif
-            .WriteTo.File(
-                Path.Combine(Constants.GetLoggingDirectory().FullName, @"app.log"),
-                retainedFileTimeLimit: TimeSpan.FromDays(7),
-                rollingInterval: RollingInterval.Day)
+            .WriteTo.Logger(fl => fl
+                .WriteTo.File(
+                    new ExpressionTemplate("{@t:yyyy-MM-dd HH:mm:ss.fff zzz} " +
+                                           "[{@l:u3}]" +
+                                           "{#if SourceContext is not null} " +
+                                                "{Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1),-15}:" +
+                                           "{#end} " +
+                                           "{@m} " +
+                                           "{#each name, value in Rest(true)}({name}:{value}) {#end}" +
+                                           "{#if @x is not null}\n{@x}{#end}\n"),
+                    Path.Combine(Constants.GetLoggingDirectory().FullName, @"app.log"),
+                    retainedFileTimeLimit: TimeSpan.FromDays(7),
+                    rollingInterval: RollingInterval.Day)
+                .Filter.ByExcluding(Matching.WithProperty<ConsoleLogSource>(@"TrebSource", _ => true))
+            )
             .WriteTo.Sink(internalLogSink, new BatchingOptions()
             {
-                BatchSizeLimit = 50,
+                BatchSizeLimit = 20,
                 BufferingTimeLimit = TimeSpan.FromMilliseconds(500),
                 EagerlyEmitFirstEvent = false
             })
@@ -167,6 +185,7 @@ public partial class App : Application, IApplication
         services.AddSingleton<IIniGenerator, YuuIniGenerator>();
         services.AddSingleton<IProgressCallback<double>, Progress>();
         services.AddSingleton<Steam>();
+        services.AddSingleton<ConanProcessFactory>();
         services.AddSingleton<Launcher>();
         services.AddSingleton<TaskBlocker>();
         services.AddSingleton<SteamApi>();

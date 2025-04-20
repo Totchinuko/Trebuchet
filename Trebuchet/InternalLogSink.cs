@@ -1,60 +1,38 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Runtime.InteropServices.JavaScript;
 using System.Threading.Tasks;
+using AvaloniaEdit.Utils;
+using Cyotek.Collections.Generic;
 using Microsoft.Extensions.Logging;
 using Serilog.Core;
 using Serilog.Events;
+using Serilog.Filters;
 using tot_lib;
 using TrebuchetLib;
 
 namespace Trebuchet;
 
-public class InternalLogSink : IBatchedLogEventSink, ILogReader
+public class InternalLogSink : IBatchedLogEventSink
 {
+    private readonly CircularBuffer<LogEvent> _eventBuffer = new(100);
+
+    private readonly Func<LogEvent, bool> _bufferFilter
+        = Matching.WithProperty<ConsoleLogSource>(@"TrebSource", _ => false);
+    
+    public event AsyncEventHandler<IReadOnlyCollection<LogEvent>>? LogReceived;
+    
     public async Task EmitBatchAsync(IReadOnlyCollection<LogEvent> batch)
     {
+        _eventBuffer.AddRange(batch.Where(_bufferFilter));
         if (LogReceived is null) return;
-        LogEventArgs args = new LogEventArgs();
-        foreach (var logEvent in batch)
-        {
-            if (logEvent.Exception is not null)
-                args.Append(LogEventLine.CreateError(logEvent.Exception));
-            else
-                args.Append(LogEventLine.Create(
-                    logEvent.MessageTemplate.Text, 
-                    logEvent.Timestamp.LocalDateTime, 
-                    ToLogLevel(logEvent.Level)));
-        }
-
-        if(args.Lines.Count > 0)
-            await LogReceived.Invoke(this, args);
+        if(batch.Count > 0)
+            await LogReceived.Invoke(this, batch);
     }
 
-    public void Dispose()
+    public IReadOnlyCollection<LogEvent> GetLastLogs()
     {
+        return _eventBuffer.ToList();
     }
-
-    private LogLevel ToLogLevel(LogEventLevel seriLevel)
-    {
-        switch (seriLevel)
-        {
-            case LogEventLevel.Debug:
-                return LogLevel.Debug;
-            case LogEventLevel.Error:
-                return LogLevel.Error;
-            case LogEventLevel.Fatal:
-                return LogLevel.Critical;
-            case LogEventLevel.Information:
-                return LogLevel.Information;
-            case LogEventLevel.Verbose:
-                return LogLevel.Debug;
-            case LogEventLevel.Warning:
-                return LogLevel.Warning;
-            default:
-                return LogLevel.None;
-        }
-    }
-
-    public event AsyncEventHandler<LogEventArgs>? LogReceived;
 }

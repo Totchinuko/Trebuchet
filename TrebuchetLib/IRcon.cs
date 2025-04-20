@@ -9,12 +9,10 @@ namespace TrebuchetLib
 {
     public interface IRcon
     {
-        event AsyncEventHandler<RconEventArgs>? RconResponded;
-
-        Task<int> Send(string data, CancellationToken token);
-        Task<List<int>> Send(IEnumerable<string> data, CancellationToken token);
+        Task<RConResponse> Send(string data, CancellationToken token);
+        Task<List<RConResponse>> Send(IEnumerable<string> data, CancellationToken token);
         int QueueData(string data);
-        Task FlushQueue(CancellationToken token);
+        Task<List<RConResponse>> FlushQueue(CancellationToken token);
         Task Disconnect();
     }
 }

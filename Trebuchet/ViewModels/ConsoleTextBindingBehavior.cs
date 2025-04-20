@@ -33,7 +33,7 @@ public class ConsoleTextBindingBehavior : Behavior<TextEditor>
         base.OnDetaching();
         if (AssociatedObject is not { } textEditor) return;
         if(TextSource is not null)
-            TextSource.LineAppended -= OnLineAppended;
+            TextSource.TextAppended -= OnTextAppended;
     }
 
     private void OnTextSourceChanged(ConsoleTextBindingBehavior sender, AvaloniaPropertyChangedEventArgs<ITextSource?> args)
@@ -42,12 +42,12 @@ public class ConsoleTextBindingBehavior : Behavior<TextEditor>
 
         if (args.OldValue.Value is { } previous)
         {
-            previous.LineAppended -= OnLineAppended;
+            previous.TextAppended -= OnTextAppended;
             previous.TextCleared -= OnTextCleared;
         }
             
         if (args.NewValue.Value is not { } current) return;
-        current.LineAppended += OnLineAppended;
+        current.TextAppended += OnTextAppended;
         current.TextCleared += OnTextCleared;
         _textEditor.Clear();
         _textEditor.AppendText(current.Text);
@@ -61,15 +61,16 @@ public class ConsoleTextBindingBehavior : Behavior<TextEditor>
         _textEditor.Clear();
     }
 
-    private void OnLineAppended(object? sender, string line)
+    private void OnTextAppended(object? sender, string text)
     {
         if (_textEditor is not { Document: not null } || TextSource is null) return;
             
         var caretOffset = _textEditor.CaretOffset;
-        if(_textEditor.Document.LineCount == TextSource.MaxLines)
-            _textEditor.Document.Remove(
-                _textEditor.Document.GetLineByNumber(1));
-        _textEditor.AppendText(line);
+        _textEditor.BeginChange();
+        while(_textEditor.Document.TextLength > TextSource.MaxChar)
+            _textEditor.Document.Remove(_textEditor.Document.GetLineByNumber(0));
+        _textEditor.AppendText(text);
+        _textEditor.EndChange();
         _textEditor.CaretOffset = caretOffset;
         if(TextSource.AutoScroll)
             _textEditor.ScrollToEnd();

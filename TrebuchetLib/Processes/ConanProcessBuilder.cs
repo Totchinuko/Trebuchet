@@ -1,10 +1,11 @@
 using System.Diagnostics;
 using System.Net;
+using Microsoft.Extensions.Logging;
 using TrebuchetLib.Services;
 
 namespace TrebuchetLib.Processes;
 
-public class ConanProcessBuilder
+public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
 {
     private ConanProcessBuilder()
     {
@@ -12,85 +13,107 @@ public class ConanProcessBuilder
     
     private DateTime _start = DateTime.UtcNow;
     private FileInfo? _log;
-    private ConanServerInfos? _serverInfos;
     private Process? _process;
     private bool _logAtBeginning;
+    private ILogger<Rcon>? _rconLogger;
+    private Func<Task<ConanServerInfos>>? _serverInfosGetter;
+    private ILogger<LogReader>? _gameLogger;
 
     public static ConanProcessBuilder Create()
     {
         return new ConanProcessBuilder();
     }
 
-    public ConanProcessBuilder SetStartingTime(DateTime time)
+    public IConanProcessBuilder SetStartDate(DateTime time)
     {
         _start = time;
         return this;
     }
 
-    public ConanProcessBuilder SetLogFile(string logFile)
+    public IConanProcessServerBuilderLogTracked SetLogFile(string logFile)
     {
         _log = new FileInfo(logFile);
         return this;
     }
 
-    public ConanProcessBuilder StartLogAtBeginning()
+    public IConanProcessServerBuilderLogTracked StartLogAtBeginning()
     {
         _logAtBeginning = true;
         return this;
     }
 
-    public ConanProcessBuilder SetServerInfos(ServerProfile profile, int instance)
+    public ConanProcessBuilder SetRConLogger(ILogger<Rcon> logger)
     {
-        _serverInfos = new ConanServerInfos(profile, instance);
+        _rconLogger = logger;
         return this;
     }
 
-    public async Task<ConanProcessBuilder> SetServerInfos(IIniGenerator iniGenerator, int instance)
+    public ConanProcessBuilder SetGameLogger(ILogger<LogReader> logger)
     {
-        _serverInfos = await iniGenerator.GetInfosFromServerAsync(instance);
+        _gameLogger = logger;
         return this;
     }
 
-    public ConanProcessBuilder SetProcess(Process process)
+    public IConanProcessServerBuilder SetServerInfos(ServerProfile profile, int instance)
+    {
+        _serverInfosGetter = () => Task.FromResult(new ConanServerInfos(profile, instance));
+        return this;
+    }
+
+    public IConanProcessServerBuilder SetServerInfos(IIniGenerator iniGenerator, int instance)
+    {
+        _serverInfosGetter = async () => await iniGenerator.GetInfosFromServerAsync(instance);
+        return this;
+    }
+
+    public IConanProcessBuilderWithProcess SetProcess(Process process)
     {
         _process = process;
         return this;
     }
 
-    public IConanServerProcess BuildServer()
+    public async Task<IConanServerProcess> BuildServer()
     {
         if (_process is null) throw new ArgumentNullException(nameof(_process), @"Process is not set");
-        if(_serverInfos is null) throw new ArgumentNullException(nameof(_serverInfos), @"ServerInfos is not set");
+        if(_serverInfosGetter is null) throw new ArgumentNullException(nameof(_serverInfosGetter), @"ServerInfos is not set");
         if(_log is null) throw new ArgumentNullException(nameof(_log), @"Log is not set");
+        if(_rconLogger is null) throw new ArgumentNullException(nameof(_log), @"Log is not set");
+        if(_rconLogger is null) throw new ArgumentNullException(nameof(_rconLogger), @"rcon logger is not set");
+        if(_gameLogger is null) throw new ArgumentNullException(nameof(_gameLogger), @"game logger is not set");
         
-        var logReader = new LogReader(_log.FullName);
+        var serverInfo = await _serverInfosGetter.Invoke();
+        
+        var logReader = new LogReader(_gameLogger, _log.FullName)
+            .SetContext("instance", serverInfo.Instance);
+        
         if(_logAtBeginning) logReader.StartAtBeginning();
         else logReader.Start();
         
-        var sourceQuery = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, _serverInfos.QueryPort), 4 * 1000, 5 * 1000);
+        var sourceQuery = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, serverInfo.QueryPort), 4 * 1000, 5 * 1000);
         sourceQuery.StartQueryThread();
         
-        var rcon = new Rcon(new IPEndPoint(IPAddress.Loopback, _serverInfos.RConPort), _serverInfos.RConPassword, timeout:10, keepAlive:300);
-        var console = new MixedConsole(rcon).AddLogSource(logReader, ConsoleLogSource.ServerLog);
-
-        return new ConanServerProcess(_process)
+        var rcon = new Rcon(
+            new IPEndPoint(IPAddress.Loopback, serverInfo.RConPort), 
+            serverInfo.RConPassword,
+            _rconLogger
+            ).SetContext("instance", serverInfo.Instance);
+        
+        return new ConanServerProcess(_process, logReader)
         {
             SourceQueryReader = sourceQuery,
-            LogReader = logReader,
             StartUtc = _start,
             RCon = rcon,
-            Console = console,
-            ServerInfos = _serverInfos
+            ServerInfos = serverInfo
         };
     }
 
-    public IConanProcess BuildClient()
+    public Task<IConanProcess> BuildClient()
     {
         if (_process is null) throw new ArgumentNullException(nameof(_process), @"Process is not set");
 
-        return new ConanClientProcess(_process)
+        return Task.FromResult<IConanProcess>(new ConanClientProcess(_process)
         {
             StartUtc = _start
-        };
+        });
     }
 }

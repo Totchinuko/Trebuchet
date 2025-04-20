@@ -7,6 +7,7 @@ using System.Reactive;
 using System.Threading.Tasks;
 using DynamicData.Binding;
 using Humanizer;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.ViewModels.InnerContainer;
@@ -22,11 +23,13 @@ namespace Trebuchet.ViewModels.Panels
             DialogueBox box,
             AppSetup setup, 
             AppFiles appFiles, 
+            ILogger<ClientProfilePanel> logger,
             UIConfig uiConfig)
         {
             _box = box;
             _setup = setup;
             _appFiles = appFiles;
+            _logger = logger;
             _uiConfig = uiConfig;
             CanBeOpened = Tools.IsClientInstallValid(_setup.Config) && _setup.Config.ManageClient;
             
@@ -49,6 +52,7 @@ namespace Trebuchet.ViewModels.Panels
         private readonly DialogueBox _box;
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
+        private readonly ILogger<ClientProfilePanel> _logger;
         private readonly UIConfig _uiConfig;
         private ClientProfile _profile;
         private string _profileSize = string.Empty;
@@ -90,6 +94,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public async Task RefreshPanel()
         {
+            _logger.LogDebug(@"Refresh panel");
             CanBeOpened = Tools.IsClientInstallValid(_setup.Config) && _setup.Config.ManageClient;
             _profile = _appFiles.Client.Get(SelectedProfile);
             foreach (var f in Fields.OfType<IValueField>())
@@ -114,11 +119,13 @@ namespace Trebuchet.ViewModels.Panels
         {
             string? folder = Path.GetDirectoryName(_profile.FilePath);
             if (string.IsNullOrEmpty(folder)) return;
+            _logger.LogDebug(@"Opening folder {folder}", folder);
             Process.Start("explorer.exe", folder);
         }
 
         private async Task OnProfileChanged(string newProfile)
         {
+            _logger.LogDebug(@"Swap profile to {profile}", newProfile);
             _uiConfig.CurrentClientProfile = SelectedProfile;
             _uiConfig.SaveFile();
             await RefreshPanel();
@@ -128,6 +135,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             var name = await GetNewProfileName();
             if (name is null) return;
+            _logger.LogInformation(@"Create profile {name}", name);
             _appFiles.Client.Create(name);
             LoadProfileList();
             SelectedProfile = name;
@@ -154,6 +162,7 @@ namespace Trebuchet.ViewModels.Panels
             await _box.OpenAsync(confirm);
             if (!confirm.Result) return;
             
+            _logger.LogInformation(@"Delete profile {name}", SelectedProfile);
             _appFiles.Client.Delete(SelectedProfile);
 
             LoadProfileList();
@@ -164,6 +173,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             var name = await GetNewProfileName();
             if (name is null) return;
+            _logger.LogInformation(@"Duplicate profile {selected} to {name}", _profile.ProfileName, name);
             await _appFiles.Client.Duplicate(_profile.ProfileName, name);
             LoadProfileList();
             SelectedProfile = name;
