@@ -38,7 +38,6 @@
                 <MergeResourceInclude Source="Templates\ClientDashboard.axaml" />
                 <MergeResourceInclude Source="Templates\ServerDashboard.axaml" />
                 <MergeResourceInclude Source="Templates\ConsolePanel.axaml" />
-                <MergeResourceInclude Source="Templates\LogFilterPanel.axaml" />
                 <MergeResourceInclude Source="Templates\SteamWidget.axaml" />
                 <MergeResourceInclude Source="Templates\PasswordField.axaml" />
                 <MergeResourceInclude Source="Templates\MultiLineTextboxField.axaml" />
@@ -62,7 +61,6 @@
         <StaticResource ResourceKey="ClientSettings" />
         <StaticResource ResourceKey="ServerSettings" />
         <StaticResource ResourceKey="ConsolePanel" />
-        <StaticResource ResourceKey="LogFilterPanel" />
         <StaticResource ResourceKey="ComboBoxField" />
         <StaticResource ResourceKey="CpuAffinityField" />
         <StaticResource ResourceKey="DirectoryField" />
