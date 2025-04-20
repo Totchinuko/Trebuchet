@@ -37,10 +37,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Services\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <EmbeddedResource Include="MarkdownHeaderLight.html" />
       <None Remove="MarkdownHeaderDark.html" />
       <EmbeddedResource Include="MarkdownHeaderDark.html" />
