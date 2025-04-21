@@ -12,7 +12,7 @@ public class KillServerCommand(Launcher launcher, ILogger<KillServerCommand> log
         .CreateInvokable<KillServerCommand>("server", "Kill a server instance")
         .SetServiceConfiguration(Program.ConfigureServices)
         .Arguments.Create<int>("instance")
-        .AddSetter((c,v) => c.Instance = v).SetDefault(0)
+        .SetSetter((c,v) => c.Instance = v).SetDefault(0)
         .BuildArgument()
         .BuildCommand();
     
