@@ -15,6 +15,7 @@
         <Deterministic>true</Deterministic>
         <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
         <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+        <PublishReadyToRun>true</PublishReadyToRun>
 
         <Product>trebuchet</Product>
         <Description>Open Source Conan Exile Launcher</Description>
