@@ -14,11 +14,11 @@ public class LambClientCommand(Launcher launcher, ILogger<LambClientCommand> log
         .CreateInvokable<LambClientCommand>("client", "Start a conan exile game process and exit")
         .SetServiceConfiguration(Program.ConfigureServices)
         .Options.Create<string>("--modlist", "modlist name as seen in trebuchet").AddAlias("-m")
-        .AddSetter((c,v) => c.Modlist = v ?? string.Empty).BuildOption()
+        .SetSetter((c,v) => c.Modlist = v ?? string.Empty).BuildOption()
         .Options.Create<string>("--save", "client save name as seen in trebuchet").AddAlias("-s")
-        .AddSetter((c,v) => c.Profile = v ?? string.Empty).BuildOption()
+        .SetSetter((c,v) => c.Profile = v ?? string.Empty).BuildOption()
         .Options.Create<bool>("--battle-eye", "start with battle eye").AddAlias("-b")
-        .AddSetter((c,v) => c.BattleEye = v).BuildOption()
+        .SetSetter((c,v) => c.BattleEye = v).BuildOption()
         .BuildCommand();
     public string Profile { get; set; } = string.Empty;
     public string Modlist { get; set; } = string.Empty;

@@ -14,11 +14,11 @@ public class LambServerCommand(Launcher launcher, ILogger<LambServerCommand> log
         .CreateInvokable<LambServerCommand>("server", "Start a conan exile server process and exit")
         .SetServiceConfiguration(Program.ConfigureServices)
         .Options.Create<string>("--modlist", "modlist name as seen in trebuchet").AddAlias("-m")
-        .AddSetter((c,v) => c.Modlist = v ?? string.Empty).BuildOption()
+        .SetSetter((c,v) => c.Modlist = v ?? string.Empty).BuildOption()
         .Options.Create<string>("--save", "server save name as seen in trebuchet").AddAlias("-s")
-        .AddSetter((c,v) => c.Profile = v ?? string.Empty).BuildOption()
+        .SetSetter((c,v) => c.Profile = v ?? string.Empty).BuildOption()
         .Options.Create<int>("--instance", "instance number of your trebuchet install").AddAlias("-i")
-        .AddSetter((c,v) => c.Instance = v).BuildOption()
+        .SetSetter((c,v) => c.Instance = v).BuildOption()
         .BuildCommand();
     
     public string Profile { get; set; } = string.Empty;
