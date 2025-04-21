@@ -24,14 +24,14 @@ public class ModlistImporter
         return ImportFormats.Invalid;
     }
 
-    public string Export(IEnumerable<string> data, ImportFormats format)
+    public string Export(ModListProfile profile, ImportFormats format)
     {
         if (!_importers.TryGetValue(format, out var importer))
             throw new TrebException($"No importer for the given format {format}");
-        return importer.Export(data);
+        return importer.Export(profile);
     }
 
-    public IEnumerable<string> Import(string data)
+    public ModlistExport Import(string data)
     {
         foreach (var importer in _importers.Values)
         {
@@ -45,7 +45,7 @@ public class ModlistImporter
         throw new TrebException("Could not import the provided data with any importers");
     }
 
-    public IEnumerable<string> Import(string data, ImportFormats format)
+    public ModlistExport Import(string data, ModListProfile profile, ImportFormats format)
     {
         if (!_importers.TryGetValue(format, out var importer))
             throw new TrebException($"No importer for the given format {format}");

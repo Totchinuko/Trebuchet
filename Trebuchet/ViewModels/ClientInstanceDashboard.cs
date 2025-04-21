@@ -26,6 +26,7 @@ public sealed class ClientInstanceDashboard : ReactiveObject
     private string _selectedProfile = string.Empty;
     private List<ulong> _updateNeeded = [];
     private bool _canUseDashboard;
+    private bool _battleEye;
 
     public ClientInstanceDashboard(IProcessStats processStats, TaskBlocker blocker, DialogueBox box)
     {
@@ -39,23 +40,26 @@ public sealed class ClientInstanceDashboard : ReactiveObject
         var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
         var canLaunch = this.WhenAnyValue(x => x.CanLaunch).CombineLatest(canBlockerLaunch, (f,s) => f && s);
         LaunchCommand = ReactiveCommand.CreateFromTask(OnLaunched, canLaunch);
-        LaunchBattleEyeCommand = ReactiveCommand.CreateFromTask(OnBattleEyeLaunched, canLaunch);
+        LaunchAndConnect = ReactiveCommand.CreateFromTask(OnConnect, canLaunch);
         UpdateModsCommand = ReactiveCommand.CreateFromTask(OnModUpdate, canDownloadMods);
 
         this.WhenAnyValue(x => x.SelectedModlist)
             .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnModlistSelected));
         this.WhenAnyValue(x => x.SelectedProfile)
             .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnProfileSelected));
+        this.WhenAnyValue(x => x.BattleEye)
+            .InvokeCommand(ReactiveCommand.CreateFromTask<bool>(OnBattleEyeChanged));
     }
 
     public event AsyncEventHandler? KillClicked;
     public event AsyncEventHandler<bool>? LaunchClicked;
     public event AsyncEventHandler<string>? ProfileSelected;
     public event AsyncEventHandler<string>? ModlistSelected;
+    public event AsyncEventHandler<bool>? BattleEyeChanged; 
     public event AsyncEventHandler? UpdateClicked;
 
     public ReactiveCommand<Unit,Unit> KillCommand { get; }
-    public ReactiveCommand<Unit,Unit> LaunchBattleEyeCommand { get; }
+    public ReactiveCommand<Unit,Unit> LaunchAndConnect { get; }
     public ReactiveCommand<Unit,Unit> LaunchCommand { get; }
     public ReactiveCommand<Unit,Unit> UpdateModsCommand { get; }
 
@@ -69,6 +73,12 @@ public sealed class ClientInstanceDashboard : ReactiveObject
     {
         get => _canLaunch;
         set => this.RaiseAndSetIfChanged(ref _canLaunch, value);
+    }
+
+    public bool BattleEye
+    {
+        get => _battleEye;
+        set => this.RaiseAndSetIfChanged(ref _battleEye, value);
     }
 
     public List<string> Modlists
@@ -155,13 +165,19 @@ public sealed class ClientInstanceDashboard : ReactiveObject
             await ModlistSelected.Invoke(this, modlist);
     }
 
+    private async Task OnBattleEyeChanged(bool battleEye)
+    {
+        if(BattleEyeChanged is not null)
+            await BattleEyeChanged.Invoke(this, battleEye);
+    }
+
     private async Task OnUpdateClicked()
     {
         if (UpdateClicked is not null)
             await UpdateClicked.Invoke(this, EventArgs.Empty);
     }
 
-    private async Task OnBattleEyeLaunched()
+    private async Task OnConnect()
     {
         if(LaunchClicked is not null)
             await LaunchClicked.Invoke(this, true);

@@ -4,6 +4,7 @@ using System.Collections.ObjectModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -158,12 +159,17 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
         
-        public async Task LaunchClient(bool isBattleEye)
+        public async Task LaunchClient(bool autoConnect)
         {
             if (Client.ProcessRunning) return;
             if (!await CheckForSteamClientRunning()) return;
 
-            using(_logger.BeginScope((@"isBattleEye", isBattleEye)))
+            var data = new Dictionary<string, object>
+            {
+                { @"autoConnect", autoConnect },
+                { @"isBattleEye", Client.BattleEye }
+            };
+            using(_logger.BeginScope(data))
                 _logger.LogInformation(@"Launching client");
             Client.CanLaunch = false;
             try
@@ -176,7 +182,7 @@ namespace Trebuchet.ViewModels.Panels
 
                 _setup.Config.SelectedClientProfile = Client.SelectedProfile;
                 _setup.Config.SelectedClientModlist = Client.SelectedModlist;
-                await _launcher.CatapultClient(isBattleEye);
+                await _launcher.CatapultClient(Client.BattleEye, autoConnect);
             }
             catch (Exception ex)
             {
@@ -303,7 +309,7 @@ namespace Trebuchet.ViewModels.Panels
                 return Task.CompletedTask;
             };
             client.KillClicked += (_, _)  => KillClient();
-            client.LaunchClicked += (_, battleEye) => LaunchClient(battleEye);
+            client.LaunchClicked += (_, autoConnect) => LaunchClient(autoConnect);
             client.UpdateClicked += (_, _) => UpdateMods();
         }
 

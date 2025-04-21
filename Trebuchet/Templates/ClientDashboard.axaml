@@ -45,10 +45,10 @@
                                 <TextBlock Text="{x:Static a:Resources.Launch}" />
                             </StackPanel>
                         </Button>
-                        <Button Command="{Binding LaunchBattleEyeCommand}" Classes="Base Yellow" Margin="0,0,6,0" VerticalAlignment="Center">
+                        <Button Command="{Binding LaunchAndConnect}" Classes="Base Yellow" Margin="0,0,6,0" VerticalAlignment="Center">
                             <StackPanel Orientation="Horizontal">
-                                <i:Icon Value="mdi-shield" Classes="Normal" Margin="0,0,6,0" />
-                                <TextBlock Text="{x:Static a:Resources.BattleEye}" />
+                                <i:Icon Value="mdi-lan-connect" Classes="Normal" Margin="0,0,6,0" />
+                                <TextBlock Text="{x:Static a:Resources.Connect}" />
                             </StackPanel>
                         </Button>
                         <Button Command="{Binding KillCommand}" Classes="Base Red" Margin="0,0,6,0" VerticalAlignment="Center">
@@ -65,6 +65,7 @@
                                 </StackPanel>
                             </Button>
                         </Border>
+                        <CheckBox Content="{x:Static a:Resources.BattleEye}" VerticalAlignment="Center" IsChecked="{Binding BattleEye}" />
                     </WrapPanel>
                 </Grid>
                 <Border Grid.Column="1" Classes="DarkPanel" CornerRadius="0 3 3 0">

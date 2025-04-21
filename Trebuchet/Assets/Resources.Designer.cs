@@ -267,6 +267,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        public static string Connect {
+            get {
+                return ResourceManager.GetString("Connect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CPU.
         /// </summary>
         public static string CPU_CentralProcessorUnit {
@@ -2658,6 +2667,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Server Auto Connect Information. Add the IP, port and password, in order to launch and connect automatically. (Optional).
+        /// </summary>
+        public static string TooltipServerAutoConnect {
+            get {
+                return ResourceManager.GetString("TooltipServerAutoConnect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Translation Authors.
         /// </summary>
         public static string TranslationAuthors {
@@ -2906,6 +2924,33 @@ namespace Trebuchet.Assets {
         public static string WatermarkModlistURLTip {
             get {
                 return ResourceManager.GetString("WatermarkModlistURLTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IP Address.
+        /// </summary>
+        public static string WatermarkServerIp {
+            get {
+                return ResourceManager.GetString("WatermarkServerIp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string WatermarkServerPassword {
+            get {
+                return ResourceManager.GetString("WatermarkServerPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string WatermarkServerPort {
+            get {
+                return ResourceManager.GetString("WatermarkServerPort", resourceCulture);
             }
         }
         

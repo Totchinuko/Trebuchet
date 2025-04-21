@@ -4,10 +4,14 @@ namespace TrebuchetLib.Services.Importer;
 
 public class PlainTextImporter(AppModlistFiles files) : ITrebuchetImporter
 {
-    public IEnumerable<string> ParseImport(string import)
+    public ModlistExport ParseImport(string import)
     {
-        return import.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
-            .Select(ParseLine);
+        var modlist = import.Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries)
+            .Select(ParseLine).ToList();
+        return new ModlistExport()
+        {
+            Modlist = modlist
+        };
     }
 
     public bool CanParseImport(string import)
@@ -28,11 +32,11 @@ public class PlainTextImporter(AppModlistFiles files) : ITrebuchetImporter
         return true;
     }
 
-    public string Export(IEnumerable<string> modlist)
+    public string Export(ModListProfile profile)
     {
         StringBuilder builder = new();
         string path;
-        foreach (var mod in modlist)
+        foreach (var mod in profile.Modlist)
         {
             path = mod;
             if (!files.ResolveMod(ref path))

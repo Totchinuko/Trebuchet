@@ -70,6 +70,16 @@
                                 Command="{Binding FetchCommand}" />
                     </StackPanel>
                 </Border>
+                <Border Classes="Panel" Padding="8" Margin="0 0 6 6" Classes.Red="{Binding !ServerDetailsValid}">
+                    <StackPanel Spacing="6" Orientation="Horizontal">
+                        <Border Background="Transparent" ToolTip.Tip="{x:Static a:Resources.TooltipServerAutoConnect}">
+                            <i:Icon Value="mdi-server" Classes="Normal" />
+                        </Border>
+                        <TextBox Watermark="{x:Static a:Resources.WatermarkServerIp}" Width="150" Text="{Binding ServerAddress}" />
+                        <TextBox Watermark="{x:Static a:Resources.WatermarkServerPort}" Width="100" Text="{Binding ServerPort}" />
+                        <TextBox Watermark="{x:Static a:Resources.WatermarkServerPassword}" Width="200" Text="{Binding ServerPassword}" />
+                    </StackPanel>
+                </Border>
                 <Border Classes="Panel" Padding="8" Margin="0 0 6 6" ToolTip.Tip="{x:Static a:Resources.ModlistSizeTip}">
                     <TextBlock TextAlignment="Center">
                         <Run Text="{x:Static a:Resources.ModlistSize}" FontWeight="Bold" />

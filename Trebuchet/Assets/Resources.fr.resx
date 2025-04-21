@@ -976,4 +976,19 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="SettingExperimentsText" xml:space="preserve">
         <value>Active les fonctions expérimental de Trebuchet, qui ne sont pas forcement stable ou finie.</value>
     </data>
+    <data name="WatermarkServerIp" xml:space="preserve">
+        <value>Adresse IP</value>
+    </data>
+    <data name="WatermarkServerPort" xml:space="preserve">
+        <value>Port</value>
+    </data>
+    <data name="WatermarkServerPassword" xml:space="preserve">
+        <value>Mot de pass</value>
+    </data>
+    <data name="TooltipServerAutoConnect" xml:space="preserve">
+        <value>Connection automatique au serveur. Ajoutez l'adresse Ip, le port and le mot de pass, pour vous connecter automatiquement au lancement du jeu. (Optionnel)</value>
+    </data>
+    <data name="Connect" xml:space="preserve">
+        <value>Connecter</value>
+    </data>
 </root>

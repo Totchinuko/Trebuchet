@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
@@ -60,6 +61,9 @@ namespace Trebuchet.ViewModels.Panels
             _selectedModlist = _appFiles.Mods.ResolveProfile(_uiConfig.CurrentModlistProfile);
             _profile = _appFiles.Mods.Get(_selectedModlist);
             _modlistUrl = _profile.SyncURL;
+            _serverPassword = _profile.ServerPassword;
+            _serverAddress = _profile.ServerAddress;
+            _serverPort = _profile.ServerPort <= 0 ? string.Empty : _profile.ServerPort.ToString();
 
             _modFileFactory.Removed += RemoveModFile;
             _modFileFactory.Updated += UpdateModFile;
@@ -91,10 +95,29 @@ namespace Trebuchet.ViewModels.Panels
             this.WhenAnyValue(x => x.ModlistUrl)
                 .Subscribe((url) =>
                 {
-                    if (_profile.SyncURL == url) return;
+                    if (_swapping) return;
                     _profile.SyncURL = url;
                     _profile.SaveFile();
                 });
+            this.WhenAnyValue(x => x.ServerAddress, x => x.ServerPort, x => x.ServerPassword)
+                .Subscribe((args) =>
+                {
+                    if (_swapping) return;
+                    _profile.ServerAddress = args.Item1;
+                    if (int.TryParse(args.Item2, out var port))
+                        _profile.ServerPort = port;
+                    else
+                        _profile.ServerPort = -1;
+                    _profile.ServerPassword = args.Item3;
+                    _profile.SaveFile();
+                });
+
+            _serverDetailsValid = this.WhenAnyValue(x => x.ServerAddress, x => x.ServerPort,
+                    (a, p) => 
+                        (IPAddress.TryParse(a, out _) || string.IsNullOrEmpty(a)) && 
+                        (int.TryParse(p, out var port) && port is >= 0 and <= 65535 || string.IsNullOrEmpty(p))
+                    )
+                .ToProperty(this, x => x.ServerDetailsValid);
             
             this.WhenAnyValue(x => x.SelectedModlist)
                 .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnModlistChanged));
@@ -116,6 +139,11 @@ namespace Trebuchet.ViewModels.Panels
         private string _selectedModlist;
         private string _modlistSize = string.Empty;
         private bool _canBeOpened = true;
+        private string _serverAddress;
+        private string _serverPort;
+        private string _serverPassword;
+        private bool _swapping = false;
+        public ObservableAsPropertyHelper<bool> _serverDetailsValid;
 
         public ReactiveCommand<Unit, Unit> CreateModlistCommand { get; }
         public ReactiveCommand<Unit, Unit> DeleteModlistCommand { get; }
@@ -147,6 +175,26 @@ namespace Trebuchet.ViewModels.Panels
             set => this.RaiseAndSetIfChanged(ref _modlistUrl, value);
         }
 
+        public string ServerAddress
+        {
+            get => _serverAddress;
+            set => this.RaiseAndSetIfChanged(ref _serverAddress, value);
+        }
+
+        public string ServerPort
+        {
+            get => _serverPort;
+            set => this.RaiseAndSetIfChanged(ref _serverPort, value);
+        }
+
+        public string ServerPassword
+        {
+            get => _serverPassword;
+            set => this.RaiseAndSetIfChanged(ref _serverPassword, value);
+        }
+
+        public bool ServerDetailsValid => _serverDetailsValid.Value;
+
         public string SelectedModlist
         {
             get => _selectedModlist;
@@ -166,8 +214,7 @@ namespace Trebuchet.ViewModels.Panels
         public ObservableCollectionExtended<string> Profiles { get; } = [];
         
         public event AsyncEventHandler? RequestRefresh;
-
-       
+        
         public async Task AddModFromWorkshop(WorkshopSearchResult mod)
         {
             if (Modlist.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
@@ -209,13 +256,19 @@ namespace Trebuchet.ViewModels.Panels
             await LoadModlist();
         }
 
+        private Task OnModlistChanged() => OnModlistChanged(SelectedModlist);
         private async Task OnModlistChanged(string modlist)
         {
             _logger.LogDebug(@"Swap to modlist {modlist}", modlist);
             _uiConfig.CurrentModlistProfile = modlist;
             _uiConfig.SaveFile();
             _profile = _appFiles.Mods.Get(modlist);
+            _swapping = true;
             ModlistUrl = _profile.SyncURL;
+            ServerAddress = _profile.ServerAddress;
+            ServerPort = _profile.ServerPort <= 0 ? string.Empty : _profile.ServerPort.ToString();
+            ServerPassword = _profile.ServerPassword;
+            _swapping = false;
             await LoadModlist();
         }
 
@@ -248,9 +301,10 @@ namespace Trebuchet.ViewModels.Panels
             try
             {
                 var result = await Tools.DownloadModList(builder.ToString(), CancellationToken.None);
-                _profile.Modlist = _appFiles.Mods.ParseModList(result.Modlist).ToList();
+                var export = _importer.Import(result);
+                export.SetValues(_profile);
                 _profile.SaveFile();
-                await LoadModlist();
+                await OnModlistChanged();
             }
             catch (Exception tex)
             {
@@ -282,7 +336,7 @@ namespace Trebuchet.ViewModels.Panels
                     modlist.Add(child.PublishedFileId);
                 _profile.Modlist = modlist;
                 _profile.SaveFile();
-                await LoadModlist();
+                await OnModlistChanged();
             }
             catch (Exception tex)
             {
@@ -342,17 +396,16 @@ namespace Trebuchet.ViewModels.Panels
 
         private async Task OnExportToJson()
         {
-            var json = _importer.Export(_profile.Modlist, ImportFormats.Json);
+            var json = _importer.Export(_profile, ImportFormats.Json);
             var editor = new OnBoardingModlistImport(json, true, FileType.Json);
             await _box.OpenAsync(editor);
-            
         }
 
         private async Task OnExportToTxt()
         {
             try
             {
-                var content = _importer.Export(_profile.Modlist, ImportFormats.Txt);
+                var content = _importer.Export(_profile, ImportFormats.Txt);
                 var editor = new OnBoardingModlistImport(content, true, FileType.Txt);
                 await _box.OpenAsync(editor);
             }
@@ -433,11 +486,28 @@ namespace Trebuchet.ViewModels.Panels
             if (editor.Canceled || editor.Value == null) return;
 
             _logger.LogInformation(@"Importing modlist");
+            var format = _importer.GetFormat(import);
             var text = editor.Value;
-            List<string> modlist = [];
             try
             {
-                modlist.AddRange(_importer.Import(text));
+                var export = _importer.Import(text);
+                if (format == ImportFormats.Txt)
+                {
+                    if (editor.Append)
+                        _profile.Modlist.AddRange(export.Modlist);
+                    else
+                        _profile.Modlist = export.Modlist;
+                }
+                else
+                {
+                    if(editor.Append)
+                        _profile.Modlist.AddRange(export.Modlist);
+                    else
+                    {
+                        export.SetValues(_profile);
+                    }
+                }
+                    
             }
             catch(Exception ex)
             {
@@ -446,12 +516,8 @@ namespace Trebuchet.ViewModels.Panels
                 return;
             }
 
-            if (editor.Append)
-                _profile.Modlist.AddRange(modlist);
-            else
-                _profile.Modlist = modlist;
             _profile.SaveFile();
-            await LoadModlist();
+            await OnModlistChanged();
         }
 
         private void OnModFileChanged(object sender, FileSystemEventArgs e)

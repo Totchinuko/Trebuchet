@@ -37,6 +37,7 @@ public static class Constants
     public const string FolderWorkshop = "Workshop";
     public const string GameArgsLog = "-log";
     public const string GameArgsModList = "-modlist=\"{0}\"";
+    public const string GameArgsContinueSession = "--continuesession";
     public const string GameArgsUseAllCore = "-useallavailablecores";
     public const string RegexSavedFolder = @"ConanSandbox([\\/]+)Saved";
     public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
@@ -58,6 +59,7 @@ public static class Constants
     public const string argBoulderSave = "--save";
     public const string argBoulderInstance = "--instance";
     public const string argBoulderModlist = "--modlist";
+    public const string argBoulderAutoConnect = "--auto-connect";
     public const string argBoulderBattleEye = "--battle-eye";
     public const string cmdBoulderLamb = "lamb";
     public const string cmdBoulderLambClient = "lamb client";

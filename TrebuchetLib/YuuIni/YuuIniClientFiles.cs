@@ -33,6 +33,22 @@ public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
             await Tools.SetFileContent(Path.Combine(appFiles.Client.GetClientFolder(), document.Key), document.Value.ToString());
         }
     }
+
+    public async Task WriteLastConnection(string address, int port, string password)
+    {
+        // Modify the default SectionName parse because funcom sometime does an oupsi and generate sections with an empty name
+        var iniParserConfiguration = new IniParserConfiguration();
+        iniParserConfiguration.SectionNameRegex = "\\s*[^\\[\\]]*\\s*";
+        var iniPath = Path.Combine(appFiles.Client.GetClientFolder(), string.Format(Constants.FileIniUser, "Game"));
+        var iniContent = await Tools.GetFileContent(iniPath);
+        var document = IniParser.Parse(iniContent, iniParserConfiguration);
+        
+        document.GetSection("SavedServers")
+            .SetParameter("LastConnected", $"{address}:{port}");
+        document.GetSection("SavedServers")
+            .SetParameter("LastPassword", password);
+        await Tools.SetFileContent(iniPath, document.ToString());
+    }
     
     [IniSetting(Constants.FileIniDefault, "Engine")]
     public void DefaultEngine(ClientProfile profile, IniDocument document)

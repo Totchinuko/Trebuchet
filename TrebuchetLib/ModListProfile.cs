@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Text.Json.Serialization;
 
 namespace TrebuchetLib
@@ -7,6 +8,9 @@ namespace TrebuchetLib
     {
         public List<string> Modlist { get; set; } = new List<string>();
         public string SyncURL { get; set; } = string.Empty;
+        public string ServerAddress { get; set; } = string.Empty;
+        public int ServerPort { get; set; } = 0;
+        public string ServerPassword { get; set; } = string.Empty;
 
         [JsonIgnore]
         public string ProfileName => Path.GetFileNameWithoutExtension(FilePath) ?? string.Empty;

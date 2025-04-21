@@ -4,12 +4,13 @@ namespace TrebuchetLib.Services.Importer;
 
 public class JsonImporter : ITrebuchetImporter
 {
-    public IEnumerable<string> ParseImport(string import)
+    public ModlistExport ParseImport(string import)
     {
         var data = JsonSerializer.Deserialize(import, ModlistExportJsonContext.Default.ModlistExport);
         if (data is null)
             throw new JsonException("Imported data is invalid");
-        return data.Modlist.Select(ParseMod);
+        data.Modlist = data.Modlist.Select(ParseMod).ToList();
+        return data;
     }
 
     public bool CanParseImport(string import)
@@ -31,12 +32,11 @@ public class JsonImporter : ITrebuchetImporter
         return true;
     }
 
-    public string Export(IEnumerable<string> modlist)
+    public string Export(ModListProfile profile)
     {
-        return JsonSerializer.Serialize(new ModlistExport()
-        {
-            Modlist = modlist.ToList()
-        }, ModlistExportJsonContext.Default.ModlistExport);
+        var export = new ModlistExport();
+        export.GetValues(profile);
+        return JsonSerializer.Serialize(export, ModlistExportJsonContext.Default.ModlistExport);
     }
 
     private string ParseMod(string entry)

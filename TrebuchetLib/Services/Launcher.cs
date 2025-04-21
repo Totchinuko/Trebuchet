@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using System.Net;
 using System.Text;
 using Microsoft.Extensions.Logging;
 using tot_lib;
@@ -26,25 +27,18 @@ public class Launcher(
         _serverProcesses.Clear();
     }
 
-    public async Task CatapultClient(bool isBattleEye)
+    public async Task CatapultClient(bool isBattleEye, bool autoConnect)
     {
         var profile = setup.Config.SelectedClientProfile;
         var modlist = setup.Config.SelectedClientModlist;
-        await CatapultClient(profile, modlist, isBattleEye);
+        await CatapultClient(profile, modlist, isBattleEye, autoConnect);
     }
 
-    public async Task CatapultClientBoulder(bool isBattleEye)
+    public async Task<Process> CatapultClientProcess(bool isBattleEye, bool autoConnect)
     {
         var profile = setup.Config.SelectedClientProfile;
         var modlist = setup.Config.SelectedClientModlist;
-        await CatapultClientBoulder(profile, modlist, isBattleEye);
-    }
-
-    public async Task<Process> CatapultClientProcess(bool isBattleEye)
-    {
-        var profile = setup.Config.SelectedClientProfile;
-        var modlist = setup.Config.SelectedClientModlist;
-        return await CatapultClientProcess(profile, modlist, isBattleEye);
+        return await CatapultClientProcess(profile, modlist, isBattleEye, autoConnect);
     }
 
     /// <summary>
@@ -54,69 +48,29 @@ public class Launcher(
     /// <param name="profileName"></param>
     /// <param name="modlistName"></param>
     /// <param name="isBattleEye">Launch with BattlEye anti cheat.</param>
+    /// <param name="autoConnect">Launch and try to connect to a server automatically</param>
     /// <exception cref="FileNotFoundException"></exception>
     /// <exception cref="ArgumentException">
     ///     Profiles can only be used by one process at a times, since they contain the db of
     ///     the game.
     /// </exception>
-    public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye)
+    public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye, bool autoConnect)
     {
         if (_conanClientProcess != null) return;
 
-        var process = await CatapultClientProcess(profileName, modlistName, isBattleEye);
+        var process = await CatapultClientProcess(profileName, modlistName, isBattleEye, autoConnect);
 
         _conanClientProcess = await processFactory.Create().SetProcess(process).BuildClient();
     }
-    
-    public async Task CatapultClientBoulder(string profile, string modlist, bool battleEye)
-    {
-        if (_conanClientProcess != null) return;
-        var data = new Dictionary<string, object>
-        {
-            {@"profile", profile},
-            {"modlist", modlist},
-            {"isBattleEye", battleEye}
-        };
-        using var scope = logger.BeginScope(data);
-        logger.LogInformation("Launching Boulder");
-        
-        string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-        if (appFolder is null) throw new IOException("Can't access app folder");
-        var boulder = Path.Combine(appFolder, Constants.BoulderExe);
-        if (!File.Exists(boulder)) throw new IOException("boulder not found");
 
-        var args = new List<string>
-        {
-            Constants.cmdBoulderLambClient,
-            $"{Constants.argBoulderSave} \"{profile}\"",
-            $"{Constants.argBoulderModlist} \"{modlist}\""
-        };
-        if(battleEye)
-            args.Add(Constants.argBoulderBattleEye);
-        
-        Process startProcess = new();
-        startProcess.StartInfo = new ProcessStartInfo
-        {
-            Arguments = string.Join(' ', args),
-            FileName = boulder,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true
-        };
-        startProcess.Start();
-        await startProcess.WaitForExitAsync();
-    }
-
-    public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye)
+    public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye, bool autoConnect)
     {
         var data = new Dictionary<string, object>
         {
             {@"profile", profileName},
             {"modlist", modlistName},
-            {"isBattleEye", isBattleEye}
+            {"isBattleEye", isBattleEye},
+            {"autoConnect", autoConnect}
         };
         using var scope = logger.BeginScope(data);
         logger.LogInformation("Launching");
@@ -131,7 +85,15 @@ public class Launcher(
         SetupJunction(appFiles.Client.GetPrimaryJunction(), profile.ProfileFolder);
 
         await iniHandler.WriteClientSettingsAsync(profile);
-        var process = await CreateClientProcess(profile, modlist, isBattleEye);
+        
+        if (autoConnect)
+        {
+            if (!IsAutoConnectInfoValid(modlist))
+                throw new Exception("Auto connection address is invalid");
+            await iniHandler.WriteClientLastConnection(modlist.ServerAddress, modlist.ServerPort, modlist.ServerPassword);
+        }
+        
+        var process = await CreateClientProcess(profile, modlist, isBattleEye, autoConnect);
 
         process.Start();
 
@@ -144,12 +106,19 @@ public class Launcher(
         return childProcess;
     }
 
-    private async Task<Process> CreateClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye)
+    private bool IsAutoConnectInfoValid(ModListProfile profile)
+    {
+        if (!IPAddress.TryParse(profile.ServerAddress, out _)) return false;
+        if (profile.ServerPort is < 0 or > 65535) return false;
+        return true;
+    }
+
+    private async Task<Process> CreateClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye, bool autoConnect)
     {
         var filename = isBattleEye ? appFiles.Client.GetBattleEyeBinaryPath() : appFiles.Client.GetGameBinaryPath();
         var modlistFile = Path.GetTempFileName();
         await File.WriteAllLinesAsync(modlistFile, appFiles.Mods.GetResolvedModlist(modlist.Modlist));
-        var args = profile.GetClientArgs(modlistFile);
+        var args = profile.GetClientArgs(modlistFile, autoConnect);
 
         var dir = Path.GetDirectoryName(filename);
         if (dir == null)
@@ -216,13 +185,6 @@ public class Launcher(
         var modlist = setup.Config.GetInstanceModlist(instance);
         await CatapultServer(profile, modlist, instance);
     }
-    
-    public async Task CatapultServerBoulder(int instance)
-    {
-        var profile = setup.Config.GetInstanceProfile(instance);
-        var modlist = setup.Config.GetInstanceModlist(instance);
-        await CatapultServerBoulder(profile, modlist, instance);
-    }
 
     public async Task<Process> CatapultServerProcess(int instance)
     {
@@ -261,47 +223,6 @@ public class Launcher(
         _serverProcesses.TryAdd(instance, await builder.BuildServer());
     }
     
-    public async Task CatapultServerBoulder(string profile, string modlist, int instance)
-    {
-        if (_serverProcesses.ContainsKey(instance)) return;
-        var data = new Dictionary<string, object>
-        {
-            {@"profile", profile},
-            {"modlist", modlist},
-            {"instance", instance}
-        };
-        using var scope = logger.BeginScope(data);
-        logger.LogInformation("Launching Boulder");
-        
-        string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-        if (appFolder is null) throw new IOException("Can't access app folder");
-        var boulder = Path.Combine(appFolder, Constants.BoulderExe);
-        if (!File.Exists(boulder)) throw new IOException("boulder not found");
-
-        var args = new List<string>
-        {
-            Constants.cmdBoulderLambServer,
-            $"{Constants.argBoulderSave} \"{profile}\"",
-            $"{Constants.argBoulderInstance} {instance}",
-            $"{Constants.argBoulderModlist} \"{modlist}\""
-        };
-
-        Process startProcess = new();
-        startProcess.StartInfo = new()
-        {
-            Arguments = string.Join(' ', args),
-            FileName = boulder,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true
-        };
-        startProcess.Start();
-        await startProcess.WaitForExitAsync();
-    }
-
     public async Task<Process> CatapultServerProcess(string profileName, string modlistName, int instance)
     {
         var data = new Dictionary<string, object>

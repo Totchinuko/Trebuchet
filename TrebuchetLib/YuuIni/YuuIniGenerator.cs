@@ -10,6 +10,11 @@ public class YuuIniGenerator(AppFiles appFiles, AppSetup setup) : IIniGenerator
         await new YuuIniClientFiles(appFiles, setup).WriteIni(profile);
     }
 
+    public async Task WriteClientLastConnection(string address, int port, string password)
+    {
+        await new YuuIniClientFiles(appFiles, setup).WriteLastConnection(address, port, password);
+    }
+
     public async Task WriteServerSettingsAsync(ServerProfile profile, int instance)
     {
         await new YuuIniServerFiles(appFiles).WriteIni(profile, instance);   
