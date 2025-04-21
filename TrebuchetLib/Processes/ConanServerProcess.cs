@@ -6,8 +6,6 @@ namespace TrebuchetLib.Processes;
 
 internal sealed class ConanServerProcess : IConanServerProcess
 {
-
-
     public ConanServerProcess(Process process, LogReader logReader)
     {
         Process = process;
@@ -23,6 +21,7 @@ internal sealed class ConanServerProcess : IConanServerProcess
     private int _players;
     private ProcessState _state;
     private LogReader _logReader;
+    private bool _hasTriedRConShutdown;
 
     public event EventHandler<ProcessState>? StateChanged; 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -83,7 +82,7 @@ internal sealed class ConanServerProcess : IConanServerProcess
     public Process Process { get; }
     public required ConanServerInfos ServerInfos { get; init; }
     public required SourceQueryReader SourceQueryReader { get; init; }
-    public required IRcon RCon { get; init; }
+    public IRcon? RCon { get; init; }
 
     public int Instance => ServerInfos.Instance;
     public int Port => ServerInfos.Port;
@@ -163,7 +162,13 @@ internal sealed class ConanServerProcess : IConanServerProcess
     public Task StopAsync()
     {
         State = ProcessState.STOPPING;
-        Process.CloseMainWindow();
+        if (RCon is not null && !_hasTriedRConShutdown)
+        {
+            _hasTriedRConShutdown = true;
+            RCon.Send(@"shutdown", CancellationToken.None);
+        }
+        else
+            Process.CloseMainWindow();
         return Task.CompletedTask;
     }
 

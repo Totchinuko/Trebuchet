@@ -170,7 +170,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     {
         try
         {
-            if (Process is not null)
+            if (Process?.RCon is not null)
             {
                 _logger.LogInformation(@"Send {command}", input);
                 await _textWriter.WriteLineAsync(@"> " + input);
@@ -226,7 +226,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
 
     private void RefreshLabel()
     {
-        if (Process is null)
+        if (Process?.RCon is null)
         {
             CanSend = false;
             ServerLabel = $@"{Resources.Unavailable} - {Resources.Instance} {_instance}";

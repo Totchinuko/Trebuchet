@@ -26,5 +26,6 @@ public interface IConanProcessServerBuilder : IConanProcessBuilderWithProcess
 public interface IConanProcessServerBuilderLogTracked : IConanProcessServerBuilder
 {
     IConanProcessServerBuilderLogTracked StartLogAtBeginning();
+    IConanProcessServerBuilderLogTracked UseRCon();
     Task<IConanServerProcess> BuildServer();
 }

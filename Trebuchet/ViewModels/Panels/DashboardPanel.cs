@@ -147,7 +147,6 @@ namespace Trebuchet.ViewModels.Panels
             }
 
             _logger.LogWarning(@"Killing client");
-            Client.CanKill = false;
             try
             {
                 await _launcher.KillClient();
@@ -193,7 +192,6 @@ namespace Trebuchet.ViewModels.Panels
             if (!dashboard.ProcessRunning) return;
 
             _logger.LogInformation(@"Closing server {instance}", instance);
-            dashboard.CanClose = false;
             await _launcher.CloseServer(instance);
         }
         
@@ -210,8 +208,6 @@ namespace Trebuchet.ViewModels.Panels
             }
 
             _logger.LogWarning(@"Killing server {instance}", instance);
-            dashboard.CanKill = false;
-            dashboard.CanClose = false;
             await _launcher.KillServer(dashboard.Instance);
         }
         

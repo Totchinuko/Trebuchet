@@ -20,7 +20,7 @@ public interface IConanServerProcess : IConanProcess
     
     public bool Online { get; }
     
-    public IRcon RCon { get; }
+    public IRcon? RCon { get; }
     
     public bool KillZombies { get; set; }
     

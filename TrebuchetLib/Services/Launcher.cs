@@ -246,14 +246,17 @@ public class Launcher(
         if (_serverProcesses.ContainsKey(instance)) return;
 
         var process = await CatapultServerProcess(profileName, modlistName, instance);
+        var profile = appFiles.Server.Get(profileName);
 
-        var serverProcess = await processFactory.Create()
+        var builder = processFactory.Create()
             .SetProcess(process)
-            .SetServerInfos(appFiles.Server.Get(profileName), instance)
+            .SetServerInfos(profile, instance)
             .SetLogFile(appFiles.Server.GetGameLogs(profileName))
-            .StartLogAtBeginning()
-            .BuildServer();
-        _serverProcesses.TryAdd(instance, serverProcess);
+            .StartLogAtBeginning();
+        if (profile.EnableRCon)
+            builder.UseRCon();
+        
+        _serverProcesses.TryAdd(instance, await builder.BuildServer());
     }
     
     public async Task CatapultServerBoulder(string profile, string modlist, int instance)
@@ -390,7 +393,7 @@ public class Launcher(
         return _conanClientProcess;
     }
 
-    public IRcon GetServerRcon(int instance)
+    public IRcon? GetServerRcon(int instance)
     {
         if (_serverProcesses.TryGetValue(instance, out var watcher))
             return watcher.RCon;
@@ -521,13 +524,15 @@ public class Launcher(
         await foreach (var process in FindServerProcesses())
         {
             if(_serverProcesses.ContainsKey(process.Instance)) continue;
-            _serverProcesses.TryAdd(process.Instance, await processFactory.Create()
+            var serverInfos = await iniHandler.GetInfosFromServerAsync(process.Instance);
+            var builder = processFactory.Create()
                 .SetStartDate(process.Start)
                 .SetProcess(process.Process)
-                .SetServerInfos(iniHandler, process.Instance)
-                .SetLogFile(process.GameLogs)
-                .BuildServer()
-            );
+                .SetServerInfos(serverInfos)
+                .SetLogFile(process.GameLogs);
+            if (serverInfos.RConPort > 0)
+                builder.UseRCon();
+            _serverProcesses.TryAdd(process.Instance, await builder.BuildServer());
         }
     }
 

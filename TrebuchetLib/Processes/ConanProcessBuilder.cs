@@ -18,6 +18,7 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
     private ILogger<Rcon>? _rconLogger;
     private Func<Task<ConanServerInfos>>? _serverInfosGetter;
     private ILogger<LogReader>? _gameLogger;
+    private bool _useRcon = false;
 
     public static ConanProcessBuilder Create()
     {
@@ -78,6 +79,12 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
         return this;
     }
 
+    public IConanProcessServerBuilderLogTracked UseRCon()
+    {
+        _useRcon = true;
+        return this;
+    }
+
     public async Task<IConanServerProcess> BuildServer()
     {
         if (_process is null) throw new ArgumentNullException(nameof(_process), @"Process is not set");
@@ -97,12 +104,14 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
         
         var sourceQuery = new SourceQueryReader(new IPEndPoint(IPAddress.Loopback, serverInfo.QueryPort), 4 * 1000, 5 * 1000);
         sourceQuery.StartQueryThread();
-        
-        var rcon = new Rcon(
-            new IPEndPoint(IPAddress.Loopback, serverInfo.RConPort), 
-            serverInfo.RConPassword,
-            _rconLogger
-            ).SetContext("instance", serverInfo.Instance);
+
+        IRcon? rcon = null;
+        if(_useRcon)
+            rcon = new Rcon(
+                new IPEndPoint(IPAddress.Loopback, serverInfo.RConPort), 
+                serverInfo.RConPassword,
+                _rconLogger
+                ).SetContext("instance", serverInfo.Instance);
         
         return new ConanServerProcess(_process, logReader)
         {
