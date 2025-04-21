@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
@@ -41,6 +42,7 @@ public partial class App : Application, IApplication
     private ILogger<App>? _logger;
     private UIConfig? _uiConfig;
     private LanguageManager? _langManager;
+    private InternalLogSink? _internalLogSink;
     public bool HasCrashed { get; private set; }
     public IImage? AppIconPath => Resources[@"AppIcon"] as IImage;
 
@@ -90,9 +92,15 @@ public partial class App : Application, IApplication
         mainWindow.Show();
         currentWindow?.Close();
     }
-        
+         
     public void Crash() => HasCrashed = true;
-    
+
+    public static async Task HandleAppCrash(Exception ex)
+    {
+        if (Application.Current is null) return;
+        await ((App)Application.Current).HandleCrash(ex);
+    }
+
     public override void OnFrameworkInitializationCompleted()
     {
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
@@ -144,8 +152,8 @@ public partial class App : Application, IApplication
                 AppConstants.GithubRepoUpdate,
                 AppConstants.GetUpdateContentType()));
 
-        var internalLogSink = new InternalLogSink();
-        services.AddSingleton(internalLogSink);
+        _internalLogSink = new InternalLogSink();
+        services.AddSingleton(_internalLogSink);
         
         var logger = new LoggerConfiguration()
 #if !DEBUG
@@ -166,7 +174,7 @@ public partial class App : Application, IApplication
                     rollingInterval: RollingInterval.Day)
                 .Filter.ByExcluding(Matching.WithProperty<ConsoleLogSource>(@"TrebSource", _ => true))
             )
-            .WriteTo.Sink(internalLogSink, new BatchingOptions()
+            .WriteTo.Sink(_internalLogSink, new BatchingOptions()
             {
                 BatchSizeLimit = 20,
                 BufferingTimeLimit = TimeSpan.FromMilliseconds(500),
@@ -216,9 +224,8 @@ public partial class App : Application, IApplication
     {
         try
         {
-            _logger?.LogError(e.Exception, @"DispatcherUnhandledException");
             e.Handled = true;
-            await CrashHandler.Handle(e.Exception);
+            await App.HandleAppCrash(e.Exception);
         }
         catch(Exception ex)
         {
@@ -230,8 +237,7 @@ public partial class App : Application, IApplication
     {
         try
         {
-            _logger?.LogError((Exception)e.ExceptionObject, @"UnhandledException");
-            await CrashHandler.Handle((Exception)e.ExceptionObject);
+            await App.HandleAppCrash((Exception)e.ExceptionObject);
         }
         catch(Exception ex)
         {
@@ -243,12 +249,32 @@ public partial class App : Application, IApplication
     {
         try
         {
-            _logger?.LogError(e.Exception, @"UnobservedTaskException");
-            await CrashHandler.Handle(e.Exception);
+            await App.HandleAppCrash(e.Exception);
         }
         catch(Exception ex)
         {
             _logger?.LogCritical(ex, @"OnUnobservedTaskException");
         }
+    }
+    
+    private async Task HandleCrash(Exception ex)
+    {
+        _logger?.LogError(ex, @"UnhandledException");
+        List<CrashHandlerLog> logs = [];
+        if (_internalLogSink is not null)
+        {
+            foreach (var log in _internalLogSink.GetLastLogs())
+            {
+                logs.Add(new CrashHandlerLog
+                {
+                    Properties = log.Properties
+                        .Select(x => new KeyValuePair<string,string>(x.Key, x.Value.ToString())).ToDictionary(),
+                    Date = log.Timestamp.UtcDateTime,
+                    LogLevel = Enum.GetName(log.Level) ?? string.Empty,
+                    Message = log.RenderMessage()
+                });
+            }
+        }
+        await CrashHandler.Handle(ex, logs);
     }
 }

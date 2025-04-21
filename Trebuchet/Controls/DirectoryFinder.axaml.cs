@@ -69,7 +69,7 @@ namespace Trebuchet.Controls
             {}
             catch (Exception ex)
             {
-                await CrashHandler.Handle(ex);
+                await App.HandleAppCrash(ex);
             }
         }
     }

@@ -21,4 +21,5 @@ public class CrashHandlerPayload(Exception ex)
     public string ProcessPath { get; } = Environment.ProcessPath ?? string.Empty;
     public bool RunAs { get; } = ProcessUtil.IsProcessElevated();
     public string TrebuchetVersion { get; } = ProcessUtil.GetAppVersion().ToString();
+    public List<CrashHandlerLog> Logs { get; init; } = [];
 }

@@ -148,7 +148,7 @@ public sealed class TrebuchetApp : ReactiveObject
         catch (OperationCanceledException) {}
         catch (Exception ex)
         {
-            await CrashHandler.Handle(ex);
+            await App.HandleAppCrash(ex);
         }
     }
 
@@ -166,7 +166,7 @@ public sealed class TrebuchetApp : ReactiveObject
         catch (OperationCanceledException){}
         catch (Exception ex)
         {
-            await CrashHandler.Handle(ex);
+            await App.HandleAppCrash(ex);
         }
         
     }

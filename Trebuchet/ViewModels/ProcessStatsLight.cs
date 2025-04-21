@@ -141,7 +141,7 @@ namespace Trebuchet.ViewModels
             catch (OperationCanceledException){}
             catch (Exception ex)
             {
-                await CrashHandler.Handle(ex);
+                await App.HandleAppCrash(ex);
             }
         }
 

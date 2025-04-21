@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -19,10 +20,12 @@ namespace TrebuchetUtils;
 
 internal class CrashHandlerViewModel : ReactiveObject
 {
-
-    public CrashHandlerViewModel(Exception ex)
+    public CrashHandlerViewModel(Exception ex, List<CrashHandlerLog> logs)
     {
-        _payload = new CrashHandlerPayload(ex);
+        _payload = new CrashHandlerPayload(ex)
+        {
+            Logs = logs
+        };
         Title = ex.GetType().Name;
         Message = ex.Message;
         CallStack = ex.GetAllExceptions();
@@ -127,15 +130,16 @@ public static class CrashHandler
 
     public static void SetReportUri(Uri uri) => _reportSendUri = uri;
     public static void SetReportUri(string url) => _reportSendUri = new Uri(url);
-    public static bool HasReportUri() => _reportSendUri != null; 
+    public static bool HasReportUri() => _reportSendUri != null;
 
-    public static async Task Handle(Exception ex)
+    public static Task Handle(Exception ex) => Handle(ex, []);
+    public static async Task Handle(Exception ex, List<CrashHandlerLog> logs)
     {
         if (!Dispatcher.UIThread.CheckAccess())
         {
             await Dispatcher.UIThread.InvokeAsync(async () =>
             {
-                await Handle(ex);
+                await Handle(ex, logs);
             });
             return;
         }
@@ -143,7 +147,7 @@ public static class CrashHandler
         if (_semaphore is null)
             _semaphore = new SemaphoreSlim(1, 1);
         await _semaphore.WaitAsync();
-        var handler = new CrashHandlerViewModel(ex);
+        var handler = new CrashHandlerViewModel(ex, logs);
         var window = new CrashHandlerWindow();
         window.DataContext = handler;
         if (Application.Current is not null &&

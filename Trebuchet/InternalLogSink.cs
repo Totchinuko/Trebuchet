@@ -19,13 +19,13 @@ public class InternalLogSink : IBatchedLogEventSink
     private readonly CircularBuffer<LogEvent> _eventBuffer = new(100);
 
     private readonly Func<LogEvent, bool> _bufferFilter
-        = Matching.WithProperty<ConsoleLogSource>(@"TrebSource", _ => false);
+        = Matching.WithProperty<ConsoleLogSource>(@"TrebSource", _ => true);
     
     public event AsyncEventHandler<IReadOnlyCollection<LogEvent>>? LogReceived;
     
     public async Task EmitBatchAsync(IReadOnlyCollection<LogEvent> batch)
     {
-        _eventBuffer.AddRange(batch.Where(_bufferFilter));
+        _eventBuffer.AddRange(batch.Where((l) => !_bufferFilter(l)));
         if (LogReceived is null) return;
         if(batch.Count > 0)
             await LogReceived.Invoke(this, batch);
