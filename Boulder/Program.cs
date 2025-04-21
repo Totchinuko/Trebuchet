@@ -4,8 +4,12 @@ using System.CommandLine.Parsing;
 using Boulder.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Serilog;
+using Serilog.Sinks.SystemConsole.Themes;
+using Serilog.Templates;
+using Serilog.Templates.Themes;
 using tot_lib;
 using TrebuchetLib;
+using TrebuchetLib.Processes;
 using TrebuchetLib.Services;
 using TrebuchetLib.YuuIni;
 using IConsole = System.CommandLine.IConsole;
@@ -20,27 +24,27 @@ class Program
     static async Task<int> Main(string[] args)
     {
         var rootCommand = new RootCommand("Boulder - Trebuchet's CLI");
-        rootCommand.CreateTot<LambCommand>(ConfigureServices);
+        rootCommand.AddCommand(LambCommand.Command);
+        
         var parser = new CommandLineBuilder(rootCommand).UseDefaults().Build();
-
         var result = parser.Parse(args);
         _testlive = result.UnmatchedTokens.Contains(Constants.argTestLive);
         _experiment = result.UnmatchedTokens.Contains(Constants.argExperiment);
         return await result.InvokeAsync();
     }
 
-    static void ConfigureServices(IServiceCollection collection)
+    public static void ConfigureServices(IServiceCollection collection)
     {
-        collection.AddSingleton<AppSetup>(
+        collection.AddSingleton(
             new AppSetup(Config.LoadConfig(Constants.GetConfigPath(_testlive)), _testlive, false, _experiment));
         collection.AddLogging(builder => builder.AddSerilog(GetLogger(), true));
         collection.AddSingleton<AppClientFiles>();
         collection.AddSingleton<AppServerFiles>();
         collection.AddSingleton<AppModlistFiles>();
+        collection.AddSingleton<ConanProcessFactory>();
         collection.AddSingleton<AppFiles>();
         collection.AddSingleton<Launcher>();
         collection.AddSingleton<IIniGenerator, YuuIniGenerator>();
-        collection.AddSingleton<IConsole>(new DotnetConsole());
     }
 
     static ILogger GetLogger()
@@ -49,10 +53,28 @@ class Program
 #if !DEBUG
             .MinimumLevel.Information()
 #endif
-            .WriteTo.File(
-                Path.Combine(Constants.GetLoggingDirectory().FullName, "boulder.log"),
-                retainedFileTimeLimit: TimeSpan.FromDays(7),
-                rollingInterval: RollingInterval.Day)
+            .WriteTo.Logger(fl => fl
+                .WriteTo.File(
+                    new ExpressionTemplate("{@t:yyyy-MM-dd HH:mm:ss.fff zzz} " +
+                                           "[{@l:u3}]" +
+                                           "{#if SourceContext is not null} " +
+                                           "{Substring(SourceContext, LastIndexOf(SourceContext, '.') + 1),-15}:" +
+                                           "{#end} " +
+                                           "{@m} " +
+                                           "{#each name, value in Rest(true)}({name}:{value}) {#end}" +
+                                           "{#if @x is not null}\n{@x}{#end}\n"),
+                    Path.Combine(Constants.GetLoggingDirectory().FullName, @"boulder.log"),
+                    retainedFileTimeLimit: TimeSpan.FromDays(7),
+                    rollingInterval: RollingInterval.Day)
+            )
+            .WriteTo.Console(
+                new ExpressionTemplate("[{@t:HH:mm:ss} {@l:u3}] " +
+                                       "{#if TrebSource is not null}" +
+                                            "{TrebSource}:" +
+                                       "{#end}" +
+                                       "{@m}\n{@x}",
+                theme: TemplateTheme.Code
+                ))
             .CreateLogger();
     }
 }

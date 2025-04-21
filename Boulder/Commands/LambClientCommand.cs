@@ -1,52 +1,49 @@
 using System.CommandLine;
 using System.CommandLine.IO;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
 using tot_lib;
+using tot_lib.CommandLine;
 using TrebuchetLib.Services;
 
 namespace Boulder.Commands;
 
-public class LambClientCommand : ITotCommand, ITotCommandInvoked, ITotCommandOptions
+public class LambClientCommand(Launcher launcher, ILogger<LambClientCommand> logger) : IInvokableCommand<LambClientCommand>
 {
-    public string Command => "client";
-    public string Description => "Start a conan exile game process and exit";
+    public static readonly Command Command = CommandBuilder
+        .CreateInvokable<LambClientCommand>("client", "Start a conan exile game process and exit")
+        .SetServiceConfiguration(Program.ConfigureServices)
+        .Options.Create<string>("--modlist", "modlist name as seen in trebuchet").AddAlias("-m")
+        .AddSetter((c,v) => c.Modlist = v ?? string.Empty).BuildOption()
+        .Options.Create<string>("--save", "client save name as seen in trebuchet").AddAlias("-s")
+        .AddSetter((c,v) => c.Profile = v ?? string.Empty).BuildOption()
+        .Options.Create<bool>("--battle-eye", "start with battle eye").AddAlias("-b")
+        .AddSetter((c,v) => c.BattleEye = v).BuildOption()
+        .BuildCommand();
     public string Profile { get; set; } = string.Empty;
     public string Modlist { get; set; } = string.Empty;
     public bool BattleEye { get; set; } = false;
     
-    public IEnumerable<Option> GetOptions()
+    public async Task<int> InvokeAsync(CancellationToken token)
     {
-        var modlistOpt = new TotOption<string>("--modlist", "modlist name as seen in trebuchet");
-        modlistOpt.AddAlias("-m");
-        modlistOpt.AddSetter(x => Modlist = x ?? string.Empty);
-        yield return modlistOpt;
-        var profileOpt = new TotOption<string>("--save", "client save name as seen in trebuchet");
-        profileOpt.AddAlias("-s");
-        profileOpt.AddSetter(x => Profile = x ?? string.Empty);
-        yield return profileOpt;
-        var battleEyeOpt = new TotOption<bool>("--battle-eye", "start with battle eye");
-        battleEyeOpt.AddAlias("-b");
-        battleEyeOpt.AddSetter(x => BattleEye = x);
-        yield return battleEyeOpt;
-    }
-    
-    public async Task<int> InvokeAsync(IServiceProvider provider, CancellationToken token)
-    {
-        var launcher = provider.GetRequiredService<Launcher>();
-        var console = provider.GetRequiredService<IConsole>();
-
         try
         {
+            var data = new Dictionary<string, object>
+            {
+                { "profile", Profile },
+                { "modlist", Modlist },
+                { "battle-eye", BattleEye }
+            };
+            using(logger.BeginScope(data))
+                logger.LogInformation("Starting process");
             var process = await launcher.CatapultClientProcess(Profile, Modlist, BattleEye);
-            console.WriteLine(process.Id.ToString());
+            logger.LogInformation("Process Started: {pid} ({name})", process.Id, process.ProcessName);
             return 0;
         }
         catch (Exception ex)
         {
-            console.Error.WriteLine(ex.Message);
-            return 1;
+            logger.LogCritical(ex, "Failed to start process");
+            return ex.GetErrorCode();
         }
     }
-
-
 }
