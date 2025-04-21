@@ -25,6 +25,7 @@ class Program
     {
         var rootCommand = new RootCommand("Boulder - Trebuchet's CLI");
         rootCommand.AddCommand(LambCommand.Command);
+        rootCommand.AddCommand(KillCommand.Command);
         
         var parser = new CommandLineBuilder(rootCommand).UseDefaults().Build();
         var result = parser.Parse(args);

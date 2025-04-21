@@ -468,42 +468,66 @@ public class Launcher(
         }
     }
 
-    private async Task FindExistingClient()
+    public async Task<ConanClientProcessInfos?> FindClientProcess()
     {
         var data = (await Tools.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
 
-        if (_conanClientProcess != null) return;
-        if (data.IsEmpty) return;
-        if (!data.TryGetProcess(out var process)) return;
+        if (data.IsEmpty) return null;
+        if (!data.TryGetProcess(out var process)) return null;
 
-        _conanClientProcess = await processFactory.Create()
-            .SetStartDate(data.start)
-            .SetProcess(process)
-            .BuildClient();
+        return new ConanClientProcessInfos()
+        {
+            Process = process,
+            Start = data.start
+        };
     }
-
-    private async Task FindExistingServers()
+    
+    public async IAsyncEnumerable<ConanServerProcessInfos> FindServerProcesses()
     {
         var processes = await Tools.GetProcessesWithName(Constants.FileServerBin);
         foreach (var p in processes)
         {
             if (!appFiles.Server.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
-            if (_serverProcesses.ContainsKey(instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
-            logger.LogInformation("Found process {process}", process.ProcessName);
             var gameLogs = Path.Combine(appFiles.Server.GetInstancePath(instance),
                 Constants.FolderGameSave,
                 Constants.FolderGameSaveLog,
                 Constants.FileGameLogFile);
-            IConanServerProcess server = await processFactory.Create()
-                .SetStartDate(p.start)
-                .SetProcess(process)
-                .SetServerInfos(iniHandler, instance)
-                .SetLogFile(gameLogs)
-                .BuildServer();
-                
-            _serverProcesses.TryAdd(instance, server);
+            yield return new ConanServerProcessInfos()
+            {
+                Process = process,
+                Start = p.start,
+                Instance = instance,
+                GameLogs = gameLogs
+            };
+        }
+    }
+    
+    private async Task FindExistingClient()
+    {
+        if (_conanClientProcess != null) return;
+
+        var process = await FindClientProcess();
+        if (process is not null)
+            _conanClientProcess = await processFactory.Create()
+                .SetStartDate(process.Start)
+                .SetProcess(process.Process)
+                .BuildClient();
+    }
+
+    private async Task FindExistingServers()
+    {
+        await foreach (var process in FindServerProcesses())
+        {
+            if(_serverProcesses.ContainsKey(process.Instance)) continue;
+            _serverProcesses.TryAdd(process.Instance, await processFactory.Create()
+                .SetStartDate(process.Start)
+                .SetProcess(process.Process)
+                .SetServerInfos(iniHandler, process.Instance)
+                .SetLogFile(process.GameLogs)
+                .BuildServer()
+            );
         }
     }
 

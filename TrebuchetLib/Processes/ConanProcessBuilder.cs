@@ -60,6 +60,12 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
         return this;
     }
 
+    public IConanProcessServerBuilder SetServerInfos(ConanServerInfos infos)
+    {
+        _serverInfosGetter = () => Task.FromResult(infos);
+        return this;
+    }
+
     public IConanProcessServerBuilder SetServerInfos(IIniGenerator iniGenerator, int instance)
     {
         _serverInfosGetter = async () => await iniGenerator.GetInfosFromServerAsync(instance);

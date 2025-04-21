@@ -14,6 +14,7 @@ public interface IConanProcessBuilderWithProcess : IConanProcessBuilder
     Task<IConanProcess> BuildClient();
     IConanProcessServerBuilder SetServerInfos(ServerProfile profile, int instance);
     IConanProcessServerBuilder SetServerInfos(IIniGenerator iniGenerator, int instance);
+    IConanProcessServerBuilder SetServerInfos(ConanServerInfos infos);
 }
 
 
