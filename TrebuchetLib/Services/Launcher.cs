@@ -133,7 +133,7 @@ public class Launcher(
         await iniHandler.WriteClientSettingsAsync(profile);
         var process = await CreateClientProcess(profile, modlist, isBattleEye);
 
-        await Task.Run(() => process.Start());
+        process.Start();
 
         var childProcess = await CatchClientChildProcess(process);
         if (childProcess == null)
@@ -168,10 +168,12 @@ public class Launcher(
     private async Task<Process?> CatchClientChildProcess(Process parent)
     {
         var target = ProcessData.Empty;
+        DateTime start = DateTime.UtcNow;
         while (target.IsEmpty && !parent.HasExited)
         {
+            if ((DateTime.UtcNow - start).TotalSeconds > 20) return null;
             target = (await Tools.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
-            await Task.Delay(50);
+            await Task.Delay(25);
         }
 
         if (target.IsEmpty) return null;
@@ -323,8 +325,7 @@ public class Launcher(
 
         await iniHandler.WriteServerSettingsAsync(profile, instance);
         var process = await CreateServerProcess(instance, profile, modlist);
-
-        await Task.Run(() => process.Start());
+        process.Start();
 
         var childProcess = await CatchServerChildProcess(process);
         if (childProcess == null)
@@ -361,10 +362,12 @@ public class Launcher(
     private async Task<Process?> CatchServerChildProcess(Process process)
     {
         var child = ProcessData.Empty;
+        DateTime start = DateTime.UtcNow;
         while (child.IsEmpty && !process.HasExited)
         {
+            if ((DateTime.UtcNow - start).TotalSeconds > 20) return null;
             child = Tools.GetFirstChildProcesses(process.Id);
-            await Task.Delay(50);
+            await Task.Delay(25);
         }
 
         if (child.IsEmpty) return null;
