@@ -156,7 +156,7 @@ public class SteamApi(
     public int CountUnusedMods()
     {
         var installedMods = steam.GetUGCFileIdsFromStorage();
-        var usedMods = appFiles.Mods.ListProfiles()
+        var usedMods = appFiles.Mods.GetList()
             .SelectMany(x => appFiles.Mods.Get(x).GetWorkshopMods());
         var count = installedMods.Except(usedMods).Count();
         return count;
@@ -168,7 +168,7 @@ public class SteamApi(
         try
         {
             var installedMods = steam.GetUGCFileIdsFromStorage();
-            var usedMods = appFiles.Mods.ListProfiles()
+            var usedMods = appFiles.Mods.GetList()
                 .SelectMany(x => appFiles.Mods.Get(x).GetWorkshopMods());
             var toRemove = installedMods.Except(usedMods).ToList();
             steam.ClearUGCFileIdsFromStorage(toRemove);

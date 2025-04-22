@@ -8,15 +8,13 @@ namespace TrebuchetLib.Services
     public class Steam : IDebugListener
     {
         private readonly ILogger<Steam> _logger;
-        private readonly AppFiles _appFiles;
         private readonly AppSetup _appSetup;
         private readonly IProgressCallback<double> _progress;
         private readonly Steam3Session _session;
 
-        public Steam(ILogger<Steam> logger, AppFiles appFiles, AppSetup appSetup, IProgressCallback<double> progress)
+        public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgressCallback<double> progress)
         {
             _logger = logger;
-            _appFiles = appFiles;
             _appSetup = appSetup;
             _progress = progress;
 
@@ -70,7 +68,7 @@ namespace TrebuchetLib.Services
         {
             int count = 0;
 
-            string folder = Path.Combine(_appFiles.Server.GetBaseInstancePath());
+            string folder = Path.Combine(_appSetup.GetBaseInstancePath());
             if (!Directory.Exists(folder))
                 return 0;
 
@@ -94,7 +92,7 @@ namespace TrebuchetLib.Services
         public ulong GetInstanceBuildID(int instance)
         {
             string manifest = Path.Combine(
-                _appFiles.Server.GetInstancePath(instance),
+                _appSetup.GetInstancePath(instance),
                 Constants.FileBuildID);
 
             if (!File.Exists(manifest))
@@ -187,7 +185,7 @@ namespace TrebuchetLib.Services
 
             var depotConfigStore = DepotConfigStore.LoadInstanceFromFile(
                 Path.Combine(
-                    _appFiles.Mods.GetWorkshopFolder(), 
+                    _appSetup.GetWorkshopFolder(), 
                     ContentDownloader.CONFIG_DIR, 
                     ContentDownloader.DEPOT_CONFIG));
             foreach (var (pubID, manisfestID) in keyValuePairs)
@@ -204,7 +202,7 @@ namespace TrebuchetLib.Services
             UpdateDownloaderConfig();
             DepotConfigStore.LoadFromFile(
                 Path.Combine(
-                    _appFiles.Mods.GetWorkshopFolder(), 
+                    _appSetup.GetWorkshopFolder(), 
                     ContentDownloader.CONFIG_DIR, 
                     ContentDownloader.DEPOT_CONFIG));
             
@@ -218,7 +216,7 @@ namespace TrebuchetLib.Services
             UpdateDownloaderConfig();
             DepotConfigStore.LoadFromFile(
                 Path.Combine(
-                    _appFiles.Mods.GetWorkshopFolder(), 
+                    _appSetup.GetWorkshopFolder(), 
                     ContentDownloader.CONFIG_DIR, 
                     ContentDownloader.DEPOT_CONFIG));
             return DepotConfigStore.Instance.InstalledUGCManifestIDs.Keys.ToList();
@@ -229,7 +227,7 @@ namespace TrebuchetLib.Services
         /// </summary>
         public void RemoveAllSymbolicLinks()
         {
-            string folder = _appFiles.Server.GetBaseInstancePath();
+            string folder = _appSetup.GetBaseInstancePath();
             if (!Directory.Exists(folder))
                 return;
             string[] instances = Directory.GetDirectories(folder);
@@ -242,9 +240,9 @@ namespace TrebuchetLib.Services
             ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
             ContentDownloader.Config.MaxDownloads = _appSetup.Config.MaxDownloads;
             ContentDownloader.Config.MaxServers = Math.Max(_appSetup.Config.MaxServers, ContentDownloader.Config.MaxDownloads);
-            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_appFiles.Mods.GetWorkshopFolder(), ContentDownloader.CONFIG_DIR);
+            ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_appSetup.GetWorkshopFolder(), ContentDownloader.CONFIG_DIR);
             AccountSettingsStore.LoadFromFile(
-                Path.Combine(_appFiles.Mods.GetWorkshopFolder(), 
+                Path.Combine(_appSetup.GetWorkshopFolder(), 
                     _appSetup.VersionFolder, 
                     "account.config"));
         }
@@ -260,7 +258,7 @@ namespace TrebuchetLib.Services
             if (!await WaitSteamConnectionAsync()) return;
 
             UpdateDownloaderConfig();
-            ContentDownloader.Config.InstallDirectory = Path.Combine(_appFiles.Mods.GetWorkshopFolder());
+            ContentDownloader.Config.InstallDirectory = Path.Combine(_appSetup.GetWorkshopFolder());
             await Task.Run(async () =>
             {
                 try
@@ -290,7 +288,7 @@ namespace TrebuchetLib.Services
 
             _logger.LogInformation($"Updating server instance {instanceNumber}.");
 
-            string instance = _appFiles.Server.GetInstancePath(instanceNumber);
+            string instance = _appSetup.GetInstancePath(instanceNumber);
             if (reinstall)
             {
                 Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
@@ -330,8 +328,8 @@ namespace TrebuchetLib.Services
 
             _logger.LogInformation("Updating server instance {0} from instance 0.", instanceNumber);
 
-            string instance = _appFiles.Server.GetInstancePath(instanceNumber);
-            string instance0 = _appFiles.Server.GetInstancePath(0);
+            string instance = _appSetup.GetInstancePath(instanceNumber);
+            string instance0 = _appSetup.GetInstancePath(0);
 
             if (!Directory.Exists(instance0))
                 throw new DirectoryNotFoundException($"{instance0} was not found.");

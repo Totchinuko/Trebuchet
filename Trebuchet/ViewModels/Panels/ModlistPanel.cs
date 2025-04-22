@@ -36,7 +36,8 @@ namespace Trebuchet.ViewModels.Panels
     public class ModlistPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRefreshingPanel
     {
         public ModlistPanel(
-            SteamApi steamApi, 
+            SteamApi steamApi,
+            AppSetup setup,
             AppFiles appFiles,
             UIConfig uiConfig, 
             TaskBlocker blocker,
@@ -47,6 +48,7 @@ namespace Trebuchet.ViewModels.Panels
             ILogger<ModlistPanel> logger) 
         {
             _steamApi = steamApi;
+            _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             _box = box;
@@ -58,7 +60,7 @@ namespace Trebuchet.ViewModels.Panels
             SetupFileWatcher();
             RefreshProfiles();
             
-            _selectedModlist = _appFiles.Mods.ResolveProfile(_uiConfig.CurrentModlistProfile);
+            _selectedModlist = _appFiles.Mods.Resolve(_uiConfig.CurrentModlistProfile);
             _profile = _appFiles.Mods.Get(_selectedModlist);
             _modlistUrl = _profile.SyncURL;
             _serverPassword = _profile.ServerPassword;
@@ -124,6 +126,7 @@ namespace Trebuchet.ViewModels.Panels
         }
         
         private readonly SteamApi _steamApi;
+        private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private readonly DialogueBox _box;
@@ -142,7 +145,7 @@ namespace Trebuchet.ViewModels.Panels
         private string _serverAddress;
         private string _serverPort;
         private string _serverPassword;
-        private bool _swapping = false;
+        private bool _swapping;
         public ObservableAsPropertyHelper<bool> _serverDetailsValid;
 
         public ReactiveCommand<Unit, Unit> CreateModlistCommand { get; }
@@ -200,7 +203,7 @@ namespace Trebuchet.ViewModels.Panels
             get => _selectedModlist;
             set
             {
-                var resolved = _appFiles.Mods.ResolveProfile(value);
+                var resolved = _appFiles.Mods.Resolve(value);
                 this.RaiseAndSetIfChanged(ref _selectedModlist, resolved);
             }
         }
@@ -593,7 +596,7 @@ namespace Trebuchet.ViewModels.Panels
             var name = await GetNewProfileName();
             if (name is null) return;
             _logger.LogInformation(@"Modlist duplicate {from} to {to}", _profile.ProfileName, name);
-            _profile = _appFiles.Mods.Duplicate(_profile.ProfileName, name);
+            _profile = await _appFiles.Mods.Duplicate(_profile.ProfileName, name);
             RefreshProfiles();
             SelectedModlist = name;
         }
@@ -608,7 +611,7 @@ namespace Trebuchet.ViewModels.Panels
         private void RefreshProfiles()
         {
             Profiles.Clear();
-            Profiles.AddRange(_appFiles.Mods.ListProfiles());
+            Profiles.AddRange(_appFiles.Mods.GetList());
         }
 
         [MemberNotNull("_modWatcher")]
@@ -618,7 +621,7 @@ namespace Trebuchet.ViewModels.Panels
                 return;
 
             _logger.LogInformation(@"Starting mod file watcher");
-            var path = Path.Combine(_appFiles.Mods.GetWorkshopFolder());
+            var path = Path.Combine(_setup.GetWorkshopFolder());
             if (!Directory.Exists(path))
                 Tools.CreateDir(path);
 

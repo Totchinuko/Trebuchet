@@ -2,22 +2,22 @@ using tot_lib;
 
 namespace TrebuchetLib.Services;
 
-public class AppFiles(AppClientFiles clientFiles, AppServerFiles serverFiles, AppModlistFiles modListFiles)
+public class AppFiles(AppSetup setup, AppClientFiles clientFiles, AppServerFiles serverFiles, AppModlistFiles modListFiles)
 {
-    public AppClientFiles Client { get; } = clientFiles;
-    public AppServerFiles Server { get; } = serverFiles;
-    public AppModlistFiles Mods { get; } = modListFiles;
+    public IAppClientFiles Client { get; } = clientFiles;
+    public IAppServerFiles Server { get; } = serverFiles;
+    public IAppModListFiles Mods { get; } = modListFiles;
     
     public bool SetupFolders()
     {
-        Tools.CreateDir(Server.GetBaseInstancePath());
+        Tools.CreateDir(setup.GetServerInstancePath());
         Tools.CreateDir(Client.GetBaseFolder());
         Tools.CreateDir(Server.GetBaseFolder());
         Tools.CreateDir(Mods.GetBaseFolder());
-        Tools.CreateDir(Mods.GetWorkshopFolder());
-        Tools.CreateDir(Client.GetEmptyJunction());
-        if(!JunctionPoint.Exists(Client.GetPrimaryJunction()))
-            Tools.SetupSymboliclink(Client.GetPrimaryJunction(), Client.GetEmptyJunction());
+        Tools.CreateDir(setup.GetWorkshopFolder());
+        Tools.CreateDir(setup.GetEmptyJunction());
+        if(!JunctionPoint.Exists(setup.GetPrimaryJunction()))
+            Tools.SetupSymboliclink(setup.GetPrimaryJunction(), setup.GetEmptyJunction());
 
         return true;
     }

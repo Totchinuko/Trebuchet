@@ -5,7 +5,7 @@ using Yuu.Ini;
 
 namespace TrebuchetLib.YuuIni;
 
-public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
+public class YuuIniClientFiles(AppSetup setup)
 {
     public async Task WriteIni(ClientProfile profile)
     {
@@ -19,7 +19,7 @@ public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
             IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
             if (!documents.TryGetValue(attr.Path, out IniDocument? document))
             {
-                var iniPath = Path.Combine(appFiles.Client.GetClientFolder(), attr.Path);
+                var iniPath = Path.Combine(setup.GetClientFolder(), attr.Path);
                 var iniContent = await Tools.GetFileContent(iniPath);
                 document = IniParser.Parse(iniContent, iniParserConfiguration);
                 documents.Add(attr.Path, document);
@@ -30,7 +30,7 @@ public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
         foreach (var document in documents)
         {
             document.Value.MergeDuplicateSections();
-            await Tools.SetFileContent(Path.Combine(appFiles.Client.GetClientFolder(), document.Key), document.Value.ToString());
+            await Tools.SetFileContent(Path.Combine(setup.GetClientFolder(), document.Key), document.Value.ToString());
         }
     }
 
@@ -39,7 +39,7 @@ public class YuuIniClientFiles(AppFiles appFiles, AppSetup setup)
         // Modify the default SectionName parse because funcom sometime does an oupsi and generate sections with an empty name
         var iniParserConfiguration = new IniParserConfiguration();
         iniParserConfiguration.SectionNameRegex = "\\s*[^\\[\\]]*\\s*";
-        var iniPath = Path.Combine(appFiles.Client.GetClientFolder(), string.Format(Constants.FileIniUser, "Game"));
+        var iniPath = Path.Combine(setup.GetClientFolder(), string.Format(Constants.FileIniUser, "Game"));
         var iniContent = await Tools.GetFileContent(iniPath);
         var document = IniParser.Parse(iniContent, iniParserConfiguration);
         

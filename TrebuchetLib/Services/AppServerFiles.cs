@@ -2,9 +2,8 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TrebuchetLib.Services;
 
-public class AppServerFiles(AppSetup appSetup)
+public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
 {
-    
     private readonly Dictionary<string, ServerProfile> _cache = [];
     public ServerProfile Create(string name)
     {
@@ -52,88 +51,21 @@ public class AppServerFiles(AppSetup appSetup)
         return copy;
     }
 
-    public ServerProfile Move(string name, string destination)
+    public Task<ServerProfile> Rename(string name, string destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
         var profile = Get(name);
         profile.MoveFolderTo(GetPath(destination));
         _cache.Remove(name);
-        var moved = Get(destination);
-        return moved;
+        return Task.FromResult(Get(destination));
     }
 
-    /// <summary>
-    /// Get the folder of a server profile.
-    /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    public string GetFolder(string name)
+    public Task<long> GetSize(string name)
     {
-        return Path.Combine(appSetup.GetDataDirectory().FullName,
-            appSetup.VersionFolder, Constants.FolderServerProfiles, name);
-    }
-
-    /// <summary>
-    /// Get the path of a server instance.
-    /// </summary>
-    /// <param name="instance"></param>
-    /// <returns></returns>
-    public string GetInstancePath(int instance)
-    {
-        return Path.Combine(
-            GetBaseInstancePath(),
-            string.Format(Constants.FolderInstancePattern, instance));
-    }
-
-    public string GetBaseInstancePath(DirectoryInfo baseFolder)
-    {
-        return Path.Combine(
-            baseFolder.FullName, 
-            appSetup.VersionFolder, 
-            Constants.FolderServerInstances);
-    }
-    
-    public string GetBaseInstancePath()
-    {
-        return Path.Combine(
-            appSetup.GetCommonAppDataDirectory().FullName, 
-            appSetup.VersionFolder, 
-            Constants.FolderServerInstances);
-    }
-
-    public string GetBaseInstancePath(bool testlive)
-    {
-        return Path.Combine(
-            appSetup.GetCommonAppDataDirectory().FullName, 
-            testlive ? Constants.FolderTestLive : Constants.FolderLive, 
-            Constants.FolderServerInstances);
-    }
-
-    /// <summary>
-    /// Get the executable of a server instance.
-    /// </summary>
-    /// <param name="instance"></param>
-    /// <returns></returns>
-    public string GetIntanceBinary(int instance)
-    {
-        return Path.Combine(
-            appSetup.GetCommonAppDataDirectory().FullName, 
-            appSetup.VersionFolder, 
-            Constants.FolderServerInstances,
-            string.Format(Constants.FolderInstancePattern, instance), 
-            Constants.FileServerProxyBin);
-    }
-
-    public string GetInstanceInternalBinary(int instance)
-    {
-        return Path.Combine(
-            appSetup.GetCommonAppDataDirectory().FullName, 
-            appSetup.VersionFolder, 
-            Constants.FolderServerInstances,
-            string.Format(Constants.FolderInstancePattern, instance), 
-            Constants.FolderGameBinaries,
-            Constants.FileServerBin);
+        var dir = Path.GetDirectoryName(GetPath(name));
+        if (dir is null) return Task.FromResult(0L);
+        return Task.Run(() => Tools.DirectorySize(dir));
     }
 
     public string GetBaseFolder()
@@ -161,7 +93,7 @@ public class AppServerFiles(AppSetup appSetup)
     /// List all the server profiles in the installation folder.
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<string> ListProfiles()
+    public IEnumerable<string> GetList()
     {
         string folder = Path.Combine(
             appSetup.GetDataDirectory().FullName, 
@@ -173,30 +105,6 @@ public class AppServerFiles(AppSetup appSetup)
         string[] profiles = Directory.GetDirectories(folder, "*");
         foreach (string p in profiles)
             yield return Path.GetFileName(p);
-    }
-
-    /// <summary>
-    /// Resolve a server profile name, if it is not valid, it will be set to the first profile found, if no profile is found, it will be set to "Default" and a new profile will be created.
-    /// </summary>
-    /// <param name="profileName"></param>
-    public string ResolveProfile(string profileName)
-    {
-        if (!string.IsNullOrEmpty(profileName))
-        {
-            string path = GetPath(profileName);
-            ServerProfile.RepairMissingProfileFile(path);
-            if (File.Exists(path)) 
-                return profileName;
-        }
-
-        profileName = Tools.GetFirstDirectoryName(Path.Combine(appSetup.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
-        if (!string.IsNullOrEmpty(profileName)) 
-            return profileName;
-
-        profileName = "Default";
-        if (!File.Exists(GetPath(profileName)))
-            ServerProfile.CreateProfile(GetPath(profileName)).SaveFile();
-        return profileName;
     }
 
     /// <summary>
@@ -216,22 +124,19 @@ public class AppServerFiles(AppSetup appSetup)
         }
         catch { return false; }
     }
-
-    public bool TryGetInstanceIndexFromPath(string path, out int instance)
-    {
-        instance = -1;
-        for (int i = 0; i < appSetup.Config.ServerInstanceCount; i++)
-        {
-            var instancePath = Path.GetFullPath(GetInstanceInternalBinary(i));
-            if (string.Equals(instancePath, path, StringComparison.Ordinal))
-            {
-                instance = i;
-                return true;
-            }
-        }
-        return false;
-    }
     
+    public string GetDefault()
+    {
+        var name = Tools.GetFirstDirectoryName(Path.Combine(appSetup.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderServerProfiles), "*");
+        if (!string.IsNullOrEmpty(name)) 
+            return name;
+
+        name = "Default";
+        if (!File.Exists(GetPath(name)))
+            ServerProfile.CreateProfile(GetPath(name)).SaveFile();
+        return name;
+    }
+
     public string GetGameLogs(string name)
     {
         return Path.Combine(

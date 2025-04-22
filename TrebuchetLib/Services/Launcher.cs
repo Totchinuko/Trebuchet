@@ -1,6 +1,5 @@
 ﻿using System.Diagnostics;
 using System.Net;
-using System.Text;
 using Microsoft.Extensions.Logging;
 using tot_lib;
 using TrebuchetLib.Processes;
@@ -82,7 +81,7 @@ public class Launcher(
         if (IsClientProfileLocked(profileName))
             throw new TrebException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(appFiles.Client.GetPrimaryJunction(), profile.ProfileFolder);
+        SetupJunction(setup.GetPrimaryJunction(), profile.ProfileFolder);
 
         await iniHandler.WriteClientSettingsAsync(profile);
         
@@ -115,7 +114,7 @@ public class Launcher(
 
     private async Task<Process> CreateClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye, bool autoConnect)
     {
-        var filename = isBattleEye ? appFiles.Client.GetBattleEyeBinaryPath() : appFiles.Client.GetGameBinaryPath();
+        var filename = setup.GetBinFile(isBattleEye);
         var modlistFile = Path.GetTempFileName();
         await File.WriteAllLinesAsync(modlistFile, appFiles.Mods.GetResolvedModlist(modlist.Modlist));
         var args = profile.GetClientArgs(modlistFile, autoConnect);
@@ -241,7 +240,7 @@ public class Launcher(
         if (IsServerProfileLocked(profileName))
             throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(Path.Combine(appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave), 
+        SetupJunction(Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave), 
             profile.ProfileFolder);
 
         await iniHandler.WriteServerSettingsAsync(profile, instance);
@@ -261,7 +260,7 @@ public class Launcher(
     {
         var process = new Process();
 
-        var filename = appFiles.Server.GetIntanceBinary(instance);
+        var filename = setup.GetIntanceBinary(instance);
         
         var modfileFile = Path.GetTempFileName();
         await File.WriteAllLinesAsync(modfileFile, appFiles.Mods.GetResolvedModlist(modlist.Modlist));
@@ -414,10 +413,10 @@ public class Launcher(
         var processes = await Tools.GetProcessesWithName(Constants.FileServerBin);
         foreach (var p in processes)
         {
-            if (!appFiles.Server.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
+            if (!setup.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
-            var gameLogs = Path.Combine(appFiles.Server.GetInstancePath(instance),
+            var gameLogs = Path.Combine(setup.GetInstancePath(instance),
                 Constants.FolderGameSave,
                 Constants.FolderGameSaveLog,
                 Constants.FileGameLogFile);
@@ -489,13 +488,13 @@ public class Launcher(
     {
         if (_conanClientProcess == null) return false;
         var junction = Path.GetFullPath(GetCurrentClientJunction());
-        var profilePath = Path.GetFullPath(appFiles.Client.GetFolder(profileName));
+        var profilePath = Path.GetFullPath(appFiles.Client.GetDirectory(profileName));
         return string.Equals(junction, profilePath, StringComparison.Ordinal);
     }
 
     public bool IsServerProfileLocked(string profileName)
     {
-        var profilePath = Path.GetFullPath(appFiles.Server.GetFolder(profileName));
+        var profilePath = Path.GetFullPath(appFiles.Server.GetDirectory(profileName));
         foreach (var s in _serverProcesses.Values)
         {
             var instance = s.Instance;
@@ -509,7 +508,7 @@ public class Launcher(
 
     private string GetCurrentClientJunction()
     {
-        var path = Path.Combine(appFiles.Client.GetClientFolder(), Constants.FolderGameSave);
+        var path = Path.Combine(setup.GetClientFolder(), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;
@@ -517,7 +516,7 @@ public class Launcher(
 
     private string GetCurrentServerJunction(int instance)
     {
-        var path = Path.Combine(appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave);
+        var path = Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;

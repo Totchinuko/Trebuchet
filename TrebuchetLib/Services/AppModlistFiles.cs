@@ -2,7 +2,7 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TrebuchetLib.Services;
 
-public class AppModlistFiles(AppSetup setup)
+public class AppModlistFiles(AppSetup setup) : IAppModListFiles
 {
     private readonly Dictionary<string, ModListProfile> _cache = [];
     public ModListProfile Create(string name)
@@ -38,25 +38,40 @@ public class AppModlistFiles(AppSetup setup)
         profile.DeleteFile();
     }
 
-    public ModListProfile Duplicate(string name, string destination)
+    public Task<long> GetSize(string name)
+    {
+        return Task.FromResult(0L);
+    }
+    
+    public string GetDefault()
+    {
+        var profileName = Tools.GetFirstFileName(Path.Combine(setup.GetDataDirectory().FullName, setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
+        if (!string.IsNullOrEmpty(profileName)) 
+            return profileName;
+
+        profileName = "Default";
+        if (!File.Exists(GetPath(profileName)))
+            ModListProfile.CreateProfile(GetPath(profileName)).SaveFile();
+        return profileName;
+    }
+
+    public Task<ModListProfile> Duplicate(string name, string destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
         var profile = Get(name);
         profile.CopyFileTo(GetPath(destination));
-        var copy = Get(destination);
-        return copy;
+        return Task.FromResult(Get(destination));
     }
 
-    public ModListProfile Move(string name, string destination)
+    public Task<ModListProfile> Rename(string name, string destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
         var profile = Get(name);
         profile.MoveFolderTo(GetPath(destination));
         _cache.Remove(name);
-        var moved = Get(destination);
-        return moved;
+        return Task.FromResult(Get(destination));
     }
 
     public IEnumerable<ulong> CollectAllMods(IEnumerable<string> modlists)
@@ -98,7 +113,7 @@ public class AppModlistFiles(AppSetup setup)
             modlistName + ".json");
     }
 
-    public IEnumerable<string> ListProfiles()
+    public IEnumerable<string> GetList()
     {
         string folder = Path.Combine(setup.GetDataDirectory().FullName, setup.VersionFolder, Constants.FolderModlistProfiles);
         if (!Directory.Exists(folder))
@@ -118,19 +133,11 @@ public class AppModlistFiles(AppSetup setup)
                 yield return mod;
     }
 
-    public string GetWorkshopFolder()
-    {
-        return Path.Combine(
-            setup.GetCommonAppDataDirectory().FullName,
-            Constants.FolderWorkshop
-        );
-    }
-
     private bool ResolveMod(uint appId, ref string mod)
     {
         string file = mod;
         if (long.TryParse(mod, out _))
-            file = Path.Combine(GetWorkshopFolder(), appId.ToString(), mod, "none");
+            file = Path.Combine(setup.GetWorkshopFolder(), appId.ToString(), mod, "none");
 
         string? folder = Path.GetDirectoryName(file);
         if (folder == null)
@@ -175,25 +182,6 @@ public class AppModlistFiles(AppSetup setup)
                 throw new TrebException($"Could not resolve mod {path}.");
             yield return path;
         }
-    }
-
-    public string ResolveProfile(string profileName)
-    {
-        if (!string.IsNullOrEmpty(profileName))
-        {
-            string path = GetPath(profileName);
-            if (File.Exists(path)) 
-                return profileName;
-        }
-
-        profileName = Tools.GetFirstFileName(Path.Combine(setup.GetDataDirectory().FullName, setup.VersionFolder, Constants.FolderModlistProfiles), "*.json");
-        if (!string.IsNullOrEmpty(profileName)) 
-            return profileName;
-
-        profileName = "Default";
-        if (!File.Exists(GetPath(profileName)))
-            ModListProfile.CreateProfile(GetPath(profileName)).SaveFile();
-        return profileName;
     }
 
     public bool TryGet(string name, [NotNullWhen(true)] out ModListProfile? profile)

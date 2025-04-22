@@ -246,16 +246,16 @@ public class OnBoarding(
             if (setup.Config.ManageClient)
             {
                 logger.LogInformation(@"Creating junction");
-                Tools.SetupSymboliclink(savedDir, appFiles.Client.GetPrimaryJunction());
+                Tools.SetupSymboliclink(savedDir, setup.GetPrimaryJunction());
             }
             else
             {
-                if (!appFiles.Client.ListProfiles().Any())
+                if (!appFiles.Client.GetList().Any())
                     return true;
                 var saveName = await OnBoardingChooseClientSave();
                 logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
                 Directory.CreateDirectory(savedDir);
-                await Tools.DeepCopyAsync(appFiles.Client.GetFolder(saveName), savedDir, CancellationToken.None);
+                await Tools.DeepCopyAsync(appFiles.Client.GetDirectory(saveName), savedDir, CancellationToken.None);
             }
             return true;
         }
@@ -264,13 +264,13 @@ public class OnBoarding(
         {
             logger.LogWarning(@"Junction found, but does not manage");
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
-            if (!appFiles.Client.ListProfiles().Any())
+            if (!appFiles.Client.GetList().Any())
                 return true;
             var saveName = await OnBoardingChooseClientSave();
             logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
             JunctionPoint.Delete(savedDir);
             Directory.CreateDirectory(savedDir);
-            await Tools.DeepCopyAsync(appFiles.Client.GetFolder(saveName), savedDir, CancellationToken.None);
+            await Tools.DeepCopyAsync(appFiles.Client.GetDirectory(saveName), savedDir, CancellationToken.None);
             return true;
         }
 
@@ -280,20 +280,20 @@ public class OnBoarding(
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
             var saveName = await OnBoardingChooseClientSaveName();
             logger.LogInformation(@"Copying game save into trebuchet {saveName}", saveName);
-            await Tools.DeepCopyAsync(savedDir, appFiles.Client.GetFolder(saveName), CancellationToken.None);
+            await Tools.DeepCopyAsync(savedDir, appFiles.Client.GetDirectory(saveName), CancellationToken.None);
             await OnBoardingSafeIO(() => Directory.Delete(savedDir, true),savedDir);
-            Tools.SetupSymboliclink(savedDir, appFiles.Client.GetPrimaryJunction());
+            Tools.SetupSymboliclink(savedDir, setup.GetPrimaryJunction());
             return true;
         }
 
         if (JunctionPoint.Exists(savedDir))
         {
             var path = JunctionPoint.GetTarget(savedDir);
-            if (Path.GetFullPath(path) != Path.GetFullPath(appFiles.Client.GetPrimaryJunction()))
+            if (Path.GetFullPath(path) != Path.GetFullPath(setup.GetPrimaryJunction()))
             {
                 if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
                 logger.LogWarning(@"Broken junction found, repairing");
-                JunctionPoint.Create(savedDir, appFiles.Client.GetPrimaryJunction(), true);
+                JunctionPoint.Create(savedDir, setup.GetPrimaryJunction(), true);
             }
         }
 
@@ -302,13 +302,13 @@ public class OnBoarding(
 
     public async Task<string> OnBoardingChooseClientSave()
     {
-        var list = appFiles.Client.ListProfiles().ToList();
+        var list = appFiles.Client.GetList().ToList();
         if (list.Count == 0)
             return await OnBoardingChooseClientSaveName();
         var choice = new OnBoardingListSelection(
                 Resources.OnBoardingGameSave, 
                 Resources.OnBoardingChooseGameSaveText, 
-                appFiles.Client.ListProfiles().ToList());
+                appFiles.Client.GetList().ToList());
         await dialogueBox.OpenAsync(choice);
         if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException(@"OnBoarding was cancelled");
         return choice.Value;
@@ -326,7 +326,7 @@ public class OnBoarding(
     public Validation ValidateClientSaveName(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return new Validation(false, Resources.ErrorNameEmpty);
-        if(appFiles.Client.ListProfiles().Any(x => x == name))
+        if(appFiles.Client.GetList().Any(x => x == name))
             return new Validation(false, Resources.ErrorNameAlreadyTaken);
         if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             return new Validation(false, Resources.ErrorNameInvalidCharacters);
@@ -481,9 +481,9 @@ public class OnBoarding(
         if (Directory.Exists(workshopDir))
         {
             logger.LogInformation(@"Copying workshop directory {directory}", workshopDir);
-            await Tools.DeepCopyAsync(workshopDir, appFiles.Mods.GetWorkshopFolder(), CancellationToken.None, progress);
+            await Tools.DeepCopyAsync(workshopDir, setup.GetWorkshopFolder(), CancellationToken.None, progress);
             if (isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(appFiles.Mods.GetWorkshopFolder()));
+                Tools.SetEveryoneAccess(new DirectoryInfo(setup.GetWorkshopFolder()));
             await OnBoardingSafeIO(() => Directory.Delete(workshopDir, true), workshopDir);
         }
         
@@ -493,9 +493,9 @@ public class OnBoarding(
         {
             logger.LogInformation(@"Copying instance directory {directory}", instanceDir);
             Tools.RemoveAllJunctions(instanceDir); 
-            await Tools.DeepCopyAsync(instanceDir, appFiles.Server.GetBaseInstancePath(testlive), CancellationToken.None, progress);
+            await Tools.DeepCopyAsync(instanceDir, setup.GetBaseInstancePath(testlive), CancellationToken.None, progress);
             if(isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(appFiles.Server.GetBaseInstancePath(testlive)));
+                Tools.SetEveryoneAccess(new DirectoryInfo(setup.GetBaseInstancePath(testlive)));
             await OnBoardingSafeIO(() => Directory.Delete(instanceDir, true), instanceDir);
         }
         progress.Report(0.0);

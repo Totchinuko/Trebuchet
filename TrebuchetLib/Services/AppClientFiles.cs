@@ -1,9 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
-using System.Reflection.Metadata;
 
 namespace TrebuchetLib.Services;
 
-public class AppClientFiles(AppSetup appSetup)
+public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
 {
     private readonly Dictionary<string, ClientProfile> _cache = [];
     public ClientProfile Create(string name)
@@ -52,15 +51,14 @@ public class AppClientFiles(AppSetup appSetup)
         return copy;
     }
 
-    public ClientProfile Move(string name, string destination)
+    public Task<ClientProfile> Rename(string name, string destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
         var profile = Get(name);
         profile.MoveFolderTo(GetPath(destination));
         _cache.Remove(name);
-        var moved = Get(destination);
-        return moved;
+        return Task.FromResult(Get(destination));
     }
     
     public string GetFolder(string name)
@@ -84,23 +82,7 @@ public class AppClientFiles(AppSetup appSetup)
             Constants.FileProfileConfig);
     }
 
-    public string GetPrimaryJunction()
-    {
-        return Path.Combine(
-            appSetup.GetCommonAppDataDirectory().FullName,
-            Constants.GamePrimaryJunction
-        );
-    }
-
-    public string GetEmptyJunction()
-    {
-        return Path.Combine(
-            appSetup.GetCommonAppDataDirectory().FullName,
-            Constants.GameEmptyJunction
-        );
-    }
-    
-    public IEnumerable<string> ListProfiles()
+    public IEnumerable<string> GetList()
     {
         string folder = Path.Combine(appSetup.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderClientProfiles);
         if (!Directory.Exists(folder))
@@ -110,21 +92,15 @@ public class AppClientFiles(AppSetup appSetup)
         foreach (string p in profiles)
             yield return Path.GetFileName(p);
     }
-    
-    public string ResolveProfile(string profileName)
+
+    public Task<long> GetSize(string name)
     {
-        if (!string.IsNullOrEmpty(profileName))
-        {
-            string path = GetPath(profileName);
-            ClientProfile.RepairMissingProfileFile(path);
-            if (File.Exists(path)) 
-                return profileName;
-        }
-
-        return GetDefaultProfile();
+        var dir = Path.GetDirectoryName(GetPath(name));
+        if (dir is null) return Task.FromResult(0L);
+        return Task.Run(() => Tools.DirectorySize(dir));
     }
-
-    public string GetDefaultProfile()
+    
+    public string GetDefault()
     {
         var name = Tools.GetFirstDirectoryName(Path.Combine(appSetup.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
         if (!string.IsNullOrEmpty(name)) 
@@ -134,18 +110,6 @@ public class AppClientFiles(AppSetup appSetup)
         if (!File.Exists(GetPath(name)))
             ClientProfile.CreateProfile(GetPath(name)).SaveFile();
         return name;
-    }
-    
-    public bool ProfileExists(string name)
-    {
-        return File.Exists(GetPath(name));
-    }
-    
-    public string GetUniqueOriginalProfile()
-    {
-        int i = 1;
-        while (ProfileExists("_Original_" + i)) i++;
-        return GetPath("_Original_" + i);
     }
     
     public bool TryGet(string name, [NotNullWhen(true)] out ClientProfile? profile)
@@ -158,20 +122,6 @@ public class AppClientFiles(AppSetup appSetup)
             return true;
         }
         catch { return false; }
-    }
-
-    public string GetGameBinaryPath()
-    {
-        return Path.Combine(appSetup.Config.ClientPath, Constants.FolderGameBinaries, Constants.FileClientBin);
-    }
-    public string GetBattleEyeBinaryPath()
-    {
-        return Path.Combine(appSetup.Config.ClientPath, Constants.FolderGameBinaries, Constants.FileClientBEBin);
-    }
-
-    public string GetClientFolder()
-    {
-        return appSetup.Config.ClientPath;
     }
 
     public string GetGameLogs(string name)

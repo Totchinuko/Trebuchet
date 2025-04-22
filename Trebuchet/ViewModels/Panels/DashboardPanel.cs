@@ -320,11 +320,11 @@ namespace Trebuchet.ViewModels.Panels
         
         private void RefreshClientSelection(string profile, string modlist)
         {
-            modlist = _appFiles.Mods.ResolveProfile(modlist);
-            profile = _appFiles.Client.ResolveProfile(profile);
+            modlist = _appFiles.Mods.Resolve(modlist);
+            profile = _appFiles.Client.Exists(profile) ? profile : _appFiles.Client.GetDefault();
 
-            Client.Modlists = _appFiles.Mods.ListProfiles().ToList();
-            Client.Profiles = _appFiles.Client.ListProfiles().ToList();
+            Client.Modlists = _appFiles.Mods.GetList().ToList();
+            Client.Profiles = _appFiles.Client.GetList().ToList();
             Client.SelectedProfile = profile;
             Client.SelectedModlist = modlist;
         }
@@ -337,11 +337,11 @@ namespace Trebuchet.ViewModels.Panels
 
         private void RefreshServerSelection(ServerInstanceDashboard dashboard)
         {
-            var modlist = _appFiles.Mods.ResolveProfile(dashboard.SelectedModlist);
-            var profile = _appFiles.Server.ResolveProfile(dashboard.SelectedProfile);
+            var modlist = _appFiles.Mods.Resolve(dashboard.SelectedModlist);
+            var profile = _appFiles.Server.Resolve(dashboard.SelectedProfile);
             
-            dashboard.Profiles = _appFiles.Server.ListProfiles().ToList();
-            dashboard.Modlists = _appFiles.Mods.ListProfiles().ToList();
+            dashboard.Profiles = _appFiles.Server.GetList().ToList();
+            dashboard.Modlists = _appFiles.Mods.GetList().ToList();
             dashboard.SelectedModlist = modlist;
             dashboard.SelectedProfile = profile;
         }

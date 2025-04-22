@@ -45,7 +45,7 @@ namespace Trebuchet.ViewModels.Panels
             CanBeOpened = Tools.IsServerInstallValid(_setup.Config);
 
             LoadProfileList();
-            _selectedProfile = _appFiles.Server.ResolveProfile(_uiConfig.CurrentServerProfile);
+            _selectedProfile = _appFiles.Server.Resolve(_uiConfig.CurrentServerProfile);
             _profile = _appFiles.Server.Get(_selectedProfile);
             
             this.WhenAnyValue(x => x.SelectedProfile)
@@ -74,7 +74,7 @@ namespace Trebuchet.ViewModels.Panels
             get => _selectedProfile;
             set
             {
-                var resolved = _appFiles.Server.ResolveProfile(value);
+                var resolved = _appFiles.Server.Resolve(value);
                 this.RaiseAndSetIfChanged(ref _selectedProfile, resolved);
             }
         }
@@ -112,7 +112,7 @@ namespace Trebuchet.ViewModels.Panels
         
         private async Task RefreshProfileSize(string profile)
         {
-            var path = _appFiles.Server.GetFolder(profile);
+            var path = _appFiles.Server.GetDirectory(profile);
             var size = await Task.Run(() => Tools.DirectorySize(path));
             ProfileSize = size.Bytes().Humanize();
         }
@@ -120,7 +120,7 @@ namespace Trebuchet.ViewModels.Panels
         private void LoadProfileList()
         {
             Profiles.Clear();
-            Profiles.AddRange(_appFiles.Server.ListProfiles());
+            Profiles.AddRange(_appFiles.Server.GetList());
         }
 
         private void OnOpenFolderProfile()
