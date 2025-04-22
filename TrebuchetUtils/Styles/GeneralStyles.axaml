@@ -222,6 +222,20 @@
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
     </Style>
+    <Style Selector="Border.Toolbar">
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="Background" Value="{DynamicResource TBackground}" />
+        <Setter Property="BorderThickness" Value="0 0 0 1"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+    </Style>
+    <Style Selector="Border.BottomToolbar">
+        <Setter Property="CornerRadius" Value="0" />
+        <Setter Property="Padding" Value="6" />
+        <Setter Property="Background" Value="{DynamicResource TBackground}" />
+        <Setter Property="BorderThickness" Value="0 1 0 0"/>
+        <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}"/>
+    </Style>
     <Style Selector="Border.Panel.Blue">
         <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}"/>
     </Style>
@@ -274,6 +288,10 @@
                 <BrushTransition Property="Background" Duration="0:0:0.1"/>
             </Transitions>
         </Setter>
+    </Style>
+    
+    <Style Selector="Button.Sharp /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="CornerRadius" Value="0" />
     </Style>
     
     <Style Selector="Button.Base:pointerover /template/ ContentPresenter#PART_ContentPresenter">
@@ -354,9 +372,6 @@
     <Style Selector="Button.Heavy /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="BorderThickness" Value="1" />
     </Style>
-    <Style Selector="Button.Flat /template/ ContentPresenter#PART_ContentPresenter">
-        <Setter Property="BorderThickness" Value="0" />
-    </Style>
     <Style Selector="Button.TabRight /template/ ContentPresenter#PART_ContentPresenter">
         <Setter Property="BorderThickness" Value="1 1 0 1" />
         <Setter Property="CornerRadius" Value="3 0 0 3"/>
@@ -373,14 +388,32 @@
         <Setter Property="BorderThickness" Value="1 0 1 1" />
         <Setter Property="CornerRadius" Value="0 0 3 3"/>
     </Style>
+    <Style Selector="Button.Flat /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="0" />
+    </Style>
     
     <Style Selector=".FoldedTabs">
         <Style Selector="^ Button.Base Label">
             <Setter Property="IsVisible" Value="False" />
         </Style>
-        <Style Selector="^ Button.Base i|Icon">
-            <Setter Property="FontSize" Value="25" />
-        </Style>
+    </Style>
+    
+    <!-- Flat Tab -->
+    <Style Selector="Button.Flat.Sharp.Colored.TabRight /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="0 0 3 0" />
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+    <Style Selector="Button.Flat.Sharp.Colored.TabLeft /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="3 0 0 0" />
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+    <Style Selector="Button.Flat.Sharp.Colored.TabTop /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="0 0 0 3" />
+        <Setter Property="CornerRadius" Value="0"/>
+    </Style>
+    <Style Selector="Button.Flat.Sharp.Colored.TabBottom /template/ ContentPresenter#PART_ContentPresenter">
+        <Setter Property="BorderThickness" Value="0 3 0 0" />
+        <Setter Property="CornerRadius" Value="0"/>
     </Style>
     
     
@@ -731,7 +764,7 @@
     <!-- Window Inner Contextual --> 
     <Style Selector="Panel.DialogueBox">
         <Setter Property="Opacity" Value="0" />
-        <Setter Property="ZIndex" Value="1" />
+        <Setter Property="ZIndex" Value="10" />
         <Setter Property="IsVisible" Value="False" />
         <Setter Property="HorizontalAlignment" Value="Stretch" />
         <Setter Property="VerticalAlignment" Value="Stretch" />
@@ -776,8 +809,15 @@
     </Style>
     
     <!-- Scrollviewer and bars -->
+    <Style Selector="ScrollBar">
+        <Style.Resources>
+            <x:Double x:Key="ScrollBarSize">12</x:Double>
+        </Style.Resources>
+  
+        <Setter Property="ShowDelay" Value="0:0:0.1"/>
+        <Setter Property="HideDelay" Value="0:0:0.2"/>
+    </Style>
     <Style Selector="ScrollViewer">
-        <Setter Property="AllowAutoHide" Value="False" />
         <Style Selector="^[IsExpanded=true] /template/ Panel#PART_ScrollBarsSeparator">
             <Setter Property="Opacity" Value="1" />
             <Setter Property="Background" Value="Transparent" />
@@ -789,13 +829,13 @@
         <Setter Property="MinHeight" Value="{DynamicResource TScrollbarSize}" />
         <Setter Property="Background" Value="Transparent" />
         <Style Selector="^:horizontal/template/Rectangle#TrackRect">
-            <Setter Property="Fill" Value="Transparent" />
+            <Setter Property="Fill" Value="{DynamicResource TBackground}" />
         </Style>
         <Style Selector="^:horizontal/template/Border#HorizontalRoot">
             <Setter Property="Background" Value="Transparent" />
         </Style>
         <Style Selector="^:vertical/template/Rectangle#TrackRect">
-            <Setter Property="Fill" Value="Transparent" />
+            <Setter Property="Fill" Value="{DynamicResource TBackground}" />
         </Style>
         <Style Selector="^:vertical/template/Border#VerticalRoot">
             <Setter Property="Background" Value="Transparent" />
