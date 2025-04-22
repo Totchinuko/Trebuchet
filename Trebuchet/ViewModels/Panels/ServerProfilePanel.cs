@@ -455,7 +455,7 @@ namespace Trebuchet.ViewModels.Panels
                 .SetTitle(Resources.SettingServerLogFilters)
                 .SetDescription(Resources.SettingServerLogFiltersText)
                 .SetGetter(() => string.Join(Environment.NewLine, _profile.LogFilters))
-                .SetSetter((v) => _profile.LogFilters = v.Split(Environment.NewLine).ToList())
+                .SetSetter((v) => _profile.LogFilters = v.Trim().Split(Environment.NewLine, StringSplitOptions.RemoveEmptyEntries).ToList())
                 .SetDefault(() => string.Join(Environment.NewLine, ServerProfile.LogFiltersDefault))
             );
         }
