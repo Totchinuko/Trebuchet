@@ -107,24 +107,6 @@ public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
             yield return Path.GetFileName(p);
     }
 
-    /// <summary>
-    /// Try to load a profile, if it fails, it will return false.
-    /// </summary>
-    /// <param name="name"></param>
-    /// <param name="profile"></param>
-    /// <returns></returns>
-    public bool TryGet(string name, [NotNullWhen(true)] out ServerProfile? profile)
-    {
-        profile = null;
-        if (!Exists(name)) return false;
-        try
-        {
-            profile = Get(name);
-            return true;
-        }
-        catch { return false; }
-    }
-    
     public string GetDefault()
     {
         var name = Tools.GetFirstDirectoryName(Path.Combine(appSetup.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderServerProfiles), "*");

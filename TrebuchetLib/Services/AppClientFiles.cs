@@ -61,11 +61,6 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
         return Task.FromResult(Get(destination));
     }
     
-    public string GetFolder(string name)
-    {
-        return Path.Combine(appSetup.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderClientProfiles, name);
-    }
-
     public string GetBaseFolder()
     {
         return Path.Combine(
@@ -112,18 +107,6 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
         return name;
     }
     
-    public bool TryGet(string name, [NotNullWhen(true)] out ClientProfile? profile)
-    {
-        profile = null;
-        if (!Exists(name)) return false;
-        try
-        {
-            profile = Get(name);
-            return true;
-        }
-        catch { return false; }
-    }
-
     public string GetGameLogs(string name)
     {
         return Path.Combine(

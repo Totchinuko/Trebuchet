@@ -1,5 +1,5 @@
 namespace TrebuchetLib.Services;
 
-public interface IAppClientFiles : IAppFileHandler<ClientProfile>
+public interface IAppClientFiles : IAppFileHandler<ClientProfile>, IAppFileHandlerWithSize<ClientProfile>
 {
 }

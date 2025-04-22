@@ -1,5 +1,3 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace TrebuchetLib.Services;
 
 public class AppModlistFiles(AppSetup setup) : IAppModListFiles
@@ -37,11 +35,6 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         var profile = Get(name);
         profile.DeleteFile();
     }
-
-    public Task<long> GetSize(string name)
-    {
-        return Task.FromResult(0L);
-    }
     
     public string GetDefault()
     {
@@ -77,7 +70,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
     public IEnumerable<ulong> CollectAllMods(IEnumerable<string> modlists)
     {
         foreach (var i in modlists.Distinct())
-            if (TryGet(i, out ModListProfile? profile))
+            if (this.TryGet(i, out ModListProfile? profile))
                 foreach (var m in profile.Modlist)
                     if (TryParseModId(m, out ulong id))
                         yield return id;
@@ -85,7 +78,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
 
     public IEnumerable<ulong> CollectAllMods(string modlist)
     {
-        if (TryGet(modlist, out ModListProfile? profile))
+        if (this.TryGet(modlist, out ModListProfile? profile))
             foreach (var m in profile.Modlist)
                 if (TryParseModId(m, out ulong id))
                     yield return id;
@@ -184,18 +177,6 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         }
     }
 
-    public bool TryGet(string name, [NotNullWhen(true)] out ModListProfile? profile)
-    {
-        profile = null;
-        if (!Exists(name)) return false;
-        try
-        {
-            profile = Get(name);
-            return true;
-        }
-        catch { return false; }
-    }
-
     public bool TryParseDirectory2ModId(string path, out ulong id)
     {
         id = 0;
@@ -231,14 +212,5 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
             return TryParseFile2ModId(path, out id);
         else
             return TryParseDirectory2ModId(path, out id);
-    }
-    
-    public IEnumerable<KeyValuePair<ulong, FileInfo>> GetModFiles(IEnumerable<string> files)
-    {
-        foreach (var file in files)
-        {
-            if (TryParseModId(file, out ulong id))
-                yield return new KeyValuePair<ulong, FileInfo>(id, new FileInfo(file));
-        }
     }
 }
