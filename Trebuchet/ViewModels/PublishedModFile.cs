@@ -14,7 +14,7 @@ public class PublishedModFile : ReactiveObject, IPublishedModFile
         PublishedId = publishedId;
         FilePath = path;
         Title = Path.GetFileName(path);
-        LastUpdate = string.Empty;
+        LastUpdate = File.Exists(path) ? Resources.Loading : Resources.Missing;
         IconClasses.Add(@"Live");
         IconToolTip = Resources.LiveMod;
         FileSize = 0;

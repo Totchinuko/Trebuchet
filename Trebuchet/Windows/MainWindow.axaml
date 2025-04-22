@@ -10,7 +10,7 @@
         mc:Ignorable="d"
         Title="Tot!Trebuchet"
         Height="650" Width="1010"
-        MinHeight="550" MinWidth="800"
+        MinHeight="600" MinWidth="800"
         WindowStartupLocation="CenterScreen"
         ExtendClientAreaToDecorationsHint="True"
         ExtendClientAreaChromeHints="NoChrome"
@@ -42,28 +42,23 @@
                 </controls:WindowTitlebar.Header>
             </controls:WindowTitlebar>
             <Border BorderThickness="0 1 0 0" BorderBrush="{DynamicResource TPanelAccent}" Grid.Row="1">
-                <Grid x:Name="WindowContent" ColumnDefinitions="Auto,*" RowDefinitions="Auto,*,Auto">
-                    <Border Margin="1 0 0 6" Classes.FoldedTabs="{Binding FoldedMenu}">
-                        <Button Classes="Base TabLeft" HorizontalAlignment="Stretch" Classes.Sneak="{Binding !FoldedMenu}" Classes.Colored="{Binding FoldedMenu}" Command="{Binding ToggleFoldedCommand}">
-                            <i:Icon Value="mdi-view-list" HorizontalAlignment="Left" FontSize="23" Classes="Normal" />
-                        </Button>
-                    </Border>
-                    <ItemsControl Grid.Column="0" Grid.Row="1" Margin="1 0 0 0" ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                <Grid x:Name="WindowContent" ColumnDefinitions="Auto,*" RowDefinitions="*,Auto">
+                    <ItemsControl Grid.Column="0" Grid.Row="0" Margin="1 12 0 0" ItemsSource="{Binding TopPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Spacing="6" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
-                    <ItemsControl Grid.Column="0" Grid.Row="2" Margin="1 0 0 0" Padding="0 0 0 12" ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
+                    <ItemsControl Grid.Column="0" Grid.Row="1" Margin="1 0 0 0" Padding="0 0 0 12" ItemsSource="{Binding BottomPanels}" ItemTemplate="{StaticResource TabButtonTemplate}" Classes.FoldedTabs="{Binding FoldedMenu}">
                         <ItemsControl.ItemsPanel>
                             <ItemsPanelTemplate>
                                 <StackPanel Spacing="6" />
                             </ItemsPanelTemplate>
                         </ItemsControl.ItemsPanel>
                     </ItemsControl>
-                    <Border x:Name="ContentPanel" Classes="DarkPanel" CornerRadius="0" BorderThickness="1 0 0 0" BorderBrush="{DynamicResource TPanelAccent}" Grid.Column="1" Grid.Row="0" Grid.RowSpan="3">
-                        <ContentControl Content="{Binding ActivePanel.Panel}" />
+                    <Border x:Name="ContentPanel" Classes="DarkPanel" CornerRadius="0" BorderThickness="1 0 0 0" BorderBrush="{DynamicResource TPanelAccent}" Grid.Column="1" Grid.Row="0" Grid.RowSpan="2">
+                        <ContentControl Content="{Binding ActivePanel.Panel}" ClipToBounds="False" />
                     </Border>
                 </Grid>
             </Border>

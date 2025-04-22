@@ -21,14 +21,18 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         AppId = file.ConsumerAppId;
         var updateDate = Tools.UnixTimeStampToDateTime(file.TimeUpdated).ToLocalTime();
         LastDateUpdate = updateDate;
-        LastUpdate = @$"{Resources.LastUpdate}: {updateDate.Humanize()}";
         IconClasses.Add(file.ConsumerAppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
         IconToolTip = file.ConsumerAppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = file.FileSize;
-        if(File.Exists(path))
+        if (File.Exists(path))
+        {
+            
+            LastUpdate = @$"{(needUpdate ? Resources.UpdateAvailable : Resources.UpToDate)} - {Resources.LastUpdate}: {updateDate.Humanize()}";
             StatusClasses.Add(needUpdate ? @"UpdateAvailable" : @"Up2Date");
+        }
         else
         {
+            LastUpdate = @$"{Resources.Missing} - {Resources.LastUpdate}: {updateDate.Humanize()}";
             StatusClasses.Add(@"Missing");
             NeedUpdate = true;
         }
@@ -43,14 +47,18 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         Title = file.Title;
         AppId = file.AppId;
         LastDateUpdate = file.LastUpdate;
-        LastUpdate = @$"{Resources.LastUpdate}: {file.LastUpdate.Humanize()}";
         IconClasses.Add(file.AppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
         IconToolTip = file.AppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = (long)file.Size;
-        if(File.Exists(path))
+        if (File.Exists(path))
+        {
+            
+            LastUpdate = @$"{(needUpdate ? Resources.UpdateAvailable : Resources.UpToDate)} - {Resources.LastUpdate}: {file.LastUpdate.Humanize()}";
             StatusClasses.Add(needUpdate ? @"UpdateAvailable" : @"Up2Date");
+        }
         else
         {
+            LastUpdate = @$"{Resources.Missing} - {Resources.LastUpdate}: {file.LastUpdate.Humanize()}";
             StatusClasses.Add(@"Missing");
             NeedUpdate = true;
         }
@@ -66,14 +74,19 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         AppId = file.AppId;
         NeedUpdate = file.NeedUpdate;
         LastDateUpdate = file.LastDateUpdate;
-        LastUpdate = @$"{Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
         IconClasses.Add(file.AppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
         IconToolTip = file.AppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = file.FileSize;
-        if(File.Exists(path))
+        if (File.Exists(path))
+        {
+            LastUpdate = @$"{(NeedUpdate ? Resources.UpdateAvailable : Resources.UpToDate)} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
             StatusClasses.Add(NeedUpdate ? @"UpdateAvailable" : @"Up2Date");
+        }
         else
+        {
+            LastUpdate = @$"{Resources.Missing} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
             StatusClasses.Add(@"Missing");
+        }
     }
     
     public bool NeedUpdate { get; }

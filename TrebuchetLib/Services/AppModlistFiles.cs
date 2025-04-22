@@ -168,14 +168,17 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         }
     }
     
-    public IEnumerable<string> GetResolvedModlist(IEnumerable<string> modlist)
+    public IEnumerable<string> GetResolvedModlist(IEnumerable<string> modlist, bool throwIfFailed = true)
     {
         foreach (string mod in modlist)
         {
             string path = mod;
             if (!ResolveMod(ref path))
-                throw new TrebException($"Could not resolve mod {path}.");
-            yield return path;
+                if (throwIfFailed)
+                    throw new TrebException($"Could not resolve mod {path}.");
+                else yield return mod;
+            else
+                yield return path;
         }
     }
 
@@ -225,8 +228,15 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
 
     public async Task<ModListProfile> Import(FileInfo import, string name)
     {
-        var path = GetPath(name);
         var json = await File.ReadAllTextAsync(import.FullName);
-        return ModListProfile.ImportFile(json, path);
+        return await Import(json, name);
+    }
+
+    public Task<ModListProfile> Import(string json, string name)
+    {
+        var path = GetPath(name);
+        var profile = ModListProfile.ImportFile(json, path);
+        _cache[name] = profile;
+        return Task.FromResult(profile);
     }
 }

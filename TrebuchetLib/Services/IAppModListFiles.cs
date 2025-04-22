@@ -8,5 +8,5 @@ public interface IAppModListFiles : IAppFileHandler<ModListProfile>, IAppFileHan
     IEnumerable<ulong> CollectAllMods(string modlist);
     IEnumerable<ulong> GetModIdList(IEnumerable<string> modlist);
     IEnumerable<string> ParseModList(IEnumerable<string> modlist);
-    IEnumerable<string> GetResolvedModlist(IEnumerable<string> modlist);
+    IEnumerable<string> GetResolvedModlist(IEnumerable<string> modlist, bool throwIfFailed = true);
 }

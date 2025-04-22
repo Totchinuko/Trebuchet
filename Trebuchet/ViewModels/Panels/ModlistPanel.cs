@@ -5,14 +5,10 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
-using Avalonia.Platform.Storage;
 using Avalonia.Threading;
 using DynamicData.Binding;
 using Humanizer;
@@ -24,7 +20,6 @@ using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
-using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.Windows;
 using TrebuchetLib;
@@ -58,32 +53,25 @@ namespace Trebuchet.ViewModels.Panels
             _logger = logger;
             _workshop.ModAdded += (_,mod) => AddModFromWorkshop(mod);
             SetupFileWatcher();
-            RefreshProfiles();
             
-            _selectedModlist = _appFiles.Mods.Resolve(_uiConfig.CurrentModlistProfile);
-            _profile = _appFiles.Mods.Get(_selectedModlist);
-            _modlistUrl = _profile.SyncURL;
-            _serverPassword = _profile.ServerPassword;
-            _serverAddress = _profile.ServerAddress;
-            _serverPort = _profile.ServerPort <= 0 ? string.Empty : _profile.ServerPort.ToString();
+            var startingFile = _appFiles.Mods.Resolve(_uiConfig.CurrentModlistProfile);
+            FileMenu = new FileMenuViewModel<ModListProfile>(Resources.PanelMods, appFiles.Mods, box, logger);
+            FileMenu.FileSelected += OnFileSelected;
+            FileMenu.Selected = startingFile;
+            
+            _profile = _appFiles.Mods.Get(startingFile);
 
             _modFileFactory.Removed += RemoveModFile;
             _modFileFactory.Updated += UpdateModFile;
 
-            CreateModlistCommand = ReactiveCommand.CreateFromTask(OnModlistCreate);
-            DeleteModlistCommand = ReactiveCommand.CreateFromTask(OnModlistDelete);
-            DuplicateModlistCommand = ReactiveCommand.CreateFromTask(OnModlistDuplicate);
-            ExploreLocalCommand = ReactiveCommand.CreateFromTask(OnExploreLocal);
-            ExploreWorkshopCommand = ReactiveCommand.Create(OnExploreWorkshop);
-            ExportToJsonCommand = ReactiveCommand.CreateFromTask(OnExportToJson);
-            ExportToTxtCommand = ReactiveCommand.CreateFromTask(OnExportToTxt);
-            ImportFromFileCommand = ReactiveCommand.CreateFromTask(OnImportFromFile);
-            ImportFromTextCommand = ReactiveCommand.CreateFromTask(OnImportFromText);
-            FetchCommand = ReactiveCommand.CreateFromTask(OnFetchClicked);
-            RefreshModlistCommand = ReactiveCommand.CreateFromTask(ForceLoadModlist);
+            Workshop = ReactiveCommand.Create(OnExploreWorkshop);
+            EditAsText = ReactiveCommand.CreateFromTask(OnEditModlistAsText);
+            Sync = ReactiveCommand.CreateFromTask(OnSync);
+            SyncEdit = ReactiveCommand.CreateFromTask(OnSyncEdit);
+            RefreshList = ReactiveCommand.CreateFromTask(ForceLoadModlist);
 
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
-            UpdateModsCommand = ReactiveCommand.CreateFromTask(() =>
+            Update = ReactiveCommand.CreateFromTask(() =>
             {
                 return UpdateMods(Modlist.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList());
             }, canDownloadMods);
@@ -93,36 +81,6 @@ namespace Trebuchet.ViewModels.Panels
                 {
                     _modWatcher.EnableRaisingEvents = x;
                 }));
-
-            this.WhenAnyValue(x => x.ModlistUrl)
-                .Subscribe((url) =>
-                {
-                    if (_swapping) return;
-                    _profile.SyncURL = url;
-                    _profile.SaveFile();
-                });
-            this.WhenAnyValue(x => x.ServerAddress, x => x.ServerPort, x => x.ServerPassword)
-                .Subscribe((args) =>
-                {
-                    if (_swapping) return;
-                    _profile.ServerAddress = args.Item1;
-                    if (int.TryParse(args.Item2, out var port))
-                        _profile.ServerPort = port;
-                    else
-                        _profile.ServerPort = -1;
-                    _profile.ServerPassword = args.Item3;
-                    _profile.SaveFile();
-                });
-
-            _serverDetailsValid = this.WhenAnyValue(x => x.ServerAddress, x => x.ServerPort,
-                    (a, p) => 
-                        (IPAddress.TryParse(a, out _) || string.IsNullOrEmpty(a)) && 
-                        (int.TryParse(p, out var port) && port is >= 0 and <= 65535 || string.IsNullOrEmpty(p))
-                    )
-                .ToProperty(this, x => x.ServerDetailsValid);
-            
-            this.WhenAnyValue(x => x.SelectedModlist)
-                .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnModlistChanged));
         }
         
         private readonly SteamApi _steamApi;
@@ -138,30 +96,19 @@ namespace Trebuchet.ViewModels.Panels
         private bool _needRefresh;
         private ModListProfile _profile;
         private WorkshopSearch? _searchWindow;
-        private string _modlistUrl;
-        private string _selectedModlist;
         private string _modlistSize = string.Empty;
         private bool _canBeOpened = true;
-        private string _serverAddress;
-        private string _serverPort;
-        private string _serverPassword;
-        private bool _swapping;
-        public ObservableAsPropertyHelper<bool> _serverDetailsValid;
 
-        public ReactiveCommand<Unit, Unit> CreateModlistCommand { get; }
-        public ReactiveCommand<Unit, Unit> DeleteModlistCommand { get; }
-        public ReactiveCommand<Unit, Unit> DuplicateModlistCommand { get; }
-        public ReactiveCommand<Unit, Unit> ExploreLocalCommand { get; }
-        public ReactiveCommand<Unit, Unit> ExploreWorkshopCommand { get; }
-        public ReactiveCommand<Unit, Unit> ExportToJsonCommand { get; }
-        public ReactiveCommand<Unit, Unit> ExportToTxtCommand { get; }
-        public ReactiveCommand<Unit, Unit> FetchCommand { get; }
-        public ReactiveCommand<Unit, Unit> ImportFromFileCommand { get; }
-        public ReactiveCommand<Unit, Unit> ImportFromTextCommand { get; }
-        public ReactiveCommand<Unit, Unit> UpdateModsCommand { get; }
-        public ReactiveCommand<Unit, Unit> RefreshModlistCommand { get; }
+        public ReactiveCommand<Unit, Unit> Workshop { get; }
+        public ReactiveCommand<Unit, Unit> EditAsText { get; }
+        public ReactiveCommand<Unit, Unit> Sync { get; }
+        public ReactiveCommand<Unit, Unit> SyncEdit { get; }
+        public ReactiveCommand<Unit, Unit> Update { get; }
+        public ReactiveCommand<Unit, Unit> RefreshList { get; }
 
         public ObservableCollectionExtended<IModFile> Modlist { get; } = [];
+        
+        public IFileMenuViewModel FileMenu { get; }
 
         public string Icon => @"mdi-toy-brick";
         public string Label => Resources.PanelMods;
@@ -172,50 +119,12 @@ namespace Trebuchet.ViewModels.Panels
             set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
         }
 
-        public string ModlistUrl
-        {
-            get => _modlistUrl;
-            set => this.RaiseAndSetIfChanged(ref _modlistUrl, value);
-        }
-
-        public string ServerAddress
-        {
-            get => _serverAddress;
-            set => this.RaiseAndSetIfChanged(ref _serverAddress, value);
-        }
-
-        public string ServerPort
-        {
-            get => _serverPort;
-            set => this.RaiseAndSetIfChanged(ref _serverPort, value);
-        }
-
-        public string ServerPassword
-        {
-            get => _serverPassword;
-            set => this.RaiseAndSetIfChanged(ref _serverPassword, value);
-        }
-
-        public bool ServerDetailsValid => _serverDetailsValid.Value;
-
-        public string SelectedModlist
-        {
-            get => _selectedModlist;
-            set
-            {
-                var resolved = _appFiles.Mods.Resolve(value);
-                this.RaiseAndSetIfChanged(ref _selectedModlist, resolved);
-            }
-        }
-
         public string ModlistSize
         {
             get => _modlistSize;
             set => this.RaiseAndSetIfChanged(ref _modlistSize, value);
         }
 
-        public ObservableCollectionExtended<string> Profiles { get; } = [];
-        
         public event AsyncEventHandler? RequestRefresh;
         
         public async Task AddModFromWorkshop(WorkshopSearchResult mod)
@@ -231,7 +140,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public Task RemoveModFile(IModFile mod)
         {
-            _logger.LogInformation(@"Remove mod {mod} from list {name}", mod.Export(), SelectedModlist);
+            _logger.LogInformation(@"Remove mod {mod} from list {name}", mod.Export(), FileMenu.Selected);
             Modlist.Remove(mod);
             _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
             _profile.SaveFile();
@@ -258,20 +167,14 @@ namespace Trebuchet.ViewModels.Panels
             _needRefresh = false;
             await LoadModlist();
         }
-
-        private Task OnModlistChanged() => OnModlistChanged(SelectedModlist);
-        private async Task OnModlistChanged(string modlist)
+        
+        private Task OnModlistChanged() => OnFileSelected(this, FileMenu.Selected);
+        private async Task OnFileSelected(object? sender, string profile)
         {
-            _logger.LogDebug(@"Swap to modlist {modlist}", modlist);
-            _uiConfig.CurrentModlistProfile = modlist;
+            _logger.LogDebug(@"Swap to modlist {modlist}", profile);
+            _uiConfig.CurrentModlistProfile = profile;
             _uiConfig.SaveFile();
-            _profile = _appFiles.Mods.Get(modlist);
-            _swapping = true;
-            ModlistUrl = _profile.SyncURL;
-            ServerAddress = _profile.ServerAddress;
-            ServerPort = _profile.ServerPort <= 0 ? string.Empty : _profile.ServerPort.ToString();
-            ServerPassword = _profile.ServerPassword;
-            _swapping = false;
+            _profile = _appFiles.Mods.Get(profile);
             await LoadModlist();
         }
 
@@ -296,7 +199,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
 
-        private async Task FetchJsonList(UriBuilder builder)
+        private async Task SyncJson(UriBuilder builder)
         {
             using(_logger.BeginScope((@"url", builder.ToString())))
                 _logger.LogInformation(@"Fetching json list");
@@ -304,9 +207,7 @@ namespace Trebuchet.ViewModels.Panels
             try
             {
                 var result = await Tools.DownloadModList(builder.ToString(), CancellationToken.None);
-                var export = _importer.Import(result);
-                export.SetValues(_profile);
-                _profile.SaveFile();
+                await _appFiles.Mods.Import(result, FileMenu.Selected);
                 await OnModlistChanged();
             }
             catch (Exception tex)
@@ -317,7 +218,7 @@ namespace Trebuchet.ViewModels.Panels
 
         }
 
-        private async Task FetchSteamCollection(UriBuilder builder)
+        private async Task SyncSteamCollection(UriBuilder builder)
         {
             using(_logger.BeginScope((@"url", builder.ToString())))
                 _logger.LogInformation(@"Fetching steam collection");
@@ -363,29 +264,6 @@ namespace Trebuchet.ViewModels.Panels
             ModlistSize = CalculateModlistSize().Bytes().Humanize();
         }
 
-        private async Task OnExploreLocal()
-        {
-            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
-            if (desktop.MainWindow == null) return;
-
-            var files = await desktop.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-            {
-                Title = Resources.AddLocalMod,
-                FileTypeFilter = [FileType.Pak],
-                AllowMultiple = true
-            });
-
-            _logger.BeginScope(@"Adding local mods");
-            Modlist.AddRange(
-                files.Where(f => f.Path.IsFile)
-                    .Select(f => Path.GetFullPath(f.Path.LocalPath))
-                    .Select(f => _modFileFactory.Create(f))
-                );
-            _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
-            _profile.SaveFile();
-            ModlistSize = CalculateModlistSize().Bytes().Humanize();
-        }
-
         private void OnExploreWorkshop()
         {
             if (_searchWindow != null) return;
@@ -396,43 +274,47 @@ namespace Trebuchet.ViewModels.Panels
             _searchWindow.Closing += OnSearchClosing;
             _searchWindow.Show();
         }
-
-        private async Task OnExportToJson()
+     
+        private async Task OnEditModlistAsText()
         {
-            var json = _importer.Export(_profile, ImportFormats.Json);
-            var editor = new OnBoardingModlistImport(json, true, FileType.Json);
-            await _box.OpenAsync(editor);
-        }
-
-        private async Task OnExportToTxt()
-        {
-            try
+            var modlist = _appFiles.Mods.GetResolvedModlist(_profile.Modlist, false);
+            var editor = new OnBoardingModlistImport(string.Join(Environment.NewLine, modlist));
+            
+            while (true)
             {
-                var content = _importer.Export(_profile, ImportFormats.Txt);
-                var editor = new OnBoardingModlistImport(content, true, FileType.Txt);
                 await _box.OpenAsync(editor);
-            }
-            catch
-            {
-                await _box.OpenErrorAsync(Resources.ExportErrorModNotFound);
+                if (editor.Value is null) return;
+                try
+                {
+                    var parsed = _importer.Import(editor.Value, ImportFormats.Txt);
+                    _profile.Modlist = parsed.Modlist;
+                    _profile.SaveFile();
+                    await OnModlistChanged();
+                    return;
+                }
+                catch(Exception ex)
+                {
+                    await _box.OpenErrorAsync(ex.Message);
+                }
             }
         }
 
-        private async Task OnFetchClicked()
+        private async Task OnSync()
         {
-            if (string.IsNullOrEmpty(ModlistUrl)) return;
-
             _logger.LogInformation(@"Sync modlist");
             OnBoardingConfirmation confirm = new OnBoardingConfirmation(
                 Resources.ModlistReplace,
-                string.Format(Resources.ModlistReplaceText, SelectedModlist));
+                string.Format(Resources.ModlistReplaceText, FileMenu.Selected));
             await _box.OpenAsync(confirm);
             if (!confirm.Result) return;
+
+            if (string.IsNullOrEmpty(_profile.SyncURL))
+                await OnSyncEdit();
 
             UriBuilder builder;
             try
             {
-                builder = new UriBuilder(ModlistUrl);
+                builder = new UriBuilder(_profile.SyncURL);
             }
             catch(Exception ex)
             {
@@ -442,85 +324,20 @@ namespace Trebuchet.ViewModels.Panels
             }
 
             if (SteamWorks.SteamCommunityHost == builder.Host)
-                await FetchSteamCollection(builder);
+                await SyncSteamCollection(builder);
             else
-                await FetchJsonList(builder);
+                await SyncJson(builder);
         }
 
-        private async Task OnImportFromFile()
+        private async Task OnSyncEdit()
         {
-            if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
-            if (desktop.MainWindow == null) return;
-
-            var files = await desktop.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
-            {
-                AllowMultiple = false,
-                Title = Resources.ImportModList,
-                FileTypeFilter = [FileType.Json, FileType.Txt],
-                SuggestedFileName = @"modlist.txt"
-            });
-
-            if (files.Count <= 0) return;
-            if (!files[0].Path.IsFile) return;
-            var file = files[0].Path.LocalPath;
-            var path = Path.GetFullPath(file);
-
-            var content = await File.ReadAllTextAsync(path);
-            if (_importer.GetFormat(content) == ImportFormats.Invalid)
-                await _box.OpenErrorAsync(Resources.WrongType, Resources.WrongTypeText);
-            else
-                await OnImportFromText(content);
-            
-        }
-
-        private async Task OnImportFromText()
-        {
-            var clipboard = await Utils.Utils.GetClipBoard();
-            if (_importer.GetFormat(clipboard) == ImportFormats.Invalid)
-                clipboard = string.Empty;
-            
-            await OnImportFromText(clipboard);
-        }
-
-        private async Task OnImportFromText(string import)
-        {
-            var editor = new OnBoardingModlistImport(import, false, FileType.Json);
+            var editor = new OnBoardingNameSelection(Resources.Sync, Resources.SyncText);
+            editor.Value = _profile.SyncURL;
+            editor.Watermark = @"https://";
             await _box.OpenAsync(editor);
-            if (editor.Canceled || editor.Value == null) return;
-
-            _logger.LogInformation(@"Importing modlist");
-            var format = _importer.GetFormat(import);
-            var text = editor.Value;
-            try
-            {
-                var export = _importer.Import(text);
-                if (format == ImportFormats.Txt)
-                {
-                    if (editor.Append)
-                        _profile.Modlist.AddRange(export.Modlist);
-                    else
-                        _profile.Modlist = export.Modlist;
-                }
-                else
-                {
-                    if(editor.Append)
-                        _profile.Modlist.AddRange(export.Modlist);
-                    else
-                    {
-                        export.SetValues(_profile);
-                    }
-                }
-                    
-            }
-            catch(Exception ex)
-            {
-                _logger.LogWarning(ex, @"Failed");
-                await _box.OpenErrorAsync(Resources.WrongType, Resources.WrongTypeText);
-                return;
-            }
-
+            if (editor.Value is null) return;
+            _profile.SyncURL = editor.Value;
             _profile.SaveFile();
-            await OnModlistChanged();
         }
 
         private void OnModFileChanged(object sender, FileSystemEventArgs e)
@@ -545,73 +362,11 @@ namespace Trebuchet.ViewModels.Panels
             });
         }
 
-        private async Task OnModlistCreate()
-        {
-            var name = await GetNewProfileName();
-            if (name is null) return;
-            _logger.LogInformation(@"Create modlist {name}", name);
-            _appFiles.Mods.Create(name);
-            RefreshProfiles();
-            SelectedModlist = name;
-        }
-
-        private async Task OnModlistDelete()
-        {
-            if (string.IsNullOrEmpty(SelectedModlist)) return;
-
-            OnBoardingConfirmation confirm = new OnBoardingConfirmation(
-                Resources.Deletion,
-                string.Format(Resources.DeletionText, SelectedModlist));
-            await _box.OpenAsync(confirm);
-            if (!confirm.Result) return;
-            
-            _logger.LogInformation(@"Modlist delete {name}", SelectedModlist);
-            _appFiles.Mods.Delete(SelectedModlist);
-
-            RefreshProfiles();
-            SelectedModlist = string.Empty;
-        }
-        
-        private Validation ValidateName(string? name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return Validation.Invalid(Resources.ErrorNameEmpty);
-            if (Profiles.Contains(name))
-                return Validation.Invalid(Resources.ErrorNameAlreadyTaken);
-            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-                return Validation.Invalid(Resources.ErrorNameInvalidCharacters);
-            return Validation.Valid;
-        }
-        
-        private async Task<string?> GetNewProfileName()
-        {
-            var modal = new OnBoardingNameSelection(Resources.Create, string.Empty)
-                .SetValidation(ValidateName);
-            await _box.OpenAsync(modal);
-            return modal.Value;
-        }
-
-        private async Task OnModlistDuplicate()
-        {
-            var name = await GetNewProfileName();
-            if (name is null) return;
-            _logger.LogInformation(@"Modlist duplicate {from} to {to}", _profile.ProfileName, name);
-            _profile = await _appFiles.Mods.Duplicate(_profile.ProfileName, name);
-            RefreshProfiles();
-            SelectedModlist = name;
-        }
-
         private void OnSearchClosing(object? sender, CancelEventArgs e)
         {
             if (_searchWindow == null) return;
             _searchWindow.Closing -= OnSearchClosing;
             _searchWindow = null;
-        }
-
-        private void RefreshProfiles()
-        {
-            Profiles.Clear();
-            Profiles.AddRange(_appFiles.Mods.GetList());
         }
 
         [MemberNotNull("_modWatcher")]

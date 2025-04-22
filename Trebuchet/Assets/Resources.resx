@@ -999,4 +999,28 @@ DO NOT place it in your Steam Directory.</value>
     <data name="Connect" xml:space="preserve">
         <value>Connect</value>
     </data>
+    <data name="Rename" xml:space="preserve">
+        <value>Rename</value>
+    </data>
+    <data name="Export" xml:space="preserve">
+        <value>Export</value>
+    </data>
+    <data name="Import" xml:space="preserve">
+        <value>Import</value>
+    </data>
+    <data name="Open" xml:space="preserve">
+        <value>Open</value>
+    </data>
+    <data name="Refresh" xml:space="preserve">
+        <value>Refresh</value>
+    </data>
+    <data name="Edit" xml:space="preserve">
+        <value>Edit</value>
+    </data>
+    <data name="SyncText" xml:space="preserve">
+        <value>Synchronize your mod list with either a Steam collection or a compatible Json file (Exported from Trebuchet). This will replace your list.</value>
+    </data>
+    <data name="Save" xml:space="preserve">
+        <value>Save</value>
+    </data>
 </root>

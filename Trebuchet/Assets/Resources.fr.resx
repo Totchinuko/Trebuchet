@@ -864,7 +864,7 @@ ATTENTION : Ceci peut rendre la détection des processus sans réponse inefficac
         <value>Synchroniser</value>
     </data>
     <data name="RefreshModInfos" xml:space="preserve">
-        <value>Rafraîchir les données de mods</value>
+        <value>2</value>
     </data>
     <data name="Servers" xml:space="preserve">
         <value>Serveurs</value>
@@ -990,5 +990,29 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     </data>
     <data name="Connect" xml:space="preserve">
         <value>Connecter</value>
+    </data>
+    <data name="Rename" xml:space="preserve">
+        <value>Renommer</value>
+    </data>
+    <data name="Export" xml:space="preserve">
+        <value>Exporter</value>
+    </data>
+    <data name="Import" xml:space="preserve">
+        <value>Importer</value>
+    </data>
+    <data name="Open" xml:space="preserve">
+        <value>Ouvrir</value>
+    </data>
+    <data name="Refresh" xml:space="preserve">
+        <value>Rafraichir</value>
+    </data>
+    <data name="Edit" xml:space="preserve">
+        <value>Editer</value>
+    </data>
+    <data name="SyncText" xml:space="preserve">
+        <value>Synchroniser votre mod liste soit avec un collection Steam, soit avec un fichier Json compatible (Exporté avec Trebuchet). Cela remplacera votre liste.</value>
+    </data>
+    <data name="Save" xml:space="preserve">
+        <value>Enregistrer</value>
     </data>
 </root>

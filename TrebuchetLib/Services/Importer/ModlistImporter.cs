@@ -45,7 +45,7 @@ public class ModlistImporter
         throw new TrebException("Could not import the provided data with any importers");
     }
 
-    public ModlistExport Import(string data, ModListProfile profile, ImportFormats format)
+    public ModlistExport Import(string data, ImportFormats format)
     {
         if (!_importers.TryGetValue(format, out var importer))
             throw new TrebException($"No importer for the given format {format}");

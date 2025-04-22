@@ -38,8 +38,10 @@
 
     <Style Selector="Border.ModStatus" >
         <Setter Property="BorderThickness" Value="0 0 0 0"/>
+        <Setter Property="Width" Value="6"/>
         <Setter Property="CornerRadius" Value="3" />
-        <Setter Property="Padding" Value="8" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="VerticalAlignment" Value="Stretch" />
         <Style Selector="^.Found">
             <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
             <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
@@ -48,7 +50,7 @@
             </Style>
         </Style>
         <Style Selector="^.Loading">
-            <Setter Property="Background" Value="{DynamicResource TPanel}" />
+            <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
             <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
             <Style Selector="^ > TextBlock">
                 <Setter Property="Text" Value="{x:Static a:Resources.Loading}" />

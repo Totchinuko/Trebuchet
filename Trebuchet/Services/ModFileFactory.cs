@@ -144,11 +144,12 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
     
     private void AddRemoveAction(IModFile file)
     {
-        file.Actions.Add(new ModFileAction(
-            Resources.RemoveFromList, 
-            "mdi-delete", 
-            ReactiveCommand.Create(() => Removed?.Invoke(file)), 
-            "Base Red"));
+        var action = new ModFileAction(
+            Resources.RemoveFromList,
+            "mdi-delete",
+            ReactiveCommand.Create(() => Removed?.Invoke(file)));
+        action.Classes.Add(@"Red");
+        file.Actions.Add(action);
     }
 
     private void AddOpenWorkshopAction(IPublishedModFile file)

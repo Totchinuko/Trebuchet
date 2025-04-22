@@ -15,15 +15,19 @@
                             </DataTemplate>
                         </ComboBox.ItemTemplate>
                     </ComboBox>
+                    <Button DockPanel.Dock="Right" Classes="Base Sneak Blue" Margin="0 0 12 0" Command="{Binding ToggleFoldedMenu}" Classes.Colored="{Binding FoldedMenu}">
+                        <i:Icon Value="mdi-menu-open" Classes="Normal" />
+                    </Button>
                     <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center">
                         <Run Text="{x:Static a:Resources.TranslationAuthors}" />
                         <Run Text=": " />
                         <Run Text="{x:Static a:Resources.TranslatorsIdentity}" />
                     </TextBlock>
+
                 </DockPanel>
             </Border>
             <ScrollViewer DockPanel.Dock="Top">
-                <ItemsControl ItemsSource="{Binding Fields}">
+                <ItemsControl ItemsSource="{Binding Fields}" ClipToBounds="False">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
                             <VirtualizingStackPanel Margin="12" />

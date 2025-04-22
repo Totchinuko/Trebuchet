@@ -11,7 +11,10 @@
         <StyleInclude Source="avares://TrebuchetUtils/Styles/GeneralStyles.axaml" />
     </UserControl.Styles>
     <StackPanel HorizontalAlignment="Stretch">
-        <Button x:Name="ProfileSelector" HorizontalAlignment="Stretch" Classes="Base Flat" Command="{Binding $parent[UserControl].TogglePopup}">
+        <Button x:Name="ProfileSelector" 
+                HorizontalAlignment="Stretch" 
+                Classes="BaseControl" 
+                Command="{Binding $parent[UserControl].TogglePopup}">
             <Grid ColumnDefinitions="*,Auto" >
                 <TextBlock x:Name="SelectedLabel" />
                 <i:Icon Grid.Column="1" Value="mdi-chevron-down" Classes="Normal" />

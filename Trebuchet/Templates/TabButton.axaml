@@ -4,7 +4,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="TabButtonTemplate" x:DataType="panels:PanelTab">
-        <Button Classes="Base Blue TabLeft Flat Sharp"
+        <Button Classes="Base Blue TabLeft Flat Sharp FlatTab"
                 HorizontalAlignment="Stretch"
                 Classes.Sneak="{Binding !Active}"
                 Classes.Colored="{Binding Active}"
@@ -12,8 +12,8 @@
                 ToolTip.Tip="{Binding Label}"
                 HorizontalContentAlignment="Left">
             <StackPanel Orientation="Horizontal" Spacing="6">
-                <i:Icon Value="{Binding Icon}" FontSize="23" Classes="Normal" VerticalAlignment="Center" />
-                <Label Content="{Binding Label}" VerticalAlignment="Center" />
+                <i:Icon Value="{Binding Icon}" FontSize="23" Classes="Normal" VerticalAlignment="Center" Classes.SubText="{Binding !Active}" />
+                <Label Content="{Binding Label}" VerticalAlignment="Center" Classes.SubText="{Binding !Active}" />
             </StackPanel>
         </Button>
     </DataTemplate>

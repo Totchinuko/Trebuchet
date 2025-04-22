@@ -9,26 +9,21 @@
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="Auto" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition MinWidth="220" Width="2*" />
+                    <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <Border Margin="0 0 6 0" ToolTip.Tip="Drag to reorder" Background="Transparent" Cursor="SizeNorthSouth">
-                    <i:Icon Value="mdi-drag-vertical" Foreground="{DynamicResource TPanelAccent}" FontSize="30"  />
-                </Border>
+                <Border Margin="4 0 8 0" u:Classes.List="{Binding StatusClasses}" />
                 <Border Grid.Column="1" Margin="0,0,12,0" ToolTip.Tip="{Binding IconToolTip}" u:Classes.List="{Binding IconClasses}">
                     <i:Icon Classes="Normal"  />
                 </Border>
-                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Title, Mode=OneWay}" />
-                <Border Grid.Column="3" u:Classes.List="{Binding StatusClasses}" Margin="0,0,12,0">
-                    <TextBlock />
-                </Border>
-                <TextBlock Grid.Column="4" Text="{Binding LastUpdate}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                <ItemsControl Grid.Column="5" ItemsSource="{Binding Actions}">
+                <StackPanel Grid.Column="2">
+                    <TextBlock Text="{Binding Title, Mode=OneWay}" />
+                    <TextBlock Text="{Binding LastUpdate}" Classes="SubText" FontSize="12" />
+                </StackPanel>
+                <ItemsControl Grid.Column="3" Classes="Grouped" ItemsSource="{Binding Actions}">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="3" />
+                            <StackPanel Orientation="Horizontal" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                     <ItemsControl.ItemTemplate>

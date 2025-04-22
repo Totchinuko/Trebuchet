@@ -6,7 +6,7 @@
                     xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
     <DataTemplate x:Key="ClientDashboard" x:DataType="viewModels:ClientInstanceDashboard">
-        <Border Grid.Column="1" IsVisible="{Binding CanUseDashboard}" Classes="Panel" Padding="0">
+        <Border Grid.Column="1" IsVisible="{Binding CanUseDashboard}" Classes="Panel Shadowed" Padding="0">
             <Border.Styles>
                 <Style Selector="TextBlock.ProcessName">
                     <Setter Property="Foreground" Value="{DynamicResource TForeground}" />

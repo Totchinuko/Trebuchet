@@ -6,54 +6,26 @@ using Avalonia.Controls.ApplicationLifetimes;
 using Avalonia.Platform.Storage;
 using ReactiveUI;
 using Trebuchet.Assets;
+using Trebuchet.Utils;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 
 public class OnBoardingModlistImport : ValidatedInputDialogue<string, OnBoardingModlistImport>
 {
-    public OnBoardingModlistImport(string text, bool export, FilePickerFileType type) : base(Resources.ImportModList, string.Empty)
+    public OnBoardingModlistImport(string text) : base(Resources.Edit, string.Empty)
     {
         SetStretch<OnBoardingModlistImport>();
         Value = text;
-        _export = export;
-        _fileType = type;
-        AppendCommand = ReactiveCommand.Create(OnAppend);
-        ApplyCommand = ReactiveCommand.Create(OnApply);
-        SaveCommand = ReactiveCommand.CreateFromTask(OnSave);
+        SaveAsFile = ReactiveCommand.CreateFromTask(OnSaveAsFile);
+        OpenFile = ReactiveCommand.CreateFromTask(OnOpenFile);
+        SaveModlist = ReactiveCommand.Create(Close);
     }
     
-    private bool _append;
-    private bool _canceled = true;
-    private readonly bool _export;
-    private readonly FilePickerFileType _fileType;
-    
-    public ReactiveCommand<Unit, Unit> AppendCommand { get; }
-    public ReactiveCommand<Unit, Unit> ApplyCommand { get; }
-    public ReactiveCommand<Unit, Unit> SaveCommand { get; }
-    public bool Append { get => _append; set => _append = value; }
-    
-    public bool Canceled { get => _canceled; set => _canceled = value; }
-    public bool ImportVisible => !_export;
-    public bool SaveAsVisible => _export;
-    
-    private void OnAppend()
+    public ReactiveCommand<Unit, Unit> SaveAsFile { get; }
+    public ReactiveCommand<Unit, Unit> OpenFile { get; }
+    public ReactiveCommand<Unit, Unit> SaveModlist { get; }
+    private async Task OnSaveAsFile()
     {
-        if (_export) return;
-        _append = true;
-        _canceled = false;
-        Close();
-    }
-
-    private void OnApply()
-    {
-        if (_export) return;
-        _canceled = false;
-        Close();
-    }
-
-    private async Task OnSave()
-    {
-        if (!_export) return;
         if (string.IsNullOrEmpty(Value)) return;
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
         if (desktop.MainWindow == null) return;
@@ -62,13 +34,32 @@ public class OnBoardingModlistImport : ValidatedInputDialogue<string, OnBoarding
         {
             Title = Resources.SaveFile,
             SuggestedFileName = Resources.Untitled,
-            FileTypeChoices = [_fileType]
+            FileTypeChoices = [FileType.Txt]
         });
 
         if (file is null) return;
         if (!file.Path.IsFile) return;
         var path = Path.GetFullPath(file.Path.LocalPath);
         await File.WriteAllTextAsync(path, Value);
-        Close();
+    }
+    
+    private async Task OnOpenFile()
+    {
+        if (string.IsNullOrEmpty(Value)) return;
+        if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
+        if (desktop.MainWindow == null) return;
+
+        var file = await desktop.MainWindow.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions()
+        {
+            Title = Resources.SaveFile,
+            SuggestedFileName = Resources.Untitled,
+            AllowMultiple = false,
+            FileTypeFilter = [FileType.Txt],
+        });
+
+        if (file.Count == 0) return;
+        if (!file[0].Path.IsFile) return;
+        var path = Path.GetFullPath(file[0].Path.LocalPath);
+        Value = await File.ReadAllTextAsync(path);
     }
 }

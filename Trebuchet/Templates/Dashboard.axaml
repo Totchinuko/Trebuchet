@@ -29,8 +29,8 @@
             </Border>
             <ScrollViewer DockPanel.Dock="Top">
                 <DockPanel LastChildFill="True" Margin="12">
-                    <ContentControl DockPanel.Dock="Top" ContentTemplate="{StaticResource ClientDashboard}" Content="{Binding Client}" />
-                    <Border DockPanel.Dock="Top" Margin="0,12" IsVisible="{Binding CanDisplayServers}" Classes="Panel">
+                    <ContentControl DockPanel.Dock="Top" ContentTemplate="{StaticResource ClientDashboard}" Content="{Binding Client}" ClipToBounds="False" />
+                    <Border DockPanel.Dock="Top" Margin="0,12" IsVisible="{Binding CanDisplayServers}" Classes="Panel Shadowed">
                         <Grid Margin="12">
                             <TextBlock Text="{x:Static a:Resources.Servers}" Margin="-10,-16,0,20" FontSize="30" Opacity="0.3" FontWeight="Bold" />
                             <WrapPanel Orientation="Horizontal" Margin="0,20,0,0">
@@ -56,7 +56,7 @@
                         </Grid>
                     </Border>
                     <Border DockPanel.Dock="Top" Padding="24,0,0,0">
-                        <ItemsControl ItemsSource="{Binding Instances}" ItemTemplate="{StaticResource ServerDashboard}" />
+                        <ItemsControl ItemsSource="{Binding Instances}" ItemTemplate="{StaticResource ServerDashboard}" ClipToBounds="False" />
                     </Border>
                 </DockPanel>
             </ScrollViewer>

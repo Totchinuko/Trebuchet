@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
-using DynamicData.Binding;
 using Humanizer;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
@@ -19,13 +16,11 @@ namespace Trebuchet.ViewModels.Panels
 {
     public class ServerProfilePanel : ReactiveObject, IRefreshablePanel, IDisplablePanel
     {
-        private readonly DialogueBox _box;
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private readonly ILogger<ServerProfilePanel> _logger;
         private ServerProfile _profile;
-        private string _selectedProfile;
         private string _profileSize = string.Empty;
         private bool _canBeOpened;
 
@@ -37,47 +32,28 @@ namespace Trebuchet.ViewModels.Panels
             ILogger<ServerProfilePanel> logger
             )
         {
-            _box = box;
             _setup = setup;
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             _logger = logger;
             CanBeOpened = Tools.IsServerInstallValid(_setup.Config);
 
-            LoadProfileList();
-            _selectedProfile = _appFiles.Server.Resolve(_uiConfig.CurrentServerProfile);
-            _profile = _appFiles.Server.Get(_selectedProfile);
-            
-            this.WhenAnyValue(x => x.SelectedProfile)
-                .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnProfileChanged));
-            
-            CreateProfileCommand = ReactiveCommand.CreateFromTask(OnProfileCreate);
-            DeleteProfileCommand = ReactiveCommand.CreateFromTask(OnProfileDelete);
-            DuplicateProfileCommand = ReactiveCommand.CreateFromTask(OnProfileDuplicate);
-            OpenFolderProfileCommand = ReactiveCommand.Create(OnOpenFolderProfile);
+            var startingProfile = _appFiles.Server.Resolve(_uiConfig.CurrentServerProfile);
+            _profile = _appFiles.Server.Get(startingProfile);
             SaveProfile = ReactiveCommand.Create(() => _profile.SaveFile());
+
+            FileMenu = new FileMenuViewModel<ServerProfile>(Resources.PanelServerSaves, appFiles.Server, box, _logger);
+            FileMenu.FileSelected += OnFileSelected;
+            FileMenu.Selected = startingProfile;
            
             BuildFields();
         }
 
         public ObservableCollection<FieldElement> Fields { get; } = [];
-        public ObservableCollectionExtended<string> Profiles { get; } = [];
 
-        public ReactiveCommand<Unit,Unit> CreateProfileCommand { get; }
-        public ReactiveCommand<Unit,Unit> DeleteProfileCommand { get; }
-        public ReactiveCommand<Unit,Unit> DuplicateProfileCommand { get; }
-        public ReactiveCommand<Unit,Unit> OpenFolderProfileCommand { get; }
         public ReactiveCommand<Unit,Unit> SaveProfile { get; }
-
-        public string SelectedProfile
-        {
-            get => _selectedProfile;
-            set
-            {
-                var resolved = _appFiles.Server.Resolve(value);
-                this.RaiseAndSetIfChanged(ref _selectedProfile, resolved);
-            }
-        }
+        
+        public IFileMenuViewModel FileMenu { get; }
 
         public string ProfileSize
         {
@@ -98,8 +74,8 @@ namespace Trebuchet.ViewModels.Panels
         {
             _logger.LogDebug(@"Refresh panel");
             CanBeOpened = Tools.IsServerInstallValid(_setup.Config);
-            _profile = _appFiles.Server.Get(SelectedProfile);
-            await RefreshProfileSize(SelectedProfile);
+            _profile = _appFiles.Server.Get(FileMenu.Selected);
+            await RefreshProfileSize(FileMenu.Selected);
             foreach (var f in Fields.OfType<IValueField>())
                 f.Update.Execute().Subscribe();
         }
@@ -107,7 +83,14 @@ namespace Trebuchet.ViewModels.Panels
         public async Task DisplayPanel()
         {
             _logger.LogDebug(@"Display panel");
-            await RefreshProfileSize(SelectedProfile);
+            await RefreshProfileSize(FileMenu.Selected);
+        }
+        
+        private Task OnFileSelected(object? sender, string profile)
+        {
+            _uiConfig.CurrentServerProfile = profile;
+            _uiConfig.SaveFile();
+            return RefreshPanel();
         }
         
         private async Task RefreshProfileSize(string profile)
@@ -115,85 +98,6 @@ namespace Trebuchet.ViewModels.Panels
             var path = _appFiles.Server.GetDirectory(profile);
             var size = await Task.Run(() => Tools.DirectorySize(path));
             ProfileSize = size.Bytes().Humanize();
-        }
-
-        private void LoadProfileList()
-        {
-            Profiles.Clear();
-            Profiles.AddRange(_appFiles.Server.GetList());
-        }
-
-        private void OnOpenFolderProfile()
-        {
-            var folder = Path.GetDirectoryName(_profile.FilePath);
-            if (string.IsNullOrEmpty(folder)) return;
-            _logger.LogDebug(@"Opening folder {folder}", folder);
-            Process.Start("explorer.exe", folder);
-        }
-
-        private async Task OnProfileChanged(string newProfile)
-        {
-            _logger.LogDebug(@"Swap profile {profile}", newProfile);
-            _uiConfig.CurrentServerProfile = newProfile;
-            _uiConfig.SaveFile();
-            await RefreshPanel();
-        }
-
-        private async Task OnProfileCreate()
-        {
-            var name = await GetNewProfileName();
-            if (name is null) return;
-            _logger.LogInformation(@"Create profile {name}", name);
-            _appFiles.Server.Create(name);
-            _profile.SaveFile();
-            LoadProfileList();
-            SelectedProfile = name;
-        }
-
-        private async Task OnProfileDelete()
-        {
-            if (string.IsNullOrEmpty(SelectedProfile)) return;
-
-            var confirm = new OnBoardingConfirmation(
-                Resources.Deletion,
-                string.Format(Resources.DeletionText, SelectedProfile));
-            await _box.OpenAsync(confirm);
-            if (!confirm.Result) return;
-            
-            _logger.LogInformation(@"Delete profile {name}", SelectedProfile);
-            _appFiles.Server.Delete(SelectedProfile);
-
-            LoadProfileList();
-            SelectedProfile = string.Empty;
-        }
-
-        private async Task OnProfileDuplicate()
-        {
-            var name = await GetNewProfileName();
-            if (name is null) return;
-            _logger.LogInformation(@"Duplicate profile {from} to {to}", _profile.ProfileName, name);
-            await _appFiles.Server.Duplicate(_profile.ProfileName, name);
-            LoadProfileList();
-            SelectedProfile = name;
-        }
-        
-        private async Task<string?> GetNewProfileName()
-        {
-            var modal = new OnBoardingNameSelection(Resources.Create, string.Empty)
-                .SetValidation(ValidateName);
-            await _box.OpenAsync(modal);
-            return modal.Value;
-        }
-        
-        private Validation ValidateName(string? name)
-        {
-            if (string.IsNullOrWhiteSpace(name))
-                return Validation.Invalid(Resources.ErrorNameEmpty);
-            if (Profiles.Contains(name))
-                return Validation.Invalid(Resources.ErrorNameAlreadyTaken);
-            if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
-                return Validation.Invalid(Resources.ErrorNameInvalidCharacters);
-            return Validation.Valid;
         }
 
         private void BuildFields()

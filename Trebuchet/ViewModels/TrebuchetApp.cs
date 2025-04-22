@@ -38,6 +38,7 @@ public sealed class TrebuchetApp : ReactiveObject
         _setup = setup;
         _appFiles = appFiles;
         _launcher = launcher;
+        _uiConfig = uiConfig;
         _steam = steam;
         _box = box;
         _onBoarding = onBoarding;
@@ -63,13 +64,6 @@ public sealed class TrebuchetApp : ReactiveObject
         _activePanel = BottomPanels.First(x => x.Panel.CanBeOpened);
 
         FoldedMenu = uiConfig.FoldedMenu;
-        ToggleFoldedCommand = ReactiveCommand.Create(() =>
-        {
-            FoldedMenu = !FoldedMenu;
-            uiConfig.FoldedMenu = FoldedMenu;
-            uiConfig.SaveFile();
-        });
-            
         _timer = new DispatcherTimer(TimeSpan.FromSeconds(1), DispatcherPriority.Background, OnTimerTick);
 
         Start();
@@ -78,6 +72,7 @@ public sealed class TrebuchetApp : ReactiveObject
     private readonly AppSetup _setup;
     private readonly AppFiles _appFiles;
     private readonly Launcher _launcher;
+    private readonly UIConfig _uiConfig;
     private readonly Steam _steam;
     private readonly DialogueBox _box;
     private readonly OnBoarding _onBoarding;
@@ -92,8 +87,6 @@ public sealed class TrebuchetApp : ReactiveObject
         get => _foldedMenu;
         set => this.RaiseAndSetIfChanged(ref _foldedMenu, value);
     }
-        
-    public ReactiveCommand<Unit, Unit> ToggleFoldedCommand { get; }
         
     public PanelTab ActivePanel
     {
@@ -173,6 +166,7 @@ public sealed class TrebuchetApp : ReactiveObject
 
     private async Task RefreshPanels()
     {
+        FoldedMenu = _uiConfig.FoldedMenu;
         foreach (var panel in _panels)
             if(panel is IRefreshablePanel refreshable)
                 await refreshable.RefreshPanel();
