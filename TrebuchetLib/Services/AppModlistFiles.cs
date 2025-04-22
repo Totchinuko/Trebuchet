@@ -1,3 +1,5 @@
+using SteamKit2.WebUI.Internal;
+
 namespace TrebuchetLib.Services;
 
 public class AppModlistFiles(AppSetup setup) : IAppModListFiles
@@ -212,5 +214,19 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
             return TryParseFile2ModId(path, out id);
         else
             return TryParseDirectory2ModId(path, out id);
+    }
+
+    public Task Export(string name, FileInfo file)
+    {
+        var path = GetPath(name);
+        File.Copy(path, file.FullName, true);
+        return Task.CompletedTask;
+    }
+
+    public async Task<ModListProfile> Import(FileInfo import, string name)
+    {
+        var path = GetPath(name);
+        var json = await File.ReadAllTextAsync(import.FullName);
+        return ModListProfile.ImportFile(json, path);
     }
 }

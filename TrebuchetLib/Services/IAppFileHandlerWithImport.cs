@@ -2,6 +2,6 @@ namespace TrebuchetLib.Services;
 
 public interface IAppFileHandlerWithImport<T> where T : JsonFile<T>
 {
-    Task Export(FileInfo exportFile);
-    Task<T> Import(FileInfo importFile);
+    Task Export(string name, FileInfo exportFile);
+    Task<T> Import(FileInfo importFile, string name);
 }

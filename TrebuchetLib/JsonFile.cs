@@ -137,6 +137,22 @@ namespace TrebuchetLib
             OnFileSaved();
         }
 
+        public static T ImportFile(string json, string path, JsonSerializerOptions? options = null)
+        {
+            T? file = JsonSerializer.Deserialize<T>(json, options != null ? options : _jsonOptions);
+            if (file == null)
+                throw new Exception($"{path} could not be loaded");
+            
+            string content = JsonSerializer.Serialize(file, typeof(T), _jsonOptions);
+            string? folder = Path.GetDirectoryName(path);
+            if (folder == null)
+                throw new Exception($"{path} is an invalid path");
+            Tools.CreateDir(folder);
+            File.WriteAllText(path, content);
+            file.FilePath = path;
+            return file;
+        }
+
         /// <summary>
         /// Create a new file to be saved at the specified path
         /// </summary>

@@ -1,6 +1,6 @@
 namespace TrebuchetLib.Services;
 
-public interface IAppModListFiles : IAppFileHandler<ModListProfile>
+public interface IAppModListFiles : IAppFileHandler<ModListProfile>, IAppFileHandlerWithImport<ModListProfile>
 {
     bool TryParseDirectory2ModId(string fullPath, out ulong id);
     bool ResolveMod(ref string path);
