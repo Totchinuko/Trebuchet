@@ -12,7 +12,7 @@ namespace TrebuchetLib
     {
         public static IniSection GetSection(this IniDocument document, string section)
         {
-            if (document.HasSection(section))
+            if (document.HasSection(section) && document.GetSections(section).Count > 0)
                 return document.GetSections(section)[0];
             document.AddSection(section);
             return document.GetSections(section)[0];

@@ -89,7 +89,9 @@ public class YuuIniServerFiles(AppSetup setup)
         if (profile.LogFilters.Count > 0)
             foreach (string filter in profile.LogFilters)
             {
+                if(!filter.Contains('=')) continue;
                 string[] content = filter.Split('=', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+                if(content.Length < 2) continue;
                 section.AddParameter(content[0], content[1]);
             }
         else
