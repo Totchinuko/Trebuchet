@@ -38,6 +38,7 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
     public void Delete(string name)
     {
         var profile = Get(name);
+        _cache.Remove(name);
         profile.DeleteFolder();
     }
 

@@ -38,6 +38,7 @@ public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
     public void Delete(string name)
     {
         var profile = Get(name);
+        _cache.Remove(name);
         profile.DeleteFolder();
     }
 

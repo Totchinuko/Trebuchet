@@ -35,6 +35,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
     public void Delete(string name)
     {
         var profile = Get(name);
+        _cache.Remove(name);
         profile.DeleteFile();
     }
     
