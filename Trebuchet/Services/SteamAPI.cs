@@ -11,6 +11,7 @@ using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Assets;
 using Trebuchet.ViewModels;
+using TrebuchetLib;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
@@ -78,15 +79,15 @@ public class SteamApi(
         return results;
     }
 
-    public List<ulong> CheckModsForUpdate(ICollection<(ulong pubId, ulong manifestId)> mods)
+    public List<UGCFileStatus> CheckModsForUpdate(ICollection<(ulong pubId, ulong manifestId)> mods)
     {
         var updated = steam.GetUpdatedUGCFileIDs(mods).ToList();
         
         foreach (var (pubId, _) in mods)
         {
-            string mod = pubId.ToString();
-            if (!appFiles.Mods.ResolveMod(ref mod) && !updated.Contains(pubId))
-                updated.Add(pubId);
+            var mod = pubId.ToString();
+            if (!appFiles.Mods.ResolveMod(ref mod) && updated.All(x => x.PublishedId != pubId))
+                updated.Add(new UGCFileStatus(pubId, UGCStatus.Missing));
         } 
         return updated;
     }

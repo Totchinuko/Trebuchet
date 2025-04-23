@@ -44,14 +44,14 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
         _fileHandler = fileHandler;
         _dialogue = dialogue;
         _logger = logger;
-
         _selected = fileHandler.GetDefault();
+        Exportable = _fileHandler is IAppFileHandlerWithImport<T>;
+
         RefreshList();
         SetupFileWatcher(fileHandler.GetBaseFolder());
 
         Create = ReactiveCommand.CreateFromTask(OnCreate);
         Import = ReactiveCommand.CreateFromTask(OnImport);
-        Exportable = _fileHandler is IAppFileHandlerWithImport<T>;
 
          this.WhenAnyValue(x => x.Selected)
              .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnSelect));

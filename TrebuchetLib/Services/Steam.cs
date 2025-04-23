@@ -179,7 +179,7 @@ namespace TrebuchetLib.Services
         /// </summary>
         /// <param name="keyValuePairs"></param>
         /// <returns></returns>
-        public IEnumerable<ulong> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubId, ulong manisfestId)> keyValuePairs)
+        public IEnumerable<UGCFileStatus> GetUpdatedUGCFileIDs(IEnumerable<(ulong pubId, ulong manisfestId)> keyValuePairs)
         {
             UpdateDownloaderConfig();
 
@@ -191,9 +191,16 @@ namespace TrebuchetLib.Services
             foreach (var (pubID, manisfestID) in keyValuePairs)
             {
                 if (!depotConfigStore.InstalledUGCManifestIDs.TryGetValue(pubID, out ulong manisfest))
-                    yield return pubID;
+                    yield return new UGCFileStatus(pubID, UGCStatus.Missing);
                 if (manisfest != manisfestID)
-                    yield return pubID;
+                {
+                    if(manisfest == ContentDownloader.INVALID_MANIFEST_ID)
+                        yield return new UGCFileStatus(pubID, UGCStatus.Corrupted);
+                    else
+                        yield return new UGCFileStatus(pubID, UGCStatus.Updatable);
+                }
+
+                yield return new UGCFileStatus(pubID, UGCStatus.UpToDate);
             }
         }
 

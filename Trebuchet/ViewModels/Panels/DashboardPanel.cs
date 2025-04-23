@@ -346,22 +346,30 @@ namespace Trebuchet.ViewModels.Panels
             dashboard.SelectedProfile = profile;
         }
 
-        private void RefreshClientNeededUpdates(List<ulong> neededUpdates)
+        private void RefreshClientNeededUpdates(List<UGCFileStatus> neededUpdates)
         {
             var mods = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
-            Client.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
+            Client.UpdateNeeded = neededUpdates
+                .Where(x => x.Status != UGCStatus.UpToDate)
+                .Select(x => x.PublishedId)
+                .Intersect(mods)
+                .ToList();
         }
 
-        private void RefreshServerNeededUpdates(List<ulong> neededUpdates)
+        private void RefreshServerNeededUpdates(List<UGCFileStatus> neededUpdates)
         {
             foreach (var dashboard in Instances)
                 RefreshServerNeededUpdates(dashboard, neededUpdates);
         }
 
-        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<ulong> neededUpdates)
+        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<UGCFileStatus> neededUpdates)
         {
             var mods = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
-            dashboard.UpdateNeeded = neededUpdates.Intersect(mods).ToList();
+            dashboard.UpdateNeeded = neededUpdates
+                .Where(x => x.Status != UGCStatus.UpToDate)
+                .Select(x => x.PublishedId)
+                .Intersect(mods)
+                .ToList();
         }
 
         private Task CheckModUpdatesAsync()

@@ -73,7 +73,7 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
     {
         var published = files.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList();
         var details = await steam.RequestModDetails(published);
-        var needUpdate = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList());
+        var statusList = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList());
         for (var i = 0; i < files.Count; i++)
         {
             var current = files[i];
@@ -81,7 +81,9 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
             var workshop = details.FirstOrDefault(d => d.PublishedFileID == pub.PublishedId);
             if (workshop is null) continue;
             if (workshop.CreatorAppId != 0)
-                files[i] = Create(workshop, needUpdate.Contains(workshop.PublishedFileID));
+                files[i] = Create(workshop, statusList
+                    .FirstOrDefault(x => x.PublishedId == workshop.PublishedFileID, UGCFileStatus.Default(workshop.PublishedFileID))
+                );
             else
                 files[i] = CreateUnknown(pub.FilePath, pub.PublishedId);
         }
@@ -92,8 +94,9 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
         var path = workshopFile.PublishedFileId.ToString();
         appFiles.Mods.ResolveMod(ref path);
         var details = await steam.RequestModDetails([workshopFile.PublishedFileId]);
-        var needUpdate = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList()).Any();
-        var file = new WorkshopModFile(path, workshopFile, needUpdate);
+        var status = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList())
+            .FirstOrDefault(UGCFileStatus.Default(workshopFile.PublishedFileId));
+        var file = new WorkshopModFile(path, workshopFile, status);
         AddOpenWorkshopAction(file);
         AddUpdateAction(file);
         AddRemoveAction(file);
@@ -105,19 +108,20 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
         var path = workshopFile.PublishedFileID.ToString();
         appFiles.Mods.ResolveMod(ref path);
         var details = await steam.RequestModDetails([workshopFile.PublishedFileID]);
-        var needUpdate = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList()).Any();
-        var file = new WorkshopModFile(path, workshopFile, needUpdate);
+        var status = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList())
+            .FirstOrDefault(UGCFileStatus.Default(workshopFile.PublishedFileID));
+        var file = new WorkshopModFile(path, workshopFile, status);
         AddOpenWorkshopAction(file);
         AddUpdateAction(file);
         AddRemoveAction(file);
         return file;
     }
     
-    private IModFile Create(PublishedFile workshopFile, bool needUpdate)
+    private IModFile Create(PublishedFile workshopFile, UGCFileStatus status)
     {
         var path = workshopFile.PublishedFileID.ToString();
         appFiles.Mods.ResolveMod(ref path);
-        var file = new WorkshopModFile(path, workshopFile, needUpdate);
+        var file = new WorkshopModFile(path, workshopFile, status);
         AddOpenWorkshopAction(file);
         AddUpdateAction(file);
         AddRemoveAction(file);

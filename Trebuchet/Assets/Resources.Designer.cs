@@ -276,6 +276,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Corrupted.
+        /// </summary>
+        public static string Corrupted {
+            get {
+                return ResourceManager.GetString("Corrupted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CPU.
         /// </summary>
         public static string CPU_CentralProcessorUnit {

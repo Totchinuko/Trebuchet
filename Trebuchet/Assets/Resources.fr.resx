@@ -1015,4 +1015,7 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="Save" xml:space="preserve">
         <value>Enregistrer</value>
     </data>
+    <data name="Corrupted" xml:space="preserve">
+        <value>Corrompu</value>
+    </data>
 </root>
