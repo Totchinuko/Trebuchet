@@ -101,7 +101,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
     public string IconToolTip { get; }
     public string LastUpdate { get; }
     public ObservableCollection<ModFileAction> Actions { get; } = [];
-    
+    public ModProgressViewModel Progress { get; } = new();
     public string Export()
     {
         return PublishedId.ToString();

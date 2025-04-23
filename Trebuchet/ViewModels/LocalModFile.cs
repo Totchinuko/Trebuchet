@@ -40,7 +40,7 @@ public class LocalModFile : ReactiveObject, IModFile
     public string FilePath { get; }
     public long FileSize { get; }
     public ObservableCollection<ModFileAction> Actions { get; } = [];
-
+    public ModProgressViewModel Progress { get; } = new();
     public string Export()
     {
         return FilePath;

@@ -25,6 +25,7 @@ using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetLib.Services.Importer;
+using Progress = DepotDownloader.Progress;
 
 namespace Trebuchet.ViewModels.Panels
 {
@@ -40,6 +41,7 @@ namespace Trebuchet.ViewModels.Panels
             ModlistImporter importer,
             WorkshopSearchViewModel workshop,
             ModFileFactory modFileFactory,
+            IProgressCallback<DepotDownloader.Progress> progress,
             ILogger<ModlistPanel> logger) 
         {
             _steamApi = steamApi;
@@ -53,6 +55,8 @@ namespace Trebuchet.ViewModels.Panels
             _logger = logger;
             _workshop.ModAdded += (_,mod) => AddModFromWorkshop(mod);
             SetupFileWatcher();
+
+            progress.ProgressChanged += OnProgressChanged;
             
             var startingFile = _appFiles.Mods.Resolve(_uiConfig.CurrentModlistProfile);
             FileMenu = new FileMenuViewModel<ModListProfile>(Resources.PanelMods, appFiles.Mods, box, logger);
@@ -82,7 +86,7 @@ namespace Trebuchet.ViewModels.Panels
                     _modWatcher.EnableRaisingEvents = x;
                 }));
         }
-        
+
         private readonly SteamApi _steamApi;
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
@@ -166,6 +170,17 @@ namespace Trebuchet.ViewModels.Panels
             if (!_needRefresh) return;
             _needRefresh = false;
             await LoadModlist();
+        }
+        
+        private void OnProgressChanged(object? sender, Progress e)
+        {
+            if (!e.IsFile) return;
+
+            foreach (var file in Modlist)
+            {
+                if(file is IPublishedModFile pub && pub.PublishedId == e.PublishedId)
+                    file.Progress.Report(e);
+            }
         }
         
         private Task OnModlistChanged() => OnFileSelected(this, FileMenu.Selected);

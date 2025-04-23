@@ -19,4 +19,6 @@ public interface IModFile
     long FileSize { get; }
     ObservableCollection<ModFileAction> Actions { get; }
     string Export();
+    
+    ModProgressViewModel Progress { get; }
 }

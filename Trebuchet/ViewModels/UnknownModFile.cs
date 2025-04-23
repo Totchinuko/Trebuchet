@@ -41,7 +41,7 @@ public class UnknownModFile : ReactiveObject, IPublishedModFile
     public string FilePath { get; }
     public long FileSize { get; }
     public ObservableCollection<ModFileAction> Actions { get; } = [];
-    
+    public ModProgressViewModel Progress { get; } = new();
     public string Export()
     {
         return PublishedId.ToString();
