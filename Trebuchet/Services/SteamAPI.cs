@@ -191,7 +191,7 @@ public class SteamApi(
     }
 
 
-    public IDisposable SetDownloaderProgress(IProgress<double> progress)
+    public IDisposable SetDownloaderProgress(IProgress<DepotDownloader.Progress> progress)
     {
         steam.SetTemporaryProgress(progress);
         return new SteamProgressRestore(steam);

@@ -9,10 +9,10 @@ namespace TrebuchetLib.Services
     {
         private readonly ILogger<Steam> _logger;
         private readonly AppSetup _appSetup;
-        private readonly IProgressCallback<double> _progress;
+        private readonly IProgressCallback<DepotDownloader.Progress> _progress;
         private readonly Steam3Session _session;
 
-        public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgressCallback<double> progress)
+        public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgressCallback<DepotDownloader.Progress> progress)
         {
             _logger = logger;
             _appSetup = appSetup;
@@ -50,7 +50,7 @@ namespace TrebuchetLib.Services
             _session.Disconnect(sendLogOff);
         }
 
-        public void SetTemporaryProgress(IProgress<double> progress)
+        public void SetTemporaryProgress(IProgress<DepotDownloader.Progress> progress)
         {
             ContentDownloader.Config.Progress = progress;
         }

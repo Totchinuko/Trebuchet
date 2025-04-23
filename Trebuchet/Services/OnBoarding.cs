@@ -10,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services.Language;
+using Trebuchet.ViewModels;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -187,7 +188,8 @@ public class OnBoarding(
     {
         var progress = new OnBoardingProgress<double>(Resources.UpdateServersLabel, string.Empty, 0.0, 1.0);
         dialogueBox.Show(progress);
-        using var downProgress = steamApi.SetDownloaderProgress(progress);
+        var progressConverter = new ProgressConverter(progress);
+        using var downProgress = steamApi.SetDownloaderProgress(progressConverter);
         await steamApi.UpdateServers();
         progress.Progress = 1.0;
         progress.Close();

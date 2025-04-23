@@ -3,14 +3,14 @@ using System.Runtime.CompilerServices;
 
 namespace TrebuchetLib.Services;
 
-public class Progress : IProgressCallback<double>
+public class Progress : IProgressCallback<DepotDownloader.Progress>
 {
-    private double _value;
+    private DepotDownloader.Progress _value;
     private SemaphoreSlim _semaphore = new SemaphoreSlim(1, 1);
     
-    public event EventHandler<double>? ProgressChanged;
+    public event EventHandler<DepotDownloader.Progress>? ProgressChanged;
 
-    public async void Report(double value)
+    public async void Report(DepotDownloader.Progress value)
     {
         try
         {
@@ -28,7 +28,7 @@ public class Progress : IProgressCallback<double>
         }
     }
 
-    public async Task<double> GetProgressAsync()
+    public async Task<DepotDownloader.Progress> GetProgressAsync()
     {
         await _semaphore.WaitAsync();
         var value = _value;

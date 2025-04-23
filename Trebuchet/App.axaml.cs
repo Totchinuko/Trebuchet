@@ -191,7 +191,7 @@ public partial class App : Application, IApplication
         services.AddSingleton<ModlistImporter>();
         services.AddSingleton<OnBoarding>();
         services.AddSingleton<IIniGenerator, YuuIniGenerator>();
-        services.AddSingleton<IProgressCallback<double>, Progress>();
+        services.AddSingleton<IProgressCallback<DepotDownloader.Progress>, Progress>();
         services.AddSingleton<Steam>();
         services.AddSingleton<ConanProcessFactory>();
         services.AddSingleton<Launcher>();
