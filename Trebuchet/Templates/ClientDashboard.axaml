@@ -3,75 +3,100 @@
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
                     xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
     <DataTemplate x:Key="ClientDashboard" x:DataType="viewModels:ClientInstanceDashboard">
-        <Border Grid.Column="1" IsVisible="{Binding CanUseDashboard}" Classes="Panel Shadowed" Padding="0">
-            <Border.Styles>
-                <Style Selector="TextBlock.ProcessName">
-                    <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
-                    <Setter Property="Opacity" Value="0.3" />
-                </Style>
-                <Style Selector="TextBlock.Active">
-                    <Setter Property="Foreground" Value="{DynamicResource TGreen}" />
-                    <Setter Property="Opacity" Value="0.8" />
-                </Style>
-            </Border.Styles>
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="250" />
-                </Grid.ColumnDefinitions>
-                <Grid Grid.Column="0" Margin="12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="auto" />
-                        <RowDefinition Height="auto" />
-                    </Grid.RowDefinitions>
-                    <TextBlock Text="{x:Static a:Resources.Game}" Classes="ProcessName" Classes.Active="{Binding ProcessRunning}" Margin="-10,-16,0,20" FontSize="30" FontWeight="Bold"/>
-                    <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,20,0,12">
-                        <Grid Margin="0,20,0,0" IsEnabled="{Binding !ProcessRunning}">
-                            <TextBlock Margin="0,-18,0,0" Text="{x:Static a:Resources.GameSave}" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                            <c:ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" Width="250" VerticalAlignment="Center" Margin="0,0,12,0" />
-                        </Grid>
-                        <Grid Margin="0,20,0,0" IsEnabled="{Binding !ProcessRunning}">
-                            <TextBlock Margin="0,-18,0,0" Text="{x:Static a:Resources.ModList}" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
-                            <c:ComboBox ItemsSource="{Binding Modlists}" SelectedItem="{Binding SelectedModlist}" Width="250" VerticalAlignment="Center" Margin="0,0,12,0" />
-                        </Grid>
-                    </WrapPanel>
-                    <WrapPanel Grid.Row="1">
-                        <Button Command="{Binding LaunchCommand}" Classes="Base Green" Margin="0,0,6,0" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal">
-                                <i:Icon Value="mdi-pac-man" Classes="Normal" Margin="0,0,6,0" />
-                                <TextBlock Text="{x:Static a:Resources.Launch}" />
-                            </StackPanel>
-                        </Button>
-                        <Button Command="{Binding LaunchAndConnect}" Classes="Base Yellow" Margin="0,0,6,0" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal">
-                                <i:Icon Value="mdi-lan-connect" Classes="Normal" Margin="0,0,6,0" />
-                                <TextBlock Text="{x:Static a:Resources.Connect}" />
-                            </StackPanel>
-                        </Button>
-                        <Button Command="{Binding KillCommand}" Classes="Base Red" Margin="0,0,6,0" VerticalAlignment="Center">
-                            <StackPanel Orientation="Horizontal">
-                                <i:Icon Value="mdi-skull" Classes="Normal" Margin="0,0,6,0" />
-                                <TextBlock Text="{x:Static a:Resources.Kill}" />
-                            </StackPanel>
-                        </Button>
-                        <Border VerticalAlignment="Center" IsVisible="{Binding UpdateNeeded.Count}" Margin="0,0,6,0">
-                            <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue">
+        <Panel>
+            <Border IsVisible="{Binding CanUseDashboard}" Classes="Panel Shadowed" Padding="0">
+                <Border.Styles>
+                    <Style Selector="TextBlock.ProcessName">
+                        <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+                        <Setter Property="Opacity" Value="0.3" />
+                    </Style>
+                    <Style Selector="TextBlock.Active">
+                        <Setter Property="Foreground" Value="{DynamicResource TGreen}" />
+                        <Setter Property="Opacity" Value="0.8" />
+                    </Style>
+                </Border.Styles>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="250" />
+                    </Grid.ColumnDefinitions>
+                    <Grid Grid.Column="0" Margin="12">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto" />
+                            <RowDefinition Height="auto" />
+                        </Grid.RowDefinitions>
+                        <TextBlock Text="{x:Static a:Resources.Game}" Classes="ProcessName" Classes.Active="{Binding ProcessRunning}" Margin="-10,-16,0,20" FontSize="30" FontWeight="Bold"/>
+                        <WrapPanel Grid.Row="0" Orientation="Horizontal" Margin="0,20,0,12">
+                            <Grid Margin="0,20,0,0" IsEnabled="{Binding !ProcessRunning}">
+                                <TextBlock Margin="0,-18,0,0" Text="{x:Static a:Resources.GameSave}" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                <c:ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" Width="250" VerticalAlignment="Center" Margin="0,0,12,0" />
+                            </Grid>
+                            <Grid Margin="0,20,0,0" IsEnabled="{Binding !ProcessRunning}">
+                                <TextBlock Margin="0,-18,0,0" Text="{x:Static a:Resources.ModList}" Classes="SubText" FontWeight="Light" FontSize="12" HorizontalAlignment="Left" VerticalAlignment="Top" />
+                                <c:ComboBox ItemsSource="{Binding Modlists}" SelectedItem="{Binding SelectedModlist}" Width="250" VerticalAlignment="Center" Margin="0,0,12,0" />
+                            </Grid>
+                        </WrapPanel>
+                        <WrapPanel Grid.Row="1">
+                            <Button Command="{Binding LaunchCommand}" Classes="Base Green" Margin="0,0,6,0" VerticalAlignment="Center">
                                 <StackPanel Orientation="Horizontal">
-                                    <i:Icon Value="mdi-update" Classes="Normal" Margin="0,0,6,0" />
-                                    <TextBlock Text="{x:Static a:Resources.UpdateMods}" />
+                                    <i:Icon Value="mdi-pac-man" Classes="Normal" Margin="0,0,6,0" />
+                                    <TextBlock Text="{x:Static a:Resources.Launch}" />
                                 </StackPanel>
                             </Button>
-                        </Border>
-                        <CheckBox Content="{x:Static a:Resources.BattleEye}" VerticalAlignment="Center" IsChecked="{Binding BattleEye}" />
-                    </WrapPanel>
+                            <Button Name="ConnectButton" Command="{Binding LaunchAndConnect}" Classes="Base Yellow" Margin="0,0,6,0" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <i:Icon Value="mdi-lan-connect" Classes="Normal" Margin="0,0,6,0" />
+                                    <TextBlock Text="{x:Static a:Resources.Connect}" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding KillCommand}" Classes="Base Red" Margin="0,0,6,0" VerticalAlignment="Center">
+                                <StackPanel Orientation="Horizontal">
+                                    <i:Icon Value="mdi-skull" Classes="Normal" Margin="0,0,6,0" />
+                                    <TextBlock Text="{x:Static a:Resources.Kill}" />
+                                </StackPanel>
+                            </Button>
+                            <Border VerticalAlignment="Center" IsVisible="{Binding UpdateNeeded.Count}" Margin="0,0,6,0">
+                                <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue">
+                                    <StackPanel Orientation="Horizontal">
+                                        <i:Icon Value="mdi-update" Classes="Normal" Margin="0,0,6,0" />
+                                        <TextBlock Text="{x:Static a:Resources.UpdateMods}" />
+                                    </StackPanel>
+                                </Button>
+                            </Border>
+                            <CheckBox Content="{x:Static a:Resources.BattleEye}" VerticalAlignment="Center" IsChecked="{Binding BattleEye}" />
+                        </WrapPanel>
+                    </Grid>
+                    <Border Grid.Column="1" Classes="DarkPanel" CornerRadius="0 3 3 0">
+                        <ContentControl Content="{Binding ProcessStats}" ContentTemplate="{StaticResource ProcessStats}" />
+                    </Border>
                 </Grid>
-                <Border Grid.Column="1" Classes="DarkPanel" CornerRadius="0 3 3 0">
-                    <ContentControl Content="{Binding ProcessStats}" ContentTemplate="{StaticResource ProcessStats}" />
+            </Border>
+            <Popup PlacementTarget="ConnectButton" Placement="BottomEdgeAlignedLeft" IsLightDismissEnabled="True" IsOpen="{Binding ConnectPopupOpen, Mode=TwoWay}">
+                <Border Classes="BackPanel" MaxHeight="250" MaxWidth="200">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding ConnectionList}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="x:String">
+                                    <Button Classes="Base Flat Sharp Sneak"
+                                            HorizontalAlignment="Stretch"
+                                            Content="{Binding}"
+                                            Command="{Binding $parent[ItemsControl].((vm:ClientInstanceDashboard)DataContext).ConnectTo}"
+                                            CommandParameter="{Binding}"/>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
                 </Border>
-            </Grid>
-        </Border>
+            </Popup>
+        </Panel>
     </DataTemplate>
 </ResourceDictionary>

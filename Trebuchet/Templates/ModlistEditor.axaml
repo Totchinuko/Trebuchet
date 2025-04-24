@@ -57,7 +57,7 @@
                 </DockPanel>
             </Border>
 
-            <ListBox DockPanel.Dock="Top" Padding="12" Classes="draggableVirtualizing" SelectionMode="Multiple" ItemsSource="{Binding ModList.List}" ItemTemplate="{StaticResource ModlistItems}"/>
+            <ContentControl Margin="6" Content="{Binding ModList}" />
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

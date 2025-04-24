@@ -26,14 +26,14 @@ public class Launcher(
         _serverProcesses.Clear();
     }
 
-    public async Task CatapultClient(bool isBattleEye, bool autoConnect)
+    public async Task CatapultClient(bool isBattleEye, string autoConnect)
     {
         var profile = setup.Config.SelectedClientProfile;
         var modlist = setup.Config.SelectedClientModlist;
         await CatapultClient(profile, modlist, isBattleEye, autoConnect);
     }
 
-    public async Task<Process> CatapultClientProcess(bool isBattleEye, bool autoConnect)
+    public async Task<Process> CatapultClientProcess(bool isBattleEye, string autoConnect)
     {
         var profile = setup.Config.SelectedClientProfile;
         var modlist = setup.Config.SelectedClientModlist;
@@ -53,7 +53,7 @@ public class Launcher(
     ///     Profiles can only be used by one process at a times, since they contain the db of
     ///     the game.
     /// </exception>
-    public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye, bool autoConnect)
+    public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye, string autoConnect)
     {
         if (_conanClientProcess != null) return;
 
@@ -62,7 +62,7 @@ public class Launcher(
         _conanClientProcess = await processFactory.Create().SetProcess(process).BuildClient();
     }
 
-    public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye, bool autoConnect)
+    public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye, string autoConnect)
     {
         var data = new Dictionary<string, object>
         {
@@ -85,11 +85,12 @@ public class Launcher(
 
         await iniHandler.WriteClientSettingsAsync(profile);
         
-        if (autoConnect)
+        if (!string.IsNullOrEmpty(autoConnect))
         {
-            if (!IsAutoConnectInfoValid(modlist))
+            var connection = profile.ClientConnections.FirstOrDefault(x => x.Name == autoConnect);
+            if (connection is null || !IsAutoConnectInfoValid(connection))
                 throw new Exception("Auto connection address is invalid");
-            await iniHandler.WriteClientLastConnection(modlist.ServerAddress, modlist.ServerPort, modlist.ServerPassword);
+            await iniHandler.WriteClientLastConnection(connection);
         }
         
         var process = await CreateClientProcess(profile, modlist, isBattleEye, autoConnect);
@@ -105,19 +106,19 @@ public class Launcher(
         return childProcess;
     }
 
-    private bool IsAutoConnectInfoValid(ModListProfile profile)
+    private bool IsAutoConnectInfoValid(ClientConnection connection)
     {
-        if (!IPAddress.TryParse(profile.ServerAddress, out _)) return false;
-        if (profile.ServerPort is < 0 or > 65535) return false;
+        if (!IPAddress.TryParse(connection.IpAddress, out _)) return false;
+        if (connection.Port is < 0 or > 65535) return false;
         return true;
     }
 
-    private async Task<Process> CreateClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye, bool autoConnect)
+    private async Task<Process> CreateClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye, string autoConnect)
     {
         var filename = setup.GetBinFile(isBattleEye);
         var modlistFile = Path.GetTempFileName();
         await File.WriteAllLinesAsync(modlistFile, appFiles.Mods.GetResolvedModlist(modlist.Modlist));
-        var args = profile.GetClientArgs(modlistFile, autoConnect);
+        var args = profile.GetClientArgs(modlistFile, !string.IsNullOrEmpty(autoConnect));
 
         var dir = Path.GetDirectoryName(filename);
         if (dir == null)

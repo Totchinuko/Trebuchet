@@ -11,7 +11,6 @@ using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 using tot_lib;
 using Trebuchet.Assets;
-using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.Windows;
@@ -65,7 +64,6 @@ namespace Trebuchet.ViewModels.Panels
             }, canDownloadMods);
   
         }
-
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private readonly DialogueBox _box;
@@ -111,7 +109,7 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogDebug(@"Display panel");
             if (!_needRefresh) return;
             _needRefresh = false;
-            await ModList.LoadModList(_profile.Modlist);
+            await ModList.SetList(_profile.Modlist);
         }
         
         private Task OnModListChanged(object? sender, EventArgs args)
@@ -121,14 +119,15 @@ namespace Trebuchet.ViewModels.Panels
             return Task.CompletedTask;
         }
         
+        
         private Task OnFileChanged() => OnFileSelected(this, FileMenu.Selected);
         private async Task OnFileSelected(object? sender, string profile)
         {
-            _logger.LogDebug(@"Swap to modlist {modlist}", profile);
+            _logger.LogDebug(@"Swap to mod list {modList}", profile);
             _uiConfig.CurrentModlistProfile = profile;
             _uiConfig.SaveFile();
             _profile = _appFiles.Mods.Get(profile);
-            await ModList.LoadModList(_profile.Modlist);
+            await ModList.SetList(_profile.Modlist);
         }
 
         private async Task SyncJson(UriBuilder builder)
@@ -168,7 +167,7 @@ namespace Trebuchet.ViewModels.Panels
                 var result = await SteamRemoteStorage.GetCollectionDetails(
                     new GetCollectionDetailsQuery(collectionId), CancellationToken.None);
 
-                ModList.ReplaceModList(result.CollectionDetails
+                await ModList.SetList(result.CollectionDetails
                     .First()
                     .Children.Select(x => x.PublishedFileId));
             }
@@ -192,8 +191,8 @@ namespace Trebuchet.ViewModels.Panels
      
         private async Task OnEditModListAsText()
         {
-            var modlist = _appFiles.Mods.GetResolvedModlist(_profile.Modlist, false);
-            var editor = new OnBoardingModlistImport(string.Join(Environment.NewLine, modlist));
+            var modList = _appFiles.Mods.GetResolvedModlist(_profile.Modlist, false);
+            var editor = new OnBoardingModlistImport(string.Join(Environment.NewLine, modList));
             
             while (true)
             {
@@ -202,7 +201,7 @@ namespace Trebuchet.ViewModels.Panels
                 try
                 {
                     var parsed = _importer.Import(editor.Value, ImportFormats.Txt);
-                    ModList.ReplaceModList(parsed.Modlist);
+                    await ModList.SetList(parsed.Modlist);
                     return;
                 }
                 catch(Exception ex)
@@ -214,7 +213,7 @@ namespace Trebuchet.ViewModels.Panels
 
         private async Task OnSync()
         {
-            _logger.LogInformation(@"Sync modlist");
+            _logger.LogInformation(@"Sync modList");
             OnBoardingConfirmation confirm = new OnBoardingConfirmation(
                 Resources.ModlistReplace,
                 string.Format(Resources.ModlistReplaceText, FileMenu.Selected));

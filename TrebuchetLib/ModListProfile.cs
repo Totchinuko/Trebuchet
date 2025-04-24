@@ -12,11 +12,8 @@ namespace TrebuchetLib
     
     public sealed class ModListProfile : ProfileFile<ModListProfile>
     {
-        public List<string> Modlist { get; set; } = new List<string>();
+        public List<string> Modlist { get; set; } = [];
         public string SyncURL { get; set; } = string.Empty;
-        public string ServerAddress { get; set; } = string.Empty;
-        public int ServerPort { get; set; } = 0;
-        public string ServerPassword { get; set; } = string.Empty;
 
         [JsonIgnore]
         public string ProfileName => Path.GetFileNameWithoutExtension(FilePath) ?? string.Empty;

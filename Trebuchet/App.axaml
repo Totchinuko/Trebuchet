@@ -53,6 +53,9 @@
                 <MergeResourceInclude Source="Templates\AppDataDirectoryField.axaml" />
                 <MergeResourceInclude Source="Templates\MixedConsoleView.axaml" />
                 <MergeResourceInclude Source="Templates\FileMenuView.axaml" />
+                <MergeResourceInclude Source="Templates\ClientConnectionView.axaml" />
+                <MergeResourceInclude Source="Templates\ModListView.axaml" />
+                <MergeResourceInclude Source="Templates\ClientConnectionListView.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -96,6 +99,10 @@
         <StaticResource ResourceKey="AppDataDirectoryField" />
         <StaticResource ResourceKey="MixedConsoleView" />
         <StaticResource ResourceKey="FileMenuView" />
+        <StaticResource ResourceKey="ClientConnectionView" />
+        <StaticResource ResourceKey="ModlistItems" />
+        <StaticResource ResourceKey="ClientConnectionListView" />
+        <StaticResource ResourceKey="ModListView" />
     </Application.DataTemplates>
     <Application.Styles>
         <FluentTheme />

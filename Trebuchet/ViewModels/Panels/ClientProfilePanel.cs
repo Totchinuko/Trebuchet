@@ -21,6 +21,7 @@ namespace Trebuchet.ViewModels.Panels
             AppSetup setup, 
             AppFiles appFiles, 
             ILogger<ClientProfilePanel> logger,
+            ClientConnectionListViewModel clientConnectionList,
             UIConfig uiConfig)
         {
             _setup = setup;
@@ -28,6 +29,9 @@ namespace Trebuchet.ViewModels.Panels
             _logger = logger;
             _uiConfig = uiConfig;
             CanBeOpened = Tools.IsClientInstallValid(_setup.Config) && _setup.Config.ManageClient;
+
+            ClientConnectionList = clientConnectionList;
+            ClientConnectionList.ConnectionListChanged += OnConnectionListChanged;
 
             var startingProfile = _appFiles.Client.Resolve(_uiConfig.CurrentClientProfile);
             _profile = _appFiles.Client.Get(startingProfile);
@@ -40,6 +44,7 @@ namespace Trebuchet.ViewModels.Panels
             
             BuildFields();
         }
+
         private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly ILogger<ClientProfilePanel> _logger;
@@ -53,6 +58,8 @@ namespace Trebuchet.ViewModels.Panels
         public ObservableCollection<FieldElement> Fields { get; } = [];
         
         public IFileMenuViewModel FileMenu { get; }
+
+        public ClientConnectionListViewModel ClientConnectionList { get; }
        
         private ReactiveCommand<Unit, Unit> SaveProfile { get; }
         public string ProfileSize
@@ -75,6 +82,14 @@ namespace Trebuchet.ViewModels.Panels
             foreach (var f in Fields.OfType<IValueField>())
                 f.Update.Execute().Subscribe();
             await RefreshProfileSize(FileMenu.Selected);
+            ClientConnectionList.SetList(_profile.ClientConnections);
+        }
+        
+        private Task OnConnectionListChanged(object? sender, EventArgs args)
+        {
+            _profile.ClientConnections = ClientConnectionList.List.Select(x => x.Export()).ToList();
+            _profile.SaveFile();
+            return Task.CompletedTask;
         }
         
         private Task OnFileSelected(object? sender, string profile)

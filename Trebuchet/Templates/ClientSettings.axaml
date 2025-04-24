@@ -22,15 +22,22 @@
                     </Border>
                 </DockPanel>
             </Border>
-            <ScrollViewer DockPanel.Dock="Top">
-                <ItemsControl ItemsSource="{Binding Fields}" ClipToBounds="False">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel Margin="12" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
-            </ScrollViewer>
+            <TabControl DockPanel.Dock="Top">
+                <TabItem Header="{x:Static a:Resources.PanelSettings}">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding Fields}" ClipToBounds="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static a:Resources.PanelClientConnections}">
+                    <ContentControl Content="{Binding ClientConnectionList}" />
+                </TabItem>
+            </TabControl>
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

@@ -2,6 +2,7 @@ using System.CommandLine;
 using System.CommandLine.IO;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using SteamKit2.GC.CSGO.Internal;
 using tot_lib;
 using tot_lib.CommandLine;
 using TrebuchetLib.Services;
@@ -23,13 +24,13 @@ public class LambClientCommand(Launcher launcher, ILogger<LambClientCommand> log
         .Options.Create<bool>("--battle-eye", "start with battle eye").AddAlias("-b")
         .SetSetter((c,v) => c.BattleEye = v).SetDefault(false).BuildOption()
         
-        .Options.Create<bool>("--auto-connect", "Try to auto connect to the modlist server after launch")
-        .SetDefault(false).AddAlias("-a").SetSetter((c,v) => c.AutoConnect = v).BuildOption()
+        .Options.Create<string>("--auto-connect", "Try to auto connect to a client connection")
+        .SetDefault(string.Empty).AddAlias("-a").SetSetter((c,v) => c.AutoConnect = v ?? string.Empty).BuildOption()
         .BuildCommand();
     public string Profile { get; set; } = string.Empty;
     public string Modlist { get; set; } = string.Empty;
     public bool BattleEye { get; set; } = false;
-    public bool AutoConnect { get; set; } = false;
+    public string AutoConnect { get; set; } = string.Empty;
     
     public async Task<int> InvokeAsync(CancellationToken token)
     {

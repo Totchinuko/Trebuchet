@@ -1018,4 +1018,13 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="Corrupted" xml:space="preserve">
         <value>Corrompu</value>
     </data>
+    <data name="Name" xml:space="preserve">
+        <value>Nom</value>
+    </data>
+    <data name="PanelClientConnections" xml:space="preserve">
+        <value>Connections Client</value>
+    </data>
+    <data name="Add" xml:space="preserve">
+        <value>Ajouter</value>
+    </data>
 </root>

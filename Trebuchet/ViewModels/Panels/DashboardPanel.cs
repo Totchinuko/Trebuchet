@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Net;
 using System.Reactive;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -55,7 +52,7 @@ namespace Trebuchet.ViewModels.Panels
             VerifyFilesCommand = ReactiveCommand.CreateFromTask(
                 canExecute: canDownloadMods, execute:OnFileVerification);
 
-            Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker, _box);
+            Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker, _box, appFiles);
             ConfigureClient(Client);
             RefreshClientSelection(_setup.Config.SelectedClientProfile, _setup.Config.SelectedClientModlist);
         }
@@ -159,7 +156,7 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
         
-        public async Task LaunchClient(bool autoConnect)
+        public async Task LaunchClient(string autoConnect)
         {
             if (Client.ProcessRunning) return;
             if (!await CheckForSteamClientRunning()) return;
@@ -316,6 +313,7 @@ namespace Trebuchet.ViewModels.Panels
         private void RefreshClientSelection()
         {
             RefreshClientSelection(Client.SelectedProfile, Client.SelectedModlist);
+            Client.RefreshPanel();
         }
         
         private void RefreshClientSelection(string profile, string modlist)

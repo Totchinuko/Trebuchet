@@ -204,6 +204,7 @@ public partial class App : Application, IApplication
         services.AddSingleton<TrebuchetApp>();
         services.AddTransient<WorkshopSearchViewModel>();
         services.AddTransient<ModListViewModel>();
+        services.AddTransient<ClientConnectionListViewModel>();
 
         services.AddSingleton<IPanel, ModListPanel>();
         services.AddSingleton<IPanel, ClientProfilePanel>();

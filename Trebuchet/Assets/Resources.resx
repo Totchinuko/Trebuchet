@@ -1026,4 +1026,13 @@ DO NOT place it in your Steam Directory.</value>
     <data name="Corrupted" xml:space="preserve">
         <value>Corrupted</value>
     </data>
+    <data name="Name" xml:space="preserve">
+        <value>Name</value>
+    </data>
+    <data name="PanelClientConnections" xml:space="preserve">
+        <value>Client Connections</value>
+    </data>
+    <data name="Add" xml:space="preserve">
+        <value>Add</value>
+    </data>
 </root>

@@ -34,7 +34,7 @@ public class YuuIniClientFiles(AppSetup setup)
         }
     }
 
-    public async Task WriteLastConnection(string address, int port, string password)
+    public async Task WriteLastConnection(ClientConnection connection)
     {
         // Modify the default SectionName parse because funcom sometime does an oupsi and generate sections with an empty name
         var iniParserConfiguration = new IniParserConfiguration();
@@ -44,9 +44,9 @@ public class YuuIniClientFiles(AppSetup setup)
         var document = IniParser.Parse(iniContent, iniParserConfiguration);
         
         document.GetSection("SavedServers")
-            .SetParameter("LastConnected", $"{address}:{port}");
+            .SetParameter("LastConnected", $"{connection.IpAddress}:{connection.Port}");
         document.GetSection("SavedServers")
-            .SetParameter("LastPassword", password);
+            .SetParameter("LastPassword", connection.Password);
         await Tools.SetFileContent(iniPath, document.ToString());
     }
     

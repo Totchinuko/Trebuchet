@@ -60,6 +60,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add.
+        /// </summary>
+        public static string Add {
+            get {
+                return ResourceManager.GetString("Add", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add local mods.
         /// </summary>
         public static string AddLocalMod {
@@ -789,6 +798,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to No.
         /// </summary>
         public static string No {
@@ -1241,6 +1259,15 @@ namespace Trebuchet.Assets {
         public static string OpenWorkshopPage {
             get {
                 return ResourceManager.GetString("OpenWorkshopPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Connections.
+        /// </summary>
+        public static string PanelClientConnections {
+            get {
+                return ResourceManager.GetString("PanelClientConnections", resourceCulture);
             }
         }
         

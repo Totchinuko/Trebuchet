@@ -19,6 +19,7 @@ namespace TrebuchetLib
         public bool TotAdminDoNotLoadServerList { get; set; } = TotAdminDoNotLoadServerListDefault;
         public bool UltraAnisotropy { get; set; } = UltraAnisotropyDefault;
         public bool UseAllCores { get; set; } = UseAllCoresDefault;
+        public List<ClientConnection> ClientConnections { get; set; } = [];
         
         public static readonly long CPUThreadAffinityDefault = 0xffffffffffff;
         public static readonly int ConfiguredInternetSpeedDefault = 25000; 

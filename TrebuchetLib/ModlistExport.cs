@@ -17,24 +17,15 @@ namespace TrebuchetLib
     public class ModlistExport
     {
         public List<string> Modlist { get; set; } = [];
-        public string ServerAddress { get; set; } = string.Empty;
-        public int ServerPort { get; set; } = 0;
-        public string ServerPassword { get; set; } = string.Empty;
 
         public void GetValues(ModListProfile profile)
         {
             Modlist = profile.Modlist.ToList();
-            ServerAddress = profile.ServerAddress;
-            ServerPort = profile.ServerPort;
-            ServerPassword = profile.ServerPassword;
         }
 
         public void SetValues(ModListProfile profile)
         {
             profile.Modlist = Modlist.ToList();
-            profile.ServerAddress = ServerAddress;
-            profile.ServerPort = ServerPort;
-            profile.ServerPassword = ServerPassword;
         }
     }
 }

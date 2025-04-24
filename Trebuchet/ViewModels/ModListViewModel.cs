@@ -61,6 +61,7 @@ public class ModListViewModel : ReactiveObject
     private readonly AppSetup _setup;
     private readonly DialogueBox _dialogueBox;
     private string _size = string.Empty;
+    private bool _isReadOnly = false;
 
     public event AsyncEventHandler? ModListChanged;
     
@@ -72,13 +73,17 @@ public class ModListViewModel : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _size, value);
     }
 
-    internal void ReplaceModList(IEnumerable<string> modFiles)
+    public bool IsReadOnly
     {
-        using (List.SuspendNotifications())
-        {
-            List.Clear();
-            List.AddRange(modFiles.Select(x => _modFileFactory.Create(x)));
-        }
+        get => _isReadOnly;
+        set => this.RaiseAndSetIfChanged(ref _isReadOnly, value);
+    }
+
+    internal async Task SetReadOnly()
+    {
+        if (_isReadOnly) return;
+        _isReadOnly = true;
+        await SetList(List.Select(x => x.Export()));
     }
 
     internal Task UpdateMods()
@@ -93,7 +98,7 @@ public class ModListViewModel : ReactiveObject
         {
             await _steamApi.UpdateMods(mods);
             using(List.SuspendNotifications())
-                await _modFileFactory.QueryFromWorkshop(List);
+                await _modFileFactory.QueryFromWorkshop(List, IsReadOnly);
         }
         catch (Exception tex)
         {
@@ -105,16 +110,16 @@ public class ModListViewModel : ReactiveObject
     internal async Task ForceLoadModList(IEnumerable<string> modList)
     {
         _steamApi.InvalidateCache();
-        await LoadModList(modList);
+        await SetList(modList);
     }
     
-    internal async Task LoadModList(IEnumerable<string> modList)
+    internal async Task SetList(IEnumerable<string> modList)
     {
         using (List.SuspendNotifications())
         {
             List.Clear();
-            List.AddRange(modList.Select(x => _modFileFactory.Create(x)));
-            await _modFileFactory.QueryFromWorkshop(List);
+            List.AddRange(modList.Select(x => _modFileFactory.Create(x, IsReadOnly)));
+            await _modFileFactory.QueryFromWorkshop(List, IsReadOnly);
         }
         Size = CalculateModListSize().Bytes().Humanize();
     }
@@ -123,7 +128,7 @@ public class ModListViewModel : ReactiveObject
     {
         if (List.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
         _logger.LogInformation(@"Adding mod {mod} from workshop", mod.PublishedFileId);
-        List.Add(await _modFileFactory.Create(mod));
+        List.Add(await _modFileFactory.Create(mod, IsReadOnly));
         Size = CalculateModListSize().Bytes().Humanize();
     }
 
@@ -184,7 +189,7 @@ public class ModListViewModel : ReactiveObject
                 if (modFile is not IPublishedModFile published || published.PublishedId != id) continue;
                 var path = published.PublishedId.ToString();  
                 _appFiles.Mods.ResolveMod(ref path);
-                List[i] = _modFileFactory.Create(modFile, path);
+                List[i] = _modFileFactory.Create(modFile, path, IsReadOnly);
             }
             watch.Stop();
             using(_logger.BeginScope((@"fullPath", fullPath)))

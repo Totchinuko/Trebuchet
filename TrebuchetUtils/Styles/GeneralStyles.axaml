@@ -63,6 +63,7 @@
                     <SolidColorBrush x:Key="TPanelAccent" Color="#FFFFFF" Opacity="0.08" />
                     <SolidColorBrush x:Key="TDarkPanel" Color="#000000" Opacity="0.22" />
                     <SolidColorBrush x:Key="TSubText" Color="#D7D7D7" />
+                    <SolidColorBrush x:Key="TUnselected" Color="#B9B9B9" />
                     <SolidColorBrush x:Key="TGrayDim" Color="#AA595959" />
                     <SolidColorBrush x:Key="TGray" Color="#FF595959" />
                     <SolidColorBrush x:Key="SeparatorDark" Color="#55000000" />
@@ -101,7 +102,7 @@
 
     <Design.PreviewWith>
         <ThemeVariantScope RequestedThemeVariant="Dark">
-            <Border Background="{DynamicResource TBackground}">
+            <Border Background="{DynamicResource TBackground}" Width="600">
                 <ScrollViewer HorizontalScrollBarVisibility="Visible" VerticalScrollBarVisibility="Visible">
                     <Border Padding="20" Background="{DynamicResource TBackground}">
                         <StackPanel>
@@ -139,6 +140,17 @@
                             <ProgressBar IsEnabled="false" Classes="large" Value="0.5" Minimum="0.0" Maximum="1.0"
                                          Margin="0 0 0 12" />
                             <ProgressBar IsEnabled="false" Value="0.5" Minimum="0.0" Maximum="1.0" />
+                            <TabControl TabStripPlacement="Bottom">
+                                <TabItem Header="Arch">
+                                    <Border Background="AntiqueWhite" Height="100">
+                                        <TextBlock Text="Content" Foreground="Black" FontSize="20"/>
+                                    </Border>
+                                </TabItem>
+                                <TabItem Header="Leaf">
+                                    <Border Background="Green" Height="100" />
+                                </TabItem>
+                                <TabItem Header="Disabled" IsEnabled="False" />
+                            </TabControl>
                         </StackPanel>
                     </Border>
                 </ScrollViewer>
@@ -614,6 +626,10 @@
         <Setter Property="BorderBrush" Value="{DynamicResource TPanelAccent}" />
         <Setter Property="Background" Value="{DynamicResource TDarkPanel}" />
         <Setter Property="CornerRadius" Value="3" />
+        <Style Selector="^.Error">
+            <Setter Property="BorderBrush" Value="{DynamicResource TRedDim}" />
+            <Setter Property="Background" Value="{DynamicResource TRedFaded}" />
+        </Style>
         <Style Selector="^:pointerover">
             <Style Selector="^/template/Border#PART_BorderElement">
                 <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
@@ -625,6 +641,13 @@
                 <Setter Property="BorderBrush" Value="{DynamicResource TBlueDim}" />
                 <Setter Property="BorderThickness" Value="2" />
                 <Setter Property="Background" Value="{DynamicResource TDarkPanel}" />
+            </Style>
+        </Style>
+        <Style Selector="^.Error:focus">
+            <Style Selector="^/template/Border#PART_BorderElement">
+                <Setter Property="BorderBrush" Value="{DynamicResource TRedDim}" />
+                <Setter Property="BorderThickness" Value="2" />
+                <Setter Property="Background" Value="{DynamicResource TRedFaded}" />
             </Style>
         </Style>
         <Style Selector="^:disabled">
@@ -967,6 +990,89 @@
         <Style Selector="^:horizontal /template/ :is(RepeatButton)#PART_LineDownButton">
             <Setter Property="Width" Value="{DynamicResource TScrollbarSize}" />
             <Setter Property="MinHeight" Value="{DynamicResource TScrollbarSize}" />
+        </Style>
+    </Style>
+    
+    <!-- Tab Control -->
+    <Style Selector="TabItem">
+        <Setter Property="FontSize" Value="18" />
+        <Setter Property="Foreground" Value="{DynamicResource TUnselected}" />
+        <Style Selector="^ /template/ Border#PART_SelectedPipe">
+            <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
+        </Style>
+        <Style Selector="^:selected">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
+        </Style>
+        <Style Selector="^:selected /template/ Border#PART_SelectedPipe">
+            <Setter Property="IsVisible" Value="True" />
+            <Setter Property="Background" Value="{DynamicResource TBlueDim}" />
+        </Style>
+        <Style Selector="^:pointerover /template/ Border#PART_LayoutRoot">
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource TSubText}" />
+        </Style>
+
+        <!--  Selected PointerOver state  -->
+        <Style Selector="^:selected:pointerover /template/ Border#PART_LayoutRoot">
+            <Setter Property="TextElement.Foreground" Value="{DynamicResource TForeground}" />
+        </Style>
+    </Style>
+    <Style Selector="TabControl">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}"
+                        CornerRadius="{TemplateBinding CornerRadius}"
+                        Background="{TemplateBinding Background}"
+                        HorizontalAlignment="{TemplateBinding HorizontalAlignment}"
+                        VerticalAlignment="{TemplateBinding VerticalAlignment}">
+                    <DockPanel>
+                        <ItemsPresenter Name="PART_ItemsPresenter"
+                                        ItemsPanel="{TemplateBinding ItemsPanel}"
+                                        DockPanel.Dock="{TemplateBinding TabStripPlacement}" />
+                        <Border Name="PART_Separator" DockPanel.Dock="{TemplateBinding TabStripPlacement}" />
+                        <ContentPresenter Name="PART_SelectedContentHost"
+                                          Margin="{TemplateBinding Padding}"
+                                          HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                          VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}"
+                                          Content="{TemplateBinding SelectedContent}"
+                                          ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+                    </DockPanel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+        <Style Selector="^[TabStripPlacement=Left] /template/ Border#PART_Separator">
+            <Setter Property="Background" Value="{DynamicResource SeparatorDark}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SeparatorLight}" />
+            <Setter Property="BorderThickness" Value="0,0,1,0" />
+            <Setter Property="Width" Value="2" />
+            <Setter Property="ZIndex" Value="-1" />
+            <Setter Property="Margin" Value="-6 6 6 6" />
+        </Style>
+        <Style Selector="^[TabStripPlacement=Right] /template/ Border#PART_Separator">
+            <Setter Property="Background" Value="{DynamicResource SeparatorDark}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SeparatorLight}" />
+            <Setter Property="BorderThickness" Value="0,0,1,0" />
+            <Setter Property="Width" Value="2" />
+            <Setter Property="ZIndex" Value="-1" />
+            <Setter Property="Margin" Value="6 6 -6 6" />
+        </Style>
+        <Style Selector="^[TabStripPlacement=Top] /template/ Border#PART_Separator">
+            <Setter Property="Background" Value="{DynamicResource SeparatorDark}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SeparatorLight}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Height" Value="2" />
+            <Setter Property="ZIndex" Value="-1" />
+            <Setter Property="Margin" Value="6 -6 6 6" />
+        </Style>
+        
+        <Style Selector="^[TabStripPlacement=Bottom] /template/ Border#PART_Separator">
+            <Setter Property="Background" Value="{DynamicResource SeparatorDark}" />
+            <Setter Property="BorderBrush" Value="{DynamicResource SeparatorLight}" />
+            <Setter Property="BorderThickness" Value="0,0,0,1" />
+            <Setter Property="Height" Value="2" />
+            <Setter Property="ZIndex" Value="-1" />
+            <Setter Property="Margin" Value="6 6 6 -6" />
         </Style>
     </Style>
 </Styles>
