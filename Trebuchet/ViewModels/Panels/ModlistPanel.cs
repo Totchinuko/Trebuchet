@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
@@ -10,6 +11,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
 using Avalonia.Threading;
+using AvaloniaEdit.Utils;
 using DynamicData.Binding;
 using Humanizer;
 using Microsoft.Extensions.Logging;
@@ -41,7 +43,7 @@ namespace Trebuchet.ViewModels.Panels
             ModlistImporter importer,
             WorkshopSearchViewModel workshop,
             ModFileFactory modFileFactory,
-            IProgressCallback<DepotDownloader.Progress> progress,
+            IProgressCallback<Progress> progress,
             ILogger<ModlistPanel> logger) 
         {
             _steamApi = steamApi;
@@ -62,6 +64,7 @@ namespace Trebuchet.ViewModels.Panels
             FileMenu = new FileMenuViewModel<ModListProfile>(Resources.PanelMods, appFiles.Mods, box, logger);
             FileMenu.FileSelected += OnFileSelected;
             FileMenu.Selected = startingFile;
+            Modlist.CollectionChanged += OnListChanged;
             
             _profile = _appFiles.Mods.Get(startingFile);
 
@@ -135,10 +138,7 @@ namespace Trebuchet.ViewModels.Panels
         {
             if (Modlist.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
             _logger.LogInformation(@"Adding mod {mod} from workshop", mod.PublishedFileId);
-            var file = await _modFileFactory.Create(mod);
-            Modlist.Add(file);
-            _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
-            _profile.SaveFile();
+            Modlist.Add(await _modFileFactory.Create(mod));
             ModlistSize = CalculateModlistSize().Bytes().Humanize();
         }
 
@@ -146,8 +146,6 @@ namespace Trebuchet.ViewModels.Panels
         {
             _logger.LogInformation(@"Remove mod {mod} from list {name}", mod.Export(), FileMenu.Selected);
             Modlist.Remove(mod);
-            _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
-            _profile.SaveFile();
             ModlistSize = CalculateModlistSize().Bytes().Humanize();
             return Task.CompletedTask;
         }
@@ -182,8 +180,13 @@ namespace Trebuchet.ViewModels.Panels
                     file.Progress.Report(e);
             }
         }
+        private void OnListChanged(object? sender, NotifyCollectionChangedEventArgs e)
+        {
+            _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
+            _profile.SaveFile();
+        }
         
-        private Task OnModlistChanged() => OnFileSelected(this, FileMenu.Selected);
+        private Task OnFileChanged() => OnFileSelected(this, FileMenu.Selected);
         private async Task OnFileSelected(object? sender, string profile)
         {
             _logger.LogDebug(@"Swap to modlist {modlist}", profile);
@@ -223,7 +226,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 var result = await Tools.DownloadModList(builder.ToString(), CancellationToken.None);
                 await _appFiles.Mods.Import(result, FileMenu.Selected);
-                await OnModlistChanged();
+                await OnFileChanged();
             }
             catch (Exception tex)
             {
@@ -250,12 +253,16 @@ namespace Trebuchet.ViewModels.Panels
             {
                 var result = await SteamRemoteStorage.GetCollectionDetails(
                     new GetCollectionDetailsQuery(collectionId), CancellationToken.None);
-                var modlist = new List<string>();
-                foreach (var child in result.CollectionDetails.First().Children)
-                    modlist.Add(child.PublishedFileId);
-                _profile.Modlist = modlist;
-                _profile.SaveFile();
-                await OnModlistChanged();
+
+                using (Modlist.SuspendNotifications())
+                {
+                    Modlist.Clear();
+                    Modlist.AddRange(result.CollectionDetails
+                        .First()
+                        .Children
+                        .Select(x => _modFileFactory.Create(x.PublishedFileId))
+                    );
+                }
             }
             catch (Exception tex)
             {
@@ -272,10 +279,12 @@ namespace Trebuchet.ViewModels.Panels
 
         private async Task LoadModlist()
         {
-            Modlist.Clear();
-            foreach (var mod in _profile.Modlist)
-                Modlist.Add(_modFileFactory.Create(mod));
-            await _modFileFactory.QueryFromWorkshop(Modlist);
+            using (Modlist.SuspendNotifications())
+            {
+                Modlist.Clear();
+                Modlist.AddRange(_profile.Modlist.Select(x => _modFileFactory.Create(x)));
+                await _modFileFactory.QueryFromWorkshop(Modlist);
+            }
             ModlistSize = CalculateModlistSize().Bytes().Humanize();
         }
 
@@ -302,9 +311,13 @@ namespace Trebuchet.ViewModels.Panels
                 try
                 {
                     var parsed = _importer.Import(editor.Value, ImportFormats.Txt);
-                    _profile.Modlist = parsed.Modlist;
-                    _profile.SaveFile();
-                    await OnModlistChanged();
+                    using (Modlist.SuspendNotifications())
+                    {
+                        Modlist.Clear();
+                        Modlist.AddRange(parsed.Modlist
+                            .Select(x => _modFileFactory.Create(x))
+                                );
+                    }
                     return;
                 }
                 catch(Exception ex)
@@ -367,7 +380,7 @@ namespace Trebuchet.ViewModels.Panels
                 {
                     var modFile = Modlist[i];
                     if (modFile is not IPublishedModFile published || published.PublishedId != id) continue;
-                    var path = published.PublishedId.ToString();
+                    var path = published.PublishedId.ToString();  
                     _appFiles.Mods.ResolveMod(ref path);
                     Modlist[i] = _modFileFactory.Create(modFile, path);
                 }
