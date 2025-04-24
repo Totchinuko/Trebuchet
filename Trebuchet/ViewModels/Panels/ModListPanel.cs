@@ -1,19 +1,10 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Collections.Specialized;
 using System.ComponentModel;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Web;
-using Avalonia.Threading;
-using AvaloniaEdit.Utils;
-using DynamicData.Binding;
-using Humanizer;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using SteamWorksWebAPI;
@@ -27,83 +18,63 @@ using Trebuchet.Windows;
 using TrebuchetLib;
 using TrebuchetLib.Services;
 using TrebuchetLib.Services.Importer;
-using Progress = DepotDownloader.Progress;
 
 namespace Trebuchet.ViewModels.Panels
 {
-    public class ModlistPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRefreshingPanel
+    public class ModListPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRefreshingPanel
     {
-        public ModlistPanel(
-            SteamApi steamApi,
-            AppSetup setup,
+        public ModListPanel(
+            ModListViewModel modList,
             AppFiles appFiles,
             UIConfig uiConfig, 
             TaskBlocker blocker,
             DialogueBox box,
             ModlistImporter importer,
             WorkshopSearchViewModel workshop,
-            ModFileFactory modFileFactory,
-            IProgressCallback<Progress> progress,
-            ILogger<ModlistPanel> logger) 
+            ILogger<ModListPanel> logger)
         {
-            _steamApi = steamApi;
-            _setup = setup;
+            ModList = modList;
+            ModList.ModListChanged += OnModListChanged;
+            
             _appFiles = appFiles;
             _uiConfig = uiConfig;
             _box = box;
             _importer = importer;
             _workshop = workshop;
-            _modFileFactory = modFileFactory;
             _logger = logger;
-            _workshop.ModAdded += (_,mod) => AddModFromWorkshop(mod);
-            SetupFileWatcher();
-
-            progress.ProgressChanged += OnProgressChanged;
+            _workshop.ModAdded += (_,mod) => ModList.AddModFromWorkshop(mod);
             
             var startingFile = _appFiles.Mods.Resolve(_uiConfig.CurrentModlistProfile);
             FileMenu = new FileMenuViewModel<ModListProfile>(Resources.PanelMods, appFiles.Mods, box, logger);
             FileMenu.FileSelected += OnFileSelected;
             FileMenu.Selected = startingFile;
-            Modlist.CollectionChanged += OnListChanged;
             
             _profile = _appFiles.Mods.Get(startingFile);
 
-            _modFileFactory.Removed += RemoveModFile;
-            _modFileFactory.Updated += UpdateModFile;
-
             Workshop = ReactiveCommand.Create(OnExploreWorkshop);
-            EditAsText = ReactiveCommand.CreateFromTask(OnEditModlistAsText);
+            EditAsText = ReactiveCommand.CreateFromTask(OnEditModListAsText);
             Sync = ReactiveCommand.CreateFromTask(OnSync);
             SyncEdit = ReactiveCommand.CreateFromTask(OnSyncEdit);
-            RefreshList = ReactiveCommand.CreateFromTask(ForceLoadModlist);
+            RefreshList = ReactiveCommand.CreateFromTask(() => ModList.ForceLoadModList(_profile.Modlist));
 
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
-            Update = ReactiveCommand.CreateFromTask(() =>
+            Update = ReactiveCommand.CreateFromTask(async () =>
             {
-                return UpdateMods(Modlist.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList());
+                await ModList.UpdateMods();
+                await OnRequestRefresh();
             }, canDownloadMods);
-
-            blocker.WhenAnyValue(x => x.CanDownloadMods)
-                .InvokeCommand(ReactiveCommand.Create<bool>((x) =>
-                {
-                    _modWatcher.EnableRaisingEvents = x;
-                }));
+  
         }
 
-        private readonly SteamApi _steamApi;
-        private readonly AppSetup _setup;
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
         private readonly DialogueBox _box;
         private readonly ModlistImporter _importer;
         private readonly WorkshopSearchViewModel _workshop;
-        private readonly ModFileFactory _modFileFactory;
-        private readonly ILogger<ModlistPanel> _logger;
-        private FileSystemWatcher _modWatcher;
+        private readonly ILogger<ModListPanel> _logger;
         private bool _needRefresh;
         private ModListProfile _profile;
         private WorkshopSearch? _searchWindow;
-        private string _modlistSize = string.Empty;
         private bool _canBeOpened = true;
 
         public ReactiveCommand<Unit, Unit> Workshop { get; }
@@ -112,10 +83,10 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit, Unit> SyncEdit { get; }
         public ReactiveCommand<Unit, Unit> Update { get; }
         public ReactiveCommand<Unit, Unit> RefreshList { get; }
-
-        public ObservableCollectionExtended<IModFile> Modlist { get; } = [];
         
         public IFileMenuViewModel FileMenu { get; }
+        
+        public ModListViewModel ModList { get; }
 
         public string Icon => @"mdi-toy-brick";
         public string Label => Resources.PanelMods;
@@ -126,35 +97,8 @@ namespace Trebuchet.ViewModels.Panels
             set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
         }
 
-        public string ModlistSize
-        {
-            get => _modlistSize;
-            set => this.RaiseAndSetIfChanged(ref _modlistSize, value);
-        }
-
         public event AsyncEventHandler? RequestRefresh;
         
-        public async Task AddModFromWorkshop(WorkshopSearchResult mod)
-        {
-            if (Modlist.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
-            _logger.LogInformation(@"Adding mod {mod} from workshop", mod.PublishedFileId);
-            Modlist.Add(await _modFileFactory.Create(mod));
-            ModlistSize = CalculateModlistSize().Bytes().Humanize();
-        }
-
-        public Task RemoveModFile(IModFile mod)
-        {
-            _logger.LogInformation(@"Remove mod {mod} from list {name}", mod.Export(), FileMenu.Selected);
-            Modlist.Remove(mod);
-            ModlistSize = CalculateModlistSize().Bytes().Humanize();
-            return Task.CompletedTask;
-        }
-
-        public Task UpdateModFile(IPublishedModFile mod)
-        {
-            return UpdateMods([mod.PublishedId]);
-        }
-
         public Task RefreshPanel()
         {
             _logger.LogDebug(@"Refresh panel");
@@ -167,23 +111,14 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogDebug(@"Display panel");
             if (!_needRefresh) return;
             _needRefresh = false;
-            await LoadModlist();
+            await ModList.LoadModList(_profile.Modlist);
         }
         
-        private void OnProgressChanged(object? sender, Progress e)
+        private Task OnModListChanged(object? sender, EventArgs args)
         {
-            if (!e.IsFile) return;
-
-            foreach (var file in Modlist)
-            {
-                if(file is IPublishedModFile pub && pub.PublishedId == e.PublishedId)
-                    file.Progress.Report(e);
-            }
-        }
-        private void OnListChanged(object? sender, NotifyCollectionChangedEventArgs e)
-        {
-            _profile.Modlist = Modlist.Select(x => x.Export()).ToList();
+            _profile.Modlist = ModList.List.Select(x => x.Export()).ToList();
             _profile.SaveFile();
+            return Task.CompletedTask;
         }
         
         private Task OnFileChanged() => OnFileSelected(this, FileMenu.Selected);
@@ -193,28 +128,7 @@ namespace Trebuchet.ViewModels.Panels
             _uiConfig.CurrentModlistProfile = profile;
             _uiConfig.SaveFile();
             _profile = _appFiles.Mods.Get(profile);
-            await LoadModlist();
-        }
-
-        private long CalculateModlistSize()
-        {
-            return Modlist.Count == 0 ? 0 : Modlist.Select(x => x.FileSize).Aggregate((a, b) => a+b);
-        }
-
-        private async Task UpdateMods(List<ulong> mods)
-        {
-            _logger.LogInformation(@"Updating mods");
-            try
-            {
-                await _steamApi.UpdateMods(mods);
-                await _modFileFactory.QueryFromWorkshop(Modlist);
-                await OnRequestRefresh();
-            }
-            catch (Exception tex)
-            {
-                _logger.LogError(tex, @"Failed");
-                await _box.OpenErrorAsync(tex.Message);
-            }
+            await ModList.LoadModList(_profile.Modlist);
         }
 
         private async Task SyncJson(UriBuilder builder)
@@ -254,38 +168,15 @@ namespace Trebuchet.ViewModels.Panels
                 var result = await SteamRemoteStorage.GetCollectionDetails(
                     new GetCollectionDetailsQuery(collectionId), CancellationToken.None);
 
-                using (Modlist.SuspendNotifications())
-                {
-                    Modlist.Clear();
-                    Modlist.AddRange(result.CollectionDetails
-                        .First()
-                        .Children
-                        .Select(x => _modFileFactory.Create(x.PublishedFileId))
-                    );
-                }
+                ModList.ReplaceModList(result.CollectionDetails
+                    .First()
+                    .Children.Select(x => x.PublishedFileId));
             }
             catch (Exception tex)
             {
                 _logger.LogError(tex, @"Failed");
                 await _box.OpenErrorAsync(tex.Message);
             }
-        }
-
-        private async Task ForceLoadModlist()
-        {
-            _steamApi.InvalidateCache();
-            await LoadModlist();
-        }
-
-        private async Task LoadModlist()
-        {
-            using (Modlist.SuspendNotifications())
-            {
-                Modlist.Clear();
-                Modlist.AddRange(_profile.Modlist.Select(x => _modFileFactory.Create(x)));
-                await _modFileFactory.QueryFromWorkshop(Modlist);
-            }
-            ModlistSize = CalculateModlistSize().Bytes().Humanize();
         }
 
         private void OnExploreWorkshop()
@@ -299,7 +190,7 @@ namespace Trebuchet.ViewModels.Panels
             _searchWindow.Show();
         }
      
-        private async Task OnEditModlistAsText()
+        private async Task OnEditModListAsText()
         {
             var modlist = _appFiles.Mods.GetResolvedModlist(_profile.Modlist, false);
             var editor = new OnBoardingModlistImport(string.Join(Environment.NewLine, modlist));
@@ -311,13 +202,7 @@ namespace Trebuchet.ViewModels.Panels
                 try
                 {
                     var parsed = _importer.Import(editor.Value, ImportFormats.Txt);
-                    using (Modlist.SuspendNotifications())
-                    {
-                        Modlist.Clear();
-                        Modlist.AddRange(parsed.Modlist
-                            .Select(x => _modFileFactory.Create(x))
-                                );
-                    }
+                    ModList.ReplaceModList(parsed.Modlist);
                     return;
                 }
                 catch(Exception ex)
@@ -368,63 +253,12 @@ namespace Trebuchet.ViewModels.Panels
             _profile.SaveFile();
         }
 
-        private void OnModFileChanged(object sender, FileSystemEventArgs e)
-        {
-            var fullPath = e.FullPath;
-            Dispatcher.UIThread.Invoke(() =>
-            {
-                var watch = new Stopwatch();
-                watch.Start();
-                if (!_appFiles.Mods.TryParseDirectory2ModId(fullPath, out var id)) return;
-                for (var i = 0; i < Modlist.Count; i++)
-                {
-                    var modFile = Modlist[i];
-                    if (modFile is not IPublishedModFile published || published.PublishedId != id) continue;
-                    var path = published.PublishedId.ToString();  
-                    _appFiles.Mods.ResolveMod(ref path);
-                    Modlist[i] = _modFileFactory.Create(modFile, path);
-                }
-                watch.Stop();
-                using(_logger.BeginScope((@"fullPath", fullPath)))
-                    _logger.LogDebug(@$"Update time {watch.ElapsedMilliseconds}ms");
-            });
-        }
-
         private void OnSearchClosing(object? sender, CancelEventArgs e)
         {
             if (_searchWindow == null) return;
             _searchWindow.Closing -= OnSearchClosing;
             _searchWindow = null;
         }
-
-        [MemberNotNull("_modWatcher")]
-        private void SetupFileWatcher()
-        {
-            if (_modWatcher != null)
-                return;
-
-            _logger.LogInformation(@"Starting mod file watcher");
-            var path = Path.Combine(_setup.GetWorkshopFolder());
-            if (!Directory.Exists(path))
-                Tools.CreateDir(path);
-
-            _modWatcher = new FileSystemWatcher(path);
-            _modWatcher.NotifyFilter = NotifyFilters.Attributes
-                                       | NotifyFilters.CreationTime
-                                       | NotifyFilters.DirectoryName
-                                       | NotifyFilters.FileName
-                                       | NotifyFilters.LastAccess
-                                       | NotifyFilters.LastWrite
-                                       | NotifyFilters.Security
-                                       | NotifyFilters.Size;
-            _modWatcher.Changed += OnModFileChanged;
-            _modWatcher.Created += OnModFileChanged;
-            _modWatcher.Deleted += OnModFileChanged;
-            _modWatcher.Renamed += OnModFileChanged;
-            _modWatcher.IncludeSubdirectories = true;
-            _modWatcher.EnableRaisingEvents = true;
-        }
-
 
         private async Task OnRequestRefresh()
         {

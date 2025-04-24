@@ -4,6 +4,12 @@ using System.Text.Json.Serialization;
 
 namespace TrebuchetLib
 {
+    [JsonSourceGenerationOptions(PropertyNameCaseInsensitive = true)]
+    [JsonSerializable(typeof(ModListProfile))]
+    public partial class ModListProfileJsonContext : JsonSerializerContext
+    {
+    }
+    
     public sealed class ModListProfile : ProfileFile<ModListProfile>
     {
         public List<string> Modlist { get; set; } = new List<string>();

@@ -4,7 +4,7 @@
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
-    <DataTemplate x:Key="ModlistEditor" x:DataType="p:ModlistPanel">
+    <DataTemplate x:Key="ModlistEditor" x:DataType="p:ModListPanel">
         <DockPanel LastChildFill="True">
             <Border DockPanel.Dock="Left" BorderThickness="0 0 1 0" Width="210" BorderBrush="{DynamicResource TPanelAccent}">
                 <ContentControl Content="{Binding FileMenu}" />
@@ -14,7 +14,7 @@
                     <Border DockPanel.Dock="Right" BorderThickness="1 0 0 0" Padding="6" BorderBrush="{DynamicResource TPanelAccent}" Background="Transparent" ToolTip.Tip="{x:Static a:Resources.ModlistSizeTip}">
                         <StackPanel Spacing="3" VerticalAlignment="Center" HorizontalAlignment="Center">
                             <i:Icon Value="mdi-weight" Classes="Normal" />
-                            <TextBlock TextAlignment="Center" Text="{Binding ModlistSize}"/>
+                            <TextBlock TextAlignment="Center" Text="{Binding ModList.Size}"/>
                         </StackPanel>
                     </Border>
                     <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="0">
@@ -57,7 +57,7 @@
                 </DockPanel>
             </Border>
 
-            <ListBox DockPanel.Dock="Top" Padding="12" Classes="draggableVirtualizing" SelectionMode="Multiple" ItemsSource="{Binding Modlist}" ItemTemplate="{StaticResource ModlistItems}"/>
+            <ListBox DockPanel.Dock="Top" Padding="12" Classes="draggableVirtualizing" SelectionMode="Multiple" ItemsSource="{Binding ModList.List}" ItemTemplate="{StaticResource ModlistItems}"/>
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>
