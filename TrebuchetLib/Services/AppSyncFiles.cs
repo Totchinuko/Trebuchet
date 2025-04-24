@@ -1,28 +1,32 @@
+using System.Web;
+using Microsoft.Extensions.Logging;
 using SteamKit2.WebUI.Internal;
+using SteamWorksWebAPI;
+using SteamWorksWebAPI.Interfaces;
 
 namespace TrebuchetLib.Services;
 
-public class AppModlistFiles(AppSetup setup) : IAppModListFiles
+public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
 {
-    private readonly Dictionary<string, ModListProfile> _cache = [];
-    public ModListProfile Create(string name)
+    private readonly Dictionary<string, SyncProfile> _cache = [];
+    public SyncProfile Create(string name)
     {
         if (_cache.TryGetValue(name, out var profile))
         {
             profile.SaveFile();
             return profile;
         }
-        var file = ModListProfile.CreateProfile(GetPath(name));
+        var file = SyncProfile.CreateProfile(GetPath(name));
         file.SaveFile();
         _cache[name] = file;
         return file;
     }
 
-    public ModListProfile Get(string name)
+    public SyncProfile Get(string name)
     {
         if (_cache.TryGetValue(name, out var profile))
             return profile;
-        var file = ModListProfile.LoadProfile(GetPath(name));
+        var file = SyncProfile.LoadProfile(GetPath(name));
         _cache[name] = file;
         return file;
     }
@@ -47,11 +51,11 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
 
         profileName = "Default";
         if (!File.Exists(GetPath(profileName)))
-            ModListProfile.CreateProfile(GetPath(profileName)).SaveFile();
+            SyncProfile.CreateProfile(GetPath(profileName)).SaveFile();
         return profileName;
     }
 
-    public Task<ModListProfile> Duplicate(string name, string destination)
+    public Task<SyncProfile> Duplicate(string name, string destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -60,7 +64,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         return Task.FromResult(Get(destination));
     }
 
-    public Task<ModListProfile> Rename(string name, string destination)
+    public Task<SyncProfile> Rename(string name, string destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -70,36 +74,12 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         return Task.FromResult(Get(destination));
     }
 
-    public IEnumerable<ulong> CollectAllMods(IEnumerable<string> modlists)
-    {
-        foreach (var i in modlists.Distinct())
-            if (this.TryGet(i, out ModListProfile? profile))
-                foreach (var m in profile.Modlist)
-                    if (TryParseModId(m, out ulong id))
-                        yield return id;
-    }
-
-    public IEnumerable<ulong> CollectAllMods(string modlist)
-    {
-        if (this.TryGet(modlist, out ModListProfile? profile))
-            foreach (var m in profile.Modlist)
-                if (TryParseModId(m, out ulong id))
-                    yield return id;
-    }
-
-    public IEnumerable<ulong> GetModIdList(IEnumerable<string> modlist)
-    {
-        foreach (var mod in modlist)
-            if (TryParseModId(mod, out var id))
-                yield return id;
-    }
-
     public string GetBaseFolder()
     {
         return Path.Combine(
             setup.GetDataDirectory().FullName, 
             setup.VersionFolder, 
-            Constants.FolderModlistProfiles);
+            Constants.FolderSyncProfiles);
     }
 
     public string GetPath(string modlistName)
@@ -117,15 +97,6 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         string[] profiles = Directory.GetFiles(GetBaseFolder(), "*.json");
         foreach (string p in profiles)
             yield return Path.GetFileNameWithoutExtension(p);
-    }
-
-    public IEnumerable<string> ParseModList(IEnumerable<string> modlist)
-    {
-        foreach (var mod in modlist)
-            if (TryParseModId(mod, out ulong id))
-                yield return id.ToString();
-            else
-                yield return mod;
     }
 
     private bool ResolveMod(uint appId, ref string mod)
@@ -182,43 +153,6 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         }
     }
 
-    public bool TryParseDirectory2ModId(string path, out ulong id)
-    {
-        id = 0;
-        if (ulong.TryParse(Path.GetFileName(path), out id))
-            return true;
-
-        string? parent = Path.GetDirectoryName(path);
-        if (parent != null && ulong.TryParse(Path.GetFileName(parent), out id))
-            return true;
-
-        return false;
-    }
-
-    public bool TryParseFile2ModId(string path, out ulong id)
-    {
-        id = 0;
-        string? folder = Path.GetDirectoryName(path);
-        if (folder == null)
-            return false;
-        if (ulong.TryParse(Path.GetFileName(folder), out id))
-            return true;
-
-        return false;
-    }
-
-    public bool TryParseModId(string path, out ulong id)
-    {
-        id = 0;
-        if (ulong.TryParse(path, out id))
-            return true;
-
-        if (Path.GetExtension(path) == ".pak")
-            return TryParseFile2ModId(path, out id);
-        else
-            return TryParseDirectory2ModId(path, out id);
-    }
-
     public Task Export(string name, FileInfo file)
     {
         var path = GetPath(name);
@@ -226,17 +160,55 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         return Task.CompletedTask;
     }
 
-    public async Task<ModListProfile> Import(FileInfo import, string name)
+    public async Task<SyncProfile> Import(FileInfo import, string name)
     {
         var json = await File.ReadAllTextAsync(import.FullName);
         return await Import(json, name);
     }
 
-    public Task<ModListProfile> Import(string json, string name)
+    public Task<SyncProfile> Import(string json, string name)
     {
         var path = GetPath(name);
-        var profile = ModListProfile.ImportFile(json, path);
+        var profile = SyncProfile.ImportFile(json, path);
         _cache[name] = profile;
         return Task.FromResult(profile);
+    }
+
+    public async Task Sync(string name)
+    {
+        var profile = Get(name);
+        if (string.IsNullOrWhiteSpace(profile.SyncURL))
+            throw new Exception("Url is invalid");
+        
+        UriBuilder builder = new UriBuilder(profile.SyncURL);
+
+        if (SteamWorks.SteamCommunityHost == builder.Host)
+        {
+            profile.Modlist = await SyncSteamCollection(builder);
+            profile.SaveFile();
+        }
+        else
+            await SyncJson(builder, name);
+    }
+    
+    private async Task SyncJson(UriBuilder builder, string name)
+    {
+        var result = await Tools.DownloadModList(builder.ToString(), CancellationToken.None);
+        await Import(result, name);
+    }
+
+    private async Task<List<string>> SyncSteamCollection(UriBuilder builder)
+    {
+        var query = HttpUtility.ParseQueryString(builder.Query);
+        var id = query.Get(@"id");
+        if (id == null || !ulong.TryParse(id, out var collectionId))
+            throw new Exception("Steam Collection URL is invalid");
+
+        var result = await SteamRemoteStorage.GetCollectionDetails(
+            new GetCollectionDetailsQuery(collectionId), CancellationToken.None);
+
+        return result.CollectionDetails
+            .First()
+            .Children.Select(x => x.PublishedFileId).ToList();
     }
 }

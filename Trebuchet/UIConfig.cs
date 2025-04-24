@@ -8,6 +8,7 @@ namespace Trebuchet
         public bool FoldedMenu { get; set; }
         public string CurrentClientProfile { get; set; } = string.Empty;
         public string CurrentModlistProfile { get; set; } = string.Empty;
+        public string CurrentSyncProfile { get; set; } = string.Empty;
         public string CurrentServerProfile { get; set; } = string.Empty;
         public bool DisplayProcessPerformance { get; set; } = DisplayProcessPerformanceDefault;
         public bool DisplayWarningOnKill { get; set; } = DisplayWarningOnKillDefault;

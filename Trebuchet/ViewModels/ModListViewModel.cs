@@ -82,7 +82,7 @@ public class ModListViewModel : ReactiveObject
     internal async Task SetReadOnly()
     {
         if (_isReadOnly) return;
-        _isReadOnly = true;
+        IsReadOnly = true;
         await SetList(List.Select(x => x.Export()));
     }
 

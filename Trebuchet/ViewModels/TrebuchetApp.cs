@@ -176,7 +176,6 @@ public sealed class TrebuchetApp : ReactiveObject
     {
         try
         {
-            _appFiles.SetupFolders();
             if (!await _onBoarding.OnBoardingLanguageChoice()) return;
             if (!await _onBoarding.OnBoardingCheckForUpdate(_updater)) return;
             if (!await _onBoarding.OnBoardingCheckTrebuchet()) return;

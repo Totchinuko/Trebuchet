@@ -27,6 +27,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\DepotDownloader\DepotDownloader\DepotDownloader.csproj" />
+      <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
       <ProjectReference Include="..\tot-lib\tot-lib.csproj" />
     </ItemGroup>
 

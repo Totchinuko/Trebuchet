@@ -31,6 +31,7 @@ public static class Constants
     public const string FolderInstancePattern = "Instance_{0}";
     public const string FolderLive = "Live";
     public const string FolderModlistProfiles = "Modlists";
+    public const string FolderSyncProfiles = "Sync";
     public const string FolderServerInstances = "ServerInstances";
     public const string FolderServerProfiles = "ServerProfiles";
     public const string FolderTestLive = "TestLive";

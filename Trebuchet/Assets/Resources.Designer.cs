@@ -1335,6 +1335,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Synchronize.
+        /// </summary>
+        public static string PanelSync {
+            get {
+                return ResourceManager.GetString("PanelSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Toolbox.
         /// </summary>
         public static string PanelToolbox {

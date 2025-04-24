@@ -723,8 +723,8 @@
         </Style>
     </Style>
 
-    <!-- Draggable ListBoxes -->
-    <Style Selector=":is(ListBox).draggableVirtualizing">
+    <!-- ListBoxes -->
+    <Style Selector=":is(ListBox)">
         <Setter Property="Background" Value="Transparent" />
         <Setter Property="ItemsPanel">
             <Setter.Value>
@@ -734,8 +734,30 @@
             </Setter.Value>
         </Setter>
     </Style>
-
+    
     <Style Selector=":is(ListBox).draggableVirtualizing > :is(ListBoxItem)">
+        <Setter Property="(Interaction.Behaviors)">
+            <BehaviorCollectionTemplate>
+                <BehaviorCollection>
+                    <u:ItemDragBehavior HorizontalDragThreshold="3" VerticalDragThreshold="3" Orientation="Vertical" />
+                </BehaviorCollection>
+            </BehaviorCollectionTemplate>
+        </Setter>
+        <Style Selector="^:not(:dragging)">
+            <Setter Property="Transitions">
+                <Setter.Value>
+                    <Transitions>
+                        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1" />
+                    </Transitions>
+                </Setter.Value>
+            </Setter>
+        </Style>
+        <Style Selector="^:pressed">
+            <Setter Property="ZIndex" Value="1" />
+        </Style>
+    </Style>
+
+    <Style Selector=":is(ListBox) > :is(ListBoxItem)">
         <Setter Property="CornerRadius" Value="3" />
         <Setter Property="Background" Value="{DynamicResource TPanel}" />
         <Setter Property="BorderThickness" Value="1" />
@@ -751,27 +773,8 @@
         <Style Selector="^:pointerover">
             <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
         </Style>
-        <Setter Property="(Interaction.Behaviors)">
-            <BehaviorCollectionTemplate>
-                <BehaviorCollection>
-                    <u:ItemDragBehavior HorizontalDragThreshold="3" VerticalDragThreshold="3" Orientation="Vertical" />
-                </BehaviorCollection>
-            </BehaviorCollectionTemplate>
-        </Setter>
     </Style>
-    <Style Selector=":is(ListBox).draggableVirtualizing > :is(ListBoxItem)">
-        <Style Selector="^:pressed">
-            <Setter Property="ZIndex" Value="1" />
-        </Style>
-        <Style Selector="^:not(:dragging)">
-            <Setter Property="Transitions">
-                <Setter.Value>
-                    <Transitions>
-                        <TransformOperationsTransition Property="RenderTransform" Duration="0:0:0.1" />
-                    </Transitions>
-                </Setter.Value>
-            </Setter>
-        </Style>
+    <Style Selector=":is(ListBox) > :is(ListBoxItem)">
         <!--  Selected State  -->
         <Style Selector="^:selected">
             <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
@@ -798,9 +801,8 @@
             </Style>
         </Style>
         <!--  Selected State (Hidden)  -->
-
     </Style>
-    <Style Selector=":is(ListBox).draggableVirtualizing.NoSelection > :is(ListBoxItem)">
+    <Style Selector=":is(ListBox).NoSelection > :is(ListBoxItem)">
         <Style Selector="^:selected">
             <Style Selector="^ /template/ ContentPresenter#PART_ContentPresenter">
                 <Setter Property="Background" Value="{DynamicResource TPanel}" />
@@ -815,7 +817,7 @@
 
             <!--  Selected PointerOver State  -->
             <Style Selector="^:pointerover /template/ ContentPresenter#PART_ContentPresenter">
-                <Setter Property="Background" Value="{DynamicResource TPanelAccent}" />
+                <Setter Property="Background" Value="{DynamicResource TPanel}" />
                 <Setter Property="Foreground" Value="{DynamicResource TForeground}" />
             </Style>
 
@@ -826,6 +828,8 @@
             </Style>
         </Style>
     </Style>
+    
+    <!-- Progress Bar -->
 
     <Style Selector="ProgressBar.large">
         <Setter Property="Background" Value="{DynamicResource TPanel}" />

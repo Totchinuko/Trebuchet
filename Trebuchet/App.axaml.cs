@@ -88,6 +88,7 @@ public partial class App : Application, IApplication
         MainWindow mainWindow = new ();
         var currentWindow = desktop.MainWindow;
         desktop.MainWindow = mainWindow;
+        services.GetRequiredService<AppFiles>().SetupFolders();
         mainWindow.SetApp(services.GetRequiredService<TrebuchetApp>());
         mainWindow.Show();
         currentWindow?.Close();
@@ -187,6 +188,7 @@ public partial class App : Application, IApplication
         services.AddSingleton<AppClientFiles>();
         services.AddSingleton<AppServerFiles>();
         services.AddSingleton<AppModlistFiles>();
+        services.AddSingleton<AppSyncFiles>();
         services.AddSingleton<AppFiles>();
         services.AddSingleton<ModlistImporter>();
         services.AddSingleton<OnBoarding>();
@@ -208,6 +210,7 @@ public partial class App : Application, IApplication
 
         services.AddSingleton<IPanel, ModListPanel>();
         services.AddSingleton<IPanel, ClientProfilePanel>();
+        services.AddSingleton<IPanel, SyncPanel>();
         services.AddSingleton<IPanel, ServerProfilePanel>();
         services.AddSingleton<IPanel, ConsolePanel>();
        

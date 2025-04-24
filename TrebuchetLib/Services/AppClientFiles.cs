@@ -80,11 +80,10 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
 
     public IEnumerable<string> GetList()
     {
-        string folder = Path.Combine(appSetup.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderClientProfiles);
-        if (!Directory.Exists(folder))
+        if (!Directory.Exists(GetBaseFolder()))
             yield break;
 
-        string[] profiles = Directory.GetDirectories(folder, "*");
+        string[] profiles = Directory.GetDirectories(GetBaseFolder(), "*");
         foreach (string p in profiles)
             yield return Path.GetFileName(p);
     }
@@ -98,7 +97,7 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
     
     public string GetDefault()
     {
-        var name = Tools.GetFirstDirectoryName(Path.Combine(appSetup.GetDataDirectory().FullName, appSetup.VersionFolder, Constants.FolderClientProfiles), "*");
+        var name = Tools.GetFirstDirectoryName(GetBaseFolder(), "*");
         if (!string.IsNullOrEmpty(name)) 
             return name;
 

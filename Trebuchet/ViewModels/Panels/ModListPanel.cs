@@ -52,8 +52,6 @@ namespace Trebuchet.ViewModels.Panels
 
             Workshop = ReactiveCommand.Create(OnExploreWorkshop);
             EditAsText = ReactiveCommand.CreateFromTask(OnEditModListAsText);
-            Sync = ReactiveCommand.CreateFromTask(OnSync);
-            SyncEdit = ReactiveCommand.CreateFromTask(OnSyncEdit);
             RefreshList = ReactiveCommand.CreateFromTask(() => ModList.ForceLoadModList(_profile.Modlist));
 
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
@@ -62,7 +60,6 @@ namespace Trebuchet.ViewModels.Panels
                 await ModList.UpdateMods();
                 await OnRequestRefresh();
             }, canDownloadMods);
-  
         }
         private readonly AppFiles _appFiles;
         private readonly UIConfig _uiConfig;
@@ -77,8 +74,6 @@ namespace Trebuchet.ViewModels.Panels
 
         public ReactiveCommand<Unit, Unit> Workshop { get; }
         public ReactiveCommand<Unit, Unit> EditAsText { get; }
-        public ReactiveCommand<Unit, Unit> Sync { get; }
-        public ReactiveCommand<Unit, Unit> SyncEdit { get; }
         public ReactiveCommand<Unit, Unit> Update { get; }
         public ReactiveCommand<Unit, Unit> RefreshList { get; }
         
@@ -119,8 +114,6 @@ namespace Trebuchet.ViewModels.Panels
             return Task.CompletedTask;
         }
         
-        
-        private Task OnFileChanged() => OnFileSelected(this, FileMenu.Selected);
         private async Task OnFileSelected(object? sender, string profile)
         {
             _logger.LogDebug(@"Swap to mod list {modList}", profile);
@@ -128,54 +121,6 @@ namespace Trebuchet.ViewModels.Panels
             _uiConfig.SaveFile();
             _profile = _appFiles.Mods.Get(profile);
             await ModList.SetList(_profile.Modlist);
-        }
-
-        private async Task SyncJson(UriBuilder builder)
-        {
-            using(_logger.BeginScope((@"url", builder.ToString())))
-                _logger.LogInformation(@"Fetching json list");
-            
-            try
-            {
-                var result = await Tools.DownloadModList(builder.ToString(), CancellationToken.None);
-                await _appFiles.Mods.Import(result, FileMenu.Selected);
-                await OnFileChanged();
-            }
-            catch (Exception tex)
-            {
-                _logger.LogError(tex, @"Failed");
-                await _box.OpenErrorAsync(tex.Message);
-            }
-
-        }
-
-        private async Task SyncSteamCollection(UriBuilder builder)
-        {
-            using(_logger.BeginScope((@"url", builder.ToString())))
-                _logger.LogInformation(@"Fetching steam collection");
-            
-            var query = HttpUtility.ParseQueryString(builder.Query);
-            var id = query.Get(@"id");
-            if (id == null || !ulong.TryParse(id, out var collectionId))
-            {
-                await _box.OpenErrorAsync(Resources.InvalidURL, Resources.InvalidURLText);
-                return;
-            }
-
-            try
-            {
-                var result = await SteamRemoteStorage.GetCollectionDetails(
-                    new GetCollectionDetailsQuery(collectionId), CancellationToken.None);
-
-                await ModList.SetList(result.CollectionDetails
-                    .First()
-                    .Children.Select(x => x.PublishedFileId));
-            }
-            catch (Exception tex)
-            {
-                _logger.LogError(tex, @"Failed");
-                await _box.OpenErrorAsync(tex.Message);
-            }
         }
 
         private void OnExploreWorkshop()
@@ -209,47 +154,6 @@ namespace Trebuchet.ViewModels.Panels
                     await _box.OpenErrorAsync(ex.Message);
                 }
             }
-        }
-
-        private async Task OnSync()
-        {
-            _logger.LogInformation(@"Sync modList");
-            OnBoardingConfirmation confirm = new OnBoardingConfirmation(
-                Resources.ModlistReplace,
-                string.Format(Resources.ModlistReplaceText, FileMenu.Selected));
-            await _box.OpenAsync(confirm);
-            if (!confirm.Result) return;
-
-            if (string.IsNullOrEmpty(_profile.SyncURL))
-                await OnSyncEdit();
-
-            UriBuilder builder;
-            try
-            {
-                builder = new UriBuilder(_profile.SyncURL);
-            }
-            catch(Exception ex)
-            {
-                _logger.LogWarning(ex, @"Failed");
-                await _box.OpenErrorAsync(Resources.InvalidURL);
-                return;
-            }
-
-            if (SteamWorks.SteamCommunityHost == builder.Host)
-                await SyncSteamCollection(builder);
-            else
-                await SyncJson(builder);
-        }
-
-        private async Task OnSyncEdit()
-        {
-            var editor = new OnBoardingNameSelection(Resources.Sync, Resources.SyncText);
-            editor.Value = _profile.SyncURL;
-            editor.Watermark = @"https://";
-            await _box.OpenAsync(editor);
-            if (editor.Value is null) return;
-            _profile.SyncURL = editor.Value;
-            _profile.SaveFile();
         }
 
         private void OnSearchClosing(object? sender, CancelEventArgs e)

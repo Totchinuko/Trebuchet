@@ -1035,4 +1035,7 @@ DO NOT place it in your Steam Directory.</value>
     <data name="Add" xml:space="preserve">
         <value>Add</value>
     </data>
+    <data name="PanelSync" xml:space="preserve">
+        <value>Synchronize</value>
+    </data>
 </root>

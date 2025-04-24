@@ -4,7 +4,7 @@
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
-    <DataTemplate x:Key="ModlistEditor" x:DataType="p:ModListPanel">
+    <DataTemplate x:Key="SyncPanelView" x:DataType="p:SyncPanel">
         <DockPanel LastChildFill="True">
             <Border DockPanel.Dock="Left" BorderThickness="0 0 1 0" Width="210" BorderBrush="{DynamicResource TPanelAccent}">
                 <ContentControl Content="{Binding FileMenu}" />
@@ -30,22 +30,29 @@
                                 <TextBlock Text="{x:Static a:Resources.Update}" />
                             </StackPanel>
                         </Button>
-                        <Button Margin="0 0 6 0" Command="{Binding Workshop}" Classes="Base Blue">
-                            <StackPanel Orientation="Horizontal" Spacing="3">
-                                <i:Icon Value="mdi-steam" Classes="Normal"/>
-                                <TextBlock Text="{x:Static a:Resources.WorkshopSteam}" />
-                            </StackPanel>
-                        </Button>
-                        <Button Margin="0 0 6 0" Command="{Binding EditAsText}" Classes="Base">
-                            <StackPanel Orientation="Horizontal" Spacing="3">
-                                <i:Icon Value="mdi-file-edit" Classes="Normal"/>
-                                <TextBlock Text="{x:Static a:Resources.Edit}" />
-                            </StackPanel>
-                        </Button>
+                        <StackPanel Classes="Grouped" Orientation="Horizontal">
+                            <Button Command="{Binding Sync}" Classes="Base"> 
+                                <StackPanel Orientation="Horizontal" Spacing="3">
+                                    <i:Icon Value="mdi-web-sync" Classes="Normal"/>
+                                    <TextBlock Text="{x:Static a:Resources.Sync}" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding SyncEdit}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.UpdateMods}">
+                                <i:Icon Value="mdi-pencil" Classes="Normal"/>
+                            </Button>
+                        </StackPanel>
                     </StackPanel>
                 </DockPanel>
             </Border>
-            <ContentControl Margin="6" Content="{Binding ModList}" />
+
+            <TabControl>
+                <TabItem Header="{x:Static a:Resources.PanelMods}">
+                    <ContentControl Margin="6" Content="{Binding ModList}" />
+                </TabItem>
+                <TabItem Header="{x:Static a:Resources.PanelClientConnections}">
+                    <ContentControl Margin="6" Content="{Binding ClientConnectionList}" />
+                </TabItem>
+            </TabControl>
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>
