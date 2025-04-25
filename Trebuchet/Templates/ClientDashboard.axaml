@@ -85,7 +85,7 @@
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate DataType="x:String">
+                                <DataTemplate DataType="vm:ClientConnectionRefViewModel">
                                     <Button Classes="Base Flat Sharp Sneak"
                                             HorizontalAlignment="Stretch"
                                             Content="{Binding}"

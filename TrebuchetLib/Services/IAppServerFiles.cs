@@ -1,6 +1,6 @@
 namespace TrebuchetLib.Services;
 
-public interface IAppServerFiles : IAppFileHandler<ServerProfile>, IAppFileHandlerWithSize<ServerProfile>
+public interface IAppServerFiles : IAppFileHandler<ServerProfile, ServerProfileRef>, IAppFileHandlerWithSize<ServerProfile, ServerProfileRef>
 {
-    string GetGameLogs(string name);
+    string GetGameLogs(ServerProfileRef name);
 }

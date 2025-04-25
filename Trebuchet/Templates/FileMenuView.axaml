@@ -34,7 +34,7 @@
                                 </ItemsPanelTemplate>
                             </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate x:DataType="vm:FileViewModel">
+                                <DataTemplate x:DataType="vm:IFileViewModel">
                                     <Button Name="FileButton" Margin="0 0 0 0" Classes="Base Blue Flat Sharp NoPad"
                                             Height="30"
                                             IsPointerOver="{Binding IsOver, Mode=OneWayToSource}"

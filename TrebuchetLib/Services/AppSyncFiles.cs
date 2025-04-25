@@ -1,15 +1,20 @@
 using System.Web;
-using Microsoft.Extensions.Logging;
-using SteamKit2.WebUI.Internal;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
 
 namespace TrebuchetLib.Services;
 
-public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
+public class AppSyncFiles(AppSetup setup) : 
+    IAppSyncFiles
 {
-    private readonly Dictionary<string, SyncProfile> _cache = [];
-    public SyncProfile Create(string name)
+    private readonly Dictionary<SyncProfileRef, SyncProfile> _cache = [];
+
+    public SyncProfileRef Ref(string name)
+    {
+        return new SyncProfileRef(name, this);
+    }
+    
+    public SyncProfile Create(SyncProfileRef name)
     {
         if (_cache.TryGetValue(name, out var profile))
         {
@@ -22,7 +27,7 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
         return file;
     }
 
-    public SyncProfile Get(string name)
+    public SyncProfile Get(SyncProfileRef name)
     {
         if (_cache.TryGetValue(name, out var profile))
             return profile;
@@ -31,31 +36,36 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
         return file;
     }
 
+    public bool Exists(SyncProfileRef name)
+    {
+        return File.Exists(GetPath(name));
+    }
+    
     public bool Exists(string name)
     {
         return File.Exists(GetPath(name));
     }
 
-    public void Delete(string name)
+    public void Delete(SyncProfileRef name)
     {
         var profile = Get(name);
         _cache.Remove(name);
         profile.DeleteFile();
     }
     
-    public string GetDefault()
+    public SyncProfileRef GetDefault()
     {
-        var profileName = Tools.GetFirstFileName(GetBaseFolder(), "*.json");
-        if (!string.IsNullOrEmpty(profileName)) 
+        var profileName = Ref(Tools.GetFirstFileName(GetBaseFolder(), "*.json"));
+        if (!string.IsNullOrEmpty(profileName.Name)) 
             return profileName;
 
-        profileName = "Default";
+        profileName = Ref("Default");
         if (!File.Exists(GetPath(profileName)))
             SyncProfile.CreateProfile(GetPath(profileName)).SaveFile();
         return profileName;
     }
 
-    public Task<SyncProfile> Duplicate(string name, string destination)
+    public Task<SyncProfile> Duplicate(SyncProfileRef name, SyncProfileRef destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -64,7 +74,7 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
         return Task.FromResult(Get(destination));
     }
 
-    public Task<SyncProfile> Rename(string name, string destination)
+    public Task<SyncProfile> Rename(SyncProfileRef name, SyncProfileRef destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -82,21 +92,22 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
             Constants.FolderSyncProfiles);
     }
 
-    public string GetPath(string modlistName)
+    public string GetPath(SyncProfileRef reference) => GetPath(reference.Name);
+    private string GetPath(string modlistName)
     {
         return Path.Combine(
             GetBaseFolder(),
             modlistName + ".json");
     }
 
-    public IEnumerable<string> GetList()
+    public IEnumerable<SyncProfileRef> GetList()
     {
         if (!Directory.Exists(GetBaseFolder()))
             yield break;
 
         string[] profiles = Directory.GetFiles(GetBaseFolder(), "*.json");
         foreach (string p in profiles)
-            yield return Path.GetFileNameWithoutExtension(p);
+            yield return Ref(Path.GetFileNameWithoutExtension(p));
     }
 
     private bool ResolveMod(uint appId, ref string mod)
@@ -139,9 +150,9 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
         }
     }
     
-    public IEnumerable<string> GetResolvedModlist(IEnumerable<string> modlist, bool throwIfFailed = true)
+    public IEnumerable<string> GetResolvedModlist(IEnumerable<string> mods, bool throwIfFailed = true)
     {
-        foreach (string mod in modlist)
+        foreach (string mod in mods)
         {
             string path = mod;
             if (!ResolveMod(ref path))
@@ -153,20 +164,20 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
         }
     }
 
-    public Task Export(string name, FileInfo file)
+    public Task Export(SyncProfileRef name, FileInfo file)
     {
         var path = GetPath(name);
         File.Copy(path, file.FullName, true);
         return Task.CompletedTask;
     }
 
-    public async Task<SyncProfile> Import(FileInfo import, string name)
+    public async Task<SyncProfile> Import(FileInfo import, SyncProfileRef name)
     {
         var json = await File.ReadAllTextAsync(import.FullName);
         return await Import(json, name);
     }
 
-    public Task<SyncProfile> Import(string json, string name)
+    public Task<SyncProfile> Import(string json, SyncProfileRef name)
     {
         var path = GetPath(name);
         var profile = SyncProfile.ImportFile(json, path);
@@ -174,7 +185,7 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
         return Task.FromResult(profile);
     }
 
-    public async Task Sync(string name)
+    public async Task Sync(SyncProfileRef name)
     {
         var profile = Get(name);
         if (string.IsNullOrWhiteSpace(profile.SyncURL))
@@ -191,7 +202,7 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
             await SyncJson(builder, name);
     }
     
-    private async Task SyncJson(UriBuilder builder, string name)
+    private async Task SyncJson(UriBuilder builder, SyncProfileRef name)
     {
         var result = await Tools.DownloadModList(builder.ToString(), CancellationToken.None);
         await Import(result, name);

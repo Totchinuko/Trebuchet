@@ -52,7 +52,7 @@ namespace Trebuchet.ViewModels.Panels
             VerifyFilesCommand = ReactiveCommand.CreateFromTask(
                 canExecute: canDownloadMods, execute:OnFileVerification);
 
-            Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker, _box, appFiles);
+            Client = new ClientInstanceDashboard(new ProcessStatsLight(), _blocker, _box);
             ConfigureClient(Client);
             RefreshClientSelection(_setup.Config.SelectedClientProfile, _setup.Config.SelectedClientModlist);
         }
@@ -99,11 +99,11 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogInformation(@"Updating mods");
             try
             {
-                var modlists = Instances.Select(i => i.SelectedModlist).ToList();
-                modlists.Add(Client.SelectedModlist);
+                var modlists = Instances.Select(i => i.SelectedModlist?.ModList).OfType<IPRefWithModList>().ToList();
+                if(Client.SelectedModlist?.ModList is not null)
+                    modlists.Add(Client.SelectedModlist.ModList);
                 var mods = modlists.Distinct()
-                    .Select(l => _appFiles.Mods.CollectAllMods(l))
-                    .SelectMany(x => x)
+                    .SelectMany(l => l.GetModsFromList())
                     .Distinct().ToList();
                 await _steamApi.UpdateMods(mods);
                 await OnRequestRefresh();
@@ -156,14 +156,15 @@ namespace Trebuchet.ViewModels.Panels
             }
         }
         
-        public async Task LaunchClient(string autoConnect)
+        public async Task LaunchClient(ClientConnectionRef? autoConnect)
         {
+            if (Client.SelectedModlist?.ModList is null || Client.SelectedProfile is null) return;
             if (Client.ProcessRunning) return;
             if (!await CheckForSteamClientRunning()) return;
 
             var data = new Dictionary<string, object>
             {
-                { @"autoConnect", autoConnect },
+                { @"autoConnect", autoConnect?.Connection ?? string.Empty },
                 { @"isBattleEye", Client.BattleEye }
             };
             using(_logger.BeginScope(data))
@@ -173,12 +174,12 @@ namespace Trebuchet.ViewModels.Panels
             {
                 if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
                 {
-                    var modlist = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
+                    var modlist = Client.SelectedModlist.ModList.GetModsFromList().ToList();
                     await _steamApi.UpdateMods(modlist);
                 }
 
-                _setup.Config.SelectedClientProfile = Client.SelectedProfile;
-                _setup.Config.SelectedClientModlist = Client.SelectedModlist;
+                _setup.Config.SelectedClientProfile = Client.SelectedProfile.Uri.OriginalString;
+                _setup.Config.SelectedClientModlist = Client.SelectedModlist.ModList.Uri.OriginalString;
                 await _launcher.CatapultClient(Client.BattleEye, autoConnect);
             }
             catch (Exception ex)
@@ -217,6 +218,8 @@ namespace Trebuchet.ViewModels.Panels
         public async Task LaunchServer(int instance)
         {
             var dashboard = GetServerInstance(instance);
+            if (dashboard.SelectedModlist is null || dashboard.SelectedProfile is null) return;
+            
             if(dashboard.ProcessRunning) return;
             dashboard.CanLaunch = false;
 
@@ -229,13 +232,14 @@ namespace Trebuchet.ViewModels.Panels
                     !_launcher.IsClientRunning())
                 {
                     _logger.LogInformation(@"Update before launch");
-                    var modlist = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
+                    var modlist = dashboard.SelectedModlist.ModList.GetModsFromList().ToList();
                     await _steamApi.UpdateServers();
                     await _steamApi.UpdateMods(modlist);
                 }
 
-                _setup.Config.SetInstanceParameters(dashboard.Instance, dashboard.SelectedModlist,
-                    dashboard.SelectedProfile);
+                _setup.Config.SetInstanceParameters(dashboard.Instance, 
+                    dashboard.SelectedModlist.ModList.Uri.OriginalString,
+                    dashboard.SelectedProfile.Uri.OriginalString);
                 await _launcher.CatapultServer(dashboard.Instance);
             }
             catch (Exception ex)
@@ -295,13 +299,13 @@ namespace Trebuchet.ViewModels.Panels
         {
             client.ModlistSelected += (_, modlist) =>
             {
-                _setup.Config.SelectedClientModlist = modlist;
+                _setup.Config.SelectedClientModlist = modlist.Uri.OriginalString;
                 _setup.Config.SaveFile();
                 return CheckModUpdatesAsync();
             };
             client.ProfileSelected += (_, profile) =>
             {
-                _setup.Config.SelectedClientProfile = profile;
+                _setup.Config.SelectedClientProfile = profile.Uri.OriginalString;
                 _setup.Config.SaveFile();
                 return Task.CompletedTask;
             };
@@ -312,19 +316,26 @@ namespace Trebuchet.ViewModels.Panels
 
         private void RefreshClientSelection()
         {
-            RefreshClientSelection(Client.SelectedProfile, Client.SelectedModlist);
+            RefreshClientSelection(Client.SelectedProfile, Client.SelectedModlist?.ModList);
             Client.RefreshPanel();
         }
-        
+
         private void RefreshClientSelection(string profile, string modlist)
         {
-            modlist = _appFiles.Mods.Resolve(modlist);
-            profile = _appFiles.Client.Exists(profile) ? profile : _appFiles.Client.GetDefault();
-
-            Client.Modlists = _appFiles.Mods.GetList().ToList();
+            RefreshClientSelection(_appFiles.Client.Resolve(profile), _appFiles.Mods.Resolve(modlist));
+        }
+        private void RefreshClientSelection(ClientProfileRef? profile, IPRefWithModList? modlist)
+        {
+            profile = profile is null ? _appFiles.Client.GetDefault() : _appFiles.Client.Resolve(profile);
+            modlist = modlist is null ? _appFiles.Mods.GetDefault() : modlist.Resolve();
+            
+            Client.Modlists = [];
+            Client.Modlists.AddRange(_appFiles.Mods.GetList().Select(x => new ModListRefViewModel(x)));
+            Client.Modlists.AddRange(_appFiles.Sync.GetList().Select(x => new ModListRefViewModel(x)));
+            
             Client.Profiles = _appFiles.Client.GetList().ToList();
             Client.SelectedProfile = profile;
-            Client.SelectedModlist = modlist;
+            Client.SelectedModlist = new ModListRefViewModel(modlist);
         }
 
         private void RefreshServerSelection()
@@ -335,18 +346,27 @@ namespace Trebuchet.ViewModels.Panels
 
         private void RefreshServerSelection(ServerInstanceDashboard dashboard)
         {
-            var modlist = _appFiles.Mods.Resolve(dashboard.SelectedModlist);
-            var profile = _appFiles.Server.Resolve(dashboard.SelectedProfile);
+            dashboard.SelectedModlist = new ModListRefViewModel(dashboard.SelectedModlist?.ModList is null 
+                ? _appFiles.Mods.GetDefault() 
+                : dashboard.SelectedModlist.ModList.Resolve());
+            dashboard.SelectedProfile = dashboard.SelectedProfile is null
+                ? _appFiles.Server.GetDefault()
+                : _appFiles.Server.Resolve(dashboard.SelectedProfile);
             
             dashboard.Profiles = _appFiles.Server.GetList().ToList();
-            dashboard.Modlists = _appFiles.Mods.GetList().ToList();
-            dashboard.SelectedModlist = modlist;
-            dashboard.SelectedProfile = profile;
+            dashboard.Modlists = [];
+            dashboard.Modlists.AddRange(_appFiles.Mods.GetList().Select(x => new ModListRefViewModel(x)));
+            dashboard.Modlists.AddRange(_appFiles.Sync.GetList().Select(x => new ModListRefViewModel(x)));
         }
 
         private void RefreshClientNeededUpdates(List<UGCFileStatus> neededUpdates)
         {
-            var mods = _appFiles.Mods.CollectAllMods(Client.SelectedModlist).ToList();
+            if (Client.SelectedModlist is null)
+            {
+                Client.UpdateNeeded = [];
+                return;
+            }
+            var mods = Client.SelectedModlist.ModList.GetModsFromList().ToList();
             Client.UpdateNeeded = neededUpdates
                 .Where(x => x.Status != UGCStatus.UpToDate)
                 .Select(x => x.PublishedId)
@@ -362,7 +382,12 @@ namespace Trebuchet.ViewModels.Panels
 
         private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<UGCFileStatus> neededUpdates)
         {
-            var mods = _appFiles.Mods.CollectAllMods(dashboard.SelectedModlist).ToList();
+            if (dashboard.SelectedModlist is null)
+            {
+                dashboard.UpdateNeeded = [];
+                return;
+            }
+            var mods = dashboard.SelectedModlist.ModList.GetModsFromList().ToList();
             dashboard.UpdateNeeded = neededUpdates
                 .Where(x => x.Status != UGCStatus.UpToDate)
                 .Select(x => x.PublishedId)
@@ -372,19 +397,19 @@ namespace Trebuchet.ViewModels.Panels
 
         private Task CheckModUpdatesAsync()
         {
-            var modlists = Instances.Select(i => i.SelectedModlist).ToList();
-            modlists.Add(Client.SelectedModlist);
+            var modlists = Instances.Select(i => i.SelectedModlist?.ModList).OfType<IPRefWithModList>().ToList();
+            if(Client.SelectedModlist?.ModList is not null)
+                modlists.Add(Client.SelectedModlist.ModList);
             return CheckModUpdatesAsync(modlists);
         }
         
-        private async Task CheckModUpdatesAsync(List<string> modlists)
+        private async Task CheckModUpdatesAsync(List<IPRefWithModList> modlists)
         {
             _logger.LogInformation(@"Check for mod updates");
             try
             {
                 var mods = modlists.Distinct()
-                    .Select(l => _appFiles.Mods.CollectAllMods(l))
-                    .SelectMany(x => x)
+                    .SelectMany(x => x.GetModsFromList())
                     .Distinct().ToList();
                 var response = await _steamApi.RequestModDetails(mods);
                 var neededUpdates = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList());
@@ -405,11 +430,10 @@ namespace Trebuchet.ViewModels.Panels
 
             for (var i = Instances.Count; i < _setup.Config.ServerInstanceCount; i++)
             {
-                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(), _blocker, _box)
-                    {
-                        SelectedModlist = _setup.Config.GetInstanceModlist(i),
-                        SelectedProfile = _setup.Config.GetInstanceProfile(i)
-                    };
+                var instance = new ServerInstanceDashboard(i, new ProcessStatsLight(), _blocker, _box);
+                instance.SelectedModlist = new ModListRefViewModel(_appFiles.ResolveModList(_setup.Config.GetInstanceModlist(i)));
+                instance.SelectedProfile = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(i));
+                
                 RegisterServerInstanceEvents(instance);
                 Instances.Add(instance);
             }
@@ -419,13 +443,13 @@ namespace Trebuchet.ViewModels.Panels
         {
             instance.ModlistSelected += (_, arg) =>
             {
-                _setup.Config.SetInstanceModlist(arg.Instance, arg.Selection);
+                _setup.Config.SetInstanceModlist(arg.Instance, arg.Selection.Uri.OriginalString);
                 _setup.Config.SaveFile();
                 return CheckModUpdatesAsync();
             };
             instance.ProfileSelected += (_, arg) =>
             {
-                _setup.Config.SetInstanceProfile(arg.Instance, arg.Selection);
+                _setup.Config.SetInstanceProfile(arg.Instance, arg.Selection.Uri.OriginalString);
                 _setup.Config.SaveFile();
                 return Task.CompletedTask;
             };
@@ -450,11 +474,11 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogInformation(@"File Verification");
             try
             {
-                var modlists = Instances.Select(i => i.SelectedModlist).ToList();
-                modlists.Add(Client.SelectedModlist);
+                var modlists = Instances.Select(i => i.SelectedModlist?.ModList).OfType<IPRefWithModList>().ToList();
+                if(Client.SelectedModlist?.ModList is not null)
+                    modlists.Add(Client.SelectedModlist.ModList);
                 var mods = modlists.Distinct()
-                    .Select(l => _appFiles.Mods.CollectAllMods(l))
-                    .SelectMany(x => x)
+                    .SelectMany(l => l.GetModsFromList())
                     .Distinct().ToList();
                 
                 await _steamApi.VerifyFiles(mods);

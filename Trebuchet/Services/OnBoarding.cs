@@ -257,7 +257,7 @@ public class OnBoarding(
                 var saveName = await OnBoardingChooseClientSave();
                 logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
                 Directory.CreateDirectory(savedDir);
-                await Tools.DeepCopyAsync(appFiles.Client.GetDirectory(saveName), savedDir, CancellationToken.None);
+                await Tools.DeepCopyAsync(appFiles.Client.GetDirectory(appFiles.Client.Ref(saveName)), savedDir, CancellationToken.None);
             }
             return true;
         }
@@ -272,7 +272,7 @@ public class OnBoarding(
             logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
             JunctionPoint.Delete(savedDir);
             Directory.CreateDirectory(savedDir);
-            await Tools.DeepCopyAsync(appFiles.Client.GetDirectory(saveName), savedDir, CancellationToken.None);
+            await Tools.DeepCopyAsync(appFiles.Client.GetDirectory(appFiles.Client.Ref(saveName)), savedDir, CancellationToken.None);
             return true;
         }
 
@@ -282,7 +282,7 @@ public class OnBoarding(
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
             var saveName = await OnBoardingChooseClientSaveName();
             logger.LogInformation(@"Copying game save into trebuchet {saveName}", saveName);
-            await Tools.DeepCopyAsync(savedDir, appFiles.Client.GetDirectory(saveName), CancellationToken.None);
+            await Tools.DeepCopyAsync(savedDir, appFiles.Client.GetDirectory(appFiles.Client.Ref(saveName)), CancellationToken.None);
             await OnBoardingSafeIO(() => Directory.Delete(savedDir, true),savedDir);
             Tools.SetupSymboliclink(savedDir, setup.GetPrimaryJunction());
             return true;
@@ -310,7 +310,7 @@ public class OnBoarding(
         var choice = new OnBoardingListSelection(
                 Resources.OnBoardingGameSave, 
                 Resources.OnBoardingChooseGameSaveText, 
-                appFiles.Client.GetList().ToList());
+                appFiles.Client.GetList().Select(x => x.Name).ToList());
         await dialogueBox.OpenAsync(choice);
         if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException(@"OnBoarding was cancelled");
         return choice.Value;
@@ -328,7 +328,7 @@ public class OnBoarding(
     public Validation ValidateClientSaveName(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return new Validation(false, Resources.ErrorNameEmpty);
-        if(appFiles.Client.GetList().Any(x => x == name))
+        if(appFiles.Client.GetList().Any(x => x.Name == name))
             return new Validation(false, Resources.ErrorNameAlreadyTaken);
         if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             return new Validation(false, Resources.ErrorNameInvalidCharacters);

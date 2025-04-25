@@ -36,7 +36,7 @@ namespace Trebuchet.ViewModels.Panels
             var startingProfile = _appFiles.Client.Resolve(_uiConfig.CurrentClientProfile);
             _profile = _appFiles.Client.Get(startingProfile);
             
-            FileMenu = new FileMenuViewModel<ClientProfile>(Resources.PanelGameSaves, appFiles.Client, box, _logger);
+            FileMenu = new FileMenuViewModel<ClientProfile, ClientProfileRef>(Resources.PanelGameSaves, appFiles.Client, box, _logger);
             FileMenu.FileSelected += OnFileSelected;
             FileMenu.Selected = startingProfile;
 
@@ -56,8 +56,8 @@ namespace Trebuchet.ViewModels.Panels
         public string Icon => @"mdi-controller";
         public string Label => Resources.PanelGameSaves;
         public ObservableCollection<FieldElement> Fields { get; } = [];
-        
-        public IFileMenuViewModel FileMenu { get; }
+
+        public FileMenuViewModel<ClientProfile, ClientProfileRef> FileMenu { get; }
 
         public ClientConnectionListViewModel ClientConnectionList { get; }
        
@@ -92,14 +92,14 @@ namespace Trebuchet.ViewModels.Panels
             return Task.CompletedTask;
         }
         
-        private Task OnFileSelected(object? sender, string profile)
+        private Task OnFileSelected(object? sender, ClientProfileRef profile)
         {
-            _uiConfig.CurrentClientProfile = profile;
+            _uiConfig.CurrentClientProfile = profile.Uri.OriginalString;
             _uiConfig.SaveFile();
             return RefreshPanel();
         }
 
-        private async Task RefreshProfileSize(string profile)
+        private async Task RefreshProfileSize(ClientProfileRef profile)
         {
             var path = _appFiles.Client.GetDirectory(profile);
             var size = await Task.Run(() => Tools.DirectorySize(path));

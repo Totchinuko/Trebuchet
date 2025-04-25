@@ -9,7 +9,7 @@ using TrebuchetLib.Services;
 
 namespace Boulder.Commands;
 
-public class LambClientCommand(Launcher launcher, ILogger<LambClientCommand> logger) : IInvokableCommand<LambClientCommand>
+public class LambClientCommand(AppFiles files, Launcher launcher, ILogger<LambClientCommand> logger) : IInvokableCommand<LambClientCommand>
 {
     public static readonly Command Command = CommandBuilder
         .CreateInvokable<LambClientCommand>("client", "Start a conan exile game process and exit")
@@ -44,7 +44,11 @@ public class LambClientCommand(Launcher launcher, ILogger<LambClientCommand> log
             };
             using(logger.BeginScope(data))
                 logger.LogInformation("Starting process");
-            var process = await launcher.CatapultClientProcess(Profile, Modlist, BattleEye, AutoConnect);
+            var process = await launcher.CatapultClientProcess(
+                files.Client.Resolve(Profile), 
+                files.ResolveModList(Modlist), 
+                BattleEye, 
+                files.ResolveClientConnectionRef(AutoConnect));
             logger.LogInformation("Process Started: {pid} ({name})", process.Id, process.ProcessName);
             return 0;
         }

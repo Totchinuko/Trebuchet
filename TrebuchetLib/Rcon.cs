@@ -179,6 +179,7 @@ namespace TrebuchetLib
             {
                 try
                 {
+                    //todo: have the response have a max size and have it match the announced size
                     int size = br.ReadInt32();
                     if (size < 10 ||
                         size > 4096) // rcon message (called packet) can never be larger than 4096 bytes and never smaller than 10, this is by design in the protocol definition

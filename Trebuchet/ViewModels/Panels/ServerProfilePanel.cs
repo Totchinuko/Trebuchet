@@ -42,7 +42,7 @@ namespace Trebuchet.ViewModels.Panels
             _profile = _appFiles.Server.Get(startingProfile);
             SaveProfile = ReactiveCommand.Create(() => _profile.SaveFile());
 
-            FileMenu = new FileMenuViewModel<ServerProfile>(Resources.PanelServerSaves, appFiles.Server, box, _logger);
+            FileMenu = new FileMenuViewModel<ServerProfile, ServerProfileRef>(Resources.PanelServerSaves, appFiles.Server, box, _logger);
             FileMenu.FileSelected += OnFileSelected;
             FileMenu.Selected = startingProfile;
            
@@ -53,7 +53,7 @@ namespace Trebuchet.ViewModels.Panels
 
         public ReactiveCommand<Unit,Unit> SaveProfile { get; }
         
-        public IFileMenuViewModel FileMenu { get; }
+        public FileMenuViewModel<ServerProfile, ServerProfileRef> FileMenu { get; }
 
         public string ProfileSize
         {
@@ -86,14 +86,14 @@ namespace Trebuchet.ViewModels.Panels
             await RefreshProfileSize(FileMenu.Selected);
         }
         
-        private Task OnFileSelected(object? sender, string profile)
+        private Task OnFileSelected(object? sender, ServerProfileRef profile)
         {
-            _uiConfig.CurrentServerProfile = profile;
+            _uiConfig.CurrentServerProfile = profile.Uri.OriginalString;
             _uiConfig.SaveFile();
             return RefreshPanel();
         }
         
-        private async Task RefreshProfileSize(string profile)
+        private async Task RefreshProfileSize(ServerProfileRef profile)
         {
             var path = _appFiles.Server.GetDirectory(profile);
             var size = await Task.Run(() => Tools.DirectorySize(path));

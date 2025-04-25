@@ -1,6 +1,4 @@
 using System.CommandLine;
-using System.CommandLine.IO;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using tot_lib;
 using tot_lib.CommandLine;
@@ -8,7 +6,7 @@ using TrebuchetLib.Services;
 
 namespace Boulder.Commands;
 
-public class LambServerCommand(Launcher launcher, ILogger<LambServerCommand> logger) : IInvokableCommand<LambServerCommand>
+public class LambServerCommand(AppFiles files, Launcher launcher, ILogger<LambServerCommand> logger) : IInvokableCommand<LambServerCommand>
 {
     public static readonly Command Command = CommandBuilder
         .CreateInvokable<LambServerCommand>("server", "Start a conan exile server process and exit")
@@ -23,7 +21,7 @@ public class LambServerCommand(Launcher launcher, ILogger<LambServerCommand> log
     
     public string Profile { get; set; } = string.Empty;
     public string Modlist { get; set; } = string.Empty;
-    public int Instance { get; set; } = 0;
+    public int Instance { get; set; }
     
     public async Task<int> InvokeAsync(CancellationToken token)
     {
@@ -37,7 +35,10 @@ public class LambServerCommand(Launcher launcher, ILogger<LambServerCommand> log
             };
             using(logger.BeginScope(data))
                 logger.LogInformation("Starting process");
-            var process = await launcher.CatapultServerProcess(Profile, Modlist, Instance);
+            var process = await launcher.CatapultServerProcess(
+                files.Server.Resolve(Profile), 
+                files.ResolveModList(Modlist), 
+                Instance);
             logger.LogInformation("Process Started: {pid} ({name})", process.Id, process.ProcessName);
             return 0;
         }

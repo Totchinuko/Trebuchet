@@ -39,7 +39,7 @@ public class SyncPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRe
         ClientConnectionList.SetReadOnly();
 
         var startingFile = files.Sync.Resolve(uiConfig.CurrentSyncProfile);
-        FileMenu = new FileMenuViewModel<SyncProfile>(Resources.PanelSync, files.Sync, dialogueBox, logger);
+        FileMenu = new FileMenuViewModel<SyncProfile, SyncProfileRef>(Resources.PanelSync, files.Sync, dialogueBox, logger);
         FileMenu.FileSelected += OnFileSelected;
         FileMenu.Selected = startingFile;
         
@@ -68,7 +68,7 @@ public class SyncPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRe
     public string Icon => @"mdi-web-sync";
     public string Label => Resources.PanelSync;
     public bool CanBeOpened { get; } = true;
-    public IFileMenuViewModel FileMenu { get; }
+    public FileMenuViewModel<SyncProfile, SyncProfileRef> FileMenu { get; }
     
     public ReactiveCommand<Unit, Unit> Sync { get; }
     public ReactiveCommand<Unit, Unit> SyncEdit { get; }
@@ -98,10 +98,10 @@ public class SyncPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRe
     }
 
     private Task OnFileChanged() => OnFileSelected(this, FileMenu.Selected);
-    private async Task OnFileSelected(object? sender, string profile)
+    private async Task OnFileSelected(object? sender, SyncProfileRef profile)
     {
         _logger.LogDebug(@"Swap to sync {sync}", profile);
-        _uiConfig.CurrentSyncProfile = profile;
+        _uiConfig.CurrentSyncProfile = profile.Uri.OriginalString;
         _uiConfig.SaveFile();
         _profile = _files.Sync.Get(profile);
         await ModList.SetReadOnly();

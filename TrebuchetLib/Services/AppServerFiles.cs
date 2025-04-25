@@ -1,11 +1,15 @@
-using System.Diagnostics.CodeAnalysis;
-
 namespace TrebuchetLib.Services;
 
 public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
 {
-    private readonly Dictionary<string, ServerProfile> _cache = [];
-    public ServerProfile Create(string name)
+    private readonly Dictionary<ServerProfileRef, ServerProfile> _cache = [];
+
+    public ServerProfileRef Ref(string name)
+    {
+        return new ServerProfileRef(name, this);
+    }
+    
+    public ServerProfile Create(ServerProfileRef name)
     {
         if (_cache.TryGetValue(name, out var profile))
         {
@@ -18,7 +22,7 @@ public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
         return file;
     }
 
-    public ServerProfile Get(string name)
+    public ServerProfile Get(ServerProfileRef name)
     {
         if (_cache.TryGetValue(name, out var profile))
             return profile;
@@ -29,20 +33,26 @@ public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
         return file;
     }
 
+    public bool Exists(ServerProfileRef name)
+    {
+        ServerProfile.RepairMissingProfileFile(GetPath(name));
+        return File.Exists(GetPath(name));
+    }
+    
     public bool Exists(string name)
     {
         ServerProfile.RepairMissingProfileFile(GetPath(name));
         return File.Exists(GetPath(name));
     }
 
-    public void Delete(string name)
+    public void Delete(ServerProfileRef name)
     {
         var profile = Get(name);
         _cache.Remove(name);
         profile.DeleteFolder();
     }
 
-    public async Task<ServerProfile> Duplicate(string name, string destination)
+    public async Task<ServerProfile> Duplicate(ServerProfileRef name, ServerProfileRef destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -52,7 +62,7 @@ public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
         return copy;
     }
 
-    public Task<ServerProfile> Rename(string name, string destination)
+    public Task<ServerProfile> Rename(ServerProfileRef name, ServerProfileRef destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -62,7 +72,7 @@ public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
         return Task.FromResult(Get(destination));
     }
 
-    public Task<long> GetSize(string name)
+    public Task<long> GetSize(ServerProfileRef name)
     {
         var dir = Path.GetDirectoryName(GetPath(name));
         if (dir is null) return Task.FromResult(0L);
@@ -77,12 +87,8 @@ public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
             Constants.FolderServerProfiles);
     }
 
-    /// <summary>
-    /// Get the path of the json file of a server profile.
-    /// </summary>
-    /// <param name="name"></param>
-    /// <returns></returns>
-    public string GetPath(string name)
+    public string GetPath(ServerProfileRef reference) => GetPath(reference.Name);
+    private string GetPath(string name)
     {
         return Path.Combine(
             GetBaseFolder(), 
@@ -94,33 +100,33 @@ public class AppServerFiles(AppSetup appSetup) : IAppServerFiles
     /// List all the server profiles in the installation folder.
     /// </summary>
     /// <returns></returns>
-    public IEnumerable<string> GetList()
+    public IEnumerable<ServerProfileRef> GetList()
     {
         if (!Directory.Exists(GetBaseFolder()))
             yield break;
 
         string[] profiles = Directory.GetDirectories(GetBaseFolder(), "*");
         foreach (string p in profiles)
-            yield return Path.GetFileName(p);
+            yield return Ref(Path.GetFileName(p));
     }
 
-    public string GetDefault()
+    public ServerProfileRef GetDefault()
     {
-        var name = Tools.GetFirstDirectoryName(GetBaseFolder(), "*");
-        if (!string.IsNullOrEmpty(name)) 
-            return name;
+        var profile = Ref(Tools.GetFirstDirectoryName(GetBaseFolder(), "*"));
+        if (!string.IsNullOrEmpty(profile.Name)) 
+            return profile;
 
-        name = "Default";
-        if (!File.Exists(GetPath(name)))
-            ServerProfile.CreateProfile(GetPath(name)).SaveFile();
-        return name;
+        profile = Ref("Default");
+        if (!File.Exists(GetPath(profile)))
+            ServerProfile.CreateProfile(GetPath(profile)).SaveFile();
+        return profile;
     }
 
-    public string GetGameLogs(string name)
+    public string GetGameLogs(ServerProfileRef name)
     {
         return Path.Combine(
             GetBaseFolder(),
-            name,
+            name.Name,
             Constants.FolderGameSaveLog,
             Constants.FileGameLogFile
         );

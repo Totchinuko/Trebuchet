@@ -182,7 +182,7 @@ public class ModListViewModel : ReactiveObject
         {
             var watch = new Stopwatch();
             watch.Start();
-            if (!_appFiles.Mods.TryParseDirectory2ModId(fullPath, out var id)) return;
+            if (!ModListUtil.TryParseDirectory2ModId(fullPath, out var id)) return;
             for (var i = 0; i < List.Count; i++)
             {
                 var modFile = List[i];

@@ -4,8 +4,14 @@ namespace TrebuchetLib.Services;
 
 public class AppModlistFiles(AppSetup setup) : IAppModListFiles
 {
-    private readonly Dictionary<string, ModListProfile> _cache = [];
-    public ModListProfile Create(string name)
+    private readonly Dictionary<ModListProfileRef, ModListProfile> _cache = [];
+
+    public ModListProfileRef Ref(string name)
+    {
+        return new ModListProfileRef(name, this);
+    }
+
+    public ModListProfile Create(ModListProfileRef name)
     {
         if (_cache.TryGetValue(name, out var profile))
         {
@@ -18,7 +24,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         return file;
     }
 
-    public ModListProfile Get(string name)
+    public ModListProfile Get(ModListProfileRef name)
     {
         if (_cache.TryGetValue(name, out var profile))
             return profile;
@@ -27,31 +33,36 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         return file;
     }
 
+    public bool Exists(ModListProfileRef name)
+    {
+        return File.Exists(GetPath(name));
+    }
+
     public bool Exists(string name)
     {
         return File.Exists(GetPath(name));
     }
 
-    public void Delete(string name)
+    public void Delete(ModListProfileRef name)
     {
         var profile = Get(name);
         _cache.Remove(name);
         profile.DeleteFile();
     }
     
-    public string GetDefault()
+    public ModListProfileRef GetDefault()
     {
-        var profileName = Tools.GetFirstFileName(GetBaseFolder(), "*.json");
-        if (!string.IsNullOrEmpty(profileName)) 
-            return profileName;
+        var profile = Ref(Tools.GetFirstFileName(GetBaseFolder(), "*.json"));
+        if (!string.IsNullOrEmpty(profile.Name))
+            return profile;
 
-        profileName = "Default";
-        if (!File.Exists(GetPath(profileName)))
-            ModListProfile.CreateProfile(GetPath(profileName)).SaveFile();
-        return profileName;
+        profile = Ref("Default");
+        if (!File.Exists(GetPath(profile)))
+            ModListProfile.CreateProfile(GetPath(profile)).SaveFile();
+        return profile;
     }
 
-    public Task<ModListProfile> Duplicate(string name, string destination)
+    public Task<ModListProfile> Duplicate(ModListProfileRef name, ModListProfileRef destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -60,7 +71,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         return Task.FromResult(Get(destination));
     }
 
-    public Task<ModListProfile> Rename(string name, string destination)
+    public Task<ModListProfile> Rename(ModListProfileRef name, ModListProfileRef destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -69,31 +80,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         _cache.Remove(name);
         return Task.FromResult(Get(destination));
     }
-
-    public IEnumerable<ulong> CollectAllMods(IEnumerable<string> modlists)
-    {
-        foreach (var i in modlists.Distinct())
-            if (this.TryGet(i, out ModListProfile? profile))
-                foreach (var m in profile.Modlist)
-                    if (TryParseModId(m, out ulong id))
-                        yield return id;
-    }
-
-    public IEnumerable<ulong> CollectAllMods(string modlist)
-    {
-        if (this.TryGet(modlist, out ModListProfile? profile))
-            foreach (var m in profile.Modlist)
-                if (TryParseModId(m, out ulong id))
-                    yield return id;
-    }
-
-    public IEnumerable<ulong> GetModIdList(IEnumerable<string> modlist)
-    {
-        foreach (var mod in modlist)
-            if (TryParseModId(mod, out var id))
-                yield return id;
-    }
-
+ 
     public string GetBaseFolder()
     {
         return Path.Combine(
@@ -102,30 +89,22 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
             Constants.FolderModlistProfiles);
     }
 
-    public string GetPath(string modlistName)
+    public string GetPath(ModListProfileRef reference) => GetPath(reference.Name);
+    private string GetPath(string modlistName)
     {
         return Path.Combine(
             GetBaseFolder(),
             modlistName + ".json");
     }
 
-    public IEnumerable<string> GetList()
+    public IEnumerable<ModListProfileRef> GetList()
     {
         if (!Directory.Exists(GetBaseFolder()))
             yield break;
 
         string[] profiles = Directory.GetFiles(GetBaseFolder(), "*.json");
         foreach (string p in profiles)
-            yield return Path.GetFileNameWithoutExtension(p);
-    }
-
-    public IEnumerable<string> ParseModList(IEnumerable<string> modlist)
-    {
-        foreach (var mod in modlist)
-            if (TryParseModId(mod, out ulong id))
-                yield return id.ToString();
-            else
-                yield return mod;
+            yield return Ref(Path.GetFileNameWithoutExtension(p));
     }
 
     private bool ResolveMod(uint appId, ref string mod)
@@ -168,7 +147,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         }
     }
     
-    public IEnumerable<string> GetResolvedModlist(IEnumerable<string> modlist, bool throwIfFailed = true)
+    public IEnumerable<string> ResolveMods(IEnumerable<string> modlist, bool throwIfFailed = true)
     {
         foreach (string mod in modlist)
         {
@@ -182,57 +161,20 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         }
     }
 
-    public bool TryParseDirectory2ModId(string path, out ulong id)
-    {
-        id = 0;
-        if (ulong.TryParse(Path.GetFileName(path), out id))
-            return true;
-
-        string? parent = Path.GetDirectoryName(path);
-        if (parent != null && ulong.TryParse(Path.GetFileName(parent), out id))
-            return true;
-
-        return false;
-    }
-
-    public bool TryParseFile2ModId(string path, out ulong id)
-    {
-        id = 0;
-        string? folder = Path.GetDirectoryName(path);
-        if (folder == null)
-            return false;
-        if (ulong.TryParse(Path.GetFileName(folder), out id))
-            return true;
-
-        return false;
-    }
-
-    public bool TryParseModId(string path, out ulong id)
-    {
-        id = 0;
-        if (ulong.TryParse(path, out id))
-            return true;
-
-        if (Path.GetExtension(path) == ".pak")
-            return TryParseFile2ModId(path, out id);
-        else
-            return TryParseDirectory2ModId(path, out id);
-    }
-
-    public Task Export(string name, FileInfo file)
+    public Task Export(ModListProfileRef name, FileInfo file)
     {
         var path = GetPath(name);
         File.Copy(path, file.FullName, true);
         return Task.CompletedTask;
     }
 
-    public async Task<ModListProfile> Import(FileInfo import, string name)
+    public async Task<ModListProfile> Import(FileInfo import, ModListProfileRef name)
     {
         var json = await File.ReadAllTextAsync(import.FullName);
         return await Import(json, name);
     }
 
-    public Task<ModListProfile> Import(string json, string name)
+    public Task<ModListProfile> Import(string json, ModListProfileRef name)
     {
         var path = GetPath(name);
         var profile = ModListProfile.ImportFile(json, path);

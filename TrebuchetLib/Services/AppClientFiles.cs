@@ -4,8 +4,14 @@ namespace TrebuchetLib.Services;
 
 public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
 {
-    private readonly Dictionary<string, ClientProfile> _cache = [];
-    public ClientProfile Create(string name)
+    private readonly Dictionary<ClientProfileRef, ClientProfile> _cache = [];
+
+    public ClientProfileRef Ref(string name)
+    {
+        return new ClientProfileRef(name, this);
+    }
+    
+    public ClientProfile Create(ClientProfileRef name)
     {
         if (_cache.TryGetValue(name, out var profile))
         {
@@ -18,7 +24,7 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
         return file;
     }
 
-    public ClientProfile Get(string name)
+    public ClientProfile Get(ClientProfileRef name)
     {
         if (_cache.TryGetValue(name, out var profile))
             return profile;
@@ -29,20 +35,26 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
         return file;
     }
 
+    public bool Exists(ClientProfileRef name)
+    {
+        ClientProfile.RepairMissingProfileFile(GetPath(name));
+        return File.Exists(GetPath(name));
+    }
+    
     public bool Exists(string name)
     {
         ClientProfile.RepairMissingProfileFile(GetPath(name));
         return File.Exists(GetPath(name));
     }
 
-    public void Delete(string name)
+    public void Delete(ClientProfileRef name)
     {
         var profile = Get(name);
         _cache.Remove(name);
         profile.DeleteFolder();
     }
 
-    public async Task<ClientProfile> Duplicate(string name, string destination)
+    public async Task<ClientProfile> Duplicate(ClientProfileRef name, ClientProfileRef destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -52,7 +64,7 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
         return copy;
     }
 
-    public Task<ClientProfile> Rename(string name, string destination)
+    public Task<ClientProfile> Rename(ClientProfileRef name, ClientProfileRef destination)
     {
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
@@ -70,7 +82,12 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
             Constants.FolderClientProfiles);
     }
 
-    public string GetPath(string name)
+    public string GetPath(ClientProfileRef reference)
+    {
+        return GetPath(reference.Name);
+    }
+    
+    private string GetPath(string name)
     {
         return Path.Combine(
             GetBaseFolder(), 
@@ -78,33 +95,33 @@ public class AppClientFiles(AppSetup appSetup) : IAppClientFiles
             Constants.FileProfileConfig);
     }
 
-    public IEnumerable<string> GetList()
+    public IEnumerable<ClientProfileRef> GetList()
     {
         if (!Directory.Exists(GetBaseFolder()))
             yield break;
 
         string[] profiles = Directory.GetDirectories(GetBaseFolder(), "*");
         foreach (string p in profiles)
-            yield return Path.GetFileName(p);
+            yield return Ref(Path.GetFileName(p));
     }
 
-    public Task<long> GetSize(string name)
+    public Task<long> GetSize(ClientProfileRef name)
     {
         var dir = Path.GetDirectoryName(GetPath(name));
         if (dir is null) return Task.FromResult(0L);
         return Task.Run(() => Tools.DirectorySize(dir));
     }
     
-    public string GetDefault()
+    public ClientProfileRef GetDefault()
     {
-        var name = Tools.GetFirstDirectoryName(GetBaseFolder(), "*");
-        if (!string.IsNullOrEmpty(name)) 
-            return name;
+        var profile = Ref(Tools.GetFirstDirectoryName(GetBaseFolder(), "*"));
+        if (!string.IsNullOrEmpty(profile.Name)) 
+            return profile;
 
-        name = "Default";
-        if (!File.Exists(GetPath(name)))
-            ClientProfile.CreateProfile(GetPath(name)).SaveFile();
-        return name;
+        profile = Ref("Default");
+        if (!File.Exists(GetPath(profile)))
+            ClientProfile.CreateProfile(GetPath(profile)).SaveFile();
+        return profile;
     }
     
     public string GetGameLogs(string name)

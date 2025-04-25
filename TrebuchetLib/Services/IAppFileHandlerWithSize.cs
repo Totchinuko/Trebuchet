@@ -1,6 +1,6 @@
 namespace TrebuchetLib.Services;
 
-public interface IAppFileHandlerWithSize<T>  where T : JsonFile<T>
+public interface IAppFileHandlerWithSize<T, TRef>  where T : JsonFile<T> where TRef : IPRef<T, TRef>
 {
-    Task<long> GetSize(string name);
+    Task<long> GetSize(TRef name);
 }

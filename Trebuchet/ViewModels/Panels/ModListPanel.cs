@@ -44,7 +44,7 @@ namespace Trebuchet.ViewModels.Panels
             _workshop.ModAdded += (_,mod) => ModList.AddModFromWorkshop(mod);
             
             var startingFile = _appFiles.Mods.Resolve(_uiConfig.CurrentModlistProfile);
-            FileMenu = new FileMenuViewModel<ModListProfile>(Resources.PanelMods, appFiles.Mods, box, logger);
+            FileMenu = new FileMenuViewModel<ModListProfile, ModListProfileRef>(Resources.PanelMods, appFiles.Mods, box, logger);
             FileMenu.FileSelected += OnFileSelected;
             FileMenu.Selected = startingFile;
             
@@ -77,7 +77,7 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit, Unit> Update { get; }
         public ReactiveCommand<Unit, Unit> RefreshList { get; }
         
-        public IFileMenuViewModel FileMenu { get; }
+        public FileMenuViewModel<ModListProfile, ModListProfileRef> FileMenu { get; }
         
         public ModListViewModel ModList { get; }
 
@@ -114,10 +114,10 @@ namespace Trebuchet.ViewModels.Panels
             return Task.CompletedTask;
         }
         
-        private async Task OnFileSelected(object? sender, string profile)
+        private async Task OnFileSelected(object? sender, ModListProfileRef profile)
         {
             _logger.LogDebug(@"Swap to mod list {modList}", profile);
-            _uiConfig.CurrentModlistProfile = profile;
+            _uiConfig.CurrentModlistProfile = profile.Uri.OriginalString;
             _uiConfig.SaveFile();
             _profile = _appFiles.Mods.Get(profile);
             await ModList.SetList(_profile.Modlist);
@@ -136,7 +136,7 @@ namespace Trebuchet.ViewModels.Panels
      
         private async Task OnEditModListAsText()
         {
-            var modList = _appFiles.Mods.GetResolvedModlist(_profile.Modlist, false);
+            var modList = _appFiles.Mods.ResolveMods(_profile.Modlist, false);
             var editor = new OnBoardingModlistImport(string.Join(Environment.NewLine, modList));
             
             while (true)

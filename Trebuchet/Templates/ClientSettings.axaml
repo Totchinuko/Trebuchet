@@ -35,7 +35,9 @@
                     </ScrollViewer>
                 </TabItem>
                 <TabItem Header="{x:Static a:Resources.PanelClientConnections}">
-                    <ContentControl Content="{Binding ClientConnectionList}" />
+                    <ScrollViewer>
+                        <ContentControl Content="{Binding ClientConnectionList}" />
+                    </ScrollViewer>
                 </TabItem>
             </TabControl>
         </DockPanel>

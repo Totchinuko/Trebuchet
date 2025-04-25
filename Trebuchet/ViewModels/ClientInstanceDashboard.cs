@@ -20,10 +20,9 @@ public sealed class ClientInstanceDashboard : ReactiveObject
 {
 
 
-    public ClientInstanceDashboard(IProcessStats processStats, TaskBlocker blocker, DialogueBox box, AppFiles files)
+    public ClientInstanceDashboard(IProcessStats processStats, TaskBlocker blocker, DialogueBox box)
     {
         _box = box;
-        _files = files;
         ProcessStats = processStats;
 
         KillCommand = ReactiveCommand.CreateFromTask(OnKilled, this.WhenAnyValue(x => x.CanKill));
@@ -38,26 +37,25 @@ public sealed class ClientInstanceDashboard : ReactiveObject
         LaunchCommand = ReactiveCommand.CreateFromTask(OnLaunched, canLaunch);
         LaunchAndConnect = ReactiveCommand.CreateFromTask(OnConnect, canLaunch);
         UpdateModsCommand = ReactiveCommand.CreateFromTask(OnModUpdate, canDownloadMods);
-        ConnectTo = ReactiveCommand.CreateFromTask<string>(OnConnect, canConnect);
+        ConnectTo = ReactiveCommand.CreateFromTask<ClientConnectionRefViewModel>(OnConnect, canConnect);
 
         this.WhenAnyValue(x => x.SelectedModlist)
-            .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnModlistSelected));
+            .InvokeCommand(ReactiveCommand.CreateFromTask<ModListRefViewModel?>(OnModlistSelected));
         this.WhenAnyValue(x => x.SelectedProfile)
-            .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnProfileSelected));
+            .InvokeCommand(ReactiveCommand.CreateFromTask<ClientProfileRef?>(OnProfileSelected));
         this.WhenAnyValue(x => x.BattleEye)
             .InvokeCommand(ReactiveCommand.CreateFromTask<bool>(OnBattleEyeChanged));
     }
     
     private readonly DialogueBox _box;
-    private readonly AppFiles _files;
     private ProcessState _lastState;
     private bool _canKill;
     private bool _canLaunch = true;
-    private List<string> _modlists = [];
+    private List<ModListRefViewModel> _modlists = [];
     private bool _processRunning;
-    private List<string> _profiles = [];
-    private string _selectedModlist = string.Empty;
-    private string _selectedProfile = string.Empty;
+    private List<ClientProfileRef> _profiles = [];
+    private ModListRefViewModel? _selectedModlist;
+    private ClientProfileRef? _selectedProfile;
     private List<ulong> _updateNeeded = [];
     private bool _canUseDashboard;
     private bool _battleEye;
@@ -65,9 +63,9 @@ public sealed class ClientInstanceDashboard : ReactiveObject
     private bool _canConnect;
 
     public event AsyncEventHandler? KillClicked;
-    public event AsyncEventHandler<string>? LaunchClicked;
-    public event AsyncEventHandler<string>? ProfileSelected;
-    public event AsyncEventHandler<string>? ModlistSelected;
+    public event AsyncEventHandler<ClientConnectionRef?>? LaunchClicked;
+    public event AsyncEventHandler<ClientProfileRef>? ProfileSelected;
+    public event AsyncEventHandler<IPRefWithModList>? ModlistSelected;
     public event AsyncEventHandler<bool>? BattleEyeChanged; 
     public event AsyncEventHandler? UpdateClicked;
 
@@ -75,7 +73,7 @@ public sealed class ClientInstanceDashboard : ReactiveObject
     public ReactiveCommand<Unit,Unit> LaunchAndConnect { get; }
     public ReactiveCommand<Unit,Unit> LaunchCommand { get; }
     public ReactiveCommand<Unit,Unit> UpdateModsCommand { get; }
-    public ReactiveCommand<string, Unit> ConnectTo { get; }
+    public ReactiveCommand<ClientConnectionRefViewModel, Unit> ConnectTo { get; }
 
     public bool CanKill
     {
@@ -95,7 +93,7 @@ public sealed class ClientInstanceDashboard : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _battleEye, value);
     }
 
-    public List<string> Modlists
+    public List<ModListRefViewModel> Modlists
     {
         get => _modlists;
         set => this.RaiseAndSetIfChanged(ref _modlists, value);
@@ -107,19 +105,19 @@ public sealed class ClientInstanceDashboard : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _processRunning, value);
     }
 
-    public List<string> Profiles
+    public List<ClientProfileRef> Profiles
     {
         get => _profiles;
         set => this.RaiseAndSetIfChanged(ref _profiles, value);
     }
 
-    public string SelectedModlist
+    public ModListRefViewModel? SelectedModlist
     {
         get => _selectedModlist;
         set => this.RaiseAndSetIfChanged(ref _selectedModlist, value);
     }
 
-    public string SelectedProfile
+    public ClientProfileRef? SelectedProfile
     {
         get => _selectedProfile;
         set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
@@ -151,7 +149,7 @@ public sealed class ClientInstanceDashboard : ReactiveObject
 
     public IProcessStats ProcessStats { get; }
 
-    public ObservableCollectionExtended<string> ConnectionList { get; } = [];
+    public ObservableCollectionExtended<ClientConnectionRefViewModel> ConnectionList { get; } = [];
 
     public void RefreshPanel()
     {
@@ -174,16 +172,16 @@ public sealed class ClientInstanceDashboard : ReactiveObject
         _lastState = state;
     }
 
-    private async Task OnProfileSelected(string profile)
+    private async Task OnProfileSelected(ClientProfileRef? profile)
     {
-        if (ProfileSelected is not null)
+        if (ProfileSelected is not null && profile is not null)
             await ProfileSelected.Invoke(this, profile);
     }
 
-    private async Task OnModlistSelected(string modlist)
+    private async Task OnModlistSelected(ModListRefViewModel? list)
     {
-        if (ModlistSelected is not null)
-            await ModlistSelected.Invoke(this, modlist);
+        if (ModlistSelected is not null && list is not null)
+            await ModlistSelected.Invoke(this, list.ModList);
     }
 
     private async Task OnBattleEyeChanged(bool battleEye)
@@ -196,16 +194,19 @@ public sealed class ClientInstanceDashboard : ReactiveObject
     {
         RefreshConnectionList();
         if (ConnectionList.Count == 1)
-            await OnConnect(ConnectionList[0]);
+        {
+            if(LaunchClicked is not null)
+                await LaunchClicked.Invoke(this, ConnectionList[0].Reference);
+        }
         else
             ConnectPopupOpen = true;
     }
 
-    private async Task OnConnect(string autoConnect)
+    private async Task OnConnect(ClientConnectionRefViewModel autoConnect)
     {
         ConnectPopupOpen = false;
         if(LaunchClicked is not null)
-            await LaunchClicked.Invoke(this, autoConnect);
+            await LaunchClicked.Invoke(this, autoConnect.Reference);
     }
 
     private void RefreshConnectionList()
@@ -213,7 +214,14 @@ public sealed class ClientInstanceDashboard : ReactiveObject
         using (ConnectionList.SuspendNotifications())
         {
             ConnectionList.Clear();
-            ConnectionList.AddRange(_files.Client.Get(SelectedProfile).ClientConnections.Select(x => x.Name));
+            if(SelectedProfile is not null)
+                ConnectionList.AddRange(SelectedProfile
+                    .GetConnectionRefs()
+                    .Select(x => new ClientConnectionRefViewModel(x, Resources.Save)));
+            if(SelectedModlist?.ModList is IPRefWithClientConnection collection)
+                ConnectionList.AddRange(collection
+                    .GetConnectionRefs()
+                    .Select(x => new ClientConnectionRefViewModel(x, Resources.Sync)));
         }
 
         CanConnect = ConnectionList.Count > 0;
@@ -228,12 +236,12 @@ public sealed class ClientInstanceDashboard : ReactiveObject
     private async Task OnLaunched()
     {
         if(LaunchClicked is not null)
-            await LaunchClicked.Invoke(this, string.Empty);
+            await LaunchClicked.Invoke(this, null);
     }
 
     private async Task OnModUpdate()
     {
-        if (string.IsNullOrEmpty(SelectedModlist)) return;
+        if (SelectedModlist is null) return;
         if (UpdateClicked is not null)
             await UpdateClicked.Invoke(this, EventArgs.Empty);
     }

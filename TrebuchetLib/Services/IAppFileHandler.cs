@@ -2,16 +2,18 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace TrebuchetLib.Services;
 
-public interface IAppFileHandler<T> where T : JsonFile<T>
+public interface IAppFileHandler<T, TRef> where T : JsonFile<T> where TRef : IPRef<T, TRef>
 {
-    T Create(string name);
-    T Get(string name);
+    TRef Ref(string name);
+    T Create(TRef name);
+    T Get(TRef name);
     bool Exists(string name);
-    void Delete(string name);
-    Task<T> Duplicate(string name, string created);
-    Task<T> Rename(string name, string changed);
-    IEnumerable<string> GetList();
-    string GetDefault();
+    bool Exists(TRef name);
+    void Delete(TRef name);
+    Task<T> Duplicate(TRef name, TRef created);
+    Task<T> Rename(TRef name, TRef changed);
+    IEnumerable<TRef> GetList();
+    TRef GetDefault();
     string GetBaseFolder();
-    string GetPath(string name);
+    string GetPath(TRef name);
 }

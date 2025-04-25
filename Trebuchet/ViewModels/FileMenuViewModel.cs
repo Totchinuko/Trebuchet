@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
@@ -12,6 +13,7 @@ using Avalonia.Threading;
 using DynamicData.Binding;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
+using SteamKit2.WebUI.Internal;
 using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Utils;
@@ -21,31 +23,30 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels;
 
-public interface IFileMenuViewModel
+public interface IFileMenuViewModel : IReactiveObject
 {
     public string Name { get; }
-    public string Selected { get; set; }
     public bool Exportable { get; }
     public bool IsLoading { get; }
-    ObservableCollectionExtended<FileViewModel> List { get; }
+    public IEnumerable<IFileViewModel> List { get; }
     ReactiveCommand<Unit,Unit> Import { get; }
     ReactiveCommand<Unit,Unit> Create { get; }
-
-    event AsyncEventHandler<string>? FileSelected;
 }
 
-public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T : JsonFile<T>
+public class FileMenuViewModel<T, TRef> : ReactiveObject, IFileMenuViewModel 
+    where T : JsonFile<T>
+    where TRef : IPRef<T, TRef>
 {
     public string Name { get; }
 
-    public FileMenuViewModel(string name, IAppFileHandler<T> fileHandler, DialogueBox dialogue, ILogger logger)
+    public FileMenuViewModel(string name, IAppFileHandler<T, TRef> fileHandler, DialogueBox dialogue, ILogger logger)
     {
         Name = name;
         _fileHandler = fileHandler;
         _dialogue = dialogue;
         _logger = logger;
         _selected = fileHandler.GetDefault();
-        Exportable = _fileHandler is IAppFileHandlerWithImport<T>;
+        Exportable = _fileHandler is IAppFileHandlerWithImport<T, TRef>;
 
         RefreshList();
         SetupFileWatcher(fileHandler.GetBaseFolder());
@@ -54,25 +55,27 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
         Import = ReactiveCommand.CreateFromTask(OnImport);
 
          this.WhenAnyValue(x => x.Selected)
-             .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnSelect));
+             .InvokeCommand(ReactiveCommand.CreateFromTask<TRef>(OnSelect));
     }
     private FileSystemWatcher _modWatcher;
-    private readonly IAppFileHandler<T> _fileHandler;
+    private readonly IAppFileHandler<T, TRef> _fileHandler;
     private readonly DialogueBox _dialogue;
     private readonly ILogger _logger;
-    private string _selected;
+    private TRef _selected;
     private bool _isLoading;
 
-    public event AsyncEventHandler<string>? FileSelected; 
+    public event AsyncEventHandler<TRef>? FileSelected; 
     
     public bool Exportable { get; }
     
     public ReactiveCommand<Unit,Unit> Import { get; }
     public ReactiveCommand<Unit,Unit> Create { get; }
 
-    public ObservableCollectionExtended<FileViewModel> List { get; } = [];
+    public ObservableCollectionExtended<FileViewModel<T, TRef>> List { get; } = [];
 
-    public string Selected
+    IEnumerable<IFileViewModel> IFileMenuViewModel.List => List;
+
+    public TRef Selected
     {
         get => _selected;
         set => this.RaiseAndSetIfChanged(ref _selected, value);
@@ -91,17 +94,17 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
             List.Clear();
             foreach (var file in _fileHandler.GetList())
             {
-                var vm = new FileViewModel(file, file == Selected, Exportable);
+                var vm = new FileViewModel<T, TRef>(file, file.Equals(Selected), Exportable);
                 vm.Clicked += OnFileClicked;
                 List.Add(vm);
             }
         }
     }
 
-    private async Task OnSelect(string selected)
+    private async Task OnSelect(TRef selected)
     {
         foreach (var file in List)
-            file.Selected = file.Name == selected;
+            file.Selected = file.Reference.Equals(selected);
         
         await OnFileSelected(Selected);
     }
@@ -110,14 +113,15 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
     {
         var name = await GetNewProfileName();
         if (name is null) return;
+        var reference = _fileHandler.Ref(name);
         _logger.LogInformation(@"Create {name}", name);
-        _fileHandler.Create(name);
-        Selected = name;
+        _fileHandler.Create(reference);
+        Selected = reference;
     }
 
     private async Task OnImport()
     {
-        if (_fileHandler is not IAppFileHandlerWithImport<T> importer) return;
+        if (_fileHandler is not IAppFileHandlerWithImport<T, TRef> importer) return;
         
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
         if (desktop.MainWindow == null) return;
@@ -135,11 +139,12 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
 
         var name = await GetNewProfileName();
         if (name is null) return;
+        var reference = _fileHandler.Ref(name);
 
         try
         {
             _logger.LogInformation(@"Importing {file} into {name}", path, name);
-            await importer.Import(new FileInfo(path), name);
+            await importer.Import(new FileInfo(path), reference);
         }
         catch (Exception ex)
         {
@@ -148,19 +153,19 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
         }
     }
 
-    private async Task OnFileClicked(object? sender, FileViewModelEventArgs args)
+    private async Task OnFileClicked(object? sender, FileViewModelEventArgs<T, TRef> args)
     {
         switch (args.Action)
         {
             case FileViewAction.Select:
-                Selected = args.Name;
+                Selected = args.Reference;
                 break;
             case FileViewAction.Delete:
-                if (await Confirmation(Resources.Deletion, string.Format(Resources.DeletionText, args.Name)))
+                if (await Confirmation(Resources.Deletion, string.Format(Resources.DeletionText, args.Reference)))
                 {
                     IsLoading = true;
-                    _logger.LogInformation(@"Delete {name}", args.Name);
-                    await CatchError(@"delete", () => _fileHandler.Delete(args.Name));
+                    _logger.LogInformation(@"Delete {name}", args.Reference);
+                    await CatchError(@"delete", () => _fileHandler.Delete(args.Reference));
                     Selected = _fileHandler.GetDefault();
                     IsLoading = false;
                 }
@@ -168,27 +173,29 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
             case FileViewAction.Duplicate:
                 var name = await GetNewProfileName();
                 if (name is null) return;
+                var reference = _fileHandler.Ref(name);
                 IsLoading = true;
                 _logger.LogInformation(@"Duplicating {name}", name);
-                await CatchError(@"duplicate", () => _fileHandler.Duplicate(args.Name, name));
-                Selected = name;
+                await CatchError(@"duplicate", () => _fileHandler.Duplicate(args.Reference, reference));
+                Selected = reference;
                 IsLoading = false;
                 break;
             case FileViewAction.Export:
-                await ExportFile(args.Name);
+                await ExportFile(args.Reference);
                 break;
             case FileViewAction.Rename:
-                var renamed = await GetNewProfileName(args.Name);
+                var renamed = await GetNewProfileName(args.Reference.Name);
                 if (renamed is null) return;
-                _logger.LogInformation(@"Renaming {old} into {new}", args.Name, renamed);
+                var renamedReference = _fileHandler.Ref(renamed);
+                _logger.LogInformation(@"Renaming {old} into {new}", args.Reference, renamed);
                 IsLoading = true;
-                await CatchError(@"rename", () => _fileHandler.Rename(args.Name, renamed));
-                Selected = renamed;
+                await CatchError(@"rename", () => _fileHandler.Rename(args.Reference, renamedReference));
+                Selected = renamedReference;
                 IsLoading = false;
                 break;
             case FileViewAction.OpenFolder:
-                _logger.LogInformation(@"Opening {name} folder", args.Name);
-                string dir = _fileHandler.GetDirectory(args.Name);
+                _logger.LogInformation(@"Opening {name} folder", args.Reference);
+                string dir = _fileHandler.GetDirectory(args.Reference);
                 Process.Start("explorer.exe", dir);
                 break;
         }
@@ -216,9 +223,9 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
         });
     }
 
-    private async Task ExportFile(string name)
+    private async Task ExportFile(TRef reference)
     {
-        if (_fileHandler is not IAppFileHandlerWithImport<T> importer) return;
+        if (_fileHandler is not IAppFileHandlerWithImport<T, TRef> importer) return;
         
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
         if (desktop.MainWindow == null) return;
@@ -226,7 +233,7 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
         var file = await desktop.MainWindow.StorageProvider.SaveFilePickerAsync(new FilePickerSaveOptions()
         {
             Title = Resources.SaveFile,
-            SuggestedFileName = name,
+            SuggestedFileName = reference.Name,
             FileTypeChoices = [FileType.Json]
         });
 
@@ -236,8 +243,8 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
 
         try
         {
-            _logger.LogInformation(@"Exporting {name} into {file}", name, path);
-            await importer.Export(name, new FileInfo(path));
+            _logger.LogInformation(@"Exporting {name} into {file}", reference.Name, path);
+            await importer.Export(reference, new FileInfo(path));
         }
         catch (Exception ex)
         {
@@ -308,7 +315,7 @@ public class FileMenuViewModel<T> : ReactiveObject, IFileMenuViewModel where T :
         Dispatcher.UIThread.Invoke(RefreshList);
     }
 
-    protected virtual async Task OnFileSelected(string args)
+    protected virtual async Task OnFileSelected(TRef args)
     {
         if (FileSelected is not null)
             await FileSelected.Invoke(this, args);

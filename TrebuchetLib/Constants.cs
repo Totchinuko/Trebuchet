@@ -67,6 +67,12 @@ public static class Constants
     public const string cmdBoulderLambServer = "lamb server";
     
     public const string LogFolder = "logs";
+
+    public const string UriScheme = "trebuchet";
+    public const string UriSyncHost = "sync";
+    public const string UriModListHost = "mods";
+    public const string UriClientHost = "clients";
+    public const string UriServerHost = "servers";
     
     public static string GetConfigPath(bool testlive)
     {
