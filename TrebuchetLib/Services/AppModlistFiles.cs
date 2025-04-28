@@ -76,7 +76,7 @@ public class AppModlistFiles(AppSetup setup) : IAppModListFiles
         if (Exists(destination)) throw new Exception("Destination profile exists");
         if (!Exists(name)) throw new Exception("Source profile does not exists");
         var profile = Get(name);
-        profile.MoveFolderTo(GetPath(destination));
+        profile.MoveFileTo(GetPath(destination));
         _cache.Remove(name);
         return Task.FromResult(Get(destination));
     }

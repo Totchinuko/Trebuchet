@@ -121,6 +121,25 @@ namespace TrebuchetLib
             Directory.Move(folder, targetFolder);
             FilePath = path;
         }
+        
+        /// <summary>
+        /// Move the file and its parent folder to the specified path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="Exception"></exception>
+        internal void MoveFileTo(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentException("path is invalid");
+
+            if (File.Exists(path))
+                throw new Exception($"{path} already exists");
+
+            File.Move(FilePath, path);
+            FilePath = path;
+        }
 
         /// <summary>
         /// Save the file to disk as Json file
