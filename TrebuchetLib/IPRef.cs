@@ -11,8 +11,8 @@ public interface IPRef
 }
 
 public interface IPRef<T, TRef> : IPRef 
-    where T : JsonFile<T> 
-    where TRef : IPRef<T, TRef>
+    where T : ProfileFile<T> 
+    where TRef : class,IPRef<T, TRef>
 {
     IAppFileHandler<T, TRef> Handler { get; }
 }

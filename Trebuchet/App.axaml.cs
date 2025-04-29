@@ -185,10 +185,6 @@ public partial class App : Application, IApplication
 
         services.AddLogging(builder => builder.AddSerilog(logger, true));
         
-        services.AddSingleton<AppClientFiles>();
-        services.AddSingleton<AppServerFiles>();
-        services.AddSingleton<AppModlistFiles>();
-        services.AddSingleton<AppSyncFiles>();
         services.AddSingleton<AppFiles>();
         services.AddSingleton<ModlistImporter>();
         services.AddSingleton<OnBoarding>();

@@ -2,12 +2,12 @@ using tot_lib;
 
 namespace TrebuchetLib.Services;
 
-public class AppFiles(AppSetup setup, AppClientFiles clientFiles, AppServerFiles serverFiles, AppModlistFiles modListFiles, AppSyncFiles syncFiles)
+public class AppFiles(AppSetup setup)
 {
-    public IAppClientFiles Client { get; } = clientFiles;
-    public IAppServerFiles Server { get; } = serverFiles;
-    public IAppModListFiles Mods { get; } = modListFiles;
-    public IAppSyncFiles Sync { get; } = syncFiles;
+    public IAppClientFiles Client { get; } = new AppClientFiles(setup);
+    public IAppServerFiles Server { get; } = new AppServerFiles(setup);
+    public IAppModListFiles Mods { get; } = new AppModlistFiles(setup);
+    public IAppSyncFiles Sync { get; } = new AppSyncFiles(setup);
     
     public bool SetupFolders()
     {

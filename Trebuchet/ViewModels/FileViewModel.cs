@@ -24,8 +24,8 @@ public interface IFileViewModel : IReactiveObject
 } 
 
 public class FileViewModel<T, TRef> : ReactiveObject, IFileViewModel
-    where T : JsonFile<T>
-    where TRef : IPRef<T, TRef>
+    where T : ProfileFile<T>
+    where TRef : class,IPRef<T, TRef>
 {
     public FileViewModel(TRef reference, bool selected, bool exportable)
     {

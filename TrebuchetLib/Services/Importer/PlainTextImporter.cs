@@ -2,7 +2,7 @@ using System.Text;
 
 namespace TrebuchetLib.Services.Importer;
 
-public class PlainTextImporter(AppModlistFiles files) : ITrebuchetImporter
+public class PlainTextImporter(IAppModListFiles files) : ITrebuchetImporter
 {
     public ModlistExport ParseImport(string import)
     {

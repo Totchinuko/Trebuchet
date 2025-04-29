@@ -13,7 +13,6 @@ using Avalonia.Threading;
 using DynamicData.Binding;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using SteamKit2.WebUI.Internal;
 using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Utils;
@@ -34,8 +33,8 @@ public interface IFileMenuViewModel : IReactiveObject
 }
 
 public class FileMenuViewModel<T, TRef> : ReactiveObject, IFileMenuViewModel 
-    where T : JsonFile<T>
-    where TRef : IPRef<T, TRef>
+    where T : ProfileFile<T>
+    where TRef : class,IPRef<T, TRef>
 {
     public string Name { get; }
 
@@ -46,7 +45,7 @@ public class FileMenuViewModel<T, TRef> : ReactiveObject, IFileMenuViewModel
         _dialogue = dialogue;
         _logger = logger;
         _selected = fileHandler.GetDefault();
-        Exportable = _fileHandler is IAppFileHandlerWithImport<T, TRef>;
+        Exportable = !fileHandler.UseSubFolders; // todo: When sub folder export is supported, remove
 
         RefreshList();
         SetupFileWatcher(fileHandler.GetBaseFolder());
@@ -121,8 +120,6 @@ public class FileMenuViewModel<T, TRef> : ReactiveObject, IFileMenuViewModel
 
     private async Task OnImport()
     {
-        if (_fileHandler is not IAppFileHandlerWithImport<T, TRef> importer) return;
-        
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
         if (desktop.MainWindow == null) return;
 
@@ -144,7 +141,7 @@ public class FileMenuViewModel<T, TRef> : ReactiveObject, IFileMenuViewModel
         try
         {
             _logger.LogInformation(@"Importing {file} into {name}", path, name);
-            await importer.Import(new FileInfo(path), reference);
+            await _fileHandler.Import(new FileInfo(path), reference);
         }
         catch (Exception ex)
         {
@@ -225,8 +222,6 @@ public class FileMenuViewModel<T, TRef> : ReactiveObject, IFileMenuViewModel
 
     private async Task ExportFile(TRef reference)
     {
-        if (_fileHandler is not IAppFileHandlerWithImport<T, TRef> importer) return;
-        
         if (Application.Current?.ApplicationLifetime is not IClassicDesktopStyleApplicationLifetime desktop) return;
         if (desktop.MainWindow == null) return;
 
@@ -244,7 +239,7 @@ public class FileMenuViewModel<T, TRef> : ReactiveObject, IFileMenuViewModel
         try
         {
             _logger.LogInformation(@"Exporting {name} into {file}", reference.Name, path);
-            await importer.Export(reference, new FileInfo(path));
+            await _fileHandler.Export(reference, new FileInfo(path));
         }
         catch (Exception ex)
         {

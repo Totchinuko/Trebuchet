@@ -5,7 +5,7 @@ namespace TrebuchetLib.Services;
 public static class AppFilesEx
 {
     public static TRef Resolve<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef reference) 
-        where T : JsonFile<T> 
+        where T : ProfileFile<T>
         where TRef : class,IPRef<T, TRef>
     {
         if (handler.Exists(reference)) return reference;
@@ -112,7 +112,7 @@ public static class AppFilesEx
     }
 
     public static bool TryParse<T, TRef>(this AppFiles files, string name, [NotNullWhen(true)] out TRef? reference)
-        where T : JsonFile<T>
+        where T : ProfileFile<T>
         where TRef : class,IPRef<T, TRef>
     {
         try
@@ -128,7 +128,7 @@ public static class AppFilesEx
     }
     
     public static bool TryParse<T, TRef>(this AppFiles files, Uri uri, [NotNullWhen(true)] out TRef? reference)
-        where T : JsonFile<T> 
+        where T : ProfileFile<T>
         where TRef : class,IPRef<T, TRef>
     {
         reference = null;
@@ -138,7 +138,7 @@ public static class AppFilesEx
     }
 
     public static IAppFileHandler<T, TRef>? GetFileHandler<T, TRef>(this AppFiles files, Uri uri)
-        where T : JsonFile<T>
+        where T : ProfileFile<T>
         where TRef : class,IPRef<T, TRef>
     {
         try
@@ -165,7 +165,7 @@ public static class AppFilesEx
     }
 
     public static string? GetFileHost<T, TRef>()
-        where T : JsonFile<T>
+        where T : ProfileFile<T>
         where TRef : class,IPRef<T, TRef>
     {
         if (typeof(TRef) == typeof(ClientProfileRef))
@@ -180,7 +180,7 @@ public static class AppFilesEx
     }
 
     public static TRef Resolve<T, TRef>(this IAppFileHandler<T, TRef> handler, string data)
-        where T : JsonFile<T>
+        where T : ProfileFile<T>
         where TRef : class, IPRef<T, TRef>
     {
         try
@@ -197,14 +197,14 @@ public static class AppFilesEx
     }
 
     public static string GetDirectory<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef reference) 
-        where T : JsonFile<T> 
-        where TRef : IPRef<T, TRef>
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
     {
         return Path.GetDirectoryName(handler.GetPath(reference)) ?? throw new DirectoryNotFoundException();
     }
 
     public static bool TryGet<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef reference, [NotNullWhen(true)] out T? file)
-        where T : JsonFile<T>
+        where T : ProfileFile<T>
         where TRef : class,IPRef<T, TRef>
     {
         file = null; 
@@ -221,10 +221,198 @@ public static class AppFilesEx
     }
 
     public static T Get<T, TRef>(this IPRef<T, TRef> reference)
-        where T : JsonFile<T>
+        where T : ProfileFile<T>
         where TRef : class,IPRef<T, TRef>
     {
         return reference.Handler.Get((TRef)reference);
+    }
+    
+    public static T Create<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef reference)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (handler.Cache.TryGetValue(reference, out var profile))
+        {
+            profile.SaveFile();
+            return profile;
+        }
+        var file = ProfileFile<T>.CreateProfile(handler.GetPath(reference));
+        file.SaveFile();
+        handler.Cache[reference] = file;
+        return file;
+    }
+    
+    public static T Get<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef name)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (handler.Cache.TryGetValue(name, out var profile))
+            return profile;
+        
+        if(handler.UseSubFolders)
+            ProfileFile<T>.RepairMissingProfileFile(handler.GetPath(name));
+        var file = ProfileFile<T>.LoadProfile(handler.GetPath(name));
+        handler.Cache[name] = file;
+        return file;
+    }
+    
+    public static bool Exists<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef name)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if(handler.UseSubFolders)
+            ProfileFile<T>.RepairMissingProfileFile(handler.GetPath(name));
+        return File.Exists(handler.GetPath(name));
+    }
+    
+    public static bool Exists<T, TRef>(this IAppFileHandler<T, TRef> handler, string name)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if(handler.UseSubFolders)
+            ProfileFile<T>.RepairMissingProfileFile(handler.GetPath(name));
+        return File.Exists(handler.GetPath(name));
+    }
+    
+    public static string GetPath<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef reference)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        return handler.GetPath(reference.Name);
+    }
+    
+    internal static string GetPath<T, TRef>(this IAppFileHandler<T, TRef> handler, string name)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if(handler.UseSubFolders)
+            return Path.Combine(
+                handler.GetBaseFolder(), 
+                name, 
+                Constants.FileProfileConfig);
+        return Path.Combine(handler.GetBaseFolder(), name + ".json");
+    }
+    
+    public static void Delete<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef name)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        var profile = Get(name);
+        handler.Cache.Remove(name);
+        if(handler.UseSubFolders)
+            profile.DeleteFolder();
+        else profile.DeleteFile();
+    }
+
+    public static async Task<T> Duplicate<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef name, TRef destination)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (handler.Exists(destination)) throw new Exception("Destination profile exists");
+        if (!handler.Exists(name)) throw new Exception("Source profile does not exists");
+        var profile = Get(name);
+        if (handler.UseSubFolders)
+            await profile.CopyFolderTo(handler.GetPath(destination));
+        else profile.CopyFileTo(handler.GetPath(destination));
+        var copy = Get(destination);
+        return copy;
+    }
+
+    public static Task<T> Rename<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef name, TRef destination)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (handler.Exists(destination)) throw new Exception("Destination profile exists");
+        if (!handler.Exists(name)) throw new Exception("Source profile does not exists");
+        var profile = Get(name);
+        if(handler.UseSubFolders)
+            profile.MoveFolderTo(handler.GetPath(destination));
+        else profile.MoveFileTo(handler.GetPath(destination));
+        handler.Cache.Remove(name);
+        return Task.FromResult(Get(destination));
+    }
+    
+    public static IEnumerable<TRef> GetList<T, TRef>(this IAppFileHandler<T, TRef> handler)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (!Directory.Exists(handler.GetBaseFolder()))
+            yield break;
+
+        string[] profiles = handler.UseSubFolders 
+            ? Directory.GetDirectories(handler.GetBaseFolder(), "*")
+            : Directory.GetFiles(handler.GetBaseFolder(), "*.json");
+        foreach (string p in profiles)
+            yield return handler.Ref(Path.GetFileNameWithoutExtension(p));
+    }
+
+    public static Task<long> GetSize<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef name)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (!handler.UseSubFolders) return Task.FromResult(0L);
+        var dir = Path.GetDirectoryName(handler.GetPath(name));
+        if (dir is null) return Task.FromResult(0L);
+        return Task.Run(() => Tools.DirectorySize(dir));
+    }
+    
+    public static TRef GetDefault<T, TRef>(this IAppFileHandler<T, TRef> handler)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        var profile = handler.UseSubFolders 
+            ? handler.Ref(Tools.GetFirstDirectoryName(handler.GetBaseFolder(), "*"))
+            : handler.Ref(Tools.GetFirstFileName(handler.GetBaseFolder(), "*.json"));
+        if (!string.IsNullOrEmpty(profile.Name)) 
+            return profile;
+
+        profile = handler.Ref("Default");
+        if (!File.Exists(handler.GetPath(profile)))
+            ProfileFile<T>.CreateProfile(handler.GetPath(profile)).SaveFile();
+        return profile;
+    }
+    
+    public static string GetGameLogs<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef reference)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (!handler.UseSubFolders)
+            return string.Empty;
+        return Path.Combine(
+            handler.GetPath(reference),
+            Constants.FolderGameSaveLog,
+            Constants.FileGameLogFile
+        );
+    }
+    
+    public static Task Export<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef name, FileInfo file)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (handler.UseSubFolders) throw new NotImplementedException();
+        var path = handler.GetPath(name);
+        File.Copy(path, file.FullName, true);
+        return Task.CompletedTask;
+    }
+
+    public static async Task<T> Import<T, TRef>(this IAppFileHandler<T, TRef> handler, FileInfo import, TRef name)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (handler.UseSubFolders) throw new NotImplementedException();
+        var json = await File.ReadAllTextAsync(import.FullName);
+        return await handler.Import(json, name);
+    }
+
+    public static Task<T> Import<T, TRef>(this IAppFileHandler<T, TRef> handler, string json, TRef name)
+        where T : ProfileFile<T>
+        where TRef : class,IPRef<T, TRef>
+    {
+        if (handler.UseSubFolders) throw new NotImplementedException();
+        var path = handler.GetPath(name);
+        var profile = ProfileFile<T>.ImportFile(json, path);
+        handler.Cache[name] = profile;
+        return Task.FromResult(profile);
     }
 
     public static IEnumerable<ClientConnectionRef> GetConnectionRefs(this IPRefWithClientConnection reference)
