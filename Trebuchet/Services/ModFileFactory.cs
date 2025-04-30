@@ -15,55 +15,37 @@ namespace Trebuchet.Services;
 
 public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskBlocker taskBlocker)
 {
-    public event IModFileArgs? Removed;
-    public event IPublishedModFileArgs? Updated;
-    
-    public IModFile Create(string mod, bool readOnly)
+    public ModFileBuilder Create(string mod)
     {
         var path = mod;
         appFiles.Mods.ResolveMod(ref path);
         if (ulong.TryParse(mod, out var publishedFileId))
-            return CreatePublished(path, publishedFileId, readOnly);
-        return CreateLocal(path, readOnly);
+            return CreatePublished(path, publishedFileId);
+        return CreateLocal(path);
     }
 
-    public IModFile CreateUnknown(string path, ulong publishedFile, bool readOnly)
+    public ModFileBuilder CreateUnknown(string path, ulong publishedFile)
     {
         var file = new UnknownModFile(path, publishedFile);
-        AddOpenWorkshopDisabledAction(file);
-        AddUpdateDisabledAction(file);
-        AddRemoveAction(file, readOnly);
-        return file;
+        return new ModFileBuilder(file, taskBlocker);
     }
 
-    public IModFile Create(IModFile modfile, string path, bool readOnly)
+    public ModFileBuilder Create(IModFile modfile, string path)
     {
         switch (modfile)
         {
             case LocalModFile:
                 var file = new LocalModFile(path);
-                AddOpenWorkshopDisabledAction(file);
-                AddUpdateDisabledAction(file);
-                AddRemoveAction(file, readOnly);
-                return file;
+                return new ModFileBuilder(file, taskBlocker);
             case PublishedModFile pub:
                 var pfile =  new PublishedModFile(path, pub.PublishedId);
-                AddOpenWorkshopAction(pfile);
-                AddUpdateAction(pfile);
-                AddRemoveAction(pfile, readOnly);
-                return pfile;
+                return new ModFileBuilder(pfile, taskBlocker);
             case WorkshopModFile w:
                 var wfile =  new WorkshopModFile(path, w);
-                AddOpenWorkshopAction(wfile);
-                AddUpdateAction(wfile);
-                AddRemoveAction(wfile, readOnly);
-                return wfile;
+                return new ModFileBuilder(wfile, taskBlocker);
             case UnknownModFile u:
                 var ufile = new UnknownModFile(path, u.PublishedId);
-                AddOpenWorkshopDisabledAction(ufile);
-                AddUpdateDisabledAction(ufile);
-                AddRemoveAction(ufile, readOnly);
-                return ufile;
+                return new ModFileBuilder(ufile, taskBlocker);
             default:
                 throw new NotImplementedException();
         }
@@ -83,13 +65,14 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
             if (workshop.CreatorAppId != 0)
                 files[i] = Create(workshop, statusList
                     .FirstOrDefault(x => x.PublishedId == workshop.PublishedFileID, UGCFileStatus.Default(workshop.PublishedFileID))
-                ,readOnly);
+                    ).SetActions(files[i])
+                    .Build();
             else
-                files[i] = CreateUnknown(pub.FilePath, pub.PublishedId, readOnly);
+                files[i] = CreateUnknown(pub.FilePath, pub.PublishedId).SetActions(files[i]).Build();
         }
     }
 
-    public async Task<IModFile> Create(WorkshopSearchResult workshopFile, bool readOnly)
+    public async Task<ModFileBuilder> Create(WorkshopSearchResult workshopFile)
     {
         var path = workshopFile.PublishedFileId.ToString();
         appFiles.Mods.ResolveMod(ref path);
@@ -97,13 +80,10 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
         var status = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList())
             .FirstOrDefault(UGCFileStatus.Default(workshopFile.PublishedFileId));
         var file = new WorkshopModFile(path, workshopFile, status);
-        AddOpenWorkshopAction(file);
-        AddUpdateAction(file);
-        AddRemoveAction(file, readOnly);
-        return file;
+        return new ModFileBuilder(file, taskBlocker);
     }
     
-    public async Task<IModFile> Create(PublishedFile workshopFile, bool readOnly)
+    public async Task<ModFileBuilder> Create(PublishedFile workshopFile)
     {
         var path = workshopFile.PublishedFileID.ToString();
         appFiles.Mods.ResolveMod(ref path);
@@ -111,99 +91,26 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
         var status = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList())
             .FirstOrDefault(UGCFileStatus.Default(workshopFile.PublishedFileID));
         var file = new WorkshopModFile(path, workshopFile, status);
-        AddOpenWorkshopAction(file);
-        AddUpdateAction(file);
-        AddRemoveAction(file, readOnly);
-        return file;
+        return new ModFileBuilder(file, taskBlocker);
     }
     
-    private IModFile Create(PublishedFile workshopFile, UGCFileStatus status, bool readOnly)
+    private ModFileBuilder Create(PublishedFile workshopFile, UGCFileStatus status)
     {
         var path = workshopFile.PublishedFileID.ToString();
         appFiles.Mods.ResolveMod(ref path);
         var file = new WorkshopModFile(path, workshopFile, status);
-        AddOpenWorkshopAction(file);
-        AddUpdateAction(file);
-        AddRemoveAction(file, readOnly);
-        return file;
+        return new ModFileBuilder(file, taskBlocker);
     }
 
-    private IModFile CreatePublished(string path, ulong publishedFile, bool readOnly)
+    private ModFileBuilder CreatePublished(string path, ulong publishedFile)
     {
         var file = new PublishedModFile(path, publishedFile);
-        AddOpenWorkshopAction(file);
-        AddUpdateAction(file);
-        AddRemoveAction(file, readOnly);
-        return file;
+        return new ModFileBuilder(file, taskBlocker);
     }
 
-    private IModFile CreateLocal(string path, bool readOnly)
+    private ModFileBuilder CreateLocal(string path)
     {
         var file = new LocalModFile(path);
-        AddOpenWorkshopDisabledAction(file);
-        AddUpdateDisabledAction(file);
-        AddRemoveAction(file, readOnly);
-        return file;
-    }
-    
-    private void AddRemoveAction(IModFile file, bool readOnly)
-    {
-        if (readOnly)
-        {
-            file.Actions.Add(new ModFileAction(
-                Resources.Update,
-                "mdi-delete",
-                ReactiveCommand.Create(() => {}, Observable.Empty<bool>().StartWith(false))
-            ));
-        }
-        else
-        {
-            var action = new ModFileAction(
-                Resources.RemoveFromList,
-                "mdi-delete",
-                ReactiveCommand.Create(() => Removed?.Invoke(file)));
-            action.Classes.Add(@"Red");
-            file.Actions.Add(action);
-        }
-    }
-
-    private void AddOpenWorkshopAction(IPublishedModFile file)
-    {
-        file.Actions.Add(new ModFileAction(
-            Resources.OpenWorkshopPage,
-            "mdi-steam",
-            ReactiveCommand.Create(() =>
-            {
-                tot_lib.Utils.OpenWeb(string.Format(Constants.SteamWorkshopURL, file.PublishedId));
-            }))
-        );
-    }
-
-    private void AddUpdateAction(IPublishedModFile file)
-    {
-        var canExecute = taskBlocker.WhenAnyValue(x => x.CanDownloadMods);
-        file.Actions.Add(new ModFileAction(
-            Resources.Update,
-            "mdi-update",
-            ReactiveCommand.Create(() => Updated?.Invoke(file), canExecute)
-            ));
-    }
-    
-    private void AddOpenWorkshopDisabledAction(IModFile file)
-    {
-        file.Actions.Add(new ModFileAction(
-            Resources.Update,
-            "mdi-steam",
-            ReactiveCommand.Create(() => {}, Observable.Empty<bool>().StartWith(false))
-        ));
-    }
-    
-    private void AddUpdateDisabledAction(IModFile file)
-    {
-        file.Actions.Add(new ModFileAction(
-            Resources.Update,
-            "mdi-update",
-            ReactiveCommand.Create(() => {}, Observable.Empty<bool>().StartWith(false))
-        ));
+        return new ModFileBuilder(file, taskBlocker);
     }
 }

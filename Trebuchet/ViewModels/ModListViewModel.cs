@@ -48,9 +48,6 @@ public class ModListViewModel : ReactiveObject
             {
                 _modWatcher.EnableRaisingEvents = x;
             }));
-        
-        _modFileFactory.Removed += RemoveModFile;
-        _modFileFactory.Updated += UpdateModFile;
     }
     
     private FileSystemWatcher _modWatcher;
@@ -61,7 +58,7 @@ public class ModListViewModel : ReactiveObject
     private readonly AppSetup _setup;
     private readonly DialogueBox _dialogueBox;
     private string _size = string.Empty;
-    private bool _isReadOnly = false;
+    private bool _isReadOnly;
 
     public event AsyncEventHandler? ModListChanged;
     
@@ -118,7 +115,22 @@ public class ModListViewModel : ReactiveObject
         using (List.SuspendNotifications())
         {
             List.Clear();
-            List.AddRange(modList.Select(x => _modFileFactory.Create(x, IsReadOnly)));
+            if(IsReadOnly)
+                List.AddRange(modList
+                    .Select(x => _modFileFactory
+                        .Create(x)
+                        .SetActions(RemoveModFile, UpdateModFile)
+                        .Build()
+                    )
+                );
+            else
+                List.AddRange(modList
+                    .Select(x => _modFileFactory
+                        .Create(x)
+                        .SetActions(UpdateModFile)
+                        .Build()
+                    )
+                );
             await _modFileFactory.QueryFromWorkshop(List, IsReadOnly);
         }
         Size = CalculateModListSize().Bytes().Humanize();
@@ -128,7 +140,7 @@ public class ModListViewModel : ReactiveObject
     {
         if (List.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
         _logger.LogInformation(@"Adding mod {mod} from workshop", mod.PublishedFileId);
-        List.Add(await _modFileFactory.Create(mod, IsReadOnly));
+        List.Add((await _modFileFactory.Create(mod)).SetActions(RemoveModFile, UpdateModFile).Build());
         Size = CalculateModListSize().Bytes().Humanize();
     }
 
@@ -189,7 +201,7 @@ public class ModListViewModel : ReactiveObject
                 if (modFile is not IPublishedModFile published || published.PublishedId != id) continue;
                 var path = published.PublishedId.ToString();  
                 _appFiles.Mods.ResolveMod(ref path);
-                List[i] = _modFileFactory.Create(modFile, path, IsReadOnly);
+                List[i] = _modFileFactory.Create(modFile, path).SetActions(List[i]).Build();
             }
             watch.Stop();
             using(_logger.BeginScope((@"fullPath", fullPath)))
