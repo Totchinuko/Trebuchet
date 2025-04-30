@@ -322,7 +322,7 @@ namespace Trebuchet.ViewModels.Panels
 
         private void RefreshClientSelection(string profile, string modlist)
         {
-            RefreshClientSelection(_appFiles.Client.Resolve(profile), _appFiles.Mods.Resolve(modlist));
+            RefreshClientSelection(_appFiles.Client.Resolve(profile), _appFiles.ResolveModList(modlist));
         }
         private void RefreshClientSelection(ClientProfileRef? profile, IPRefWithModList? modlist)
         {
