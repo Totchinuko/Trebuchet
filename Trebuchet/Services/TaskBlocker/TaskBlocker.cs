@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Controls.Platform;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 
@@ -17,13 +18,12 @@ namespace Trebuchet.Services.TaskBlocker
         public IEnumerable<Type> ActiveTypes { get; } = actives;
     }
     
-    public sealed class TaskBlocker : ReactiveObject
+    public sealed class TaskBlocker : ReactiveObject, IDisposable
     {
         private readonly ILogger<TaskBlocker> _logger;
 
-        private class BlockedTask(SemaphoreSlim semaphore, CancellationTokenSource cts, IBlockedTaskType type) : IBlockedTask
+        private class BlockedTask(CancellationTokenSource cts, IBlockedTaskType type) : IBlockedTask
         {
-            public SemaphoreSlim Semaphore { get; } = semaphore;
             public CancellationTokenSource Cts { get; } = cts;
             public IBlockedTaskType Type { get; } = type;
             public event EventHandler<BlockedTask>? OperationReleased;
@@ -34,6 +34,7 @@ namespace Trebuchet.Services.TaskBlocker
         }
         
         private readonly Dictionary<Type, BlockedTask> _tasks = [];
+        private readonly Dictionary<Type, SemaphoreSlim> _semaphores = [];
         private readonly ObservableAsPropertyHelper<bool> _canDownloadMods;
         private readonly ObservableAsPropertyHelper<bool> _canDownloadServers;
         private readonly ObservableAsPropertyHelper<bool> _canLaunch;
@@ -75,7 +76,8 @@ namespace Trebuchet.Services.TaskBlocker
                 task = CreateTask(operation, cancelAfterSec);
                 task.OperationReleased += (_, t) => Release(t);
             }
-            await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
+
+            await WaitSemaphore(operation.GetType()).WaitAsync(task.Cts.Token).ConfigureAwait(false);
             _logger.LogInformation(@$"Entering task {operation.GetType().Name}");
             _tasks[operation.GetType()] = task;
             OnTaskChanged(operation, true);
@@ -92,7 +94,7 @@ namespace Trebuchet.Services.TaskBlocker
 
             var task = CreateTask(operation, cancelAfterSec);
             task.OperationReleased += (_, t) => Release(t);
-            await task.Semaphore.WaitAsync(task.Cts.Token).ConfigureAwait(false);
+            await WaitSemaphore(operation.GetType()).ConfigureAwait(false);
             _logger.LogInformation(@$"Entering task {operation.GetType().Name}");
             _tasks[operation.GetType()] = task;
             OnTaskChanged(operation, true);
@@ -123,11 +125,9 @@ namespace Trebuchet.Services.TaskBlocker
         {
             if(cancelTimer > 0)
                 return new BlockedTask(
-                    new SemaphoreSlim(1, 1), 
                     new CancellationTokenSource(cancelTimer * 1000),
                     operation);
             return new BlockedTask(
-                new SemaphoreSlim(1, 1), 
                 new CancellationTokenSource(),
                 operation);
         }
@@ -138,8 +138,7 @@ namespace Trebuchet.Services.TaskBlocker
             {
                 _logger.LogInformation(@$"Releasing task {task.GetType().Name}");
                 source.Cts.Dispose();
-                source.Semaphore.Release();
-                source.Semaphore.Dispose();
+                _semaphores[task.Type.GetType()].Release();
                 _tasks.Remove(task.Type.GetType());
                 OnTaskChanged(task.Type, false);
             }
@@ -153,13 +152,28 @@ namespace Trebuchet.Services.TaskBlocker
         private async Task WaitForBlockingTasks(IBlockedTaskType type, CancellationToken token)
         {
             foreach(var blockingType in type.BlockingTypes)
-                if (_tasks.TryGetValue(blockingType, out var task))
-                    await Task.Run(() => task.Semaphore.AvailableWaitHandle.WaitOne(), token);
+                if (_tasks.TryGetValue(blockingType, out _))
+                    await Task.Run(() => _semaphores[type.GetType()].AvailableWaitHandle.WaitOne(), token);
         }
 
         private void OnTaskChanged(IBlockedTaskType t, bool toggled)
         {
             TaskChanged?.Invoke(this, new TaskChangedEventArgs(t, toggled, _tasks.Keys));
+        }
+
+        private Task WaitSemaphore(Type operationType)
+        {
+            if (_semaphores.TryGetValue(operationType, out var semSlim))
+                return semSlim.WaitAsync();
+            var semaphore = new SemaphoreSlim(1, 1);
+            _semaphores[operationType] = semaphore;
+            return semaphore.WaitAsync();
+        }
+
+        public void Dispose()
+        {
+            foreach (var sem in _semaphores.Values)
+                sem.Dispose();
         }
     }
 }
