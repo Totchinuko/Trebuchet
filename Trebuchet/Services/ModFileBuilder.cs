@@ -13,23 +13,17 @@ public class ModFileBuilder(IModFile modFile, TaskBlocker.TaskBlocker blocker)
 {
     public ModFileBuilder SetActions(Func<IModFile, Task> remove, Func<IPublishedModFile, Task>? updater = null)
     {
+        SetOpenWorkshopAction();
         SetUpdater(updater);
         SetRemove(remove);
-        SetOpenWorkshopAction();
-        return this;
-    }
-
-    public ModFileBuilder SetActions(IModFile replacedModFile)
-    {
-        modFile.Actions.AddRange(replacedModFile.Actions);
         return this;
     }
 
     public ModFileBuilder SetActions(Func<IPublishedModFile, Task>? updater = null)
     {
+        SetOpenWorkshopAction();
         SetUpdater(updater);
         SetRemoveReadOnly();
-        SetOpenWorkshopAction();
         return this; 
     }
 

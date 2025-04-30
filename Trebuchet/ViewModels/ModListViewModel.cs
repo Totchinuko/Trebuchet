@@ -14,6 +14,7 @@ using ReactiveUI;
 using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -95,7 +96,7 @@ public class ModListViewModel : ReactiveObject
         {
             await _steamApi.UpdateMods(mods);
             using(List.SuspendNotifications())
-                await _modFileFactory.QueryFromWorkshop(List, IsReadOnly);
+                await QueryFromWorkshop(List, IsReadOnly);
         }
         catch (Exception tex)
         {
@@ -115,7 +116,7 @@ public class ModListViewModel : ReactiveObject
         using (List.SuspendNotifications())
         {
             List.Clear();
-            if(IsReadOnly)
+            if(!IsReadOnly)
                 List.AddRange(modList
                     .Select(x => _modFileFactory
                         .Create(x)
@@ -131,7 +132,7 @@ public class ModListViewModel : ReactiveObject
                         .Build()
                     )
                 );
-            await _modFileFactory.QueryFromWorkshop(List, IsReadOnly);
+            await QueryFromWorkshop(List, IsReadOnly);
         }
         Size = CalculateModListSize().Bytes().Humanize();
     }
@@ -201,12 +202,43 @@ public class ModListViewModel : ReactiveObject
                 if (modFile is not IPublishedModFile published || published.PublishedId != id) continue;
                 var path = published.PublishedId.ToString();  
                 _appFiles.Mods.ResolveMod(ref path);
-                List[i] = _modFileFactory.Create(modFile, path).SetActions(List[i]).Build();
+                if(!IsReadOnly)
+                    List[i] = _modFileFactory.Create(modFile, path)
+                        .SetActions(RemoveModFile, UpdateModFile)
+                        .Build();
+                else
+                    List[i] = _modFileFactory.Create(modFile, path)
+                        .SetActions(UpdateModFile)
+                        .Build();
             }
             watch.Stop();
             using(_logger.BeginScope((@"fullPath", fullPath)))
                 _logger.LogDebug(@$"Update time {watch.ElapsedMilliseconds}ms");
         });
+    }
+    
+    public async Task QueryFromWorkshop(IList<IModFile> files, bool readOnly)
+    {
+        var published = files.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList();
+        var details = await _steamApi.RequestModDetails(published);
+        var statusList = _steamApi.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList());
+        for (var i = 0; i < files.Count; i++)
+        {
+            var current = files[i];
+            if (current is not IPublishedModFile pub) continue;
+            var workshop = details.FirstOrDefault(d => d.PublishedFileID == pub.PublishedId);
+            if (workshop is null) continue;
+            if (workshop.CreatorAppId != 0)
+                files[i] = _modFileFactory.Create(workshop, statusList
+                        .FirstOrDefault(x => x.PublishedId == workshop.PublishedFileID, UGCFileStatus.Default(workshop.PublishedFileID))
+                    )
+                    .SetActions(RemoveModFile, UpdateModFile)
+                    .Build();
+            else
+                files[i] = _modFileFactory.CreateUnknown(pub.FilePath, pub.PublishedId)
+                    .SetActions(RemoveModFile, UpdateModFile)
+                    .Build();
+        }
     }
     
     [MemberNotNull("_modWatcher")]

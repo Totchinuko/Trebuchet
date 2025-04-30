@@ -51,27 +51,6 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
         }
     }
 
-    public async Task QueryFromWorkshop(IList<IModFile> files, bool readOnly)
-    {
-        var published = files.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList();
-        var details = await steam.RequestModDetails(published);
-        var statusList = steam.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList());
-        for (var i = 0; i < files.Count; i++)
-        {
-            var current = files[i];
-            if (current is not IPublishedModFile pub) continue;
-            var workshop = details.FirstOrDefault(d => d.PublishedFileID == pub.PublishedId);
-            if (workshop is null) continue;
-            if (workshop.CreatorAppId != 0)
-                files[i] = Create(workshop, statusList
-                    .FirstOrDefault(x => x.PublishedId == workshop.PublishedFileID, UGCFileStatus.Default(workshop.PublishedFileID))
-                    ).SetActions(files[i])
-                    .Build();
-            else
-                files[i] = CreateUnknown(pub.FilePath, pub.PublishedId).SetActions(files[i]).Build();
-        }
-    }
-
     public async Task<ModFileBuilder> Create(WorkshopSearchResult workshopFile)
     {
         var path = workshopFile.PublishedFileId.ToString();
@@ -94,7 +73,7 @@ public class ModFileFactory(AppFiles appFiles, SteamApi steam, TaskBlocker.TaskB
         return new ModFileBuilder(file, taskBlocker);
     }
     
-    private ModFileBuilder Create(PublishedFile workshopFile, UGCFileStatus status)
+    public ModFileBuilder Create(PublishedFile workshopFile, UGCFileStatus status)
     {
         var path = workshopFile.PublishedFileID.ToString();
         appFiles.Mods.ResolveMod(ref path);
