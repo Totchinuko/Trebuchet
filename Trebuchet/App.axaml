@@ -57,6 +57,7 @@
                 <MergeResourceInclude Source="Templates\ModListView.axaml" />
                 <MergeResourceInclude Source="Templates\ClientConnectionListView.axaml" />
                 <MergeResourceInclude Source="Templates\SyncPanelView.axaml" />
+                <MergeResourceInclude Source="Templates\MixedConsolePopedOutView.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -105,6 +106,7 @@
         <StaticResource ResourceKey="ClientConnectionListView" />
         <StaticResource ResourceKey="ModListView" />
         <StaticResource ResourceKey="SyncPanelView" />
+        <StaticResource ResourceKey="MixedConsolePopedOutView" />
     </Application.DataTemplates>
     <Application.Styles>
         <FluentTheme />

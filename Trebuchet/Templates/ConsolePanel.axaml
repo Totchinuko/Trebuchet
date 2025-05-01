@@ -1,35 +1,45 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:controls="clr-namespace:Trebuchet.Controls"
+                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:vm="clr-namespace:Trebuchet.ViewModels"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:panels="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="ConsolePanel" x:DataType="panels:ConsolePanel">
         <DockPanel LastChildFill="True">
             <Border Classes="Toolbar" DockPanel.Dock="Top">
-                <Panel>
-                    <Button x:Name="ConsoleSelector" HorizontalAlignment="Left" Classes="Base Flat" Command="{Binding OpenPopup}">
-                        <DockPanel LastChildFill="True">
-                            <i:Icon Value="mdi-chevron-down" Classes="Normal" DockPanel.Dock="Right" />
-                            <TextBlock Text="{Binding Console.ServerLabel}" DockPanel.Dock="Left" />
-                        </DockPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Panel>
+                        <Button x:Name="ConsoleSelector" HorizontalAlignment="Left" Classes="Base Flat" Command="{Binding OpenPopup}">
+                            <DockPanel LastChildFill="True">
+                                <i:Icon Value="mdi-chevron-down" Classes="Normal" DockPanel.Dock="Right" />
+                                <TextBlock Text="{Binding SelectedConsole.ServerLabel}" DockPanel.Dock="Left" />
+                            </DockPanel>
+                        </Button>
+                        <Popup Name="MapListPopup" IsLightDismissEnabled="True" IsOpen="{Binding PopupOpen, Mode=TwoWay}" Placement="BottomEdgeAlignedLeft" PlacementTarget="ConsoleSelector">
+                            <Border Classes="BackPanel" MaxHeight="350" MinWidth="{Binding #ConsoleSelector.DesiredSize.Width}">
+                                <ScrollViewer>
+                                    <StackPanel Spacing="6">
+                                        <ItemsControl ItemsSource="{Binding ConsoleList}">
+                                            <ItemsControl.ItemTemplate>
+                                                <DataTemplate DataType="vm:MixedConsoleViewModel">
+                                                    <Button HorizontalAlignment="Stretch" Classes="Base Sneak Flat" Content="{Binding ServerLabel}" Command="{Binding $parent[Popup].((panels:ConsolePanel)DataContext).Select}" CommandParameter="{Binding}" Padding="4" HorizontalContentAlignment="Left" />
+                                                </DataTemplate>
+                                            </ItemsControl.ItemTemplate>
+                                        </ItemsControl>
+                                    </StackPanel>
+                                </ScrollViewer>
+                            </Border>
+                        </Popup>
+                    </Panel>
+                    <Button Classes="Base" Command="{Binding PopOut}" IsVisible="{Binding !IsPopupedOut}">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                            <i:Icon Value="mdi-application" Classes="Normal" />
+                            <TextBlock Text="{x:Static a:Resources.PopOut}" />
+                        </StackPanel>
                     </Button>
-                    <Popup Name="MapListPopup" IsLightDismissEnabled="True" IsOpen="{Binding PopupOpen, Mode=TwoWay}" Placement="BottomEdgeAlignedLeft" PlacementTarget="ConsoleSelector">
-                        <Border Classes="BackPanel" MaxHeight="350" MinWidth="{Binding #ConsoleSelector.DesiredSize.Width}">
-                            <ScrollViewer>
-                                <StackPanel Spacing="6">
-                                    <ItemsControl ItemsSource="{Binding ConsoleList}">
-                                        <ItemsControl.ItemTemplate>
-                                            <DataTemplate DataType="vm:MixedConsoleViewModel">
-                                                <Button HorizontalAlignment="Stretch" Classes="Base Sneak Flat" Content="{Binding ServerLabel}" Command="{Binding Select}" Padding="4" HorizontalContentAlignment="Left" />
-                                            </DataTemplate>
-                                        </ItemsControl.ItemTemplate>
-                                    </ItemsControl>
-                                </StackPanel>
-                            </ScrollViewer>
-                        </Border>
-                    </Popup>
-                </Panel>
+                </StackPanel>
             </Border>
             <ContentControl Content="{Binding Console}" />
         </DockPanel>

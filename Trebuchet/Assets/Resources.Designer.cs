@@ -366,6 +366,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dock.
+        /// </summary>
+        public static string Dock {
+            get {
+                return ResourceManager.GetString("Dock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Drop .pak files to add to your list.
         /// </summary>
         public static string DropPakLabel {
@@ -1394,6 +1403,15 @@ namespace Trebuchet.Assets {
         public static string Players {
             get {
                 return ResourceManager.GetString("Players", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Pop out.
+        /// </summary>
+        public static string PopOut {
+            get {
+                return ResourceManager.GetString("PopOut", resourceCulture);
             }
         }
         

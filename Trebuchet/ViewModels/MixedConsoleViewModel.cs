@@ -61,7 +61,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
             TextCleared?.Invoke(this, EventArgs.Empty);
         });
         
-        Select = ReactiveCommand.Create(OnConsoleSelected);
         RefreshLabel();
     }
 
@@ -93,7 +92,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     private readonly MessageTemplateTextFormatter _trebFormater = new (
         @"[{Timestamp:HH:mm:ss}][{Level:u3}] {SourceContext}: {Message:lj}{NewLine}{Exception}");
 
-    public event EventHandler<int>? ConsoleSelected; 
     public event EventHandler? ScrollToEnd;
     public event EventHandler? ScrollToHome;
     public event EventHandler<string>? TextAppended;
@@ -146,7 +144,8 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         set => this.RaiseAndSetIfChanged(ref _displayTrebuchetLog, value);
     }
 
-    public ReactiveCommand<Unit,Unit> Select { get; }
+    public int Instance => _instance;
+
     public ReactiveCommand<Unit, Unit> SendCommand { get; }
     public ReactiveCommand<Unit,Unit> ToggleAutoScroll { get; }
     public ReactiveCommand<Unit,Unit> ClearText { get; }
@@ -225,11 +224,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         }
     }
 
-    private void OnConsoleSelected()
-    {
-        ConsoleSelected?.Invoke(this, _instance);
-    }
-
     private void OnScrollToEnd()
     {
         if(AutoScroll)
@@ -249,4 +243,8 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         await Send(command);
     }
 
+    public override string ToString()
+    {
+        return ServerLabel;
+    }
 }

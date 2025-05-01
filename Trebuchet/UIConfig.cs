@@ -44,7 +44,23 @@ namespace Trebuchet
         {
             if (_consoleFilters.Length <= instance) return false;
 
-            return (ConsoleFilters[instance] & (1 << (int)source)) > 0;
+            return (ConsoleFilters[instance] & (1 << (int)source)) != 0;
+        }
+
+        public void SetInstancePopup(int instance, bool popupedOut)
+        {
+            if (_consoleFilters.Length <= instance)
+                Array.Resize(ref _consoleFilters, instance + 1);
+            ConsoleFilters[instance] = popupedOut 
+                ? ConsoleFilters[instance] | (1 << 31) 
+                : ConsoleFilters[instance] & ~(1 << 31);
+        }
+        
+        public bool GetInstancePopup(int instance)
+        {
+            if (_consoleFilters.Length <= instance) return false;
+
+            return (ConsoleFilters[instance] & (1 << 31)) != 0;
         }
     }
 }
