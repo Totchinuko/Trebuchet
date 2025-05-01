@@ -25,7 +25,6 @@ public class ConsoleTextBindingBehavior : Behavior<TextEditor>
         if (AssociatedObject is not { } textEditor) return;
         _textEditor = textEditor;
         _textEditor.Options.AllowScrollBelowDocument = false;
-        TextSourceProperty.Changed.AddClassHandler<ConsoleTextBindingBehavior, ITextSource?>(OnTextSourceChanged);
     }
 
     protected override void OnDetaching()
@@ -36,23 +35,27 @@ public class ConsoleTextBindingBehavior : Behavior<TextEditor>
             TextSource.TextAppended -= OnTextAppended;
     }
 
-    private void OnTextSourceChanged(ConsoleTextBindingBehavior sender, AvaloniaPropertyChangedEventArgs<ITextSource?> args)
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
     {
+        base.OnPropertyChanged(change);
         if (_textEditor is not { Document: not null }) return;
 
-        if (args.OldValue.Value is { } previous)
+        if (change.Property == TextSourceProperty)
         {
-            previous.TextAppended -= OnTextAppended;
-            previous.TextCleared -= OnTextCleared;
-        }
+            if (change.OldValue is ITextSource previous)
+            {
+                previous.TextAppended -= OnTextAppended;
+                previous.TextCleared -= OnTextCleared;
+            }
             
-        if (args.NewValue.Value is not { } current) return;
-        current.TextAppended += OnTextAppended;
-        current.TextCleared += OnTextCleared;
-        _textEditor.Clear();
-        _textEditor.AppendText(current.Text);
-        if(current.AutoScroll)
-            _textEditor.ScrollToEnd();
+            if (change.NewValue is not ITextSource current) return;
+            current.TextAppended += OnTextAppended;
+            current.TextCleared += OnTextCleared;
+            _textEditor.Clear();
+            _textEditor.AppendText(current.Text);
+            if(current.AutoScroll)
+                _textEditor.ScrollToEnd();
+        }
     }
 
     private void OnTextCleared(object? sender, EventArgs e)
