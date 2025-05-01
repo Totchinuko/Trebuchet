@@ -44,10 +44,10 @@ public static class AppFilesEx
         switch (uri.Host)
         {
             case Constants.UriSyncHost:
-                reference = files.Sync.Ref(uri.Segments[1]);
+                reference = files.Sync.Ref(Uri.UnescapeDataString(uri.Segments[1]));
                 return true;
             case Constants.UriModListHost:
-                reference = files.Mods.Ref(uri.Segments[1]);
+                reference = files.Mods.Ref(Uri.UnescapeDataString(uri.Segments[1]));
                 return true;
             default:
                 return false;
@@ -85,7 +85,7 @@ public static class AppFilesEx
             var uri = new Uri(name);
             if (uri.Segments.Length < 3) return null;
             if (files.TryParseConnectionRef(uri, out var reference))
-                return new ClientConnectionRef(reference, uri.Segments[2]);
+                return new ClientConnectionRef(reference, Uri.UnescapeDataString(uri.Segments[2]));
             return null;
         }
         catch
@@ -101,10 +101,10 @@ public static class AppFilesEx
         switch (uri.Host)
         {
             case Constants.UriSyncHost:
-                reference = files.Sync.Ref(uri.Segments[1]);
+                reference = files.Sync.Ref(Uri.UnescapeDataString(uri.Segments[1]));
                 return true;
             case Constants.UriClientHost:
-                reference = files.Client.Ref(uri.Segments[1]);
+                reference = files.Client.Ref(Uri.UnescapeDataString(uri.Segments[1]));
                 return true;
             default:
                 return false;
@@ -133,7 +133,7 @@ public static class AppFilesEx
     {
         reference = null;
         if (uri.Segments.Length < 2) return false;
-        reference = files.GetFileHandler<T, TRef>(uri)?.Ref(uri.Segments[1]);
+        reference = files.GetFileHandler<T, TRef>(uri)?.Ref(Uri.UnescapeDataString(uri.Segments[1]));
         return reference != null;
     }
 
@@ -187,7 +187,7 @@ public static class AppFilesEx
         {
             var uri = new Uri(data);
             if (uri.Segments.Length >= 2 && uri.Host == GetFileHost<T, TRef>())
-                return handler.Resolve(handler.Ref(uri.Segments[1]));
+                return handler.Resolve(handler.Ref(Uri.UnescapeDataString(uri.Segments[1])));
             return handler.Resolve(handler.Ref(data));
         }
         catch
