@@ -96,19 +96,19 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         switch (status.Status)
         {
             case UGCStatus.Corrupted:
-                label = @$"{Resources.Corrupted} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
+                label = @$"{Resources.Corrupted} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()} ({FileSize.Bytes().Humanize()})";
                 xamlClass = @"Missing";
                 break;
             case UGCStatus.Updatable:
-                label = @$"{Resources.UpdateAvailable} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
+                label = @$"{Resources.UpdateAvailable} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()} ({FileSize.Bytes().Humanize()})";
                 xamlClass = @"UpdateAvailable";
                 break;
             case UGCStatus.UpToDate:
-                label = @$"{Resources.UpToDate} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
+                label = @$"{Resources.UpToDate} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()} ({FileSize.Bytes().Humanize()})";
                 xamlClass = @"Up2Date";
                 break;
             default:
-                label = @$"{Resources.Missing} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
+                label = @$"{Resources.Missing} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()} ({FileSize.Bytes().Humanize()})";
                 xamlClass = @"Missing";
                 break;
         }

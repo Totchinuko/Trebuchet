@@ -21,8 +21,8 @@ public class LocalModFile : ReactiveObject, IModFile
         if (fileInfo.Exists)
         {
             StatusClasses.Add(@"Found");
-            LastUpdate = @$"{Resources.Found} - {Resources.LastModified}: {fileInfo.LastWriteTime.Humanize()}";
             FileSize = fileInfo.Length;
+            LastUpdate = @$"{Resources.Found} - {Resources.LastModified}: {fileInfo.LastWriteTime.Humanize()} ({FileSize.Bytes().Humanize()})";
         }
         else
         {

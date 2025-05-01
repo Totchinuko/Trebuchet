@@ -21,7 +21,7 @@ public class UnknownModFile : ReactiveObject, IPublishedModFile
         if (fileInfo.Exists)
         {
             StatusClasses.Add(@"Found");
-            LastUpdate = @$"{Resources.Found} - {Resources.LastModified}: {fileInfo.LastWriteTime.Humanize()}";
+            LastUpdate = @$"{Resources.Found} - {Resources.LastModified}: {fileInfo.LastWriteTime.Humanize()} ({FileSize.Bytes().Humanize()})";
             FileSize = fileInfo.Length;
         }
         else
