@@ -864,7 +864,7 @@ ATTENTION : Ceci peut rendre la détection des processus sans réponse inefficac
         <value>Synchroniser</value>
     </data>
     <data name="RefreshModInfos" xml:space="preserve">
-        <value>Rafraîchir les données de mods</value>
+        <value>2</value>
     </data>
     <data name="Servers" xml:space="preserve">
         <value>Serveurs</value>
@@ -975,5 +975,68 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     </data>
     <data name="SettingExperimentsText" xml:space="preserve">
         <value>Active les fonctions expérimental de Trebuchet, qui ne sont pas forcement stable ou finie.</value>
+    </data>
+    <data name="WatermarkServerIp" xml:space="preserve">
+        <value>Adresse IP</value>
+    </data>
+    <data name="WatermarkServerPort" xml:space="preserve">
+        <value>Port</value>
+    </data>
+    <data name="WatermarkServerPassword" xml:space="preserve">
+        <value>Mot de pass</value>
+    </data>
+    <data name="TooltipServerAutoConnect" xml:space="preserve">
+        <value>Connection automatique au serveur. Ajoutez l'adresse Ip, le port and le mot de pass, pour vous connecter automatiquement au lancement du jeu. (Optionnel)</value>
+    </data>
+    <data name="Connect" xml:space="preserve">
+        <value>Connecter</value>
+    </data>
+    <data name="Rename" xml:space="preserve">
+        <value>Renommer</value>
+    </data>
+    <data name="Export" xml:space="preserve">
+        <value>Exporter</value>
+    </data>
+    <data name="Import" xml:space="preserve">
+        <value>Importer</value>
+    </data>
+    <data name="Open" xml:space="preserve">
+        <value>Ouvrir</value>
+    </data>
+    <data name="Refresh" xml:space="preserve">
+        <value>Rafraichir</value>
+    </data>
+    <data name="Edit" xml:space="preserve">
+        <value>Editer</value>
+    </data>
+    <data name="SyncText" xml:space="preserve">
+        <value>Synchroniser votre mod liste soit avec un collection Steam, soit avec un fichier Json compatible (Exporté avec Trebuchet). Cela remplacera votre liste.</value>
+    </data>
+    <data name="Save" xml:space="preserve">
+        <value>Enregistrer</value>
+    </data>
+    <data name="Corrupted" xml:space="preserve">
+        <value>Corrompu</value>
+    </data>
+    <data name="Name" xml:space="preserve">
+        <value>Nom</value>
+    </data>
+    <data name="PanelClientConnections" xml:space="preserve">
+        <value>Connections Client</value>
+    </data>
+    <data name="Add" xml:space="preserve">
+        <value>Ajouter</value>
+    </data>
+    <data name="PanelSync" xml:space="preserve">
+        <value>Synchroniser</value>
+    </data>
+    <data name="DropPakLabel" xml:space="preserve">
+        <value>Déposez des fichiers .pak pour ajouter à votre list</value>
+    </data>
+    <data name="PopOut" xml:space="preserve">
+        <value>Détacher</value>
+    </data>
+    <data name="Dock" xml:space="preserve">
+        <value>Attacher</value>
     </data>
 </root>

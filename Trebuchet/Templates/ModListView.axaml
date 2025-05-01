@@ -1,0 +1,10 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="ModListView" x:DataType="vm:ModListViewModel">
+        <DockPanel LastChildFill="True">
+            <ProgressBar DockPanel.Dock="Top" IsIndeterminate="True" IsVisible="{Binding IsLoading}" Margin="0 0 0 12" />
+            <ListBox DockPanel.Dock="Top" Classes.NoSelection="{Binding IsReadOnly}" Classes.draggableVirtualizing="{Binding !IsReadOnly}" SelectionMode="Multiple" ItemsSource="{Binding List}"/>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

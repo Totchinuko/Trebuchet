@@ -5,7 +5,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
     <DataTemplate x:Key="ServerDashboard" x:DataType="viewModels:ServerInstanceDashboard">
-        <Border Grid.Column="1" Classes="Panel" IsVisible="{Binding CanUseDashboard}" Padding="0" Margin="0,0,0,12">
+        <Border Grid.Column="1" Classes="Panel Shadowed" IsVisible="{Binding CanUseDashboard}" Padding="0" Margin="0,0,0,12">
             <Border.Styles>
                 <Style Selector="TextBlock.ProcessName">
                     <Setter Property="Foreground" Value="{DynamicResource TForeground}" />

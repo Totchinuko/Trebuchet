@@ -57,12 +57,6 @@ namespace TrebuchetLib
                 Array.Resize(ref _selectedServerProfiles, instance + 1);
             SelectedServerProfiles[instance] = profile;
         }
-        
-        public void GetInstanceParameters(int instance, out string modlist, out string profile)
-        {
-            modlist = GetInstanceModlist(instance);
-            profile = GetInstanceProfile(instance);
-        }
 
         public string GetInstanceModlist(int instance)
         {

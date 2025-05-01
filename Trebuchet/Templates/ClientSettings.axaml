@@ -6,44 +6,40 @@
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="ClientSettings" x:DataType="p:ClientProfilePanel">
         <DockPanel LastChildFill="True">
-            <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0 0 0 12">
-                <Border Classes="Panel" Padding="8" Margin="0 0 6 6">
-                    <StackPanel Spacing="6" Orientation="Horizontal">
-                        <Button Command="{Binding CreateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Create}">
-                            <i:Icon Value="mdi-plus-box" Classes="Normal"/>
-                        </Button>
-                        <c:ComboBox ItemsSource="{Binding Profiles}" SelectedItem="{Binding SelectedProfile}" MinWidth="250" />
-                        <Button Command="{Binding DeleteProfileCommand}" Classes="Base Red" ToolTip.Tip="{x:Static a:Resources.Delete}">
-                            <i:Icon Value="mdi-delete" Classes="Normal"/>
-                        </Button>
-                        <Button Command="{Binding DuplicateProfileCommand}" Classes="Base Green" ToolTip.Tip="{x:Static a:Resources.Duplicate}">
-                            <i:Icon Value="mdi-content-copy" Classes="Normal"/>
-                        </Button>
-                        <Button Command="{Binding OpenFolderProfileCommand}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.OpenSaveFolder}">
-                            <i:Icon Value="mdi-folder-open" Classes="Normal" />
-                        </Button>
-                    </StackPanel>
-                </Border>
-                <Border Classes="Panel" Padding="8" Margin="0 0 6 6">
-                    <ToolTip.Tip>
-                        <TextBlock TextWrapping="Wrap" Text="{x:Static a:Resources.SaveSizeTip}" />
-                    </ToolTip.Tip>
-                    <TextBlock TextAlignment="Center">
-                        <Run Text="{x:Static a:Resources.SaveSize}" FontWeight="Bold" />
-                        <LineBreak />
-                        <Run Text="{Binding ProfileSize}" />
-                    </TextBlock>
-                </Border>
-            </WrapPanel>
-            <ScrollViewer DockPanel.Dock="Top" AllowAutoHide="False" Padding="0 0 12 0">
-                <ItemsControl ItemsSource="{Binding Fields}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <VirtualizingStackPanel />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                </ItemsControl>
-            </ScrollViewer>
+            <Border DockPanel.Dock="Left" BorderThickness="0 0 1 0" Width="210" BorderBrush="{DynamicResource TPanelAccent}">
+                <ContentControl Content="{Binding FileMenu}" />
+            </Border>
+            <Border DockPanel.Dock="Top" Classes="Toolbar" Padding="0">
+                <DockPanel LastChildFill="False">
+                    <Border DockPanel.Dock="Right" Padding="6" BorderBrush="{DynamicResource TPanelAccent}" BorderThickness="1 0 0 0" Background="Transparent">
+                        <ToolTip.Tip>
+                            <TextBlock TextWrapping="Wrap" Text="{x:Static a:Resources.SaveSizeTip}" />
+                        </ToolTip.Tip>
+                        <StackPanel VerticalAlignment="Center" Orientation="Vertical" Spacing="3">
+                            <i:Icon Value="mdi-weight" Classes="Normal" />
+                            <TextBlock TextAlignment="Center" Text="{Binding ProfileSize}"/>
+                        </StackPanel>
+                    </Border>
+                </DockPanel>
+            </Border>
+            <TabControl DockPanel.Dock="Top">
+                <TabItem Header="{x:Static a:Resources.PanelSettings}">
+                    <ScrollViewer>
+                        <ItemsControl ItemsSource="{Binding Fields}" ClipToBounds="False">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </TabItem>
+                <TabItem Header="{x:Static a:Resources.PanelClientConnections}">
+                    <ScrollViewer>
+                        <ContentControl Content="{Binding ClientConnectionList}" />
+                    </ScrollViewer>
+                </TabItem>
+            </TabControl>
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

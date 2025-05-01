@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics;
-using System.Text;
+using System.Net;
 using Microsoft.Extensions.Logging;
 using tot_lib;
 using TrebuchetLib.Processes;
@@ -26,25 +26,18 @@ public class Launcher(
         _serverProcesses.Clear();
     }
 
-    public async Task CatapultClient(bool isBattleEye)
+    public async Task CatapultClient(bool isBattleEye, ClientConnectionRef? autoConnect)
     {
-        var profile = setup.Config.SelectedClientProfile;
-        var modlist = setup.Config.SelectedClientModlist;
-        await CatapultClient(profile, modlist, isBattleEye);
+        var profile = appFiles.Client.Resolve(setup.Config.SelectedClientProfile);
+        var modlist = appFiles.ResolveModList(setup.Config.SelectedClientModlist);
+        await CatapultClient(profile, modlist, isBattleEye, autoConnect);
     }
 
-    public async Task CatapultClientBoulder(bool isBattleEye)
+    public async Task<Process> CatapultClientProcess(bool isBattleEye, ClientConnectionRef? autoConnect)
     {
-        var profile = setup.Config.SelectedClientProfile;
-        var modlist = setup.Config.SelectedClientModlist;
-        await CatapultClientBoulder(profile, modlist, isBattleEye);
-    }
-
-    public async Task<Process> CatapultClientProcess(bool isBattleEye)
-    {
-        var profile = setup.Config.SelectedClientProfile;
-        var modlist = setup.Config.SelectedClientModlist;
-        return await CatapultClientProcess(profile, modlist, isBattleEye);
+        var profile = appFiles.Client.Resolve(setup.Config.SelectedClientProfile);
+        var modlist = appFiles.ResolveModList(setup.Config.SelectedClientModlist);
+        return await CatapultClientProcess(profile, modlist, isBattleEye, autoConnect);
     }
 
     /// <summary>
@@ -54,84 +47,54 @@ public class Launcher(
     /// <param name="profileName"></param>
     /// <param name="modlistName"></param>
     /// <param name="isBattleEye">Launch with BattlEye anti cheat.</param>
+    /// <param name="autoConnect">Launch and try to connect to a server automatically</param>
     /// <exception cref="FileNotFoundException"></exception>
     /// <exception cref="ArgumentException">
     ///     Profiles can only be used by one process at a times, since they contain the db of
     ///     the game.
     /// </exception>
-    public async Task CatapultClient(string profileName, string modlistName, bool isBattleEye)
+    public async Task CatapultClient(ClientProfileRef profileName, IPRefWithModList modlistName, bool isBattleEye, ClientConnectionRef? autoConnect)
     {
         if (_conanClientProcess != null) return;
 
-        var process = await CatapultClientProcess(profileName, modlistName, isBattleEye);
+        var process = await CatapultClientProcess(profileName, modlistName, isBattleEye, autoConnect);
 
         _conanClientProcess = await processFactory.Create().SetProcess(process).BuildClient();
     }
-    
-    public async Task CatapultClientBoulder(string profile, string modlist, bool battleEye)
-    {
-        if (_conanClientProcess != null) return;
-        var data = new Dictionary<string, object>
-        {
-            {@"profile", profile},
-            {"modlist", modlist},
-            {"isBattleEye", battleEye}
-        };
-        using var scope = logger.BeginScope(data);
-        logger.LogInformation("Launching Boulder");
-        
-        string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-        if (appFolder is null) throw new IOException("Can't access app folder");
-        var boulder = Path.Combine(appFolder, Constants.BoulderExe);
-        if (!File.Exists(boulder)) throw new IOException("boulder not found");
 
-        var args = new List<string>
-        {
-            Constants.cmdBoulderLambClient,
-            $"{Constants.argBoulderSave} \"{profile}\"",
-            $"{Constants.argBoulderModlist} \"{modlist}\""
-        };
-        if(battleEye)
-            args.Add(Constants.argBoulderBattleEye);
-        
-        Process startProcess = new();
-        startProcess.StartInfo = new ProcessStartInfo
-        {
-            Arguments = string.Join(' ', args),
-            FileName = boulder,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true
-        };
-        startProcess.Start();
-        await startProcess.WaitForExitAsync();
-    }
-
-    public async Task<Process> CatapultClientProcess(string profileName, string modlistName, bool isBattleEye)
+    public async Task<Process> CatapultClientProcess(ClientProfileRef profileRef, IPRefWithModList modListRef, bool isBattleEye, ClientConnectionRef? autoConnect)
     {
         var data = new Dictionary<string, object>
         {
-            {@"profile", profileName},
-            {"modlist", modlistName},
+            {@"profile", profileRef},
+            {"modlist", modListRef},
             {"isBattleEye", isBattleEye}
         };
+        if (autoConnect is not null)
+            data["autoConnect"] = autoConnect.Connection;
+        
         using var scope = logger.BeginScope(data);
         logger.LogInformation("Launching");
         
-        if (!appFiles.Client.TryGet(profileName, out var profile))
-            throw new TrebException($"{profileName} profile not found.");
-        if (!appFiles.Mods.TryGet(modlistName, out var modlist))
-            throw new TrebException($"{modlistName} modlist not found.");
-        if (IsClientProfileLocked(profileName))
-            throw new TrebException($"Profile {profileName} folder is currently locked by another process.");
+        if (!appFiles.Client.TryGet(profileRef, out var profile))
+            throw new TrebException($"{profileRef} profile not found.");
+        if (!modListRef.TryGetModList(out var modList))
+            throw new TrebException($"{modListRef} modlist not found.");
+        if (IsClientProfileLocked(profileRef))
+            throw new TrebException($"Profile {profileRef} folder is currently locked by another process.");
 
-        SetupJunction(appFiles.Client.GetPrimaryJunction(), profile.ProfileFolder);
+        SetupJunction(setup.GetPrimaryJunction(), profile.ProfileFolder);
 
         await iniHandler.WriteClientSettingsAsync(profile);
-        var process = await CreateClientProcess(profile, modlist, isBattleEye);
+        
+        if (autoConnect is not null && autoConnect.TryGet(out var connection))
+        {
+            if (!IsAutoConnectInfoValid(connection))
+                throw new Exception("Auto connection address is invalid");
+            await iniHandler.WriteClientLastConnection(connection);
+        }
+        
+        var process = await CreateClientProcess(profile, modList, isBattleEye, autoConnect is not null);
 
         process.Start();
 
@@ -144,12 +107,19 @@ public class Launcher(
         return childProcess;
     }
 
-    private async Task<Process> CreateClientProcess(ClientProfile profile, ModListProfile modlist, bool isBattleEye)
+    private bool IsAutoConnectInfoValid(ClientConnection connection)
     {
-        var filename = isBattleEye ? appFiles.Client.GetBattleEyeBinaryPath() : appFiles.Client.GetGameBinaryPath();
+        if (!IPAddress.TryParse(connection.IpAddress, out _)) return false;
+        if (connection.Port is < 0 or > 65535) return false;
+        return true;
+    }
+
+    private async Task<Process> CreateClientProcess(ClientProfile profile, IEnumerable<string> modList, bool isBattleEye, bool autoConnect)
+    {
+        var filename = setup.GetBinFile(isBattleEye);
         var modlistFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modlistFile, appFiles.Mods.GetResolvedModlist(modlist.Modlist));
-        var args = profile.GetClientArgs(modlistFile);
+        await File.WriteAllLinesAsync(modlistFile, appFiles.Mods.ResolveMods(modList));
+        var args = profile.GetClientArgs(modlistFile, autoConnect);
 
         var dir = Path.GetDirectoryName(filename);
         if (dir == null)
@@ -212,22 +182,15 @@ public class Launcher(
 
     public async Task CatapultServer(int instance)
     {
-        var profile = setup.Config.GetInstanceProfile(instance);
-        var modlist = setup.Config.GetInstanceModlist(instance);
+        var profile = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(instance));
+        var modlist = appFiles.ResolveModList(setup.Config.GetInstanceModlist(instance));
         await CatapultServer(profile, modlist, instance);
-    }
-    
-    public async Task CatapultServerBoulder(int instance)
-    {
-        var profile = setup.Config.GetInstanceProfile(instance);
-        var modlist = setup.Config.GetInstanceModlist(instance);
-        await CatapultServerBoulder(profile, modlist, instance);
     }
 
     public async Task<Process> CatapultServerProcess(int instance)
     {
-        var profile = setup.Config.GetInstanceProfile(instance);
-        var modlist = setup.Config.GetInstanceModlist(instance);
+        var profile = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(instance));
+        var modlist = appFiles.ResolveModList(setup.Config.GetInstanceModlist(instance));
         return await CatapultServerProcess(profile, modlist, instance);
     }
     
@@ -236,18 +199,18 @@ public class Launcher(
     ///     Process is created on a separate thread, and fire the event ServerProcessStarted when the process is running.
     /// </summary>
     /// <param name="profileName"></param>
-    /// <param name="modlistName"></param>
+    /// <param name="listRef"></param>
     /// <param name="instance">Index of the instance you want to launch</param>
     /// <exception cref="FileNotFoundException"></exception>
     /// <exception cref="ArgumentException">
     ///     Profiles can only be used by one process at a times, since they contain the db of
     ///     the game.
     /// </exception>
-    public async Task CatapultServer(string profileName, string modlistName, int instance)
+    public async Task CatapultServer(ServerProfileRef profileName, IPRefWithModList listRef, int instance)
     {
         if (_serverProcesses.ContainsKey(instance)) return;
 
-        var process = await CatapultServerProcess(profileName, modlistName, instance);
+        var process = await CatapultServerProcess(profileName, listRef, instance);
         var profile = appFiles.Server.Get(profileName);
 
         var builder = processFactory.Create()
@@ -261,53 +224,12 @@ public class Launcher(
         _serverProcesses.TryAdd(instance, await builder.BuildServer());
     }
     
-    public async Task CatapultServerBoulder(string profile, string modlist, int instance)
-    {
-        if (_serverProcesses.ContainsKey(instance)) return;
-        var data = new Dictionary<string, object>
-        {
-            {@"profile", profile},
-            {"modlist", modlist},
-            {"instance", instance}
-        };
-        using var scope = logger.BeginScope(data);
-        logger.LogInformation("Launching Boulder");
-        
-        string? appFolder = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory);
-        if (appFolder is null) throw new IOException("Can't access app folder");
-        var boulder = Path.Combine(appFolder, Constants.BoulderExe);
-        if (!File.Exists(boulder)) throw new IOException("boulder not found");
-
-        var args = new List<string>
-        {
-            Constants.cmdBoulderLambServer,
-            $"{Constants.argBoulderSave} \"{profile}\"",
-            $"{Constants.argBoulderInstance} {instance}",
-            $"{Constants.argBoulderModlist} \"{modlist}\""
-        };
-
-        Process startProcess = new();
-        startProcess.StartInfo = new()
-        {
-            Arguments = string.Join(' ', args),
-            FileName = boulder,
-            UseShellExecute = false,
-            CreateNoWindow = true,
-            StandardOutputEncoding = Encoding.UTF8,
-            StandardErrorEncoding = Encoding.UTF8,
-            RedirectStandardError = true,
-            RedirectStandardOutput = true
-        };
-        startProcess.Start();
-        await startProcess.WaitForExitAsync();
-    }
-
-    public async Task<Process> CatapultServerProcess(string profileName, string modlistName, int instance)
+    public async Task<Process> CatapultServerProcess(ServerProfileRef profileName, IPRefWithModList listRef, int instance)
     {
         var data = new Dictionary<string, object>
         {
             {@"profile", profileName},
-            {"modlist", modlistName},
+            {"modlist", listRef.Uri.OriginalString},
             {"instance", instance}
         };
         using var scope = logger.BeginScope(data);
@@ -315,16 +237,16 @@ public class Launcher(
         
         if (!appFiles.Server.TryGet(profileName, out var profile))
             throw new FileNotFoundException($"{profileName} profile not found.");
-        if (!appFiles.Mods.TryGet(modlistName, out var modlist))
-            throw new FileNotFoundException($"{modlistName} modlist not found.");
+        if (!listRef.TryGetModList(out var list))
+            throw new FileNotFoundException($"{listRef} modlist not found.");
         if (IsServerProfileLocked(profileName))
             throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(Path.Combine(appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave), 
+        SetupJunction(Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave), 
             profile.ProfileFolder);
 
         await iniHandler.WriteServerSettingsAsync(profile, instance);
-        var process = await CreateServerProcess(instance, profile, modlist);
+        var process = await CreateServerProcess(instance, profile, list);
         process.Start();
 
         var childProcess = await CatchServerChildProcess(process);
@@ -336,14 +258,14 @@ public class Launcher(
         return childProcess;
     }
 
-    private async Task<Process> CreateServerProcess(int instance, ServerProfile profile, ModListProfile modlist)
+    private async Task<Process> CreateServerProcess(int instance, ServerProfile profile, IEnumerable<string> modlist)
     {
         var process = new Process();
 
-        var filename = appFiles.Server.GetIntanceBinary(instance);
+        var filename = setup.GetIntanceBinary(instance);
         
         var modfileFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modfileFile, appFiles.Mods.GetResolvedModlist(modlist.Modlist));
+        await File.WriteAllLinesAsync(modfileFile, appFiles.Mods.ResolveMods(modlist));
         
         var args = profile.GetServerArgs(instance, modfileFile);
 
@@ -463,7 +385,7 @@ public class Launcher(
             await _conanClientProcess.RefreshAsync();
         foreach (var process in _serverProcesses.Values)
         {
-            var name = setup.Config.GetInstanceProfile(process.Instance);
+            var name = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(process.Instance));
             if (appFiles.Server.Exists(name))
             {
                 var profile = appFiles.Server.Get(name);
@@ -493,10 +415,10 @@ public class Launcher(
         var processes = await Tools.GetProcessesWithName(Constants.FileServerBin);
         foreach (var p in processes)
         {
-            if (!appFiles.Server.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
+            if (!setup.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
-            var gameLogs = Path.Combine(appFiles.Server.GetInstancePath(instance),
+            var gameLogs = Path.Combine(setup.GetInstancePath(instance),
                 Constants.FolderGameSave,
                 Constants.FolderGameSaveLog,
                 Constants.FileGameLogFile);
@@ -554,7 +476,7 @@ public class Launcher(
             {
                 logger.LogInformation("Server {instance} stopped", server.Key);
                 _serverProcesses.Remove(server.Key);
-                var name = setup.Config.GetInstanceProfile(server.Key);
+                var name = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(server.Key));
                 if (server.Value.State == ProcessState.CRASHED && appFiles.Server.Get(name).RestartWhenDown)
                 {
                     await ReCatapultServer(server.Key);
@@ -564,17 +486,17 @@ public class Launcher(
         }
     }
 
-    public bool IsClientProfileLocked(string profileName)
+    public bool IsClientProfileLocked(ClientProfileRef profileRef)
     {
         if (_conanClientProcess == null) return false;
         var junction = Path.GetFullPath(GetCurrentClientJunction());
-        var profilePath = Path.GetFullPath(appFiles.Client.GetFolder(profileName));
+        var profilePath = Path.GetFullPath(appFiles.Client.GetDirectory(profileRef));
         return string.Equals(junction, profilePath, StringComparison.Ordinal);
     }
 
-    public bool IsServerProfileLocked(string profileName)
+    public bool IsServerProfileLocked(ServerProfileRef profileRef)
     {
-        var profilePath = Path.GetFullPath(appFiles.Server.GetFolder(profileName));
+        var profilePath = Path.GetFullPath(appFiles.Server.GetDirectory(profileRef));
         foreach (var s in _serverProcesses.Values)
         {
             var instance = s.Instance;
@@ -588,7 +510,7 @@ public class Launcher(
 
     private string GetCurrentClientJunction()
     {
-        var path = Path.Combine(appFiles.Client.GetClientFolder(), Constants.FolderGameSave);
+        var path = Path.Combine(setup.GetClientFolder(), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;
@@ -596,7 +518,7 @@ public class Launcher(
 
     private string GetCurrentServerJunction(int instance)
     {
-        var path = Path.Combine(appFiles.Server.GetInstancePath(instance), Constants.FolderGameSave);
+        var path = Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;

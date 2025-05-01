@@ -60,6 +60,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Add.
+        /// </summary>
+        public static string Add {
+            get {
+                return ResourceManager.GetString("Add", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Add local mods.
         /// </summary>
         public static string AddLocalMod {
@@ -267,6 +276,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Connect.
+        /// </summary>
+        public static string Connect {
+            get {
+                return ResourceManager.GetString("Connect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Corrupted.
+        /// </summary>
+        public static string Corrupted {
+            get {
+                return ResourceManager.GetString("Corrupted", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CPU.
         /// </summary>
         public static string CPU_CentralProcessorUnit {
@@ -339,11 +366,38 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Dock.
+        /// </summary>
+        public static string Dock {
+            get {
+                return ResourceManager.GetString("Dock", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Drop .pak files to add to your list.
+        /// </summary>
+        public static string DropPakLabel {
+            get {
+                return ResourceManager.GetString("DropPakLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Duplicate.
         /// </summary>
         public static string Duplicate {
             get {
                 return ResourceManager.GetString("Duplicate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Edit.
+        /// </summary>
+        public static string Edit {
+            get {
+                return ResourceManager.GetString("Edit", resourceCulture);
             }
         }
         
@@ -407,6 +461,15 @@ namespace Trebuchet.Assets {
         public static string Exit {
             get {
                 return ResourceManager.GetString("Exit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Export.
+        /// </summary>
+        public static string Export {
+            get {
+                return ResourceManager.GetString("Export", resourceCulture);
             }
         }
         
@@ -488,6 +551,15 @@ namespace Trebuchet.Assets {
         public static string GameSave {
             get {
                 return ResourceManager.GetString("GameSave", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Import.
+        /// </summary>
+        public static string Import {
+            get {
+                return ResourceManager.GetString("Import", resourceCulture);
             }
         }
         
@@ -740,6 +812,15 @@ namespace Trebuchet.Assets {
         public static string ModlistSizeTip {
             get {
                 return ResourceManager.GetString("ModlistSizeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Name.
+        /// </summary>
+        public static string Name {
+            get {
+                return ResourceManager.GetString("Name", resourceCulture);
             }
         }
         
@@ -1173,6 +1254,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Open.
+        /// </summary>
+        public static string Open {
+            get {
+                return ResourceManager.GetString("Open", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Open save folder.
         /// </summary>
         public static string OpenSaveFolder {
@@ -1187,6 +1277,15 @@ namespace Trebuchet.Assets {
         public static string OpenWorkshopPage {
             get {
                 return ResourceManager.GetString("OpenWorkshopPage", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Client Connections.
+        /// </summary>
+        public static string PanelClientConnections {
+            get {
+                return ResourceManager.GetString("PanelClientConnections", resourceCulture);
             }
         }
         
@@ -1254,6 +1353,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Synchronize.
+        /// </summary>
+        public static string PanelSync {
+            get {
+                return ResourceManager.GetString("PanelSync", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Toolbox.
         /// </summary>
         public static string PanelToolbox {
@@ -1299,6 +1407,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Pop out.
+        /// </summary>
+        public static string PopOut {
+            get {
+                return ResourceManager.GetString("PopOut", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Refresh.
+        /// </summary>
+        public static string Refresh {
+            get {
+                return ResourceManager.GetString("Refresh", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Refresh mods data.
         /// </summary>
         public static string RefreshModInfos {
@@ -1326,11 +1452,29 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Rename.
+        /// </summary>
+        public static string Rename {
+            get {
+                return ResourceManager.GetString("Rename", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Reset.
         /// </summary>
         public static string Reset {
             get {
                 return ResourceManager.GetString("Reset", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Save.
+        /// </summary>
+        public static string Save {
+            get {
+                return ResourceManager.GetString("Save", resourceCulture);
             }
         }
         
@@ -2640,6 +2784,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Synchronize your mod list with either a Steam collection or a compatible Json file (Exported from Trebuchet). This will replace your list..
+        /// </summary>
+        public static string SyncText {
+            get {
+                return ResourceManager.GetString("SyncText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Test Live.
         /// </summary>
         public static string TestLive {
@@ -2654,6 +2807,15 @@ namespace Trebuchet.Assets {
         public static string TestLiveMod {
             get {
                 return ResourceManager.GetString("TestLiveMod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Auto Connect Information. Add the IP, port and password, in order to launch and connect automatically. (Optional).
+        /// </summary>
+        public static string TooltipServerAutoConnect {
+            get {
+                return ResourceManager.GetString("TooltipServerAutoConnect", resourceCulture);
             }
         }
         
@@ -2906,6 +3068,33 @@ namespace Trebuchet.Assets {
         public static string WatermarkModlistURLTip {
             get {
                 return ResourceManager.GetString("WatermarkModlistURLTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to IP Address.
+        /// </summary>
+        public static string WatermarkServerIp {
+            get {
+                return ResourceManager.GetString("WatermarkServerIp", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Password.
+        /// </summary>
+        public static string WatermarkServerPassword {
+            get {
+                return ResourceManager.GetString("WatermarkServerPassword", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Port.
+        /// </summary>
+        public static string WatermarkServerPort {
+            get {
+                return ResourceManager.GetString("WatermarkServerPort", resourceCulture);
             }
         }
         

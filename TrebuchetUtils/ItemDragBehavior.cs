@@ -13,6 +13,7 @@ using Avalonia.Layout;
 using Avalonia.Media.Transformation;
 using Avalonia.VisualTree;
 using Avalonia.Xaml.Interactivity;
+using DynamicData.Binding;
 using tot_lib;
 
 namespace TrebuchetUtils;
@@ -267,11 +268,15 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
     {
         if (itemsControl is ListBox
             {
-                SelectionMode: SelectionMode.Multiple, 
+                SelectionMode: SelectionMode.Multiple,
                 ItemsSource: IList listSource,
                 SelectedItems.Count: > 1
             } listBox)
         {
+            IDisposable? disposable = null;
+            if (itemsControl.ItemsSource!.Cast<object?>() is ObservableCollectionExtended<object?> observable)
+                disposable = observable.SuspendNotifications();
+            
             var i = 0;
             if (draggedIndex < targetIndex) targetIndex++;
             var indexes = listBox.Selection.SelectedIndexes.ToList();
@@ -297,7 +302,7 @@ public class ItemDragBehavior : StyledElementBehavior<Control>
                 listBox.SelectedIndex = listSource.IndexOf(list.First());
             else
                 listBox.Selection.SelectRange(listSource.IndexOf(list.First()), listSource.IndexOf(list.Last()));
-
+            disposable?.Dispose();
         }
         else if (itemsControl?.ItemsSource is IList itemsSource)
         {

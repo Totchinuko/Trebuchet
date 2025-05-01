@@ -29,21 +29,23 @@
                     </TextBlock>
                 </StackPanel>
             </Button>
-            <Border VerticalAlignment="Center" Height="32" IsVisible="{Binding IsLoading}" MinWidth="400" HorizontalAlignment="Center" CornerRadius="3" Padding="0,0,0,0">
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="auto" />
-                    </Grid.ColumnDefinitions>
-                    <ProgressBar Grid.ColumnSpan="2" IsIndeterminate="{Binding IsIndeterminate}" Minimum="0.0" Maximum="1.0" Height="32" Value="{Binding Progress, Mode=OneWay}" />
-                    <TextBlock Text="{Binding Description}" Margin="6,0,12,0" VerticalAlignment="Center" />
-                    <Button Grid.Column="1"
-                            Classes="Base Sneak Yellow"
+            <Border VerticalAlignment="Center" Margin="32 0 0 0" Height="32" IsVisible="{Binding IsLoading}" MinWidth="450" HorizontalAlignment="Center" CornerRadius="3" Padding="0">
+                <DockPanel LastChildFill="True">
+                    <Button DockPanel.Dock="Right"
+                            Classes="Base Yellow Flat TabLeft"
                             Margin="0"
                             Padding="8,0"
-                            Content="{x:Static a:Resources.Cancel}"
-                            Command="{Binding CancelCommand}" />
-                </Grid>
+                            Command="{Binding CancelCommand}">
+                        <i:Icon Value="mdi-cancel" Classes="Normal" />
+                    </Button>
+                    <Panel DockPanel.Dock="Left">
+                        <ProgressBar IsIndeterminate="{Binding IsIndeterminate}" CornerRadius="3 0 0 3" BorderThickness="0 0 1 0" Minimum="0.0" Maximum="1.0" Height="32" Value="{Binding Progress, Mode=OneWay}" />
+                        <DockPanel LastChildFill="True" Margin="6" VerticalAlignment="Center">
+                            <TextBlock DockPanel.Dock="Right" Text="{Binding ProgressLabel}" FontSize="12" Foreground="{DynamicResource TSubText}" />
+                            <TextBlock DockPanel.Dock="Left" Text="{Binding Description}"/>
+                        </DockPanel>
+                    </Panel>
+                </DockPanel>
             </Border>
         </Grid>
     </DataTemplate>

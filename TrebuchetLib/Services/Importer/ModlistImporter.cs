@@ -5,14 +5,14 @@ namespace TrebuchetLib.Services.Importer;
 public class ModlistImporter
 {
 
-    public ModlistImporter(AppModlistFiles files)
+    public ModlistImporter(AppFiles files)
     {
         _files = files;
         _importers.Add(ImportFormats.Json, new JsonImporter());
-        _importers.Add(ImportFormats.Txt, new PlainTextImporter(files));
+        _importers.Add(ImportFormats.Txt, new PlainTextImporter(files.Mods));
     }
     
-    private readonly AppModlistFiles _files;
+    private readonly AppFiles _files;
     private Dictionary<ImportFormats, ITrebuchetImporter> _importers = [];
 
     public ImportFormats GetFormat(string data)
@@ -24,14 +24,14 @@ public class ModlistImporter
         return ImportFormats.Invalid;
     }
 
-    public string Export(IEnumerable<string> data, ImportFormats format)
+    public string Export(ModListProfile profile, ImportFormats format)
     {
         if (!_importers.TryGetValue(format, out var importer))
             throw new TrebException($"No importer for the given format {format}");
-        return importer.Export(data);
+        return importer.Export(profile);
     }
 
-    public IEnumerable<string> Import(string data)
+    public ModlistExport Import(string data)
     {
         foreach (var importer in _importers.Values)
         {
@@ -45,7 +45,7 @@ public class ModlistImporter
         throw new TrebException("Could not import the provided data with any importers");
     }
 
-    public IEnumerable<string> Import(string data, ImportFormats format)
+    public ModlistExport Import(string data, ImportFormats format)
     {
         if (!_importers.TryGetValue(format, out var importer))
             throw new TrebException($"No importer for the given format {format}");

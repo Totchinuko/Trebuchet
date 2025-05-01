@@ -121,6 +121,25 @@ namespace TrebuchetLib
             Directory.Move(folder, targetFolder);
             FilePath = path;
         }
+        
+        /// <summary>
+        /// Move the file and its parent folder to the specified path
+        /// </summary>
+        /// <param name="path"></param>
+        /// <exception cref="ArgumentException"></exception>
+        /// <exception cref="DirectoryNotFoundException"></exception>
+        /// <exception cref="Exception"></exception>
+        internal void MoveFileTo(string path)
+        {
+            if (string.IsNullOrEmpty(path))
+                throw new ArgumentException("path is invalid");
+
+            if (File.Exists(path))
+                throw new Exception($"{path} already exists");
+
+            File.Move(FilePath, path);
+            FilePath = path;
+        }
 
         /// <summary>
         /// Save the file to disk as Json file
@@ -135,6 +154,22 @@ namespace TrebuchetLib
             Tools.CreateDir(folder);
             File.WriteAllText(FilePath, json);
             OnFileSaved();
+        }
+
+        public static T ImportFile(string json, string path, JsonSerializerOptions? options = null)
+        {
+            T? file = JsonSerializer.Deserialize<T>(json, options != null ? options : _jsonOptions);
+            if (file == null)
+                throw new Exception($"{path} could not be loaded");
+            
+            string content = JsonSerializer.Serialize(file, typeof(T), _jsonOptions);
+            string? folder = Path.GetDirectoryName(path);
+            if (folder == null)
+                throw new Exception($"{path} is an invalid path");
+            Tools.CreateDir(folder);
+            File.WriteAllText(path, content);
+            file.FilePath = path;
+            return file;
         }
 
         /// <summary>

@@ -88,6 +88,7 @@ public partial class App : Application, IApplication
         MainWindow mainWindow = new ();
         var currentWindow = desktop.MainWindow;
         desktop.MainWindow = mainWindow;
+        services.GetRequiredService<AppFiles>().SetupFolders();
         mainWindow.SetApp(services.GetRequiredService<TrebuchetApp>());
         mainWindow.Show();
         currentWindow?.Close();
@@ -184,14 +185,11 @@ public partial class App : Application, IApplication
 
         services.AddLogging(builder => builder.AddSerilog(logger, true));
         
-        services.AddSingleton<AppClientFiles>();
-        services.AddSingleton<AppServerFiles>();
-        services.AddSingleton<AppModlistFiles>();
         services.AddSingleton<AppFiles>();
         services.AddSingleton<ModlistImporter>();
         services.AddSingleton<OnBoarding>();
         services.AddSingleton<IIniGenerator, YuuIniGenerator>();
-        services.AddSingleton<IProgressCallback<double>, Progress>();
+        services.AddSingleton<IProgressCallback<DepotDownloader.Progress>, Progress>();
         services.AddSingleton<Steam>();
         services.AddSingleton<ConanProcessFactory>();
         services.AddSingleton<Launcher>();
@@ -203,9 +201,12 @@ public partial class App : Application, IApplication
         services.AddSingleton<DialogueBox>();
         services.AddSingleton<TrebuchetApp>();
         services.AddTransient<WorkshopSearchViewModel>();
+        services.AddTransient<ModListViewModel>();
+        services.AddTransient<ClientConnectionListViewModel>();
 
-        services.AddSingleton<IPanel, ModlistPanel>();
+        services.AddSingleton<IPanel, ModListPanel>();
         services.AddSingleton<IPanel, ClientProfilePanel>();
+        services.AddSingleton<IPanel, SyncPanel>();
         services.AddSingleton<IPanel, ServerProfilePanel>();
         services.AddSingleton<IPanel, ConsolePanel>();
        

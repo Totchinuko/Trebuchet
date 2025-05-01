@@ -984,4 +984,67 @@ DO NOT place it in your Steam Directory.</value>
     <data name="SettingExperimentsText" xml:space="preserve">
         <value>Unable the experimental features of Trebuchet, which are not always stable or even finished at all.</value>
     </data>
+    <data name="WatermarkServerIp" xml:space="preserve">
+        <value>IP Address</value>
+    </data>
+    <data name="WatermarkServerPort" xml:space="preserve">
+        <value>Port</value>
+    </data>
+    <data name="WatermarkServerPassword" xml:space="preserve">
+        <value>Password</value>
+    </data>
+    <data name="TooltipServerAutoConnect" xml:space="preserve">
+        <value>Server Auto Connect Information. Add the IP, port and password, in order to launch and connect automatically. (Optional)</value>
+    </data>
+    <data name="Connect" xml:space="preserve">
+        <value>Connect</value>
+    </data>
+    <data name="Rename" xml:space="preserve">
+        <value>Rename</value>
+    </data>
+    <data name="Export" xml:space="preserve">
+        <value>Export</value>
+    </data>
+    <data name="Import" xml:space="preserve">
+        <value>Import</value>
+    </data>
+    <data name="Open" xml:space="preserve">
+        <value>Open</value>
+    </data>
+    <data name="Refresh" xml:space="preserve">
+        <value>Refresh</value>
+    </data>
+    <data name="Edit" xml:space="preserve">
+        <value>Edit</value>
+    </data>
+    <data name="SyncText" xml:space="preserve">
+        <value>Synchronize your mod list with either a Steam collection or a compatible Json file (Exported from Trebuchet). This will replace your list.</value>
+    </data>
+    <data name="Save" xml:space="preserve">
+        <value>Save</value>
+    </data>
+    <data name="Corrupted" xml:space="preserve">
+        <value>Corrupted</value>
+    </data>
+    <data name="Name" xml:space="preserve">
+        <value>Name</value>
+    </data>
+    <data name="PanelClientConnections" xml:space="preserve">
+        <value>Client Connections</value>
+    </data>
+    <data name="Add" xml:space="preserve">
+        <value>Add</value>
+    </data>
+    <data name="PanelSync" xml:space="preserve">
+        <value>Synchronize</value>
+    </data>
+    <data name="DropPakLabel" xml:space="preserve">
+        <value>Drop .pak files to add to your list</value>
+    </data>
+    <data name="PopOut" xml:space="preserve">
+        <value>Pop out</value>
+    </data>
+    <data name="Dock" xml:space="preserve">
+        <value>Dock</value>
+    </data>
 </root>

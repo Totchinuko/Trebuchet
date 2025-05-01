@@ -118,7 +118,7 @@ public static class Tools
         return size;
     }
 
-    public static async Task<ModlistExport> DownloadModList(string url, CancellationToken ct)
+    public static async Task<string> DownloadModList(string url, CancellationToken ct)
     {
         if (string.IsNullOrEmpty(url))
             throw new ArgumentException("Sync URL is invalid");
@@ -133,8 +133,7 @@ public static class Tools
         if (response.Content.Headers.ContentType?.MediaType != "application/json")
             throw new Exception("Content was not json.");
 
-        await using var download = await response.Content.ReadAsStreamAsync(ct);
-        return await JsonSerializer.DeserializeAsync<ModlistExport>(download, new JsonSerializerOptions(), ct) ?? new ModlistExport();
+        return await response.Content.ReadAsStringAsync(ct);
     }
 
     [SupportedOSPlatform("windows")]

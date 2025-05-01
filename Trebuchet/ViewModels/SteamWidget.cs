@@ -2,6 +2,7 @@
 using System.Reactive;
 using System.Reactive.Linq;
 using Avalonia.Threading;
+using Humanizer;
 using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
@@ -14,13 +15,14 @@ namespace Trebuchet.ViewModels
         private readonly Steam _steam;
         private string _description = string.Empty;
         private bool _isConnected;
-        private readonly ObservableAsPropertyHelper<bool> _isIndeterminate;
         private double _progressBar;
         private bool _canConnect = true;
         private bool _isLoading;
+        private string _progressLabel = string.Empty;
+        private bool _isIndeterminate;
 
         public SteamWidget(
-            IProgressCallback<double> progress, 
+            IProgressCallback<DepotDownloader.Progress> progress, 
             Steam steam, 
             TaskBlocker taskBlocker)
         {
@@ -44,20 +46,21 @@ namespace Trebuchet.ViewModels
                 .Subscribe((pattern) =>
                 {   
                     Progress = 0;
+                    ProgressLabel = string.Empty;
+                    IsIndeterminate = true;
                     Description = pattern.EventArgs.Toggle ? pattern.EventArgs.Type.Label : string.Empty;
                     IsLoading = pattern.EventArgs.Toggle;
                 });
-                
-            _isIndeterminate = this.WhenAnyValue(x => x.Progress)
-                .Select(x => x == 0.0)
-                .ToProperty(this, x => x.IsIndeterminate);
         }
 
-        private void OnProgressChanged(object? sender, double e)
+        private void OnProgressChanged(object? sender, DepotDownloader.Progress e)
         {
+            if (e.IsFile) return;
             Dispatcher.UIThread.Invoke(() =>
             {
-                Progress = e;
+                Progress = e.Current / (double)e.Total;
+                IsIndeterminate = e.Total == 0;
+                ProgressLabel = $@"{((long)e.Current).Bytes().Humanize()}/{((long)e.Total).Bytes().Humanize()}";
             });
         }
 
@@ -82,12 +85,22 @@ namespace Trebuchet.ViewModels
             set => this.RaiseAndSetIfChanged(ref _isConnected, value);
         }
 
-        public bool IsIndeterminate => _isIndeterminate.Value;
+        public bool IsIndeterminate
+        {
+            get => _isIndeterminate;
+            set => this.RaiseAndSetIfChanged(ref _isIndeterminate, value);
+        }
 
         public double Progress
         {
             get => _progressBar;
             set => this.RaiseAndSetIfChanged(ref _progressBar, value);
+        }
+
+        public string ProgressLabel
+        {
+            get => _progressLabel;
+            set => this.RaiseAndSetIfChanged(ref _progressLabel, value);
         }
 
         public bool CanConnect

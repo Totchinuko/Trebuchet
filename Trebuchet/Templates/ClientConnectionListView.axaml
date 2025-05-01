@@ -1,0 +1,17 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="ClientConnectionListView" x:DataType="vm:ClientConnectionListViewModel">
+        <StackPanel Spacing="12">
+            <Button Classes="Base Green" Command="{Binding AddConnection}" IsVisible="{Binding !IsReadOnly}">
+                <StackPanel Orientation="Horizontal" Spacing="3">
+                    <i:Icon Value="mdi-plus" Classes="Normal" />
+                    <TextBlock Text="{x:Static a:Resources.Add}" />
+                </StackPanel>
+            </Button>
+            <ListBox DockPanel.Dock="Top" Classes.draggableVirtualizing="{Binding !IsReadOnly}" SelectionMode="Multiple" ItemsSource="{Binding List}"/>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

@@ -1,0 +1,102 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="FileMenuView" x:DataType="vm:IFileMenuViewModel">
+        <Border Background="{DynamicResource TPanel}" Padding="0 0 0 0">
+            <DockPanel LastChildFill="True">
+                <StackPanel DockPanel.Dock="Bottom" Classes.Grouped="{Binding Exportable}" Margin="6 6" VerticalAlignment="Center" Orientation="Horizontal" HorizontalAlignment="Center">
+                    <Button Command="{Binding Create}" 
+                            ToolTip.Tip="{x:Static a:Resources.Create}"
+                            Classes="Base Flat Green">
+                        <i:Icon Value="mdi-plus" Classes="Normal" />
+                    </Button>
+                    <Button Command="{Binding Import}" 
+                            Classes="Base Flat" 
+                            ToolTip.Tip="{x:Static a:Resources.Import}"
+                            IsVisible="{Binding Exportable}">
+                        <i:Icon Value="mdi-file-import" Classes="Normal" />
+                    </Button>
+                </StackPanel>
+                <Border Height="50" DockPanel.Dock="Top" BorderThickness="0 0 0 1" Margin="0 0 0 0" BorderBrush="{DynamicResource TPanelAccent}">
+                    <TextBlock Text="{Binding Name}" Margin="6" VerticalAlignment="Center" FontSize="18" />
+                </Border>
+                <Panel>
+                    <Border ZIndex="2" Background="{DynamicResource TDarkPanel}" IsVisible="{Binding IsLoading}">
+                        <ProgressBar IsIndeterminate="True" Width="150" VerticalAlignment="Center" HorizontalAlignment="Center" />
+                    </Border>
+                    <ScrollViewer DockPanel.Dock="Top" Margin="0 12 0 12">
+                        <ItemsControl ItemsSource="{Binding List}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <VirtualizingStackPanel />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="vm:IFileViewModel">
+                                    <Button Name="FileButton" Margin="0 0 0 0" Classes="Base Blue Flat Sharp NoPad"
+                                            Height="30"
+                                            IsPointerOver="{Binding IsOver, Mode=OneWayToSource}"
+                                            HorizontalAlignment="Stretch"
+                                            Command="{Binding Select}"
+                                            Classes.Sneak="{Binding !Selected}"
+                                            Classes.Colored="{Binding Selected}">
+                                        <DockPanel LastChildFill="True" Margin="12 0 0 0">
+                                            <Panel DockPanel.Dock="Right">
+                                                <Button Name="MenuButton" Padding="2" Margin="0" Classes="Base Sneak" Command="{Binding TogglePopup}" IsVisible="{Binding DisplayButton}">
+                                                    <i:Icon Value="mdi-menu" Classes="Normal" />
+                                                </Button>
+                                                <Popup IsLightDismissEnabled="True" Placement="BottomEdgeAlignedLeft" PlacementTarget="MenuButton" MinWidth="150" IsOpen="{Binding IsPopupOpen, Mode=TwoWay}">
+                                                    <Border Classes="BackPanel">
+                                                        <StackPanel>
+                                                            <Button Classes="Base Flat Sneak Sharp" HorizontalAlignment="Stretch" Command="{Binding OpenFolder}">
+                                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                    <i:Icon Value="mdi-folder-open" Classes="Normal" />
+                                                                    <TextBlock Text="{x:Static a:Resources.Open}" />
+                                                                </StackPanel>
+                                                            </Button>
+                                                            <Border Classes="HSeparator" Margin="0" />
+                                                            <Button Classes="Base Flat Sneak Sharp" HorizontalAlignment="Stretch" Command="{Binding Rename}">
+                                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                    <i:Icon Value="mdi-rename" Classes="Normal" />
+                                                                    <TextBlock Text="{x:Static a:Resources.Rename}" />
+                                                                </StackPanel>
+                                                            </Button>
+                                                            <Border Classes="HSeparator" Margin="0" />
+                                                            <Button Classes="Base Flat Sneak Sharp" HorizontalAlignment="Stretch" Command="{Binding Duplicate}">
+                                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                    <i:Icon Value="mdi-content-copy" Classes="Normal" />
+                                                                    <TextBlock Text="{x:Static a:Resources.Duplicate}" />
+                                                                </StackPanel>
+                                                            </Button>
+                                                            <Border Classes="HSeparator" Margin="0"  />
+                                                            <Button Classes="Base Flat Sneak Sharp" HorizontalAlignment="Stretch" Command="{Binding Export}" IsVisible="{Binding Exportable}">
+                                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                    <i:Icon Value="mdi-file-export" Classes="Normal" />
+                                                                    <TextBlock Text="{x:Static a:Resources.Export}" />
+                                                                </StackPanel>
+                                                            </Button>
+                                                            <Border Classes="HSeparator" Margin="0" IsVisible="{Binding Exportable}"  />
+                                                            <Button Classes="Base Flat Sneak Sharp" HorizontalAlignment="Stretch" Command="{Binding Delete}">
+                                                                <StackPanel Orientation="Horizontal" Spacing="6">
+                                                                    <i:Icon Value="mdi-delete" Classes="Normal" />
+                                                                    <TextBlock Text="{x:Static a:Resources.Delete}" />
+                                                                </StackPanel>
+                                                            </Button>
+                                                        </StackPanel>
+                                                    </Border>
+                                                </Popup>
+                                            </Panel>
+                                            <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center" Text="{Binding Name}" Margin="3" />
+                                        </DockPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
+                </Panel>
+            </DockPanel>
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>

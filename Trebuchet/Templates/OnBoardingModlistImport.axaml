@@ -2,6 +2,8 @@
                     xmlns:l="clr-namespace:Trebuchet.ViewModels.InnerContainer"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:e="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="OnBoardingModlistImport" DataType="l:OnBoardingModlistImport">
         <DockPanel LastChildFill="True">
@@ -9,29 +11,50 @@
             <TextBlock DockPanel.Dock="Top" IsVisible="{Binding Description}" Text="{Binding Description}" TextWrapping="Wrap" MaxWidth="550" />
             <TextBlock DockPanel.Dock="Top" Classes="Error" Classes.Hidden="{Binding !IsValid}" Text="{Binding ErrorMessage}" />
             <WrapPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right"  Margin="0 12 0 0">
-                <Button Classes="Base"
-                        Content="{x:Static a:Resources.SaveAs}"
-                        IsVisible="{Binding SaveAsVisible}"
-                        Command="{Binding SaveCommand}"
-                        HotKey="Ctrl+S"
-                        Margin="6" />
+                <StackPanel Classes="Grouped" Orientation="Horizontal">
+                    <Button Classes="Base"
+                            Command="{Binding SaveAsFile}"
+                            HotKey="Ctrl+S">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                            <i:Icon Value="mdi-file" Classes="Normal" />
+                            <TextBlock Text="{x:Static a:Resources.SaveAs}" />
+                        </StackPanel>
+                    </Button>
+                    <Button Classes="Base"
+                            Command="{Binding OpenFile}"
+                            HotKey="Ctrl+O"
+                            Margin="0 0 6 0">
+                        <StackPanel Orientation="Horizontal" Spacing="3">
+                            <i:Icon Value="mdi-open-in-app" Classes="Normal" />
+                            <TextBlock Text="{x:Static a:Resources.Open}" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
                 <Button Classes="Base Green"
-                        Content="{x:Static a:Resources.Append}"
-                        IsVisible="{Binding ImportVisible}"
-                        Command="{Binding AppendCommand}"
-                        Margin="6" />
-                <Button Classes="Base Yellow"
-                        Content="{x:Static a:Resources.ModlistReplace}"
-                        IsVisible="{Binding ImportVisible}"
-                        Command="{Binding ApplyCommand}"
-                        Margin="6" />
+                        Command="{Binding SaveModlist}"
+                        Margin="0 0 6 0">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <i:Icon Value="mdi-content-save" Classes="Normal" />
+                        <TextBlock Text="{x:Static a:Resources.Save}" />
+                    </StackPanel>
+                </Button>
                 <Button Classes="Base"
                         HotKey="Escape"
-                        Content="{x:Static a:Resources.Close}"
                         Command="{Binding CancelCommand}"
-                        Margin="6" />
+                        Margin="0 0 6 0">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <i:Icon Value="mdi-cancel" Classes="Normal" />
+                        <TextBlock Text="{x:Static a:Resources.Cancel}" />
+                    </StackPanel>
+                </Button>
             </WrapPanel>
-            <TextBox DockPanel.Dock="Top" AcceptsReturn="True" Text="{Binding Value}" TextWrapping="Wrap"  />
+            <Border DockPanel.Dock="Top" Classes="DarkPanel">
+                <e:TextEditor ShowLineNumbers="True" LineNumbersForeground="{DynamicResource TSubText}" Padding="8" >
+                    <Interaction.Behaviors>
+                        <vm:DocumentTextBindingBehavior AllowScrollBellowDocument="False" Text="{Binding Value}" />
+                    </Interaction.Behaviors>
+                </e:TextEditor>
+            </Border>
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

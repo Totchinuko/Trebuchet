@@ -11,6 +11,7 @@ using SteamWorksWebAPI.Interfaces;
 using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Assets;
 using Trebuchet.ViewModels;
+using TrebuchetLib;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
@@ -78,15 +79,15 @@ public class SteamApi(
         return results;
     }
 
-    public List<ulong> CheckModsForUpdate(ICollection<(ulong pubId, ulong manifestId)> mods)
+    public List<UGCFileStatus> CheckModsForUpdate(ICollection<(ulong pubId, ulong manifestId)> mods)
     {
         var updated = steam.GetUpdatedUGCFileIDs(mods).ToList();
         
         foreach (var (pubId, _) in mods)
         {
-            string mod = pubId.ToString();
-            if (!appFiles.Mods.ResolveMod(ref mod) && !updated.Contains(pubId))
-                updated.Add(pubId);
+            var mod = pubId.ToString();
+            if (!appFiles.Mods.ResolveMod(ref mod) && updated.All(x => x.PublishedId != pubId))
+                updated.Add(new UGCFileStatus(pubId, UGCStatus.Missing));
         } 
         return updated;
     }
@@ -156,7 +157,7 @@ public class SteamApi(
     public int CountUnusedMods()
     {
         var installedMods = steam.GetUGCFileIdsFromStorage();
-        var usedMods = appFiles.Mods.ListProfiles()
+        var usedMods = appFiles.Mods.GetList()
             .SelectMany(x => appFiles.Mods.Get(x).GetWorkshopMods());
         var count = installedMods.Except(usedMods).Count();
         return count;
@@ -168,7 +169,7 @@ public class SteamApi(
         try
         {
             var installedMods = steam.GetUGCFileIdsFromStorage();
-            var usedMods = appFiles.Mods.ListProfiles()
+            var usedMods = appFiles.Mods.GetList()
                 .SelectMany(x => appFiles.Mods.Get(x).GetWorkshopMods());
             var toRemove = installedMods.Except(usedMods).ToList();
             steam.ClearUGCFileIdsFromStorage(toRemove);
@@ -191,7 +192,7 @@ public class SteamApi(
     }
 
 
-    public IDisposable SetDownloaderProgress(IProgress<double> progress)
+    public IDisposable SetDownloaderProgress(IProgress<DepotDownloader.Progress> progress)
     {
         steam.SetTemporaryProgress(progress);
         return new SteamProgressRestore(steam);

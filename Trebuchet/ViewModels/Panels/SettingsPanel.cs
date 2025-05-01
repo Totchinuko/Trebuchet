@@ -51,7 +51,10 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
         
         this.WhenValueChanged<SettingsPanel, LanguageModel>(x => x.SelectedLanguage, false, () => _langManager.DefaultLanguage)
             .InvokeCommand(ChangeLanguage);
-            
+
+        _foldedMenu = uiConfig.FoldedMenu;
+        ToggleFoldedMenu = ReactiveCommand.CreateFromTask(OnToggleFoldedMenu);
+        
         BuildFields();
     }
     
@@ -63,14 +66,22 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
     private readonly TaskBlocker _blocker;
     private LanguageModel _selectedLanguage;
     private bool _canBeOpened = true;
+    private bool _foldedMenu = false;
 
     public ReactiveCommand<Unit,Unit> SaveConfig { get; }
     public ReactiveCommand<Unit,Unit> SaveUiConfig { get; }
     public ReactiveCommand<Unit, Unit> ChangePlateformTheme { get; }
     public ReactiveCommand<LanguageModel?,Unit> ChangeLanguage { get; }
     public ReactiveCommand<Unit,Unit> RestartProcess { get; }
+    public ReactiveCommand<Unit,Unit> ToggleFoldedMenu { get; }
     public List<FieldElement> Fields { get; } = [];
     public ObservableCollectionExtended<LanguageModel> AvailableLocales { get; } = [];
+
+    public bool FoldedMenu
+    {
+        get => _foldedMenu;
+        set => this.RaiseAndSetIfChanged(ref _foldedMenu, value);
+    }
 
     public LanguageModel SelectedLanguage
     {
@@ -110,7 +121,16 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
         }
     }
 
-    public async Task OnRestartProcess()
+    private async Task OnToggleFoldedMenu()
+    {
+        _uiConfig.FoldedMenu = !_uiConfig.FoldedMenu;
+        _uiConfig.SaveFile();
+
+        FoldedMenu = _uiConfig.FoldedMenu;
+        await OnRequestRefresh();
+    }
+
+    private async Task OnRestartProcess()
     {
         if (_blocker.IsSet<SteamDownload>())
         {

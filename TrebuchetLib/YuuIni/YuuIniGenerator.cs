@@ -3,20 +3,25 @@ using TrebuchetLib.Services;
 
 namespace TrebuchetLib.YuuIni;
 
-public class YuuIniGenerator(AppFiles appFiles, AppSetup setup) : IIniGenerator
+public class YuuIniGenerator(AppSetup setup) : IIniGenerator
 {
     public async Task WriteClientSettingsAsync(ClientProfile profile)
     {
-        await new YuuIniClientFiles(appFiles, setup).WriteIni(profile);
+        await new YuuIniClientFiles(setup).WriteIni(profile);
+    }
+
+    public async Task WriteClientLastConnection(ClientConnection connection)
+    {
+        await new YuuIniClientFiles(setup).WriteLastConnection(connection);
     }
 
     public async Task WriteServerSettingsAsync(ServerProfile profile, int instance)
     {
-        await new YuuIniServerFiles(appFiles).WriteIni(profile, instance);   
+        await new YuuIniServerFiles(setup).WriteIni(profile, instance);   
     }
 
     public Task<ConanServerInfos> GetInfosFromServerAsync(int instance)
     {
-        return new YuuIniServerFiles(appFiles).GetInfosFromIni(instance);
+        return new YuuIniServerFiles(setup).GetInfosFromIni(instance);
     }
 }

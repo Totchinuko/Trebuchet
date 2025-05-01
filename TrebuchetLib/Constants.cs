@@ -31,12 +31,14 @@ public static class Constants
     public const string FolderInstancePattern = "Instance_{0}";
     public const string FolderLive = "Live";
     public const string FolderModlistProfiles = "Modlists";
+    public const string FolderSyncProfiles = "Sync";
     public const string FolderServerInstances = "ServerInstances";
     public const string FolderServerProfiles = "ServerProfiles";
     public const string FolderTestLive = "TestLive";
     public const string FolderWorkshop = "Workshop";
     public const string GameArgsLog = "-log";
     public const string GameArgsModList = "-modlist=\"{0}\"";
+    public const string GameArgsContinueSession = "--continuesession";
     public const string GameArgsUseAllCore = "-useallavailablecores";
     public const string RegexSavedFolder = @"ConanSandbox([\\/]+)Saved";
     public const string ServerArgsMaxPlayers = "-MaxPlayers={0}";
@@ -58,12 +60,19 @@ public static class Constants
     public const string argBoulderSave = "--save";
     public const string argBoulderInstance = "--instance";
     public const string argBoulderModlist = "--modlist";
+    public const string argBoulderAutoConnect = "--auto-connect";
     public const string argBoulderBattleEye = "--battle-eye";
     public const string cmdBoulderLamb = "lamb";
     public const string cmdBoulderLambClient = "lamb client";
     public const string cmdBoulderLambServer = "lamb server";
     
     public const string LogFolder = "logs";
+
+    public const string UriScheme = "trebuchet";
+    public const string UriSyncHost = "sync";
+    public const string UriModListHost = "mods";
+    public const string UriClientHost = "clients";
+    public const string UriServerHost = "servers";
     
     public static string GetConfigPath(bool testlive)
     {

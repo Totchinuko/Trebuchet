@@ -1,0 +1,58 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+                    xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
+    <DataTemplate x:Key="SyncPanelView" x:DataType="p:SyncPanel">
+        <DockPanel LastChildFill="True">
+            <Border DockPanel.Dock="Left" BorderThickness="0 0 1 0" Width="210" BorderBrush="{DynamicResource TPanelAccent}">
+                <ContentControl Content="{Binding FileMenu}" />
+            </Border>
+            <Border DockPanel.Dock="Top" Classes="Toolbar" Padding="6 0 0 0">
+                <DockPanel LastChildFill="True">
+                    <Border DockPanel.Dock="Right" BorderThickness="1 0 0 0" Padding="6" BorderBrush="{DynamicResource TPanelAccent}" Background="Transparent" ToolTip.Tip="{x:Static a:Resources.ModlistSizeTip}">
+                        <StackPanel Spacing="3" VerticalAlignment="Center" HorizontalAlignment="Center">
+                            <i:Icon Value="mdi-weight" Classes="Normal" />
+                            <TextBlock TextAlignment="Center" Text="{Binding ModList.Size}"/>
+                        </StackPanel>
+                    </Border>
+                    <StackPanel DockPanel.Dock="Left" Orientation="Horizontal" Spacing="0">
+                        <Button Margin="0 0 6 0" Command="{Binding RefreshList}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.RefreshModInfos}">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <i:Icon Value="mdi-refresh" Classes="Normal"/>
+                                <TextBlock Text="{x:Static a:Resources.Refresh}" />
+                            </StackPanel>
+                        </Button>
+                        <Button Margin="0 0 6 0" Command="{Binding Update}" Classes="Base Blue" ToolTip.Tip="{x:Static a:Resources.UpdateMods}">
+                            <StackPanel Orientation="Horizontal" Spacing="3">
+                                <i:Icon Value="mdi-update" Classes="Normal"/>
+                                <TextBlock Text="{x:Static a:Resources.Update}" />
+                            </StackPanel>
+                        </Button>
+                        <StackPanel Classes="Grouped" Orientation="Horizontal">
+                            <Button Command="{Binding Sync}" Classes="Base"> 
+                                <StackPanel Orientation="Horizontal" Spacing="3">
+                                    <i:Icon Value="mdi-web-sync" Classes="Normal"/>
+                                    <TextBlock Text="{x:Static a:Resources.Sync}" />
+                                </StackPanel>
+                            </Button>
+                            <Button Command="{Binding SyncEdit}" Classes="Base" ToolTip.Tip="{x:Static a:Resources.UpdateMods}">
+                                <i:Icon Value="mdi-pencil" Classes="Normal"/>
+                            </Button>
+                        </StackPanel>
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <TabControl>
+                <TabItem Header="{x:Static a:Resources.PanelMods}">
+                    <ContentControl Margin="6" Content="{Binding ModList}" />
+                </TabItem>
+                <TabItem Header="{x:Static a:Resources.PanelClientConnections}">
+                    <ContentControl Margin="6" Content="{Binding ClientConnectionList}" />
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

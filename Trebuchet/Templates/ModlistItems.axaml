@@ -4,42 +4,35 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Trebuchet.ViewModels">
     <DataTemplate x:Key="ModlistItems" x:DataType="vm:IModFile">
-        <Border Padding="0 8 8 8">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="3*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition MinWidth="220" Width="2*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <Border Margin="0 0 6 0" ToolTip.Tip="Drag to reorder" Background="Transparent" Cursor="SizeNorthSouth">
-                    <i:Icon Value="mdi-drag-vertical" Foreground="{DynamicResource TPanelAccent}" FontSize="30"  />
-                </Border>
-                <Border Grid.Column="1" Margin="0,0,12,0" ToolTip.Tip="{Binding IconToolTip}" u:Classes.List="{Binding IconClasses}">
-                    <i:Icon Classes="Normal"  />
-                </Border>
-                <TextBlock Grid.Column="2" VerticalAlignment="Center" Text="{Binding Title, Mode=OneWay}" />
-                <Border Grid.Column="3" u:Classes.List="{Binding StatusClasses}" Margin="0,0,12,0">
-                    <TextBlock />
-                </Border>
-                <TextBlock Grid.Column="4" Text="{Binding LastUpdate}" VerticalAlignment="Center" Margin="0,0,12,0" />
-                <ItemsControl Grid.Column="5" ItemsSource="{Binding Actions}">
-                    <ItemsControl.ItemsPanel>
-                        <ItemsPanelTemplate>
-                            <StackPanel Orientation="Horizontal" Spacing="3" />
-                        </ItemsPanelTemplate>
-                    </ItemsControl.ItemsPanel>
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate DataType="vm:ModFileAction">
-                            <Button u:Classes.List="{Binding Classes}" ToolTip.Tip="{Binding Name, Mode=OneWay}" Command="{Binding Action}">
-                                <i:Icon Value="{Binding Icon, Mode=OneWay}" Classes="Normal"/>
-                            </Button>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-            </Grid>
-        </Border>
+        <Panel>
+            <ProgressBar IsVisible="{Binding Progress.IsProgressing}" Minimum="0.0" Maximum="1.0" VerticalAlignment="Stretch" Margin="0 0 0 0" Background="Transparent" Foreground="{DynamicResource TBlueDull}" CornerRadius="3" BorderThickness="0" Value="{Binding Progress.Progress}" IsIndeterminate="{Binding Progress.IsIndeterminate}" />
+            <Border Padding="0 8 8 8">
+                <Grid ColumnDefinitions="Auto, Auto, *, Auto">
+                    <Border Margin="4 0 8 0" u:Classes.List="{Binding StatusClasses}" />
+                    <Border Grid.Column="1" Margin="0,0,12,0" ToolTip.Tip="{Binding IconToolTip}" u:Classes.List="{Binding IconClasses}">
+                        <i:Icon Classes="Normal"  />
+                    </Border>
+                    <StackPanel Grid.Column="2">
+                        <TextBlock Text="{Binding Title, Mode=OneWay}" />
+                        <TextBlock Text="{Binding LastUpdate}" IsVisible="{Binding !Progress.IsProgressing}" Classes="SubText" FontSize="12" />
+                        <TextBlock Text="{Binding Progress.ProgressLabel}" IsVisible="{Binding Progress.IsProgressing}" Classes="SubText" FontSize="12" />
+                    </StackPanel>
+                    <ItemsControl Grid.Column="3" Classes="Grouped" ItemsSource="{Binding Actions}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate DataType="vm:ModFileAction">
+                                <Button u:Classes.List="{Binding Classes}" ToolTip.Tip="{Binding Name, Mode=OneWay}" Command="{Binding Action}">
+                                    <i:Icon Value="{Binding Icon, Mode=OneWay}" Classes="Normal"/>
+                                </Button>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Grid>
+            </Border>
+        </Panel>
     </DataTemplate>
 </ResourceDictionary>

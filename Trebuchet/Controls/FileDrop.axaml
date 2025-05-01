@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:c="using:Trebuchet.Controls"
+             xmlns:a="clr-namespace:Trebuchet.Assets"
+             xmlns:i="https://github.com/projektanker/icons.avalonia"
+             ClipToBounds="False"
+             DragDrop.AllowDrop="True"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Trebuchet.Controls.FileDrop">
+    <Panel>
+        <ContentControl Content="{Binding $parent[c:FileDrop].ControlContent}" ClipToBounds="False" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" />
+        <Border Background="{DynamicResource TDarkPanel}" IsVisible="{Binding $parent[c:FileDrop].DropPanelVisible}">
+            <StackPanel MaxWidth="200" VerticalAlignment="Center" HorizontalAlignment="Center">
+                <i:Icon Value="mdi-file-download" FontSize="60" />
+                <TextBlock Text="{x:Static a:Resources.DropPakLabel}" FontSize="20" FontWeight="Bold" TextWrapping="Wrap" TextAlignment="Center" />
+            </StackPanel>
+        </Border>
+    </Panel>
+</UserControl>

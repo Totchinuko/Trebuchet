@@ -13,10 +13,16 @@ using TrebuchetLib.Processes;
 
 namespace Trebuchet.ViewModels
 {
-    public class ServerInstanceSelectionEventArgs(int instance, string selection) : EventArgs
+    public class ServerInstanceProfileEventArgs(int instance, ServerProfileRef selection) : EventArgs
     {
         public int Instance { get; } = instance;
-        public string Selection { get; } = selection;
+        public ServerProfileRef Selection { get; } = selection;
+    }
+    
+    public class ServerInstanceModListEventArgs(int instance, IPRefWithModList selection) : EventArgs
+    {
+        public int Instance { get; } = instance;
+        public IPRefWithModList Selection { get; } = selection;
     }
     
     public sealed class ServerInstanceDashboard : ReactiveObject
@@ -27,11 +33,11 @@ namespace Trebuchet.ViewModels
         private bool _canKill;
         private bool _canLaunch = true;
         private bool _canUseDashboard;
-        private List<string> _modlists = [];
+        private List<ModListRefViewModel> _modlists = [];
         private bool _processRunning;
-        private List<string> _profiles = [];
-        private string _selectedModlist = string.Empty;
-        private string _selectedProfile = string.Empty;
+        private List<ServerProfileRef> _profiles = [];
+        private ModListRefViewModel? _selectedModlist;
+        private ServerProfileRef? _selectedProfile;
         private List<ulong> _updateNeeded = [];
 
         public ServerInstanceDashboard(int instance, IProcessStats stats, TaskBlocker blocker, DialogueBox box)
@@ -53,16 +59,16 @@ namespace Trebuchet.ViewModels
             UpdateModsCommand = ReactiveCommand.CreateFromTask(OnModUpdate, canDownloadMods);
 
             this.WhenAnyValue(x => x.SelectedModlist)
-                .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnModlistSelected));
+                .InvokeCommand(ReactiveCommand.CreateFromTask<ModListRefViewModel?>(OnModlistSelected));
             this.WhenAnyValue(x => x.SelectedProfile)
-                .InvokeCommand(ReactiveCommand.CreateFromTask<string>(OnProfileSelected));
+                .InvokeCommand(ReactiveCommand.CreateFromTask<ServerProfileRef?>(OnProfileSelected));
         }
 
         public event AsyncEventHandler<int>? LaunchClicked;
         public event AsyncEventHandler<int>? KillClicked;
         public event AsyncEventHandler<int>? CloseClicked;
-        public event AsyncEventHandler<ServerInstanceSelectionEventArgs>? ModlistSelected;
-        public event AsyncEventHandler<ServerInstanceSelectionEventArgs>? ProfileSelected;
+        public event AsyncEventHandler<ServerInstanceModListEventArgs>? ModlistSelected;
+        public event AsyncEventHandler<ServerInstanceProfileEventArgs>? ProfileSelected;
         public event AsyncEventHandler<int>? UpdateClicked;
 
         public bool CanClose
@@ -89,7 +95,7 @@ namespace Trebuchet.ViewModels
             set => this.RaiseAndSetIfChanged(ref _canUseDashboard, value);
         }
 
-        public List<string> Modlists
+        public List<ModListRefViewModel> Modlists
         {
             get => _modlists;
             set => this.RaiseAndSetIfChanged(ref _modlists, value);
@@ -101,19 +107,19 @@ namespace Trebuchet.ViewModels
             set => this.RaiseAndSetIfChanged(ref _processRunning, value);
         }
 
-        public List<string> Profiles
+        public List<ServerProfileRef> Profiles
         {
             get => _profiles;
             set => this.RaiseAndSetIfChanged(ref _profiles, value);
         }
 
-        public string SelectedModlist
+        public ModListRefViewModel? SelectedModlist
         {
             get => _selectedModlist;
             set => this.RaiseAndSetIfChanged(ref _selectedModlist, value);
         }
 
-        public string SelectedProfile
+        public ServerProfileRef? SelectedProfile
         {
             get => _selectedProfile;
             set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
@@ -161,16 +167,16 @@ namespace Trebuchet.ViewModels
                 await LaunchClicked.Invoke(this, Instance);
         }
 
-        private async Task OnProfileSelected(string profile)
+        private async Task OnProfileSelected(ServerProfileRef? profile)
         {
-            if (ProfileSelected is not null)
-                await ProfileSelected.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, profile));
+            if (ProfileSelected is not null && profile is not null)
+                await ProfileSelected.Invoke(this, new ServerInstanceProfileEventArgs(Instance, profile));
         }
 
-        private async Task OnModlistSelected(string modlist)
+        private async Task OnModlistSelected(ModListRefViewModel? modlist)
         {
-            if (ModlistSelected is not null)
-                await ModlistSelected.Invoke(this, new ServerInstanceSelectionEventArgs(Instance, modlist));
+            if (ModlistSelected is not null && modlist is not null)
+                await ModlistSelected.Invoke(this, new ServerInstanceModListEventArgs(Instance, modlist.ModList));
         }
 
         private async Task OnUpdateClicked()
@@ -197,7 +203,7 @@ namespace Trebuchet.ViewModels
 
         private async Task OnModUpdate()
         {
-            if (string.IsNullOrEmpty(SelectedModlist)) return;
+            if (SelectedModlist is null) return;
             await OnUpdateClicked();
         }
 

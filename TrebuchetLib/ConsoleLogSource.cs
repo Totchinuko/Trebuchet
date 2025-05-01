@@ -2,7 +2,7 @@ namespace TrebuchetLib;
 
 public enum ConsoleLogSource
 {
-    RCon,
-    ServerLog,
-    Trebuchet
+    RCon = 0,
+    ServerLog = 1,
+    Trebuchet = 2
 }

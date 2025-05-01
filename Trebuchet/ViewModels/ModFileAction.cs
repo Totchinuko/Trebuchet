@@ -6,11 +6,11 @@ using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels;
 
-public class ModFileAction(string name, [Localizable(false)] string icon, ICommand action, [Localizable(false)] string classes = "Base") : 
+public class ModFileAction(string name, [Localizable(false)] string icon, ICommand action) : 
     ReactiveObject
 {
     public ICommand Action { get; } = action;
     public string Name { get; } = name;
     public string Icon { get; } = icon;
-    public ObservableCollection<string> Classes { get; } = classes.Split(' ').ToObservableCollection();
+    public ObservableCollection<string> Classes { get; } = [@"Base"];
 }

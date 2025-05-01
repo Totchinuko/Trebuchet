@@ -5,32 +5,36 @@
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
     <DataTemplate x:Key="AppSettings" x:DataType="p:SettingsPanel">
-        <ScrollViewer Grid.Row="1" AllowAutoHide="False" Padding="0 0 12 0">
-            <StackPanel>
-                <Border Padding="12" Classes="Panel" Margin="0 0 0 12">
-                    <DockPanel HorizontalAlignment="Stretch" LastChildFill="True">
-                        <ComboBox Width="180" DockPanel.Dock="Right" ItemsSource="{Binding AvailableLocales}" SelectedItem="{Binding SelectedLanguage}">
-                            <ComboBox.ItemTemplate>
-                                <DataTemplate DataType="l:LanguageModel">
-                                    <Label Content="{Binding NativeName}" />
-                                </DataTemplate>
-                            </ComboBox.ItemTemplate>
-                        </ComboBox>
-                        <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center">
-                            <Run Text="{x:Static a:Resources.TranslationAuthors}" />
-                            <Run Text=": " />
-                            <Run Text="{x:Static a:Resources.TranslatorsIdentity}" />
-                        </TextBlock>
-                    </DockPanel>
-                </Border>
-                <ItemsControl ItemsSource="{Binding Fields}">
+        <DockPanel LastChildFill="True">
+            <Border Classes="Toolbar" DockPanel.Dock="Top">
+                <DockPanel HorizontalAlignment="Stretch" LastChildFill="True">
+                    <ComboBox Width="180" DockPanel.Dock="Right" ItemsSource="{Binding AvailableLocales}" SelectedItem="{Binding SelectedLanguage}">
+                        <ComboBox.ItemTemplate>
+                            <DataTemplate DataType="l:LanguageModel">
+                                <Label Content="{Binding NativeName}" />
+                            </DataTemplate>
+                        </ComboBox.ItemTemplate>
+                    </ComboBox>
+                    <Button DockPanel.Dock="Right" Classes="Base Sneak Blue" Margin="0 0 12 0" Command="{Binding ToggleFoldedMenu}" Classes.Colored="{Binding FoldedMenu}">
+                        <i:Icon Value="mdi-menu-open" Classes="Normal" />
+                    </Button>
+                    <TextBlock DockPanel.Dock="Left" VerticalAlignment="Center">
+                        <Run Text="{x:Static a:Resources.TranslationAuthors}" />
+                        <Run Text=": " />
+                        <Run Text="{x:Static a:Resources.TranslatorsIdentity}" />
+                    </TextBlock>
+
+                </DockPanel>
+            </Border>
+            <ScrollViewer DockPanel.Dock="Top">
+                <ItemsControl ItemsSource="{Binding Fields}" ClipToBounds="False">
                     <ItemsControl.ItemsPanel>
                         <ItemsPanelTemplate>
-                            <VirtualizingStackPanel />
+                            <VirtualizingStackPanel Margin="12" />
                         </ItemsPanelTemplate>
                     </ItemsControl.ItemsPanel>
                 </ItemsControl>
-            </StackPanel>
-        </ScrollViewer>
+            </ScrollViewer>
+        </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

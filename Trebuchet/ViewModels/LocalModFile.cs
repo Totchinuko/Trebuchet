@@ -21,13 +21,13 @@ public class LocalModFile : ReactiveObject, IModFile
         if (fileInfo.Exists)
         {
             StatusClasses.Add(@"Found");
-            LastUpdate = @$"{Resources.LastModified}: {fileInfo.LastWriteTime.Humanize()}";
             FileSize = fileInfo.Length;
+            LastUpdate = @$"{Resources.Found} - {Resources.LastModified}: {fileInfo.LastWriteTime.Humanize()} ({FileSize.Bytes().Humanize()})";
         }
         else
         {
             StatusClasses.Add(@"Missing");
-            LastUpdate = string.Empty;
+            LastUpdate = Resources.Missing;
             FileSize = 0;
         }
     }
@@ -40,7 +40,7 @@ public class LocalModFile : ReactiveObject, IModFile
     public string FilePath { get; }
     public long FileSize { get; }
     public ObservableCollection<ModFileAction> Actions { get; } = [];
-
+    public ModProgressViewModel Progress { get; } = new();
     public string Export()
     {
         return FilePath;
