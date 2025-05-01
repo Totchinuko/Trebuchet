@@ -1041,10 +1041,10 @@ DO NOT place it in your Steam Directory.</value>
     <data name="DropPakLabel" xml:space="preserve">
         <value>Drop .pak files to add to your list</value>
     </data>
-    <data name="PopOut" xml:space="preserve">
-        <value>Pop out</value>
-    </data>
     <data name="Dock" xml:space="preserve">
         <value>Dock</value>
+    </data>
+    <data name="Undock" xml:space="preserve">
+        <value>Undock</value>
     </data>
 </root>

@@ -1033,10 +1033,10 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="DropPakLabel" xml:space="preserve">
         <value>Déposez des fichiers .pak pour ajouter à votre list</value>
     </data>
-    <data name="PopOut" xml:space="preserve">
-        <value>Détacher</value>
-    </data>
     <data name="Dock" xml:space="preserve">
         <value>Attacher</value>
+    </data>
+    <data name="Undock" xml:space="preserve">
+        <value>Détacher</value>
     </data>
 </root>

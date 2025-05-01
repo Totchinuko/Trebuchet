@@ -36,7 +36,7 @@
                     <Button Classes="Base" Command="{Binding PopOut}" IsVisible="{Binding !IsPopupedOut}">
                         <StackPanel Orientation="Horizontal" Spacing="3">
                             <i:Icon Value="mdi-application" Classes="Normal" />
-                            <TextBlock Text="{x:Static a:Resources.PopOut}" />
+                            <TextBlock Text="{x:Static a:Resources.Undock}" />
                         </StackPanel>
                     </Button>
                 </StackPanel>

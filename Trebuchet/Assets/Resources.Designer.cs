@@ -1407,15 +1407,6 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Pop out.
-        /// </summary>
-        public static string PopOut {
-            get {
-                return ResourceManager.GetString("PopOut", resourceCulture);
-            }
-        }
-        
-        /// <summary>
         ///   Looks up a localized string similar to Refresh.
         /// </summary>
         public static string Refresh {
@@ -2897,6 +2888,15 @@ namespace Trebuchet.Assets {
         public static string Unavailable {
             get {
                 return ResourceManager.GetString("Unavailable", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Undock.
+        /// </summary>
+        public static string Undock {
+            get {
+                return ResourceManager.GetString("Undock", resourceCulture);
             }
         }
         
