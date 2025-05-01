@@ -22,18 +22,23 @@
                         <TextBlock Text="{x:Static a:Resources.AutoScroll}" />
                     </StackPanel>
                 </Button>
-                <Button Classes="Base Blue TabTop" Classes.Flat="{Binding !DisplayServerLog}" Classes.Colored="{Binding DisplayServerLog}" Command="{Binding ToggleServerLogs}">
-                    <StackPanel Spacing="3" Orientation="Horizontal">
-                        <i:Icon Value="mdi-server" Classes="Normal" />
-                        <TextBlock Text="{x:Static a:Resources.ServerLogs}" />
-                    </StackPanel>
-                </Button>
-                <Button Classes="Base Blue TabTop" Classes.Flat="{Binding !DisplayTrebuchetLog}" Classes.Colored="{Binding DisplayTrebuchetLog}" Command="{Binding ToggleTrebuchetLogs}">
-                    <StackPanel Spacing="3" Orientation="Horizontal">
-                        <i:Icon Value="mdi-rocket" Classes="Normal" />
-                        <TextBlock Text="{x:Static a:Resources.TrebuchetLogs}" />
-                    </StackPanel>
-                </Button>
+                <ItemsControl ItemsSource="{Binding Filters}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" Spacing="6" />
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate DataType="vm:ConsoleLogFilterViewModel">
+                            <Button Classes="Base Blue TabTop" Classes.Flat="{Binding !IsDisplayed}" Classes.Colored="{Binding IsDisplayed}" Command="{Binding Toggle}">
+                                <StackPanel Spacing="3" Orientation="Horizontal">
+                                    <i:Icon Value="{Binding Icon}" Classes="Normal" />
+                                    <TextBlock Text="{Binding Name}" />
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
                 <Button Classes="Base Yellow Flat TabTop" Command="{Binding ClearText}">
                     <StackPanel Spacing="3" Orientation="Horizontal">
                         <i:Icon Value="mdi-broom" Classes="Normal" />

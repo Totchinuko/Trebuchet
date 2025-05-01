@@ -1,6 +1,6 @@
 using System;
 using System.Collections.Generic;
-using System.ComponentModel;
+using System.Linq;
 using System.Net;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -24,15 +24,22 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
 {
     public const int MAX_CHAR = 500000;
     
-    public MixedConsoleViewModel(int instance, InternalLogSink trebuchetLog, ILogger logger)
+    public MixedConsoleViewModel(UIConfig config, int instance, InternalLogSink trebuchetLog, ILogger logger)
     {
         trebuchetLog.LogReceived += OnSinkLogReceived;
         
+        Filters.Add(new ConsoleLogFilterViewModel(config, instance, ConsoleLogSource.ServerLog, Resources.ServerLogs, @"mdi-server"));
+        Filters.Add(new ConsoleLogFilterViewModel(config, instance, ConsoleLogSource.Trebuchet, Resources.TrebuchetLogs, @"mdi-rocket"));
+        
         _instance = instance;
         _logger = logger;
-        _InstanceEqual = Matching.WithProperty<int>(@"instance", p => p == _instance);
+        _instanceEqual = Matching.WithProperty<int>(@"instance", p => p == _instance);
         _hasAnySource = Matching.WithProperty<ConsoleLogSource>(@"TrebSource", _ => true);
-        _canBeDisplayed = Matching.WithProperty<ConsoleLogSource>(@"TrebSource", p => _sources.Contains(p));
+        _canBeDisplayed = Matching.WithProperty<ConsoleLogSource>(@"TrebSource", p => Filters
+            .Where(x => x.IsDisplayed)
+            .Select(x => x.LogSource)
+            .Append(ConsoleLogSource.RCon)
+            .Contains(p));
         _textWriter = new ConsoleWriter(500, MAX_CHAR);
         _textWriter.TextFlushed += OnTextFlushed;
         
@@ -47,21 +54,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         SendCommand = ReactiveCommand.CreateFromTask(OnSendCommand, canSendCommand);
 
         ToggleAutoScroll = ReactiveCommand.Create<Unit>((_) => AutoScroll = !AutoScroll);
-        ToggleServerLogs = ReactiveCommand.Create(() =>
-        {
-            if (!Sources.Contains(ConsoleLogSource.ServerLog)) 
-                Sources.Add(ConsoleLogSource.ServerLog);
-            else Sources.Remove(ConsoleLogSource.ServerLog);
-            DisplayServerLog = Sources.Contains(ConsoleLogSource.ServerLog);
-        });
-        
-        ToggleTrebuchetLogs = ReactiveCommand.Create(() =>
-        {
-            if (!Sources.Contains(ConsoleLogSource.Trebuchet)) 
-                Sources.Add(ConsoleLogSource.Trebuchet);
-            else Sources.Remove(ConsoleLogSource.Trebuchet);
-            DisplayTrebuchetLog = Sources.Contains(ConsoleLogSource.Trebuchet);
-        });
 
         ClearText = ReactiveCommand.Create(() =>
         {
@@ -91,8 +83,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     private bool _canSend;
     private bool _autoScroll = true;
     private string _commandField = string.Empty;
-    private ObservableCollectionExtended<ConsoleLogSource> _sources = [ConsoleLogSource.RCon];
-    private readonly Func<LogEvent, bool> _InstanceEqual;
+    private readonly Func<LogEvent, bool> _instanceEqual;
     private readonly Func<LogEvent, bool> _hasAnySource;
     private readonly Func<LogEvent, bool> _canBeDisplayed;
     private readonly ConsoleWriter _textWriter;
@@ -109,12 +100,8 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     public event EventHandler? TextCleared;
 
     public int MaxChar => MAX_CHAR;
-    
-    private ObservableCollectionExtended<ConsoleLogSource> Sources
-    {
-        get => _sources;
-        set => this.RaiseAndSetIfChanged(ref _sources, value);
-    }
+
+    public ObservableCollectionExtended<ConsoleLogFilterViewModel> Filters { get; } = [];
 
     public IConanServerProcess? Process
     {
@@ -161,8 +148,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
 
     public ReactiveCommand<Unit,Unit> Select { get; }
     public ReactiveCommand<Unit, Unit> SendCommand { get; }
-    public ReactiveCommand<Unit,Unit> ToggleServerLogs { get; }
-    public ReactiveCommand<Unit,Unit> ToggleTrebuchetLogs { get; }
     public ReactiveCommand<Unit,Unit> ToggleAutoScroll { get; }
     public ReactiveCommand<Unit,Unit> ClearText { get; }
 
@@ -189,7 +174,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         {
             if (_hasAnySource(log))
             {
-                if (_InstanceEqual(log) && _canBeDisplayed(log)) 
+                if (_instanceEqual(log) && _canBeDisplayed(log)) 
                     _textFormater.Format(log, _textWriter);
             }
             else if(DisplayTrebuchetLog)
@@ -240,12 +225,6 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         }
     }
 
-    [Localizable(false)]
-    private IEnumerable<string> SplitLines(string input)
-    {
-        return input.Split(["\r\n", "\r", "\n"], StringSplitOptions.None);
-    }
-
     private void OnConsoleSelected()
     {
         ConsoleSelected?.Invoke(this, _instance);
@@ -261,7 +240,7 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
     {
         if(AutoScroll)
             ScrollToHome?.Invoke(this, EventArgs.Empty);
-    }
+    } 
     
     private async Task OnSendCommand()
     {

@@ -1,5 +1,4 @@
 ﻿using System;
-using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
@@ -17,11 +16,13 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
         AppSetup setup, 
         Launcher launcher, 
         InternalLogSink logSink, 
+        UIConfig uiConfig,
         ILogger<ConsolePanel> logger)
     {
         _setup = setup;
         _launcher = launcher;
         _logSink = logSink;
+        _uiConfig = uiConfig;
         _logger = logger;
 
         AdjustConsoleListIfNeeded();
@@ -34,6 +35,7 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
     private readonly AppSetup _setup;
     private readonly Launcher _launcher;
     private readonly InternalLogSink _logSink;
+    private readonly UIConfig _uiConfig;
     private readonly ILogger<ConsolePanel> _logger;
     private MixedConsoleViewModel _console;
     private bool _canBeOpened;
@@ -87,7 +89,7 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
         if (ConsoleList.Count >= count) return;
         for (var i = ConsoleList.Count; i < count; i++)
         {
-            var console = new MixedConsoleViewModel(i, _logSink, _logger);
+            var console = new MixedConsoleViewModel(_uiConfig, i, _logSink, _logger);
             console.ConsoleSelected += OnConsoleSelected;
             ConsoleList.Add(console);
         }
