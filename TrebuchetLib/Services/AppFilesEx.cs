@@ -379,7 +379,8 @@ public static class AppFilesEx
         if (!handler.UseSubFolders)
             return string.Empty;
         return Path.Combine(
-            handler.GetPath(reference),
+            handler.GetBaseFolder(),
+            reference.Name,
             Constants.FolderGameSaveLog,
             Constants.FileGameLogFile
         );
