@@ -60,6 +60,7 @@ public class ModListViewModel : ReactiveObject
     private readonly DialogueBox _dialogueBox;
     private string _size = string.Empty;
     private bool _isReadOnly;
+    private bool _isLoading;
 
     public event AsyncEventHandler? ModListChanged;
     
@@ -75,6 +76,12 @@ public class ModListViewModel : ReactiveObject
     {
         get => _isReadOnly;
         set => this.RaiseAndSetIfChanged(ref _isReadOnly, value);
+    }
+
+    public bool IsLoading
+    {
+        get => _isLoading;
+        set => this.RaiseAndSetIfChanged(ref _isLoading, value);
     }
 
     internal async Task SetReadOnly()
@@ -142,7 +149,9 @@ public class ModListViewModel : ReactiveObject
         if (IsReadOnly) return;
         if (List.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
         _logger.LogInformation(@"Adding mod {mod} from workshop", mod.PublishedFileId);
+        IsLoading = true;
         List.Add((await _modFileFactory.Create(mod)).SetActions(RemoveModFile, UpdateModFile).Build());
+        IsLoading = false;
         Size = CalculateModListSize().Bytes().Humanize();
     }
 
@@ -246,6 +255,7 @@ public class ModListViewModel : ReactiveObject
     public async Task QueryFromWorkshop(IList<IModFile> files, bool readOnly)
     {
         var published = files.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList();
+        IsLoading = true;
         var details = await _steamApi.RequestModDetails(published);
         var statusList = _steamApi.CheckModsForUpdate(details.GetManifestKeyValuePairs().ToList());
         for (var i = 0; i < files.Count; i++)
@@ -265,6 +275,8 @@ public class ModListViewModel : ReactiveObject
                     .SetActions(RemoveModFile, UpdateModFile)
                     .Build();
         }
+
+        IsLoading = false;
     }
     
     [MemberNotNull("_modWatcher")]
