@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
-                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+                    xmlns:c="clr-namespace:Trebuchet.Controls"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="ModlistEditor" x:DataType="p:ModListPanel">
         <DockPanel LastChildFill="True">
@@ -45,7 +45,7 @@
                     </StackPanel>
                 </DockPanel>
             </Border>
-            <ContentControl Margin="6" Content="{Binding ModList}" />
+            <c:FileDrop DockPanel.Dock="Top" Padding="6" DroppedCommand="{Binding DropFiles}" ControlContent="{Binding ModList}" />
         </DockPanel>
     </DataTemplate>
 </ResourceDictionary>

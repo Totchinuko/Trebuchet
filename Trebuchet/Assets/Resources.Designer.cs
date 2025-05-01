@@ -366,6 +366,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Drop .pak files to add to your list.
+        /// </summary>
+        public static string DropPakLabel {
+            get {
+                return ResourceManager.GetString("DropPakLabel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Duplicate.
         /// </summary>
         public static string Duplicate {

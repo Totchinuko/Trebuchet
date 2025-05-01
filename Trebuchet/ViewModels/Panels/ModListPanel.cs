@@ -1,14 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Reactive;
-using System.Threading;
 using System.Threading.Tasks;
-using System.Web;
+using Avalonia.Platform.Storage;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
-using SteamWorksWebAPI;
-using SteamWorksWebAPI.Interfaces;
 using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services.TaskBlocker;
@@ -41,7 +39,7 @@ namespace Trebuchet.ViewModels.Panels
             _importer = importer;
             _workshop = workshop;
             _logger = logger;
-            _workshop.ModAdded += (_,mod) => ModList.AddModFromWorkshop(mod);
+            _workshop.ModAdded += (_,mod) => ModList.Add(mod);
             
             var startingFile = _appFiles.Mods.Resolve(_uiConfig.CurrentModlistProfile);
             FileMenu = new FileMenuViewModel<ModListProfile, ModListProfileRef>(Resources.PanelMods, appFiles.Mods, box, logger);
@@ -53,6 +51,7 @@ namespace Trebuchet.ViewModels.Panels
             Workshop = ReactiveCommand.Create(OnExploreWorkshop);
             EditAsText = ReactiveCommand.CreateFromTask(OnEditModListAsText);
             RefreshList = ReactiveCommand.CreateFromTask(() => ModList.ForceLoadModList(_profile.Modlist));
+            DropFiles = ReactiveCommand.Create<List<IStorageItem>?>(OnDropFiles);
 
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
             Update = ReactiveCommand.CreateFromTask(async () =>
@@ -76,6 +75,7 @@ namespace Trebuchet.ViewModels.Panels
         public ReactiveCommand<Unit, Unit> EditAsText { get; }
         public ReactiveCommand<Unit, Unit> Update { get; }
         public ReactiveCommand<Unit, Unit> RefreshList { get; }
+        public ReactiveCommand<List<IStorageItem>?, Unit> DropFiles { get; }
         
         public FileMenuViewModel<ModListProfile, ModListProfileRef> FileMenu { get; }
         
@@ -105,6 +105,15 @@ namespace Trebuchet.ViewModels.Panels
             if (!_needRefresh) return;
             _needRefresh = false;
             await ModList.SetList(_profile.Modlist);
+        }
+
+        private void OnDropFiles(List<IStorageItem>? files)
+        {
+            if (files is null) return;
+            ModList.AddRange(files
+                .Where(x => x.Path.IsFile && System.IO.Path.GetExtension(x.Path.LocalPath) == @".pak")
+                .Select(x => x.Path.LocalPath)
+            );
         }
         
         private Task OnModListChanged(object? sender, EventArgs args)

@@ -1038,4 +1038,7 @@ DO NOT place it in your Steam Directory.</value>
     <data name="PanelSync" xml:space="preserve">
         <value>Synchronize</value>
     </data>
+    <data name="DropPakLabel" xml:space="preserve">
+        <value>Drop .pak files to add to your list</value>
+    </data>
 </root>

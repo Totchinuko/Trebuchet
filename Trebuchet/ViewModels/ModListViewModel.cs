@@ -137,11 +137,37 @@ public class ModListViewModel : ReactiveObject
         Size = CalculateModListSize().Bytes().Humanize();
     }
     
-    internal async Task AddModFromWorkshop(WorkshopSearchResult mod)
+    public async Task Add(WorkshopSearchResult mod)
     {
+        if (IsReadOnly) return;
         if (List.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
         _logger.LogInformation(@"Adding mod {mod} from workshop", mod.PublishedFileId);
         List.Add((await _modFileFactory.Create(mod)).SetActions(RemoveModFile, UpdateModFile).Build());
+        Size = CalculateModListSize().Bytes().Humanize();
+    }
+
+    public void Add(string file)
+    {
+        if (IsReadOnly) return;
+        _logger.LogInformation(@"Adding mod {file}", file);
+        List.Add(_modFileFactory.Create(file).SetActions(RemoveModFile, UpdateModFile).Build());
+        Size = CalculateModListSize().Bytes().Humanize();
+    }
+
+    public void AddRange(IEnumerable<string> files)
+    {
+        if (IsReadOnly) return;
+        using (List.SuspendNotifications())
+        {
+            foreach (var file in files)
+            {
+                _logger.LogInformation(@"Adding mod {file}", file);
+                List.Add(_modFileFactory
+                    .Create(file)
+                    .SetActions(RemoveModFile, UpdateModFile)
+                    .Build());
+            }
+        }
         Size = CalculateModListSize().Bytes().Humanize();
     }
 
