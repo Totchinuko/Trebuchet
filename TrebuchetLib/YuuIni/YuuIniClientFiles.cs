@@ -47,6 +47,8 @@ public class YuuIniClientFiles(AppSetup setup)
             .SetParameter("LastConnected", $"{connection.IpAddress}:{connection.Port}");
         document.GetSection("SavedServers")
             .SetParameter("LastPassword", connection.Password);
+        document.GetSection("SavedCoopData")
+            .SetParameter("StartedListenServerSession", "False");
         await Tools.SetFileContent(iniPath, document.ToString());
     }
     
