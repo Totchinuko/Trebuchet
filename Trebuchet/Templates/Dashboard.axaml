@@ -17,7 +17,12 @@
                             <TextBlock Text="{x:Static a:Resources.UpdateServers}" />
                         </StackPanel>
                     </Button>
-                    <Button Command="{Binding UpdateAllModsCommand}" Classes="Base Blue" Margin="0,0,6,0">
+                    <Button 
+                        Command="{Binding UpdateAllModsCommand}" 
+                        Classes="Base Blue" 
+                        Classes.Heavy="{Binding AnyModUpdate}"
+                        Classes.Colored="{Binding AnyModUpdate}"
+                        Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <i:Icon Value="mdi-update" Classes="Normal" Margin="0,0,6,0" />
                             <TextBlock Text="{x:Static a:Resources.UpdateAllMods}" />

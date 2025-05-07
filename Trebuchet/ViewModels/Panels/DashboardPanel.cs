@@ -68,6 +68,7 @@ namespace Trebuchet.ViewModels.Panels
         private DateTime _lastUpdateCheck = DateTime.MinValue;
         private bool _canBeOpened;
         private bool _serverUpdateAvailable;
+        private bool _anyModUpdate;
 
         public string Icon => @"mdi-view-dashboard";
         public string Label => Resources.PanelDashboard;
@@ -82,6 +83,12 @@ namespace Trebuchet.ViewModels.Panels
         {
             get => _serverUpdateAvailable;
             set => this.RaiseAndSetIfChanged(ref _serverUpdateAvailable, value);
+        }
+
+        public bool AnyModUpdate
+        {
+            get => _anyModUpdate;
+            set => this.RaiseAndSetIfChanged(ref _anyModUpdate, value);
         }
 
         public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
@@ -113,6 +120,7 @@ namespace Trebuchet.ViewModels.Panels
                     .SelectMany(l => l.GetModsFromList())
                     .Distinct().ToList();
                 await _steamApi.UpdateMods(mods);
+                _lastUpdateCheck = DateTime.MinValue;
                 await OnRequestRefresh();
             }
             catch (Exception tex)
@@ -302,7 +310,6 @@ namespace Trebuchet.ViewModels.Panels
             RefreshClientSelection();
             RefreshServerSelection();
             await RefreshPanel();
-            await CheckModUpdatesAsync();
         }
 
         private void ConfigureClient(ClientInstanceDashboard client)
@@ -390,7 +397,7 @@ namespace Trebuchet.ViewModels.Panels
                 RefreshServerNeededUpdates(dashboard, neededUpdates);
         }
 
-        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<UGCFileStatus> neededUpdates)
+        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, IEnumerable<UGCFileStatus> neededUpdates)
         {
             if (dashboard.SelectedModlist is null)
             {
@@ -422,9 +429,11 @@ namespace Trebuchet.ViewModels.Panels
                     .SelectMany(x => x.GetModsFromList())
                     .Distinct().ToList();
                 var response = await _steamApi.RequestModDetails(mods);
-                var neededUpdates = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList());
+                var neededUpdates = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList())
+                    .Where(x => x.Status != UGCStatus.UpToDate).ToList();
                 RefreshClientNeededUpdates(neededUpdates);
                 RefreshServerNeededUpdates(neededUpdates);
+                AnyModUpdate = neededUpdates.Count > 0;
             }
             catch (Exception tex)
             {
