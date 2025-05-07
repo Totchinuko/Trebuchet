@@ -202,4 +202,17 @@ public class SteamApi(
     {
         return steam.GetInstalledInstances();
     }
+
+    public async Task<bool> CheckServerUpdate()
+    {
+        try
+        {
+            return await steam.GetSteamBuildId() != steam.GetInstanceBuildId(0);
+        }
+        catch(Exception ex)
+        {
+            logger.LogWarning(ex, @"Failed to check server update");
+            return false;
+        }
+    } 
 }

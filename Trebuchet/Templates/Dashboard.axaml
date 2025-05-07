@@ -7,7 +7,11 @@
         <DockPanel LastChildFill="True">
             <Border DockPanel.Dock="Top" Classes="Toolbar">
                 <WrapPanel Orientation="Horizontal">
-                    <Button Command="{Binding UpdateServerCommand}" Classes="Base Blue" Margin="0,0,6,0">
+                    <Button Command="{Binding UpdateServerCommand}" 
+                            Classes="Base Blue" 
+                            Classes.Colored="{Binding ServerUpdateAvailable}" 
+                            Classes.Heavy="{Binding ServerUpdateAvailable}" 
+                            Margin="0,0,6,0">
                         <StackPanel Orientation="Horizontal">
                             <i:Icon Value="mdi-server-network" Classes="Normal" Margin="0,0,6,0" />
                             <TextBlock Text="{x:Static a:Resources.UpdateServers}" />

@@ -67,6 +67,7 @@ namespace Trebuchet.ViewModels.Panels
         private readonly ILogger<DashboardPanel> _logger;
         private DateTime _lastUpdateCheck = DateTime.MinValue;
         private bool _canBeOpened;
+        private bool _serverUpdateAvailable;
 
         public string Icon => @"mdi-view-dashboard";
         public string Label => Resources.PanelDashboard;
@@ -75,6 +76,12 @@ namespace Trebuchet.ViewModels.Panels
         {
             get => _canBeOpened;
             set => this.RaiseAndSetIfChanged(ref _canBeOpened, value);
+        }
+
+        public bool ServerUpdateAvailable
+        {
+            get => _serverUpdateAvailable;
+            set => this.RaiseAndSetIfChanged(ref _serverUpdateAvailable, value);
         }
 
         public bool CanDisplayServers => _setup.Config is { ServerInstanceCount: > 0 };
@@ -125,6 +132,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 await _steamApi.UpdateServers();
                 await RefreshPanel();
+                _lastUpdateCheck = DateTime.MinValue;
             }
             catch (Exception tex)
             {
@@ -235,6 +243,7 @@ namespace Trebuchet.ViewModels.Panels
                     var modlist = dashboard.SelectedModlist.ModList.GetModsFromList().ToList();
                     await _steamApi.UpdateServers();
                     await _steamApi.UpdateMods(modlist);
+                    _lastUpdateCheck = DateTime.MinValue;
                 }
 
                 _setup.Config.SetInstanceParameters(dashboard.Instance, 
@@ -267,6 +276,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _lastUpdateCheck = DateTime.UtcNow;
                 await CheckModUpdatesAsync();
+                ServerUpdateAvailable = await _steamApi.CheckServerUpdate();
             }
         }
 

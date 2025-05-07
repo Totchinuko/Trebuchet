@@ -32,7 +32,7 @@ namespace TrebuchetLib.Services
 
         public event EventHandler? Connected;
         public event EventHandler? Disconnected;
-        public bool IsConnected => _session.steamClient?.IsConnected ?? false;
+        public bool IsConnected => _session.IsLoggedOn;
 
         public void ClearCache()
         {
@@ -89,7 +89,7 @@ namespace TrebuchetLib.Services
         /// <param name="instance"></param>
         /// <returns></returns>
         /// <exception cref="Exception"></exception>
-        public ulong GetInstanceBuildID(int instance)
+        public ulong GetInstanceBuildId(int instance)
         {
             string manifest = Path.Combine(
                 _appSetup.GetInstancePath(instance),
@@ -99,21 +99,31 @@ namespace TrebuchetLib.Services
                 return 0;
 
             string content = File.ReadAllText(manifest);
-            if (!ulong.TryParse(content, out ulong buildID))
+            if (ulong.TryParse(content, out ulong buildID))
                 return buildID;
             return 0;
         }
+
+        public void SetInstanceBuildId(int instance, ulong buildId)
+        {
+            string manifest = Path.Combine(
+                _appSetup.GetInstancePath(instance),
+                Constants.FileBuildID);
+            
+            File.WriteAllText(manifest, buildId.ToString());
+        }
         
-        public uint GetSteam3AppBuildNumber(uint appId, string branch)
+        public async Task<ulong> GetSteam3AppBuildNumber(uint appId)
         {
             UpdateDownloaderConfig();
 
             if (appId == ContentDownloader.INVALID_APP_ID)
                 return 0;
 
+            await _session.RequestAppInfo(appId, true);
             var depots = ContentDownloader.GetSteam3AppSection(appId, EAppInfoSection.Depots);
             var branches = depots["branches"];
-            var node = branches[branch];
+            var node = branches[ContentDownloader.DEFAULT_BRANCH];
 
             if (node == KeyValue.Invalid)
                 return 0;
@@ -130,12 +140,13 @@ namespace TrebuchetLib.Services
         /// Force refresh of the steam app info cache and get the current build id of the server app.
         /// </summary>
         /// <returns></returns>
-        public async Task<uint> GetSteamBuildID()
+        public async Task<uint> GetSteamBuildId()
         {
             UpdateDownloaderConfig();
 
-            if (_session == null)
-                throw new InvalidOperationException("Steam session is not functioning");
+            if (!await WaitSteamConnectionAsync())
+                throw new Exception("Could not connect to steam");
+
             return await Task.Run(async () =>
             {
                 try
@@ -311,6 +322,8 @@ namespace TrebuchetLib.Services
                 {
                     await ContentDownloader.DownloadAppAsync(_appSetup.ServerAppId, [],
                         ContentDownloader.DEFAULT_BRANCH, null, null, null, false, false, cts);
+                    var buildId = await GetSteam3AppBuildNumber(_appSetup.ServerAppId);
+                    SetInstanceBuildId(instanceNumber, buildId);
                 }
                 catch (Exception ex)
                 {
