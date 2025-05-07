@@ -1,10 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Avalonia.Threading;
 using ReactiveUI;
@@ -12,37 +9,23 @@ using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.ViewModels.Panels;
-using TrebuchetLib;
 using TrebuchetLib.Services;
-using TrebuchetUtils;
 
 namespace Trebuchet.ViewModels;
 
-public sealed class TrebuchetApp : ReactiveObject
+public sealed class TrebuchetApp : ReactiveObject, IDisposable
 {
     public static string VersionHeader => ProcessUtil.GetStringVersion();
     
     public TrebuchetApp(
-        AppSetup setup,
-        AppFiles appFiles,
-        Launcher launcher, 
         UIConfig uiConfig,
-        Steam steam, 
-        DialogueBox box,
         SteamWidget steamWidget,
         DialogueBox dialogueBox,
-        OnBoarding onBoarding,
-        IUpdater updater,
+        Operations operations,
         IEnumerable<IPanel> panels)
     {
-        _setup = setup;
-        _appFiles = appFiles;
-        _launcher = launcher;
         _uiConfig = uiConfig;
-        _steam = steam;
-        _box = box;
-        _onBoarding = onBoarding;
-        _updater = updater;
+        _operations = operations;
         _panels = panels.ToList();
         SteamWidget = steamWidget;
         DialogueBox = dialogueBox;
@@ -69,14 +52,8 @@ public sealed class TrebuchetApp : ReactiveObject
         Start();
     }
     
-    private readonly AppSetup _setup;
-    private readonly AppFiles _appFiles;
-    private readonly Launcher _launcher;
     private readonly UIConfig _uiConfig;
-    private readonly Steam _steam;
-    private readonly DialogueBox _box;
-    private readonly OnBoarding _onBoarding;
-    private readonly IUpdater _updater;
+    private readonly Operations _operations;
     private readonly List<IPanel> _panels;
     private readonly DispatcherTimer _timer;
     private PanelTab _activePanel;
@@ -101,23 +78,6 @@ public sealed class TrebuchetApp : ReactiveObject
         
     public DialogueBox DialogueBox { get; }
 
-    public async Task OnWindowShow()
-    {
-        await _steam.Connect();
-    }
-        
-    internal void OnAppClose()
-    {
-        _launcher.Dispose();
-        _steam.Disconnect();
-        _timer.Stop();
-        Task.Run(() =>
-        {
-            while (_steam.IsConnected)
-                Task.Delay(100);
-        }).Wait();
-    }
-
     private async Task OnTabClicked(object? sender, PanelTab tab)
     {
         ActivePanel.Active = false;
@@ -132,7 +92,6 @@ public sealed class TrebuchetApp : ReactiveObject
         try
         {
             _timer.Stop();
-            await _launcher.Tick();
             foreach (var panel in _panels)
                 if(panel is ITickingPanel ticking)
                     await ticking.TickPanel();
@@ -154,7 +113,7 @@ public sealed class TrebuchetApp : ReactiveObject
             if(_activePanel.Panel is IDisplablePanel displayed) 
                 await displayed.DisplayPanel(); 
             await RefreshPanels();
-            await OnBoardingActions();
+            await StartActions();
         }
         catch (OperationCanceledException){}
         catch (Exception ex)
@@ -167,40 +126,37 @@ public sealed class TrebuchetApp : ReactiveObject
     private async Task RefreshPanels()
     {
         FoldedMenu = _uiConfig.FoldedMenu;
-        foreach (var panel in _panels)
-            if(panel is IRefreshablePanel refreshable)
-                await refreshable.RefreshPanel();
+        foreach (var panel in _panels.OfType<IRefreshablePanel>())
+            await panel.RefreshPanel();
     }
 
-    private async Task OnBoardingActions()
+    private async Task<bool> StartPanelActions()
+    {
+        foreach (var panel in _panels.OfType<IStartingPanel>())
+            if (!await panel.StartPanel())
+                return false;
+        return true;
+    }
+
+    private async Task StartActions()
     {
         try
         {
-            if (!await _onBoarding.OnBoardingLanguageChoice()) return;
-            if (!await _onBoarding.OnBoardingCheckForUpdate(_updater)) return;
-            if (!await _onBoarding.OnBoardingCheckTrebuchet()) return;
-            if (!await OnBoardingFirstLaunch()) return;
-            if (!await OnBoardingRepairBrokenJunctions()) return;
+            if (!await StartPanelActions()) return;
+            if (!await _operations.OnBoardingCheckForUpdate()) return;
+            if (!await _operations.OnBoardingCheckTrebuchet()) return;
+            if (!await _operations.OnBoardingFirstLaunch()) return;
+            if (!await _operations.RepairBrokenJunctions()) return;
+            await RefreshPanels();
         }
         catch (OperationCanceledException ex)
         {
-            await _box.OpenErrorAndExitAsync(ex.Message);
+            await DialogueBox.OpenErrorAndExitAsync(ex.Message);
         }
     }
 
-    private async Task<bool> OnBoardingRepairBrokenJunctions()
+    public void Dispose()
     {
-        if (!Tools.IsClientInstallValid(_setup.Config)) return true;
-        return await _onBoarding.OnBoardingApplyConanManagement();
-    }
-
-    private async Task<bool> OnBoardingFirstLaunch()
-    {
-        var configPath = Constants.GetConfigPath(_setup.IsTestLive);
-        if(File.Exists(configPath)) return true;
-        if (!await _onBoarding.OnBoardingUsageChoice()) return false;
-        _setup.Config.SaveFile();
-        await RefreshPanels();
-        return true;
+        _timer.Stop();
     }
 }

@@ -12,9 +12,9 @@ namespace Trebuchet.ViewModels.SettingFields;
 
 public class ServerInstallationField : DescriptiveElement<ServerInstallationField>
 {
-    public ServerInstallationField(OnBoarding onBoarding, AppSetup setup)
+    public ServerInstallationField(Operations operations, AppSetup setup)
     {
-        _onBoarding = onBoarding;
+        _operations = operations;
         _setup = setup;
 
         var isInstalled = this.WhenAnyValue(x => x.Installed);
@@ -33,7 +33,7 @@ public class ServerInstallationField : DescriptiveElement<ServerInstallationFiel
         InstanceCount = setup.Config.ServerInstanceCount;
     }
     
-    private readonly OnBoarding _onBoarding;
+    private readonly Operations _operations;
     private readonly AppSetup _setup;
     private bool _installed;
     private int _instanceCount;
@@ -65,7 +65,7 @@ public class ServerInstallationField : DescriptiveElement<ServerInstallationFiel
     {
         try
         {
-            var success = await _onBoarding.OnBoardingServerInstanceSelection();
+            var success = await _operations.OnBoardingServerInstanceSelection();
             if (success)
             {
                 _setup.Config.SaveFile();

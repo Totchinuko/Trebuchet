@@ -118,7 +118,7 @@ public class Launcher(
     {
         var filename = setup.GetBinFile(isBattleEye);
         var modlistFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modlistFile, appFiles.Mods.ResolveMods(modList));
+        await File.WriteAllLinesAsync(modlistFile, setup.GetModsPath(modList));
         var args = profile.GetClientArgs(modlistFile, autoConnect);
 
         var dir = Path.GetDirectoryName(filename);
@@ -265,7 +265,7 @@ public class Launcher(
         var filename = setup.GetIntanceBinary(instance);
         
         var modfileFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modfileFile, appFiles.Mods.ResolveMods(modlist));
+        await File.WriteAllLinesAsync(modfileFile, setup.GetModsPath(modlist));
         
         var args = profile.GetServerArgs(instance, modfileFile);
 

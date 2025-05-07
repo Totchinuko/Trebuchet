@@ -35,3 +35,8 @@ public interface IDisplablePanel : IPanel
 {
     Task DisplayPanel();
 }
+
+public interface IStartingPanel : IPanel
+{
+    Task<bool> StartPanel();
+}

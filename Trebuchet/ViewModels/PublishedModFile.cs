@@ -7,18 +7,18 @@ namespace Trebuchet.ViewModels;
 
 public class PublishedModFile : ReactiveObject, IPublishedModFile
 {
-    public PublishedModFile(string path, ulong publishedId)
+    public PublishedModFile(ulong publishedId, string? path = null)
     {
         IconClasses.Add(@"ModIcon");
         StatusClasses.Add(@"ModStatus");
         PublishedId = publishedId;
-        FilePath = path;
-        Title = Path.GetFileName(path);
+        FilePath = path ?? string.Empty;
+        Title = string.IsNullOrEmpty(path) ? publishedId.ToString() : Path.GetFileName(path);
         LastUpdate = File.Exists(path) ? Resources.Loading : Resources.Missing;
         IconClasses.Add(@"Live");
         IconToolTip = Resources.LiveMod;
         FileSize = 0;
-        StatusClasses.Add(File.Exists(path) ? @"Loading" : @"Missing");
+        StatusClasses.Add(!string.IsNullOrEmpty(path) && File.Exists(path) ? @"Loading" : @"Missing");
     }
     
     public ulong PublishedId { get; }

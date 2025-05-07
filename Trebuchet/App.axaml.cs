@@ -15,6 +15,7 @@ using Serilog;
 using Serilog.Configuration;
 using Serilog.Filters;
 using Serilog.Templates;
+using SteamKit2.Internal;
 using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
@@ -43,6 +44,7 @@ public partial class App : Application, IApplication
     private UIConfig? _uiConfig;
     private LanguageManager? _langManager;
     private InternalLogSink? _internalLogSink;
+    private ServiceProvider? _serviceProvider;
     public bool HasCrashed { get; private set; }
     public IImage? AppIconPath => Resources[@"AppIcon"] as IImage;
 
@@ -75,8 +77,8 @@ public partial class App : Application, IApplication
         
         var serviceCollection = new ServiceCollection();
         ConfigureServices(serviceCollection, testlive, catapult, experiment);
-        var services = serviceCollection.BuildServiceProvider();
-        _logger = services.GetRequiredService<ILogger<App>>();
+        _serviceProvider = serviceCollection.BuildServiceProvider();
+        _logger = _serviceProvider.GetRequiredService<ILogger<App>>();
         
         CodeHighlighting.RegisterHighlight(@"Trebuchet.Assets.LogHightlighting.xshd", @"Log", [@".log"]);
         
@@ -88,8 +90,8 @@ public partial class App : Application, IApplication
         MainWindow mainWindow = new ();
         var currentWindow = desktop.MainWindow;
         desktop.MainWindow = mainWindow;
-        services.GetRequiredService<AppFiles>().SetupFolders();
-        mainWindow.SetApp(services.GetRequiredService<TrebuchetApp>());
+        _serviceProvider.GetRequiredService<AppFiles>().SetupFolders();
+        mainWindow.DataContext = _serviceProvider.GetRequiredService<TrebuchetApp>();
         mainWindow.Show();
         currentWindow?.Close();
     }
@@ -156,7 +158,7 @@ public partial class App : Application, IApplication
         _internalLogSink = new InternalLogSink();
         services.AddSingleton(_internalLogSink);
         
-        var logger = new LoggerConfiguration()
+        Log.Logger = new LoggerConfiguration()
 #if !DEBUG
             .MinimumLevel.Information()
 #endif
@@ -183,18 +185,17 @@ public partial class App : Application, IApplication
             })
             .CreateLogger();
 
-        services.AddLogging(builder => builder.AddSerilog(logger, true));
+        services.AddLogging(builder => builder.AddSerilog(dispose:true));
         
         services.AddSingleton<AppFiles>();
         services.AddSingleton<ModlistImporter>();
-        services.AddSingleton<OnBoarding>();
+        services.AddSingleton<Operations>();
         services.AddSingleton<IIniGenerator, YuuIniGenerator>();
         services.AddSingleton<IProgressCallback<DepotDownloader.Progress>, Progress>();
         services.AddSingleton<Steam>();
         services.AddSingleton<ConanProcessFactory>();
         services.AddSingleton<Launcher>();
         services.AddSingleton<TaskBlocker>();
-        services.AddSingleton<SteamApi>();
         services.AddSingleton<ModFileFactory>();
 
         services.AddSingleton<SteamWidget>();
@@ -217,8 +218,11 @@ public partial class App : Application, IApplication
 
     private void OnShutdownRequested(object? sender, ShutdownRequestedEventArgs e)
     {
+        _internalLogSink?.Dispose();
         _logger?.LogInformation(@"Trebuchet off");
         _logger?.LogInformation(@"----------------------------------------");
+        if (_serviceProvider is not null)
+            _serviceProvider.Dispose();
     }
 
     private async void OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

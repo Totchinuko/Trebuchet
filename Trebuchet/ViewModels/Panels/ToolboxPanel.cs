@@ -12,12 +12,10 @@ public class ToolboxPanel : ReactiveObject, IDisplablePanel, IBottomPanel
 {
 
     public ToolboxPanel(
-        OnBoarding onBoarding,
-        SteamApi steamApi 
+        Operations operations
         )
     {
-        _onBoarding = onBoarding;
-        _steamApi = steamApi;
+        _operations = operations;
 
         _unusedModsSub = this.WhenAnyValue(x => x.UnusedMods)
             .Select(x => string.Format(Resources.TrimUnusedModsSub, x))
@@ -26,8 +24,7 @@ public class ToolboxPanel : ReactiveObject, IDisplablePanel, IBottomPanel
         RemoveUnusedMods = ReactiveCommand.CreateFromTask(OnRemoveUnusedMods, this.WhenAnyValue(x => x.UnusedMods, x => x > 0));
     }
     
-    private readonly OnBoarding _onBoarding;
-    private readonly SteamApi _steamApi;
+    private readonly Operations _operations;
     private int _unusedMods;
     private readonly ObservableAsPropertyHelper<string> _unusedModsSub;
     private bool _canBeOpened = true;
@@ -52,7 +49,7 @@ public class ToolboxPanel : ReactiveObject, IDisplablePanel, IBottomPanel
 
     public Task DisplayPanel()
     {
-        UnusedMods = _steamApi.CountUnusedMods();
+        UnusedMods = _operations.CountUnusedMods();
         return Task.CompletedTask;
     }
 
@@ -60,8 +57,8 @@ public class ToolboxPanel : ReactiveObject, IDisplablePanel, IBottomPanel
     {
         try
         {
-            await _onBoarding.OnBoardingRemoveUnusedMods();
-            UnusedMods = _steamApi.CountUnusedMods();
+            await _operations.OnBoardingRemoveUnusedMods();
+            UnusedMods = _operations.CountUnusedMods();
         }
         catch(OperationCanceledException) {}
     }

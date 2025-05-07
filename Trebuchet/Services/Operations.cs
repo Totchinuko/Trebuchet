@@ -1,15 +1,19 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
+using ReactiveUI;
 using tot_lib;
 using Trebuchet.Assets;
-using Trebuchet.Services.Language;
+using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Utils;
 using Trebuchet.ViewModels;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
@@ -17,47 +21,254 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
 
-public class OnBoarding(
-    AppFiles appFiles, 
-    AppSetup setup, 
-    DialogueBox dialogueBox,
-    UIConfig uiConfig,
-    ILanguageManager langManager,
-    ILogger<OnBoarding> logger,
-    SteamApi steamApi)
+public class Operations : IDisposable
 {
-    public async Task<bool> OnBoardingCheckForUpdate(IUpdater updater)
+    public Operations(AppFiles appFiles, 
+        AppSetup setup, 
+        DialogueBox dialogueBox,
+        TaskBlocker.TaskBlocker taskBlocker, 
+        ILogger<Operations> logger,
+        IUpdater updater,
+        Steam steam)
+    {
+        _appFiles = appFiles;
+        _setup = setup;
+        _dialogueBox = dialogueBox;
+        _taskBlocker = taskBlocker;
+        _logger = logger;
+        _updater = updater;
+        _steam = steam;
+        
+        SetupFileWatcher();
+        
+        taskBlocker.WhenAnyValue(x => x.CanDownloadMods)
+            .InvokeCommand(ReactiveCommand.Create<bool>((x) =>
+            {
+                _modWatcher.EnableRaisingEvents = x;
+            }));
+    }
+    
+    private readonly AppFiles _appFiles;
+    private readonly AppSetup _setup;
+    private readonly DialogueBox _dialogueBox;
+    private readonly TaskBlocker.TaskBlocker _taskBlocker;
+    private readonly ILogger<Operations> _logger;
+    private readonly IUpdater _updater;
+    private readonly Steam _steam;
+    private FileSystemWatcher _modWatcher;
+
+    public event EventHandler<FileSystemEventArgs>? ModFileChanged; 
+
+    public void Dispose()
+    {
+        _modWatcher.Dispose();
+    }
+
+    public async Task<bool> RepairBrokenJunctions()
+    {
+        if (!Tools.IsClientInstallValid(_setup.Config)) return true;
+        return await OnBoardingApplyConanManagement();
+    }
+
+    public async Task UpdateMods(List<ulong> list)
+    {
+        using(_logger.BeginScope((@"ModList", list)))
+            _logger.LogInformation(@"Updating mods");
+        var task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateModsLabel));
+        try
+        {
+            await _steam.UpdateMods(list, task.Cts);
+        }
+        catch (OperationCanceledException){}
+        finally
+        {
+            task.Release();
+        }
+    }
+
+    public async Task UpdateServers()
+    {
+        _logger.LogInformation(@"Updating servers");
+        var task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateServersLabel));
+        try
+        {
+            await _steam.UpdateServerInstances(task.Cts);
+        }
+        catch (OperationCanceledException){}
+        finally
+        {
+            task.Release();
+        }
+    }
+
+    public async Task VerifyFiles(IEnumerable<ulong> modlist)
+    {
+        var task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyServersLabel));
+        _logger.LogInformation(@"Verifying server files");
+        _steam.ClearCache();
+        _steam.InvalidateCache();
+        try
+        {
+            await _steam.UpdateServerInstances(task.Cts);
+        }
+        catch (OperationCanceledException){}
+        finally
+        {
+            task.Release();
+        }
+        
+        task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyModsLabel));
+        var enumerable = modlist.ToList();
+        using(_logger.BeginScope((@"ModList", enumerable)))
+            _logger.LogInformation(@"Verifying mod files");
+        try
+        {
+            await _steam.UpdateMods(enumerable, task.Cts);
+        }
+        catch (OperationCanceledException) {}
+        finally
+        {
+            task.Release();
+        }
+    }
+
+    public int CountUnusedMods()
+    {
+        var installedMods = _steam.GetUGCFileIdsFromStorage();
+        var usedMods = _appFiles.Mods.GetList()
+            .SelectMany(x => _appFiles.Mods.Get(x).GetWorkshopMods());
+        var count = installedMods.Except(usedMods).Count();
+        return count;
+    }
+
+    public async Task RemoveUnusedMods()
+    {
+        var task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.TrimmingUnusedMods));
+        try
+        {
+            var installedMods = _steam.GetUGCFileIdsFromStorage();
+            var usedMods = _appFiles.Mods.GetList()
+                .SelectMany(x => _appFiles.Mods.Get(x).GetWorkshopMods());
+            var toRemove = installedMods.Except(usedMods).ToList();
+            _steam.ClearUGCFileIdsFromStorage(toRemove);
+
+            _logger.LogInformation(@"Cleaning unused mods");
+            foreach (var mod in toRemove)
+            {
+                if (!_setup.TryGetModPath(mod.ToString(), out var path)) continue;
+                if (!File.Exists(path)) continue;
+                _logger.LogInformation(path);
+                File.Delete(path);
+            }
+        }
+        catch (OperationCanceledException){}
+        finally
+        {
+            task.Release();
+        }
+    }
+
+    public IDisposable SetDownloaderProgress(IProgress<DepotDownloader.Progress> progress)
+    {
+        _steam.SetTemporaryProgress(progress);
+        return new SteamProgressRestore(_steam);
+    }
+
+    public int GetInstalledServerInstanceCount()
+    {
+        return _steam.GetInstalledInstances();
+    }
+
+    public async Task<bool> CheckServerUpdate()
+    {
+        try
+        {
+            return await _steam.GetSteamBuildId() != _steam.GetInstanceBuildId(0);
+        }
+        catch(Exception ex)
+        {
+            _logger.LogWarning(ex, @"Failed to check server update");
+            return false;
+        }
+    } 
+    
+    [MemberNotNull("_modWatcher")]
+    private void SetupFileWatcher()
+    {
+        if (_modWatcher != null)
+            return;
+
+        _logger.LogInformation(@"Starting mod file watcher");
+        var path = Path.Combine(_setup.GetWorkshopFolder());
+        if (!Directory.Exists(path))
+            Tools.CreateDir(path);
+
+        _modWatcher = new FileSystemWatcher(path);
+        _modWatcher.NotifyFilter = NotifyFilters.Attributes
+                                   | NotifyFilters.CreationTime
+                                   | NotifyFilters.DirectoryName
+                                   | NotifyFilters.FileName
+                                   | NotifyFilters.LastAccess
+                                   | NotifyFilters.LastWrite
+                                   | NotifyFilters.Security
+                                   | NotifyFilters.Size;
+        _modWatcher.Changed += OnModFileChanged;
+        _modWatcher.Created += OnModFileChanged;
+        _modWatcher.Deleted += OnModFileChanged;
+        _modWatcher.Renamed += OnModFileChanged;
+        _modWatcher.IncludeSubdirectories = true;
+        _modWatcher.EnableRaisingEvents = true;
+    }
+
+    private void OnModFileChanged(object sender, FileSystemEventArgs e)
+    {
+        Dispatcher.UIThread.Invoke(() =>
+        {
+            ModFileChanged?.Invoke(this, e);
+        });
+    }
+    
+    public async Task<bool> OnBoardingFirstLaunch()
+    {
+        var configPath = Constants.GetConfigPath(_setup.IsTestLive);
+        if(File.Exists(configPath)) return true;
+        if (!await OnBoardingUsageChoice()) return false;
+        _setup.Config.SaveFile();
+        return true;
+    }
+    
+    public async Task<bool> OnBoardingCheckForUpdate()
     {
         if (!OperatingSystem.IsWindows()) return true;
-        logger.LogInformation(@"Checking for updates");
+        _logger.LogInformation(@"Checking for updates");
 
         try
         {
             var currentVersion = ProcessUtil.GetAppVersion();
-            await updater.CheckForUpdates(currentVersion);
-            if (updater.IsUpToDate) return true;
+            await _updater.CheckForUpdates(currentVersion);
+            if (_updater.IsUpToDate) return true;
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, @"Could not check for update");
+            _logger.LogError(ex, @"Could not check for update");
             return true; //Pretend that nothing happened
         }
 
-        using(logger.BeginScope((@"UpdateName", updater.Name)))
-            logger.LogInformation(@"Update found");
-        var title = string.Format(Resources.OnBoardingUpdate, updater.Version);
+        using(_logger.BeginScope((@"UpdateName", _updater.Name)))
+            _logger.LogInformation(@"Update found");
+        var title = string.Format(Resources.OnBoardingUpdate, _updater.Version);
         var confirm = new OnBoardingUpdate(title)
             .SetStretch<OnBoardingUpdate>()
-            .LoadMarkdownDescription(updater.Body);
-        await dialogueBox.OpenAsync(confirm);
+            .LoadMarkdownDescription(_updater.Body);
+        await _dialogueBox.OpenAsync(confirm);
         if (!confirm.Result) return true;
 
         try
         {
-            logger.LogInformation(@"Updating");
-            var progress = new OnBoardingProgress<long>(title, string.Empty, 0, updater.Size);
-            dialogueBox.Show(progress);
-            var file = await updater.DownloadUpdate(progress);
+            _logger.LogInformation(@"Updating");
+            var progress = new OnBoardingProgress<long>(title, string.Empty, 0, _updater.Size);
+            _dialogueBox.Show(progress);
+            var file = await _updater.DownloadUpdate(progress);
             progress.Report(0);
 
             new Process
@@ -74,7 +285,7 @@ public class OnBoarding(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, @"Update failed");
+            _logger.LogError(ex, @"Update failed");
             return true;
         }
     }
@@ -84,11 +295,11 @@ public class OnBoarding(
         var directoryChoice
             = new OnBoardingDirectory(Resources.OnBoardingDataDirectory, Resources.OnBoardingDataDirectorySub)
                 .SetValidation(ValidateDataDirectory);
-        await dialogueBox.OpenAsync(directoryChoice);
+        await _dialogueBox.OpenAsync(directoryChoice);
         if(directoryChoice.Value is null)throw new OperationCanceledException(@"OnBoarding was cancelled");
-        using(logger.BeginScope((@"DataDirectory", directoryChoice.Value)))
-            logger.LogInformation(@"Changing DataDirectory");
-        setup.Config.DataDirectory = directoryChoice.Value;
+        using(_logger.BeginScope((@"DataDirectory", directoryChoice.Value)))
+            _logger.LogInformation(@"Changing DataDirectory");
+        _setup.Config.DataDirectory = directoryChoice.Value;
         return true;
     }
 
@@ -101,64 +312,50 @@ public class OnBoarding(
 
     public async Task<bool> OnBoardingRemoveUnusedMods()
     {
-        var count = steamApi.CountUnusedMods();
+        var count = CountUnusedMods();
         if (count <= 0)
         {
             var message = new OnBoardingMessage(Resources.OnBoardingNoUnusedMods, Resources.OnBoardingNoUnusedModsSub);
-            await dialogueBox.OpenAsync(message);
+            await _dialogueBox.OpenAsync(message);
             return true;
         }
 
         var confirm = new OnBoardingConfirmation(Resources.OnBoardingModTrimConfirm,
             string.Format(Resources.OnBoardingModTrimConfirmSub, count));
-        await dialogueBox.OpenAsync(confirm);
+        await _dialogueBox.OpenAsync(confirm);
         if (!confirm.Result) throw new OperationCanceledException(@"OnBoarding was cancelled");
-        logger.LogInformation(@"Cleaning unused mods");
+        _logger.LogInformation(@"Cleaning unused mods");
         var progress = new OnBoardingProgress<double>(Resources.OnBoardingModTrimConfirm, string.Empty, 0.0, 1.0);
         progress.Report(0);
-        dialogueBox.Show(progress);
-        await steamApi.RemoveUnusedMods();
-        dialogueBox.Close();
+        _dialogueBox.Show(progress);
+        await RemoveUnusedMods();
+        _dialogueBox.Close();
         return true;
     }
 
-    public async Task<bool> OnBoardingLanguageChoice()
-    {
-        if (!string.IsNullOrEmpty(uiConfig.UICulture)) return true;
-        var choice = new OnBoardingLanguage(Resources.OnBoardingLanguageChange, string.Empty, 
-            langManager.AllLanguages.ToList(), langManager.DefaultLanguage);
-        await dialogueBox.OpenAsync(choice);
-        if(choice.Value is null) throw new OperationCanceledException(@"OnBoarding was cancelled");
-        using(logger.BeginScope((@"Language", choice.Value.Code)))
-            logger.LogInformation(@"Changing language");
-        uiConfig.UICulture = choice.Value.Code;
-        uiConfig.SaveFile();
-        Utils.Utils.RestartProcess(setup);
-        return false;
-    }
-    
+
     public async Task<bool> OnBoardingUsageChoice()
     {
         var choice = new OnBoardingBranch(Resources.OnBoardingUsageChoice, Resources.OnBoardingUsageChoiceText)
             .AddChoice(Resources.OnBoardingUsageChoicePlayer, Resources.OnBoardingUsageChoicePlayerSub)
             .AddChoice(Resources.OnBoardingUsageChoiceServer, Resources.OnBoardingUsageChoiceServerSub)
             .AddChoice(Resources.OnBoardingUsageChoiceModder, Resources.OnBoardingUsageChoiceModderSub);
-        await dialogueBox.OpenAsync(choice);
-        using(logger.BeginScope((@"UsageChoice", choice.Result)))
-            logger.LogInformation(@"Making usage choice");
+        await _dialogueBox.OpenAsync(choice);
+        using(_logger.BeginScope((@"UsageChoice", choice.Result)))
+            _logger.LogInformation(@"Making usage choice");
         switch (choice.Result)
         {
             case 0: // Play Conan
-                setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
-                setup.Config.ServerInstanceCount = 0;
+                _setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
+                _setup.Config.ServerInstanceCount = 0;
                 return await OnBoardingFindConanExile();
             case 1: //Server Admin
-                setup.Config.AutoUpdateStatus = AutoUpdateStatus.CheckForUpdates;
-                setup.Config.ServerInstanceCount = 1;
+                _setup.Config.AutoUpdateStatus = AutoUpdateStatus.CheckForUpdates;
+                _setup.Config.ServerInstanceCount = 1;
                 return await OnBoardingServerInstanceSelection();
             case 2: // Modding
-                setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
-                setup.Config.ServerInstanceCount = 1;
+                _setup.Config.AutoUpdateStatus = AutoUpdateStatus.Never;
+                _setup.Config.ServerInstanceCount = 1;
                 if(!await OnBoardingFindConanExile()) return false;
                 return await OnBoardingServerDownload();
             default:
@@ -173,24 +370,24 @@ public class OnBoarding(
                 Resources.OnBoardingServerInstanceCountSub,
                 1, 6)
         {
-            Value = setup.Config.ServerInstanceCount
+            Value = _setup.Config.ServerInstanceCount
         };
         
-        await dialogueBox.OpenAsync(choice);
+        await _dialogueBox.OpenAsync(choice);
         if(choice.Cancelled) throw new OperationCanceledException(@"OnBoarding was cancelled");
-        using(logger.BeginScope((@"ServerInstanceCount", choice.Value)))
-            logger.LogInformation(@"Changing server instance count");
-        setup.Config.ServerInstanceCount = choice.Value;
+        using(_logger.BeginScope((@"ServerInstanceCount", choice.Value)))
+            _logger.LogInformation(@"Changing server instance count");
+        _setup.Config.ServerInstanceCount = choice.Value;
         return await OnBoardingServerDownload();
     }
 
     public async Task<bool> OnBoardingServerDownload()
     {
         var progress = new OnBoardingProgress<double>(Resources.UpdateServersLabel, string.Empty, 0.0, 1.0);
-        dialogueBox.Show(progress);
+        _dialogueBox.Show(progress);
         var progressConverter = new ProgressConverter(progress);
-        using var downProgress = steamApi.SetDownloaderProgress(progressConverter);
-        await steamApi.UpdateServers();
+        using var downProgress = SetDownloaderProgress(progressConverter);
+        await UpdateServers();
         progress.Progress = 1.0;
         progress.Close();
         return true;
@@ -198,16 +395,16 @@ public class OnBoarding(
 
     public async Task<bool> OnBoardingFindConanExile(bool force = false)
     {
-        if (Tools.IsClientInstallValid(setup.Config.ClientPath) && !force)
+        if (Tools.IsClientInstallValid(_setup.Config.ClientPath) && !force)
             return await OnBoardingApplyConanManagement();
         
-        var finder = new OnBoardingDirectory(Resources.OnBoardingLocateConan, Resources.OnBoardingLocateConanText, setup.Config.ClientPath)
+        var finder = new OnBoardingDirectory(Resources.OnBoardingLocateConan, Resources.OnBoardingLocateConanText, _setup.Config.ClientPath)
             .SetValidation(ValidateConanExileLocation);
-        await dialogueBox.OpenAsync(finder);
+        await _dialogueBox.OpenAsync(finder);
         if(finder.Value is null) throw new OperationCanceledException(@"OnBoarding was cancelled");
-        using(logger.BeginScope((@"ClientPath", finder.Value)))
-            logger.LogInformation(@"Changing conan exiles directory");
-        setup.Config.ClientPath = finder.Value;
+        using(_logger.BeginScope((@"ClientPath", finder.Value)))
+            _logger.LogInformation(@"Changing conan exiles directory");
+        _setup.Config.ClientPath = finder.Value;
         return await OnBoardingAllowConanManagement();
     }
 
@@ -225,77 +422,77 @@ public class OnBoarding(
         var choice = new OnBoardingBranch(Resources.OnBoardingManageConan, Resources.OnBoardingManageConanText)
             .AddChoice(Resources.OnBoardingManageConanNo, Resources.OnBoardingManageConanNoSub)
             .AddChoice(Resources.OnBoardingManageConanYes, Resources.OnBoardingManageConanYesSub);
-        await dialogueBox.OpenAsync(choice);
+        await _dialogueBox.OpenAsync(choice);
         if(choice.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
-        using(logger.BeginScope((@"ManageClient", choice.Result)))
-            logger.LogInformation(@"Change client management");
-        setup.Config.ManageClient = choice.Result == 1;
+        using(_logger.BeginScope((@"ManageClient", choice.Result)))
+            _logger.LogInformation(@"Change client management");
+        _setup.Config.ManageClient = choice.Result == 1;
         return await OnBoardingApplyConanManagement();
     }
 
     public async Task<bool> OnBoardingApplyConanManagement()
     {
-        if (!Tools.IsClientInstallValid(setup.Config)) return false;
-        var clientDirectory = Path.GetFullPath(setup.Config.ClientPath);
+        if (!Tools.IsClientInstallValid(_setup.Config)) return false;
+        var clientDirectory = Path.GetFullPath(_setup.Config.ClientPath);
         var savedDir = Path.Combine(clientDirectory, Constants.FolderGameSave);
-        using(logger.BeginScope((@"SavedDir", savedDir)))
-            logger.LogInformation(@"Applying Conan Management");
+        using(_logger.BeginScope((@"SavedDir", savedDir)))
+            _logger.LogInformation(@"Applying Conan Management");
         
         if (!Directory.Exists(savedDir))
         {
-            logger.LogWarning(@"Saved Directory does not exists");
+            _logger.LogWarning(@"Saved Directory does not exists");
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
-            if (setup.Config.ManageClient)
+            if (_setup.Config.ManageClient)
             {
-                logger.LogInformation(@"Creating junction");
-                Tools.SetupSymboliclink(savedDir, setup.GetPrimaryJunction());
+                _logger.LogInformation(@"Creating junction");
+                Tools.SetupSymboliclink(savedDir, _setup.GetPrimaryJunction());
             }
             else
             {
-                if (!appFiles.Client.GetList().Any())
+                if (!_appFiles.Client.GetList().Any())
                     return true;
                 var saveName = await OnBoardingChooseClientSave();
-                logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
+                _logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
                 Directory.CreateDirectory(savedDir);
-                await Tools.DeepCopyAsync(appFiles.Client.GetDirectory(appFiles.Client.Ref(saveName)), savedDir, CancellationToken.None);
+                await Tools.DeepCopyAsync(_appFiles.Client.GetDirectory(_appFiles.Client.Ref(saveName)), savedDir, CancellationToken.None);
             }
             return true;
         }
 
-        if (JunctionPoint.Exists(savedDir) && !setup.Config.ManageClient)
+        if (JunctionPoint.Exists(savedDir) && !_setup.Config.ManageClient)
         {
-            logger.LogWarning(@"Junction found, but does not manage");
+            _logger.LogWarning(@"Junction found, but does not manage");
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
-            if (!appFiles.Client.GetList().Any())
+            if (!_appFiles.Client.GetList().Any())
                 return true;
             var saveName = await OnBoardingChooseClientSave();
-            logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
+            _logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
             JunctionPoint.Delete(savedDir);
             Directory.CreateDirectory(savedDir);
-            await Tools.DeepCopyAsync(appFiles.Client.GetDirectory(appFiles.Client.Ref(saveName)), savedDir, CancellationToken.None);
+            await Tools.DeepCopyAsync(_appFiles.Client.GetDirectory(_appFiles.Client.Ref(saveName)), savedDir, CancellationToken.None);
             return true;
         }
 
-        if (!JunctionPoint.Exists(savedDir) && setup.Config.ManageClient)
+        if (!JunctionPoint.Exists(savedDir) && _setup.Config.ManageClient)
         {
-            logger.LogWarning(@"Directory found, but manage game");
+            _logger.LogWarning(@"Directory found, but manage game");
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
             var saveName = await OnBoardingChooseClientSaveName();
-            logger.LogInformation(@"Copying game save into trebuchet {saveName}", saveName);
-            await Tools.DeepCopyAsync(savedDir, appFiles.Client.GetDirectory(appFiles.Client.Ref(saveName)), CancellationToken.None);
+            _logger.LogInformation(@"Copying game save into trebuchet {saveName}", saveName);
+            await Tools.DeepCopyAsync(savedDir, _appFiles.Client.GetDirectory(_appFiles.Client.Ref(saveName)), CancellationToken.None);
             await OnBoardingSafeIO(() => Directory.Delete(savedDir, true),savedDir);
-            Tools.SetupSymboliclink(savedDir, setup.GetPrimaryJunction());
+            Tools.SetupSymboliclink(savedDir, _setup.GetPrimaryJunction());
             return true;
         }
 
         if (JunctionPoint.Exists(savedDir))
         {
             var path = JunctionPoint.GetTarget(savedDir);
-            if (Path.GetFullPath(path) != Path.GetFullPath(setup.GetPrimaryJunction()))
+            if (Path.GetFullPath(path) != Path.GetFullPath(_setup.GetPrimaryJunction()))
             {
                 if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
-                logger.LogWarning(@"Broken junction found, repairing");
-                JunctionPoint.Create(savedDir, setup.GetPrimaryJunction(), true);
+                _logger.LogWarning(@"Broken junction found, repairing");
+                JunctionPoint.Create(savedDir, _setup.GetPrimaryJunction(), true);
             }
         }
 
@@ -304,14 +501,14 @@ public class OnBoarding(
 
     public async Task<string> OnBoardingChooseClientSave()
     {
-        var list = appFiles.Client.GetList().ToList();
+        var list = _appFiles.Client.GetList().ToList();
         if (list.Count == 0)
             return await OnBoardingChooseClientSaveName();
         var choice = new OnBoardingListSelection(
                 Resources.OnBoardingGameSave, 
                 Resources.OnBoardingChooseGameSaveText, 
-                appFiles.Client.GetList().Select(x => x.Name).ToList());
-        await dialogueBox.OpenAsync(choice);
+                _appFiles.Client.GetList().Select(x => x.Name).ToList());
+        await _dialogueBox.OpenAsync(choice);
         if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException(@"OnBoarding was cancelled");
         return choice.Value;
     }
@@ -320,7 +517,7 @@ public class OnBoarding(
     {
         var choice = new OnBoardingNameSelection( Resources.OnBoardingGameSave, Resources.OnBoardingNewGameSave)
             .SetValidation(ValidateClientSaveName);
-        await dialogueBox.OpenAsync(choice);
+        await _dialogueBox.OpenAsync(choice);
         if(string.IsNullOrEmpty(choice.Value)) throw new OperationCanceledException(@"OnBoarding was cancelled");
         return choice.Value;
     }
@@ -328,7 +525,7 @@ public class OnBoarding(
     public Validation ValidateClientSaveName(string? name)
     {
         if (string.IsNullOrWhiteSpace(name)) return new Validation(false, Resources.ErrorNameEmpty);
-        if(appFiles.Client.GetList().Any(x => x.Name == name))
+        if(_appFiles.Client.GetList().Any(x => x.Name == name))
             return new Validation(false, Resources.ErrorNameAlreadyTaken);
         if (name.IndexOfAny(Path.GetInvalidFileNameChars()) >= 0)
             return new Validation(false, Resources.ErrorNameInvalidCharacters);
@@ -353,13 +550,13 @@ public class OnBoarding(
                 { @"path", path },
                 { @"reason", reason }
             };
-            using(logger.BeginScope(scopeData))
-                logger.LogInformation(@"Requesting elevation");
-            await dialogueBox.OpenAsync(uac);
+            using(_logger.BeginScope(scopeData))
+                _logger.LogInformation(@"Requesting elevation");
+            await _dialogueBox.OpenAsync(uac);
             if(uac.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
             
-            logger.LogInformation(@"Restarting as elevated");
-            Utils.Utils.RestartProcess(setup, true);
+            _logger.LogInformation(@"Restarting as elevated");
+            Utils.Utils.RestartProcess(_setup, true);
             return false;
         }
 
@@ -368,8 +565,8 @@ public class OnBoarding(
 
     public async Task<bool> OnBoardingSafeIO(Action ioAction, string file)
     {
-        var currentPopup = dialogueBox.Popup;
-        dialogueBox.Close();
+        var currentPopup = _dialogueBox.Popup;
+        _dialogueBox.Close();
         while (true)
         {
             try
@@ -381,14 +578,14 @@ public class OnBoarding(
             {
                 if (tot_lib.Utils.IsFileLocked(ex))
                 {
-                    if (!dialogueBox.Active)
+                    if (!_dialogueBox.Active)
                     {
                         var message = new OnBoardingProgress<double>(
                             Resources.OnBoardingProcessLock,
                             string.Format(Resources.OnBoardingProcessLockSub, file),
                             0.0, 1.0);
                         message.Report(0);
-                        dialogueBox.Show(message);
+                        _dialogueBox.Show(message);
                     }
                 }
                 else
@@ -396,10 +593,10 @@ public class OnBoarding(
             }
             await Task.Delay(1000);
         }
-        if(dialogueBox.Active)
-            dialogueBox.Close();
+        if(_dialogueBox.Active)
+            _dialogueBox.Close();
         if(currentPopup is not null)
-            dialogueBox.Show(currentPopup);
+            _dialogueBox.Show(currentPopup);
         return true;
     }
     
@@ -414,23 +611,23 @@ public class OnBoarding(
         var trebuchetDir = Path.GetFullPath(AppDomain.CurrentDomain.BaseDirectory);
         configLive = Path.Combine(trebuchetDir, configLive);
         configTestlive = Path.Combine(trebuchetDir, configTestlive);
-        logger.LogInformation(@"Upgrading old trebuchet");
+        _logger.LogInformation(@"Upgrading old trebuchet");
         
         if (File.Exists(configLive) || File.Exists(configTestlive))
         {
             var upgrade = new OnBoardingBranch(Resources.Upgrade, Resources.OnBoardingUpgrade)
                 .AddChoice(Resources.Upgrade, Resources.OnBoardingUpgradeSub);
-            await dialogueBox.OpenAsync(upgrade);
+            await _dialogueBox.OpenAsync(upgrade);
             if(upgrade.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
 
             if (!await OnBoardingElevationRequest(trebuchetDir, Resources.OnBoardingUpgradeUac)) return false;
 
             var progress = new OnBoardingProgress<double>(Resources.Upgrade, Resources.OnBoardingUpgradeCopy, 0.0, 1.0);
-            dialogueBox.Show(progress);
+            _dialogueBox.Show(progress);
 
             if (File.Exists(configLive))
             {
-                logger.LogInformation(@"Upgrading live");
+                _logger.LogInformation(@"Upgrading live");
                 var configJson = await File.ReadAllTextAsync(configLive);
                 var configuration = JsonSerializer.Deserialize<Config>(configJson);
                 if (configuration is not null)
@@ -446,7 +643,7 @@ public class OnBoarding(
 
             if (File.Exists(configTestlive))
             {
-                logger.LogInformation(@"Upgrading testlive");
+                _logger.LogInformation(@"Upgrading testlive");
                 var configJson = await File.ReadAllTextAsync(configTestlive);
                 var configuration = JsonSerializer.Deserialize<Config>(configJson);
                 if (configuration is not null)
@@ -460,7 +657,7 @@ public class OnBoarding(
                 File.Delete(configTestlive);
             }
             
-            Utils.Utils.RestartProcess(setup);
+            Utils.Utils.RestartProcess(_setup);
             return false;
         }
         
@@ -482,10 +679,10 @@ public class OnBoarding(
         var workshopDir = Path.Combine(installDir, Constants.FolderWorkshop);
         if (Directory.Exists(workshopDir))
         {
-            logger.LogInformation(@"Copying workshop directory {directory}", workshopDir);
-            await Tools.DeepCopyAsync(workshopDir, setup.GetWorkshopFolder(), CancellationToken.None, progress);
+            _logger.LogInformation(@"Copying workshop directory {directory}", workshopDir);
+            await Tools.DeepCopyAsync(workshopDir, _setup.GetWorkshopFolder(), CancellationToken.None, progress);
             if (isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(setup.GetWorkshopFolder()));
+                Tools.SetEveryoneAccess(new DirectoryInfo(_setup.GetWorkshopFolder()));
             await OnBoardingSafeIO(() => Directory.Delete(workshopDir, true), workshopDir);
         }
         
@@ -493,11 +690,11 @@ public class OnBoarding(
         var instanceDir = Path.Combine(installDir, versionDir, Constants.FolderServerInstances);
         if (Directory.Exists(instanceDir))
         {
-            logger.LogInformation(@"Copying instance directory {directory}", instanceDir);
+            _logger.LogInformation(@"Copying instance directory {directory}", instanceDir);
             Tools.RemoveAllJunctions(instanceDir); 
-            await Tools.DeepCopyAsync(instanceDir, setup.GetBaseInstancePath(testlive), CancellationToken.None, progress);
+            await Tools.DeepCopyAsync(instanceDir, _setup.GetBaseInstancePath(testlive), CancellationToken.None, progress);
             if(isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(setup.GetBaseInstancePath(testlive)));
+                Tools.SetEveryoneAccess(new DirectoryInfo(_setup.GetBaseInstancePath(testlive)));
             await OnBoardingSafeIO(() => Directory.Delete(instanceDir, true), instanceDir);
         }
         progress.Report(0.0);
@@ -505,10 +702,10 @@ public class OnBoarding(
         var dataDir = Path.Combine(installDir, versionDir);
         if (Directory.Exists(dataDir))
         {
-            logger.LogInformation(@"Copying data directory {directory}", dataDir);
-            await Tools.DeepCopyAsync(dataDir, Path.Combine(setup.GetDataDirectory().FullName, versionDir), CancellationToken.None, progress);
+            _logger.LogInformation(@"Copying data directory {directory}", dataDir);
+            await Tools.DeepCopyAsync(dataDir, Path.Combine(_setup.GetDataDirectory().FullName, versionDir), CancellationToken.None, progress);
             if(isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(setup.GetDataDirectory().FullName, versionDir)));
+                Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(_setup.GetDataDirectory().FullName, versionDir)));
             await OnBoardingSafeIO(() => Directory.Delete(dataDir, true),dataDir);
         }
         
@@ -516,7 +713,7 @@ public class OnBoarding(
         var logsDir = Path.Combine(installDir, @"Logs");
         if (Directory.Exists(logsDir))
         {
-            logger.LogInformation(@"Deleting old logs {directory}", logsDir);
+            _logger.LogInformation(@"Deleting old logs {directory}", logsDir);
             await OnBoardingSafeIO(() => Directory.Delete(logsDir, true), logsDir);
         }
         
@@ -525,5 +722,4 @@ public class OnBoarding(
     }
     
     #endregion
-
 }

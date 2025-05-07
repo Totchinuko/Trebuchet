@@ -433,4 +433,66 @@ public static class AppFilesEx
     {
         return references.SelectMany(x => x.GetModsFromList());
     }
+    
+    private static bool ResolveMod(this AppSetup setup, uint appId, ref string mod)
+    {
+        string file = mod;
+        if (long.TryParse(mod, out _))
+            file = Path.Combine(setup.GetWorkshopFolder(), appId.ToString(), mod, "none");
+
+        string? folder = Path.GetDirectoryName(file);
+        if (folder == null)
+            return false;
+
+        if (!long.TryParse(Path.GetFileName(folder), out _))
+            return File.Exists(file);
+
+        if (!Directory.Exists(folder))
+            return false;
+
+        string[] files = Directory.GetFiles(folder, "*.pak", SearchOption.TopDirectoryOnly);
+        if (files.Length == 0)
+            return false;
+
+        mod = files[0];
+        return true;
+    }
+    
+    public static bool TryGetModPath(this AppSetup setup, string mod, [NotNullWhen(true)] out string? path)
+    {
+        try
+        {
+            if (setup.ResolveMod(Constants.AppIDLiveClient, ref mod))
+            {
+                path = mod;
+                return true;
+            }
+            if (setup.ResolveMod(Constants.AppIDTestLiveClient, ref mod))
+            {
+                path = mod;
+                return true;
+            }
+
+            path = null;
+            return false;
+        }
+        catch
+        {
+            path = null;
+            return false;
+        }
+    }
+    
+    public static IEnumerable<string> GetModsPath(this AppSetup setup, IEnumerable<string> modlist, bool throwIfFailed = true)
+    {
+        foreach (string mod in modlist)
+        {
+            if (!setup.TryGetModPath(mod, out var path))
+                if (throwIfFailed)
+                    throw new TrebException($"Could not resolve mod {path}.");
+                else yield return mod;
+            else
+                yield return path;
+        }
+    }
 }

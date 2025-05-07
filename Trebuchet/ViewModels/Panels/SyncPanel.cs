@@ -47,7 +47,7 @@ public class SyncPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRe
         
         Sync = ReactiveCommand.CreateFromTask(OnSync);
         SyncEdit = ReactiveCommand.CreateFromTask(OnSyncEdit);
-        RefreshList = ReactiveCommand.CreateFromTask(() => ModList.ForceLoadModList(_profile.Modlist));
+        RefreshList = ReactiveCommand.CreateFromTask(() => ModList.SetList(_profile.Modlist, true));
 
         var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
         Update = ReactiveCommand.CreateFromTask(async () =>
@@ -93,7 +93,7 @@ public class SyncPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRe
         _logger.LogDebug(@"Display panel");
         if (!_needRefresh) return;
         _needRefresh = false;
-        await ModList.SetList(_profile.Modlist);
+        await ModList.SetList(_profile.Modlist, false);
         ClientConnectionList.SetList(_profile.ClientConnections);
     }
 
@@ -105,7 +105,7 @@ public class SyncPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRe
         _uiConfig.SaveFile();
         _profile = _files.Sync.Get(profile);
         await ModList.SetReadOnly();
-        await ModList.SetList(_profile.Modlist);
+        await ModList.SetList(_profile.Modlist, false);
     }
     
     private async Task OnSync()

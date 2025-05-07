@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
-using Avalonia;
-using Avalonia.Controls.ApplicationLifetimes;
 using DynamicData.Binding;
+using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using tot_lib;
 using Trebuchet.Assets;
@@ -20,23 +19,25 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels;
 
-public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
+public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, IStartingPanel
 {
 
 
     public SettingsPanel(
         AppSetup setup, 
-        OnBoarding onBoarding,
+        Operations operations,
         ILanguageManager langManager,
         DialogueBox box,
+        ILogger<SettingsPanel> logger,
         TaskBlocker blocker,
         UIConfig uiConfig)
     {
         _setup = setup;
         _uiConfig = uiConfig;
-        _onBoarding = onBoarding;
+        _operations = operations;
         _langManager = langManager;
         _box = box;
+        _logger = logger;
         _blocker = blocker;
 
         AvailableLocales.AddRange(langManager.AllLanguages);
@@ -60,13 +61,14 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
     
     private readonly AppSetup _setup;
     private readonly UIConfig _uiConfig;
-    private readonly OnBoarding _onBoarding;
+    private readonly Operations _operations;
     private readonly ILanguageManager _langManager;
     private readonly DialogueBox _box;
+    private readonly ILogger<SettingsPanel> _logger;
     private readonly TaskBlocker _blocker;
     private LanguageModel _selectedLanguage;
     private bool _canBeOpened = true;
-    private bool _foldedMenu = false;
+    private bool _foldedMenu;
 
     public ReactiveCommand<Unit,Unit> SaveConfig { get; }
     public ReactiveCommand<Unit,Unit> SaveUiConfig { get; }
@@ -99,6 +101,21 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
     }
 
     public event AsyncEventHandler? RequestRefresh;
+    
+    public async Task<bool> StartPanel()
+    {
+        if (!string.IsNullOrEmpty(_uiConfig.UICulture)) return true;
+        var choice = new OnBoardingLanguage(Resources.OnBoardingLanguageChange, string.Empty, 
+            _langManager.AllLanguages.ToList(), _langManager.DefaultLanguage);
+        await _box.OpenAsync(choice);
+        if(choice.Value is null) throw new OperationCanceledException(@"OnBoarding was cancelled");
+        using(_logger.BeginScope((@"Language", choice.Value.Code)))
+            _logger.LogInformation(@"Changing language");
+        _uiConfig.UICulture = choice.Value.Code;
+        _uiConfig.SaveFile();
+        _setup.RestartProcess();
+        return false;
+    }
 
     private async Task OnLanguageChanged(LanguageModel? model)
     {
@@ -155,17 +172,17 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel
     private void BuildFields()
     {
         Fields.Add(new TitleField().SetTitle(Resources.OnBoardingUsageChoice));
-        Fields.Add(new ClientInstallationField(_onBoarding, _setup)
+        Fields.Add(new ClientInstallationField(_operations, _setup)
             .WhenFieldChanged(ReactiveCommand.CreateFromTask(OnRequestRefresh))
             .SetTitle(Resources.SettingClientInstallation)
             .SetDescription(Resources.SettingClientInstallationText)
         );
-        Fields.Add(new ServerInstallationField(_onBoarding, _setup)
+        Fields.Add(new ServerInstallationField(_operations, _setup)
             .WhenFieldChanged(ReactiveCommand.CreateFromTask(OnRequestRefresh))
             .SetTitle(Resources.SettingServerInstanceCount)
             .SetDescription(Resources.SettingServerInstanceCountText)
         );
-        Fields.Add(new AppDataDirectoryField(_onBoarding, _setup)
+        Fields.Add(new AppDataDirectoryField(_operations, _setup)
             .SetTitle(Resources.OnBoardingDataDirectory)
             .SetDescription(Resources.OnBoardingDataDirectorySub)
         );

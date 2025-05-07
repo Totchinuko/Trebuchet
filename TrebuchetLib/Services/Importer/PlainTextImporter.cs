@@ -2,7 +2,7 @@ using System.Text;
 
 namespace TrebuchetLib.Services.Importer;
 
-public class PlainTextImporter(IAppModListFiles files) : ITrebuchetImporter
+public class PlainTextImporter(AppSetup setup) : ITrebuchetImporter
 {
     public ModlistExport ParseImport(string import)
     {
@@ -35,11 +35,9 @@ public class PlainTextImporter(IAppModListFiles files) : ITrebuchetImporter
     public string Export(ModListProfile profile)
     {
         StringBuilder builder = new();
-        string path;
         foreach (var mod in profile.Modlist)
         {
-            path = mod;
-            if (!files.ResolveMod(ref path))
+            if (!setup.TryGetModPath(mod, out var path))
                 throw new TrebException($"Could not resolve mod {mod}");
             builder.AppendLine(path);
         }

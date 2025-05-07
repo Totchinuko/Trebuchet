@@ -11,12 +11,12 @@ namespace Trebuchet.ViewModels;
 
 public class WorkshopModFile : ReactiveObject, IPublishedModFile
 {
-    public WorkshopModFile(string path, PublishedFile file, UGCFileStatus status)
+    public WorkshopModFile(PublishedMod file, UGCFileStatus status, string? path = null)
     {
         IconClasses.Add(@"ModIcon");
         StatusClasses.Add(@"ModStatus");
-        FilePath = path;
-        PublishedId = file.PublishedFileID;
+        FilePath = path ?? string.Empty;
+        PublishedId = file.PublishedFileId;
         Title = file.Title;
         AppId = file.ConsumerAppId;
         var updateDate = Tools.UnixTimeStampToDateTime(file.TimeUpdated).ToLocalTime();
@@ -25,16 +25,16 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         IconToolTip = file.ConsumerAppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = file.FileSize;
         Status = status;
-        GetStatusElements(Status, File.Exists(path), out var label, out var xamlClass);
+        GetStatusElements(out var label, out var xamlClass);
         LastUpdate = label;
         StatusClasses.Add(xamlClass);
     }
     
-    public WorkshopModFile(string path, WorkshopSearchResult file, UGCFileStatus status)
+    public WorkshopModFile(WorkshopSearchResult file, UGCFileStatus status, string? path = null)
     {
         IconClasses.Add(@"ModIcon");
         StatusClasses.Add(@"ModStatus");
-        FilePath = path;
+        FilePath = path ?? string.Empty;
         PublishedId = file.PublishedFileId;
         Title = file.Title;
         AppId = file.AppId;
@@ -43,16 +43,16 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         IconToolTip = file.AppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = (long)file.Size;
         Status = status;
-        GetStatusElements(Status, File.Exists(path), out var label, out var xamlClass);
+        GetStatusElements(out var label, out var xamlClass);
         LastUpdate = label;
         StatusClasses.Add(xamlClass);
     }
     
-    public WorkshopModFile(string path, WorkshopModFile file)
+    public WorkshopModFile(WorkshopModFile file, string? path = null)
     {
         IconClasses.Add(@"ModIcon");
         StatusClasses.Add(@"ModStatus");
-        FilePath = path;
+        FilePath = path ?? string.Empty;
         PublishedId = file.PublishedId;
         Title = file.Title;
         AppId = file.AppId;
@@ -61,7 +61,7 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         IconClasses.Add(file.AppId == Constants.AppIDTestLiveClient ? @"TestLive" : @"Live");
         IconToolTip = file.AppId == Constants.AppIDTestLiveClient ? Resources.TestLiveMod : Resources.LiveMod;
         FileSize = file.FileSize;
-        GetStatusElements(Status, File.Exists(path), out var label, out var xamlClass);
+        GetStatusElements(out var label, out var xamlClass);
         LastUpdate = label;
         StatusClasses.Add(xamlClass);
     }
@@ -84,16 +84,16 @@ public class WorkshopModFile : ReactiveObject, IPublishedModFile
         return PublishedId.ToString();
     }
 
-    private void GetStatusElements(UGCFileStatus status, bool fileExists, out string label, out string xamlClass)
+    private void GetStatusElements(out string label, out string xamlClass)
     {
-        if (!fileExists)
+        if (string.IsNullOrEmpty(FilePath) || !File.Exists(FilePath))
         {
             label = @$"{Resources.Missing} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()}";
             xamlClass = @"Missing";
             return;
         }
 
-        switch (status.Status)
+        switch (Status.Status)
         {
             case UGCStatus.Corrupted:
                 label = @$"{Resources.Corrupted} - {Resources.LastUpdate}: {LastDateUpdate.Humanize()} ({FileSize.Bytes().Humanize()})";

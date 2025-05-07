@@ -23,6 +23,7 @@ namespace Trebuchet.ViewModels.Panels
         public ModListPanel(
             ModListViewModel modList,
             AppFiles appFiles,
+            AppSetup setup,
             UIConfig uiConfig, 
             TaskBlocker blocker,
             DialogueBox box,
@@ -34,6 +35,7 @@ namespace Trebuchet.ViewModels.Panels
             ModList.ModListChanged += OnModListChanged;
             
             _appFiles = appFiles;
+            _setup = setup;
             _uiConfig = uiConfig;
             _box = box;
             _importer = importer;
@@ -50,7 +52,7 @@ namespace Trebuchet.ViewModels.Panels
 
             Workshop = ReactiveCommand.Create(OnExploreWorkshop);
             EditAsText = ReactiveCommand.CreateFromTask(OnEditModListAsText);
-            RefreshList = ReactiveCommand.CreateFromTask(() => ModList.ForceLoadModList(_profile.Modlist));
+            RefreshList = ReactiveCommand.CreateFromTask(() => ModList.SetList(_profile.Modlist, true));
             DropFiles = ReactiveCommand.Create<List<IStorageItem>?>(OnDropFiles);
 
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
@@ -61,6 +63,7 @@ namespace Trebuchet.ViewModels.Panels
             }, canDownloadMods);
         }
         private readonly AppFiles _appFiles;
+        private readonly AppSetup _setup;
         private readonly UIConfig _uiConfig;
         private readonly DialogueBox _box;
         private readonly ModlistImporter _importer;
@@ -104,7 +107,7 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogDebug(@"Display panel");
             if (!_needRefresh) return;
             _needRefresh = false;
-            await ModList.SetList(_profile.Modlist);
+            await ModList.SetList(_profile.Modlist, false);
         }
 
         private void OnDropFiles(List<IStorageItem>? files)
@@ -129,7 +132,7 @@ namespace Trebuchet.ViewModels.Panels
             _uiConfig.CurrentModlistProfile = profile.Uri.OriginalString;
             _uiConfig.SaveFile();
             _profile = _appFiles.Mods.Get(profile);
-            await ModList.SetList(_profile.Modlist);
+            await ModList.SetList(_profile.Modlist, false);
         }
 
         private void OnExploreWorkshop()
@@ -145,7 +148,7 @@ namespace Trebuchet.ViewModels.Panels
      
         private async Task OnEditModListAsText()
         {
-            var modList = _appFiles.Mods.ResolveMods(_profile.Modlist, false);
+            var modList = _setup.GetModsPath(_profile.Modlist, false);
             var editor = new OnBoardingModlistImport(string.Join(Environment.NewLine, modList));
             
             while (true)
@@ -155,7 +158,7 @@ namespace Trebuchet.ViewModels.Panels
                 try
                 {
                     var parsed = _importer.Import(editor.Value, ImportFormats.Txt);
-                    await ModList.SetList(parsed.Modlist);
+                    await ModList.SetList(parsed.Modlist, false);
                     return;
                 }
                 catch(Exception ex)

@@ -12,9 +12,9 @@ namespace Trebuchet.ViewModels.SettingFields;
 
 public class ClientInstallationField : DescriptiveElement<ClientInstallationField>
 {
-    public ClientInstallationField(OnBoarding onBoarding, AppSetup setup)
+    public ClientInstallationField(Operations operations, AppSetup setup)
     {
-        _onBoarding = onBoarding;
+        _operations = operations;
         _setup = setup;
 
         var isInstalled = this.WhenAnyValue(x => x.Installed);
@@ -35,7 +35,7 @@ public class ClientInstallationField : DescriptiveElement<ClientInstallationFiel
         ManageFiles = setup.Config.ManageClient;
     }
     
-    private readonly OnBoarding _onBoarding;
+    private readonly Operations _operations;
     private readonly AppSetup _setup;
     private bool _installed;
     private bool _manageFiles;
@@ -79,7 +79,7 @@ public class ClientInstallationField : DescriptiveElement<ClientInstallationFiel
     {
         try
         {
-            var success = await _onBoarding.OnBoardingFindConanExile(force:true);
+            var success = await _operations.OnBoardingFindConanExile(force:true);
             if (success)
             {
                 _setup.Config.SaveFile();
@@ -96,7 +96,7 @@ public class ClientInstallationField : DescriptiveElement<ClientInstallationFiel
         try
         {
             _setup.Config.ManageClient = false;
-            var success = await _onBoarding.OnBoardingApplyConanManagement();
+            var success = await _operations.OnBoardingApplyConanManagement();
             if (success)
             {
                 _setup.Config.ClientPath = string.Empty;

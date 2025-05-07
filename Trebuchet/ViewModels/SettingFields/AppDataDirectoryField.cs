@@ -11,9 +11,9 @@ namespace Trebuchet.ViewModels.SettingFields;
 
 public class AppDataDirectoryField : DescriptiveElement<AppDataDirectoryField>
 {
-    public AppDataDirectoryField(OnBoarding onBoarding, AppSetup setup)
+    public AppDataDirectoryField(Operations operations, AppSetup setup)
     {
-        _onBoarding = onBoarding;
+        _operations = operations;
         _setup = setup;
 
         var isCustomized = this.WhenAnyValue(x => x.Customized);
@@ -28,7 +28,7 @@ public class AppDataDirectoryField : DescriptiveElement<AppDataDirectoryField>
         DataDirectory = setup.Config.DataDirectory;
     }
     
-    private readonly OnBoarding _onBoarding;
+    private readonly Operations _operations;
     private readonly AppSetup _setup;
     private bool _customized;
     private string _dataDirectory = string.Empty;
@@ -63,7 +63,7 @@ public class AppDataDirectoryField : DescriptiveElement<AppDataDirectoryField>
     {
         try
         {
-            var success = await _onBoarding.OnBoardingChangeDataDirectory();
+            var success = await _operations.OnBoardingChangeDataDirectory();
             if (success)
             {
                 _setup.Config.SaveFile();

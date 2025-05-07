@@ -2,16 +2,14 @@
 using Microsoft.Extensions.Logging;
 using SteamKit2;
 using SteamKit2.Internal;
+using SteamWorksWebAPI;
+using SteamWorksWebAPI.Interfaces;
+using PublishedFile = SteamKit2.Internal.PublishedFile;
 
 namespace TrebuchetLib.Services
 {
-    public class Steam : IDebugListener
+    public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     {
-        private readonly ILogger<Steam> _logger;
-        private readonly AppSetup _appSetup;
-        private readonly IProgressCallback<DepotDownloader.Progress> _progress;
-        private readonly Steam3Session _session;
-
         public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgressCallback<DepotDownloader.Progress> progress)
         {
             _logger = logger;
@@ -29,6 +27,13 @@ namespace TrebuchetLib.Services
             _session.Connected += (_, _) => Connected?.Invoke(this, EventArgs.Empty);
             _session.Disconnected += (_, _) => Disconnected?.Invoke(this, EventArgs.Empty);
         }
+        
+        private readonly ILogger<Steam> _logger;
+        private readonly AppSetup _appSetup;
+        private readonly IProgressCallback<DepotDownloader.Progress> _progress;
+        private readonly Steam3Session _session;
+        private readonly Dictionary<ulong, SteamWorksWebAPI.PublishedFile> _publishedFiles = [];
+        private DateTime _lastCacheClear = DateTime.MinValue;
 
         public event EventHandler? Connected;
         public event EventHandler? Disconnected;
@@ -59,6 +64,61 @@ namespace TrebuchetLib.Services
         {
             ContentDownloader.Config.Progress = _progress;
         }
+        
+        public async Task<List<PublishedMod>> RequestModDetails(List<ulong> list)
+        {
+            var results = GetCache(list);
+            if (list.Count <= 0) return GetPublishedModFiles(results).ToList();
+            using(_logger.BeginScope((@"ModList", list)))
+                _logger.LogInformation(@"Seeking mod details");
+            try
+            {
+                var response = await SteamRemoteStorage.GetPublishedFileDetails(new GetPublishedFileDetailsQuery(list),
+                    CancellationToken.None);
+                foreach (var r in response.PublishedFileDetails)
+                {
+                    results.Add(r);
+                    _publishedFiles[r.PublishedFileID] = r;
+                }
+
+                return GetPublishedModFiles(results).ToList();
+            }
+            catch (OperationCanceledException)
+            {
+            }
+            catch (HttpRequestException ex)
+            {
+                _logger.LogWarning(ex, @"Could not download mod infos");
+            }
+
+            return [];
+        }
+
+        public void InvalidateCache()
+        {
+            _logger.LogInformation(@"Invalidating mod details cache");
+            _publishedFiles.Clear();
+            _lastCacheClear = DateTime.UtcNow;
+        }
+        
+        public List<SteamWorksWebAPI.PublishedFile> GetCache(List<ulong> list)
+        {
+            List<SteamWorksWebAPI.PublishedFile> results = [];
+            if ((DateTime.UtcNow - _lastCacheClear).TotalMinutes > 1.0)
+                InvalidateCache();
+            for (var i = list.Count - 1; i >= 0; i--)
+            {
+                var mod = list[i];
+                if (_publishedFiles.TryGetValue(mod, out var file))
+                {
+                    list.RemoveAt(i);
+                    results.Add(file);
+                }
+            }
+
+            return results;
+        }
+        
 
         /// <summary>
         /// Count the amount of instances currently installed. This does not verify if the files are valid, just the main binary.
@@ -183,6 +243,33 @@ namespace TrebuchetLib.Services
                 _logger.LogWarning(ex, "Failed");
                 return null;
             }
+        }
+
+        public IEnumerable<PublishedMod> GetPublishedModFiles(List<SteamWorksWebAPI.PublishedFile> files)
+        {
+            var updated = GetUpdatedUGCFileIDs(files.GetManifestKeyValuePairs()).ToList();
+
+            foreach (var file in files)
+            {
+                var status = updated
+                    .FirstOrDefault(x => x.PublishedId == file.PublishedFileID, UGCFileStatus.Default(0));
+                if (status.PublishedId != 0)
+                    yield return new PublishedMod(file, status);
+                else
+                    yield return new PublishedMod(file, new UGCFileStatus(file.PublishedFileID, UGCStatus.Missing));
+            }
+        }
+        
+        public List<UGCFileStatus> CheckModsForUpdate(ICollection<(ulong pubId, ulong manifestId)> mods)
+        {
+            var updated = GetUpdatedUGCFileIDs(mods).ToList();
+        
+            foreach (var (pubId, _) in mods)
+            {
+                if (!_appSetup.TryGetModPath(pubId.ToString(), out _) && updated.All(x => x.PublishedId != pubId))
+                    updated.Add(new UGCFileStatus(pubId, UGCStatus.Missing));
+            } 
+            return updated;
         }
 
         /// <summary>
@@ -410,6 +497,20 @@ namespace TrebuchetLib.Services
         {
             obj = obj.Replace(Environment.NewLine, string.Empty);
             _logger.LogInformation($"[ContentDownloader] {obj}");
+        }
+
+        public async ValueTask DisposeAsync()
+        {
+            Disconnect();
+            while (IsConnected)
+                await Task.Delay(25);
+        }
+
+        public void Dispose()
+        {
+            Disconnect();
+            while (IsConnected)
+                Task.Delay(25);
         }
     }
 }

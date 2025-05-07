@@ -5,14 +5,12 @@ namespace TrebuchetLib.Services.Importer;
 public class ModlistImporter
 {
 
-    public ModlistImporter(AppFiles files)
+    public ModlistImporter(AppSetup setup)
     {
-        _files = files;
         _importers.Add(ImportFormats.Json, new JsonImporter());
-        _importers.Add(ImportFormats.Txt, new PlainTextImporter(files.Mods));
+        _importers.Add(ImportFormats.Txt, new PlainTextImporter(setup));
     }
     
-    private readonly AppFiles _files;
     private Dictionary<ImportFormats, ITrebuchetImporter> _importers = [];
 
     public ImportFormats GetFormat(string data)

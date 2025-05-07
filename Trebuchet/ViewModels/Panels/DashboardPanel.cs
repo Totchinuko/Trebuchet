@@ -23,19 +23,21 @@ namespace Trebuchet.ViewModels.Panels
             AppSetup setup, 
             UIConfig uiConfig, 
             AppFiles appFiles, 
-            SteamApi steamApi,
             Launcher launcher, 
             DialogueBox box,
             TaskBlocker blocker,
+            Steam steam,
+            Operations operations,
             ILogger<DashboardPanel> logger) 
         {
             _setup = setup;
             _uiConfig = uiConfig;
             _appFiles = appFiles;
-            _steamApi = steamApi;
             _launcher = launcher;
             _box = box;
             _blocker = blocker;
+            _steam = steam;
+            _operations = operations;
             _logger = logger;
             CanBeOpened = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
 
@@ -60,10 +62,11 @@ namespace Trebuchet.ViewModels.Panels
         private readonly AppSetup _setup;
         private readonly UIConfig _uiConfig;
         private readonly AppFiles _appFiles;
-        private readonly SteamApi _steamApi;
         private readonly Launcher _launcher;
         private readonly DialogueBox _box;
         private readonly TaskBlocker _blocker;
+        private readonly Steam _steam;
+        private readonly Operations _operations;
         private readonly ILogger<DashboardPanel> _logger;
         private DateTime _lastUpdateCheck = DateTime.MinValue;
         private bool _canBeOpened;
@@ -119,7 +122,7 @@ namespace Trebuchet.ViewModels.Panels
                 var mods = modlists.Distinct()
                     .SelectMany(l => l.GetModsFromList())
                     .Distinct().ToList();
-                await _steamApi.UpdateMods(mods);
+                await _operations.UpdateMods(mods);
                 _lastUpdateCheck = DateTime.MinValue;
                 await OnRequestRefresh();
             }
@@ -138,7 +141,7 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogInformation(@"Updating servers");
             try
             {
-                await _steamApi.UpdateServers();
+                await _operations.UpdateServers();
                 await RefreshPanel();
                 _lastUpdateCheck = DateTime.MinValue;
             }
@@ -191,7 +194,7 @@ namespace Trebuchet.ViewModels.Panels
                 if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
                 {
                     var modlist = Client.SelectedModlist.ModList.GetModsFromList().ToList();
-                    await _steamApi.UpdateMods(modlist);
+                    await _operations.UpdateMods(modlist);
                 }
 
                 _setup.Config.SelectedClientProfile = Client.SelectedProfile.Uri.OriginalString;
@@ -249,8 +252,8 @@ namespace Trebuchet.ViewModels.Panels
                 {
                     _logger.LogInformation(@"Update before launch");
                     var modlist = dashboard.SelectedModlist.ModList.GetModsFromList().ToList();
-                    await _steamApi.UpdateServers();
-                    await _steamApi.UpdateMods(modlist);
+                    await _operations.UpdateServers();
+                    await _operations.UpdateMods(modlist);
                     _lastUpdateCheck = DateTime.MinValue;
                 }
 
@@ -276,6 +279,8 @@ namespace Trebuchet.ViewModels.Panels
 
         public async Task TickPanel()
         {
+            await _launcher.Tick();
+            
             await Client.ProcessRefresh(_launcher.GetClientProcess(), _uiConfig.DisplayProcessPerformance);
             foreach (var instance in _launcher.GetServerProcesses())
                 await Instances[instance.Instance].ProcessRefresh(instance, _uiConfig.DisplayProcessPerformance);
@@ -284,7 +289,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _lastUpdateCheck = DateTime.UtcNow;
                 await CheckModUpdatesAsync();
-                ServerUpdateAvailable = await _steamApi.CheckServerUpdate();
+                ServerUpdateAvailable = await _operations.CheckServerUpdate();
             }
         }
 
@@ -293,7 +298,7 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogDebug(@"Refresh panel");
             CanBeOpened = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
             Client.CanUseDashboard = Tools.IsClientInstallValid(_setup.Config);
-            int installedCount = _steamApi.GetInstalledServerInstanceCount();
+            int installedCount = _operations.GetInstalledServerInstanceCount();
             foreach (var instance in Instances)
             {
                 instance.CanUseDashboard = _setup.Config.ServerInstanceCount > instance.Instance &&
@@ -376,7 +381,7 @@ namespace Trebuchet.ViewModels.Panels
             dashboard.Modlists.AddRange(_appFiles.Sync.GetList().Select(x => new ModListRefViewModel(x)));
         }
 
-        private void RefreshClientNeededUpdates(List<UGCFileStatus> neededUpdates)
+        private void RefreshClientNeededUpdates(List<PublishedMod> neededUpdates)
         {
             if (Client.SelectedModlist is null)
             {
@@ -385,19 +390,18 @@ namespace Trebuchet.ViewModels.Panels
             }
             var mods = Client.SelectedModlist.ModList.GetModsFromList().ToList();
             Client.UpdateNeeded = neededUpdates
-                .Where(x => x.Status != UGCStatus.UpToDate)
-                .Select(x => x.PublishedId)
+                .Select(x => x.PublishedFileId)
                 .Intersect(mods)
                 .ToList();
         }
 
-        private void RefreshServerNeededUpdates(List<UGCFileStatus> neededUpdates)
+        private void RefreshServerNeededUpdates(List<PublishedMod> neededUpdates)
         {
             foreach (var dashboard in Instances)
                 RefreshServerNeededUpdates(dashboard, neededUpdates);
         }
 
-        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, IEnumerable<UGCFileStatus> neededUpdates)
+        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<PublishedMod> neededUpdates)
         {
             if (dashboard.SelectedModlist is null)
             {
@@ -406,8 +410,7 @@ namespace Trebuchet.ViewModels.Panels
             }
             var mods = dashboard.SelectedModlist.ModList.GetModsFromList().ToList();
             dashboard.UpdateNeeded = neededUpdates
-                .Where(x => x.Status != UGCStatus.UpToDate)
-                .Select(x => x.PublishedId)
+                .Select(x => x.PublishedFileId)
                 .Intersect(mods)
                 .ToList();
         }
@@ -428,12 +431,12 @@ namespace Trebuchet.ViewModels.Panels
                 var mods = modlists.Distinct()
                     .SelectMany(x => x.GetModsFromList())
                     .Distinct().ToList();
-                var response = await _steamApi.RequestModDetails(mods);
-                var neededUpdates = _steamApi.CheckModsForUpdate(response.GetManifestKeyValuePairs().ToList())
-                    .Where(x => x.Status != UGCStatus.UpToDate).ToList();
-                RefreshClientNeededUpdates(neededUpdates);
-                RefreshServerNeededUpdates(neededUpdates);
-                AnyModUpdate = neededUpdates.Count > 0;
+                var response = (await _steam.RequestModDetails(mods))
+                    .Where(x => x.Status.Status != UGCStatus.UpToDate)
+                    .ToList();
+                RefreshClientNeededUpdates(response);
+                RefreshServerNeededUpdates(response);
+                AnyModUpdate = response.Count > 0;
             }
             catch (Exception tex)
             {
@@ -500,7 +503,7 @@ namespace Trebuchet.ViewModels.Panels
                     .SelectMany(l => l.GetModsFromList())
                     .Distinct().ToList();
                 
-                await _steamApi.VerifyFiles(mods);
+                await _operations.VerifyFiles(mods);
             }
             catch (Exception tex)
             {

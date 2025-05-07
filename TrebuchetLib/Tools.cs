@@ -7,6 +7,7 @@ using System.Security.Principal;
 using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using SteamWorksWebAPI;
 using tot_lib;
 
 namespace TrebuchetLib;
@@ -587,6 +588,20 @@ public static class Tools
             dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Allow));
             // Set the access control
             file.SetAccessControl(dSecurity);
+        }
+    }
+    
+    public static IEnumerable<(ulong, ulong)> GetManifestKeyValuePairs(this List<PublishedFile> list)
+    {
+        return list.AsEnumerable().GetManifestKeyValuePairs();
+    }
+
+    public static IEnumerable<(ulong, ulong)> GetManifestKeyValuePairs(this IEnumerable<PublishedFile> list)
+    {
+        foreach (var file in list)
+        {
+            if (ulong.TryParse(file.HcontentFile, out var manifest))
+                yield return (file.PublishedFileID, manifest);
         }
     }
 }
