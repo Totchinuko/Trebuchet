@@ -28,7 +28,6 @@ public class ModListViewModel : ReactiveObject
         IProgressCallback<DepotDownloader.Progress> progress,
         DialogueBox dialogueBox)
     {
-        _operations = operations;
         _logger = logger;
         _modFileFactory = modFileFactory;
         _steam = steam;
@@ -40,7 +39,6 @@ public class ModListViewModel : ReactiveObject
         operations.ModFileChanged += OnModFileChanged;
     }
 
-    private readonly Operations _operations;
     private readonly ILogger _logger;
     private readonly ModFileFactory _modFileFactory;
     private readonly Steam _steam;
@@ -89,10 +87,11 @@ public class ModListViewModel : ReactiveObject
         _logger.LogInformation(@"Updating mods");
         try
         {
-            await _operations.UpdateMods(mods);
+            await _steam.UpdateMods(mods);
             using(List.SuspendNotifications())
                 await QueryFromWorkshop(List, true);
         }
+        catch(OperationCanceledException){}
         catch (Exception tex)
         {
             _logger.LogError(tex, @"Failed");
@@ -132,7 +131,10 @@ public class ModListViewModel : ReactiveObject
         if (List.Any(x => x is IPublishedModFile pub && pub.PublishedId == mod.PublishedFileId)) return;
         _logger.LogInformation(@"Adding mod {mod} from workshop", mod.PublishedFileId);
         IsLoading = true;
-        List.Add((await _modFileFactory.Create(mod)).SetActions(RemoveModFile, UpdateModFile).Build());
+        List.Add(_modFileFactory.Create(mod.PublishedFileId.ToString())
+            .SetActions(RemoveModFile, UpdateModFile).Build()
+        );
+        await QueryFromWorkshop(List, false);
         IsLoading = false;
         Size = CalculateModListSize().Bytes().Humanize();
     }

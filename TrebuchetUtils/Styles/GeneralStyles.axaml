@@ -120,6 +120,10 @@
                                 <ComboBoxItem>Text Item 9</ComboBoxItem>
                             </ComboBox>
                             <CheckBox>Test</CheckBox>
+                            <TimePicker UseSeconds="True"
+                                        SecondIncrement="10"
+                                        ClockIdentifier="24HourClock"
+                                        MinuteIncrement="5"/>
                             <ProgressBar Classes="large" Value="{Binding #Slider.Value}" Minimum="0.0" Maximum="1.0"
                                          Margin="0 0 0 12" />
                             <ProgressBar Value="0.5" Minimum="0.0" Maximum="1.0" />

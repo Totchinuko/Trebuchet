@@ -70,7 +70,7 @@ public class AppSyncFiles(AppSetup setup) : IAppSyncFiles
             string path = mod;
             if (!ResolveMod(ref path))
                 if (throwIfFailed)
-                    throw new TrebException($"Could not resolve mod {path}.");
+                    throw new Exception($"Could not resolve mod {path}.");
                 else yield return mod;
             else
                 yield return path;

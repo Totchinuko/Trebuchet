@@ -19,7 +19,6 @@ using SteamKit2.Internal;
 using tot_lib;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
-using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels;
 using Trebuchet.ViewModels.InnerContainer;

@@ -12,8 +12,6 @@ using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using tot_lib;
 using Trebuchet.Assets;
-using Trebuchet.Services.TaskBlocker;
-using Trebuchet.Utils;
 using Trebuchet.ViewModels;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
@@ -26,7 +24,7 @@ public class Operations : IDisposable
     public Operations(AppFiles appFiles, 
         AppSetup setup, 
         DialogueBox dialogueBox,
-        TaskBlocker.TaskBlocker taskBlocker, 
+        TaskBlocker taskBlocker, 
         ILogger<Operations> logger,
         IUpdater updater,
         Steam steam)
@@ -34,7 +32,6 @@ public class Operations : IDisposable
         _appFiles = appFiles;
         _setup = setup;
         _dialogueBox = dialogueBox;
-        _taskBlocker = taskBlocker;
         _logger = logger;
         _updater = updater;
         _steam = steam;
@@ -51,7 +48,6 @@ public class Operations : IDisposable
     private readonly AppFiles _appFiles;
     private readonly AppSetup _setup;
     private readonly DialogueBox _dialogueBox;
-    private readonly TaskBlocker.TaskBlocker _taskBlocker;
     private readonly ILogger<Operations> _logger;
     private readonly IUpdater _updater;
     private readonly Steam _steam;
@@ -70,68 +66,6 @@ public class Operations : IDisposable
         return await OnBoardingApplyConanManagement();
     }
 
-    public async Task UpdateMods(List<ulong> list)
-    {
-        using(_logger.BeginScope((@"ModList", list)))
-            _logger.LogInformation(@"Updating mods");
-        var task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateModsLabel));
-        try
-        {
-            await _steam.UpdateMods(list, task.Cts);
-        }
-        catch (OperationCanceledException){}
-        finally
-        {
-            task.Release();
-        }
-    }
-
-    public async Task UpdateServers()
-    {
-        _logger.LogInformation(@"Updating servers");
-        var task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.UpdateServersLabel));
-        try
-        {
-            await _steam.UpdateServerInstances(task.Cts);
-        }
-        catch (OperationCanceledException){}
-        finally
-        {
-            task.Release();
-        }
-    }
-
-    public async Task VerifyFiles(IEnumerable<ulong> modlist)
-    {
-        var task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyServersLabel));
-        _logger.LogInformation(@"Verifying server files");
-        _steam.ClearCache();
-        _steam.InvalidateCache();
-        try
-        {
-            await _steam.UpdateServerInstances(task.Cts);
-        }
-        catch (OperationCanceledException){}
-        finally
-        {
-            task.Release();
-        }
-        
-        task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.VerifyModsLabel));
-        var enumerable = modlist.ToList();
-        using(_logger.BeginScope((@"ModList", enumerable)))
-            _logger.LogInformation(@"Verifying mod files");
-        try
-        {
-            await _steam.UpdateMods(enumerable, task.Cts);
-        }
-        catch (OperationCanceledException) {}
-        finally
-        {
-            task.Release();
-        }
-    }
-
     public int CountUnusedMods()
     {
         var installedMods = _steam.GetUGCFileIdsFromStorage();
@@ -143,7 +77,6 @@ public class Operations : IDisposable
 
     public async Task RemoveUnusedMods()
     {
-        var task = await _taskBlocker.EnterAsync(new SteamDownload(Resources.TrimmingUnusedMods));
         try
         {
             var installedMods = _steam.GetUGCFileIdsFromStorage();
@@ -161,10 +94,11 @@ public class Operations : IDisposable
                 File.Delete(path);
             }
         }
-        catch (OperationCanceledException){}
-        finally
+        catch (OperationCanceledException) {}
+        catch (Exception ex)
         {
-            task.Release();
+            _logger.LogError(ex, @"Failed to remove unused mods");
+            await _dialogueBox.OpenErrorAsync(ex.Message);
         }
     }
 
@@ -365,6 +299,8 @@ public class Operations : IDisposable
 
     public async Task<bool> OnBoardingServerInstanceSelection()
     {
+        if (_steam.Status != SteamStatus.StandBy) return false;
+        
         var choice = new OnBoardingIntSlider(
                 Resources.OnBoardingServerInstanceCount,
                 Resources.OnBoardingServerInstanceCountSub,
@@ -387,7 +323,7 @@ public class Operations : IDisposable
         _dialogueBox.Show(progress);
         var progressConverter = new ProgressConverter(progress);
         using var downProgress = SetDownloaderProgress(progressConverter);
-        await UpdateServers();
+        await _steam.UpdateServerInstances();
         progress.Progress = 1.0;
         progress.Close();
         return true;

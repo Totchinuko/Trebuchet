@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using ReactiveUI;
 using tot_lib;
 using Trebuchet.Assets;
-using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Services;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
@@ -38,7 +38,7 @@ namespace Trebuchet.ViewModels
         private List<ServerProfileRef> _profiles = [];
         private ModListRefViewModel? _selectedModlist;
         private ServerProfileRef? _selectedProfile;
-        private List<ulong> _updateNeeded = [];
+        private bool _updateNeeded = false;
 
         public ServerInstanceDashboard(int instance, IProcessStats stats, TaskBlocker blocker, DialogueBox box)
         {
@@ -125,7 +125,7 @@ namespace Trebuchet.ViewModels
             set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
         }
 
-        public List<ulong> UpdateNeeded
+        public bool UpdateNeeded
         {
             get => _updateNeeded;
             set => this.RaiseAndSetIfChanged(ref _updateNeeded, value);

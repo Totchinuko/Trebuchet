@@ -489,7 +489,7 @@ public static class AppFilesEx
         {
             if (!setup.TryGetModPath(mod, out var path))
                 if (throwIfFailed)
-                    throw new TrebException($"Could not resolve mod {path}.");
+                    throw new Exception($"Could not resolve mod {path}.");
                 else yield return mod;
             else
                 yield return path;

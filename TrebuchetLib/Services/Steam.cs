@@ -34,6 +34,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     private readonly Dictionary<ulong, SteamWorksWebAPI.PublishedFile> _publishedFiles = [];
     private DateTime _lastCacheClear = DateTime.MinValue;
     private SteamStatus _status = SteamStatus.StandBy;
+    private CancellationTokenSource? _cts;
 
     public event EventHandler? Connected;
     public event EventHandler? Disconnected;
@@ -79,7 +80,6 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         
     public async Task<List<PublishedMod>> RequestModDetails(List<ulong> list)
     {
-        using var status = EnterStatus(SteamStatus.QueryingModDetails);
         var results = GetCache(list);
         if (list.Count <= 0) return GetPublishedModFiles(results).ToList();
         using(_logger.BeginScope((@"ModList", list)))
@@ -302,17 +302,15 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
             Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
     }
 
-
-
     /// <summary>
     /// Update a list of mods from the steam workshop.
     /// </summary>
     /// <param name="enumerable"></param>
     /// <param name="cts"></param>
     /// <returns></returns>
-    public async Task UpdateMods(IEnumerable<ulong> enumerable, CancellationTokenSource cts)
+    public async Task UpdateMods(IEnumerable<ulong> enumerable)
     {
-        using var status = EnterStatus(SteamStatus.UpdatingMods);
+        using var status = EnterStatus(SteamStatus.UpdatingMods, out var cts);
         if (!await WaitSteamConnectionAsync()) return;
 
         UpdateDownloaderConfig();
@@ -335,10 +333,10 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     /// Update instance 0 using steamcmd, then copy the files of instance0 to update other instances.
     /// </summary>
     /// <returns></returns>
-    public async Task UpdateServerInstances(CancellationTokenSource cts)
+    public async Task UpdateServerInstances()
     {
         if (_appSetup.Config.ServerInstanceCount <= 0) return;
-        using var status = EnterStatus(SteamStatus.UpdatingServers);
+        using var status = EnterStatus(SteamStatus.UpdatingServers, out var cts);
 
         if (!await WaitSteamConnectionAsync()) return;
 
@@ -375,6 +373,12 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         while (IsConnected)
             Task.Delay(25);
     }
+    
+    public void CancelOperation()
+    {
+        if (_cts is null || Status == SteamStatus.StandBy) return;
+        _cts.Cancel();
+    }
         
     private void OnStatusChanged(SteamStatus e)
     {
@@ -388,7 +392,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         return IsConnected;
     }
 
-    private IDisposable EnterStatus(SteamStatus status)
+    private IDisposable EnterStatus(SteamStatus status, out CancellationTokenSource cts)
     {
         if (status == SteamStatus.StandBy)
             throw new ArgumentException(nameof(status));
@@ -397,9 +401,13 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
             throw new OperationCanceledException("Operation is already on going");
 
         Status = status;
+        _cts = new CancellationTokenSource();
+        cts = _cts;
         return new DisposableAction(() =>
         {
             Status = SteamStatus.StandBy;
+            _cts.Dispose();
+            _cts = null;
         });
     }
 

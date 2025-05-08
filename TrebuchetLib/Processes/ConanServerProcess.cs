@@ -16,12 +16,14 @@ internal sealed class ConanServerProcess : IConanServerProcess
     }
 
     private DateTime _lastResponse;
+    private DateTime _shutdownCallTime;
     private int _maxPlayers;
     private bool _online;
     private int _players;
     private ProcessState _state;
     private LogReader _logReader;
     private bool _hasTriedRConShutdown;
+    private bool _hasTriedHandleShutdown;
 
     public event EventHandler<ProcessState>? StateChanged; 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -118,7 +120,8 @@ internal sealed class ConanServerProcess : IConanServerProcess
         switch (State)
         {
             case ProcessState.NEW:
-                State = ProcessState.RUNNING;
+                if(!Process.HasExited)
+                    State = ProcessState.RUNNING;
                 break;
             case ProcessState.RUNNING:
                 if (Online) State = ProcessState.ONLINE;
@@ -135,9 +138,14 @@ internal sealed class ConanServerProcess : IConanServerProcess
                 break;
             case ProcessState.STOPPING:
                 if (Process.HasExited) State = ProcessState.STOPPED;
+                else SendShutdown();
                 break;
             case ProcessState.FAILED:
                 State = ProcessState.CRASHED;
+                break;
+            case ProcessState.RESTARTING:
+                if (Process.HasExited) State = ProcessState.NEW;
+                else SendShutdown();
                 break;
         }
     }
@@ -161,15 +169,39 @@ internal sealed class ConanServerProcess : IConanServerProcess
 
     public Task StopAsync()
     {
+        if (State is ProcessState.STOPPING or ProcessState.STOPPED or ProcessState.RESTARTING) 
+            return Task.CompletedTask;
         State = ProcessState.STOPPING;
+        SendShutdown();
+        return Task.CompletedTask;
+    }
+
+    public Task RestartAsync()
+    {
+        if (State is ProcessState.STOPPING or ProcessState.STOPPED or ProcessState.RESTARTING) 
+            return Task.CompletedTask;
+        State = ProcessState.RESTARTING;
+        SendShutdown();
+        return Task.CompletedTask;
+    }
+
+    private void SendShutdown()
+    {
+        if ((DateTime.UtcNow - _shutdownCallTime) < TimeSpan.FromMinutes(3)) return;
+        _shutdownCallTime = DateTime.UtcNow;
+        
         if (RCon is not null && !_hasTriedRConShutdown)
         {
             _hasTriedRConShutdown = true;
             RCon.Send(@"shutdown", CancellationToken.None);
         }
-        else
+        else if (_hasTriedHandleShutdown)
+        {
+            _hasTriedHandleShutdown = true;
             Process.CloseMainWindow();
-        return Task.CompletedTask;
+        }
+        else
+            Process.Kill();
     }
 
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)

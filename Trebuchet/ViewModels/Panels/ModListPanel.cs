@@ -9,7 +9,7 @@ using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using tot_lib;
 using Trebuchet.Assets;
-using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Services;
 using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.Windows;
 using TrebuchetLib;

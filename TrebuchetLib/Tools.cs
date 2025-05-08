@@ -366,6 +366,7 @@ public static class Tools
         return state is 
             ProcessState.RUNNING or 
             ProcessState.STOPPING or 
+            ProcessState.RESTARTING or
             ProcessState.ONLINE or 
             ProcessState.FROZEN;
     }

@@ -60,7 +60,7 @@
                                 <TextBlock Text="{x:Static a:Resources.Kill}" />
                             </StackPanel>
                         </Button>
-                        <Border Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{Binding UpdateNeeded.Count}">
+                        <Border Margin="0,0,6,0" VerticalAlignment="Center" IsVisible="{Binding UpdateNeeded}">
                             <Button Command="{Binding UpdateModsCommand}" Classes="Base Blue Heavy Colored">
                                 <StackPanel Orientation="Horizontal">
                                     <i:Icon Value="mdi-update" Classes="Normal" Margin="0,0,6,0"/>

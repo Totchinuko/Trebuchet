@@ -2586,6 +2586,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Update check frequency.
+        /// </summary>
+        public static string SettingUpdateCheckFrequency {
+            get {
+                return ResourceManager.GetString("SettingUpdateCheckFrequency", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Update Check Interval.
         /// </summary>
         public static string SettingUpdateCheckInterval {
@@ -2690,6 +2699,15 @@ namespace Trebuchet.Assets {
         public static string StatusOnline {
             get {
                 return ResourceManager.GetString("StatusOnline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Restarting.
+        /// </summary>
+        public static string StatusRestarting {
+            get {
+                return ResourceManager.GetString("StatusRestarting", resourceCulture);
             }
         }
         

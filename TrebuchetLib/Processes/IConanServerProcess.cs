@@ -27,4 +27,6 @@ public interface IConanServerProcess : IConanProcess
     public int ZombieCheckSeconds { get; set; }
 
     Task StopAsync();
+
+    Task RestartAsync();
 }

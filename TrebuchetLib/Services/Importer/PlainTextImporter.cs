@@ -38,7 +38,7 @@ public class PlainTextImporter(AppSetup setup) : ITrebuchetImporter
         foreach (var mod in profile.Modlist)
         {
             if (!setup.TryGetModPath(mod, out var path))
-                throw new TrebException($"Could not resolve mod {mod}");
+                throw new Exception($"Could not resolve mod {mod}");
             builder.AppendLine(path);
         }
 

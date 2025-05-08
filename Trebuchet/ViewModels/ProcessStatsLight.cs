@@ -127,6 +127,8 @@ namespace Trebuchet.ViewModels
                     return Resources.StatusCrashed;
                 case ProcessState.FROZEN:
                     return Resources.StatusFrozen;
+                case ProcessState.RESTARTING:
+                    return Resources.StatusRestarting;
                 default:
                     return String.Empty;
             }

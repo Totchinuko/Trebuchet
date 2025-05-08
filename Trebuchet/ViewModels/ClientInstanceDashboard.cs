@@ -8,7 +8,7 @@ using DynamicData.Binding;
 using ReactiveUI;
 using tot_lib;
 using Trebuchet.Assets;
-using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Services;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Processes;
@@ -56,7 +56,7 @@ public sealed class ClientInstanceDashboard : ReactiveObject
     private List<ClientProfileRef> _profiles = [];
     private ModListRefViewModel? _selectedModlist;
     private ClientProfileRef? _selectedProfile;
-    private List<ulong> _updateNeeded = [];
+    private bool _updateNeeded = false;
     private bool _canUseDashboard;
     private bool _battleEye;
     private bool _connectPopupOpen;
@@ -123,7 +123,7 @@ public sealed class ClientInstanceDashboard : ReactiveObject
         set => this.RaiseAndSetIfChanged(ref _selectedProfile, value);
     }
 
-    public List<ulong> UpdateNeeded
+    public bool UpdateNeeded
     {
         get => _updateNeeded;
         set => this.RaiseAndSetIfChanged(ref _updateNeeded, value);

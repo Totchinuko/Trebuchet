@@ -1047,4 +1047,10 @@ DO NOT place it in your Steam Directory.</value>
     <data name="Undock" xml:space="preserve">
         <value>Undock</value>
     </data>
+    <data name="StatusRestarting" xml:space="preserve">
+        <value>Restarting</value>
+    </data>
+    <data name="SettingUpdateCheckFrequency" xml:space="preserve">
+        <value>Update check frequency</value>
+    </data>
 </root>

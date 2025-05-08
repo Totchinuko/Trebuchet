@@ -29,6 +29,7 @@
             <PrivateAssets Condition="'$(Configuration)' != 'Debug'">All</PrivateAssets>
         </PackageReference>
         <PackageReference Include="Avalonia.Xaml.Behaviors" Version="11.2.0.14" />
+        <PackageReference Include="Humanizer" Version="2.14.1" />
         <PackageReference Include="Projektanker.Icons.Avalonia.MaterialDesign" Version="9.6.1" />
     </ItemGroup>
 

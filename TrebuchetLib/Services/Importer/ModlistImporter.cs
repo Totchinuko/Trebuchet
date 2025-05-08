@@ -25,7 +25,7 @@ public class ModlistImporter
     public string Export(ModListProfile profile, ImportFormats format)
     {
         if (!_importers.TryGetValue(format, out var importer))
-            throw new TrebException($"No importer for the given format {format}");
+            throw new Exception($"No importer for the given format {format}");
         return importer.Export(profile);
     }
 
@@ -40,13 +40,13 @@ public class ModlistImporter
             catch{continue;}
         }
 
-        throw new TrebException("Could not import the provided data with any importers");
+        throw new Exception("Could not import the provided data with any importers");
     }
 
     public ModlistExport Import(string data, ImportFormats format)
     {
         if (!_importers.TryGetValue(format, out var importer))
-            throw new TrebException($"No importer for the given format {format}");
+            throw new Exception($"No importer for the given format {format}");
         return importer.ParseImport(data);
     }
 

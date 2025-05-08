@@ -15,6 +15,7 @@ namespace TrebuchetLib
         CRASHED,
         STOPPING,
         STOPPED,
-        FROZEN
+        FROZEN,
+        RESTARTING
     }
 }

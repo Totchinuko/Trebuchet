@@ -9,7 +9,7 @@ using TrebuchetLib;
 
 namespace Trebuchet.Services;
 
-public class ModFileBuilder(IModFile modFile, TaskBlocker.TaskBlocker blocker)
+public class ModFileBuilder(IModFile modFile, TaskBlocker blocker)
 {
     public ModFileBuilder SetActions(Func<IModFile, Task> remove, Func<IPublishedModFile, Task>? updater = null)
     {

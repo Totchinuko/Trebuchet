@@ -16,6 +16,7 @@ namespace TrebuchetLib
         private string[] _selectedServerProfiles = [];
         
         public int AutoUpdateStatus { get; set; } = AutoUpdateStatusDefault;
+        public TimeSpan UpdateCheckFrequency { get; set; } = UpdateCheckFrequencyDefault;
         public string ClientPath { get; set; } = ClientPathDefault;
         public bool ManageClient { get; set; } = ManageClientDefault;
         public int MaxDownloads { get; set; } = MaxDownloadsDefault;
@@ -78,5 +79,6 @@ namespace TrebuchetLib
         public static readonly int ServerInstanceCountDefault = 0;
         public static readonly bool VerifyAllDefault = false;
         public static readonly string DataDirectoryDefault = string.Empty;
+        public static readonly TimeSpan UpdateCheckFrequencyDefault = TimeSpan.FromMinutes(5);
     }
 }

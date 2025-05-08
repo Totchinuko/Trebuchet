@@ -7,7 +7,7 @@ using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
 
-public class ModFileFactory(AppSetup setup, Steam steam, TaskBlocker.TaskBlocker taskBlocker)
+public class ModFileFactory(AppSetup setup, TaskBlocker taskBlocker)
 {
     public ModFileBuilder Create(string mod)
     {
@@ -43,17 +43,6 @@ public class ModFileFactory(AppSetup setup, Steam steam, TaskBlocker.TaskBlocker
         }
     }
 
-    public async Task<ModFileBuilder> Create(WorkshopSearchResult workshopFile)
-    {
-        var status = (await steam.RequestModDetails([workshopFile.PublishedFileId]))
-            .Select(x => x.Status)
-            .FirstOrDefault(UGCFileStatus.Default(workshopFile.PublishedFileId));
-        var file = setup.TryGetModPath(workshopFile.PublishedFileId.ToString(), out var path) 
-            ? new WorkshopModFile(workshopFile, status, path)
-            : new WorkshopModFile(workshopFile, status);
-        return new ModFileBuilder(file, taskBlocker);
-    }
-    
     public ModFileBuilder Create(PublishedMod workshop, UGCFileStatus status)
     {
         var file = setup.TryGetModPath(workshop.PublishedFileId.ToString(), out var path) 

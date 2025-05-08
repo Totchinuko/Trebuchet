@@ -5,7 +5,8 @@ using Avalonia.Threading;
 using Humanizer;
 using ReactiveUI;
 using Trebuchet.Assets;
-using Trebuchet.Services.TaskBlocker;
+using Trebuchet.Services;
+using TrebuchetLib;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels
@@ -34,23 +35,36 @@ namespace Trebuchet.ViewModels
 
             CancelCommand = ReactiveCommand.Create(() =>
             {
-                taskBlocker.Cancel<SteamDownload>();
+                steam.CancelOperation();
                 Description = @$"{Resources.Cancelling}...";
             });
 
             var canConnect = this.WhenAnyValue(x => x.CanConnect, x => x.IsConnected, (can, isc) => can && !isc);
             ConnectCommand = ReactiveCommand.CreateFromTask(_steam.Connect, canConnect);
 
-            taskBlocker.TaskChanges
-                .Where(x => x.EventArgs.Type.GetType() == typeof(SteamDownload))
-                .Subscribe((pattern) =>
-                {   
-                    Progress = 0;
-                    ProgressLabel = string.Empty;
-                    IsIndeterminate = true;
-                    Description = pattern.EventArgs.Toggle ? pattern.EventArgs.Type.Label : string.Empty;
-                    IsLoading = pattern.EventArgs.Toggle;
-                });
+            steam.StatusChanged += OnSteamStatusChanged;
+        }
+
+        private void OnSteamStatusChanged(object? sender, SteamStatus e)
+        {
+            Progress = 0;
+            ProgressLabel = string.Empty;
+            IsIndeterminate = true;
+            switch (e)
+            {
+                case SteamStatus.UpdatingMods:
+                    Description = Resources.UpdateModsLabel;
+                    break;
+                case SteamStatus.UpdatingServers:
+                    Description = Resources.UpdateServersLabel;
+                    break;
+                case SteamStatus.QueryingModDetails:
+                case SteamStatus.StandBy:
+                default:
+                    Description = string.Empty;
+                    break;
+            }
+            IsLoading = e != SteamStatus.StandBy;
         }
 
         private void OnProgressChanged(object? sender, DepotDownloader.Progress e)

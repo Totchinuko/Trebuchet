@@ -10,7 +10,6 @@ using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
-using Trebuchet.Services.TaskBlocker;
 using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using Trebuchet.ViewModels.SettingFields;
@@ -123,7 +122,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
         _uiConfig.UICulture = model.Code;
         _langManager.SetLanguage(model.Code);
         _uiConfig.SaveFile();
-        if (_blocker.IsSet<SteamDownload>())
+        if (_blocker.CanLaunch)
         {
             var message = new OnBoardingMessage(Resources.OnBoardingLanguageChange, Resources.OnBoardingLanguageChangeMessage);
             await _box.OpenAsync(message);
@@ -149,7 +148,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
 
     private async Task OnRestartProcess()
     {
-        if (_blocker.IsSet<SteamDownload>())
+        if (_blocker.CanLaunch)
         {
             var message = new OnBoardingMessage(Resources.OnBoardingRestartProcess, Resources.OnBoardingRestartProcessSubMessage);
             await _box.OpenAsync(message);
@@ -228,6 +227,13 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             .SetSetter((v) => _setup.Config.AutoUpdateStatus = v)
             .SetDefault(() => Config.AutoUpdateStatusDefault)
         );
+        Fields.Add(new TimeSpanField(TimeSpan.FromMinutes(5), TimeSpan.MaxValue)
+            .WhenFieldChanged(SaveConfig)
+            .SetTitle(Resources.SettingUpdateCheckFrequency)
+            .SetGetter(() => _setup.Config.UpdateCheckFrequency)
+            .SetSetter((v) => _setup.Config.UpdateCheckFrequency = v)
+            .SetDefault(() => Config.UpdateCheckFrequencyDefault)
+        );
         Fields.Add(new ToggleField()
             .WhenFieldChanged(SaveConfig)
             .SetTitle(Resources.SettingVerifyAll)
@@ -251,14 +257,6 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             .SetGetter(() => _setup.Config.MaxServers)
             .SetSetter((v) => _setup.Config.MaxServers = v)
             .SetDefault(() => Config.MaxServersDefault)
-        );
-        Fields.Add(new ToggleField()
-            .WhenFieldChanged(SaveUiConfig)
-            .SetTitle(Resources.SettingAutoRefreshModlist)
-            .SetDescription(Resources.SettingAutoRefreshModlistText)
-            .SetGetter(() => _uiConfig.AutoRefreshModlist)
-            .SetSetter((v) => _uiConfig.AutoRefreshModlist = v)
-            .SetDefault(() => UIConfig.AutoRefreshModlistDefault)
         );
     }
 

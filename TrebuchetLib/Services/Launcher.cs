@@ -9,6 +9,7 @@ namespace TrebuchetLib.Services;
 public class Launcher(
     AppFiles appFiles, 
     AppSetup setup, 
+    Steam steam,
     IIniGenerator iniHandler, 
     ConanProcessFactory processFactory,
     ILogger<Launcher> logger)
@@ -17,6 +18,11 @@ public class Launcher(
     private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
     private IConanProcess? _conanClientProcess;
     private bool _hasCatapulted;
+    private readonly List<IPRefWithModList> _modListNeedUpdate = [];
+    private bool _serverNeedUpdate;
+    private DateTime _lastUpdateCheckTime;
+
+    public event EventHandler? StateChanged;
 
     public void Dispose()
     {
@@ -60,6 +66,7 @@ public class Launcher(
         var process = await CatapultClientProcess(profileName, modlistName, isBattleEye, autoConnect);
 
         _conanClientProcess = await processFactory.Create().SetProcess(process).BuildClient();
+        OnStateChanged();
     }
 
     public async Task<Process> CatapultClientProcess(ClientProfileRef profileRef, IPRefWithModList modListRef, bool isBattleEye, ClientConnectionRef? autoConnect)
@@ -77,11 +84,11 @@ public class Launcher(
         logger.LogInformation("Launching");
         
         if (!appFiles.Client.TryGet(profileRef, out var profile))
-            throw new TrebException($"{profileRef} profile not found.");
+            throw new Exception($"{profileRef} profile not found.");
         if (!modListRef.TryGetModList(out var modList))
-            throw new TrebException($"{modListRef} modlist not found.");
+            throw new Exception($"{modListRef} modlist not found.");
         if (IsClientProfileLocked(profileRef))
-            throw new TrebException($"Profile {profileRef} folder is currently locked by another process.");
+            throw new Exception($"Profile {profileRef} folder is currently locked by another process.");
 
         SetupJunction(setup.GetPrimaryJunction(), profile.ProfileFolder);
 
@@ -100,84 +107,11 @@ public class Launcher(
 
         var childProcess = await CatchClientChildProcess(process);
         if (childProcess == null)
-            throw new TrebException("Could not launch the game");
+            throw new Exception("Could not launch the game");
         
         ConfigureProcess(profile.ProcessPriority, profile.CPUThreadAffinity, childProcess);
 
         return childProcess;
-    }
-
-    private bool IsAutoConnectInfoValid(ClientConnection connection)
-    {
-        if (!IPAddress.TryParse(connection.IpAddress, out _)) return false;
-        if (connection.Port is < 0 or > 65535) return false;
-        return true;
-    }
-
-    private async Task<Process> CreateClientProcess(ClientProfile profile, IEnumerable<string> modList, bool isBattleEye, bool autoConnect)
-    {
-        var filename = setup.GetBinFile(isBattleEye);
-        var modlistFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modlistFile, setup.GetModsPath(modList));
-        var args = profile.GetClientArgs(modlistFile, autoConnect);
-
-        var dir = Path.GetDirectoryName(filename);
-        if (dir == null)
-            throw new Exception($"Failed to start process, invalid directory {filename}");
-
-        var process = new Process();
-        process.StartInfo.FileName = filename;
-        process.StartInfo.WorkingDirectory = dir;
-        process.StartInfo.Arguments = args;
-        process.StartInfo.UseShellExecute = false;
-        process.EnableRaisingEvents = true;
-
-        return process;
-    }
-
-    private async Task<Process?> CatchClientChildProcess(Process parent)
-    {
-        var target = ProcessData.Empty;
-        DateTime start = DateTime.UtcNow;
-        while (target.IsEmpty && !parent.HasExited)
-        {
-            if ((DateTime.UtcNow - start).TotalSeconds > 20) return null;
-            target = (await Tools.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
-            await Task.Delay(25);
-        }
-
-        if (target.IsEmpty) return null;
-        return !target.TryGetProcess(out var targetProcess) ? null : targetProcess;
-    }
-
-    private void ConfigureProcess(int priority, long threadAffinity, Process process)
-    {
-        process.PriorityClass = GetPriority(priority);
-        if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
-            process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(threadAffinity);
-    }
-
-    private ProcessPriorityClass GetPriority(int index)
-    {
-        switch (index)
-        {
-            case 1:
-                return ProcessPriorityClass.AboveNormal;
-
-            case 2:
-                return ProcessPriorityClass.High;
-
-            case 3:
-                return ProcessPriorityClass.RealTime;
-
-            default:
-                return ProcessPriorityClass.Normal;
-        }
-    }
-
-    public async Task ReCatapultServer(int instance)
-    {
-        await CatapultServer(instance);
     }
 
     public async Task CatapultServer(int instance)
@@ -222,6 +156,7 @@ public class Launcher(
             builder.UseRCon();
         
         _serverProcesses.TryAdd(instance, await builder.BuildServer());
+        OnStateChanged();
     }
     
     public async Task<Process> CatapultServerProcess(ServerProfileRef profileName, IPRefWithModList listRef, int instance)
@@ -245,58 +180,22 @@ public class Launcher(
         SetupJunction(Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave), 
             profile.ProfileFolder);
 
+        if (!await PerformCatapultUpdates())
+            throw new Exception("Pre-launch update failed");
+
         await iniHandler.WriteServerSettingsAsync(profile, instance);
         var process = await CreateServerProcess(instance, profile, list);
         process.Start();
 
         var childProcess = await CatchServerChildProcess(process);
         if (childProcess == null)
-            throw new TrebException("Could not launch the server");
+            throw new Exception("Could not launch the server");
 
         ConfigureProcess(profile.ProcessPriority, profile.CPUThreadAffinity, childProcess);
 
         return childProcess;
     }
-
-    private async Task<Process> CreateServerProcess(int instance, ServerProfile profile, IEnumerable<string> modlist)
-    {
-        var process = new Process();
-
-        var filename = setup.GetIntanceBinary(instance);
-        
-        var modfileFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modfileFile, setup.GetModsPath(modlist));
-        
-        var args = profile.GetServerArgs(instance, modfileFile);
-
-        var dir = Path.GetDirectoryName(filename);
-        if (dir == null)
-            throw new Exception($"Failed to start process, invalid directory {filename}");
-
-        process.StartInfo.FileName = filename;
-        process.StartInfo.WorkingDirectory = dir;
-        process.StartInfo.Arguments = args;
-        process.StartInfo.UseShellExecute = true;
-        process.EnableRaisingEvents = true;
-        return process;
-    }
-
-    private async Task<Process?> CatchServerChildProcess(Process process)
-    {
-        var child = ProcessData.Empty;
-        DateTime start = DateTime.UtcNow;
-        while (child.IsEmpty && !process.HasExited)
-        {
-            if ((DateTime.UtcNow - start).TotalSeconds > 20) return null;
-            child = Tools.GetFirstChildProcesses(process.Id);
-            await Task.Delay(25);
-        }
-
-        if (child.IsEmpty) return null;
-        if (!child.TryGetProcess(out var targetProcess)) return null;
-        return targetProcess;
-    }
-
+    
     public IEnumerable<int> GetActiveServers()
     {
         return _serverProcesses.Keys;
@@ -380,6 +279,7 @@ public class Launcher(
         await CleanStoppedProcesses();
         await FindExistingClient();
         await FindExistingServers();
+        await PerformPeriodicUpdateCheck();
 
         if(_conanClientProcess is not null)
             await _conanClientProcess.RefreshAsync();
@@ -431,6 +331,302 @@ public class Launcher(
             };
         }
     }
+
+    public bool HasModListUpdates(IPRefWithModList modList)
+    {
+        return _modListNeedUpdate.Contains(modList);
+    }
+
+    public bool HasServerUpdate()
+    {
+        return _serverNeedUpdate;
+    }
+
+    public async Task<bool> PerformCatapultUpdates()
+    {
+        if (setup.Config.AutoUpdateStatus == AutoUpdateStatus.Never) return true;
+        if (!await UpdateMods()) return false;
+        if (!await UpdateServers()) return false;
+        return true;
+    }
+
+    public async Task<bool> VerifyFiles()
+    {
+        if (IsAnyServerRunning() || IsClientRunning()) return false;
+        logger.LogInformation(@"Verifying files, clearing caches");
+        steam.ClearCache();
+        steam.InvalidateCache();
+        
+        try
+        {
+            await UpdateServers();
+            await UpdateMods();
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to verify files");
+            return false;
+        }
+    }
+
+    public Task<bool> UpdateMods()
+    {
+        _modListNeedUpdate.Clear();
+        var lists = new List<IPRefWithModList>();
+        for (int i = 0; i < setup.Config.ServerInstanceCount; i++)
+        {
+            if(appFiles.TryParseModListRef(setup.Config.GetInstanceModlist(i), out var modListRef))
+                lists.Add(modListRef);
+        }
+        if(appFiles.TryParseModListRef(setup.Config.SelectedClientModlist, out var clientModList))
+            lists.Add(clientModList);
+        if (lists.Count == 0) return Task.FromResult(true);
+        return UpdateMods(lists.GetModsFromList().ToList());
+    }
+    
+    public async Task<bool> UpdateMods(List<ulong> mods)
+    {
+        if (IsAnyServerRunning() || IsClientRunning()) return false;
+        
+        try
+        {
+            using(logger.BeginScope(("mods", mods)))
+                logger.LogInformation("Updating mods");
+            await steam.UpdateMods(mods);
+            await CheckModUpdates();
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update mods");
+            return false;
+        }
+    }
+
+    public async Task<bool> UpdateServers()
+    {
+        if (IsAnyServerRunning() || IsClientRunning()) return false;
+
+        try
+        {
+            logger.LogInformation("Updating servers");
+            await steam.UpdateServerInstances();
+            await CheckServerUpdate();
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to update servers");
+            return false;
+        }
+    }
+    
+    public async Task<bool> CheckModUpdates()
+    {
+        try
+        {
+            logger.LogInformation("Checking mod updates");
+            _modListNeedUpdate.Clear();
+            var lists = new List<IPRefWithModList>();
+            for (int i = 0; i < setup.Config.ServerInstanceCount; i++)
+            {
+                if(appFiles.TryParseModListRef(setup.Config.GetInstanceModlist(i), out var modListRef))
+                    lists.Add(modListRef);
+            }
+            if(appFiles.TryParseModListRef(setup.Config.SelectedClientModlist, out var clientModList))
+                lists.Add(clientModList);
+            if (lists.Count == 0) return true;
+            
+            var details = await steam.RequestModDetails(lists.GetModsFromList().ToList());
+            if (details.Count == 0) return true;
+            
+            var updates = details
+                .Where(d => d.Status.Status != UGCStatus.UpToDate)
+                .Select(x => x.PublishedFileId)
+                .ToList();
+            _modListNeedUpdate.AddRange(lists.Where(x => x.GetModsFromList().Intersect(updates).Any()));
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to check mod updates");
+            return false;
+        }
+    }
+
+    private async Task PerformPeriodicUpdateCheck()
+    {
+        if ((DateTime.UtcNow - _lastUpdateCheckTime) < setup.Config.UpdateCheckFrequency) return;
+        
+        if (!await CheckModUpdates()) return;
+        if (!await CheckServerUpdate()) return;
+        _lastUpdateCheckTime = DateTime.UtcNow;
+
+        if (setup.Config.AutoUpdateStatus != AutoUpdateStatus.CheckForUpdates) return;
+        if (IsClientRunning()) return; // can't auto-update if any client is running
+        
+        foreach (var process in _serverProcesses.Values)
+        {
+            if (_serverNeedUpdate)
+            {
+                await process.RestartAsync();
+                continue;
+            }
+                    
+            var modListRef = appFiles.ResolveModList(setup.Config.GetInstanceModlist(process.Instance));
+            if (_modListNeedUpdate.Contains(modListRef))
+                await process.RestartAsync();
+        }
+    }
+
+    private async Task<bool> CheckServerUpdate()
+    {
+        logger.LogInformation("Checking server updates");
+        if (steam.GetInstalledInstances() < setup.Config.ServerInstanceCount)
+        {
+            _serverNeedUpdate = true;
+            return true;
+        }
+        
+        try
+        {
+            _serverNeedUpdate = await steam.GetSteamBuildId() != steam.GetInstanceBuildId(0);
+            return true;
+        }
+        catch (OperationCanceledException)
+        {
+            return false;
+        }
+        catch (Exception ex)
+        {
+            logger.LogError(ex, "Failed to check server updates");
+            return false;
+        }
+    }
+    
+    private bool IsAutoConnectInfoValid(ClientConnection connection)
+    {
+        if (!IPAddress.TryParse(connection.IpAddress, out _)) return false;
+        if (connection.Port is < 0 or > 65535) return false;
+        return true;
+    }
+
+    private async Task<Process> CreateClientProcess(ClientProfile profile, IEnumerable<string> modList, bool isBattleEye, bool autoConnect)
+    {
+        var filename = setup.GetBinFile(isBattleEye);
+        var modlistFile = Path.GetTempFileName();
+        await File.WriteAllLinesAsync(modlistFile, setup.GetModsPath(modList));
+        var args = profile.GetClientArgs(modlistFile, autoConnect);
+
+        var dir = Path.GetDirectoryName(filename);
+        if (dir == null)
+            throw new Exception($"Failed to start process, invalid directory {filename}");
+
+        var process = new Process();
+        process.StartInfo.FileName = filename;
+        process.StartInfo.WorkingDirectory = dir;
+        process.StartInfo.Arguments = args;
+        process.StartInfo.UseShellExecute = false;
+        process.EnableRaisingEvents = true;
+
+        return process;
+    }
+
+    private async Task<Process?> CatchClientChildProcess(Process parent)
+    {
+        var target = ProcessData.Empty;
+        DateTime start = DateTime.UtcNow;
+        while (target.IsEmpty && !parent.HasExited)
+        {
+            if ((DateTime.UtcNow - start).TotalSeconds > 20) return null;
+            target = (await Tools.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
+            await Task.Delay(25);
+        }
+
+        if (target.IsEmpty) return null;
+        return !target.TryGetProcess(out var targetProcess) ? null : targetProcess;
+    }
+
+    private void ConfigureProcess(int priority, long threadAffinity, Process process)
+    {
+        process.PriorityClass = GetPriority(priority);
+        if (OperatingSystem.IsWindows() || OperatingSystem.IsLinux())
+            process.ProcessorAffinity = (IntPtr)Tools.Clamp2CPUThreads(threadAffinity);
+    }
+
+    private ProcessPriorityClass GetPriority(int index)
+    {
+        switch (index)
+        {
+            case 1:
+                return ProcessPriorityClass.AboveNormal;
+
+            case 2:
+                return ProcessPriorityClass.High;
+
+            case 3:
+                return ProcessPriorityClass.RealTime;
+
+            default:
+                return ProcessPriorityClass.Normal;
+        }
+    }
+
+    private async Task<Process> CreateServerProcess(int instance, ServerProfile profile, IEnumerable<string> modlist)
+    {
+        var process = new Process();
+
+        var filename = setup.GetIntanceBinary(instance);
+        
+        var modfileFile = Path.GetTempFileName();
+        await File.WriteAllLinesAsync(modfileFile, setup.GetModsPath(modlist));
+        
+        var args = profile.GetServerArgs(instance, modfileFile);
+
+        var dir = Path.GetDirectoryName(filename);
+        if (dir == null)
+            throw new Exception($"Failed to start process, invalid directory {filename}");
+
+        process.StartInfo.FileName = filename;
+        process.StartInfo.WorkingDirectory = dir;
+        process.StartInfo.Arguments = args;
+        process.StartInfo.UseShellExecute = true;
+        process.EnableRaisingEvents = true;
+        return process;
+    }
+
+    private async Task<Process?> CatchServerChildProcess(Process process)
+    {
+        var child = ProcessData.Empty;
+        DateTime start = DateTime.UtcNow;
+        while (child.IsEmpty && !process.HasExited)
+        {
+            if ((DateTime.UtcNow - start).TotalSeconds > 20) return null;
+            child = Tools.GetFirstChildProcesses(process.Id);
+            await Task.Delay(25);
+        }
+
+        if (child.IsEmpty) return null;
+        if (!child.TryGetProcess(out var targetProcess)) return null;
+        return targetProcess;
+    }
     
     private async Task FindExistingClient()
     {
@@ -438,10 +634,13 @@ public class Launcher(
 
         var process = await FindClientProcess();
         if (process is not null)
+        {
             _conanClientProcess = await processFactory.Create()
                 .SetStartDate(process.Start)
                 .SetProcess(process.Process)
                 .BuildClient();
+            OnStateChanged();
+        }
     }
 
     private async Task FindExistingServers()
@@ -458,6 +657,7 @@ public class Launcher(
             if (serverInfos.RConPort > 0)
                 builder.UseRCon();
             _serverProcesses.TryAdd(process.Instance, await builder.BuildServer());
+            OnStateChanged();
         }
     }
 
@@ -468,6 +668,7 @@ public class Launcher(
             logger.LogInformation("Client stopped");
             _conanClientProcess.Dispose();
             _conanClientProcess = null;
+            OnStateChanged();
         }
 
         foreach (var server in _serverProcesses.ToList())
@@ -476,17 +677,19 @@ public class Launcher(
             {
                 logger.LogInformation("Server {instance} stopped", server.Key);
                 _serverProcesses.Remove(server.Key);
+                OnStateChanged();
                 var name = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(server.Key));
-                if (server.Value.State == ProcessState.CRASHED && appFiles.Server.Get(name).RestartWhenDown)
+                if ((server.Value.State == ProcessState.CRASHED && appFiles.Server.Get(name).RestartWhenDown) 
+                    || server.Value.State == ProcessState.NEW)
                 {
-                    await ReCatapultServer(server.Key);
+                    await CatapultServer(server.Key);
                 }
                 server.Value.Dispose();
             }
         }
     }
 
-    public bool IsClientProfileLocked(ClientProfileRef profileRef)
+    private bool IsClientProfileLocked(ClientProfileRef profileRef)
     {
         if (_conanClientProcess == null) return false;
         var junction = Path.GetFullPath(GetCurrentClientJunction());
@@ -494,7 +697,7 @@ public class Launcher(
         return string.Equals(junction, profilePath, StringComparison.Ordinal);
     }
 
-    public bool IsServerProfileLocked(ServerProfileRef profileRef)
+    private bool IsServerProfileLocked(ServerProfileRef profileRef)
     {
         var profilePath = Path.GetFullPath(appFiles.Server.GetDirectory(profileRef));
         foreach (var s in _serverProcesses.Values)
@@ -529,5 +732,10 @@ public class Launcher(
         logger.LogInformation("Setup new junction {junction} > {target}", junction, targetPath);
         Tools.RemoveSymboliclink(junction);
         Tools.SetupSymboliclink(junction, targetPath);
+    }
+
+    private void OnStateChanged()
+    {
+        StateChanged?.Invoke(this, EventArgs.Empty);
     }
 }

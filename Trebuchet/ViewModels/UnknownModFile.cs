@@ -17,9 +17,9 @@ public class UnknownModFile : ReactiveObject, IPublishedModFile
         Title = Path.GetFileName(path);
         IconClasses.Add(@"Unknown");
         IconToolTip = Resources.UnknownMod;
-        var fileInfo = new FileInfo(path);
-        if (fileInfo.Exists)
+        if (!string.IsNullOrEmpty(path) && File.Exists(path))
         {
+            var fileInfo = new FileInfo(path);
             StatusClasses.Add(@"Found");
             LastUpdate = @$"{Resources.Found} - {Resources.LastModified}: {fileInfo.LastWriteTime.Humanize()} ({FileSize.Bytes().Humanize()})";
             FileSize = fileInfo.Length;

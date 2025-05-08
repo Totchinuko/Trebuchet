@@ -1,0 +1,18 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:Trebuchet.Controls"
+                    xmlns:tuc="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+                    xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
+    <DataTemplate x:Key="TimeSpanField" x:DataType="settingFields:TimeSpanField">
+        <c:FieldRowControl>
+            <c:FieldRowControl.FieldContent>
+                <Border Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
+                    <tuc:Duration DurationValue="{Binding Value}" 
+                                  MinimumDuration="{Binding MinDuration}" 
+                                  MaximumDuration="{Binding MaxDuration}"
+                                  Width="300" />
+                </Border>
+            </c:FieldRowControl.FieldContent>
+        </c:FieldRowControl>
+    </DataTemplate>
+</ResourceDictionary>

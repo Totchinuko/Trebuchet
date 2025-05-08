@@ -9,8 +9,6 @@ using ReactiveUI;
 using tot_lib;
 using Trebuchet.Assets;
 using Trebuchet.Services;
-using Trebuchet.Services.TaskBlocker;
-using Trebuchet.Utils;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
 using TrebuchetLib.Services;
@@ -26,7 +24,6 @@ namespace Trebuchet.ViewModels.Panels
             Launcher launcher, 
             DialogueBox box,
             TaskBlocker blocker,
-            Steam steam,
             Operations operations,
             ILogger<DashboardPanel> logger) 
         {
@@ -36,7 +33,6 @@ namespace Trebuchet.ViewModels.Panels
             _launcher = launcher;
             _box = box;
             _blocker = blocker;
-            _steam = steam;
             _operations = operations;
             _logger = logger;
             CanBeOpened = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
@@ -65,10 +61,8 @@ namespace Trebuchet.ViewModels.Panels
         private readonly Launcher _launcher;
         private readonly DialogueBox _box;
         private readonly TaskBlocker _blocker;
-        private readonly Steam _steam;
         private readonly Operations _operations;
         private readonly ILogger<DashboardPanel> _logger;
-        private DateTime _lastUpdateCheck = DateTime.MinValue;
         private bool _canBeOpened;
         private bool _serverUpdateAvailable;
         private bool _anyModUpdate;
@@ -116,14 +110,7 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogInformation(@"Updating mods");
             try
             {
-                var modlists = Instances.Select(i => i.SelectedModlist?.ModList).OfType<IPRefWithModList>().ToList();
-                if(Client.SelectedModlist?.ModList is not null)
-                    modlists.Add(Client.SelectedModlist.ModList);
-                var mods = modlists.Distinct()
-                    .SelectMany(l => l.GetModsFromList())
-                    .Distinct().ToList();
-                await _operations.UpdateMods(mods);
-                _lastUpdateCheck = DateTime.MinValue;
+                await _launcher.UpdateMods();
                 await OnRequestRefresh();
             }
             catch (Exception tex)
@@ -141,9 +128,8 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogInformation(@"Updating servers");
             try
             {
-                await _operations.UpdateServers();
+                await _launcher.UpdateServers();
                 await RefreshPanel();
-                _lastUpdateCheck = DateTime.MinValue;
             }
             catch (Exception tex)
             {
@@ -191,12 +177,6 @@ namespace Trebuchet.ViewModels.Panels
             Client.CanLaunch = false;
             try
             {
-                if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning())
-                {
-                    var modlist = Client.SelectedModlist.ModList.GetModsFromList().ToList();
-                    await _operations.UpdateMods(modlist);
-                }
-
                 _setup.Config.SelectedClientProfile = Client.SelectedProfile.Uri.OriginalString;
                 _setup.Config.SelectedClientModlist = Client.SelectedModlist.ModList.Uri.OriginalString;
                 await _launcher.CatapultClient(Client.BattleEye, autoConnect);
@@ -247,16 +227,6 @@ namespace Trebuchet.ViewModels.Panels
             
             try
             {
-                if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.Never && !_launcher.IsAnyServerRunning() &&
-                    !_launcher.IsClientRunning())
-                {
-                    _logger.LogInformation(@"Update before launch");
-                    var modlist = dashboard.SelectedModlist.ModList.GetModsFromList().ToList();
-                    await _operations.UpdateServers();
-                    await _operations.UpdateMods(modlist);
-                    _lastUpdateCheck = DateTime.MinValue;
-                }
-
                 _setup.Config.SetInstanceParameters(dashboard.Instance, 
                     dashboard.SelectedModlist.ModList.Uri.OriginalString,
                     dashboard.SelectedProfile.Uri.OriginalString);
@@ -280,17 +250,17 @@ namespace Trebuchet.ViewModels.Panels
         public async Task TickPanel()
         {
             await _launcher.Tick();
+
+            if (Client.SelectedModlist is not null)
+                Client.UpdateNeeded = _launcher.HasModListUpdates(Client.SelectedModlist.ModList);
+            foreach(var server in Instances)
+                if (server.SelectedModlist is not null)
+                    server.UpdateNeeded = _launcher.HasModListUpdates(server.SelectedModlist.ModList);
+            AnyModUpdate = Instances.Any(x => x.UpdateNeeded) || Client.UpdateNeeded;
             
             await Client.ProcessRefresh(_launcher.GetClientProcess(), _uiConfig.DisplayProcessPerformance);
             foreach (var instance in _launcher.GetServerProcesses())
                 await Instances[instance.Instance].ProcessRefresh(instance, _uiConfig.DisplayProcessPerformance);
-
-            if ((DateTime.UtcNow - _lastUpdateCheck).TotalSeconds >= 300 && _uiConfig.AutoRefreshModlist)
-            {
-                _lastUpdateCheck = DateTime.UtcNow;
-                await CheckModUpdatesAsync();
-                ServerUpdateAvailable = await _operations.CheckServerUpdate();
-            }
         }
 
         public Task RefreshPanel()
@@ -323,7 +293,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _setup.Config.SelectedClientModlist = modlist.Uri.OriginalString;
                 _setup.Config.SaveFile();
-                return CheckModUpdatesAsync();
+                return _launcher.CheckModUpdates();
             };
             client.ProfileSelected += (_, profile) =>
             {
@@ -381,70 +351,6 @@ namespace Trebuchet.ViewModels.Panels
             dashboard.Modlists.AddRange(_appFiles.Sync.GetList().Select(x => new ModListRefViewModel(x)));
         }
 
-        private void RefreshClientNeededUpdates(List<PublishedMod> neededUpdates)
-        {
-            if (Client.SelectedModlist is null)
-            {
-                Client.UpdateNeeded = [];
-                return;
-            }
-            var mods = Client.SelectedModlist.ModList.GetModsFromList().ToList();
-            Client.UpdateNeeded = neededUpdates
-                .Select(x => x.PublishedFileId)
-                .Intersect(mods)
-                .ToList();
-        }
-
-        private void RefreshServerNeededUpdates(List<PublishedMod> neededUpdates)
-        {
-            foreach (var dashboard in Instances)
-                RefreshServerNeededUpdates(dashboard, neededUpdates);
-        }
-
-        private void RefreshServerNeededUpdates(ServerInstanceDashboard dashboard, List<PublishedMod> neededUpdates)
-        {
-            if (dashboard.SelectedModlist is null)
-            {
-                dashboard.UpdateNeeded = [];
-                return;
-            }
-            var mods = dashboard.SelectedModlist.ModList.GetModsFromList().ToList();
-            dashboard.UpdateNeeded = neededUpdates
-                .Select(x => x.PublishedFileId)
-                .Intersect(mods)
-                .ToList();
-        }
-
-        private Task CheckModUpdatesAsync()
-        {
-            var modlists = Instances.Select(i => i.SelectedModlist?.ModList).OfType<IPRefWithModList>().ToList();
-            if(Client.SelectedModlist?.ModList is not null)
-                modlists.Add(Client.SelectedModlist.ModList);
-            return CheckModUpdatesAsync(modlists);
-        }
-        
-        private async Task CheckModUpdatesAsync(List<IPRefWithModList> modlists)
-        {
-            _logger.LogInformation(@"Check for mod updates");
-            try
-            {
-                var mods = modlists.Distinct()
-                    .SelectMany(x => x.GetModsFromList())
-                    .Distinct().ToList();
-                var response = (await _steam.RequestModDetails(mods))
-                    .Where(x => x.Status.Status != UGCStatus.UpToDate)
-                    .ToList();
-                RefreshClientNeededUpdates(response);
-                RefreshServerNeededUpdates(response);
-                AnyModUpdate = response.Count > 0;
-            }
-            catch (Exception tex)
-            {
-                _logger.LogError(tex, @"Failed");
-                await _box.OpenErrorAsync(tex.Message);
-            }
-        }
-
         private void CreateInstancesIfNeeded()
         {
             if (Instances.Count >= _setup.Config.ServerInstanceCount)
@@ -467,7 +373,7 @@ namespace Trebuchet.ViewModels.Panels
             {
                 _setup.Config.SetInstanceModlist(arg.Instance, arg.Selection.Uri.OriginalString);
                 _setup.Config.SaveFile();
-                return CheckModUpdatesAsync();
+                return _launcher.CheckModUpdates();
             };
             instance.ProfileSelected += (_, arg) =>
             {
@@ -496,15 +402,9 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogInformation(@"File Verification");
             try
             {
-                var modlists = Instances.Select(i => i.SelectedModlist?.ModList).OfType<IPRefWithModList>().ToList();
-                if(Client.SelectedModlist?.ModList is not null)
-                    modlists.Add(Client.SelectedModlist.ModList);
-                var mods = modlists.Distinct()
-                    .SelectMany(l => l.GetModsFromList())
-                    .Distinct().ToList();
-                
-                await _operations.VerifyFiles(mods);
+                await _launcher.VerifyFiles();
             }
+            catch (OperationCanceledException){}
             catch (Exception tex)
             {
                 _logger.LogError(tex, @"Failed");
