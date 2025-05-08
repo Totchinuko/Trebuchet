@@ -34,7 +34,6 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     private readonly Dictionary<ulong, SteamWorksWebAPI.PublishedFile> _publishedFiles = [];
     private DateTime _lastCacheClear = DateTime.MinValue;
     private SteamStatus _status = SteamStatus.StandBy;
-    private readonly SemaphoreSlim _statusSemaphore = new SemaphoreSlim(1, 1);
 
     public event EventHandler? Connected;
     public event EventHandler? Disconnected;
@@ -80,7 +79,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         
     public async Task<List<PublishedMod>> RequestModDetails(List<ulong> list)
     {
-        using var status = await EnterStatus(SteamStatus.QueryingModDetails);
+        using var status = EnterStatus(SteamStatus.QueryingModDetails);
         var results = GetCache(list);
         if (list.Count <= 0) return GetPublishedModFiles(results).ToList();
         using(_logger.BeginScope((@"ModList", list)))
@@ -313,7 +312,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     /// <returns></returns>
     public async Task UpdateMods(IEnumerable<ulong> enumerable, CancellationTokenSource cts)
     {
-        using var status = await EnterStatus(SteamStatus.UpdatingMods);
+        using var status = EnterStatus(SteamStatus.UpdatingMods);
         if (!await WaitSteamConnectionAsync()) return;
 
         UpdateDownloaderConfig();
@@ -339,7 +338,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     public async Task UpdateServerInstances(CancellationTokenSource cts)
     {
         if (_appSetup.Config.ServerInstanceCount <= 0) return;
-        using var status = await EnterStatus(SteamStatus.UpdatingServers);
+        using var status = EnterStatus(SteamStatus.UpdatingServers);
 
         if (!await WaitSteamConnectionAsync()) return;
 
@@ -389,16 +388,17 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         return IsConnected;
     }
 
-    private async Task<IDisposable> EnterStatus(SteamStatus status)
+    private IDisposable EnterStatus(SteamStatus status)
     {
         if (status == SteamStatus.StandBy)
             throw new ArgumentException(nameof(status));
 
-        await _statusSemaphore.WaitAsync();
+        if (Status != SteamStatus.StandBy)
+            throw new OperationCanceledException("Operation is already on going");
+
         Status = status;
         return new DisposableAction(() =>
         {
-            _statusSemaphore.Release();
             Status = SteamStatus.StandBy;
         });
     }
