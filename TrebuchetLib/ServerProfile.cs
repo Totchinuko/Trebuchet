@@ -1,8 +1,4 @@
-﻿using System.Diagnostics.CodeAnalysis;
-using System.Reflection;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using Yuu.Ini;
+﻿using System.Text.Json.Serialization;
 
 namespace TrebuchetLib
 {
@@ -36,6 +32,10 @@ namespace TrebuchetLib
         public List<string> SudoSuperAdmins { get; set; } = SudoSuperAdminsDefault;
         public bool UseAllCores { get; set; } = UseAllCoresDefault;
         public int ZombieCheckSeconds { get; set; } = ZombieCheckSecondsDefault;
+        public bool AutoRestart { get; set; } = AutoRestartDefault;
+        public TimeSpan AutoRestartMinUptime { get; set; } = AutoRestartMinUptimeDefault;
+        public TimeSpan AutoRestartDailyTime { get; set; } = AutoRestartDailyTimeDefault;
+        public int AutoRestartMaxPerDay { get; set; } = AutoRestartMaxPerDayDefault;
 
         
         [JsonIgnore]
@@ -54,8 +54,6 @@ namespace TrebuchetLib
         /// <exception cref="Exception"></exception>
         public string GetServerArgs(int instance, string modlistPath)
         {
-            string? profileFolder = Path.GetDirectoryName(FilePath) ?? throw new Exception("Invalid folder directory.");
-
             List<string> args = new List<string>() { Map };
             if (Log) args.Add(Constants.GameArgsLog);
             if (UseAllCores) args.Add(Constants.GameArgsUseAllCore);
@@ -135,5 +133,9 @@ namespace TrebuchetLib
         public static readonly List<string> SudoSuperAdminsDefault = [];
         public static readonly bool UseAllCoresDefault = true;
         public static readonly int ZombieCheckSecondsDefault = 300;
+        public static readonly TimeSpan AutoRestartMinUptimeDefault = TimeSpan.FromHours(2);
+        public static readonly TimeSpan AutoRestartDailyTimeDefault = TimeSpan.FromHours(12);
+        public static readonly int AutoRestartMaxPerDayDefault = 1;
+        public static readonly bool AutoRestartDefault = false;
     }
 }
