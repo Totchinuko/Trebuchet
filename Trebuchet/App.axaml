@@ -58,7 +58,7 @@
                 <MergeResourceInclude Source="Templates\ClientConnectionListView.axaml" />
                 <MergeResourceInclude Source="Templates\SyncPanelView.axaml" />
                 <MergeResourceInclude Source="Templates\MixedConsolePopedOutView.axaml" />
-                <MergeResourceInclude Source="Templates\TimeSpanField.axaml" />
+                <MergeResourceInclude Source="Templates\DurationField.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -108,7 +108,7 @@
         <StaticResource ResourceKey="ModListView" />
         <StaticResource ResourceKey="SyncPanelView" />
         <StaticResource ResourceKey="MixedConsolePopedOutView" />
-        <StaticResource ResourceKey="TimeSpanField" />
+        <StaticResource ResourceKey="DurationField" />
     </Application.DataTemplates>
     <Application.Styles>
         <FluentTheme />

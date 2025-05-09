@@ -3,7 +3,7 @@
                     xmlns:c="clr-namespace:Trebuchet.Controls"
                     xmlns:tuc="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
                     xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
-    <DataTemplate x:Key="TimeSpanField" x:DataType="settingFields:TimeSpanField">
+    <DataTemplate x:Key="DurationField" x:DataType="settingFields:DurationField">
         <c:FieldRowControl>
             <c:FieldRowControl.FieldContent>
                 <Border Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">

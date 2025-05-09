@@ -227,7 +227,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             .SetSetter((v) => _setup.Config.AutoUpdateStatus = v)
             .SetDefault(() => Config.AutoUpdateStatusDefault)
         );
-        Fields.Add(new TimeSpanField(TimeSpan.FromMinutes(5), TimeSpan.MaxValue)
+        Fields.Add(new DurationField(TimeSpan.FromMinutes(5), TimeSpan.MaxValue)
             .WhenFieldChanged(SaveConfig)
             .SetTitle(Resources.SettingUpdateCheckFrequency)
             .SetGetter(() => _setup.Config.UpdateCheckFrequency)
