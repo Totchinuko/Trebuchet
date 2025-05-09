@@ -177,11 +177,11 @@ public class Launcher(
         if (IsServerProfileLocked(profileName))
             throw new ArgumentException($"Profile {profileName} folder is currently locked by another process.");
 
-        SetupJunction(Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave), 
-            profile.ProfileFolder);
-
         if (!await PerformCatapultUpdates())
             throw new Exception("Pre-launch update failed");
+        
+        SetupJunction(Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave), 
+            profile.ProfileFolder);
 
         await iniHandler.WriteServerSettingsAsync(profile, instance);
         var process = await CreateServerProcess(instance, profile, list);
@@ -345,6 +345,7 @@ public class Launcher(
     public async Task<bool> PerformCatapultUpdates()
     {
         if (setup.Config.AutoUpdateStatus == AutoUpdateStatus.Never) return true;
+        if (IsAnyServerRunning() || IsClientRunning()) return true;
         if (!await UpdateMods()) return false;
         if (!await UpdateServers()) return false;
         return true;
