@@ -473,11 +473,12 @@ public class Launcher(
 
     private async Task PerformPeriodicUpdateCheck()
     {
-        if ((DateTime.UtcNow - _lastUpdateCheckTime) < setup.Config.UpdateCheckFrequency) return;
-        
-        if (!await CheckModUpdates()) return;
-        if (!await CheckServerUpdate()) return;
-        _lastUpdateCheckTime = DateTime.UtcNow;
+        if ((DateTime.UtcNow - _lastUpdateCheckTime) >= setup.Config.UpdateCheckFrequency)
+        {
+            if (!await CheckModUpdates()) return;
+            if (!await CheckServerUpdate()) return;
+            _lastUpdateCheckTime = DateTime.UtcNow;
+        }
 
         if (setup.Config.AutoUpdateStatus != AutoUpdateStatus.CheckForUpdates) return;
         if (IsClientRunning()) return; // can't auto-update if any client is running
