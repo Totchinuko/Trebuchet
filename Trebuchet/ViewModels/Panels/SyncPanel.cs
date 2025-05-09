@@ -81,14 +81,14 @@ public class SyncPanel : ReactiveObject, IRefreshablePanel, IDisplablePanel, IRe
     public ClientConnectionListViewModel ClientConnectionList { get; }
     
     
-    public Task DisplayPanel()
+    public Task RefreshPanel()
     {
         _logger.LogDebug(@"Refresh panel");
         _needRefresh = true;
         return Task.CompletedTask;
     }
 
-    public async Task RefreshPanel()
+    public async Task DisplayPanel()
     {
         _logger.LogDebug(@"Display panel");
         if (!_needRefresh) return;
