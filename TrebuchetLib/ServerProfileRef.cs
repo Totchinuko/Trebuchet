@@ -18,6 +18,11 @@ public class ServerProfileRef(string name, IAppFileHandler<ServerProfile, Server
         if (obj is not ServerProfileRef reference) return false;
         return reference.Name == Name;
     }
+    
+    protected bool Equals(ServerProfileRef other)
+    {
+        return Name == other.Name;
+    }
 
     public override int GetHashCode()
     {

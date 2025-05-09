@@ -17,6 +17,22 @@ public class ModListRefViewModel(IPRefWithModList modList)
         return modList.Name;
     }
 
+    public override bool Equals(object? obj)
+    {
+        if (obj is not ModListRefViewModel vm) return false;
+        return vm.ModList.Equals(ModList);
+    }
+
+    protected bool Equals(ModListRefViewModel other)
+    {
+        return ModList.Equals(other.ModList);
+    }
+
+    public override int GetHashCode()
+    {
+        return ModList.GetHashCode();
+    }
+
     public override string ToString()
     {
         return DefineLabel(ModList);

@@ -24,11 +24,16 @@ public class ClientProfileRef(string name, AppClientFiles handler) :
         return reference.Name == Name;
     }
 
+    protected bool Equals(ClientProfileRef other)
+    {
+        return Name == other.Name;
+    }
+
     public override int GetHashCode()
     {
         return Name.GetHashCode();
     }
-
+    
     public bool TryGetConnection(string name, [NotNullWhen(true)] out ClientConnection? connection)
     {
         connection = Handler.Get(this).ClientConnections.FirstOrDefault(x => x.Name == name);

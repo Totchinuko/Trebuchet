@@ -55,6 +55,11 @@ public class SyncProfileRef(string name, AppSyncFiles handler) :
         if (obj is not SyncProfileRef reference) return false;
         return reference.Name == Name;
     }
+    
+    protected bool Equals(SyncProfileRef other)
+    {
+        return Name == other.Name;
+    }
 
     public override int GetHashCode()
     {

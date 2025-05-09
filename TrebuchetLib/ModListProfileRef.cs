@@ -37,6 +37,11 @@ public class ModListProfileRef(string name, IAppFileHandler<ModListProfile, ModL
         if (obj is not ModListProfileRef reference) return false;
         return reference.Name == Name;
     }
+    
+    protected bool Equals(ModListProfileRef other)
+    {
+        return Name == other.Name;
+    }
 
     public override int GetHashCode()
     {
