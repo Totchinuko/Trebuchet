@@ -1045,4 +1045,7 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="SettingUpdateCheckFrequency" xml:space="preserve">
         <value>Fréquence de vérification de MàJ</value>
     </data>
+    <data name="SettingServerAutoRestart" xml:space="preserve">
+        <value>Redémarrage Automatique</value>
+    </data>
 </root>

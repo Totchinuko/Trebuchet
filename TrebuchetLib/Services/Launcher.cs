@@ -1,26 +1,44 @@
 ﻿using System.Diagnostics;
 using System.Net;
+using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using tot_lib;
 using TrebuchetLib.Processes;
 
 namespace TrebuchetLib.Services;
 
-public class Launcher(
-    AppFiles appFiles, 
-    AppSetup setup, 
-    Steam steam,
-    IIniGenerator iniHandler, 
-    ConanProcessFactory processFactory,
-    ILogger<Launcher> logger)
-    : IDisposable
+public class Launcher : IDisposable
 {
+    public Launcher(AppFiles appFiles, 
+        AppSetup setup, 
+        Steam steam,
+        IIniGenerator iniHandler, 
+        ConanProcessFactory processFactory,
+        ILogger<Launcher> logger)
+    {
+        _appFiles = appFiles;
+        _setup = setup;
+        _steam = steam;
+        _iniHandler = iniHandler;
+        _processFactory = processFactory;
+        _logger = logger;
+
+        _startDates = LoadStartDates();
+    }
+    
     private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
     private IConanProcess? _conanClientProcess;
     private bool _hasCatapulted;
     private readonly List<IPRefWithModList> _modListNeedUpdate = [];
     private bool _serverNeedUpdate;
     private DateTime _lastUpdateCheckTime;
+    private List<StartDates> _startDates;
+    private readonly AppFiles _appFiles;
+    private readonly AppSetup _setup;
+    private readonly Steam _steam;
+    private readonly IIniGenerator _iniHandler;
+    private readonly ConanProcessFactory _processFactory;
+    private readonly ILogger<Launcher> _logger;
 
     public event EventHandler? StateChanged;
 
@@ -34,15 +52,15 @@ public class Launcher(
 
     public async Task CatapultClient(bool isBattleEye, ClientConnectionRef? autoConnect)
     {
-        var profile = appFiles.Client.Resolve(setup.Config.SelectedClientProfile);
-        var modlist = appFiles.ResolveModList(setup.Config.SelectedClientModlist);
+        var profile = _appFiles.Client.Resolve(_setup.Config.SelectedClientProfile);
+        var modlist = _appFiles.ResolveModList(_setup.Config.SelectedClientModlist);
         await CatapultClient(profile, modlist, isBattleEye, autoConnect);
     }
 
     public async Task<Process> CatapultClientProcess(bool isBattleEye, ClientConnectionRef? autoConnect)
     {
-        var profile = appFiles.Client.Resolve(setup.Config.SelectedClientProfile);
-        var modlist = appFiles.ResolveModList(setup.Config.SelectedClientModlist);
+        var profile = _appFiles.Client.Resolve(_setup.Config.SelectedClientProfile);
+        var modlist = _appFiles.ResolveModList(_setup.Config.SelectedClientModlist);
         return await CatapultClientProcess(profile, modlist, isBattleEye, autoConnect);
     }
 
@@ -65,7 +83,7 @@ public class Launcher(
 
         var process = await CatapultClientProcess(profileName, modlistName, isBattleEye, autoConnect);
 
-        _conanClientProcess = await processFactory.Create().SetProcess(process).BuildClient();
+        _conanClientProcess = await _processFactory.Create().SetProcess(process).BuildClient();
         OnStateChanged();
     }
 
@@ -80,25 +98,25 @@ public class Launcher(
         if (autoConnect is not null)
             data["autoConnect"] = autoConnect.Connection;
         
-        using var scope = logger.BeginScope(data);
-        logger.LogInformation("Launching");
+        using var scope = _logger.BeginScope(data);
+        _logger.LogInformation("Launching");
         
-        if (!appFiles.Client.TryGet(profileRef, out var profile))
+        if (!_appFiles.Client.TryGet(profileRef, out var profile))
             throw new Exception($"{profileRef} profile not found.");
         if (!modListRef.TryGetModList(out var modList))
             throw new Exception($"{modListRef} modlist not found.");
         if (IsClientProfileLocked(profileRef))
             throw new Exception($"Profile {profileRef} folder is currently locked by another process.");
 
-        SetupJunction(setup.GetPrimaryJunction(), profile.ProfileFolder);
+        SetupJunction(_setup.GetPrimaryJunction(), profile.ProfileFolder);
 
-        await iniHandler.WriteClientSettingsAsync(profile);
+        await _iniHandler.WriteClientSettingsAsync(profile);
         
         if (autoConnect is not null && autoConnect.TryGet(out var connection))
         {
             if (!IsAutoConnectInfoValid(connection))
                 throw new Exception("Auto connection address is invalid");
-            await iniHandler.WriteClientLastConnection(connection);
+            await _iniHandler.WriteClientLastConnection(connection);
         }
         
         var process = await CreateClientProcess(profile, modList, isBattleEye, autoConnect is not null);
@@ -116,15 +134,15 @@ public class Launcher(
 
     public async Task CatapultServer(int instance)
     {
-        var profile = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(instance));
-        var modlist = appFiles.ResolveModList(setup.Config.GetInstanceModlist(instance));
+        var profile = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(instance));
+        var modlist = _appFiles.ResolveModList(_setup.Config.GetInstanceModlist(instance));
         await CatapultServer(profile, modlist, instance);
     }
 
     public async Task<Process> CatapultServerProcess(int instance)
     {
-        var profile = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(instance));
-        var modlist = appFiles.ResolveModList(setup.Config.GetInstanceModlist(instance));
+        var profile = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(instance));
+        var modlist = _appFiles.ResolveModList(_setup.Config.GetInstanceModlist(instance));
         return await CatapultServerProcess(profile, modlist, instance);
     }
     
@@ -145,12 +163,12 @@ public class Launcher(
         if (_serverProcesses.ContainsKey(instance)) return;
 
         var process = await CatapultServerProcess(profileName, listRef, instance);
-        var profile = appFiles.Server.Get(profileName);
+        var profile = _appFiles.Server.Get(profileName);
 
-        var builder = processFactory.Create()
+        var builder = _processFactory.Create()
             .SetProcess(process)
             .SetServerInfos(profile, instance)
-            .SetLogFile(appFiles.Server.GetGameLogs(profileName))
+            .SetLogFile(_appFiles.Server.GetGameLogs(profileName))
             .StartLogAtBeginning();
         if (profile.EnableRCon)
             builder.UseRCon();
@@ -167,10 +185,10 @@ public class Launcher(
             {"modlist", listRef.Uri.OriginalString},
             {"instance", instance}
         };
-        using var scope = logger.BeginScope(data);
-        logger.LogInformation("Launching");
+        using var scope = _logger.BeginScope(data);
+        _logger.LogInformation("Launching");
         
-        if (!appFiles.Server.TryGet(profileName, out var profile))
+        if (!_appFiles.Server.TryGet(profileName, out var profile))
             throw new FileNotFoundException($"{profileName} profile not found.");
         if (!listRef.TryGetModList(out var list))
             throw new FileNotFoundException($"{listRef} modlist not found.");
@@ -180,10 +198,10 @@ public class Launcher(
         if (!await PerformCatapultUpdates())
             throw new Exception("Pre-launch update failed");
         
-        SetupJunction(Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave), 
+        SetupJunction(Path.Combine(_setup.GetInstancePath(instance), Constants.FolderGameSave), 
             profile.ProfileFolder);
 
-        await iniHandler.WriteServerSettingsAsync(profile, instance);
+        await _iniHandler.WriteServerSettingsAsync(profile, instance);
         var process = await CreateServerProcess(instance, profile, list);
         process.Start();
 
@@ -193,6 +211,7 @@ public class Launcher(
 
         ConfigureProcess(profile.ProcessPriority, profile.CPUThreadAffinity, childProcess);
 
+        AddStartDate(instance);
         return childProcess;
     }
     
@@ -207,7 +226,7 @@ public class Launcher(
     /// <param name="instance"></param>
     public async Task CloseServer(int instance)
     {
-        logger.LogInformation($"Close Server {instance}");
+        _logger.LogInformation($"Close Server {instance}");
         if (_serverProcesses.TryGetValue(instance, out var watcher))
             await watcher.StopAsync();
     }
@@ -250,7 +269,7 @@ public class Launcher(
     public async Task KillClient()
     {
         if (_conanClientProcess == null) return;
-        logger.LogInformation("Kill client");
+        _logger.LogInformation("Kill client");
         await _conanClientProcess.KillAsync();
     }
 
@@ -262,17 +281,17 @@ public class Launcher(
     {
         if (_serverProcesses.TryGetValue(instance, out var watcher))
         {
-            logger.LogInformation($"Kill server {instance}");
+            _logger.LogInformation($"Kill server {instance}");
             await watcher.KillAsync();
         }
     }
 
     public async Task Tick()
     {
-        if (!_hasCatapulted && setup.Catapult)
+        if (!_hasCatapulted && _setup.Catapult)
         {
             _hasCatapulted = true;
-            for (int i = 0; i < setup.Config.ServerInstanceCount; i++)
+            for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
                 await CatapultServer(i);
         }
 
@@ -280,15 +299,16 @@ public class Launcher(
         await FindExistingClient();
         await FindExistingServers();
         await PerformPeriodicUpdateCheck();
+        await PerformAutomaticRestarts();
 
         if(_conanClientProcess is not null)
             await _conanClientProcess.RefreshAsync();
         foreach (var process in _serverProcesses.Values)
         {
-            var name = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(process.Instance));
-            if (appFiles.Server.Exists(name))
+            var name = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(process.Instance));
+            if (_appFiles.Server.Exists(name))
             {
-                var profile = appFiles.Server.Get(name);
+                var profile = _appFiles.Server.Get(name);
                 process.KillZombies = profile.KillZombies;
                 process.ZombieCheckSeconds = profile.ZombieCheckSeconds;
             }
@@ -315,10 +335,10 @@ public class Launcher(
         var processes = await Tools.GetProcessesWithName(Constants.FileServerBin);
         foreach (var p in processes)
         {
-            if (!setup.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
+            if (!_setup.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
             if (!p.TryGetProcess(out var process)) continue;
 
-            var gameLogs = Path.Combine(setup.GetInstancePath(instance),
+            var gameLogs = Path.Combine(_setup.GetInstancePath(instance),
                 Constants.FolderGameSave,
                 Constants.FolderGameSaveLog,
                 Constants.FileGameLogFile);
@@ -344,7 +364,7 @@ public class Launcher(
 
     public async Task<bool> PerformCatapultUpdates()
     {
-        if (setup.Config.AutoUpdateStatus == AutoUpdateStatus.Never) return true;
+        if (_setup.Config.AutoUpdateStatus == AutoUpdateStatus.Never) return true;
         if (IsAnyServerRunning() || IsClientRunning()) return true;
         if (!await UpdateMods()) return false;
         if (!await UpdateServers()) return false;
@@ -354,9 +374,9 @@ public class Launcher(
     public async Task<bool> VerifyFiles()
     {
         if (IsAnyServerRunning() || IsClientRunning()) return false;
-        logger.LogInformation(@"Verifying files, clearing caches");
-        steam.ClearCache();
-        steam.InvalidateCache();
+        _logger.LogInformation(@"Verifying files, clearing caches");
+        _steam.ClearCache();
+        _steam.InvalidateCache();
         
         try
         {
@@ -370,7 +390,7 @@ public class Launcher(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to verify files");
+            _logger.LogError(ex, "Failed to verify files");
             return false;
         }
     }
@@ -379,12 +399,12 @@ public class Launcher(
     {
         _modListNeedUpdate.Clear();
         var lists = new List<IPRefWithModList>();
-        for (int i = 0; i < setup.Config.ServerInstanceCount; i++)
+        for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
         {
-            if(appFiles.TryParseModListRef(setup.Config.GetInstanceModlist(i), out var modListRef))
+            if(_appFiles.TryParseModListRef(_setup.Config.GetInstanceModlist(i), out var modListRef))
                 lists.Add(modListRef);
         }
-        if(appFiles.TryParseModListRef(setup.Config.SelectedClientModlist, out var clientModList))
+        if(_appFiles.TryParseModListRef(_setup.Config.SelectedClientModlist, out var clientModList))
             lists.Add(clientModList);
         if (lists.Count == 0) return Task.FromResult(true);
         return UpdateMods(lists.GetModsFromList().ToList());
@@ -396,9 +416,9 @@ public class Launcher(
         
         try
         {
-            using(logger.BeginScope(("mods", mods)))
-                logger.LogInformation("Updating mods");
-            await steam.UpdateMods(mods);
+            using(_logger.BeginScope(("mods", mods)))
+                _logger.LogInformation("Updating mods");
+            await _steam.UpdateMods(mods);
             await CheckModUpdates();
             return true;
         }
@@ -408,7 +428,7 @@ public class Launcher(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to update mods");
+            _logger.LogError(ex, "Failed to update mods");
             return false;
         }
     }
@@ -419,8 +439,8 @@ public class Launcher(
 
         try
         {
-            logger.LogInformation("Updating servers");
-            await steam.UpdateServerInstances();
+            _logger.LogInformation("Updating servers");
+            await _steam.UpdateServerInstances();
             await CheckServerUpdate();
             return true;
         }
@@ -430,7 +450,7 @@ public class Launcher(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to update servers");
+            _logger.LogError(ex, "Failed to update servers");
             return false;
         }
     }
@@ -439,19 +459,19 @@ public class Launcher(
     {
         try
         {
-            logger.LogInformation("Checking mod updates");
+            _logger.LogInformation("Checking mod updates");
             _modListNeedUpdate.Clear();
             var lists = new List<IPRefWithModList>();
-            for (int i = 0; i < setup.Config.ServerInstanceCount; i++)
+            for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
             {
-                if(appFiles.TryParseModListRef(setup.Config.GetInstanceModlist(i), out var modListRef))
+                if(_appFiles.TryParseModListRef(_setup.Config.GetInstanceModlist(i), out var modListRef))
                     lists.Add(modListRef);
             }
-            if(appFiles.TryParseModListRef(setup.Config.SelectedClientModlist, out var clientModList))
+            if(_appFiles.TryParseModListRef(_setup.Config.SelectedClientModlist, out var clientModList))
                 lists.Add(clientModList);
             if (lists.Count == 0) return true;
             
-            var details = await steam.RequestModDetails(lists.GetModsFromList().ToList());
+            var details = await _steam.RequestModDetails(lists.GetModsFromList().ToList());
             if (details.Count == 0) return true;
             
             var updates = details
@@ -467,32 +487,115 @@ public class Launcher(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to check mod updates");
+            _logger.LogError(ex, "Failed to check mod updates");
             return false;
         }
     }
 
+    private async Task PerformAutomaticRestarts()
+    {
+        foreach (var instance in _serverProcesses.Values)
+        {
+            if(!instance.State.IsRunning() || instance.State.IsStopping()) continue;
+            
+            var profileUri = _setup.Config.GetInstanceProfile(instance.Instance);
+            var serverPRef = _appFiles.Server.Resolve(profileUri);
+            var serverProfile = serverPRef.Get();
+            
+            if(!serverProfile.AutoRestart) continue;
+            
+            var minUptime = serverProfile.AutoRestartMinUptime.TotalMinutes < 10
+                ? TimeSpan.FromMinutes(10)
+                : serverProfile.AutoRestartMinUptime;
+            if((DateTime.UtcNow - instance.StartUtc ) < minUptime) continue;
+            
+            if(StartDateCountToday(instance.Instance) >= serverProfile.AutoRestartMaxPerDay
+               && serverProfile.AutoRestartMaxPerDay > 0) continue;
+
+            var time = DateTime.Now.TimeOfDay;
+            if(serverProfile.AutoRestartDailyTime
+               .All(x => time < x || time > x + TimeSpan.FromMinutes(5))) continue;
+
+            await instance.RestartAsync();
+        } 
+    }
+
+    private List<StartDates> LoadStartDates()
+    {
+        try
+        {
+            var path = Path.Combine(_setup.GetBaseInstancePath(),
+                Constants.FileStartDateJson
+            );
+            if (!File.Exists(path)) return [];
+
+            var json = File.ReadAllText(path);
+            if (string.IsNullOrEmpty(json)) return [];
+
+            var result = JsonSerializer.Deserialize<List<StartDates>>(json);
+            if (result is null) return [];
+            return result;
+        }
+        catch
+        {
+            return [];
+        }
+    }
+
+    private void AddStartDate(int instance)
+    {
+        _startDates.Add(new StartDates(instance, DateTime.UtcNow));
+        while(_startDates.Count > 50) 
+            _startDates.RemoveAt(0);
+
+        try
+        {
+            var json = JsonSerializer.Serialize(_startDates);
+            var path = Path.Combine(_setup.GetBaseInstancePath(),
+                Constants.FileStartDateJson
+            );
+            File.WriteAllText(path, json);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to save start dates");
+        }
+    }
+
+    private int StartDateCount(TimeSpan timeSpan, int instance)
+    {
+        var date = DateTime.UtcNow - timeSpan;
+        return _startDates.Count(x => x.Date > date && x.Instance == instance);
+    }
+
+    private int StartDateCountToday(int instance)
+    {
+        return StartDateCount(DateTime.Now.TimeOfDay, instance);
+    }
+
     private async Task PerformPeriodicUpdateCheck()
     {
-        if ((DateTime.UtcNow - _lastUpdateCheckTime) >= setup.Config.UpdateCheckFrequency)
+        if ((DateTime.UtcNow - _lastUpdateCheckTime) >= _setup.Config.UpdateCheckFrequency)
         {
             if (!await CheckModUpdates()) return;
             if (!await CheckServerUpdate()) return;
             _lastUpdateCheckTime = DateTime.UtcNow;
         }
 
-        if (setup.Config.AutoUpdateStatus != AutoUpdateStatus.CheckForUpdates) return;
+        if (_setup.Config.AutoUpdateStatus != AutoUpdateStatus.CheckForUpdates) return;
         if (IsClientRunning()) return; // can't auto-update if any client is running
         
         foreach (var process in _serverProcesses.Values)
         {
+            if(!process.State.IsRunning() || process.State.IsStopping()) continue;
+            
             if (_serverNeedUpdate)
             {
                 await process.RestartAsync();
                 continue;
             }
                     
-            var modListRef = appFiles.ResolveModList(setup.Config.GetInstanceModlist(process.Instance));
+            var modListRef = _appFiles.ResolveModList(_setup.Config.GetInstanceModlist(process.Instance));
             if (_modListNeedUpdate.Contains(modListRef))
                 await process.RestartAsync();
         }
@@ -500,8 +603,8 @@ public class Launcher(
 
     private async Task<bool> CheckServerUpdate()
     {
-        logger.LogInformation("Checking server updates");
-        if (steam.GetInstalledInstances() < setup.Config.ServerInstanceCount)
+        _logger.LogInformation("Checking server updates");
+        if (_steam.GetInstalledInstances() < _setup.Config.ServerInstanceCount)
         {
             _serverNeedUpdate = true;
             return true;
@@ -509,7 +612,7 @@ public class Launcher(
         
         try
         {
-            _serverNeedUpdate = await steam.GetSteamBuildId() != steam.GetInstanceBuildId(0);
+            _serverNeedUpdate = await _steam.GetSteamBuildId() != _steam.GetInstanceBuildId(0);
             return true;
         }
         catch (OperationCanceledException)
@@ -518,7 +621,7 @@ public class Launcher(
         }
         catch (Exception ex)
         {
-            logger.LogError(ex, "Failed to check server updates");
+            _logger.LogError(ex, "Failed to check server updates");
             return false;
         }
     }
@@ -532,9 +635,9 @@ public class Launcher(
 
     private async Task<Process> CreateClientProcess(ClientProfile profile, IEnumerable<string> modList, bool isBattleEye, bool autoConnect)
     {
-        var filename = setup.GetBinFile(isBattleEye);
+        var filename = _setup.GetBinFile(isBattleEye);
         var modlistFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modlistFile, setup.GetModsPath(modList));
+        await File.WriteAllLinesAsync(modlistFile, _setup.GetModsPath(modList));
         var args = profile.GetClientArgs(modlistFile, autoConnect);
 
         var dir = Path.GetDirectoryName(filename);
@@ -595,10 +698,10 @@ public class Launcher(
     {
         var process = new Process();
 
-        var filename = setup.GetIntanceBinary(instance);
+        var filename = _setup.GetIntanceBinary(instance);
         
         var modfileFile = Path.GetTempFileName();
-        await File.WriteAllLinesAsync(modfileFile, setup.GetModsPath(modlist));
+        await File.WriteAllLinesAsync(modfileFile, _setup.GetModsPath(modlist));
         
         var args = profile.GetServerArgs(instance, modfileFile);
 
@@ -637,7 +740,7 @@ public class Launcher(
         var process = await FindClientProcess();
         if (process is not null)
         {
-            _conanClientProcess = await processFactory.Create()
+            _conanClientProcess = await _processFactory.Create()
                 .SetStartDate(process.Start)
                 .SetProcess(process.Process)
                 .BuildClient();
@@ -650,8 +753,8 @@ public class Launcher(
         await foreach (var process in FindServerProcesses())
         {
             if(_serverProcesses.ContainsKey(process.Instance)) continue;
-            var serverInfos = await iniHandler.GetInfosFromServerAsync(process.Instance);
-            var builder = processFactory.Create()
+            var serverInfos = await _iniHandler.GetInfosFromServerAsync(process.Instance);
+            var builder = _processFactory.Create()
                 .SetStartDate(process.Start)
                 .SetProcess(process.Process)
                 .SetServerInfos(serverInfos)
@@ -667,7 +770,7 @@ public class Launcher(
     {
         if (_conanClientProcess != null && !_conanClientProcess.State.IsRunning())
         {
-            logger.LogInformation("Client stopped");
+            _logger.LogInformation("Client stopped");
             _conanClientProcess.Dispose();
             _conanClientProcess = null;
             OnStateChanged();
@@ -677,11 +780,11 @@ public class Launcher(
         {
             if (!server.Value.State.IsRunning())
             {
-                logger.LogInformation("Server {instance} stopped", server.Key);
+                _logger.LogInformation("Server {instance} stopped", server.Key);
                 _serverProcesses.Remove(server.Key);
                 OnStateChanged();
-                var name = appFiles.Server.Resolve(setup.Config.GetInstanceProfile(server.Key));
-                if ((server.Value.State == ProcessState.CRASHED && appFiles.Server.Get(name).RestartWhenDown) 
+                var name = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(server.Key));
+                if ((server.Value.State == ProcessState.CRASHED && _appFiles.Server.Get(name).RestartWhenDown) 
                     || server.Value.State == ProcessState.NEW)
                 {
                     await CatapultServer(server.Key);
@@ -695,13 +798,13 @@ public class Launcher(
     {
         if (_conanClientProcess == null) return false;
         var junction = Path.GetFullPath(GetCurrentClientJunction());
-        var profilePath = Path.GetFullPath(appFiles.Client.GetDirectory(profileRef));
+        var profilePath = Path.GetFullPath(_appFiles.Client.GetDirectory(profileRef));
         return string.Equals(junction, profilePath, StringComparison.Ordinal);
     }
 
     private bool IsServerProfileLocked(ServerProfileRef profileRef)
     {
-        var profilePath = Path.GetFullPath(appFiles.Server.GetDirectory(profileRef));
+        var profilePath = Path.GetFullPath(_appFiles.Server.GetDirectory(profileRef));
         foreach (var s in _serverProcesses.Values)
         {
             var instance = s.Instance;
@@ -715,7 +818,7 @@ public class Launcher(
 
     private string GetCurrentClientJunction()
     {
-        var path = Path.Combine(setup.GetClientFolder(), Constants.FolderGameSave);
+        var path = Path.Combine(_setup.GetClientFolder(), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;
@@ -723,7 +826,7 @@ public class Launcher(
 
     private string GetCurrentServerJunction(int instance)
     {
-        var path = Path.Combine(setup.GetInstancePath(instance), Constants.FolderGameSave);
+        var path = Path.Combine(_setup.GetInstancePath(instance), Constants.FolderGameSave);
         if (JunctionPoint.Exists(path))
             return JunctionPoint.GetTarget(path);
         return string.Empty;
@@ -731,7 +834,7 @@ public class Launcher(
 
     private void SetupJunction(string junction, string targetPath)
     {
-        logger.LogInformation("Setup new junction {junction} > {target}", junction, targetPath);
+        _logger.LogInformation("Setup new junction {junction} > {target}", junction, targetPath);
         Tools.RemoveSymboliclink(junction);
         Tools.SetupSymboliclink(junction, targetPath);
     }

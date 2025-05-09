@@ -142,6 +142,7 @@ namespace Trebuchet.ViewModels.SettingFields
         protected Field(T initialValue)
         {
             _value = initialValue;
+            _defaultBuilder = () => initialValue;
 
             _isDefault = this.WhenAnyValue(x => x.Value, x => x.DefaultBuilder, (v, d) =>
             {

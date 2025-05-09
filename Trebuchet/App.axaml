@@ -60,6 +60,7 @@
                 <MergeResourceInclude Source="Templates\MixedConsolePopedOutView.axaml" />
                 <MergeResourceInclude Source="Templates\DurationField.axaml" />
                 <MergeResourceInclude Source="Templates\DayTimeField.axaml" />
+                <MergeResourceInclude Source="Templates\TimeOfDayListField.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -111,6 +112,7 @@
         <StaticResource ResourceKey="MixedConsolePopedOutView" />
         <StaticResource ResourceKey="DurationField" />
         <StaticResource ResourceKey="DayTimeField" />
+        <StaticResource ResourceKey="TimeOfDayListField" />
     </Application.DataTemplates>
     <Application.Styles>
         <FluentTheme />

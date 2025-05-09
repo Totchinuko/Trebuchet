@@ -63,7 +63,7 @@ public partial class LogReader(ILogger<LogReader> logger, string logPath) : IDis
                 if (!string.IsNullOrEmpty(output))
                     ParseAndSend(output);
             }
-            catch(FileNotFoundException){}
+            catch(IOException){}
             catch (Exception ex)
             {
                 using(logger.BeginScope(_loggerContext))

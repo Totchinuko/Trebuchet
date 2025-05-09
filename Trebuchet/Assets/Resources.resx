@@ -1053,4 +1053,16 @@ DO NOT place it in your Steam Directory.</value>
     <data name="SettingUpdateCheckFrequency" xml:space="preserve">
         <value>Update check frequency</value>
     </data>
+    <data name="SettingServerAutoRestart" xml:space="preserve">
+        <value>Auto-Restart</value>
+    </data>
+    <data name="SettingServerAutoRestartMinUptime" xml:space="preserve">
+        <value>Auto-Restart: Minimum Uptime</value>
+    </data>
+    <data name="SettingServerAutoRestartDailyTime" xml:space="preserve">
+        <value>Auto-Restart: Times</value>
+    </data>
+    <data name="SettingServerAutoRestartMaxPerDay" xml:space="preserve">
+        <value>Auto-Restart: Max Per Day</value>
+    </data>
 </root>

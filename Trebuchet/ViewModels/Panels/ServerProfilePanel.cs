@@ -198,6 +198,42 @@ namespace Trebuchet.ViewModels.Panels
                 .SetSetter((v) => _profile.RestartWhenDown = v)
                 .SetDefault(() => ServerProfile.RestartWhenDownDefault)
             );
+            var autoRestart = new ToggleField()
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerAutoRestart)
+                .SetGetter(() => _profile.AutoRestart)
+                .SetSetter((v) => _profile.AutoRestart = v)
+                .SetDefault(() => ServerProfile.AutoRestartDefault);
+            var autoRestartTimes = new TimeOfDayListField(false)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerAutoRestartDailyTime)
+                .SetGetter(() => _profile.AutoRestartDailyTime)
+                .SetSetter((v) => _profile.AutoRestartDailyTime = v)
+                .SetDefault(() => ServerProfile.AutoRestartDailyTimeDefault);
+            var autoRestartMaxPerDay = new IntField(minimum:0,maximum:Int32.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerAutoRestartMaxPerDay)
+                .SetGetter(() => _profile.AutoRestartMaxPerDay)
+                .SetSetter((v) => _profile.AutoRestartMaxPerDay = v)
+                .SetDefault(() => ServerProfile.AutoRestartMaxPerDayDefault);
+            var autoRestartMinUptime = new DurationField(minDuration:TimeSpan.FromMinutes(10),maxDuration:TimeSpan.MaxValue)
+                .WhenFieldChanged(SaveProfile)
+                .SetTitle(Resources.SettingServerAutoRestartMinUptime)
+                .SetGetter(() => _profile.AutoRestartMinUptime)
+                .SetSetter((v) => _profile.AutoRestartMinUptime = v)
+                .SetDefault(() => ServerProfile.AutoRestartMinUptimeDefault);
+            autoRestart.WhenAnyValue(x => x.Value)
+                .Subscribe(x =>
+                {
+                    autoRestartTimes.IsVisible = x;
+                    autoRestartMaxPerDay.IsVisible = x;
+                    autoRestartMinUptime.IsVisible = x;
+                });
+            Fields.Add(autoRestart);
+            Fields.Add(autoRestartTimes);
+            Fields.Add(autoRestartMaxPerDay);
+            Fields.Add(autoRestartMinUptime);
+            
             Fields.Add(new TitleField().SetTitle(Resources.CatPerformance));
             Fields.Add(new IntField(1, int.MaxValue)
                 .WhenFieldChanged(SaveProfile)

@@ -371,6 +371,13 @@ public static class Tools
             ProcessState.FROZEN;
     }
 
+    public static bool IsStopping(this ProcessState state)
+    {
+        return state is
+            ProcessState.STOPPING or
+            ProcessState.RESTARTING;
+    }
+
     public static bool IsServerInstallValid(Config config)
     {
         return config.ServerInstanceCount > 0;

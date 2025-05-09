@@ -20,6 +20,7 @@ public static class Constants
     public const string FileIniServer = "ConanSandbox\\Saved\\Config\\WindowsServer\\{0}.ini";
     public const string FileIniUser = "ConanSandbox\\Saved\\Config\\WindowsNoEditor\\{0}.ini";
     public const string FileMapJson = "maps.json";
+    public const string FileStartDateJson = "start-dates.json";
     public const string FileProfileConfig = "profile.json";
     public const string FileServerBin = "ConanSandboxServer-Win64-Shipping.exe";
     public const string FileServerProxyBin = "ConanSandboxServer.exe";

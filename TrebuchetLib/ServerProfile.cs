@@ -34,7 +34,7 @@ namespace TrebuchetLib
         public int ZombieCheckSeconds { get; set; } = ZombieCheckSecondsDefault;
         public bool AutoRestart { get; set; } = AutoRestartDefault;
         public TimeSpan AutoRestartMinUptime { get; set; } = AutoRestartMinUptimeDefault;
-        public TimeSpan AutoRestartDailyTime { get; set; } = AutoRestartDailyTimeDefault;
+        public List<TimeSpan> AutoRestartDailyTime { get; set; } = AutoRestartDailyTimeDefault;
         public int AutoRestartMaxPerDay { get; set; } = AutoRestartMaxPerDayDefault;
 
         
@@ -134,8 +134,8 @@ namespace TrebuchetLib
         public static readonly bool UseAllCoresDefault = true;
         public static readonly int ZombieCheckSecondsDefault = 300;
         public static readonly TimeSpan AutoRestartMinUptimeDefault = TimeSpan.FromHours(2);
-        public static readonly TimeSpan AutoRestartDailyTimeDefault = TimeSpan.FromHours(12);
-        public static readonly int AutoRestartMaxPerDayDefault = 1;
+        public static List<TimeSpan> AutoRestartDailyTimeDefault => [TimeSpan.FromHours(12)];
+        public static readonly int AutoRestartMaxPerDayDefault = 0;
         public static readonly bool AutoRestartDefault = false;
     }
 }

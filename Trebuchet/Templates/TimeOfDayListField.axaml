@@ -1,0 +1,43 @@
+﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    xmlns:c="clr-namespace:Trebuchet.Controls"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:settingFields="clr-namespace:Trebuchet.ViewModels.SettingFields">
+    <DataTemplate x:Key="TimeOfDayListField" x:DataType="settingFields:TimeOfDayListField">
+        <c:FieldRowControl>
+            <c:FieldRowControl.FieldContent>
+                <Border Margin="0,3" MinWidth="300" MaxWidth="400" HorizontalAlignment="Left">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <Button Classes="Base Green"
+                                VerticalAlignment="Top"
+                                Command="{Binding Add}">
+                            <i:Icon Value="mdi-plus" Classes="Normal" />
+                        </Button>
+                        <ItemsControl ItemsSource="{Binding Value}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel Spacing="6" />
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="settingFields:TimeSpanViewModel">
+                                    <StackPanel Orientation="Horizontal" Spacing="6">
+                                        <TimePicker UseSeconds="{Binding $parent[ItemsControl].((settingFields:TimeOfDayListField)DataContext).UseSeconds}"
+                                                    ClockIdentifier="24HourClock"
+                                                    SelectedTime="{Binding TimeSpan,Mode=TwoWay}"/>
+                                        <Button Classes="Base Red Colored"
+                                                Command="{Binding $parent[ItemsControl].((settingFields:TimeOfDayListField)DataContext).Remove}"
+                                                CommandParameter="{Binding}">
+                                            <i:Icon Value="mdi-delete" Classes="Normal" />
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        
+                    </StackPanel>
+                </Border>
+            </c:FieldRowControl.FieldContent>
+        </c:FieldRowControl>
+    </DataTemplate>
+</ResourceDictionary>

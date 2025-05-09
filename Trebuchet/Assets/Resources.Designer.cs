@@ -1974,6 +1974,42 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Auto-Restart.
+        /// </summary>
+        public static string SettingServerAutoRestart {
+            get {
+                return ResourceManager.GetString("SettingServerAutoRestart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto-Restart: Times.
+        /// </summary>
+        public static string SettingServerAutoRestartDailyTime {
+            get {
+                return ResourceManager.GetString("SettingServerAutoRestartDailyTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto-Restart: Max Per Day.
+        /// </summary>
+        public static string SettingServerAutoRestartMaxPerDay {
+            get {
+                return ResourceManager.GetString("SettingServerAutoRestartMaxPerDay", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Auto-Restart: Minimum Uptime.
+        /// </summary>
+        public static string SettingServerAutoRestartMinUptime {
+            get {
+                return ResourceManager.GetString("SettingServerAutoRestartMinUptime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to CPU Thread Affinity.
         /// </summary>
         public static string SettingServerCPUThreadAffinity {
