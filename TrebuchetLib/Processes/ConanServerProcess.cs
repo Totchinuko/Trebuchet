@@ -195,7 +195,7 @@ internal sealed class ConanServerProcess : IConanServerProcess
             _hasTriedRConShutdown = true;
             RCon.Send(@"shutdown", CancellationToken.None);
         }
-        else if (_hasTriedHandleShutdown)
+        else if (!_hasTriedHandleShutdown)
         {
             _hasTriedHandleShutdown = true;
             Process.CloseMainWindow();
