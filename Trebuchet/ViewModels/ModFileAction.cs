@@ -2,7 +2,7 @@ using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Windows.Input;
 using ReactiveUI;
-using TrebuchetUtils;
+using tot_gui_lib;
 
 namespace Trebuchet.ViewModels;
 

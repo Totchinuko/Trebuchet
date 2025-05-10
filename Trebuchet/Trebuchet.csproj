@@ -69,6 +69,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\SteamWorksWebAPI\SteamWorksWebAPI.csproj" />
+        <ProjectReference Include="..\tot-gui-lib\tot-gui-lib.csproj" />
         <ProjectReference Include="..\TrebuchetLib\TrebuchetLib.csproj" />
     </ItemGroup>
 

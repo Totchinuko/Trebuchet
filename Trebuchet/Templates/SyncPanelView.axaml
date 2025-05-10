@@ -2,7 +2,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
-                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=tot-gui-lib"
+                    xmlns:c="clr-namespace:tot_gui_lib.Controls;assembly=tot-gui-lib"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels">
     <DataTemplate x:Key="SyncPanelView" x:DataType="p:SyncPanel">
         <DockPanel LastChildFill="True">

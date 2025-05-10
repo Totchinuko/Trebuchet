@@ -1,5 +1,5 @@
 using System.Threading.Tasks;
-using TrebuchetUtils;
+using tot_gui_lib;
 
 namespace Trebuchet.ViewModels.InnerContainer;
 

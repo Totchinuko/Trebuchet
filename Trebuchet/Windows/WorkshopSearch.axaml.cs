@@ -3,7 +3,7 @@ using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls;
 using Trebuchet.ViewModels;
-using TrebuchetUtils;
+using tot_gui_lib;
 
 namespace Trebuchet.Windows
 {

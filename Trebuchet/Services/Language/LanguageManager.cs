@@ -4,7 +4,7 @@ using System.Globalization;
 using System.Linq;
 using System.Threading;
 using tot_lib;
-using TrebuchetUtils;
+using tot_gui_lib;
 
 namespace Trebuchet.Services.Language;
 

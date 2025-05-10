@@ -29,7 +29,7 @@ using TrebuchetLib.Processes;
 using TrebuchetLib.Services;
 using TrebuchetLib.Services.Importer;
 using TrebuchetLib.YuuIni;
-using TrebuchetUtils;
+using tot_gui_lib;
 
 // GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
 // Copyright (C) 2025 Totchinuko https://github.com/Totchinuko

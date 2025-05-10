@@ -21,7 +21,7 @@ public class OnBoardingUpdate : TitledDialogue<OnBoardingUpdate>
 
     public OnBoardingUpdate LoadMarkdownDescription(string markdown)
     {
-        var header = TrebuchetUtils.Utils.GetMarkdownHtmlHeader();
+        var header = tot_gui_lib.Utils.GetMarkdownHtmlHeader();
         var builder = new MarkdownPipelineBuilder();
         builder.Extensions.Add(new AutoLinkExtension(new AutoLinkOptions()
         {

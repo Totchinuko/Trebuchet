@@ -4,7 +4,7 @@
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:vm="clr-namespace:Trebuchet.ViewModels"
-                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=tot-gui-lib"
+                    xmlns:c="clr-namespace:tot_gui_lib.Controls;assembly=tot-gui-lib"
                     xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
     <DataTemplate x:Key="ClientDashboard" x:DataType="viewModels:ClientInstanceDashboard">
         <Panel>

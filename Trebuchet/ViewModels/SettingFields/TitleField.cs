@@ -1,7 +1,7 @@
 ﻿using System.Reactive;
 using System.Reflection;
 using ReactiveUI;
-using TrebuchetUtils;
+using tot_gui_lib;
 
 namespace Trebuchet.ViewModels.SettingFields
 {

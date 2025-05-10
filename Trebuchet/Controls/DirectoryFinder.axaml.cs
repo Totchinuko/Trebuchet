@@ -5,7 +5,7 @@ using Avalonia.Controls;
 using Avalonia.Interactivity;
 using Avalonia.Platform.Storage;
 using TrebuchetLib;
-using TrebuchetUtils;
+using tot_gui_lib;
 
 namespace Trebuchet.Controls
 {

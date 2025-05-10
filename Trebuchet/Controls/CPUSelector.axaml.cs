@@ -44,7 +44,7 @@ namespace Trebuchet.Controls
         
         private static void OnCPUAffinityChanged(CpuSelector sender, AvaloniaPropertyChangedEventArgs e)
         {
-            IEnumerable<CheckBox> children = TrebuchetUtils.GuiExtensions.FindVisualChildren<CheckBox>(sender.CheckboxPanel);
+            IEnumerable<CheckBox> children = tot_gui_lib.GuiExtensions.FindVisualChildren<CheckBox>(sender.CheckboxPanel);
             foreach (CheckBox child in children)
             {
                 if(child.Tag is null) throw new Exception(@"CpuAffinityTags Are not setup properly.");

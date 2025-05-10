@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:tl="clr-namespace:tot_lib;assembly=tot-lib"
-        xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=tot-gui-lib"
+        xmlns:controls="clr-namespace:tot_gui_lib.Controls;assembly=tot-gui-lib"
         xmlns:viewModels="clr-namespace:Trebuchet.ViewModels"
         mc:Ignorable="d"
         Title="Tot!Trebuchet"

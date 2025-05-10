@@ -15,6 +15,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tot-lib", "tot-lib\tot-lib.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DepotDownloader", "DepotDownloader\DepotDownloader\DepotDownloader.csproj", "{F506A9DE-C027-43CA-B600-11CCB755A172}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "tot-gui-lib", "tot-gui-lib\tot-gui-lib.csproj", "{EAF29B84-F43D-4508-BCD8-662FC6B22642}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,10 @@ Global
 		{F506A9DE-C027-43CA-B600-11CCB755A172}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F506A9DE-C027-43CA-B600-11CCB755A172}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F506A9DE-C027-43CA-B600-11CCB755A172}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EAF29B84-F43D-4508-BCD8-662FC6B22642}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EAF29B84-F43D-4508-BCD8-662FC6B22642}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EAF29B84-F43D-4508-BCD8-662FC6B22642}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EAF29B84-F43D-4508-BCD8-662FC6B22642}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

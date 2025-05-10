@@ -4,7 +4,7 @@ using Humanizer;
 using ReactiveUI;
 using SteamKit2.Internal;
 using TrebuchetLib;
-using TrebuchetUtils;
+using tot_gui_lib;
 
 namespace Trebuchet.ViewModels
 {
