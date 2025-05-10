@@ -6,7 +6,7 @@
         xmlns:vm="clr-namespace:Trebuchet.ViewModels"
         xmlns:a="clr-namespace:Trebuchet.Assets"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
-        xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+        xmlns:controls="clr-namespace:TrebuchetUtils.Controls;assembly=tot-gui-lib"
         mc:Ignorable="d"
         Title="{x:Static a:Resources.WorkshopSteam}"
         Height="650" Width="900"

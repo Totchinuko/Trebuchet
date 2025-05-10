@@ -4,7 +4,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:i="https://github.com/projektanker/icons.avalonia"
         xmlns:a="clr-namespace:Trebuchet.Assets"
-        xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+        xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=tot-gui-lib"
         xmlns:vm="clr-namespace:Trebuchet.ViewModels"
         mc:Ignorable="d" d:DesignWidth="400" d:DesignHeight="400"
         x:Class="Trebuchet.Windows.GameBuildWindow"

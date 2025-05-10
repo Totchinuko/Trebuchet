@@ -2,7 +2,7 @@
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:p="clr-namespace:Trebuchet.ViewModels.Panels"
-                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=tot-gui-lib"
                     xmlns:a="clr-namespace:Trebuchet.Assets">
     <DataTemplate x:Key="ServerSettings" x:DataType="p:ServerProfilePanel">
         <DockPanel LastChildFill="True">

@@ -1,7 +1,7 @@
 ﻿<ResourceDictionary xmlns="https://github.com/avaloniaui"
                     xmlns:a="clr-namespace:Trebuchet.Assets"
                     xmlns:i="https://github.com/projektanker/icons.avalonia"
-                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=TrebuchetUtils"
+                    xmlns:c="clr-namespace:TrebuchetUtils.Controls;assembly=tot-gui-lib"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:viewModels="clr-namespace:Trebuchet.ViewModels">
     <DataTemplate x:Key="ServerDashboard" x:DataType="viewModels:ServerInstanceDashboard">
