@@ -52,7 +52,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         }
     }
 
-    public void ClearCache()
+    public void ClearSteamCache()
     {
         UpdateDownloaderConfig();
         Tools.DeleteIfExists(ContentDownloader.Config.DepotConfigDirectory);
@@ -107,7 +107,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         return [];
     }
 
-    public void InvalidateCache()
+    public void ClearModDetailsCache()
     {
         _logger.LogInformation(@"Invalidating mod details cache");
         _publishedFiles.Clear();
@@ -504,7 +504,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     {
         List<SteamWorksWebAPI.PublishedFile> results = [];
         if ((DateTime.UtcNow - _lastCacheClear).TotalMinutes > 1.0)
-            InvalidateCache();
+            ClearModDetailsCache();
         for (var i = list.Count - 1; i >= 0; i--)
         {
             var mod = list[i];

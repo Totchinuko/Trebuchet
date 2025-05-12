@@ -375,8 +375,8 @@ public class Launcher : IDisposable
     {
         if (IsAnyServerRunning() || IsClientRunning()) return false;
         _logger.LogInformation(@"Verifying files, clearing caches");
-        _steam.ClearCache();
-        _steam.InvalidateCache();
+        _steam.ClearSteamCache();
+        _steam.ClearModDetailsCache();
         
         try
         {

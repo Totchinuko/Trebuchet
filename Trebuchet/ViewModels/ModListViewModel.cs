@@ -238,6 +238,8 @@ public class ModListViewModel : ReactiveObject
     {
         var published = files.OfType<IPublishedModFile>().Select(x => x.PublishedId).ToList();
         IsLoading = true;
+        if(force)
+            _steam.ClearModDetailsCache();
         var details = await _steam.RequestModDetails(published);
         for (var i = 0; i < files.Count; i++)
         {
