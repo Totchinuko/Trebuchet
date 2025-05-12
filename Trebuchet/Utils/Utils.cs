@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -59,5 +60,14 @@ internal static class Utils
                 Application.Current.RequestedThemeVariant = ThemeVariant.Light;
                 return;
         }
+    }
+
+    [Localizable(false)]
+    public static string? GetAutoStartValue(bool testLive)
+    {
+        var process = Process.GetCurrentProcess().MainModule?.FileName;
+        if (process is null) return null;
+
+        return $"\"{process}\" {(testLive ? Constants.argTestLive : Constants.argLive)}";
     }
 }

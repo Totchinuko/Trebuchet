@@ -1048,4 +1048,16 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="SettingServerAutoRestart" xml:space="preserve">
         <value>Redémarrage Automatique</value>
     </data>
+    <data name="SettingRunOnLogon" xml:space="preserve">
+        <value>Démarrage automatique à la connection</value>
+    </data>
+    <data name="SettingServerAutoRestartDailyTime" xml:space="preserve">
+        <value>Redémarrage Automatique: Heurs</value>
+    </data>
+    <data name="SettingServerAutoRestartMaxPerDay" xml:space="preserve">
+        <value>Redémarrage Automatique: Max par jours</value>
+    </data>
+    <data name="SettingServerAutoRestartMinUptime" xml:space="preserve">
+        <value>Redémarrage Automatique: Durée minimum de fonctionement</value>
+    </data>
 </root>

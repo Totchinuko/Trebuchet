@@ -15,6 +15,8 @@ public static class AppConstants
     public const string ConfigFileName = "settings.ui.json";
     public const string GithubOwnerUpdate = "Totchinuko";
     public const string GithubRepoUpdate = "Trebuchet";
+    public const string AutoStartLive = "TotTrebuchetLive";
+    public const string AutoStartTestLive = "TotTrebuchetTestLive";
 
     public const string RestartArg = "--restart";
 

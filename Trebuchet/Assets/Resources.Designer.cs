@@ -1956,6 +1956,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Automatically start on login.
+        /// </summary>
+        public static string SettingRunOnLogon {
+            get {
+                return ResourceManager.GetString("SettingRunOnLogon", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Admin Password.
         /// </summary>
         public static string SettingServerAdminPass {
@@ -1983,7 +1992,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Auto-Restart: Times.
+        ///   Looks up a localized string similar to Auto-Restart: Hours.
         /// </summary>
         public static string SettingServerAutoRestartDailyTime {
             get {

@@ -186,6 +186,22 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             .SetDescription(Resources.OnBoardingDataDirectorySub)
         );
         Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
+
+        var appName = _setup.IsTestLive ? AppConstants.AutoStartTestLive : AppConstants.AutoStartLive;
+        var content = Utils.Utils.GetAutoStartValue(_setup.IsTestLive);
+        if(content is not null)
+            Fields.Add(new ToggleField()
+                .SetTitle(Resources.SettingRunOnLogon)
+                .SetGetter(() => tot_lib.Utils.HasLogonRun(appName))
+                .SetSetter((v) =>
+                    {
+                        if (v)
+                            tot_lib.Utils.SetLogonRun(appName, content);
+                        else
+                            tot_lib.Utils.RemoveLogonRun(appName);
+                    })
+                .SetDefault(() => false)
+            );
         Fields.Add(new ToggleField()
             .WhenFieldChanged(SaveUiConfig)
             .SetTitle(Resources.SettingDisplayWarningOnKill)
