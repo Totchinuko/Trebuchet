@@ -1068,4 +1068,7 @@ DO NOT place it in your Steam Directory.</value>
     <data name="SettingRunOnLogon" xml:space="preserve">
         <value>Automatically start on login</value>
     </data>
+    <data name="SettingServerDiscordNotificationsWebhook" xml:space="preserve">
+        <value>Discord Webhook Notifications</value>
+    </data>
 </root>

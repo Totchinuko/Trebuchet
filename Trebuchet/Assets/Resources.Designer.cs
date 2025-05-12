@@ -2055,6 +2055,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Discord Webhook Notifications.
+        /// </summary>
+        public static string SettingServerDiscordNotificationsWebhook {
+            get {
+                return ResourceManager.GetString("SettingServerDiscordNotificationsWebhook", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Enable Battle Eye.
         /// </summary>
         public static string SettingServerEnableBattleEye {

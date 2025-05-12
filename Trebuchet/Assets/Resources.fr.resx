@@ -1060,4 +1060,7 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="SettingServerAutoRestartMinUptime" xml:space="preserve">
         <value>Redémarrage Automatique: Durée minimum de fonctionement</value>
     </data>
+    <data name="SettingServerDiscordNotificationsWebhook" xml:space="preserve">
+        <value>Webhook de notifcation Discord</value>
+    </data>
 </root>

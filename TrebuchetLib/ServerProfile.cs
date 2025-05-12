@@ -36,6 +36,7 @@ namespace TrebuchetLib
         public TimeSpan AutoRestartMinUptime { get; set; } = AutoRestartMinUptimeDefault;
         public List<TimeSpan> AutoRestartDailyTime { get; set; } = AutoRestartDailyTimeDefault;
         public int AutoRestartMaxPerDay { get; set; } = AutoRestartMaxPerDayDefault;
+        public string DiscordWebHookNotifications { get; set; } = DiscordWebHookNotificationsDefault;
 
         
         [JsonIgnore]
@@ -137,5 +138,6 @@ namespace TrebuchetLib
         public static List<TimeSpan> AutoRestartDailyTimeDefault => [TimeSpan.FromHours(12)];
         public static readonly int AutoRestartMaxPerDayDefault = 0;
         public static readonly bool AutoRestartDefault = false;
+        public static readonly string DiscordWebHookNotificationsDefault = string.Empty;
     }
 }

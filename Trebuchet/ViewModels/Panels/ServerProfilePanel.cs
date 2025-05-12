@@ -374,6 +374,12 @@ namespace Trebuchet.ViewModels.Panels
                 .SetDefault(() => ServerProfile.EnableBattleEyeDefault)
             );
             Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
+            Fields.Add(new TextField()
+                .SetTitle(Resources.SettingServerDiscordNotificationsWebhook)
+                .SetGetter(() => _profile.DiscordWebHookNotifications)
+                .SetSetter((v) => _profile.DiscordWebHookNotifications = v)
+                .SetDefault(() => ServerProfile.DiscordWebHookNotificationsDefault)
+                );
             Fields.Add(new ToggleField()
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingServerLog)
