@@ -292,7 +292,20 @@ public class Launcher : IDisposable
         {
             _hasCatapulted = true;
             for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
-                await CatapultServer(i);
+                if(!_serverProcesses.ContainsKey(i))
+                    await CatapultServer(i);
+        } else if (!_hasCatapulted)
+        {
+            _hasCatapulted = true;
+            for (int i = 0; i < _setup.Config.ServerInstanceCount; i++)
+            {
+                if(_serverProcesses.ContainsKey(i)) continue;
+                var profileUri = _setup.Config.GetInstanceProfile(i);
+                var serverPRef = _appFiles.Server.Resolve(profileUri);
+                var serverProfile = serverPRef.Get();
+                if(serverProfile.RestartWhenDown)
+                    await CatapultServer(i);
+            }
         }
 
         await CleanStoppedProcesses();
