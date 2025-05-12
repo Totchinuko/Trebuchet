@@ -28,6 +28,8 @@ namespace TrebuchetLib
         public string[] SelectedServerModlists { get => _selectedServerModlists; set => _selectedServerModlists = value; }
         public string[] SelectedServerProfiles { get => _selectedServerProfiles; set => _selectedServerProfiles = value; }
         public string DataDirectory { get; set; } = DataDirectoryDefault;
+        public string NotificationServerCrash { get; set; } = NotificationServerCrashDefault;
+        public string NotificationServerOnline { get; set; } = NotificationServerOnlineDefault;
         
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         [Obsolete]
@@ -80,5 +82,7 @@ namespace TrebuchetLib
         public static readonly bool VerifyAllDefault = false;
         public static readonly string DataDirectoryDefault = string.Empty;
         public static readonly TimeSpan UpdateCheckFrequencyDefault = TimeSpan.FromMinutes(5);
+        public static readonly string NotificationServerCrashDefault = "Server {serverName} has crashed";
+        public static readonly string NotificationServerOnlineDefault = "Server {serverName} is now online";
     }
 }

@@ -188,6 +188,7 @@ public partial class App : Application, IApplication
         
         services.AddSingleton<AppFiles>();
         services.AddSingleton<ModlistImporter>();
+        services.AddSingleton<UserDefinedNotifications>();
         services.AddSingleton<Operations>();
         services.AddSingleton<IIniGenerator, YuuIniGenerator>();
         services.AddSingleton<IProgressCallback<DepotDownloader.Progress>, Progress>();

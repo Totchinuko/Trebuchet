@@ -274,6 +274,22 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             .SetSetter((v) => _setup.Config.MaxServers = v)
             .SetDefault(() => Config.MaxServersDefault)
         );
+        
+        Fields.Add(new TitleField().SetTitle(Resources.CatNotification));
+        Fields.Add(new TextField()
+            .WhenFieldChanged(SaveConfig)
+            .SetTitle(Resources.SettingNotificationServerCrash)
+            .SetGetter(() => _setup.Config.NotificationServerCrash)
+            .SetSetter((v) => _setup.Config.NotificationServerCrash = v)
+            .SetDefault(() => Config.NotificationServerCrashDefault)
+            );
+        Fields.Add(new TextField()
+            .WhenFieldChanged(SaveConfig)
+            .SetTitle(Resources.SettingNotificationServerOnline)
+            .SetGetter(() => _setup.Config.NotificationServerOnline)
+            .SetSetter((v) => _setup.Config.NotificationServerOnline = v)
+            .SetDefault(() => Config.NotificationServerOnlineDefault)
+        );
     }
 
     private async Task OnRequestRefresh()

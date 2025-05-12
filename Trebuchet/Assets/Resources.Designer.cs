@@ -168,6 +168,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Notifications.
+        /// </summary>
+        public static string CatNotification {
+            get {
+                return ResourceManager.GetString("CatNotification", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Performance.
         /// </summary>
         public static string CatPerformance {
@@ -1853,6 +1862,24 @@ namespace Trebuchet.Assets {
         public static string SettingMaxServersText {
             get {
                 return ResourceManager.GetString("SettingMaxServersText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Crash.
+        /// </summary>
+        public static string SettingNotificationServerCrash {
+            get {
+                return ResourceManager.GetString("SettingNotificationServerCrash", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Online.
+        /// </summary>
+        public static string SettingNotificationServerOnline {
+            get {
+                return ResourceManager.GetString("SettingNotificationServerOnline", resourceCulture);
             }
         }
         

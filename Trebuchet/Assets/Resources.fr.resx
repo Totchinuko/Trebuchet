@@ -1063,4 +1063,13 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="SettingServerDiscordNotificationsWebhook" xml:space="preserve">
         <value>Webhook de notifcation Discord</value>
     </data>
+    <data name="CatNotification" xml:space="preserve">
+        <value>Notifications</value>
+    </data>
+    <data name="SettingNotificationServerCrash" xml:space="preserve">
+        <value>Crash du serveur</value>
+    </data>
+    <data name="SettingNotificationServerOnline" xml:space="preserve">
+        <value>Serveur en ligne</value>
+    </data>
 </root>

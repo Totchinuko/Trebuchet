@@ -1071,4 +1071,13 @@ DO NOT place it in your Steam Directory.</value>
     <data name="SettingServerDiscordNotificationsWebhook" xml:space="preserve">
         <value>Discord Webhook Notifications</value>
     </data>
+    <data name="CatNotification" xml:space="preserve">
+        <value>Notifications</value>
+    </data>
+    <data name="SettingNotificationServerCrash" xml:space="preserve">
+        <value>Server Crash</value>
+    </data>
+    <data name="SettingNotificationServerOnline" xml:space="preserve">
+        <value>Server Online</value>
+    </data>
 </root>

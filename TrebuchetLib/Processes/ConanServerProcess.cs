@@ -1,15 +1,17 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
+using TrebuchetLib.Services;
 
 namespace TrebuchetLib.Processes;
 
 internal sealed class ConanServerProcess : IConanServerProcess
 {
-    public ConanServerProcess(Process process, LogReader logReader)
+    public ConanServerProcess(Process process, LogReader logReader, UserDefinedNotifications notifications)
     {
         Process = process;
         _logReader = logReader;
+        _notifications = notifications;
         PId = Process.Id;
         State = ProcessState.RUNNING;
         _lastResponse = DateTime.UtcNow;
@@ -20,8 +22,11 @@ internal sealed class ConanServerProcess : IConanServerProcess
     private int _maxPlayers;
     private bool _online;
     private int _players;
+    private bool _onlineNotified;
+    private bool _crashNotified;
     private ProcessState _state;
     private LogReader _logReader;
+    private readonly UserDefinedNotifications _notifications;
     private bool _hasTriedRConShutdown;
     private bool _hasTriedHandleShutdown;
 
@@ -85,6 +90,7 @@ internal sealed class ConanServerProcess : IConanServerProcess
     public required ConanServerInfos ServerInfos { get; init; }
     public required SourceQueryReader SourceQueryReader { get; init; }
     public IRcon? RCon { get; init; }
+    public List<INotifier> Notifiers { get; init; } = [];
 
     public int Instance => ServerInfos.Instance;
     public int Port => ServerInfos.Port;
@@ -185,6 +191,22 @@ internal sealed class ConanServerProcess : IConanServerProcess
         return Task.CompletedTask;
     }
 
+    private void NotifyStateOnline()
+    {
+        if (_onlineNotified) return;
+        _onlineNotified = true;
+        foreach (var notifier in Notifiers)
+            notifier.Notify(_notifications.GetOnlineNotification(ServerInfos.Title));
+    }
+
+    private void NotifyStateCrash()
+    {
+        if (_crashNotified) return;
+        _crashNotified = true;
+        foreach (var notifier in Notifiers)
+            notifier.Notify(_notifications.GetCrashNotification(ServerInfos.Title));
+    }
+
     private void SendShutdown()
     {
         if ((DateTime.UtcNow - _shutdownCallTime) < TimeSpan.FromMinutes(3)) return;
@@ -219,6 +241,16 @@ internal sealed class ConanServerProcess : IConanServerProcess
 
     private void OnStateChanged(ProcessState args)
     {
+        switch (args)
+        {
+            case ProcessState.ONLINE:
+                NotifyStateOnline();
+                break;
+            case ProcessState.CRASHED:
+                NotifyStateCrash();
+                break;
+        }
+        
         StateChanged?.Invoke(this, args);
     }
 }

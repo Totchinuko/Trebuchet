@@ -169,6 +169,7 @@ public class Launcher : IDisposable
             .SetProcess(process)
             .SetServerInfos(profile, instance)
             .SetLogFile(_appFiles.Server.GetGameLogs(profileName))
+            .AddNotifier(new DiscordWebHooks(profile))
             .StartLogAtBeginning();
         if (profile.EnableRCon)
             builder.UseRCon();
@@ -767,11 +768,14 @@ public class Launcher : IDisposable
         {
             if(_serverProcesses.ContainsKey(process.Instance)) continue;
             var serverInfos = await _iniHandler.GetInfosFromServerAsync(process.Instance);
+            var profileUri = _setup.Config.GetInstanceProfile(process.Instance);
+            var profileRef = _appFiles.Server.Resolve(profileUri);
             var builder = _processFactory.Create()
                 .SetStartDate(process.Start)
                 .SetProcess(process.Process)
                 .SetServerInfos(serverInfos)
-                .SetLogFile(process.GameLogs);
+                .SetLogFile(process.GameLogs)
+                .AddNotifier(new DiscordWebHooks(profileRef.Get()));
             if (serverInfos.RConPort > 0)
                 builder.UseRCon();
             _serverProcesses.TryAdd(process.Instance, await builder.BuildServer());
