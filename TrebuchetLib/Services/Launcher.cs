@@ -4,21 +4,24 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using tot_lib;
 using TrebuchetLib.Processes;
+using TrebuchetLib.Sequences;
 using TrebuchetLib.YuuIni;
 
 namespace TrebuchetLib.Services;
 
-public class Launcher : IDisposable
+public class Launcher : IDisposable, IProgress<SequenceProgress>
 {
     public Launcher(AppFiles appFiles, 
         AppSetup setup, 
         Steam steam,
+        BackupManager backupManager,
         ConanProcessFactory processFactory,
         ILogger<Launcher> logger)
     {
         _appFiles = appFiles;
         _setup = setup;
         _steam = steam;
+        _backupManager = backupManager;
         _processFactory = processFactory;
         _logger = logger;
 
@@ -26,6 +29,7 @@ public class Launcher : IDisposable
     }
     
     private readonly Dictionary<int, IConanServerProcess> _serverProcesses = [];
+    private readonly Dictionary<int, SequenceRunner> _serverSequences = [];
     private IConanProcess? _conanClientProcess;
     private bool _hasCatapulted;
     private readonly List<IPRefWithModList> _modListNeedUpdate = [];
@@ -35,10 +39,12 @@ public class Launcher : IDisposable
     private readonly AppFiles _appFiles;
     private readonly AppSetup _setup;
     private readonly Steam _steam;
+    private readonly BackupManager _backupManager;
     private readonly ConanProcessFactory _processFactory;
     private readonly ILogger<Launcher> _logger;
 
     public event EventHandler? StateChanged;
+    public event EventHandler<SequenceProgress>? ProgressChanged; 
 
     public void Dispose()
     {
@@ -159,9 +165,16 @@ public class Launcher : IDisposable
     public async Task CatapultServer(ServerProfileRef profileName, IPRefWithModList listRef, int instance)
     {
         if (_serverProcesses.ContainsKey(instance)) return;
-
-        var process = await CatapultServerProcess(profileName, listRef, instance);
+        
         var profile = _appFiles.Server.Get(profileName);
+        if (profile.StartingSequence.Actions.Count > 0)
+        {
+            await CatapultServerSequence(instance, profile);
+            return;
+        }
+
+        await CancelServerSequence(instance);
+        var process = await CatapultServerProcess(profileName, listRef, instance);
 
         var builder = _processFactory.Create()
             .SetProcess(process)
@@ -228,7 +241,24 @@ public class Launcher : IDisposable
     {
         _logger.LogInformation($"Close Server {instance}");
         if (_serverProcesses.TryGetValue(instance, out var watcher))
-            await watcher.StopAsync();
+        {
+            if (_serverSequences.ContainsKey(instance))
+            {
+                await CancelServerSequence(instance);
+                await watcher.StopAsync();
+                return;
+            }
+
+            var uri = _setup.Config.GetInstanceProfile(instance);
+            if (!_appFiles.Server.TryResolve(uri, out var reference) 
+                || reference.Get().StopingSequence.Actions.Count == 0)
+            {
+                await watcher.StopAsync();
+                return;
+            }
+
+            await StopServerWithSequence(instance, reference.Get());
+        }
     }
 
     public IConanProcess? GetClientProcess()
@@ -502,6 +532,56 @@ public class Launcher : IDisposable
         {
             _logger.LogError(ex, "Failed to check mod updates");
             return false;
+        }
+    }
+
+    public void Report(SequenceProgress progress)
+    {
+        ProgressChanged?.Invoke(this, progress);
+    }
+
+    private async Task StopServerWithSequence(int instance, ServerProfile profile)
+    {
+        if (profile.StartingSequence.Actions.Count == 0) return;
+        await CancelServerSequence(instance);
+        
+        var args = new SequenceArgs()
+        {
+            BackupManager = _backupManager,
+            Instance = instance,
+            Launcher = this,
+            Logger = _logger,
+            MainAction = () => CatapultServer(instance)
+        };
+        var runner = new SequenceRunner(profile.StopingSequence, args, this);
+        _serverSequences[instance] = runner;
+        await runner.ExecuteSequence();
+    }
+
+    private async Task CatapultServerSequence(int instance, ServerProfile profile)
+    {
+        if (profile.StartingSequence.Actions.Count == 0) return;
+        await CancelServerSequence(instance);
+
+        var args = new SequenceArgs()
+        {
+            BackupManager = _backupManager,
+            Instance = instance,
+            Launcher = this,
+            Logger = _logger,
+            MainAction = () => CatapultServer(instance)
+        };
+        var runner = new SequenceRunner(profile.StartingSequence, args, this);
+        _serverSequences[instance] = runner;
+        await runner.ExecuteSequence();
+    }
+
+    private async Task CancelServerSequence(int instance)
+    {
+        if (_serverSequences.TryGetValue(instance, out var oldSequence))
+        {
+            await oldSequence.Cts.CancelAsync();
+            _serverSequences.Remove(instance);
         }
     }
 
