@@ -39,6 +39,7 @@ class Program
         collection.AddSingleton(
             new AppSetup(Config.LoadConfig(Constants.GetConfigPath(_testlive)), _testlive, false, _experiment));
         collection.AddLogging(builder => builder.AddSerilog(GetLogger(), true));
+        collection.AddSingleton<BackupManager>();
         collection.AddSingleton<ConanProcessFactory>();
         collection.AddSingleton<AppFiles>();
         collection.AddSingleton<Launcher>();

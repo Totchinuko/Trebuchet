@@ -195,6 +195,30 @@ public static class AppFilesEx
             return handler.Resolve(handler.Ref(data));
         }
     }
+    
+    public static bool TryResolve<T, TRef>(this IAppFileHandler<T, TRef> handler, string data,[NotNullWhen(true)] out TRef? reference)
+        where T : ProfileFile<T>
+        where TRef : class, IPRef<T, TRef>
+    {
+        try
+        {
+            var uri = new Uri(data);
+            if (uri.Segments.Length >= 2 && uri.Host == GetFileHost<T, TRef>())
+            {
+                reference = handler.Ref(Uri.UnescapeDataString(uri.Segments[1]));
+                if (handler.Exists(reference))
+                    return true;
+                return false;
+            }
+            reference = null;
+            return false;
+        }
+        catch
+        {
+            reference = null;
+            return false;
+        }
+    }
 
     public static string GetDirectory<T, TRef>(this IAppFileHandler<T, TRef> handler, TRef reference) 
         where T : ProfileFile<T>

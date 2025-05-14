@@ -8,7 +8,7 @@ public class AppFiles(AppSetup setup)
     public IAppServerFiles Server { get; } = new AppServerFiles(setup);
     public IAppModListFiles Mods { get; } = new AppModlistFiles(setup);
     public IAppSyncFiles Sync { get; } = new AppSyncFiles(setup);
-    
+
     public bool SetupFolders()
     {
         Tools.CreateDir(setup.GetServerInstancePath());

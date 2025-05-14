@@ -37,6 +37,7 @@ public static class Constants
     public const string FolderServerProfiles = "ServerProfiles";
     public const string FolderTestLive = "TestLive";
     public const string FolderWorkshop = "Workshop";
+    public const string FolderBackup = "Backups";
     public const string GameArgsLog = "-log";
     public const string GameArgsModList = "-modlist=\"{0}\"";
     public const string GameArgsContinueSession = "--continuesession";

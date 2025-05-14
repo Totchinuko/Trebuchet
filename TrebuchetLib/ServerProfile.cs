@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using TrebuchetLib.Sequences;
 
 namespace TrebuchetLib
 {
@@ -37,6 +38,9 @@ namespace TrebuchetLib
         public List<TimeSpan> AutoRestartDailyTime { get; set; } = AutoRestartDailyTimeDefault;
         public int AutoRestartMaxPerDay { get; set; } = AutoRestartMaxPerDayDefault;
         public string DiscordWebHookNotifications { get; set; } = DiscordWebHookNotificationsDefault;
+
+        public Sequence StopingSequence { get; set; } = new();
+        public Sequence StartingSequence { get; set; } = new();
 
         
         [JsonIgnore]
