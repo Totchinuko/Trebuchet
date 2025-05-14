@@ -540,27 +540,19 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         ProgressChanged?.Invoke(this, progress);
     }
 
-    private async Task StopServerWithSequence(int instance, ServerProfile profile)
+    private Task StopServerWithSequence(int instance, ServerProfile profile)
     {
-        if (profile.StartingSequence.Actions.Count == 0) return;
-        await CancelServerSequence(instance);
-        
-        var args = new SequenceArgs()
-        {
-            BackupManager = _backupManager,
-            Instance = instance,
-            Launcher = this,
-            Logger = _logger,
-            MainAction = () => CatapultServer(instance)
-        };
-        var runner = new SequenceRunner(profile.StopingSequence, args, this);
-        _serverSequences[instance] = runner;
-        await runner.ExecuteSequence();
+        return RunSequence(instance, profile.StopingSequence);
     }
 
-    private async Task CatapultServerSequence(int instance, ServerProfile profile)
+    private Task CatapultServerSequence(int instance, ServerProfile profile)
     {
-        if (profile.StartingSequence.Actions.Count == 0) return;
+        return RunSequence(instance, profile.StartingSequence);
+    }
+
+    private async Task RunSequence(int instance, Sequence sequence)
+    {
+        if (sequence.Actions.Count == 0) return;
         await CancelServerSequence(instance);
 
         var args = new SequenceArgs()
@@ -571,7 +563,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
             Logger = _logger,
             MainAction = () => CatapultServer(instance)
         };
-        var runner = new SequenceRunner(profile.StartingSequence, args, this);
+        var runner = new SequenceRunner(sequence, args, this);
         _serverSequences[instance] = runner;
         await runner.ExecuteSequence();
     }
