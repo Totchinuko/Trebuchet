@@ -118,7 +118,7 @@ public class ConsolePanel : ReactiveObject, IRefreshablePanel, ITickingPanel
         var servers = _launcher.GetServerProcesses().ToList();
         AdjustConsoleListIfNeeded();
         foreach (var s in servers)
-            ConsoleList[s.Instance].Process = s;
+            ConsoleList[s.Infos.Instance].Process = s;
 
         return Task.CompletedTask;
     }

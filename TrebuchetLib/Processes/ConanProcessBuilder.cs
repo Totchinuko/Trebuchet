@@ -18,9 +18,7 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
     private ILogger<Rcon>? _rconLogger;
     private Func<Task<ConanServerInfos>>? _serverInfosGetter;
     private ILogger<LogReader>? _gameLogger;
-    private readonly List<INotifier> _notifiers = [];
     private bool _useRcon;
-    private UserDefinedNotifications? _notifications;
 
     public static ConanProcessBuilder Create()
     {
@@ -51,12 +49,6 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
         return this;
     }
 
-    public ConanProcessBuilder SetUserDefinedNotifications(UserDefinedNotifications notifications)
-    {
-        _notifications = notifications;
-        return this;
-    }
-
     public ConanProcessBuilder SetGameLogger(ILogger<LogReader> logger)
     {
         _gameLogger = logger;
@@ -75,12 +67,6 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
         return this;
     }
 
-    public IConanProcessServerBuilder SetServerInfos(IIniGenerator iniGenerator, int instance)
-    {
-        _serverInfosGetter = async () => await iniGenerator.GetInfosFromServerAsync(instance);
-        return this;
-    }
-
     public IConanProcessBuilderWithProcess SetProcess(Process process)
     {
         _process = process;
@@ -93,12 +79,6 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
         return this;
     }
 
-    public IConanProcessServerBuilderLogTracked AddNotifier(INotifier notifier)
-    {
-        _notifiers.Add(notifier);
-        return this;
-    }
-
     public async Task<IConanServerProcess> BuildServer()
     {
         if (_process is null) throw new ArgumentNullException(nameof(_process), @"Process is not set");
@@ -107,7 +87,6 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
         if(_rconLogger is null) throw new ArgumentNullException(nameof(_log), @"Log is not set");
         if(_rconLogger is null) throw new ArgumentNullException(nameof(_rconLogger), @"rcon logger is not set");
         if(_gameLogger is null) throw new ArgumentNullException(nameof(_gameLogger), @"game logger is not set");
-        if(_notifications is null) throw new ArgumentNullException(nameof(_gameLogger), @"notications are not set");
         
         var serverInfo = await _serverInfosGetter.Invoke();
         
@@ -128,13 +107,12 @@ public class ConanProcessBuilder : IConanProcessServerBuilderLogTracked
                 _rconLogger
                 ).SetContext("instance", serverInfo.Instance);
         
-        return new ConanServerProcess(_process, logReader, _notifications)
+        return new ConanServerProcess(_process, logReader)
         {
             SourceQueryReader = sourceQuery,
             StartUtc = _start,
             RCon = rcon,
-            Notifiers = _notifiers,
-            ServerInfos = serverInfo
+            Infos = serverInfo
         };
     }
 

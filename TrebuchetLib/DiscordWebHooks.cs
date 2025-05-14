@@ -4,9 +4,9 @@ using TrebuchetLib.Services;
 
 namespace TrebuchetLib;
 
-public partial class DiscordWebHooks(ServerProfile profile) : INotifier
+public partial class DiscordWebHooks()
 {
-    public async Task Notify(string message)
+    public static async Task Notify(ServerProfile profile, string message)
     {
         if (string.IsNullOrWhiteSpace(message)) return;
         if (string.IsNullOrEmpty(profile.DiscordWebHookNotifications)) return;

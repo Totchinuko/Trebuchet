@@ -4,6 +4,7 @@ using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using tot_lib;
 using TrebuchetLib.Processes;
+using TrebuchetLib.YuuIni;
 
 namespace TrebuchetLib.Services;
 
@@ -12,14 +13,12 @@ public class Launcher : IDisposable
     public Launcher(AppFiles appFiles, 
         AppSetup setup, 
         Steam steam,
-        IIniGenerator iniHandler, 
         ConanProcessFactory processFactory,
         ILogger<Launcher> logger)
     {
         _appFiles = appFiles;
         _setup = setup;
         _steam = steam;
-        _iniHandler = iniHandler;
         _processFactory = processFactory;
         _logger = logger;
 
@@ -32,11 +31,10 @@ public class Launcher : IDisposable
     private readonly List<IPRefWithModList> _modListNeedUpdate = [];
     private bool _serverNeedUpdate;
     private DateTime _lastUpdateCheckTime;
-    private List<StartDates> _startDates;
+    private readonly List<StartDates> _startDates;
     private readonly AppFiles _appFiles;
     private readonly AppSetup _setup;
     private readonly Steam _steam;
-    private readonly IIniGenerator _iniHandler;
     private readonly ConanProcessFactory _processFactory;
     private readonly ILogger<Launcher> _logger;
 
@@ -110,13 +108,13 @@ public class Launcher : IDisposable
 
         SetupJunction(_setup.GetPrimaryJunction(), profile.ProfileFolder);
 
-        await _iniHandler.WriteClientSettingsAsync(profile);
+        await _setup.WriteIni(profile);
         
         if (autoConnect is not null && autoConnect.TryGet(out var connection))
         {
             if (!IsAutoConnectInfoValid(connection))
                 throw new Exception("Auto connection address is invalid");
-            await _iniHandler.WriteClientLastConnection(connection);
+            await _setup.WriteLastConnection(connection);
         }
         
         var process = await CreateClientProcess(profile, modList, isBattleEye, autoConnect is not null);
@@ -169,12 +167,13 @@ public class Launcher : IDisposable
             .SetProcess(process)
             .SetServerInfos(profile, instance)
             .SetLogFile(_appFiles.Server.GetGameLogs(profileName))
-            .AddNotifier(new DiscordWebHooks(profile))
             .StartLogAtBeginning();
         if (profile.EnableRCon)
             builder.UseRCon();
-        
-        _serverProcesses.TryAdd(instance, await builder.BuildServer());
+
+        var serverProcess = await builder.BuildServer();
+        serverProcess.StateChanged += OnServerStateChanged;
+        _serverProcesses.TryAdd(instance, serverProcess);
         OnStateChanged();
     }
     
@@ -202,7 +201,7 @@ public class Launcher : IDisposable
         SetupJunction(Path.Combine(_setup.GetInstancePath(instance), Constants.FolderGameSave), 
             profile.ProfileFolder);
 
-        await _iniHandler.WriteServerSettingsAsync(profile, instance);
+        await _setup.WriteIni(profile, instance);
         var process = await CreateServerProcess(instance, profile, list);
         process.Start();
 
@@ -319,7 +318,7 @@ public class Launcher : IDisposable
             await _conanClientProcess.RefreshAsync();
         foreach (var process in _serverProcesses.Values)
         {
-            var name = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(process.Instance));
+            var name = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(process.Infos.Instance));
             if (_appFiles.Server.Exists(name))
             {
                 var profile = _appFiles.Server.Get(name);
@@ -512,7 +511,7 @@ public class Launcher : IDisposable
         {
             if(!instance.State.IsRunning() || instance.State.IsStopping()) continue;
             
-            var profileUri = _setup.Config.GetInstanceProfile(instance.Instance);
+            var profileUri = _setup.Config.GetInstanceProfile(instance.Infos.Instance);
             var serverPRef = _appFiles.Server.Resolve(profileUri);
             var serverProfile = serverPRef.Get();
             
@@ -523,7 +522,7 @@ public class Launcher : IDisposable
                 : serverProfile.AutoRestartMinUptime;
             if((DateTime.UtcNow - instance.StartUtc ) < minUptime) continue;
             
-            if(StartDateCountToday(instance.Instance) >= serverProfile.AutoRestartMaxPerDay
+            if(StartDateCountToday(instance.Infos.Instance) >= serverProfile.AutoRestartMaxPerDay
                && serverProfile.AutoRestartMaxPerDay > 0) continue;
 
             var time = DateTime.Now.TimeOfDay;
@@ -609,7 +608,7 @@ public class Launcher : IDisposable
                 continue;
             }
                     
-            var modListRef = _appFiles.ResolveModList(_setup.Config.GetInstanceModlist(process.Instance));
+            var modListRef = _appFiles.ResolveModList(_setup.Config.GetInstanceModlist(process.Infos.Instance));
             if (_modListNeedUpdate.Contains(modListRef))
                 await process.RestartAsync();
         }
@@ -767,19 +766,41 @@ public class Launcher : IDisposable
         await foreach (var process in FindServerProcesses())
         {
             if(_serverProcesses.ContainsKey(process.Instance)) continue;
-            var serverInfos = await _iniHandler.GetInfosFromServerAsync(process.Instance);
-            var profileUri = _setup.Config.GetInstanceProfile(process.Instance);
-            var profileRef = _appFiles.Server.Resolve(profileUri);
+            var serverInfos = await _setup.GetInfosFromIni(process.Instance);
             var builder = _processFactory.Create()
                 .SetStartDate(process.Start)
                 .SetProcess(process.Process)
                 .SetServerInfos(serverInfos)
-                .SetLogFile(process.GameLogs)
-                .AddNotifier(new DiscordWebHooks(profileRef.Get()));
+                .SetLogFile(process.GameLogs);
             if (serverInfos.RConPort > 0)
                 builder.UseRCon();
-            _serverProcesses.TryAdd(process.Instance, await builder.BuildServer());
+            var serverProcess = await builder.BuildServer();
+            serverProcess.StateChanged += OnServerStateChanged;
+            _serverProcesses.TryAdd(process.Instance, serverProcess);
             OnStateChanged();
+        }
+    }
+
+    private async void OnServerStateChanged(object? sender, ProcessState e)
+    {
+        try
+        {
+            if (sender is not IConanServerProcess process) return;
+            var uri = _setup.Config.GetInstanceProfile(process.Infos.Instance);
+            if (!_appFiles.Server.TryResolve(uri, out var reference)) return;
+            switch (e)
+            {
+                case ProcessState.CRASHED:
+                    await DiscordWebHooks.Notify(reference.Get(), _setup.GetCrashNotification(process.Infos.Title));
+                    return;
+                case ProcessState.ONLINE:
+                    await DiscordWebHooks.Notify(reference.Get(), _setup.GetOnlineNotification(process.Infos.Title));
+                    return;
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to perform notification");
         }
     }
 
@@ -824,7 +845,7 @@ public class Launcher : IDisposable
         var profilePath = Path.GetFullPath(_appFiles.Server.GetDirectory(profileRef));
         foreach (var s in _serverProcesses.Values)
         {
-            var instance = s.Instance;
+            var instance = s.Infos.Instance;
             var junction = Path.GetFullPath(GetCurrentServerJunction(instance));
             if (string.Equals(junction, profilePath, StringComparison.Ordinal))
                 return true;

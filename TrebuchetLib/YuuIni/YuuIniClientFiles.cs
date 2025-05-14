@@ -5,16 +5,16 @@ using Yuu.Ini;
 
 namespace TrebuchetLib.YuuIni;
 
-public class YuuIniClientFiles(AppSetup setup)
+public static class YuuIniClientFiles
 {
-    public async Task WriteIni(ClientProfile profile)
+    public static async Task WriteIni(this AppSetup setup, ClientProfile profile)
     {
         Dictionary<string, IniDocument> documents = new Dictionary<string, IniDocument>();
         // Modify the default SectionName parse because funcom sometime does an oupsi and generate sections with an empty name
         var iniParserConfiguration = new IniParserConfiguration();
         iniParserConfiguration.SectionNameRegex = "\\s*[^\\[\\]]*\\s*";
 
-        foreach (var method in GetIniMethods(this))
+        foreach (var method in GetIniMethods())
         {
             IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
             if (!documents.TryGetValue(attr.Path, out IniDocument? document))
@@ -24,7 +24,7 @@ public class YuuIniClientFiles(AppSetup setup)
                 document = IniParser.Parse(iniContent, iniParserConfiguration);
                 documents.Add(attr.Path, document);
             }
-            method.Invoke(this, [profile, document]);
+            method.Invoke(null, [setup, profile, document]);
         }
 
         foreach (var document in documents)
@@ -34,7 +34,7 @@ public class YuuIniClientFiles(AppSetup setup)
         }
     }
 
-    public async Task WriteLastConnection(ClientConnection connection)
+    public static async Task WriteLastConnection(this AppSetup setup, ClientConnection connection)
     {
         // Modify the default SectionName parse because funcom sometime does an oupsi and generate sections with an empty name
         var iniParserConfiguration = new IniParserConfiguration();
@@ -53,20 +53,20 @@ public class YuuIniClientFiles(AppSetup setup)
     }
     
     [IniSetting(Constants.FileIniDefault, "Engine")]
-    public void DefaultEngine(ClientProfile profile, IniDocument document)
+    public static void DefaultEngine(AppSetup setup, ClientProfile profile, IniDocument document)
     {
         document.GetSection("/Game/Mods/TotAdmin/PreLoad/Tot_W_NoServer.Tot_W_NoServer_C").SetParameter("NoServerListAutoRefresh", profile.TotAdminDoNotLoadServerList ? "true" : "false");
     }
 
     [IniSetting(Constants.FileIniUser, "GraniteBaking")]
-    public void Granite(ClientProfile profile, IniDocument document)
+    public static void Granite(AppSetup setup, ClientProfile profile, IniDocument document)
     {
         document.GetSection("/script/granitematerialbaker.granitebakingsettings")
             .SetParameter("Quality", profile.UltraAnisotropy ? "High" : "Medium");
     }
 
     [IniSetting(Constants.FileIniDefault, "Game")]
-    public void SkipMovies(ClientProfile profile, IniDocument document)
+    public static void SkipMovies(AppSetup setup, ClientProfile profile, IniDocument document)
     {
         IniSection section = document.GetSection("/Script/MoviePlayer.MoviePlayerSettings");
         section.GetParameters("+StartupMovies").ForEach(section.Remove);
@@ -84,7 +84,7 @@ public class YuuIniClientFiles(AppSetup setup)
     }
 
     [IniSetting(Constants.FileIniUser, "Engine")]
-    public void SoundSettings(ClientProfile profile, IniDocument document)
+    public static void SoundSettings(AppSetup setup, ClientProfile profile, IniDocument document)
     {
         document.GetSection("Audio").SetParameter("UnfocusedVolumeMultiplier", profile.BackgroundSound ? "1.0" : "0,0");
 
@@ -108,14 +108,14 @@ public class YuuIniClientFiles(AppSetup setup)
     }
 
     [IniSetting(Constants.FileIniDefault, "Scalability")]
-    public void UltraSetting(ClientProfile profile, IniDocument document)
+    public static void UltraSetting(AppSetup setup, ClientProfile profile, IniDocument document)
     {
         document.GetSection("TextureQuality@3").SetParameter("r.Streaming.PoolSize", (1500 + profile.AddedTexturePool).ToString());
         document.GetSection("TextureQuality@3").SetParameter("r.MaxAnisotropy", profile.UltraAnisotropy ? "16" : "8");
     }
 
     [IniSetting(Constants.FileIniUser, "Game")]
-    public void UserGameSetting(ClientProfile profile, IniDocument document)
+    public static void UserGameSetting(AppSetup setup, ClientProfile profile, IniDocument document)
     {
         document.GetSection("/script/engine.player")
             .SetParameter("ConfiguredInternetSpeed", 
@@ -125,14 +125,15 @@ public class YuuIniClientFiles(AppSetup setup)
                     );
     }
     
-    private IEnumerable<MethodInfo> GetIniMethods(object target)
+    private static IEnumerable<MethodInfo> GetIniMethods()
     {
-        return target.GetType().GetMethods()
+        return typeof(YuuIniClientFiles).GetMethods()
             .Where(meth => meth.GetCustomAttributes(typeof(IniSettingAttribute), true).Any())
             .Where(meth =>
-                meth.GetParameters().Length == 2 && 
-                meth.GetParameters()[0].ParameterType == typeof(ClientProfile) &&
-                meth.GetParameters()[1].ParameterType == typeof(IniDocument)
+                meth.GetParameters().Length == 3 && 
+                meth.GetParameters()[0].ParameterType == typeof(AppSetup) &&
+                meth.GetParameters()[1].ParameterType == typeof(ClientProfile) &&
+                meth.GetParameters()[2].ParameterType == typeof(IniDocument)
                 );
     }
 }

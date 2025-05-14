@@ -217,9 +217,9 @@ public class MixedConsoleViewModel : ReactiveObject, IScrollController, ITextSou
         }
         else
         {
-            CanSend = Process is { RConPort: > 0, State: ProcessState.ONLINE };
+            CanSend = Process is { Infos.RConPort: > 0, State: ProcessState.ONLINE };
             ServerLabel = CanSend
-                ? $@"{Resources.CatRCon} - {Process.Title} ({Process.Instance}) - {IPAddress.Loopback}:{Process.RConPort}"
+                ? $@"{Resources.CatRCon} - {Process.Infos.Title} ({Process.Infos.Instance}) - {IPAddress.Loopback}:{Process.Infos.RConPort}"
                 : $@"{Resources.Unavailable} - {Resources.Instance} {_instance}";
         }
     }

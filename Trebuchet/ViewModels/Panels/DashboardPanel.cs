@@ -260,7 +260,7 @@ namespace Trebuchet.ViewModels.Panels
             
             await Client.ProcessRefresh(_launcher.GetClientProcess(), _uiConfig.DisplayProcessPerformance);
             foreach (var instance in _launcher.GetServerProcesses())
-                await Instances[instance.Instance].ProcessRefresh(instance, _uiConfig.DisplayProcessPerformance);
+                await Instances[instance.Infos.Instance].ProcessRefresh(instance, _uiConfig.DisplayProcessPerformance);
         }
 
         public Task RefreshPanel()

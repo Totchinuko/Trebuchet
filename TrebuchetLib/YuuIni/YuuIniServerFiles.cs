@@ -5,16 +5,16 @@ using Yuu.Ini;
 
 namespace TrebuchetLib.YuuIni;
 
-public class YuuIniServerFiles(AppSetup setup)
+public static class YuuIniServerFiles
 {
-    public async Task WriteIni(ServerProfile profile, int instance)
+    public static async Task WriteIni(this AppSetup setup, ServerProfile profile, int instance)
     {
         Dictionary<string, IniDocument> documents = new Dictionary<string, IniDocument>();
         // Modify the default SectionName parse because funcom sometime does an oupsi and generate sections with an empty name
         var iniParserConfiguration = new IniParserConfiguration();
         iniParserConfiguration.SectionNameRegex = "\\s*[^\\[\\]]*\\s*";
 
-        foreach (var method in GetIniMethods(this))
+        foreach (var method in GetIniMethods())
         {
             IniSettingAttribute attr = method.GetCustomAttribute<IniSettingAttribute>() ?? throw new Exception($"{method.Name} does not have IniSettingAttribute.");
             if (!documents.TryGetValue(attr.Path, out IniDocument? document))
@@ -24,7 +24,7 @@ public class YuuIniServerFiles(AppSetup setup)
                 document = IniParser.Parse(content, iniParserConfiguration);
                 documents.Add(attr.Path, document);
             }
-            method.Invoke(this, [profile, document]);
+            method.Invoke(null, [profile, document]);
         }
 
         foreach (var document in documents)
@@ -35,7 +35,7 @@ public class YuuIniServerFiles(AppSetup setup)
         }
     }
 
-    public async Task<ConanServerInfos> GetInfosFromIni(int instance)
+    public static async Task<ConanServerInfos> GetInfosFromIni(this AppSetup setup, int instance)
     {
         var infos = new ConanServerInfos();
         infos.Instance = instance;
@@ -61,14 +61,14 @@ public class YuuIniServerFiles(AppSetup setup)
     }
     
     [IniSetting(Constants.FileIniServer, "Engine")]
-    public void ApplyAiSpawn(ServerProfile profile, IniDocument document)
+    public static void ApplyAiSpawn(AppSetup appSetup, ServerProfile profile, IniDocument document)
     {
         document.GetSection("/Script/ConanSandbox.SystemSettings").SetParameter("dw.EnableAISpawning", profile.NoAISpawn ? "0" : "1");
         document.GetSection("/Script/ConanSandbox.SystemSettings").SetParameter("dw.EnableInitialAISpawningPass", profile.NoAISpawn ? "0" : "1");
     }
 
     [IniSetting(Constants.FileIniServer, "Engine")]
-    public void ApplyEngineSettings(ServerProfile profile, IniDocument document)
+    public static void ApplyEngineSettings(AppSetup appSetup, ServerProfile profile, IniDocument document)
     {
         IniSection section = document.GetSection("OnlineSubsystem");
         section.SetParameter("ServerName", profile.ServerName);
@@ -99,7 +99,7 @@ public class YuuIniServerFiles(AppSetup setup)
     }
 
     [IniSetting(Constants.FileIniServer, "Game")]
-    public void ApplyGameSettings(ServerProfile profile, IniDocument document)
+    public static void ApplyGameSettings(AppSetup appSetup, ServerProfile profile, IniDocument document)
     {
         IniSection section = document.GetSection("/Script/Engine.GameSession");
         section.SetParameter("MaxPlayers", profile.MaxPlayers.ToString());
@@ -112,7 +112,7 @@ public class YuuIniServerFiles(AppSetup setup)
     }
 
     [IniSetting(Constants.FileIniServer, "ServerSettings")]
-    public void ApplyServerSettings(ServerProfile profile, IniDocument document)
+    public static void ApplyServerSettings(AppSetup appSetup, ServerProfile profile, IniDocument document)
     {
         IniSection section = document.GetSection("ServerSettings");
         section.SetParameter("serverRegion", profile.ServerRegion.ToString());
@@ -122,7 +122,7 @@ public class YuuIniServerFiles(AppSetup setup)
     }
 
     [IniSetting(Constants.FileIniDefault, "Engine")]
-    public void ApplySudoSettings(ServerProfile profile, IniDocument document)
+    public static void ApplySudoSettings(AppSetup appSetup, ServerProfile profile, IniDocument document)
     {
         IniSection section = document.GetSection("/Game/Mods/ModAdmin/Auth/EA_MC_Auth.EA_MC_Auth_C");
         section.GetParameters("+SuperAdminSteamIDs").ForEach(section.Remove);
@@ -137,14 +137,15 @@ public class YuuIniServerFiles(AppSetup setup)
         section.SetParameter("DisableHighPrecisionMoveTool", profile.DisableHighPrecisionMoveTool ? "True" : "False");
     }
     
-    private IEnumerable<MethodInfo> GetIniMethods(object target)
+    private static IEnumerable<MethodInfo> GetIniMethods()
     {
-        return target.GetType().GetMethods()
+        return typeof(YuuIniServerFiles).GetMethods()
             .Where(meth => meth.GetCustomAttributes(typeof(IniSettingAttribute), true).Any())
             .Where(meth =>
-                meth.GetParameters().Length == 2 && 
-                meth.GetParameters()[0].ParameterType == typeof(ServerProfile) &&
-                meth.GetParameters()[1].ParameterType == typeof(IniDocument)
+                meth.GetParameters().Length == 3 && 
+                meth.GetParameters()[0].ParameterType == typeof(AppSetup) &&
+                meth.GetParameters()[1].ParameterType == typeof(ServerProfile) &&
+                meth.GetParameters()[2].ParameterType == typeof(IniDocument)
             );
     }
 }

@@ -43,7 +43,6 @@ class Program
         collection.AddSingleton<ConanProcessFactory>();
         collection.AddSingleton<AppFiles>();
         collection.AddSingleton<Launcher>();
-        collection.AddSingleton<IIniGenerator, YuuIniGenerator>();
     }
 
     static ILogger GetLogger()

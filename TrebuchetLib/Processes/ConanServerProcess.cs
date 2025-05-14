@@ -1,17 +1,15 @@
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Runtime.CompilerServices;
-using TrebuchetLib.Services;
 
 namespace TrebuchetLib.Processes;
 
 internal sealed class ConanServerProcess : IConanServerProcess
 {
-    public ConanServerProcess(Process process, LogReader logReader, UserDefinedNotifications notifications)
+    public ConanServerProcess(Process process, LogReader logReader)
     {
         Process = process;
         _logReader = logReader;
-        _notifications = notifications;
         PId = Process.Id;
         State = ProcessState.RUNNING;
         _lastResponse = DateTime.UtcNow;
@@ -22,13 +20,11 @@ internal sealed class ConanServerProcess : IConanServerProcess
     private int _maxPlayers;
     private bool _online;
     private int _players;
-    private bool _onlineNotified;
-    private bool _crashNotified;
     private ProcessState _state;
     private LogReader _logReader;
-    private readonly UserDefinedNotifications _notifications;
     private bool _hasTriedRConShutdown;
     private bool _hasTriedHandleShutdown;
+    private bool _requestRestart;
 
     public event EventHandler<ProcessState>? StateChanged; 
     public event PropertyChangedEventHandler? PropertyChanged;
@@ -86,18 +82,23 @@ internal sealed class ConanServerProcess : IConanServerProcess
         private set => SetField(ref _online, value);
     }
 
+    public bool RequestRestart
+    {
+        get => _requestRestart;
+        private set => SetField(ref _requestRestart, value);
+    }
+
     public Process Process { get; }
-    public required ConanServerInfos ServerInfos { get; init; }
+    public required ConanServerInfos Infos { get; init; }
     public required SourceQueryReader SourceQueryReader { get; init; }
     public IRcon? RCon { get; init; }
-    public List<INotifier> Notifiers { get; init; } = [];
 
-    public int Instance => ServerInfos.Instance;
-    public int Port => ServerInfos.Port;
-    public int QueryPort => ServerInfos.QueryPort;
-    public string RConPassword => ServerInfos.RConPassword;
-    public int RConPort => ServerInfos.RConPort;
-    public string Title => ServerInfos.Title;
+    public int Instance => Infos.Instance;
+    public int Port => Infos.Port;
+    public int QueryPort => Infos.QueryPort;
+    public string RConPassword => Infos.RConPassword;
+    public int RConPort => Infos.RConPort;
+    public string Title => Infos.Title;
 
     public void Dispose()
     {
@@ -122,7 +123,6 @@ internal sealed class ConanServerProcess : IConanServerProcess
         MaxPlayers = SourceQueryReader.MaxPlayers;
         Players = SourceQueryReader.Players;
         
-        
         switch (State)
         {
             case ProcessState.NEW:
@@ -132,15 +132,11 @@ internal sealed class ConanServerProcess : IConanServerProcess
             case ProcessState.RUNNING:
                 if (Online) State = ProcessState.ONLINE;
                 if (Process.HasExited) State = ProcessState.CRASHED;
-                else if (!Process.Responding) State = ProcessState.FROZEN;
+                else if (!Process.Responding) ZombieCheck();
                 break;
             case ProcessState.ONLINE:
                 if (Process.HasExited) State = ProcessState.CRASHED;
-                else if (!Process.Responding) State = ProcessState.FROZEN;
-                break;
-            case ProcessState.FROZEN:
-                if (Process.Responding) State = ProcessState.RUNNING;
-                else ZombieCheck();
+                else if (!Process.Responding) ZombieCheck();
                 break;
             case ProcessState.STOPPING:
                 if (Process.HasExited) State = ProcessState.STOPPED;
@@ -148,10 +144,6 @@ internal sealed class ConanServerProcess : IConanServerProcess
                 break;
             case ProcessState.FAILED:
                 State = ProcessState.CRASHED;
-                break;
-            case ProcessState.RESTARTING:
-                if (Process.HasExited) State = ProcessState.NEW;
-                else SendShutdown();
                 break;
         }
     }
@@ -175,7 +167,7 @@ internal sealed class ConanServerProcess : IConanServerProcess
 
     public Task StopAsync()
     {
-        if (State is ProcessState.STOPPING or ProcessState.STOPPED or ProcessState.RESTARTING) 
+        if (State.IsStopping() || !State.IsRunning()) 
             return Task.CompletedTask;
         State = ProcessState.STOPPING;
         SendShutdown();
@@ -184,27 +176,12 @@ internal sealed class ConanServerProcess : IConanServerProcess
 
     public Task RestartAsync()
     {
-        if (State is ProcessState.STOPPING or ProcessState.STOPPED or ProcessState.RESTARTING) 
+        if (State.IsStopping() || !State.IsRunning()) 
             return Task.CompletedTask;
-        State = ProcessState.RESTARTING;
+        State = ProcessState.STOPPING;
+        RequestRestart = true;
         SendShutdown();
         return Task.CompletedTask;
-    }
-
-    private void NotifyStateOnline()
-    {
-        if (_onlineNotified) return;
-        _onlineNotified = true;
-        foreach (var notifier in Notifiers)
-            notifier.Notify(_notifications.GetOnlineNotification(ServerInfos.Title));
-    }
-
-    private void NotifyStateCrash()
-    {
-        if (_crashNotified) return;
-        _crashNotified = true;
-        foreach (var notifier in Notifiers)
-            notifier.Notify(_notifications.GetCrashNotification(ServerInfos.Title));
     }
 
     private void SendShutdown()
@@ -241,16 +218,6 @@ internal sealed class ConanServerProcess : IConanServerProcess
 
     private void OnStateChanged(ProcessState args)
     {
-        switch (args)
-        {
-            case ProcessState.ONLINE:
-                NotifyStateOnline();
-                break;
-            case ProcessState.CRASHED:
-                NotifyStateCrash();
-                break;
-        }
-        
         StateChanged?.Invoke(this, args);
     }
 }

@@ -13,7 +13,6 @@ public interface IConanProcessBuilderWithProcess : IConanProcessBuilder
 {
     Task<IConanProcess> BuildClient();
     IConanProcessServerBuilder SetServerInfos(ServerProfile profile, int instance);
-    IConanProcessServerBuilder SetServerInfos(IIniGenerator iniGenerator, int instance);
     IConanProcessServerBuilder SetServerInfos(ConanServerInfos infos);
 }
 
@@ -27,6 +26,5 @@ public interface IConanProcessServerBuilderLogTracked : IConanProcessServerBuild
 {
     IConanProcessServerBuilderLogTracked StartLogAtBeginning();
     IConanProcessServerBuilderLogTracked UseRCon();
-    IConanProcessServerBuilderLogTracked AddNotifier(INotifier notifier);
     Task<IConanServerProcess> BuildServer();
 }
