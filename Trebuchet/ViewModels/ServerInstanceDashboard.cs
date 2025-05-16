@@ -39,6 +39,9 @@ namespace Trebuchet.ViewModels
         private ModListRefViewModel? _selectedModlist;
         private ServerProfileRef? _selectedProfile;
         private bool _updateNeeded = false;
+        private bool _sequenceRunning;
+        private bool _sequenceIndeterminate;
+        private double _sequenceProgress;
 
         public ServerInstanceDashboard(int instance, IProcessStats stats, TaskBlocker blocker, DialogueBox box)
         {
@@ -107,6 +110,24 @@ namespace Trebuchet.ViewModels
             set => this.RaiseAndSetIfChanged(ref _processRunning, value);
         }
 
+        public bool SequenceRunning
+        {
+            get => _sequenceRunning;
+            set => this.RaiseAndSetIfChanged(ref _sequenceRunning, value);
+        }
+
+        public bool SequenceIndeterminate
+        {
+            get => _sequenceIndeterminate;
+            set => this.RaiseAndSetIfChanged(ref _sequenceIndeterminate, value);
+        }
+
+        public double SequenceProgress
+        {
+            get => _sequenceProgress;
+            set => this.RaiseAndSetIfChanged(ref _sequenceProgress, value);
+        }
+
         public List<ServerProfileRef> Profiles
         {
             get => _profiles;
@@ -153,6 +174,14 @@ namespace Trebuchet.ViewModels
                 ProcessStats.Details = process;
 
             _lastState = state;
+        }
+
+        public void SetSequenceProgress(SequenceProgress progress)
+        {
+            SequenceRunning = progress.Total > 0;
+            if(progress.Total > 0)
+                SequenceProgress = (double)progress.Current / progress.Total;
+            SequenceIndeterminate = progress.Current == 0;
         }
         
         private async Task OnKillClicked()

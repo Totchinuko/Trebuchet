@@ -44,7 +44,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     private readonly ILogger<Launcher> _logger;
 
     public event EventHandler? StateChanged;
-    public event EventHandler<SequenceProgress>? ProgressChanged; 
+    public event EventHandler<SequenceProgress>? SequenceProgressChanged; 
 
     public void Dispose()
     {
@@ -167,7 +167,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         if (_serverProcesses.ContainsKey(instance)) return;
         
         var profile = _appFiles.Server.Get(profileName);
-        if (profile.StartingSequence.Actions.Count > 0)
+        if (profile.StartingSequence.Actions.Count > 0 && !_serverSequences.ContainsKey(instance))
         {
             await CatapultServerSequence(instance, profile);
             return;
@@ -537,20 +537,20 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
 
     public void Report(SequenceProgress progress)
     {
-        ProgressChanged?.Invoke(this, progress);
+        SequenceProgressChanged?.Invoke(this, progress);
     }
 
     private Task StopServerWithSequence(int instance, ServerProfile profile)
     {
-        return RunSequence(instance, profile.StoppingSequence);
+        return RunSequence(instance, profile.StoppingSequence, () => CloseServer(instance));
     }
 
     private Task CatapultServerSequence(int instance, ServerProfile profile)
     {
-        return RunSequence(instance, profile.StartingSequence);
+        return RunSequence(instance, profile.StartingSequence, () => CatapultServer(instance));
     }
 
-    private async Task RunSequence(int instance, Sequence sequence)
+    private async Task RunSequence(int instance, Sequence sequence, Func<Task> mainAction)
     {
         if (sequence.Actions.Count == 0) return;
         await CancelServerSequence(instance);
@@ -561,7 +561,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
             Instance = instance,
             Launcher = this,
             Logger = _logger,
-            MainAction = () => CatapultServer(instance)
+            MainAction = mainAction
         };
         var runner = new SequenceRunner(sequence, args, this);
         _serverSequences[instance] = runner;
@@ -569,10 +569,12 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         try
         {
             await runner.ExecuteSequence();
+            
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Failed to execute sequence");
+            Report(new SequenceProgress(instance, 0, 0));
         }
     }
 

@@ -29,5 +29,6 @@ public class SequenceRunner
             i++;
             _progress.Report(new SequenceProgress(Arguments.Instance, i, _sequence.Actions.Count));
         }
+        _progress.Report(new SequenceProgress(Arguments.Instance, 0, 0));
     }
 }

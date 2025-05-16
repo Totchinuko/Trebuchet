@@ -37,6 +37,8 @@ namespace Trebuchet.ViewModels.Panels
             _logger = logger;
             CanBeOpened = Tools.IsClientInstallValid(_setup.Config) || Tools.IsServerInstallValid(_setup.Config);
 
+            launcher.SequenceProgressChanged += OnSequenceProgressChanged;
+
             var canDownloadServer = blocker.WhenAnyValue(x => x.CanDownloadServer);
             var canDownloadMods = blocker.WhenAnyValue(x => x.CanDownloadMods);
             CloseAllCommand = ReactiveCommand.CreateFromTask(OnCloseAll);
@@ -54,7 +56,7 @@ namespace Trebuchet.ViewModels.Panels
             ConfigureClient(Client);
             RefreshClientSelection(_setup.Config.SelectedClientProfile, _setup.Config.SelectedClientModlist);
         }
-        
+
         private readonly AppSetup _setup;
         private readonly UIConfig _uiConfig;
         private readonly AppFiles _appFiles;
@@ -285,6 +287,13 @@ namespace Trebuchet.ViewModels.Panels
             RefreshClientSelection();
             RefreshServerSelection();
             await RefreshPanel();
+        }
+        
+        private void OnSequenceProgressChanged(object? sender, SequenceProgress e)
+        {
+            var instance = Instances.FirstOrDefault(x => x.Instance == e.Instance);
+            if (instance is null) return;
+            instance.SetSequenceProgress(e);
         }
 
         private void ConfigureClient(ClientInstanceDashboard client)
