@@ -1072,4 +1072,97 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="SettingNotificationServerOnline" xml:space="preserve">
         <value>Serveur en ligne</value>
     </data>
+    <data name="CancelOnFailure" xml:space="preserve">
+        <value>Annuler en cas d'échec</value>
+    </data>
+    <data name="MaxAge" xml:space="preserve">
+        <value>Age maximum</value>
+    </data>
+    <data name="WebHookUrl" xml:space="preserve">
+        <value>URL Webhook</value>
+    </data>
+    <data name="Message" xml:space="preserve">
+        <value>Message</value>
+    </data>
+    <data name="SequenceActionBackupServerData" xml:space="preserve">
+        <value>Backup du Serveur</value>
+    </data>
+    <data name="SequenceActionDiscordWebHook" xml:space="preserve">
+        <value>Webhook Discord</value>
+    </data>
+    <data name="SequenceActionExecuteProcess" xml:space="preserve">
+        <value>Exécution du processus</value>
+    </data>
+    <data name="SequenceActionRConCommand" xml:space="preserve">
+        <value>Commande RCon</value>
+    </data>
+    <data name="SequenceActionSendRESTQuery" xml:space="preserve">
+        <value>Envoyer Requéte REST</value>
+    </data>
+    <data name="SequenceActionWaitOffline" xml:space="preserve">
+        <value>Attendre l'arret</value>
+    </data>
+    <data name="SequenceActionWaitOnline" xml:space="preserve">
+        <value>Attendre la mise en ligne</value>
+    </data>
+    <data name="SequenceActionWait" xml:space="preserve">
+        <value>Attendre</value>
+    </data>
+    <data name="SequenceMainAction" xml:space="preserve">
+        <value>Action principal de la séquence</value>
+    </data>
+    <data name="SequenceEditor" xml:space="preserve">
+        <value>Éditeur de Séquence</value>
+    </data>
+    <data name="SettingServerStartingSequence" xml:space="preserve">
+        <value>Séquence de démarrage</value>
+    </data>
+    <data name="SettingServerStoppingSequence" xml:space="preserve">
+        <value>Séquence d'arret</value>
+    </data>
+    <data name="SettingServerStartingSequenceText" xml:space="preserve">
+        <value>Séquence de démarrage: {0} Action(s)</value>
+    </data>
+    <data name="SettingServerStoppingSequenceText" xml:space="preserve">
+        <value>Séquence d'arret: {0} Action(s)</value>
+    </data>
+    <data name="ProcessFilename" xml:space="preserve">
+        <value>Chemin du Fichier</value>
+    </data>
+    <data name="Arguments" xml:space="preserve">
+        <value>Arguments</value>
+    </data>
+    <data name="WaitProcessToExit" xml:space="preserve">
+        <value>Attendre que le processus ce termine</value>
+    </data>
+    <data name="CancelIfErrorCode" xml:space="preserve">
+        <value>Annuler si un code d'erreur est retourné</value>
+    </data>
+    <data name="CreateNoWindow" xml:space="preserve">
+        <value>Ne pas créer de fenêtre</value>
+    </data>
+    <data name="UseShellExecute" xml:space="preserve">
+        <value>Executer via le Shell</value>
+    </data>
+    <data name="Command" xml:space="preserve">
+        <value>Commande</value>
+    </data>
+    <data name="RequestUrl" xml:space="preserve">
+        <value>URL de la requête</value>
+    </data>
+    <data name="HttpMethod" xml:space="preserve">
+        <value>Méthode Http</value>
+    </data>
+    <data name="RequestBody" xml:space="preserve">
+        <value>Contenu de la requéte</value>
+    </data>
+    <data name="RequestHeaders" xml:space="preserve">
+        <value>En-Tête de la requête</value>
+    </data>
+    <data name="RequestTimeout" xml:space="preserve">
+        <value>Délai maximum</value>
+    </data>
+    <data name="WaitTime" xml:space="preserve">
+        <value>Durée d'attente</value>
+    </data>
 </root>

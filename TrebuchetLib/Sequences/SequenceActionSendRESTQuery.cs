@@ -11,7 +11,7 @@ public class SequenceActionSendRESTQuery : ISequenceAction
     public string Url { get; set; } = string.Empty;
     public int HttpMethod { get; set; } = 0;
     public string Body { get; set; } = string.Empty;
-    public string Headers { get; set; } = string.Empty;
+    public string Headers { get; set; } = "Content-Type:application/json";
     public TimeSpan TimeOut { get; set; } = TimeSpan.FromSeconds(10);
     
     public async Task Execute(SequenceArgs args)

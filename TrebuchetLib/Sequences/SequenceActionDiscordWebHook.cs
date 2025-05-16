@@ -7,7 +7,7 @@ namespace TrebuchetLib.Sequences;
 public class SequenceActionDiscordWebHook : ISequenceAction
 {
     public string Message { get; set; } = string.Empty;
-    public string DiscordWebHook { get; set; } = string.Empty;
+    public string DiscordWebHook { get; set; } = "hhttps://discord.com/api/webhooks/...";
     public bool CancelOnFailure { get; set; }
     
     public async Task Execute(SequenceArgs args)

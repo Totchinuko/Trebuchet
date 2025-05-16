@@ -5,7 +5,7 @@ namespace TrebuchetLib.Sequences;
 public class SequenceActionWaitOnline : ISequenceAction
 {
     public bool CancelOnFailure { get; set; }
-    public TimeSpan TimeOut { get; set; }
+    public TimeSpan TimeOut { get; set; } = TimeSpan.FromMinutes(10);
     public async Task Execute(SequenceArgs args)
     {
         var start = DateTime.UtcNow;
@@ -20,5 +20,8 @@ public class SequenceActionWaitOnline : ISequenceAction
 
         while (process.State != ProcessState.ONLINE && (DateTime.UtcNow - start) < TimeOut)
             await Task.Delay(25);
+        
+        if(CancelOnFailure && process.State != ProcessState.ONLINE)
+            throw new OperationCanceledException("Server failed to get online");
     }
 }

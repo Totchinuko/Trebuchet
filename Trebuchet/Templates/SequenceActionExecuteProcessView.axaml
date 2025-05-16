@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:s="clr-namespace:Trebuchet.ViewModels.Sequences"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:e="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="SequenceActionExecuteProcessView" DataType="s:SequenceActionExecuteProcessViewModel">
+        <StackPanel Orientation="Vertical" Spacing="6">
+            <CheckBox IsChecked="{Binding CancelOnFailure}" Content="{x:Static a:Resources.CancelOnFailure}" />
+            <TextBlock Text="{x:Static a:Resources.ProcessFilename}" />
+            <TextBox Text="{Binding Filename}" />
+            <TextBlock Text="{x:Static a:Resources.Arguments}" />
+            <TextBox Text="{Binding Arguments}" />
+            <CheckBox IsChecked="{Binding WaitForProcessToExit}" Content="{x:Static a:Resources.WaitProcessToExit}" />
+            <CheckBox IsChecked="{Binding CancelIfExitCodeIsError}" Content="{x:Static a:Resources.CancelIfErrorCode}" />
+            <CheckBox IsChecked="{Binding CreateNoWindow}" Content="{x:Static a:Resources.CreateNoWindow}" />
+            <CheckBox IsChecked="{Binding UseShellExecute}" Content="{x:Static a:Resources.UseShellExecute}" />
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

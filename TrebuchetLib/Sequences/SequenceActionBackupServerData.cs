@@ -5,7 +5,7 @@ namespace TrebuchetLib.Sequences;
 public class SequenceActionBackupServerData : ISequenceAction
 {
     public bool CancelOnFailure { get; set; }
-    public TimeSpan MaxAge { get; set; }
+    public TimeSpan MaxAge { get; set; } = TimeSpan.FromDays(7);
     
     public async Task Execute(SequenceArgs args)
     {

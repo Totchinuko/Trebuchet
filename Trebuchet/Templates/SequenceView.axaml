@@ -1,0 +1,49 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:s="clr-namespace:Trebuchet.ViewModels.Sequences"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="SequenceView" DataType="s:SequenceViewModel">
+        <DockPanel LastChildFill="True" Margin="12">
+            <Panel DockPanel.Dock="Top">
+                <Button Classes="Base Green" Margin="0 0 0 12" Command="{Binding Add}" Name="AddAction">
+                    <i:Icon Value="mdi-plus" Classes="Normal" />
+                </Button>
+                <Popup IsLightDismissEnabled="True" IsOpen="{Binding PopupOpen, Mode=TwoWay}" PlacementTarget="AddAction" Placement="BottomEdgeAlignedLeft">
+                    <Border Classes="BackPanel" MinWidth="150">
+                        <ItemsControl ItemsSource="{Binding ActionTypes}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate DataType="s:SequenceActionTypeViewModel">
+                                    <Button Classes="Base Blue Flat Sharp" 
+                                            HorizontalAlignment="Stretch"
+                                            Command="{Binding $parent[ItemsControl].((s:SequenceViewModel)DataContext).AddAction}"
+                                            CommandParameter="{Binding Type}">
+                                        <TextBlock Text="{Binding Label}" TextAlignment="Left" />
+                                    </Button>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </Border>
+                </Popup>
+            </Panel>
+            <ListBox ItemsSource="{Binding Actions}" Classes="draggableVirtualizing">
+                <ListBox.ItemTemplate>
+                    <DataTemplate DataType="s:SequenceActionViewModel">
+                        <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" Margin="6">
+                            <TextBlock Text="{Binding Label}" Classes="SmallTitle" />
+                            <Button Grid.Column="1"
+                                    Grid.Row="0"
+                                    Classes="Base Red"
+                                    Margin="12 0 0 0"
+                                    VerticalAlignment="Top"
+                                    Command="{Binding $parent[ListBox].((s:SequenceViewModel)DataContext).Remove}"
+                                    CommandParameter="{Binding}">
+                                <i:Icon Value="mdi-delete" Classes="Normal" />
+                            </Button>
+                            <ContentControl Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" Content="{Binding}" />
+                        </Grid>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </DataTemplate>
+</ResourceDictionary>

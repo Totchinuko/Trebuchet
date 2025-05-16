@@ -1,0 +1,26 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:c="clr-namespace:tot_gui_lib.Controls;assembly=tot-gui-lib"
+        xmlns:a="clr-namespace:Trebuchet.Assets"
+        xmlns:s="clr-namespace:Trebuchet.ViewModels.Sequences"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="Trebuchet.Windows.SequenceEditor"
+        x:DataType="s:SequenceViewModel"
+        Height="600" Width="800"
+        Title="{x:Static a:Resources.SequenceEditor}"        
+        WindowStartupLocation="CenterScreen"
+        ExtendClientAreaToDecorationsHint="True"
+        ExtendClientAreaChromeHints="NoChrome"
+        SystemDecorations="Full"
+        ExtendClientAreaTitleBarHeightHint="40"
+        UseLayoutRounding="True"
+        Classes="Trebuchet">
+        <Grid RowDefinitions="Auto,*">
+                <c:WindowTitlebar
+                        Grid.Row="0"
+                        Title="{x:Static a:Resources.SequenceEditor}"/>
+                <ContentControl Content="{Binding}" Grid.Row="1" />
+        </Grid>
+</Window>

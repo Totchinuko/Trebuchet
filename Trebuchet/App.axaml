@@ -61,6 +61,17 @@
                 <MergeResourceInclude Source="Templates\DurationField.axaml" />
                 <MergeResourceInclude Source="Templates\DayTimeField.axaml" />
                 <MergeResourceInclude Source="Templates\TimeOfDayListField.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceActionBackupServerDataView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceActionDiscordWebHookView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceActionExecuteProcessView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceActionRConCommandView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceActionSendRESTQueryView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceActionWaitOfflineView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceActionWaitOnlineView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceActionWaitView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceEditorField.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceMainActionView.axaml" />
+                <MergeResourceInclude Source="Templates\SequenceView.axaml" />
             </ResourceDictionary.MergedDictionaries>
         </ResourceDictionary>
     </Application.Resources>
@@ -113,6 +124,17 @@
         <StaticResource ResourceKey="DurationField" />
         <StaticResource ResourceKey="DayTimeField" />
         <StaticResource ResourceKey="TimeOfDayListField" />
+        <StaticResource ResourceKey="SequenceActionBackupServerDataView" />
+        <StaticResource ResourceKey="SequenceActionDiscordWebHookView" />
+        <StaticResource ResourceKey="SequenceActionExecuteProcessView" />
+        <StaticResource ResourceKey="SequenceActionRConCommandView" />
+        <StaticResource ResourceKey="SequenceActionSendRESTQueryView" />
+        <StaticResource ResourceKey="SequenceActionWaitOfflineView" />
+        <StaticResource ResourceKey="SequenceActionWaitOnlineView" />
+        <StaticResource ResourceKey="SequenceActionWaitView" />
+        <StaticResource ResourceKey="SequenceEditorField" />
+        <StaticResource ResourceKey="SequenceMainActionView" />
+        <StaticResource ResourceKey="SequenceView" />
     </Application.DataTemplates>
     <Application.Styles>
         <FluentTheme />

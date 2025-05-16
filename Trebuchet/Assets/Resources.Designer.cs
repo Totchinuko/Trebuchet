@@ -96,6 +96,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Arguments.
+        /// </summary>
+        public static string Arguments {
+            get {
+                return ResourceManager.GetString("Arguments", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Auto Scroll.
         /// </summary>
         public static string AutoScroll {
@@ -123,11 +132,29 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Cancel if return an error code.
+        /// </summary>
+        public static string CancelIfErrorCode {
+            get {
+                return ResourceManager.GetString("CancelIfErrorCode", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Cancelling.
         /// </summary>
         public static string Cancelling {
             get {
                 return ResourceManager.GetString("Cancelling", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Cancel on Failure.
+        /// </summary>
+        public static string CancelOnFailure {
+            get {
+                return ResourceManager.GetString("CancelOnFailure", resourceCulture);
             }
         }
         
@@ -285,6 +312,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Command.
+        /// </summary>
+        public static string Command {
+            get {
+                return ResourceManager.GetString("Command", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Connect.
         /// </summary>
         public static string Connect {
@@ -326,6 +362,15 @@ namespace Trebuchet.Assets {
         public static string Create {
             get {
                 return ResourceManager.GetString("Create", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Do not create a window.
+        /// </summary>
+        public static string CreateNoWindow {
+            get {
+                return ResourceManager.GetString("CreateNoWindow", resourceCulture);
             }
         }
         
@@ -564,6 +609,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Http Method.
+        /// </summary>
+        public static string HttpMethod {
+            get {
+                return ResourceManager.GetString("HttpMethod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Import.
         /// </summary>
         public static string Import {
@@ -753,11 +807,29 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Maximum age.
+        /// </summary>
+        public static string MaxAge {
+            get {
+                return ResourceManager.GetString("MaxAge", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Memory.
         /// </summary>
         public static string Memory {
             get {
                 return ResourceManager.GetString("Memory", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Message.
+        /// </summary>
+        public static string Message {
+            get {
+                return ResourceManager.GetString("Message", resourceCulture);
             }
         }
         
@@ -1416,6 +1488,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to File Path.
+        /// </summary>
+        public static string ProcessFilename {
+            get {
+                return ResourceManager.GetString("ProcessFilename", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Refresh.
         /// </summary>
         public static string Refresh {
@@ -1457,6 +1538,42 @@ namespace Trebuchet.Assets {
         public static string Rename {
             get {
                 return ResourceManager.GetString("Rename", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request Body.
+        /// </summary>
+        public static string RequestBody {
+            get {
+                return ResourceManager.GetString("RequestBody", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request Headers.
+        /// </summary>
+        public static string RequestHeaders {
+            get {
+                return ResourceManager.GetString("RequestHeaders", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Timeout.
+        /// </summary>
+        public static string RequestTimeout {
+            get {
+                return ResourceManager.GetString("RequestTimeout", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Request URL.
+        /// </summary>
+        public static string RequestUrl {
+            get {
+                return ResourceManager.GetString("RequestUrl", resourceCulture);
             }
         }
         
@@ -1511,6 +1628,96 @@ namespace Trebuchet.Assets {
         public static string SaveSizeTip {
             get {
                 return ResourceManager.GetString("SaveSizeTip", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Backup Server.
+        /// </summary>
+        public static string SequenceActionBackupServerData {
+            get {
+                return ResourceManager.GetString("SequenceActionBackupServerData", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Discord Webhook.
+        /// </summary>
+        public static string SequenceActionDiscordWebHook {
+            get {
+                return ResourceManager.GetString("SequenceActionDiscordWebHook", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Process Execution.
+        /// </summary>
+        public static string SequenceActionExecuteProcess {
+            get {
+                return ResourceManager.GetString("SequenceActionExecuteProcess", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to RCon Command.
+        /// </summary>
+        public static string SequenceActionRConCommand {
+            get {
+                return ResourceManager.GetString("SequenceActionRConCommand", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Send REST Request.
+        /// </summary>
+        public static string SequenceActionSendRESTQuery {
+            get {
+                return ResourceManager.GetString("SequenceActionSendRESTQuery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wait.
+        /// </summary>
+        public static string SequenceActionWait {
+            get {
+                return ResourceManager.GetString("SequenceActionWait", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wait until Offline.
+        /// </summary>
+        public static string SequenceActionWaitOffline {
+            get {
+                return ResourceManager.GetString("SequenceActionWaitOffline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wait until Online.
+        /// </summary>
+        public static string SequenceActionWaitOnline {
+            get {
+                return ResourceManager.GetString("SequenceActionWaitOnline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Sequence Editor.
+        /// </summary>
+        public static string SequenceEditor {
+            get {
+                return ResourceManager.GetString("SequenceEditor", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Main Sequence Action.
+        /// </summary>
+        public static string SequenceMainAction {
+            get {
+                return ResourceManager.GetString("SequenceMainAction", resourceCulture);
             }
         }
         
@@ -2559,6 +2766,42 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Starting Sequence.
+        /// </summary>
+        public static string SettingServerStartingSequence {
+            get {
+                return ResourceManager.GetString("SettingServerStartingSequence", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Starting Sequence: {0} Action(s).
+        /// </summary>
+        public static string SettingServerStartingSequenceText {
+            get {
+                return ResourceManager.GetString("SettingServerStartingSequenceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stopping Sequence.
+        /// </summary>
+        public static string SettingServerStoppingSequence {
+            get {
+                return ResourceManager.GetString("SettingServerStoppingSequence", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Stopping Sequence: {0} Action(s).
+        /// </summary>
+        public static string SettingServerStoppingSequenceText {
+            get {
+                return ResourceManager.GetString("SettingServerStoppingSequenceText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Use All Cores.
         /// </summary>
         public static string SettingServerUseAllCores {
@@ -3108,6 +3351,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Use Shell Execution.
+        /// </summary>
+        public static string UseShellExecute {
+            get {
+                return ResourceManager.GetString("UseShellExecute", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Validate.
         /// </summary>
         public static string Validate {
@@ -3153,6 +3405,24 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wait for the process to Exit.
+        /// </summary>
+        public static string WaitProcessToExit {
+            get {
+                return ResourceManager.GetString("WaitProcessToExit", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wait Duration.
+        /// </summary>
+        public static string WaitTime {
+            get {
+                return ResourceManager.GetString("WaitTime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Steam Collection/.json URL.
         /// </summary>
         public static string WatermarkModlistURL {
@@ -3194,6 +3464,15 @@ namespace Trebuchet.Assets {
         public static string WatermarkServerPort {
             get {
                 return ResourceManager.GetString("WatermarkServerPort", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Webhook URL.
+        /// </summary>
+        public static string WebHookUrl {
+            get {
+                return ResourceManager.GetString("WebHookUrl", resourceCulture);
             }
         }
         

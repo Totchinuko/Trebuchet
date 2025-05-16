@@ -1,0 +1,20 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:s="clr-namespace:Trebuchet.ViewModels.SettingFields"
+                    xmlns:i="https://github.com/projektanker/icons.avalonia"
+                    xmlns:c="using:Trebuchet.Controls"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="SequenceEditorField" DataType="s:SequenceEditorField">
+        <Border Classes="Panel Shadowed" Padding="0,12" Margin="0 0 0 12">
+            <StackPanel Orientation="Vertical" Spacing="6" Margin="12,0,0,0">
+                <TextBlock Text="{Binding Label}" />
+                <Button Command="{Binding Command}" CommandParameter="{Binding Sequence}">
+                    <StackPanel Orientation="Horizontal" Spacing="3">
+                        <i:Icon Value="mdi-pencil" Classes="Normal" />
+                        <TextBlock Text="{x:Static a:Resources.Edit}" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Border>
+    </DataTemplate>
+</ResourceDictionary>

@@ -39,7 +39,7 @@ namespace TrebuchetLib
         public int AutoRestartMaxPerDay { get; set; } = AutoRestartMaxPerDayDefault;
         public string DiscordWebHookNotifications { get; set; } = DiscordWebHookNotificationsDefault;
 
-        public Sequence StopingSequence { get; set; } = new();
+        public Sequence StoppingSequence { get; set; } = new();
         public Sequence StartingSequence { get; set; } = new();
 
         

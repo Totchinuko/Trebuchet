@@ -187,6 +187,7 @@ public partial class App : Application, IApplication
         services.AddLogging(builder => builder.AddSerilog(dispose:true));
         
         services.AddSingleton<AppFiles>();
+        services.AddSingleton<BackupManager>();
         services.AddSingleton<ModlistImporter>();
         services.AddSingleton<Operations>();
         services.AddSingleton<IProgressCallback<DepotDownloader.Progress>, Progress>();

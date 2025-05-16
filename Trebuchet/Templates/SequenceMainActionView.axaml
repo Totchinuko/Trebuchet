@@ -1,0 +1,10 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:s="clr-namespace:Trebuchet.ViewModels.Sequences"
+                    xmlns:c="clr-namespace:tot_gui_lib.Controls;assembly=tot-gui-lib"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:e="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="SequenceMainActionView" DataType="s:SequenceMainActionViewModel">
+    </DataTemplate>
+</ResourceDictionary>

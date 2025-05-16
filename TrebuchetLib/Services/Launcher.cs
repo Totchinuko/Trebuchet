@@ -251,7 +251,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
 
             var uri = _setup.Config.GetInstanceProfile(instance);
             if (!_appFiles.Server.TryResolve(uri, out var reference) 
-                || reference.Get().StopingSequence.Actions.Count == 0)
+                || reference.Get().StoppingSequence.Actions.Count == 0)
             {
                 await watcher.StopAsync();
                 return;
@@ -542,7 +542,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
 
     private Task StopServerWithSequence(int instance, ServerProfile profile)
     {
-        return RunSequence(instance, profile.StopingSequence);
+        return RunSequence(instance, profile.StoppingSequence);
     }
 
     private Task CatapultServerSequence(int instance, ServerProfile profile)
@@ -565,7 +565,15 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         };
         var runner = new SequenceRunner(sequence, args, this);
         _serverSequences[instance] = runner;
-        await runner.ExecuteSequence();
+
+        try
+        {
+            await runner.ExecuteSequence();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to execute sequence");
+        }
     }
 
     private async Task CancelServerSequence(int instance)

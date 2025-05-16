@@ -1,0 +1,22 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:s="clr-namespace:Trebuchet.ViewModels.Sequences"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:e="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="SequenceActionDiscordWebHookView" DataType="s:SequenceActionDiscordWebHookViewModel">
+        <StackPanel Orientation="Vertical" Spacing="6">
+            <CheckBox IsChecked="{Binding CancelOnFailure}" Content="{x:Static a:Resources.CancelOnFailure}" />
+            <TextBlock Text="{x:Static a:Resources.WebHookUrl}" />
+            <TextBox Text="{Binding DiscordWebHook}" />
+            <TextBlock Text="{x:Static a:Resources.Message}" />
+            <Border Classes="DarkPanel">
+                <e:TextEditor ShowLineNumbers="True" Height="150" LineNumbersForeground="{DynamicResource TSubText}" >
+                    <Interaction.Behaviors>
+                        <vm:DocumentTextBindingBehavior AllowScrollBellowDocument="False" Text="{Binding Message}" />
+                    </Interaction.Behaviors>
+                </e:TextEditor>
+            </Border>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

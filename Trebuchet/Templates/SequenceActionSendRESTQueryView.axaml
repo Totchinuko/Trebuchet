@@ -1,0 +1,35 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:s="clr-namespace:Trebuchet.ViewModels.Sequences"
+                    xmlns:c="clr-namespace:tot_gui_lib.Controls;assembly=tot-gui-lib"
+                    xmlns:vm="clr-namespace:Trebuchet.ViewModels"
+                    xmlns:e="clr-namespace:AvaloniaEdit;assembly=AvaloniaEdit"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="SequenceActionSendRESTQueryView" DataType="s:SequenceActionSendRESTQueryViewModel">
+        <StackPanel Orientation="Vertical" Spacing="6">
+            <CheckBox IsChecked="{Binding CancelOnFailure}" Content="{x:Static a:Resources.CancelOnFailure}" />
+            <TextBlock Text="{x:Static a:Resources.RequestUrl}" />
+            <TextBox Text="{Binding Url}" />
+            <TextBlock Text="{x:Static a:Resources.HttpMethod}" />
+            <ComboBox ItemsSource="{Binding HttpMethodList}" SelectedIndex="{Binding HttpMethod, Mode=TwoWay}" Width="220" />
+            <TextBlock Text="{x:Static a:Resources.RequestTimeout}" />
+            <c:Duration DurationValue="{Binding TimeOut}" HorizontalAlignment="Left" Width="320" />
+            <TextBlock Text="{x:Static a:Resources.RequestHeaders}" />
+            <Border Classes="DarkPanel">
+                <e:TextEditor ShowLineNumbers="True" Height="150" LineNumbersForeground="{DynamicResource TSubText}" >
+                    <Interaction.Behaviors>
+                        <vm:DocumentTextBindingBehavior AllowScrollBellowDocument="False" Text="{Binding Headers}" />
+                    </Interaction.Behaviors>
+                </e:TextEditor>
+            </Border>
+            <TextBlock Text="{x:Static a:Resources.RequestBody}" />
+            <Border Classes="DarkPanel">
+                <e:TextEditor ShowLineNumbers="True" Height="150" LineNumbersForeground="{DynamicResource TSubText}" >
+                    <Interaction.Behaviors>
+                        <vm:DocumentTextBindingBehavior AllowScrollBellowDocument="False" Text="{Binding Body}" />
+                    </Interaction.Behaviors>
+                </e:TextEditor>
+            </Border>
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>

@@ -21,7 +21,7 @@ public class SequenceRunner
     {
         int i = 0;
         _progress.Report(new SequenceProgress(Arguments.Instance, 0, _sequence.Actions.Count));
-        foreach (var action in _sequence.Actions)
+        foreach (var action in _sequence.Actions.ToList())
         {
             if (Arguments.CancellationToken.IsCancellationRequested)
                 throw new OperationCanceledException();

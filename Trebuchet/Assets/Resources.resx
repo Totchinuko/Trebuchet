@@ -1080,4 +1080,97 @@ DO NOT place it in your Steam Directory.</value>
     <data name="SettingNotificationServerOnline" xml:space="preserve">
         <value>Server Online</value>
     </data>
+    <data name="CancelOnFailure" xml:space="preserve">
+        <value>Cancel on Failure</value>
+    </data>
+    <data name="MaxAge" xml:space="preserve">
+        <value>Maximum age</value>
+    </data>
+    <data name="WebHookUrl" xml:space="preserve">
+        <value>Webhook URL</value>
+    </data>
+    <data name="Message" xml:space="preserve">
+        <value>Message</value>
+    </data>
+    <data name="SequenceActionBackupServerData" xml:space="preserve">
+        <value>Backup Server</value>
+    </data>
+    <data name="SequenceActionDiscordWebHook" xml:space="preserve">
+        <value>Discord Webhook</value>
+    </data>
+    <data name="SequenceActionExecuteProcess" xml:space="preserve">
+        <value>Process Execution</value>
+    </data>
+    <data name="SequenceActionRConCommand" xml:space="preserve">
+        <value>RCon Command</value>
+    </data>
+    <data name="SequenceActionSendRESTQuery" xml:space="preserve">
+        <value>Send REST Request</value>
+    </data>
+    <data name="SequenceActionWaitOffline" xml:space="preserve">
+        <value>Wait until Offline</value>
+    </data>
+    <data name="SequenceActionWaitOnline" xml:space="preserve">
+        <value>Wait until Online</value>
+    </data>
+    <data name="SequenceActionWait" xml:space="preserve">
+        <value>Wait</value>
+    </data>
+    <data name="SequenceMainAction" xml:space="preserve">
+        <value>Main Sequence Action</value>
+    </data>
+    <data name="SequenceEditor" xml:space="preserve">
+        <value>Sequence Editor</value>
+    </data>
+    <data name="SettingServerStartingSequence" xml:space="preserve">
+        <value>Starting Sequence</value>
+    </data>
+    <data name="SettingServerStoppingSequence" xml:space="preserve">
+        <value>Stopping Sequence</value>
+    </data>
+    <data name="SettingServerStartingSequenceText" xml:space="preserve">
+        <value>Starting Sequence: {0} Action(s)</value>
+    </data>
+    <data name="SettingServerStoppingSequenceText" xml:space="preserve">
+        <value>Stopping Sequence: {0} Action(s)</value>
+    </data>
+    <data name="ProcessFilename" xml:space="preserve">
+        <value>File Path</value>
+    </data>
+    <data name="Arguments" xml:space="preserve">
+        <value>Arguments</value>
+    </data>
+    <data name="WaitProcessToExit" xml:space="preserve">
+        <value>Wait for the process to Exit</value>
+    </data>
+    <data name="CancelIfErrorCode" xml:space="preserve">
+        <value>Cancel if return an error code</value>
+    </data>
+    <data name="CreateNoWindow" xml:space="preserve">
+        <value>Do not create a window</value>
+    </data>
+    <data name="UseShellExecute" xml:space="preserve">
+        <value>Use Shell Execution</value>
+    </data>
+    <data name="Command" xml:space="preserve">
+        <value>Command</value>
+    </data>
+    <data name="RequestUrl" xml:space="preserve">
+        <value>Request URL</value>
+    </data>
+    <data name="HttpMethod" xml:space="preserve">
+        <value>Http Method</value>
+    </data>
+    <data name="RequestBody" xml:space="preserve">
+        <value>Request Body</value>
+    </data>
+    <data name="RequestHeaders" xml:space="preserve">
+        <value>Request Headers</value>
+    </data>
+    <data name="RequestTimeout" xml:space="preserve">
+        <value>Timeout</value>
+    </data>
+    <data name="WaitTime" xml:space="preserve">
+        <value>Wait Duration</value>
+    </data>
 </root>

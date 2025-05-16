@@ -7,9 +7,13 @@ using ReactiveUI;
 
 namespace Trebuchet.ViewModels.SettingFields
 {
-    public interface IValueField
+    public interface IRefreshableField
     {
         ReactiveCommand<Unit, Unit> Update { get; }
+    }
+    
+    public interface IValueField : IRefreshableField
+    {
         ReactiveCommand<Unit, Unit> Reset { get; }
         ReactiveCommand<Unit, Unit> HyperlinkClick { get; }
         bool Experiment { get; }

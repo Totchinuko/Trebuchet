@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Reactive;
@@ -8,8 +9,11 @@ using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using Trebuchet.Assets;
 using Trebuchet.ViewModels.InnerContainer;
+using Trebuchet.ViewModels.Sequences;
 using Trebuchet.ViewModels.SettingFields;
+using Trebuchet.Windows;
 using TrebuchetLib;
+using TrebuchetLib.Sequences;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels
@@ -23,6 +27,7 @@ namespace Trebuchet.ViewModels.Panels
         private ServerProfile _profile;
         private string _profileSize = string.Empty;
         private bool _canBeOpened;
+        private Dictionary<Sequence, SequenceEditor> _sequenceWindows = [];
 
         public ServerProfilePanel(
             DialogueBox box,
@@ -76,7 +81,7 @@ namespace Trebuchet.ViewModels.Panels
             CanBeOpened = Tools.IsServerInstallValid(_setup.Config);
             _profile = _appFiles.Server.Get(FileMenu.Selected);
             await RefreshProfileSize(FileMenu.Selected);
-            foreach (var f in Fields.OfType<IValueField>())
+            foreach (var f in Fields.OfType<IRefreshableField>())
                 f.Update.Execute().Subscribe();
         }
 
@@ -85,9 +90,43 @@ namespace Trebuchet.ViewModels.Panels
             _logger.LogDebug(@"Display panel");
             await RefreshProfileSize(FileMenu.Selected);
         }
-        
+
+        private void EditSequence(Sequence sequence)
+        {
+            if (_sequenceWindows.TryGetValue(sequence, out var window))
+            {
+                window.Focus();
+                return;
+            }
+
+            var vm = new SequenceViewModel(sequence);
+            vm.SequenceChanged += OnSequenceChanged;
+            var win = new SequenceEditor();
+            win.Closing += (_, _) =>
+            {
+                _sequenceWindows.Remove(sequence);
+            };
+            win.DataContext = vm;
+            _sequenceWindows[sequence] = win;
+            win.Show();
+        }
+
+        private void OnSequenceChanged(object? sender, EventArgs e)
+        {
+            if (sender is not SequenceViewModel vm) return;
+            
+            vm.Sequence.Actions.Clear();
+            vm.Sequence.Actions.AddRange(vm.GetSequence());
+            _profile.SaveFile();
+            
+            foreach (var f in Fields.OfType<IRefreshableField>())
+                f.Update.Execute().Subscribe();
+        }
+
         private Task OnFileSelected(object? sender, ServerProfileRef profile)
         {
+            foreach (var win in _sequenceWindows.Values)
+                win.Close();
             _uiConfig.CurrentServerProfile = profile.Uri.OriginalString;
             _uiConfig.SaveFile();
             return RefreshPanel();
@@ -174,6 +213,18 @@ namespace Trebuchet.ViewModels.Panels
                 .SetDefault(() => ServerProfile.DisableHighPrecisionMoveToolDefault)
             );
             Fields.Add(new TitleField().SetTitle(Resources.CatRestartSettings));
+            Fields.Add(new SequenceEditorField(
+                Resources.SettingServerStartingSequenceText, 
+                _profile.StartingSequence,
+                ReactiveCommand.Create<Sequence>(EditSequence))
+                .SetTitle(Resources.SettingServerStartingSequence)
+                );
+            Fields.Add(new SequenceEditorField(
+                    Resources.SettingServerStoppingSequenceText, 
+                    _profile.StoppingSequence,
+                    ReactiveCommand.Create<Sequence>(EditSequence))
+                .SetTitle(Resources.SettingServerStoppingSequence)
+            );
             Fields.Add(new ToggleField()
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingServerKillZombies)

@@ -1,0 +1,13 @@
+<ResourceDictionary xmlns="https://github.com/avaloniaui"
+                    xmlns:s="clr-namespace:Trebuchet.ViewModels.Sequences"
+                    xmlns:c="clr-namespace:tot_gui_lib.Controls;assembly=tot-gui-lib"
+                    xmlns:a="clr-namespace:Trebuchet.Assets"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    <DataTemplate x:Key="SequenceActionBackupServerDataView" DataType="s:SequenceActionBackupServerDataViewModel">
+        <StackPanel Orientation="Vertical" Spacing="6">
+            <CheckBox IsChecked="{Binding CancelOnFailure}" Content="{x:Static a:Resources.CancelOnFailure}" />
+            <TextBlock Text="{x:Static a:Resources.MaxAge}" />
+            <c:Duration DurationValue="{Binding MaxAge}" HorizontalAlignment="Left" Width="320" />
+        </StackPanel>
+    </DataTemplate>
+</ResourceDictionary>
