@@ -243,7 +243,8 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         {
             var uri = _setup.Config.GetInstanceProfile(instance);
             if (!_appFiles.Server.TryResolve(uri, out var reference) 
-                || reference.Get().StoppingSequence.Actions.Count == 0)
+                || reference.Get().StoppingSequence.Actions.Count == 0
+                || _serverSequences.ContainsKey(instance))
             {
                 await watcher.StopAsync();
                 return;
