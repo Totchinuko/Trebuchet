@@ -30,6 +30,11 @@ namespace TrebuchetLib
         public string DataDirectory { get; set; } = DataDirectoryDefault;
         public string NotificationServerCrash { get; set; } = NotificationServerCrashDefault;
         public string NotificationServerOnline { get; set; } = NotificationServerOnlineDefault;
+        public string NotificationServerStop { get; set; } = NotificationServerStopDefault;
+        public string NotificationServerManualStop { get; set; } = NotificationServerManualStopDefault;
+        public string NotificationServerAutomatedRestart { get; set; } = NotificationServerAutomatedRestartDefault;
+        public string NotificationServerModUpdate { get; set; } = NotificationServerModUpdateDefault;
+        public string NotificationServerServerUpdate { get; set; } = NotificationServerServerUpdateDefault;
         
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         [Obsolete]
@@ -84,5 +89,10 @@ namespace TrebuchetLib
         public static readonly TimeSpan UpdateCheckFrequencyDefault = TimeSpan.FromMinutes(5);
         public static readonly string NotificationServerCrashDefault = "Server {serverName} has crashed";
         public static readonly string NotificationServerOnlineDefault = "Server {serverName} is now online";
+        public static readonly string NotificationServerStopDefault = "Server Shutdown: {Reason}";
+        public static readonly string NotificationServerManualStopDefault = "Manual shutdown requested";
+        public static readonly string NotificationServerAutomatedRestartDefault = "Automated Restart";
+        public static readonly string NotificationServerModUpdateDefault = "Mod update detected: {modList}";
+        public static readonly string NotificationServerServerUpdateDefault = "Game update detected";
     }
 }

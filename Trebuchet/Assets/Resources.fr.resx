@@ -1165,4 +1165,19 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     <data name="WaitTime" xml:space="preserve">
         <value>Durée d'attente</value>
     </data>
+    <data name="SettingNotificationServerAutomatedRestart" xml:space="preserve">
+        <value>Raison: Redémarrage Automatique</value>
+    </data>
+    <data name="SettingNotificationServerManualStop" xml:space="preserve">
+        <value>Raison: Arret Manuel</value>
+    </data>
+    <data name="SettingNotificationServerModUpdate" xml:space="preserve">
+        <value>Raison: MàJ de Mods</value>
+    </data>
+    <data name="SettingNotificationServerServerUpdate" xml:space="preserve">
+        <value>Raison: MàJ du Serveur</value>
+    </data>
+    <data name="SettingNotificationServerStop" xml:space="preserve">
+        <value>Notification d'arret du serveur</value>
+    </data>
 </root>

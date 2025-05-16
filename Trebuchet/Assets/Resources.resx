@@ -1173,4 +1173,19 @@ DO NOT place it in your Steam Directory.</value>
     <data name="WaitTime" xml:space="preserve">
         <value>Wait Duration</value>
     </data>
+    <data name="SettingNotificationServerStop" xml:space="preserve">
+        <value>Server Shutdown Notification</value>
+    </data>
+    <data name="SettingNotificationServerManualStop" xml:space="preserve">
+        <value>Reason: Manual Shutdown</value>
+    </data>
+    <data name="SettingNotificationServerAutomatedRestart" xml:space="preserve">
+        <value>Reason: Automated Restart</value>
+    </data>
+    <data name="SettingNotificationServerModUpdate" xml:space="preserve">
+        <value>Reason: Mod Update</value>
+    </data>
+    <data name="SettingNotificationServerServerUpdate" xml:space="preserve">
+        <value>Reason: Server Update</value>
+    </data>
 </root>

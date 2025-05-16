@@ -33,7 +33,7 @@ public class SequenceActionDiscordWebHook : ISequenceAction
         try
         {
             using var discord = new DiscordWebhookClient(DiscordWebHook);
-            await discord.SendMessageAsync(Message);
+            await discord.SendMessageAsync(Message.Replace("{Reason}", args.Reason));
         }
         catch (Exception ex)
         {

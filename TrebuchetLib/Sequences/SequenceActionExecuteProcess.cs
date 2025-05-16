@@ -21,7 +21,7 @@ public class SequenceActionExecuteProcess : ISequenceAction
             {
                 StartInfo = new()
             };
-            process.StartInfo.Arguments = Arguments;
+            process.StartInfo.Arguments = Arguments.Replace("{Reason}", args.Reason);
             process.StartInfo.FileName = Filename;
             process.StartInfo.CreateNoWindow = CreateNoWindow;
             process.StartInfo.UseShellExecute = UseShellExecute;

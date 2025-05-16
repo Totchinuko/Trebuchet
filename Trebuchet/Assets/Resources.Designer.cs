@@ -2073,6 +2073,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reason: Automated Restart.
+        /// </summary>
+        public static string SettingNotificationServerAutomatedRestart {
+            get {
+                return ResourceManager.GetString("SettingNotificationServerAutomatedRestart", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server Crash.
         /// </summary>
         public static string SettingNotificationServerCrash {
@@ -2082,11 +2091,47 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Reason: Manual Shutdown.
+        /// </summary>
+        public static string SettingNotificationServerManualStop {
+            get {
+                return ResourceManager.GetString("SettingNotificationServerManualStop", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reason: Mod Update.
+        /// </summary>
+        public static string SettingNotificationServerModUpdate {
+            get {
+                return ResourceManager.GetString("SettingNotificationServerModUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Server Online.
         /// </summary>
         public static string SettingNotificationServerOnline {
             get {
                 return ResourceManager.GetString("SettingNotificationServerOnline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Reason: Server Update.
+        /// </summary>
+        public static string SettingNotificationServerServerUpdate {
+            get {
+                return ResourceManager.GetString("SettingNotificationServerServerUpdate", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Server Shutdown Notification.
+        /// </summary>
+        public static string SettingNotificationServerStop {
+            get {
+                return ResourceManager.GetString("SettingNotificationServerStop", resourceCulture);
             }
         }
         

@@ -290,6 +290,41 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             .SetSetter((v) => _setup.Config.NotificationServerOnline = v)
             .SetDefault(() => Config.NotificationServerOnlineDefault)
         );
+        Fields.Add(new TextField()
+            .WhenFieldChanged(SaveConfig)
+            .SetTitle(Resources.SettingNotificationServerStop)
+            .SetGetter(() => _setup.Config.NotificationServerStop)
+            .SetSetter((v) => _setup.Config.NotificationServerStop = v)
+            .SetDefault(() => Config.NotificationServerStopDefault)
+        );
+        Fields.Add(new TextField()
+            .WhenFieldChanged(SaveConfig)
+            .SetTitle(Resources.SettingNotificationServerManualStop)
+            .SetGetter(() => _setup.Config.NotificationServerManualStop)
+            .SetSetter((v) => _setup.Config.NotificationServerManualStop = v)
+            .SetDefault(() => Config.NotificationServerManualStopDefault)
+        );
+        Fields.Add(new TextField()
+            .WhenFieldChanged(SaveConfig)
+            .SetTitle(Resources.SettingNotificationServerAutomatedRestart)
+            .SetGetter(() => _setup.Config.NotificationServerAutomatedRestart)
+            .SetSetter((v) => _setup.Config.NotificationServerAutomatedRestart = v)
+            .SetDefault(() => Config.NotificationServerAutomatedRestartDefault)
+        );
+        Fields.Add(new TextField()
+            .WhenFieldChanged(SaveConfig)
+            .SetTitle(Resources.SettingNotificationServerModUpdate)
+            .SetGetter(() => _setup.Config.NotificationServerModUpdate)
+            .SetSetter((v) => _setup.Config.NotificationServerModUpdate = v)
+            .SetDefault(() => Config.NotificationServerModUpdateDefault)
+        );
+        Fields.Add(new TextField()
+            .WhenFieldChanged(SaveConfig)
+            .SetTitle(Resources.SettingNotificationServerServerUpdate)
+            .SetGetter(() => _setup.Config.NotificationServerServerUpdate)
+            .SetSetter((v) => _setup.Config.NotificationServerServerUpdate = v)
+            .SetDefault(() => Config.NotificationServerServerUpdateDefault)
+        );
     }
 
     private async Task OnRequestRefresh()

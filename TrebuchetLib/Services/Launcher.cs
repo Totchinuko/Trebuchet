@@ -33,6 +33,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     private IConanProcess? _conanClientProcess;
     private bool _hasCatapulted;
     private readonly List<IPRefWithModList> _modListNeedUpdate = [];
+    private readonly List<PublishedMod> _modNeedUpdate = [];
     private bool _serverNeedUpdate;
     private DateTime _lastUpdateCheckTime;
     private readonly List<StartDates> _startDates;
@@ -42,6 +43,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     private readonly BackupManager _backupManager;
     private readonly ConanProcessFactory _processFactory;
     private readonly ILogger<Launcher> _logger;
+    private string _lastRestartReason = string.Empty;
 
     public event EventHandler? StateChanged;
     public event EventHandler<SequenceProgress>? SequenceProgressChanged; 
@@ -246,11 +248,52 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
                 || reference.Get().StoppingSequence.Actions.Count == 0
                 || _serverSequences.ContainsKey(instance))
             {
+                if (reference is not null && !_serverSequences.ContainsKey(instance))
+                {
+                    await DiscordWebHooks.Notify(reference.Get(), _setup.GetServerShutdownNotification(_lastRestartReason));
+                    _lastRestartReason = string.Empty;
+                }
                 await watcher.StopAsync();
                 return;
             }
 
+            _lastRestartReason = _setup.GetReasonManualShutdown();
             await StopServerWithSequence(instance, reference.Get());
+        }
+    }
+
+    public async void RestartServer(int instance)
+    {
+        try
+        {
+            await RestartServerAsync(instance);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to restart server");
+        }
+    }
+    
+    public async Task RestartServerAsync(int instance)
+    {
+        _logger.LogInformation($"Restarting Server {instance}");
+        if (_serverProcesses.TryGetValue(instance, out var watcher))
+        {
+            var uri = _setup.Config.GetInstanceProfile(instance);
+            if (!_appFiles.Server.TryResolve(uri, out var reference) 
+                || reference.Get().StoppingSequence.Actions.Count == 0
+                || _serverSequences.ContainsKey(instance))
+            {
+                if (reference is not null && !_serverSequences.ContainsKey(instance))
+                {
+                    await DiscordWebHooks.Notify(reference.Get(), _setup.GetServerShutdownNotification(_lastRestartReason));
+                    _lastRestartReason = string.Empty;
+                }
+                await watcher.RestartAsync();
+                return;
+            }
+
+            await RestartServerWithSequence(instance, reference.Get());
         }
     }
 
@@ -511,11 +554,10 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
             var details = await _steam.RequestModDetails(lists.GetModsFromList().ToList());
             if (details.Count == 0) return true;
             
-            var updates = details
-                .Where(d => d.Status.Status != UGCStatus.UpToDate)
-                .Select(x => x.PublishedFileId)
-                .ToList();
-            _modListNeedUpdate.AddRange(lists.Where(x => x.GetModsFromList().Intersect(updates).Any()));
+            _modNeedUpdate.Clear();;
+            _modNeedUpdate.AddRange(details
+                .Where(d => d.Status.Status != UGCStatus.UpToDate));
+            _modListNeedUpdate.AddRange(lists.Where(x => x.GetModsFromList().Intersect(_modNeedUpdate.Select(y => y.PublishedFileId)).Any()));
             return true;
         }
         catch (OperationCanceledException)
@@ -538,6 +580,11 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     {
         return RunSequence(instance, profile.StoppingSequence, () => CloseServer(instance));
     }
+    
+    private Task RestartServerWithSequence(int instance, ServerProfile profile)
+    {
+        return RunSequence(instance, profile.StoppingSequence, () => RestartServerAsync(instance));
+    }
 
     private Task CatapultServerSequence(int instance, ServerProfile profile)
     {
@@ -555,8 +602,10 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
             Instance = instance,
             Launcher = this,
             Logger = _logger,
+            Reason = _lastRestartReason,
             MainAction = mainAction
         };
+        _lastRestartReason = string.Empty;
         var runner = new SequenceRunner(sequence, args, this);
         _serverSequences[instance] = runner;
 
@@ -581,11 +630,12 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         }
     }
 
-    private async Task PerformAutomaticRestarts()
+    private Task PerformAutomaticRestarts()
     {
         foreach (var instance in _serverProcesses.Values)
         {
             if(!instance.State.IsRunning() || instance.State.IsStopping()) continue;
+            if(_serverSequences.ContainsKey(instance.Infos.Instance)) continue;
             
             var profileUri = _setup.Config.GetInstanceProfile(instance.Infos.Instance);
             var serverPRef = _appFiles.Server.Resolve(profileUri);
@@ -605,8 +655,11 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
             if(serverProfile.AutoRestartDailyTime
                .All(x => time < x || time > x + TimeSpan.FromMinutes(5))) continue;
 
-            await instance.RestartAsync();
-        } 
+            _lastRestartReason = _setup.GetReasonAutomatedRestart();
+            RestartServer(instance.Infos.Instance);
+        }
+
+        return Task.CompletedTask;
     }
 
     private List<StartDates> LoadStartDates()
@@ -664,7 +717,8 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
 
     private async Task PerformPeriodicUpdateCheck()
     {
-        if ((DateTime.UtcNow - _lastUpdateCheckTime) >= _setup.Config.UpdateCheckFrequency)
+        //if ((DateTime.UtcNow - _lastUpdateCheckTime) >= _setup.Config.UpdateCheckFrequency)
+        if ((DateTime.UtcNow - _lastUpdateCheckTime) >= TimeSpan.FromMinutes(1))
         {
             if (!await CheckModUpdates()) return;
             if (!await CheckServerUpdate()) return;
@@ -677,16 +731,23 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         foreach (var process in _serverProcesses.Values)
         {
             if(!process.State.IsRunning() || process.State.IsStopping()) continue;
+            if(_serverSequences.ContainsKey(process.Infos.Instance)) continue;
             
             if (_serverNeedUpdate)
             {
-                await process.RestartAsync();
+                _lastRestartReason = _setup.GetReasonServerUpdate();
+                RestartServer(process.Infos.Instance);
                 continue;
             }
                     
             var modListRef = _appFiles.ResolveModList(_setup.Config.GetInstanceModlist(process.Infos.Instance));
             if (_modListNeedUpdate.Contains(modListRef))
-                await process.RestartAsync();
+            {
+                var mods = modListRef.GetModsFromList();
+                _lastRestartReason
+                    = _setup.GetReasonModUpdate(_modNeedUpdate.Where(x => mods.Contains(x.PublishedFileId)));
+                RestartServer(process.Infos.Instance);
+            }
         }
     }
 
@@ -892,19 +953,19 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
 
         foreach (var server in _serverProcesses.ToList())
         {
-            if (!server.Value.State.IsRunning())
+            if (server.Value.State.IsRunning()) continue;
+            if(_serverSequences.ContainsKey(server.Value.Infos.Instance)) continue;
+            
+            _logger.LogInformation("Server {instance} stopped", server.Key);
+            _serverProcesses.Remove(server.Key);
+            OnStateChanged();
+            var name = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(server.Key));
+            if ((server.Value.State == ProcessState.CRASHED && _appFiles.Server.Get(name).RestartWhenDown) 
+                || server.Value.RequestRestart)
             {
-                _logger.LogInformation("Server {instance} stopped", server.Key);
-                _serverProcesses.Remove(server.Key);
-                OnStateChanged();
-                var name = _appFiles.Server.Resolve(_setup.Config.GetInstanceProfile(server.Key));
-                if ((server.Value.State == ProcessState.CRASHED && _appFiles.Server.Get(name).RestartWhenDown) 
-                    || server.Value.State == ProcessState.NEW)
-                {
-                    await CatapultServer(server.Key);
-                }
-                server.Value.Dispose();
+                await CatapultServer(server.Key);
             }
+            server.Value.Dispose();
         }
     }
 
