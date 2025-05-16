@@ -173,7 +173,6 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
             return;
         }
 
-        await CancelServerSequence(instance);
         var process = await CatapultServerProcess(profileName, listRef, instance);
 
         var builder = _processFactory.Create()
@@ -242,13 +241,6 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         _logger.LogInformation($"Close Server {instance}");
         if (_serverProcesses.TryGetValue(instance, out var watcher))
         {
-            if (_serverSequences.ContainsKey(instance))
-            {
-                await CancelServerSequence(instance);
-                await watcher.StopAsync();
-                return;
-            }
-
             var uri = _setup.Config.GetInstanceProfile(instance);
             if (!_appFiles.Server.TryResolve(uri, out var reference) 
                 || reference.Get().StoppingSequence.Actions.Count == 0)
@@ -569,7 +561,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         try
         {
             await runner.ExecuteSequence();
-            
+            _serverSequences.Remove(instance);
         }
         catch (Exception ex)
         {
