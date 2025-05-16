@@ -448,7 +448,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     
     public async Task<bool> UpdateMods(List<ulong> mods)
     {
-        if (IsAnyServerRunning() || IsClientRunning()) return false;
+        if (IsAnyServerRunning() || IsClientRunning()) return true;
         
         try
         {
@@ -471,7 +471,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
 
     public async Task<bool> UpdateServers()
     {
-        if (IsAnyServerRunning() || IsClientRunning()) return false;
+        if (IsAnyServerRunning() || IsClientRunning()) return true;
 
         try
         {
