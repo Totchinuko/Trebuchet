@@ -304,6 +304,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         if (_serverProcesses.TryGetValue(instance, out var watcher))
         {
             _logger.LogInformation($"Kill server {instance}");
+            await CancelServerSequence(instance);
             await watcher.KillAsync();
         }
     }
