@@ -24,7 +24,7 @@ public static class YuuIniServerFiles
                 document = IniParser.Parse(content, iniParserConfiguration);
                 documents.Add(attr.Path, document);
             }
-            method.Invoke(null, [profile, document]);
+            method.Invoke(null, [setup, profile, document]);
         }
 
         foreach (var document in documents)
