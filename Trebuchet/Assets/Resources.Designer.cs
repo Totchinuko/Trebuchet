@@ -1641,11 +1641,29 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Compress in a zip and store this save into a separate backup folder with a unique name. Backup files older than the duration specified will automatically be deleted when new backups are made. This will always fail when done after server start or before server shutdown. .
+        /// </summary>
+        public static string SequenceActionBackupServerDataText {
+            get {
+                return ResourceManager.GetString("SequenceActionBackupServerDataText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Discord Webhook.
         /// </summary>
         public static string SequenceActionDiscordWebHook {
             get {
                 return ResourceManager.GetString("SequenceActionDiscordWebHook", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Send a message to a Discord webhook. Use {Reason} in the text to insert a restart reason when the server need to do so..
+        /// </summary>
+        public static string SequenceActionDiscordWebHookText {
+            get {
+                return ResourceManager.GetString("SequenceActionDiscordWebHookText", resourceCulture);
             }
         }
         
@@ -1659,6 +1677,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Execute a program or a file with some arguments. Create no window will attempt to run the program in the background. Use Shell will run the file through the Operating System shell. For example, when needing to run a file that need a specific program to run (Such as python), the shell often know which program execute which kind of files..
+        /// </summary>
+        public static string SequenceActionExecuteProcessText {
+            get {
+                return ResourceManager.GetString("SequenceActionExecuteProcessText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to RCon Command.
         /// </summary>
         public static string SequenceActionRConCommand {
@@ -1668,11 +1695,29 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Send an RCon command to the server. This obvioulsy need to be send when the server is online, so before stopping or after it finished loading..
+        /// </summary>
+        public static string SequenceActionRConCommandText {
+            get {
+                return ResourceManager.GetString("SequenceActionRConCommandText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Send REST Request.
         /// </summary>
         public static string SequenceActionSendRESTQuery {
             get {
                 return ResourceManager.GetString("SequenceActionSendRESTQuery", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Send a Http request to an arbitrary service online. Headers are one per line, with the key separated by a comma from the value. {Reason} can be used in headers or body to insert the restart reason text..
+        /// </summary>
+        public static string SequenceActionSendRESTQueryText {
+            get {
+                return ResourceManager.GetString("SequenceActionSendRESTQueryText", resourceCulture);
             }
         }
         
@@ -1695,11 +1740,38 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Wait for the server to be fully offline after the shutdown has been ordered.
+        /// </summary>
+        public static string SequenceActionWaitOfflineText {
+            get {
+                return ResourceManager.GetString("SequenceActionWaitOfflineText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Wait until Online.
         /// </summary>
         public static string SequenceActionWaitOnline {
             get {
                 return ResourceManager.GetString("SequenceActionWaitOnline", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wait for the server to be fully online and accept players connection.
+        /// </summary>
+        public static string SequenceActionWaitOnlineText {
+            get {
+                return ResourceManager.GetString("SequenceActionWaitOnlineText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Wait a certain amount of time before continuing the sequence. Useful to warn users of a restart and wait before actually shuting down the server..
+        /// </summary>
+        public static string SequenceActionWaitText {
+            get {
+                return ResourceManager.GetString("SequenceActionWaitText", resourceCulture);
             }
         }
         
@@ -1718,6 +1790,15 @@ namespace Trebuchet.Assets {
         public static string SequenceMainAction {
             get {
                 return ResourceManager.GetString("SequenceMainAction", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Execute the main action of this sequence. On a stopping sequence, it order the server to stop. On a starting sequence, it order the server to start..
+        /// </summary>
+        public static string SequenceMainActionText {
+            get {
+                return ResourceManager.GetString("SequenceMainActionText", resourceCulture);
             }
         }
         
@@ -2244,6 +2325,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Configure the app to start on the current user session login, for this specific build of the game. Both Live and TestLive are separated in this manner. Game build selection will therefore be skipped..
+        /// </summary>
+        public static string SettingRunOnLogonText {
+            get {
+                return ResourceManager.GetString("SettingRunOnLogonText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Admin Password.
         /// </summary>
         public static string SettingServerAdminPass {
@@ -2280,6 +2370,15 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to List of the times when the server will be taken down automatically for restart. Make sure this avoid the Max Per Day and Minimum Uptime settings, otherwise the restart will be prevented..
+        /// </summary>
+        public static string SettingServerAutoRestartDailyTimeText {
+            get {
+                return ResourceManager.GetString("SettingServerAutoRestartDailyTimeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Auto-Restart: Max Per Day.
         /// </summary>
         public static string SettingServerAutoRestartMaxPerDay {
@@ -2289,11 +2388,38 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
+        ///   Looks up a localized string similar to Maximum of restarts per day. Restart are evaluated in local time, and the count will be reset at midnight. This does prevent automated restarts, but not when they involve mod or server updates..
+        /// </summary>
+        public static string SettingServerAutoRestartMaxPerDayText {
+            get {
+                return ResourceManager.GetString("SettingServerAutoRestartMaxPerDayText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Looks up a localized string similar to Auto-Restart: Minimum Uptime.
         /// </summary>
         public static string SettingServerAutoRestartMinUptime {
             get {
                 return ResourceManager.GetString("SettingServerAutoRestartMinUptime", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Prevent the automated restart of a server, if the server uptime is less than the duration specified here. This does not affect restarts for mod or server updates..
+        /// </summary>
+        public static string SettingServerAutoRestartMinUptimeText {
+            get {
+                return ResourceManager.GetString("SettingServerAutoRestartMinUptimeText", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Programe daily restarts at various moment of the day..
+        /// </summary>
+        public static string SettingServerAutoRestartText {
+            get {
+                return ResourceManager.GetString("SettingServerAutoRestartText", resourceCulture);
             }
         }
         
@@ -2325,7 +2451,7 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Automatically restart a server instance that have stopped unexpectedly.
+        ///   Looks up a localized string similar to Automatically restart a server instance that have stopped unexpectedly or at the start of Trebuchet.
         /// </summary>
         public static string SettingServerCrashRestartText {
             get {
@@ -2339,6 +2465,16 @@ namespace Trebuchet.Assets {
         public static string SettingServerDiscordNotificationsWebhook {
             get {
                 return ResourceManager.GetString("SettingServerDiscordNotificationsWebhook", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Looks up a localized string similar to Automated notification over the selected Discord webhook for specific server events.
+        ///When using sequences, this only include when the server is online, and when a server crash is detected. When not using sequences, this will also include automated restarts reasons and manual shutdown..
+        /// </summary>
+        public static string SettingServerDiscordNotificationsWebhookText {
+            get {
+                return ResourceManager.GetString("SettingServerDiscordNotificationsWebhookText", resourceCulture);
             }
         }
         
@@ -2820,7 +2956,8 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Starting Sequence: {0} Action(s).
+        ///   Looks up a localized string similar to Content: {0} Action(s)
+        ///The starting sequence will be used in place of simply starting the server. This will allow you to program a series of action both before and after the main action, which is starting the server..
         /// </summary>
         public static string SettingServerStartingSequenceText {
             get {
@@ -2838,7 +2975,8 @@ namespace Trebuchet.Assets {
         }
         
         /// <summary>
-        ///   Looks up a localized string similar to Stopping Sequence: {0} Action(s).
+        ///   Looks up a localized string similar to Content: {0} Action(s)
+        ///The stopping sequence will be used in place of simply stopping the server. This will allow you to program a series of action both before and after the main action, which is stopping the server..
         /// </summary>
         public static string SettingServerStoppingSequenceText {
             get {

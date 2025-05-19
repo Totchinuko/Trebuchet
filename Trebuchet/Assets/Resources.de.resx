@@ -557,9 +557,6 @@
     <data name="SettingServerCrashRestart" xml:space="preserve">
         <value>Starte Server bei Inaktivität neu</value>
     </data>
-    <data name="SettingServerCrashRestartText" xml:space="preserve">
-        <value>Eine Serverinstanz, die unerwartet beendet wurde, automatisch neu starten</value>
-    </data>
     <data name="SettingServerEnableBattleEye" xml:space="preserve">
         <value>Aktiviere Battle Eye</value>
     </data>

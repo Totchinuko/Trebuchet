@@ -252,24 +252,28 @@ namespace Trebuchet.ViewModels.Panels
             var autoRestart = new ToggleField()
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingServerAutoRestart)
+                .SetDescription(Resources.SettingServerAutoRestartText)
                 .SetGetter(() => _profile.AutoRestart)
                 .SetSetter((v) => _profile.AutoRestart = v)
                 .SetDefault(() => ServerProfile.AutoRestartDefault);
             var autoRestartTimes = new TimeOfDayListField(false)
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingServerAutoRestartDailyTime)
+                .SetDescription(Resources.SettingServerAutoRestartDailyTimeText)
                 .SetGetter(() => _profile.AutoRestartDailyTime)
                 .SetSetter((v) => _profile.AutoRestartDailyTime = v)
                 .SetDefault(() => ServerProfile.AutoRestartDailyTimeDefault);
             var autoRestartMaxPerDay = new IntField(minimum:0,maximum:Int32.MaxValue)
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingServerAutoRestartMaxPerDay)
+                .SetDescription(Resources.SettingServerAutoRestartMaxPerDayText)
                 .SetGetter(() => _profile.AutoRestartMaxPerDay)
                 .SetSetter((v) => _profile.AutoRestartMaxPerDay = v)
                 .SetDefault(() => ServerProfile.AutoRestartMaxPerDayDefault);
             var autoRestartMinUptime = new DurationField(minDuration:TimeSpan.FromMinutes(10),maxDuration:TimeSpan.MaxValue)
                 .WhenFieldChanged(SaveProfile)
                 .SetTitle(Resources.SettingServerAutoRestartMinUptime)
+                .SetDescription(Resources.SettingServerAutoRestartMinUptimeText)
                 .SetGetter(() => _profile.AutoRestartMinUptime)
                 .SetSetter((v) => _profile.AutoRestartMinUptime = v)
                 .SetDefault(() => ServerProfile.AutoRestartMinUptimeDefault);
@@ -427,6 +431,7 @@ namespace Trebuchet.ViewModels.Panels
             Fields.Add(new TitleField().SetTitle(Resources.CatMiscellaneous));
             Fields.Add(new TextField()
                 .SetTitle(Resources.SettingServerDiscordNotificationsWebhook)
+                .SetDescription(Resources.SettingServerDiscordNotificationsWebhookText)
                 .SetGetter(() => _profile.DiscordWebHookNotifications)
                 .SetSetter((v) => _profile.DiscordWebHookNotifications = v)
                 .SetDefault(() => ServerProfile.DiscordWebHookNotificationsDefault)

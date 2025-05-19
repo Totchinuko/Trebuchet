@@ -51,6 +51,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     public void Dispose()
     {
         _conanClientProcess?.Dispose();
+        _conanClientProcess = null;
         foreach (var item in _serverProcesses)
             item.Value.Dispose();
         _serverProcesses.Clear();

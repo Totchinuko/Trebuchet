@@ -192,6 +192,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
         if(content is not null)
             Fields.Add(new ToggleField()
                 .SetTitle(Resources.SettingRunOnLogon)
+                .SetDescription(Resources.SettingRunOnLogonText)
                 .SetGetter(() => tot_lib.Utils.HasLogonRun(appName))
                 .SetSetter((v) =>
                     {

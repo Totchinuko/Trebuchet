@@ -17,6 +17,7 @@ public abstract class SequenceActionViewModel : ReactiveObject
     public event EventHandler? ActionChanged;
 
     public string Label { get; protected set; } = string.Empty;
+    public string Description { get; protected set; } = string.Empty;
     public abstract ISequenceAction SequenceAction { get; }
     
     protected virtual void OnActionChanged()
@@ -27,6 +28,11 @@ public abstract class SequenceActionViewModel : ReactiveObject
     public void SetLabel(string label)
     {
         Label = label;
+    }
+
+    public void SetDescription(string description)
+    {
+        Description = description;
     }
     
     public static SequenceActionViewModel MakeViewModel(ISequenceAction action)
@@ -40,6 +46,7 @@ public abstract class SequenceActionViewModel : ReactiveObject
         if (vm is not SequenceActionViewModel savm)
             throw new Exception($@"Invalid type for {action.GetType()}");
         savm.SetLabel(Resources.ResourceManager.GetString(action.GetType().Name, Resources.Culture) ?? @"INVALID");
+        savm.SetDescription(Resources.ResourceManager.GetString(action.GetType().Name + @"Text", Resources.Culture) ?? @"INVALID");
         return savm;
     }
 }

@@ -437,7 +437,7 @@ Do you wish to proceed ?</value>
         <value>Restart Servers When Down</value>
     </data>
     <data name="SettingServerCrashRestartText" xml:space="preserve">
-        <value>Automatically restart a server instance that have stopped unexpectedly</value>
+        <value>Automatically restart a server instance that have stopped unexpectedly or at the start of Trebuchet</value>
     </data>
     <data name="CatPerformance" xml:space="preserve">
         <value>Performance</value>
@@ -1129,10 +1129,12 @@ DO NOT place it in your Steam Directory.</value>
         <value>Stopping Sequence</value>
     </data>
     <data name="SettingServerStartingSequenceText" xml:space="preserve">
-        <value>Starting Sequence: {0} Action(s)</value>
+        <value>Content: {0} Action(s)
+The starting sequence will be used in place of simply starting the server. This will allow you to program a series of action both before and after the main action, which is starting the server.</value>
     </data>
     <data name="SettingServerStoppingSequenceText" xml:space="preserve">
-        <value>Stopping Sequence: {0} Action(s)</value>
+        <value>Content: {0} Action(s)
+The stopping sequence will be used in place of simply stopping the server. This will allow you to program a series of action both before and after the main action, which is stopping the server.</value>
     </data>
     <data name="ProcessFilename" xml:space="preserve">
         <value>File Path</value>
@@ -1187,5 +1189,51 @@ DO NOT place it in your Steam Directory.</value>
     </data>
     <data name="SettingNotificationServerServerUpdate" xml:space="preserve">
         <value>Reason: Server Update</value>
+    </data>
+    <data name="SettingRunOnLogonText" xml:space="preserve">
+        <value>Configure the app to start on the current user session login, for this specific build of the game. Both Live and TestLive are separated in this manner. Game build selection will therefore be skipped.</value>
+    </data>
+    <data name="SettingServerAutoRestartText" xml:space="preserve">
+        <value>Programe daily restarts at various moment of the day.</value>
+    </data>
+    <data name="SettingServerAutoRestartDailyTimeText" xml:space="preserve">
+        <value>List of the times when the server will be taken down automatically for restart. Make sure this avoid the Max Per Day and Minimum Uptime settings, otherwise the restart will be prevented.</value>
+    </data>
+    <data name="SettingServerAutoRestartMaxPerDayText" xml:space="preserve">
+        <value>Maximum of restarts per day. Restart are evaluated in local time, and the count will be reset at midnight. This does prevent automated restarts, but not when they involve mod or server updates.</value>
+    </data>
+    <data name="SettingServerAutoRestartMinUptimeText" xml:space="preserve">
+        <value>Prevent the automated restart of a server, if the server uptime is less than the duration specified here. This does not affect restarts for mod or server updates.</value>
+    </data>
+    <data name="SettingServerDiscordNotificationsWebhookText" xml:space="preserve">
+        <value>Automated notification over the selected Discord webhook for specific server events.
+When using sequences, this only include when the server is online, and when a server crash is detected. When not using sequences, this will also include automated restarts reasons and manual shutdown.</value>
+    </data>
+    <data name="SequenceActionBackupServerDataText" xml:space="preserve">
+        <value>Compress in a zip and store this save into a separate backup folder with a unique name. Backup files older than the duration specified will automatically be deleted when new backups are made. This will always fail when done after server start or before server shutdown. </value>
+    </data>
+    <data name="SequenceActionDiscordWebHookText" xml:space="preserve">
+        <value>Send a message to a Discord webhook. Use {Reason} in the text to insert a restart reason when the server need to do so.</value>
+    </data>
+    <data name="SequenceActionExecuteProcessText" xml:space="preserve">
+        <value>Execute a program or a file with some arguments. Create no window will attempt to run the program in the background. Use Shell will run the file through the Operating System shell. For example, when needing to run a file that need a specific program to run (Such as python), the shell often know which program execute which kind of files.</value>
+    </data>
+    <data name="SequenceActionRConCommandText" xml:space="preserve">
+        <value>Send an RCon command to the server. This obvioulsy need to be send when the server is online, so before stopping or after it finished loading.</value>
+    </data>
+    <data name="SequenceActionSendRESTQueryText" xml:space="preserve">
+        <value>Send a Http request to an arbitrary service online. Headers are one per line, with the key separated by a comma from the value. {Reason} can be used in headers or body to insert the restart reason text.</value>
+    </data>
+    <data name="SequenceActionWaitText" xml:space="preserve">
+        <value>Wait a certain amount of time before continuing the sequence. Useful to warn users of a restart and wait before actually shuting down the server.</value>
+    </data>
+    <data name="SequenceActionWaitOfflineText" xml:space="preserve">
+        <value>Wait for the server to be fully offline after the shutdown has been ordered</value>
+    </data>
+    <data name="SequenceActionWaitOnlineText" xml:space="preserve">
+        <value>Wait for the server to be fully online and accept players connection</value>
+    </data>
+    <data name="SequenceMainActionText" xml:space="preserve">
+        <value>Execute the main action of this sequence. On a stopping sequence, it order the server to stop. On a starting sequence, it order the server to start.</value>
     </data>
 </root>

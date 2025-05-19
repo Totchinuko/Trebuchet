@@ -713,7 +713,7 @@
         <value>Redémarrer les serveurs automatiquement</value>
     </data>
     <data name="SettingServerCrashRestartText" xml:space="preserve">
-        <value>Redémarre un serveur quand ce dernier s'est arrêté de manière inattendue.</value>
+        <value>Redémarre un serveur quand ce dernier s'est arrêté de manière inattendue, ou au démarrage de Trebuchet</value>
     </data>
     <data name="SettingServerEnableBattleEyeText" xml:space="preserve">
         <value>Activer l'anti-triche Battle Eye pour votre instance serveur</value>
@@ -1121,10 +1121,12 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
         <value>Séquence d'arret</value>
     </data>
     <data name="SettingServerStartingSequenceText" xml:space="preserve">
-        <value>Séquence de démarrage: {0} Action(s)</value>
+        <value>Contenu: {0} Action(s)
+La séquence de démarrage est utilisé en lieu d'un simple démarrage du serveur. Cela vous permet, de programmer une série d'actions avant et aprés l'action principal, qui est le démarrage du serveur.</value>
     </data>
     <data name="SettingServerStoppingSequenceText" xml:space="preserve">
-        <value>Séquence d'arret: {0} Action(s)</value>
+        <value>Contenu: {0} Action(s)
+La séquence d'arret est utilisé en lieu d'un simple arret du serveur. Cela vous permet, de programmer une série d'actions avant et aprés l'action principal, qui est l'arret du serveur.</value>
     </data>
     <data name="ProcessFilename" xml:space="preserve">
         <value>Chemin du Fichier</value>
@@ -1179,5 +1181,51 @@ Ne le placez JAMAIS dans votre dossier Steam.</value>
     </data>
     <data name="SettingNotificationServerStop" xml:space="preserve">
         <value>Notification d'arret du serveur</value>
+    </data>
+    <data name="SettingRunOnLogonText" xml:space="preserve">
+        <value>Configure l'application pour démarrer à l'ouverture de la session utilisateur, pour cetter version specific du jeu. La version Live et TestLive sont de fait séparé. La sélection de la version du jeu sera donc omise.</value>
+    </data>
+    <data name="SettingServerAutoRestartText" xml:space="preserve">
+        <value>Programme des redémarrage automatique à différent moment de la journée</value>
+    </data>
+    <data name="SettingServerAutoRestartDailyTimeText" xml:space="preserve">
+        <value>Liste les heures durant lequels le serveur est mis hors ligne pour un redémarrage automatique. Vérifier que les heurs specifié sont compatible avec les paramétre de quantité journaliére et de durée minimum de fonctionement, ou le redémarrage sera ignoré.</value>
+    </data>
+    <data name="SettingServerAutoRestartMaxPerDayText" xml:space="preserve">
+        <value>Montant maximum de redémarrage par jour évalué à l'heure local, et réinitialisé à minuit. Cette limite empéche les redémarrage automatique, mais pas quand ils impliquent une mise à jour de mod ou serveur.</value>
+    </data>
+    <data name="SettingServerAutoRestartMinUptimeText" xml:space="preserve">
+        <value>Empéche le redémarrage d'un server si sa durée de fonctionement est inférieur à la durée spécifié ici. Cela n'affécte pas les redémarrage nécessaire pour les mise à jour de mod ou serveur.</value>
+    </data>
+    <data name="SettingServerDiscordNotificationsWebhookText" xml:space="preserve">
+        <value>Notification automatique à destination du webhook Discord pour des événement spécific du serveur.
+Losques des séquences sont utilisé, cela n'inclus que la mise en ligne et la détéction de plantage du serveur. Sans séquences, les raisons de redémarrage et d'arret manuel sont aussi notifié.</value>
+    </data>
+    <data name="SequenceActionBackupServerDataText" xml:space="preserve">
+        <value>Compresse dans un fichier zip et stock cette sauvegarde dans un dossier backup séparé. Les sauvegarde plus ancienne que la durée spécifié seront automatiquement supprimé losque de nouvelle sauvegarde sont faites.Cela échouera toujours lorsque la sauvegarde est effectué avant l'arret du serveur ou aprés son lancement</value>
+    </data>
+    <data name="SequenceActionDiscordWebHookText" xml:space="preserve">
+        <value>Envois une notification à un webhook Discord. Utilisez {Reason} dans le text du message pour insérer la raison du redémarrage quand le serveur s'arréte.</value>
+    </data>
+    <data name="SequenceActionExecuteProcessText" xml:space="preserve">
+        <value>Execute un programme ou un fichier avec des paramétres. Ne pas créer de fenêtre tentera de lancer le programme en arriére plan. Utiliser le shell permer d'appeler la command au traver du système d'exploitation. Par example, lorsqu'un fichier nécéssite un programme specific pour s'éxécuter (Un fichier python par example), le shell connait souvent le programme nécéssaire pour exécuter ces fichiers.</value>
+    </data>
+    <data name="SequenceActionRConCommandText" xml:space="preserve">
+        <value>Envois une command RCon au serveur. Cela nécéssite évidement que le serveur soit en ligne, donc avant son arret our aprés qu'il ai terminé de charger.</value>
+    </data>
+    <data name="SequenceActionSendRESTQueryText" xml:space="preserve">
+        <value>Envois une requette Http à un service en ligne arbitraire. Les entêtes sont séparer par lignes, and la clé séparé par un double point de la valeur. {Reason} peut être utilisé pour insérer la raison du redémarage.</value>
+    </data>
+    <data name="SequenceActionWaitText" xml:space="preserve">
+        <value>Attendre un certain temps, avant de continuer la séquence. Utile pour prévenir les utilisateurs d'un redémarrage et attendre avant d'arréter le serveur.</value>
+    </data>
+    <data name="SequenceActionWaitOfflineText" xml:space="preserve">
+        <value>Attend que le serveur soit hors ligne une fois que l'arret a été ordonné.</value>
+    </data>
+    <data name="SequenceActionWaitOnlineText" xml:space="preserve">
+        <value>Attend que le serveur soit en ligne et accépte la connection des joueurs</value>
+    </data>
+    <data name="SequenceMainActionText" xml:space="preserve">
+        <value>Exécute l'action principal de la séquence. Pour une séquence d'arret, l'arret du serveur est ordonné. Pour une séquence de démarrage, le démarrage du serveur est ordonné.</value>
     </data>
 </root>
