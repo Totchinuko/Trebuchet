@@ -259,6 +259,7 @@ namespace Trebuchet.ViewModels.Panels
                 if (server.SelectedModlist is not null)
                     server.UpdateNeeded = _launcher.HasModListUpdates(server.SelectedModlist.ModList);
             AnyModUpdate = Instances.Any(x => x.UpdateNeeded) || Client.UpdateNeeded;
+            ServerUpdateAvailable = _launcher.HasServerUpdate();
             
             await Client.ProcessRefresh(_launcher.GetClientProcess(), _uiConfig.DisplayProcessPerformance);
             foreach (var instance in _launcher.GetServerProcesses())
