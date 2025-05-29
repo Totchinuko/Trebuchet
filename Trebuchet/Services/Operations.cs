@@ -21,7 +21,8 @@ namespace Trebuchet.Services;
 
 public class Operations : IDisposable
 {
-    public Operations(AppFiles appFiles, 
+    public Operations(AppFiles appFiles,
+        IOsPlatformSpecific osSpecific,
         AppSetup setup, 
         DialogueBox dialogueBox,
         TaskBlocker taskBlocker, 
@@ -30,6 +31,7 @@ public class Operations : IDisposable
         Steam steam)
     {
         _appFiles = appFiles;
+        _osSpecific = osSpecific;
         _setup = setup;
         _dialogueBox = dialogueBox;
         _logger = logger;
@@ -46,6 +48,7 @@ public class Operations : IDisposable
     }
     
     private readonly AppFiles _appFiles;
+    private readonly IOsPlatformSpecific _osSpecific;
     private readonly AppSetup _setup;
     private readonly DialogueBox _dialogueBox;
     private readonly ILogger<Operations> _logger;
@@ -471,7 +474,7 @@ public class Operations : IDisposable
     public async Task<bool> OnBoardingElevationRequest(string path, string reason)
     {
         var canWriteInTrebuchet = Tools.IsDirectoryWritable(path);
-        var isRoot = ProcessUtil.IsProcessElevated();
+        var isRoot = _osSpecific.IsProcessElevated();
         if (!canWriteInTrebuchet)
         {
             
@@ -603,7 +606,7 @@ public class Operations : IDisposable
 
     public async Task<bool> OnBoardingUpgradeTrebuchet(string installDir, bool testlive, IProgress<double> progress)
     {
-        bool isElevated = ProcessUtil.IsProcessElevated();
+        bool isElevated = _osSpecific.IsProcessElevated();
         string appDir = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) ?? throw new Exception(@"App is installed in an invalid directory");
         installDir = installDir.Replace(@"%APP_DIRECTORY%", appDir); 
         if(string.IsNullOrEmpty(installDir)) return true;

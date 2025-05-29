@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Avalonia;
 using Avalonia.Controls.ApplicationLifetimes;
@@ -78,12 +79,13 @@ public partial class App : Application, IApplication
         ConfigureServices(serviceCollection, testlive, catapult, experiment);
         _serviceProvider = serviceCollection.BuildServiceProvider();
         _logger = _serviceProvider.GetRequiredService<ILogger<App>>();
+        var osSpecifics = _serviceProvider.GetRequiredService<IOsPlatformSpecific>();
         
         CodeHighlighting.RegisterHighlight(@"Trebuchet.Assets.LogHightlighting.xshd", @"Log", [@".log"]);
         
         _logger.LogInformation(@"Starting Trebuchet");
         _logger.LogInformation(@$"Selecting {(testlive ? @"testlive" : @"live")}");
-        if(ProcessUtil.IsProcessElevated())
+        if(osSpecifics.IsProcessElevated())
             _logger.LogInformation(@"Process is elevated");
 
         MainWindow mainWindow = new ();
@@ -153,6 +155,8 @@ public partial class App : Application, IApplication
                 AppConstants.GithubOwnerUpdate,
                 AppConstants.GithubRepoUpdate,
                 AppConstants.GetUpdateContentType()));
+
+        services.AddSingleton(OsPlatformSpecificExtensions.GetOsPlatformSpecific());
 
         _internalLogSink = new InternalLogSink();
         services.AddSingleton(_internalLogSink);

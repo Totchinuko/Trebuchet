@@ -23,6 +23,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
 
 
     public SettingsPanel(
+        IOsPlatformSpecific osPlatformSpecific,
         AppSetup setup, 
         Operations operations,
         ILanguageManager langManager,
@@ -31,6 +32,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
         TaskBlocker blocker,
         UIConfig uiConfig)
     {
+        _osPlatformSpecific = osPlatformSpecific;
         _setup = setup;
         _uiConfig = uiConfig;
         _operations = operations;
@@ -57,7 +59,8 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
         
         BuildFields();
     }
-    
+
+    private readonly IOsPlatformSpecific _osPlatformSpecific;
     private readonly AppSetup _setup;
     private readonly UIConfig _uiConfig;
     private readonly Operations _operations;
@@ -193,13 +196,13 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             Fields.Add(new ToggleField()
                 .SetTitle(Resources.SettingRunOnLogon)
                 .SetDescription(Resources.SettingRunOnLogonText)
-                .SetGetter(() => tot_lib.Utils.HasLogonRun(appName))
+                .SetGetter(() => _osPlatformSpecific.HasLogonRun(appName))
                 .SetSetter((v) =>
                     {
                         if (v)
-                            tot_lib.Utils.SetLogonRun(appName, content);
+                            _osPlatformSpecific.SetLogonRun(appName, content);
                         else
-                            tot_lib.Utils.RemoveLogonRun(appName);
+                            _osPlatformSpecific.RemoveLogonRun(appName);
                     })
                 .SetDefault(() => false)
             );
