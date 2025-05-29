@@ -6,8 +6,10 @@ using System.Threading;
 using Avalonia.ReactiveUI;
 using Projektanker.Icons.Avalonia;
 using Projektanker.Icons.Avalonia.MaterialDesign;
+using tot_lib.OsSpecific;
 using Trebuchet.Utils;
 using TrebuchetLib;
+using TrebuchetLib.OsSpecific;
 
 namespace Trebuchet;
 
@@ -30,7 +32,7 @@ static class Program
             {
                 if (process.Id != currentProcess.Id)
                 {
-                    Tools.FocusWindow(process.MainWindowHandle);
+                    TrebuchetOsSpecificEx.GetOsPlatformSpecific().FocusWindow(process.MainWindowHandle);
                     break;
                 }
             }

@@ -4,14 +4,20 @@ using SteamKit2;
 using SteamKit2.Internal;
 using SteamWorksWebAPI;
 using SteamWorksWebAPI.Interfaces;
+using tot_lib.OsSpecific;
 
 namespace TrebuchetLib.Services;
 
 public class Steam : IDebugListener, IAsyncDisposable, IDisposable
 {
-    public Steam(ILogger<Steam> logger, AppSetup appSetup, IProgressCallback<DepotDownloader.Progress> progress)
+    public Steam(
+        ILogger<Steam> logger, 
+        IOsPlatformSpecific osSpecific,
+        AppSetup appSetup, 
+        IProgressCallback<DepotDownloader.Progress> progress)
     {
         _logger = logger;
+        _osSpecific = osSpecific;
         _appSetup = appSetup;
         _progress = progress;
 
@@ -28,6 +34,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     }
         
     private readonly ILogger<Steam> _logger;
+    private readonly IOsPlatformSpecific _osSpecific;
     private readonly AppSetup _appSetup;
     private readonly IProgressCallback<DepotDownloader.Progress> _progress;
     private readonly Steam3Session _session;
@@ -299,7 +306,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
             return;
         string[] instances = Directory.GetDirectories(folder);
         foreach (string instance in instances)
-            Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
+            _osSpecific.RemoveSymbolicLink(Path.Combine(instance, Constants.FolderGameSave));
     }
 
     /// <summary>
@@ -439,8 +446,8 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         if (!Directory.Exists(instance0))
             throw new DirectoryNotFoundException($"{instance0} was not found.");
 
-        Tools.RemoveSymboliclink(Path.Combine(instance0, Constants.FolderGameSave));
-        Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
+        _osSpecific.RemoveSymbolicLink(Path.Combine(instance0, Constants.FolderGameSave));
+        _osSpecific.RemoveSymbolicLink(Path.Combine(instance, Constants.FolderGameSave));
         Tools.DeleteIfExists(instance);
         Tools.CreateDir(instance);
 
@@ -465,7 +472,7 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
         string instance = _appSetup.GetInstancePath(instanceNumber);
         if (reinstall)
         {
-            Tools.RemoveSymboliclink(Path.Combine(instance, Constants.FolderGameSave));
+            _osSpecific.RemoveSymbolicLink(Path.Combine(instance, Constants.FolderGameSave));
             Tools.DeleteIfExists(instance);
         }
 

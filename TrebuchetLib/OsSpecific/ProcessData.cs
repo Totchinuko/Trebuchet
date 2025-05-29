@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
-using System.Linq;
 using System.Management;
-using System.Numerics;
-using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace TrebuchetLib
+namespace TrebuchetLib.OsSpecific
 {
     public struct ProcessData
     {

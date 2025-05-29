@@ -69,7 +69,7 @@ public class AppDataDirectoryField : DescriptiveElement<AppDataDirectoryField>
                 _setup.Config.SaveFile();
                 Customized = true;
                 DataDirectory = _setup.Config.DataDirectory;
-                Utils.Utils.RestartProcess(_setup);
+                App.RestartProcess();
             }
         }
         catch(OperationCanceledException) {}
@@ -83,7 +83,7 @@ public class AppDataDirectoryField : DescriptiveElement<AppDataDirectoryField>
             _setup.Config.SaveFile();
             DataDirectory = string.Empty;
             Customized = false;
-            Utils.Utils.RestartProcess(_setup);
+            App.RestartProcess();
         }
         catch(OperationCanceledException) {}
     }

@@ -3,6 +3,8 @@ using System.Net;
 using System.Text.Json;
 using Microsoft.Extensions.Logging;
 using tot_lib;
+using tot_lib.OsSpecific;
+using TrebuchetLib.OsSpecific;
 using TrebuchetLib.Processes;
 using TrebuchetLib.Sequences;
 using TrebuchetLib.YuuIni;
@@ -12,6 +14,8 @@ namespace TrebuchetLib.Services;
 public class Launcher : IDisposable, IProgress<SequenceProgress>
 {
     public Launcher(AppFiles appFiles, 
+        IOsPlatformSpecific osSpecific,
+        ITrebuchetOsSpecific tOsSpecific,
         AppSetup setup, 
         Steam steam,
         BackupManager backupManager,
@@ -19,6 +23,8 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         ILogger<Launcher> logger)
     {
         _appFiles = appFiles;
+        _osSpecific = osSpecific;
+        _tOsSpecific = tOsSpecific;
         _setup = setup;
         _steam = steam;
         _backupManager = backupManager;
@@ -38,6 +44,8 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     private DateTime _lastUpdateCheckTime;
     private readonly List<StartDates> _startDates;
     private readonly AppFiles _appFiles;
+    private readonly IOsPlatformSpecific _osSpecific;
+    private readonly ITrebuchetOsSpecific _tOsSpecific;
     private readonly AppSetup _setup;
     private readonly Steam _steam;
     private readonly BackupManager _backupManager;
@@ -399,7 +407,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
 
     public async Task<ConanClientProcessInfos?> FindClientProcess()
     {
-        var data = (await Tools.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
+        var data = (await _tOsSpecific.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
 
         if (data.IsEmpty) return null;
         if (!data.TryGetProcess(out var process)) return null;
@@ -413,7 +421,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     
     public async IAsyncEnumerable<ConanServerProcessInfos> FindServerProcesses()
     {
-        var processes = await Tools.GetProcessesWithName(Constants.FileServerBin);
+        var processes = await _tOsSpecific.GetProcessesWithName(Constants.FileServerBin);
         foreach (var p in processes)
         {
             if (!_setup.TryGetInstanceIndexFromPath(p.filename, out var instance)) continue;
@@ -812,7 +820,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         while (target.IsEmpty && !parent.HasExited)
         {
             if ((DateTime.UtcNow - start).TotalSeconds > 20) return null;
-            target = (await Tools.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
+            target = (await _tOsSpecific.GetProcessesWithName(Constants.FileClientBin)).FirstOrDefault();
             await Task.Delay(25);
         }
 
@@ -875,7 +883,7 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
         while (child.IsEmpty && !process.HasExited)
         {
             if ((DateTime.UtcNow - start).TotalSeconds > 20) return null;
-            child = Tools.GetFirstChildProcesses(process.Id);
+            child = _tOsSpecific.GetFirstChildProcesses(process.Id);
             await Task.Delay(25);
         }
 
@@ -995,24 +1003,19 @@ public class Launcher : IDisposable, IProgress<SequenceProgress>
     private string GetCurrentClientJunction()
     {
         var path = Path.Combine(_setup.GetClientFolder(), Constants.FolderGameSave);
-        if (JunctionPoint.Exists(path))
-            return JunctionPoint.GetTarget(path);
-        return string.Empty;
+        return _osSpecific.GetSymbolicLinkTarget(path);
     }
 
     private string GetCurrentServerJunction(int instance)
     {
         var path = Path.Combine(_setup.GetInstancePath(instance), Constants.FolderGameSave);
-        if (JunctionPoint.Exists(path))
-            return JunctionPoint.GetTarget(path);
-        return string.Empty;
+        return _osSpecific.GetSymbolicLinkTarget(path);
     }
 
     private void SetupJunction(string junction, string targetPath)
     {
         _logger.LogInformation("Setup new junction {junction} > {target}", junction, targetPath);
-        Tools.RemoveSymboliclink(junction);
-        Tools.SetupSymboliclink(junction, targetPath);
+        _osSpecific.MakeSymbolicLink(junction, targetPath);
     }
 
     private void OnStateChanged()

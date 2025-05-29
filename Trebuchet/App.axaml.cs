@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
@@ -31,6 +32,8 @@ using TrebuchetLib.Services;
 using TrebuchetLib.Services.Importer;
 using TrebuchetLib.YuuIni;
 using tot_gui_lib;
+using tot_lib.OsSpecific;
+using TrebuchetLib.OsSpecific;
 
 // GNU GENERAL PUBLIC LICENSE // Version 2, June 1991
 // Copyright (C) 2025 Totchinuko https://github.com/Totchinuko
@@ -142,6 +145,38 @@ public partial class App : Application, IApplication
         }
         base.OnFrameworkInitializationCompleted();
     }
+    
+    public static void RestartProcess(bool asAdmin = false)
+    {
+        if (Application.Current is null) return;
+        var provider = ((App)Application.Current)._serviceProvider;
+        if (provider is null) return;
+        var setup = provider.GetRequiredService<AppSetup>();
+        var tOsSpecific = provider.GetRequiredService<ITrebuchetOsSpecific>();
+        
+        var data = tOsSpecific.GetProcess(Environment.ProcessId);
+        var version = setup.IsTestLive ? Constants.argTestLive : Constants.argLive;
+        List<string> arguments = data.args.Split(' ').ToList();
+        if (!arguments.Contains(version))
+            arguments.Add(version);
+        if(!arguments.Contains(AppConstants.RestartArg))
+            arguments.Add(AppConstants.RestartArg);
+            
+        Process process = new Process();
+        process.StartInfo.FileName = data.filename;
+        process.StartInfo.Arguments = string.Join(' ', arguments);
+        process.StartInfo.UseShellExecute = true;
+        if (asAdmin)
+            process.StartInfo.Verb = "runas";
+        process.Start();
+        ShutdownDesktopProcess();
+    }
+    
+    public static void ShutdownDesktopProcess()
+    {
+        if(Current?.ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
+            desktop.Shutdown();
+    }
 
     [Localizable(false)]
     private void ConfigureServices(IServiceCollection services, bool testlive, bool catapult, bool experiment)
@@ -157,6 +192,7 @@ public partial class App : Application, IApplication
                 AppConstants.GetUpdateContentType()));
 
         services.AddSingleton(OsPlatformSpecificExtensions.GetOsPlatformSpecific());
+        services.AddSingleton(TrebuchetOsSpecificEx.GetOsPlatformSpecific());
 
         _internalLogSink = new InternalLogSink();
         services.AddSingleton(_internalLogSink);

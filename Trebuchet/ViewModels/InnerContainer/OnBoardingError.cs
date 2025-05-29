@@ -20,7 +20,7 @@ public class OnBoardingError : TitledDialogue<OnBoardingError>
         CancelCommand.Subscribe((_) =>
         {
             if (Exit)
-                Utils.Utils.ShutdownDesktopProcess();
+                App.ShutdownDesktopProcess();
         });
     }
     

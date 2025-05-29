@@ -7,6 +7,7 @@ using DynamicData.Binding;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using tot_lib;
+using tot_lib.OsSpecific;
 using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.Services.Language;
@@ -115,7 +116,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             _logger.LogInformation(@"Changing language");
         _uiConfig.UICulture = choice.Value.Code;
         _uiConfig.SaveFile();
-        _setup.RestartProcess();
+        App.RestartProcess();
         return false;
     }
 
@@ -136,7 +137,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
                 Resources.OnBoardingLanguageChangeConfirm);
             await _box.OpenAsync(confirm);
             if(confirm.Result)
-                Utils.Utils.RestartProcess(_setup);
+                App.RestartProcess();
         }
     }
 
@@ -162,7 +163,7 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
                 Resources.OnBoardingRestartProcessSub);
             await _box.OpenAsync(confirm);
             if(confirm.Result)
-                Utils.Utils.RestartProcess(_setup);
+                App.RestartProcess();
         }
     }
 

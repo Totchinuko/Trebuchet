@@ -4,17 +4,21 @@ using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 using System.IO;
 using System.Linq;
+using System.Net.Mime;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Avalonia;
 using Avalonia.Threading;
 using Microsoft.Extensions.Logging;
 using ReactiveUI;
 using tot_lib;
+using tot_lib.OsSpecific;
 using Trebuchet.Assets;
 using Trebuchet.ViewModels;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
+using TrebuchetLib.OsSpecific;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.Services;
@@ -23,6 +27,7 @@ public class Operations : IDisposable
 {
     public Operations(AppFiles appFiles,
         IOsPlatformSpecific osSpecific,
+        ITrebuchetOsSpecific tOsSpecific,
         AppSetup setup, 
         DialogueBox dialogueBox,
         TaskBlocker taskBlocker, 
@@ -32,6 +37,7 @@ public class Operations : IDisposable
     {
         _appFiles = appFiles;
         _osSpecific = osSpecific;
+        _tOsSpecific = tOsSpecific;
         _setup = setup;
         _dialogueBox = dialogueBox;
         _logger = logger;
@@ -49,6 +55,7 @@ public class Operations : IDisposable
     
     private readonly AppFiles _appFiles;
     private readonly IOsPlatformSpecific _osSpecific;
+    private readonly ITrebuchetOsSpecific _tOsSpecific;
     private readonly AppSetup _setup;
     private readonly DialogueBox _dialogueBox;
     private readonly ILogger<Operations> _logger;
@@ -217,7 +224,7 @@ public class Operations : IDisposable
                     UseShellExecute = false
                 }
             }.Start();
-            Utils.Utils.ShutdownDesktopProcess();
+            App.ShutdownDesktopProcess();
             return false;
         }
         catch (Exception ex)
@@ -384,7 +391,7 @@ public class Operations : IDisposable
             if (_setup.Config.ManageClient)
             {
                 _logger.LogInformation(@"Creating junction");
-                Tools.SetupSymboliclink(savedDir, _setup.GetPrimaryJunction());
+                _osSpecific.MakeSymbolicLink(savedDir, _setup.GetPrimaryJunction());
             }
             else
             {
@@ -398,7 +405,7 @@ public class Operations : IDisposable
             return true;
         }
 
-        if (JunctionPoint.Exists(savedDir) && !_setup.Config.ManageClient)
+        if (_osSpecific.IsSymbolicLink(savedDir) && !_setup.Config.ManageClient)
         {
             _logger.LogWarning(@"Junction found, but does not manage");
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
@@ -406,13 +413,13 @@ public class Operations : IDisposable
                 return true;
             var saveName = await OnBoardingChooseClientSave();
             _logger.LogInformation(@"Copying trebuchet save back to game {saveName}", saveName);
-            JunctionPoint.Delete(savedDir);
+            _osSpecific.RemoveSymbolicLink(savedDir);
             Directory.CreateDirectory(savedDir);
             await Tools.DeepCopyAsync(_appFiles.Client.GetDirectory(_appFiles.Client.Ref(saveName)), savedDir, CancellationToken.None);
             return true;
         }
 
-        if (!JunctionPoint.Exists(savedDir) && _setup.Config.ManageClient)
+        if (!_osSpecific.IsSymbolicLink(savedDir) && _setup.Config.ManageClient)
         {
             _logger.LogWarning(@"Directory found, but manage game");
             if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
@@ -420,18 +427,18 @@ public class Operations : IDisposable
             _logger.LogInformation(@"Copying game save into trebuchet {saveName}", saveName);
             await Tools.DeepCopyAsync(savedDir, _appFiles.Client.GetDirectory(_appFiles.Client.Ref(saveName)), CancellationToken.None);
             await OnBoardingSafeIO(() => Directory.Delete(savedDir, true),savedDir);
-            Tools.SetupSymboliclink(savedDir, _setup.GetPrimaryJunction());
+            _osSpecific.MakeSymbolicLink(savedDir, _setup.GetPrimaryJunction());
             return true;
         }
 
-        if (JunctionPoint.Exists(savedDir))
+        if (_osSpecific.IsSymbolicLink(savedDir))
         {
-            var path = JunctionPoint.GetTarget(savedDir);
+            var path = _osSpecific.GetSymbolicLinkTarget(savedDir);
             if (Path.GetFullPath(path) != Path.GetFullPath(_setup.GetPrimaryJunction()))
             {
                 if (!await OnBoardingElevationRequest(clientDirectory, Resources.OnBoardingManageConanUac)) return false;
                 _logger.LogWarning(@"Broken junction found, repairing");
-                JunctionPoint.Create(savedDir, _setup.GetPrimaryJunction(), true);
+                _osSpecific.MakeSymbolicLink(savedDir, _setup.GetPrimaryJunction());
             }
         }
 
@@ -477,8 +484,6 @@ public class Operations : IDisposable
         var isRoot = _osSpecific.IsProcessElevated();
         if (!canWriteInTrebuchet)
         {
-            
-            
             if(isRoot) 
                 throw new IOException(@$"Can't write in {path}, permission denied");
             var uac = new OnBoardingBranch(Resources.UACDialog, Resources.UACDialogText + Environment.NewLine + reason)
@@ -495,7 +500,7 @@ public class Operations : IDisposable
             if(uac.Result < 0) throw new OperationCanceledException(@"OnBoarding was cancelled");
             
             _logger.LogInformation(@"Restarting as elevated");
-            Utils.Utils.RestartProcess(_setup, true);
+            App.RestartProcess(true);
             return false;
         }
 
@@ -595,8 +600,8 @@ public class Operations : IDisposable
                 }
                 File.Delete(configTestlive);
             }
-            
-            Utils.Utils.RestartProcess(_setup);
+
+            App.RestartProcess();
             return false;
         }
         
@@ -621,7 +626,7 @@ public class Operations : IDisposable
             _logger.LogInformation(@"Copying workshop directory {directory}", workshopDir);
             await Tools.DeepCopyAsync(workshopDir, _setup.GetWorkshopFolder(), CancellationToken.None, progress);
             if (isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(_setup.GetWorkshopFolder()));
+                _tOsSpecific.SetEveryoneAccess(new DirectoryInfo(_setup.GetWorkshopFolder()));
             await OnBoardingSafeIO(() => Directory.Delete(workshopDir, true), workshopDir);
         }
         
@@ -633,7 +638,7 @@ public class Operations : IDisposable
             Tools.RemoveAllJunctions(instanceDir); 
             await Tools.DeepCopyAsync(instanceDir, _setup.GetBaseInstancePath(testlive), CancellationToken.None, progress);
             if(isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(_setup.GetBaseInstancePath(testlive)));
+                _tOsSpecific.SetEveryoneAccess(new DirectoryInfo(_setup.GetBaseInstancePath(testlive)));
             await OnBoardingSafeIO(() => Directory.Delete(instanceDir, true), instanceDir);
         }
         progress.Report(0.0);
@@ -644,7 +649,7 @@ public class Operations : IDisposable
             _logger.LogInformation(@"Copying data directory {directory}", dataDir);
             await Tools.DeepCopyAsync(dataDir, Path.Combine(_setup.GetDataDirectory().FullName, versionDir), CancellationToken.None, progress);
             if(isElevated)
-                Tools.SetEveryoneAccess(new DirectoryInfo(Path.Combine(_setup.GetDataDirectory().FullName, versionDir)));
+                _tOsSpecific.SetEveryoneAccess(new DirectoryInfo(Path.Combine(_setup.GetDataDirectory().FullName, versionDir)));
             await OnBoardingSafeIO(() => Directory.Delete(dataDir, true),dataDir);
         }
         

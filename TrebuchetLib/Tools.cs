@@ -9,24 +9,12 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using SteamWorksWebAPI;
 using tot_lib;
+using tot_lib.OsSpecific;
 
 namespace TrebuchetLib;
 
 public static class Tools
 {
-    [System.Runtime.InteropServices.DllImport("user32.dll")]
-    private static extern int SetForegroundWindow(IntPtr hwnd);
-
-    public static void FocusWindow(IntPtr hwnd)
-    {
-        if (OperatingSystem.IsWindows())
-            SetForegroundWindow(hwnd);
-        else if (OperatingSystem.IsLinux())
-            throw new NotImplementedException();
-    }
-    
-    
-    
     public static long Clamp2CPUThreads(long value)
     {
         int maxCPU = Environment.ProcessorCount;
@@ -85,11 +73,7 @@ public static class Tools
 
     public static void RemoveAllJunctions(string directory)
     {
-        foreach (string dir in Directory.GetDirectories(directory, "*", SearchOption.AllDirectories))
-        {
-            if (Directory.Exists(dir) && File.GetAttributes(dir).HasFlag(FileAttributes.ReparsePoint))
-                RemoveSymboliclink(dir);
-        }
+
     }
 
     public static void DeleteIfExists(string file)
@@ -137,79 +121,12 @@ public static class Tools
         return await response.Content.ReadAsStringAsync(ct);
     }
 
-    [SupportedOSPlatform("windows")]
-    private static IEnumerable<ProcessData> EnumerateData(this ManagementObjectCollection collection)
-    {
-        foreach (var process in collection)
-            yield return new ProcessData(process);
-    }
-
-    public static IEnumerable<ProcessData> GetChildProcesses(int parentId)
-    {
-        if(OperatingSystem.IsWindows())
-            return GetChildProcessesWindows(parentId);
-        else if (OperatingSystem.IsLinux())
-            return GetChildProcessesLinux(parentId);
-        throw new NotSupportedException("Operating system is not supported.");
-    }
-        
-    [SupportedOSPlatform("windows")]
-    private static IEnumerable<ProcessData> GetChildProcessesWindows(int parentId)
-    {
-        var query = $"Select * From Win32_Process Where ParentProcessId = {parentId}";
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
-        ManagementObjectCollection processList = searcher.Get();
-
-        return processList.EnumerateData();
-    }
-        
-    //TODO: Find a way to recover the command line of the process post launch
-    [SupportedOSPlatform("linux")]
-    private static IEnumerable<ProcessData> GetChildProcessesLinux(int parentId)
-    {
-        Process[] processes = Process.GetProcesses();
-        foreach (var process in processes)
-        {
-            var pid = GetParentProcessIdLinux(process.Id);
-            if (pid == parentId) 
-                yield return new ProcessData(process.Id, string.Empty, process.StartTime);
-        }
-    }
-
     public static async Task<string> GetFileContent(string path)
     {
         if (!File.Exists(path)) return string.Empty;
         return await File.ReadAllTextAsync(path);
     }
         
-    public static ProcessData GetFirstChildProcesses(int parentId)
-    {
-        if(OperatingSystem.IsWindows())
-            return GetFirstChildProcessesWindows(parentId);
-        else if (OperatingSystem.IsLinux())
-            return GetFirstChildProcessesLinux(parentId);
-        throw new NotSupportedException("Operating system is not supported.");
-    }
-
-    [SupportedOSPlatform("windows")]
-    private static ProcessData GetFirstChildProcessesWindows(int parentId)
-    {
-        var query = $"Select * From Win32_Process Where ParentProcessId = {parentId}";
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
-        ManagementObjectCollection processList = searcher.Get();
-
-        if (processList.Count == 0) return ProcessData.Empty;
-
-        return new ProcessData(processList.Cast<ManagementObject>().First());
-    }
-
-    [SupportedOSPlatform("linux")]
-    private static ProcessData GetFirstChildProcessesLinux(int parentId)
-    {
-        var proc = GetChildProcessesLinux(parentId).FirstOrDefault(ProcessData.Empty);
-        return proc;
-    }
-
     public static string GetFirstDirectoryName(string folder, string pattern)
     {
         if (!Directory.Exists(folder))
@@ -228,83 +145,6 @@ public static class Tools
         if (profiles.Length == 0)
             return string.Empty;
         return Path.GetFileNameWithoutExtension(profiles[0]);
-    }
-
-    public static ProcessData GetProcess(int processId)
-    {
-        if(OperatingSystem.IsWindows())
-            return GetProcessWindows(processId);
-        else if (OperatingSystem.IsLinux())
-            return GetProcessLinux(processId);
-        throw new NotSupportedException("Operating system is not supported.");
-    }
-        
-    [SupportedOSPlatform("windows")]
-    private static ProcessData GetProcessWindows(int processId)
-    {
-        var query = $"Select * From Win32_Process Where ProcessId = {processId}";
-        ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
-        ManagementObjectCollection processList = searcher.Get();
-
-        if (processList.Count == 0) return ProcessData.Empty;
-
-        return new ProcessData(processList.Cast<ManagementObject>().First());
-    }
-
-    [SupportedOSPlatform("linux")]
-    private static ProcessData GetProcessLinux(int processId)
-    {
-        // TODO: Linux process discovery
-        return ProcessData.Empty;
-    }
-
-    public static Task<List<ProcessData>> GetProcessesWithName(string processName)
-    {
-        if(OperatingSystem.IsWindows())
-            return GetProcessesWithNameWindows(processName);
-        else  if (OperatingSystem.IsLinux())
-            return GetProcessesWithNameLinux(processName);
-        throw new NotSupportedException("Operating system is not supported.");
-    }
-
-    [SupportedOSPlatform("windows")]
-    private static async Task<List<ProcessData>> GetProcessesWithNameWindows(string processName)
-    {
-        return await Task.Run(() =>
-        {
-            var query = $"Select * From Win32_Process Where Name='{processName}'";
-            ManagementObjectSearcher searcher = new ManagementObjectSearcher(query);
-            ManagementObjectCollection processList = searcher.Get();
-
-            return processList.EnumerateData().ToList();
-        });
-    }
-
-    [SupportedOSPlatform("linux")]
-    private static Task<List<ProcessData>> GetProcessesWithNameLinux(string processName)
-    {
-        // TODO: Linux process discovery
-        throw new NotImplementedException();
-    }
-        
-    [SupportedOSPlatform("linux")]
-    private static int GetParentProcessIdLinux(int processId)
-    {
-        string? line;
-        using (StreamReader reader = new StreamReader ("/proc/" + processId + "/stat"))
-            line = reader.ReadLine();
-        if (line == null) return -1;
-            
-        int endOfName = line.LastIndexOf(')');
-        string [] parts = line.Substring(endOfName).Split (new char [] {' '}, 4);
-
-        if (parts.Length >= 3) 
-        {
-            int ppid = Int32.Parse (parts [2]);
-            return ppid;
-        }
-
-        return -1;
     }
 
     public static string GetRootPath()
@@ -347,18 +187,6 @@ public static class Tools
             else
                 return false;
         }
-    }
-
-    public static async Task<bool> IsProcessRunning(string filename)
-    {
-        if (!File.Exists(filename)) return false;
-        var processList = await GetProcessesWithName(Path.GetFileName(filename));
-        foreach (var processData in processList)
-        {
-            if (processData.filename.Replace("/", "\\").ToLower() == filename.Replace("/", "\\").ToLower())
-                return true;
-        }
-        return false;
     }
 
     public static bool IsRunning(this ProcessState state)
@@ -411,29 +239,12 @@ public static class Tools
         return result.StartsWith("\\") ? result.Substring(1) : result;
     }
 
-    public static void RemoveSymboliclink(string path)
-    {
-        if (Directory.Exists(path) && File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint))
-            JunctionPoint.Delete(path);
-        else if (Directory.Exists(path))
-            Directory.Delete(path, true);
-    }
-
     public static async Task SetFileContent(string path, string content)
     {
         string? folder = Path.GetDirectoryName(path);
         if (folder == null) throw new Exception($"Invalid folder for {path}.");
         CreateDir(folder);
         await File.WriteAllTextAsync(path, content);
-    }
-
-    public static void SetupSymboliclink(string path, string targetPath)
-    {
-        if (Directory.Exists(path) && File.GetAttributes(path).HasFlag(FileAttributes.ReparsePoint))
-            JunctionPoint.Delete(path);
-        else if (Directory.Exists(path))
-            Directory.Delete(path, true);
-        JunctionPoint.Create(path, targetPath, true);
     }
 
     public static IEnumerable<string> Split(this string str, Func<char, bool> controller)
@@ -526,74 +337,6 @@ public static class Tools
         if (data == null) throw new Exception("Map list could ne be parsed.");
 
         return data;
-    }
-    
-    /// <summary>
-    /// Set Everyone Full Control permissions for selected directory
-    /// </summary>
-    /// <param name="dirName"></param>
-    /// <returns></returns>
-    public static bool SetEveryoneAccess(string dirName)
-    {
-       if(OperatingSystem.IsWindows())
-           return SetEveryoneAccessWindows(dirName);
-       return true;
-    }
-
-    public static void SetEveryoneAccess(DirectoryInfo dir)
-    {
-        if(OperatingSystem.IsWindows())
-            SetEveryoneAccessWindows(dir);
-    }
-    
-    [SupportedOSPlatform("windows")]
-    private static bool SetEveryoneAccessWindows(string dirName)
-    {
-        // Make sure directory exists
-        if (!Directory.Exists(dirName))
-            return false;
-        // Get directory access info
-        DirectoryInfo dinfo = new DirectoryInfo(dirName);
-        DirectorySecurity dSecurity = dinfo.GetAccessControl();
-        // Add the FileSystemAccessRule to the security settings. 
-        dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-        // Set the access control
-        dinfo.SetAccessControl(dSecurity);
-
-        return true;
-    }
-
-    [SupportedOSPlatform("windows")]
-    private static void SetEveryoneAccessWindows(DirectoryInfo dir)
-    {
-        SetEveryoneAccessWindows(dir.GetDirectories("*", SearchOption.AllDirectories));
-        SetEveryoneAccessWindows(dir.GetFiles("*", SearchOption.AllDirectories));
-    }
-    
-    [SupportedOSPlatform("windows")]
-    private static void SetEveryoneAccessWindows(DirectoryInfo[] dirs)
-    {
-        foreach (var dir in dirs)
-        {
-            DirectorySecurity dSecurity = dir.GetAccessControl();
-            // Add the FileSystemAccessRule to the security settings. 
-            dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.ObjectInherit | InheritanceFlags.ContainerInherit, PropagationFlags.NoPropagateInherit, AccessControlType.Allow));
-            // Set the access control
-            dir.SetAccessControl(dSecurity);
-        }
-    }
-    
-    [SupportedOSPlatform("windows")]
-    private static void SetEveryoneAccessWindows(FileInfo[] files)
-    {
-        foreach (var file in files)
-        {
-            FileSecurity dSecurity = file.GetAccessControl();
-            // Add the FileSystemAccessRule to the security settings. 
-            dSecurity.AddAccessRule(new FileSystemAccessRule(new SecurityIdentifier(WellKnownSidType.WorldSid, null), FileSystemRights.FullControl, InheritanceFlags.None, PropagationFlags.None, AccessControlType.Allow));
-            // Set the access control
-            file.SetAccessControl(dSecurity);
-        }
     }
     
     public static IEnumerable<(ulong, ulong)> GetManifestKeyValuePairs(this List<PublishedFile> list)

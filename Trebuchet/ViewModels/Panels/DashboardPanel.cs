@@ -11,6 +11,7 @@ using Trebuchet.Assets;
 using Trebuchet.Services;
 using Trebuchet.ViewModels.InnerContainer;
 using TrebuchetLib;
+using TrebuchetLib.OsSpecific;
 using TrebuchetLib.Services;
 
 namespace Trebuchet.ViewModels.Panels
@@ -18,6 +19,7 @@ namespace Trebuchet.ViewModels.Panels
     public class DashboardPanel : ReactiveObject, ITickingPanel, IRefreshablePanel, IDisplablePanel, IRefreshingPanel, IBottomPanel
     {
         public DashboardPanel(
+            ITrebuchetOsSpecific tOsSpecific,
             AppSetup setup, 
             UIConfig uiConfig, 
             AppFiles appFiles, 
@@ -27,6 +29,7 @@ namespace Trebuchet.ViewModels.Panels
             Operations operations,
             ILogger<DashboardPanel> logger) 
         {
+            _tOsSpecific = tOsSpecific;
             _setup = setup;
             _uiConfig = uiConfig;
             _appFiles = appFiles;
@@ -57,6 +60,7 @@ namespace Trebuchet.ViewModels.Panels
             RefreshClientSelection(_setup.Config.SelectedClientProfile, _setup.Config.SelectedClientModlist);
         }
 
+        private readonly ITrebuchetOsSpecific _tOsSpecific;
         private readonly AppSetup _setup;
         private readonly UIConfig _uiConfig;
         private readonly AppFiles _appFiles;
@@ -442,7 +446,7 @@ namespace Trebuchet.ViewModels.Panels
 
         private async Task<bool> CheckForSteamClientRunning()
         {
-            var process = await Tools.GetProcessesWithName(Constants.SteamClientExe);
+            var process = await _tOsSpecific.GetProcessesWithName(Constants.SteamClientExe);
             if (process.Count > 0) return true;
 
             await _box.OpenErrorAsync(Resources.OnBoardingSteamClientOffline,

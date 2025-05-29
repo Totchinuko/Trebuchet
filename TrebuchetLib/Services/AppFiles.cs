@@ -1,8 +1,9 @@
 using tot_lib;
+using tot_lib.OsSpecific;
 
 namespace TrebuchetLib.Services;
 
-public class AppFiles(AppSetup setup)
+public class AppFiles(AppSetup setup, IOsPlatformSpecific osSpecific)
 {
     public IAppClientFiles Client { get; } = new AppClientFiles(setup);
     public IAppServerFiles Server { get; } = new AppServerFiles(setup);
@@ -18,8 +19,8 @@ public class AppFiles(AppSetup setup)
         Tools.CreateDir(Sync.GetBaseFolder());
         Tools.CreateDir(setup.GetWorkshopFolder());
         Tools.CreateDir(setup.GetEmptyJunction());
-        if(!JunctionPoint.Exists(setup.GetPrimaryJunction()))
-            Tools.SetupSymboliclink(setup.GetPrimaryJunction(), setup.GetEmptyJunction());
+        if(!osSpecific.IsSymbolicLink(setup.GetPrimaryJunction()))
+            osSpecific.MakeSymbolicLink(setup.GetPrimaryJunction(), setup.GetEmptyJunction());
 
         return true;
     }
