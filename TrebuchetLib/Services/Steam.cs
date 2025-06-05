@@ -370,8 +370,9 @@ public class Steam : IDebugListener, IDisposable
     public void Dispose()
     {
         Disconnect();
-        while (IsConnected)
-            Task.Delay(25);
+        var start = DateTime.UtcNow;
+        while (IsConnected || (DateTime.UtcNow - start).TotalSeconds < 5)
+            Task.Delay(100);
     }
     
     public void CancelOperation()
