@@ -8,7 +8,7 @@ using tot_lib.OsSpecific;
 
 namespace TrebuchetLib.Services;
 
-public class Steam : IDebugListener, IAsyncDisposable, IDisposable
+public class Steam : IDebugListener, IDisposable
 {
     public Steam(
         ILogger<Steam> logger, 
@@ -365,13 +365,6 @@ public class Steam : IDebugListener, IAsyncDisposable, IDisposable
     public void WriteLine(string category, string msg)
     {
         _logger.LogInformation($"[{category}] {msg}");
-    }
-        
-    public async ValueTask DisposeAsync()
-    {
-        Disconnect();
-        while (IsConnected)
-            await Task.Delay(25);
     }
 
     public void Dispose()
