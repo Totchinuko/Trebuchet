@@ -28,7 +28,7 @@ public class Steam : IDebugListener, IDisposable
         ContentDownloader.Config.LoginID = null;
         ContentDownloader.Config.Progress = progress;
         UpdateDownloaderConfig();
-        _session = ContentDownloader.InitializeSteam3(null, null);
+        _session = ContentDownloader.InitializeSteam3(null, null, _appSetup.Config.CellId);
         _session.Connected += (_, _) => Connected?.Invoke(this, EventArgs.Empty);
         _session.Disconnected += (_, _) => Disconnected?.Invoke(this, EventArgs.Empty);
     }

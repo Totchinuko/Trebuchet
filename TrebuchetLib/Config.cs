@@ -35,6 +35,7 @@ namespace TrebuchetLib
         public string NotificationServerAutomatedRestart { get; set; } = NotificationServerAutomatedRestartDefault;
         public string NotificationServerModUpdate { get; set; } = NotificationServerModUpdateDefault;
         public string NotificationServerServerUpdate { get; set; } = NotificationServerServerUpdateDefault;
+        public uint CellId { get; set; } = CellIdDefault;
         
         [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingDefault)]
         [Obsolete]
@@ -94,5 +95,6 @@ namespace TrebuchetLib
         public static readonly string NotificationServerAutomatedRestartDefault = "Automated Restart";
         public static readonly string NotificationServerModUpdateDefault = "Mod update detected: {modList}";
         public static readonly string NotificationServerServerUpdateDefault = "Game update detected";
+        public static readonly uint CellIdDefault = 0;
     }
 }
