@@ -490,7 +490,6 @@ public class Steam : IDebugListener, IDisposable
     {
         ContentDownloader.Config.CellID = 0; //TODO: Offer regional download selection
         ContentDownloader.Config.MaxDownloads = _appSetup.Config.MaxDownloads;
-        ContentDownloader.Config.MaxServers = Math.Max(_appSetup.Config.MaxServers, ContentDownloader.Config.MaxDownloads);
         ContentDownloader.Config.DepotConfigDirectory = Path.Combine(_appSetup.GetWorkshopFolder(), ContentDownloader.CONFIG_DIR);
         AccountSettingsStore.LoadFromFile(
             Path.Combine(_appSetup.GetWorkshopFolder(), 

@@ -271,14 +271,6 @@ public class SettingsPanel : ReactiveObject, IRefreshingPanel, IBottomPanel, ISt
             .SetSetter((v) => _setup.Config.MaxDownloads = v)
             .SetDefault(() => Config.MaxDownloadsDefault)
         );
-        Fields.Add(new IntSliderField(1, 16, 1)
-            .WhenFieldChanged(SaveConfig)
-            .SetTitle(Resources.SettingMaxServers)
-            .SetDescription(Resources.SettingMaxServersText)
-            .SetGetter(() => _setup.Config.MaxServers)
-            .SetSetter((v) => _setup.Config.MaxServers = v)
-            .SetDefault(() => Config.MaxServersDefault)
-        );
         
         Fields.Add(new TitleField().SetTitle(Resources.CatNotification));
         Fields.Add(new TextField()

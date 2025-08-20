@@ -20,7 +20,6 @@ namespace TrebuchetLib
         public string ClientPath { get; set; } = ClientPathDefault;
         public bool ManageClient { get; set; } = ManageClientDefault;
         public int MaxDownloads { get; set; } = MaxDownloadsDefault;
-        public int MaxServers { get; set; } = MaxServersDefault;
         public int ServerInstanceCount { get; set; } = ServerInstanceCountDefault;
         public bool VerifyAll { get; set; } = VerifyAllDefault;
         public string SelectedClientModlist { get; set; } = string.Empty;
@@ -83,7 +82,6 @@ namespace TrebuchetLib
         public static readonly string ClientPathDefault = string.Empty;
         public static readonly bool ManageClientDefault = false;
         public static readonly int MaxDownloadsDefault = 8;
-        public static readonly int MaxServersDefault = 20;
         public static readonly int ServerInstanceCountDefault = 0;
         public static readonly bool VerifyAllDefault = false;
         public static readonly string DataDirectoryDefault = string.Empty;
